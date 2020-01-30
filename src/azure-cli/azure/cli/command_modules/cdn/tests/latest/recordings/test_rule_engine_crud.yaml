@@ -1,0 +1,2659 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --profile-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints?api-version=2019-04-15
+  response:
+    body:
+      string: '{"error":{"code":"ParentResourceNotFound","message":"Can not perform
+        requested operation on nested resource. Parent resource ''profile123'' not
+        found."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '151'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Jan 2020 22:22:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn profile create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-01-21T22:22:52Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Jan 2020 22:22:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "sku": {"name": "Standard_Microsoft"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn profile create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '61'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"profile123\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123\",\"type\":\"Microsoft.Cdn/profiles\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Microsoft\"\r\n
+        \ },\"properties\":{\r\n    \"provisioningState\":\"Creating\",\"resourceState\":\"Creating\"\r\n
+        \ }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d299eadd-3cc8-4bc8-b32a-ec56561bdca9?api-version=2019-04-15
+      cache-control:
+      - no-cache
+      content-length:
+      - '422'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:23:01 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '24'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn profile create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d299eadd-3cc8-4bc8-b32a-ec56561bdca9?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"InProgress\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:23:11 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn profile create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/d299eadd-3cc8-4bc8-b32a-ec56561bdca9?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:23:42 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn profile create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"profile123\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123\",\"type\":\"Microsoft.Cdn/profiles\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"sku\":{\r\n    \"name\":\"Standard_Microsoft\"\r\n
+        \ },\"properties\":{\r\n    \"provisioningState\":\"Succeeded\",\"resourceState\":\"Active\"\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '421'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:23:42 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --profile-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"value\":[\r\n    \r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '28'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:23:44 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --origin
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-01-21T22:22:52Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Jan 2020 22:23:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"isCompressionEnabled": false, "isHttpAllowed":
+      true, "isHttpsAllowed": true, "origins": [{"name": "origin-0", "properties":
+      {"hostName": "www.example.com", "httpPort": 80, "httpsPort": 443}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '232'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --profile-name --origin
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Creating\",\"resourceState\":\"Creating\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":null\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f0a5f295-3482-42a8-8c31-94d160275b98?api-version=2019-04-15
+      cache-control:
+      - no-cache
+      content-length:
+      - '978'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:23:50 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --origin
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f0a5f295-3482-42a8-8c31-94d160275b98?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"InProgress\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:24:00 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --origin
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/f0a5f295-3482-42a8-8c31-94d160275b98?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:24:30 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --origin
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":null\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '978'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:24:31 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --profile-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"value\":[\r\n    {\r\n      \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \       \r\n      },\"location\":\"WestUs\",\"properties\":{\r\n        \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \         {\r\n            \"name\":\"origin-0\",\"properties\":{\r\n              \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \           }\r\n          }\r\n        ],\"customDomains\":[\r\n          \r\n
+        \       ],\"contentTypesToCompress\":[\r\n          \r\n        ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \         \r\n        ],\"deliveryPolicy\":null\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1078'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:24:33 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --order --rule-name --match-variable --operator --match-values
+        --action-name --cache-behavior
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":null\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '978'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:24:35 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"deliveryPolicy": {"description": "delivery_policy", "rules":
+      [{"name": "r1", "order": 1, "conditions": [{"name": "RemoteAddress", "parameters":
+      {"@odata.type": "#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters",
+      "operator": "GeoMatch", "matchValues": ["TH"]}}], "actions": [{"name": "CacheExpiration",
+      "parameters": {"@odata.type": "#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters",
+      "cacheBehavior": "BypassCache", "cacheType": "All"}}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '506'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --profile-name --order --rule-name --match-variable --operator --match-values
+        --action-name --cache-behavior
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\"\r\n                ],\"transforms\":[\r\n                  \r\n
+        \               ]\r\n              }\r\n            }\r\n          ],\"actions\":[\r\n
+        \           {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/940b230a-c514-4570-bbd4-ca374306b2e0?api-version=2019-04-15
+      cache-control:
+      - no-cache
+      content-length:
+      - '1789'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:24:38 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/940b230a-c514-4570-bbd4-ca374306b2e0/profileresults/profile123/endpointresults/endpoint000002?api-version=2019-04-15
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --order --rule-name --match-variable --operator --match-values
+        --action-name --cache-behavior
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/940b230a-c514-4570-bbd4-ca374306b2e0?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"InProgress\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:24:48 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --order --rule-name --match-variable --operator --match-values
+        --action-name --cache-behavior
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/940b230a-c514-4570-bbd4-ca374306b2e0?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:25:19 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --order --rule-name --match-variable --operator --match-values
+        --action-name --cache-behavior
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\"\r\n                ],\"transforms\":[\r\n                  \r\n
+        \               ]\r\n              }\r\n            }\r\n          ],\"actions\":[\r\n
+        \           {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1789'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:25:20 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule condition add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --match-variable --operator --match-values
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\"\r\n                ],\"transforms\":[\r\n                  \r\n
+        \               ]\r\n              }\r\n            }\r\n          ],\"actions\":[\r\n
+        \           {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1789'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:25:23 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"deliveryPolicy": {"description": "delivery_policy", "rules":
+      [{"name": "r1", "order": 1, "conditions": [{"name": "RemoteAddress", "parameters":
+      {"@odata.type": "#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters",
+      "operator": "GeoMatch", "negateCondition": false, "matchValues": ["TH"], "transforms":
+      []}}, {"name": "RemoteAddress", "parameters": {"@odata.type": "#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters",
+      "operator": "GeoMatch", "matchValues": ["TH", "US"]}}], "actions": [{"name":
+      "CacheExpiration", "parameters": {"@odata.type": "#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters",
+      "cacheBehavior": "BypassCache", "cacheType": "All"}}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule condition add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '737'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --match-variable --operator --match-values
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\"\r\n                ],\"transforms\":[\r\n                  \r\n
+        \               ]\r\n              }\r\n            },{\r\n              \"name\":\"RemoteAddress\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/fd4bae0c-0aae-4d85-a7cd-90e1930e261b?api-version=2019-04-15
+      cache-control:
+      - no-cache
+      content-length:
+      - '2146'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:25:26 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/fd4bae0c-0aae-4d85-a7cd-90e1930e261b/profileresults/profile123/endpointresults/endpoint000002?api-version=2019-04-15
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule condition add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --match-variable --operator --match-values
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/fd4bae0c-0aae-4d85-a7cd-90e1930e261b?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:25:36 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule condition add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --match-variable --operator --match-values
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\"\r\n                ],\"transforms\":[\r\n                  \r\n
+        \               ]\r\n              }\r\n            },{\r\n              \"name\":\"RemoteAddress\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2146'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:25:37 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule action add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --action-name --source-pattern --destination
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\"\r\n                ],\"transforms\":[\r\n                  \r\n
+        \               ]\r\n              }\r\n            },{\r\n              \"name\":\"RemoteAddress\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2146'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:25:39 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"deliveryPolicy": {"description": "delivery_policy", "rules":
+      [{"name": "r1", "order": 1, "conditions": [{"name": "RemoteAddress", "parameters":
+      {"@odata.type": "#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters",
+      "operator": "GeoMatch", "negateCondition": false, "matchValues": ["TH"], "transforms":
+      []}}, {"name": "RemoteAddress", "parameters": {"@odata.type": "#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters",
+      "operator": "GeoMatch", "negateCondition": false, "matchValues": ["TH", "US"],
+      "transforms": []}}], "actions": [{"name": "CacheExpiration", "parameters": {"@odata.type":
+      "#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters", "cacheBehavior":
+      "BypassCache", "cacheType": "All"}}, {"name": "UrlRewrite", "parameters": {"@odata.type":
+      "#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters", "sourcePattern":
+      "/abc", "destination": "/def"}}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule action add
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '954'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --action-name --source-pattern --destination
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\"\r\n                ],\"transforms\":[\r\n                  \r\n
+        \               ]\r\n              }\r\n            },{\r\n              \"name\":\"RemoteAddress\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            },{\r\n              \"name\":\"UrlRewrite\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters\",\"sourcePattern\":\"/abc\",\"destination\":\"/def\",\"preserveUnmatchedPath\":null\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/00c9c505-9c7f-4a80-b2e0-2f978bf80554?api-version=2019-04-15
+      cache-control:
+      - no-cache
+      content-length:
+      - '2403'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:25:42 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/00c9c505-9c7f-4a80-b2e0-2f978bf80554/profileresults/profile123/endpointresults/endpoint000002?api-version=2019-04-15
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule action add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --action-name --source-pattern --destination
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/00c9c505-9c7f-4a80-b2e0-2f978bf80554?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"InProgress\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:25:53 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule action add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --action-name --source-pattern --destination
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/00c9c505-9c7f-4a80-b2e0-2f978bf80554?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:23 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule action add
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --action-name --source-pattern --destination
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\"\r\n                ],\"transforms\":[\r\n                  \r\n
+        \               ]\r\n              }\r\n            },{\r\n              \"name\":\"RemoteAddress\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            },{\r\n              \"name\":\"UrlRewrite\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters\",\"sourcePattern\":\"/abc\",\"destination\":\"/def\",\"preserveUnmatchedPath\":null\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2403'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:24 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule condition remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --index
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\"\r\n                ],\"transforms\":[\r\n                  \r\n
+        \               ]\r\n              }\r\n            },{\r\n              \"name\":\"RemoteAddress\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            },{\r\n              \"name\":\"UrlRewrite\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters\",\"sourcePattern\":\"/abc\",\"destination\":\"/def\",\"preserveUnmatchedPath\":null\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2403'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:26 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"deliveryPolicy": {"description": "delivery_policy", "rules":
+      [{"name": "r1", "order": 1, "conditions": [{"name": "RemoteAddress", "parameters":
+      {"@odata.type": "#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters",
+      "operator": "GeoMatch", "negateCondition": false, "matchValues": ["TH", "US"],
+      "transforms": []}}], "actions": [{"name": "CacheExpiration", "parameters": {"@odata.type":
+      "#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters", "cacheBehavior":
+      "BypassCache", "cacheType": "All"}}, {"name": "UrlRewrite", "parameters": {"@odata.type":
+      "#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters", "sourcePattern":
+      "/abc", "destination": "/def"}}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule condition remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '729'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --index
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            },{\r\n              \"name\":\"UrlRewrite\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters\",\"sourcePattern\":\"/abc\",\"destination\":\"/def\",\"preserveUnmatchedPath\":null\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/551db036-744d-428a-85a7-a372069a0bb6?api-version=2019-04-15
+      cache-control:
+      - no-cache
+      content-length:
+      - '2051'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/551db036-744d-428a-85a7-a372069a0bb6/profileresults/profile123/endpointresults/endpoint000002?api-version=2019-04-15
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule condition remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --index
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/551db036-744d-428a-85a7-a372069a0bb6?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:42 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule condition remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --index
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            },{\r\n              \"name\":\"UrlRewrite\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters\",\"sourcePattern\":\"/abc\",\"destination\":\"/def\",\"preserveUnmatchedPath\":null\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2051'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:43 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule action remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --index
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"CacheExpiration\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleCacheExpirationActionParameters\",\"cacheBehavior\":\"BypassCache\",\"cacheDuration\":null,\"cacheType\":\"All\"\r\n
+        \             }\r\n            },{\r\n              \"name\":\"UrlRewrite\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters\",\"sourcePattern\":\"/abc\",\"destination\":\"/def\",\"preserveUnmatchedPath\":null\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2051'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:44 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"deliveryPolicy": {"description": "delivery_policy", "rules":
+      [{"name": "r1", "order": 1, "conditions": [{"name": "RemoteAddress", "parameters":
+      {"@odata.type": "#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters",
+      "operator": "GeoMatch", "negateCondition": false, "matchValues": ["TH", "US"],
+      "transforms": []}}], "actions": [{"name": "UrlRewrite", "parameters": {"@odata.type":
+      "#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters", "sourcePattern":
+      "/abc", "destination": "/def"}}]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule action remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '542'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --index
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"UrlRewrite\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters\",\"sourcePattern\":\"/abc\",\"destination\":\"/def\",\"preserveUnmatchedPath\":null\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/54f53969-a534-4225-96ae-496b5cb13baa?api-version=2019-04-15
+      cache-control:
+      - no-cache
+      content-length:
+      - '1788'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:48 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/54f53969-a534-4225-96ae-496b5cb13baa/profileresults/profile123/endpointresults/endpoint000002?api-version=2019-04-15
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule action remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --index
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/54f53969-a534-4225-96ae-496b5cb13baa?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:58 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule action remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name --index
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"UrlRewrite\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters\",\"sourcePattern\":\"/abc\",\"destination\":\"/def\",\"preserveUnmatchedPath\":null\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1788'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:26:59 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       {\r\n          \"name\":\"r1\",\"order\":1,\"conditions\":[\r\n            {\r\n
+        \             \"name\":\"RemoteAddress\",\"parameters\":{\r\n                \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleRemoteAddressConditionParameters\",\"operator\":\"GeoMatch\",\"negateCondition\":false,\"matchValues\":[\r\n
+        \                 \"TH\",\"US\"\r\n                ],\"transforms\":[\r\n
+        \                 \r\n                ]\r\n              }\r\n            }\r\n
+        \         ],\"actions\":[\r\n            {\r\n              \"name\":\"UrlRewrite\",\"parameters\":{\r\n
+        \               \"@odata.type\":\"#Microsoft.Azure.Cdn.Models.DeliveryRuleUrlRewriteActionParameters\",\"sourcePattern\":\"/abc\",\"destination\":\"/def\",\"preserveUnmatchedPath\":null\r\n
+        \             }\r\n            }\r\n          ]\r\n        }\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1788'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:27:01 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"deliveryPolicy": {"description": "delivery_policy", "rules":
+      []}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule remove
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '83'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --profile-name --rule-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       \r\n      ]\r\n    }\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/be9a965b-be83-404d-9fac-5e1f8ed159b9?api-version=2019-04-15
+      cache-control:
+      - no-cache
+      content-length:
+      - '1050'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:27:04 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/be9a965b-be83-404d-9fac-5e1f8ed159b9/profileresults/profile123/endpointresults/endpoint000002?api-version=2019-04-15
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/be9a965b-be83-404d-9fac-5e1f8ed159b9?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"InProgress\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:27:15 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/be9a965b-be83-404d-9fac-5e1f8ed159b9?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:27:45 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint rule remove
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name --rule-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"name\":\"endpoint000002\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002\",\"type\":\"Microsoft.Cdn/profiles/endpoints\",\"tags\":{\r\n
+        \   \r\n  },\"location\":\"WestUs\",\"properties\":{\r\n    \"hostName\":\"endpoint000002.azureedge.net\",\"originHostHeader\":null,\"provisioningState\":\"Succeeded\",\"resourceState\":\"Running\",\"isHttpAllowed\":true,\"isHttpsAllowed\":true,\"queryStringCachingBehavior\":\"IgnoreQueryString\",\"originPath\":null,\"origins\":[\r\n
+        \     {\r\n        \"name\":\"origin-0\",\"properties\":{\r\n          \"hostName\":\"www.example.com\",\"httpPort\":80,\"httpsPort\":443\r\n
+        \       }\r\n      }\r\n    ],\"customDomains\":[\r\n      \r\n    ],\"contentTypesToCompress\":[\r\n
+        \     \r\n    ],\"isCompressionEnabled\":false,\"optimizationType\":null,\"probePath\":null,\"geoFilters\":[\r\n
+        \     \r\n    ],\"deliveryPolicy\":{\r\n      \"description\":\"delivery_policy\",\"rules\":[\r\n
+        \       \r\n      ]\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1050'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:27:46 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --profile-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Cdn/profiles/profile123/endpoints/endpoint000002?api-version=2019-04-15
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a332cb04-b56c-4ef9-9ca7-c38a8a1dc61b?api-version=2019-04-15
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 21 Jan 2020 22:27:50 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a332cb04-b56c-4ef9-9ca7-c38a8a1dc61b/profileresults/profile123/endpointresults/endpoint000002?api-version=2019-04-15
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a332cb04-b56c-4ef9-9ca7-c38a8a1dc61b?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"InProgress\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '78'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:28:00 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - cdn endpoint delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --profile-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-cdn/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.80
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Cdn/operationresults/a332cb04-b56c-4ef9-9ca7-c38a8a1dc61b?api-version=2019-04-15
+  response:
+    body:
+      string: "{\r\n  \"status\":\"Succeeded\",\"error\":{\r\n    \"code\":\"None\",\"message\":null\r\n
+        \ }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77'
+      content-type:
+      - application/json; odata.metadata=minimal
+      date:
+      - Tue, 21 Jan 2020 22:28:30 GMT
+      expires:
+      - '-1'
+      odata-version:
+      - '4.0'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/8.5
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1
