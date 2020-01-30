@@ -2510,7 +2510,7 @@ def update_private_endpoint_connection(cmd, resource_group_name, service_name, p
     connection_state = PrivateLinkServiceConnectionState(
         status=connection_status,
         description=description,
-        action_required=action_required
+        actions_required=action_required
     )
     pe_connection = PrivateEndpointConnection(
         private_link_service_connection_state=connection_state
