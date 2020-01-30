@@ -1405,4 +1405,3 @@ azure-cli-vm
 +++++++++++++++++++++
 
 * Preview release.
-
