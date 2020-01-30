@@ -590,10 +590,14 @@ class LinuxWebappScenarioTest(ScenarioTest):
 class LinuxWebappSSHScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_ssh(self, resource_group):
-        # Skip this test on Windows as it will fail at 'webapp ssh'
+        # On Windows, test 'webapp ssh' throws error
         import platform
         if platform.system() == "Windows":
+            from azure.cli.core.util import CLIError
+            with self.assertRaises(CLIError):
+                self.cmd('webapp ssh -g {} -n {} --timeout 5'.format("foo", "bar"))
             return
+
         runtime = 'node|8.11'
         plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-ssh', length=24)

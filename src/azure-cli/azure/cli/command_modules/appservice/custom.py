@@ -3274,13 +3274,13 @@ def _start_ssh_session(hostname, port, username, password):
 
 
 def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None):  # pylint: disable=too-many-statements
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.remote_debugging_enabled:
-        raise CLIError('remote debugging is enabled, please disable')
-
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
+
+    config = get_site_configs(cmd, resource_group_name, name, slot)
+    if config.remote_debugging_enabled:
+        raise CLIError('remote debugging is enabled, please disable')
     create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
 
 
