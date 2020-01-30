@@ -6,10 +6,16 @@ Release History
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
+* [BREAKING CHANGE] 'az acr task delete' will prompt
+* Add a new command group 'az acr taskrun show/list/delete' for taskrun management
 
 **AppConfig**
 
 * Support import/export of keyvault references from/to appservice
+* Support import/export of all labels from appconfig to appconfig
+* Validate key and feature names before setting and importing
+* Expose sku modification for configuration store.
+* Add command group for managed identity.
 
 **AppService**
 
@@ -20,11 +26,25 @@ Release History
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
 
+**Azure Red Hat OpenShift**
+
+* Add `monitor` subgroup to manage Log Analytics monitoring in Azure Red Hat OpensShift cluster
+
+**CDN**
+
+* Add support for rulesEngine feature
+* Add new commands group 'cdn endpoint rule' to manage rules
+* Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
+
 **Deployment Manager**
 
 * Add list operation for all resources.
 * Enhance step resource for new step type.
 * Update azure-mgmt-deploymentmanager package to use version 0.2.0.
+
+**IoT**
+
+* Deprecated 'IoT hub Job' commands.
 
 **IoT Central**
 
@@ -38,10 +58,26 @@ Release History
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
 
+**RBAC**
+
+* [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
+
+**Security**
+
+* Added new commands `az atp show` and `az atp update` to view and manage advanced threat protection settings for storage accounts.
+
+**SQL**
+
+* [BREAKING CHANGE] `az sql db create`: Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
+
 **Storage**
 
 * Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
 * Fix issue #11415: permission error for `az storage blob update`
+* Integrate Azcopy 10.3.3 and support Win32.
+* `az storage copy`: Add `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+* `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+* `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 
 2.0.80
 ++++++
@@ -390,6 +426,7 @@ Release History
 * Change default node version on function apps to ~10 for Windows
 * Add --runtime-version property to `az functionapp create`
 * az appservice vnet-integration add: Fixed so that subnet delegation is case insensitive and delegating subnets does not overwrite previous data.
+
 
 **ARM**
 
