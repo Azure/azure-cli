@@ -26,6 +26,16 @@ Release History
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
 
+**Azure Red Hat OpenShift**
+
+* Add `monitor` subgroup to manage Log Analytics monitoring in Azure Red Hat OpensShift cluster
+
+**CDN**
+
+* Add support for rulesEngine feature
+* Add new commands group 'cdn endpoint rule' to manage rules
+* Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
+
 **IoT**
 
 * Deprecated 'IoT hub Job' commands.
