@@ -2811,34 +2811,29 @@ def _ensure_aks_service_principal(cli_ctx,
                                   dns_name_prefix=None,
                                   location=None,
                                   name=None):
-    file_name_aks = 'aksServicePrincipal.json'
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
-        # --service-principal not specified, try to load it from local disk
-        principal_obj = load_acs_service_principal(subscription_id, file_name=file_name_aks)
-        if principal_obj:
-            service_principal = principal_obj.get('service_principal')
-            client_secret = principal_obj.get('client_secret')
-        else:
-            # Nothing to load, make one.
-            if not client_secret:
-                client_secret = _create_client_secret()
-            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        # --service-principal not specified, make one.
+        if not client_secret:
+            client_secret = _create_client_secret()
+        salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-            service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
-            if not service_principal:
-                raise CLIError('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
-            logger.info('Created a service principal: %s', service_principal)
-            # We don't need to add role assignment for this created SPN
+        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        if not service_principal:
+            raise CLIError('Could not create a service principal with the right permissions. '
+                           'Are you an Owner on this project?')
+        logger.info('Created a service principal: %s', service_principal)
+        # We don't need to add role assignment for this created SPN
     else:
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
-    store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
-    return load_acs_service_principal(subscription_id, file_name=file_name_aks)
+    return {
+        'client_secret': client_secret,
+        'service_principal': service_principal,
+    }
 
 
 def _ensure_osa_aad(cli_ctx,
@@ -2912,33 +2907,30 @@ def _ensure_service_principal(cli_ctx,
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
-        # --service-principal not specified, try to load it from local disk
-        principal_obj = load_acs_service_principal(subscription_id)
-        if principal_obj:
-            service_principal = principal_obj.get('service_principal')
-            client_secret = principal_obj.get('client_secret')
-        else:
-            # Nothing to load, make one.
-            if not client_secret:
-                client_secret = _create_client_secret()
-            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        # --service-principal not specified, make one.
+        if not client_secret:
+            client_secret = _create_client_secret()
+        salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-            service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
-            if not service_principal:
-                raise CLIError('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
-            logger.info('Created a service principal: %s', service_principal)
-            # add role first before save it
-            if not _add_role_assignment(cli_ctx, 'Contributor', service_principal):
-                logger.warning('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
+        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        if not service_principal:
+            raise CLIError('Could not create a service principal with the right permissions. '
+                           'Are you an Owner on this project?')
+        logger.info('Created a service principal: %s', service_principal)
+        # add role first before save it
+        if not _add_role_assignment(cli_ctx, 'Contributor', service_principal):
+            logger.warning('Could not create a service principal with the right permissions. '
+                           'Are you an Owner on this project?')
     else:
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
-    store_acs_service_principal(subscription_id, client_secret, service_principal)
-    return load_acs_service_principal(subscription_id)
+
+    return {
+        'client_secret': client_secret,
+        'service_principal': service_principal,
+    }
 
 
 def _create_client_secret():
@@ -3113,6 +3105,15 @@ def osa_list(cmd, client, resource_group_name=None):
     return _remove_osa_nulls(list(managed_clusters))
 
 
+def _format_workspace_id(workspace_id):
+    workspace_id = workspace_id.strip()
+    if not workspace_id.startswith('/'):
+        workspace_id = '/' + workspace_id
+    if workspace_id.endswith('/'):
+        workspace_id = workspace_id.rstrip('/')
+    return workspace_id
+
+
 def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
                      location=None,
                      compute_vm_size="Standard_D4s_v3",
@@ -3197,11 +3198,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                 name=vnet_peer
             )
     if workspace_id is not None:
-        workspace_id = workspace_id.strip()
-        if not workspace_id.startswith('/'):
-            workspace_id = '/' + workspace_id
-        if workspace_id.endswith('/'):
-            workspace_id = workspace_id.rstrip('/')
+        workspace_id = _format_workspace_id(workspace_id)
         monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
     else:
         monitor_profile = None
@@ -3256,6 +3253,22 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
     instance.master_pool_profile.name = "master"
     instance.auth_profile = None
 
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    workspace_id = _format_workspace_id(workspace_id)
+    monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
+    instance.monitor_profile = monitor_profile
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+
+
+def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
+    instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 

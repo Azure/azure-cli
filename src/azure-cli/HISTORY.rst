@@ -6,6 +6,12 @@ Release History
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
+* [BREAKING CHANGE] 'az acr task delete' will prompt
+* Add a new command group 'az acr taskrun show/list/delete' for taskrun management
+
+**AKS**
+
+* Each cluster gets a separate service principal to improve isolation
 
 **AppConfig**
 
@@ -21,8 +27,27 @@ Release History
 
 **ARM**
 
+* Fix issue #10246: `az resource tag` crashes when the parameter `--ids` passed in is resource group ID
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
+* Fix issue #9916: Improve the error message of the conflict between tag and other filter conditions for `az resource list` command
+* Add new parameter `--managed-by` to support adding managedBy information for command `az group create`
+
+**Azure Red Hat OpenShift**
+
+* Add `monitor` subgroup to manage Log Analytics monitoring in Azure Red Hat OpensShift cluster
+
+**CDN**
+
+* Add support for rulesEngine feature
+* Add new commands group 'cdn endpoint rule' to manage rules
+* Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
+
+**Deployment Manager**
+
+* Add list operation for all resources.
+* Enhance step resource for new step type.
+* Update azure-mgmt-deploymentmanager package to use version 0.2.0.
 
 **IoT**
 
@@ -31,6 +56,10 @@ Release History
 **IoT Central**
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
+
+**Key Vault**
+
+* Add a new command `az keyvault key download` for downloading keys.
 
 **Misc**
 
@@ -44,6 +73,23 @@ Release History
 
 * Add new command `az policy metadata` to retrieve rich policy metadata resources
 * `az policy remediation create`: Specify whether compliance should be re-evaluated prior to remediation with the `--resource-discovery-mode` parameter
+
+**Profile**
+
+* `az account get-access-token`: Add `--tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
+
+**RBAC**
+
+* [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
+
+**Security**
+
+* Added new commands `az atp show` and `az atp update` to view and manage advanced threat protection settings for storage accounts.
+
+**SQL**
+
+* [BREAKING CHANGE] `az sql db create`: Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
+* Add New commands `sql db classification show/list/update/delete` and `sql db classification recommendation list/enable/disable` to manage sensitivity classifications for SQL databases.
 
 **Storage**
 
@@ -236,8 +282,6 @@ Release History
 
 * Support for Policy API version 2019-09-01
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
-* Add new command `az policy metadata` to retrieve rich policy metadata resources
-* az policy remediation create: Specify whether compliance should be re-evaluated prior to remediation with the `--resource-discovery-mode` parameter
 
 **Redis**
 
