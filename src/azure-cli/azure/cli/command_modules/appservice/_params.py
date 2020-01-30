@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import RUNTIME_TO_IMAGE_FUNCTIONAPP
+from ._constants import HOST_VERSIONS_FUNCTIONAPP, RUNTIME_TO_IMAGE_FUNCTIONAPP
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create)
 
@@ -50,9 +50,17 @@ def load_arguments(self, _):
     isolated_sku_arg_type = CLIArgumentType(help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
                                             arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
+    # combine all runtime versions for all functions host versions
+    functionapp_runtime_to_version = {}
+    for version in RUNTIME_TO_IMAGE_FUNCTIONAPP.values():
+        for runtime, val in version.items():
+            functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val.keys())
+
     functionapp_runtime_to_version_texts = []
-    for runtime, val in RUNTIME_TO_IMAGE_FUNCTIONAPP.items():
-        functionapp_runtime_to_version_texts.append(runtime + ' -> [' + ', '.join(val.keys()) + ']')
+    for runtime, runtime_versions in functionapp_runtime_to_version.items():
+        runtime_versions_list = list(runtime_versions)
+        runtime_versions_list.sort(key=float)
+        functionapp_runtime_to_version_texts.append(runtime + ' -> [' + ', '.join(runtime_versions_list) + ']')
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -460,6 +468,7 @@ def load_arguments(self, _):
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
+        c.argument('version', options_list=['--version', '-v'], help='The functions runtime version.', arg_type=get_enum_type(HOST_VERSIONS_FUNCTIONAPP), configured_default='2')
         c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
         c.argument('runtime_version', help='The version of the functions runtime stack. '
                                            'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
