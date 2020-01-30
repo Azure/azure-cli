@@ -9,6 +9,10 @@ Release History
 * [BREAKING CHANGE] 'az acr task delete' will prompt
 * Add a new command group 'az acr taskrun show/list/delete' for taskrun management
 
+**AKS**
+
+* Each cluster gets a separate service principal to improve isolation
+
 **AppConfig**
 
 * Support import/export of keyvault references from/to appservice
@@ -90,6 +94,31 @@ Release History
 * `az storage copy`: Add `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+
+**ServiceFabric**
+
+* Adding new commands to manage appliaction and services.
+    - sf application-type
+        - list
+        - delete
+        - show
+        - create
+    - sf application-type version
+        - list
+        - delete
+        - show
+        - create
+    - sf application
+        - list
+        - delete
+        - show
+        - create
+        - update
+    - sf service
+        - list
+        - delete
+        - show
+        - create
 
 2.0.80
 ++++++

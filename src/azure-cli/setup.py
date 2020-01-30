@@ -118,7 +118,7 @@ DEPENDENCIES = [
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',
     'azure-mgmt-servicebus~=0.6.0',
-    'azure-mgmt-servicefabric~=0.2.0',
+    'azure-mgmt-servicefabric~=0.4.0',
     'azure-mgmt-signalr~=0.3.0',
     'azure-mgmt-sql~=0.15.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
@@ -182,9 +182,11 @@ setup(
         'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
         'azure.cli.command_modules.servicefabric': [
             'template/windows/template.json',
-            'template/linux/template.json',
             'template/windows/parameter.json',
+            'template/linux/template.json',
             'template/linux/parameter.json',
+            'template/service/template.json',
+            'template/service/parameter.json'
         ],
     },
     cmdclass=cmdclass
