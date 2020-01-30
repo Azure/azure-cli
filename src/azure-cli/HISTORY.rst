@@ -84,6 +84,7 @@ Release History
 
 * [BREAKING CHANGE] `az sql db create`: Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
 * Add New commands `sql db classification show/list/update/delete` and `sql db classification recommendation list/enable/disable` to manage sensitivity classifications for SQL databases.
+* `az sql db audit-policy`: Fix for empty audit actions and groups
 
 **Storage**
 
