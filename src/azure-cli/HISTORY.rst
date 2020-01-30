@@ -3,10 +3,6 @@
 Release History
 ===============
 
-**RBAC**
-
-* [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
-
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
@@ -49,6 +45,10 @@ Release History
 **Network**
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
+
+**RBAC**
+
+* [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
 
 **Storage**
 
