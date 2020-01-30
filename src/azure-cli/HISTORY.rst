@@ -57,6 +57,10 @@ Release History
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
 
+**Profile**
+
+* `az account get-access-token`: Add `--tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
+
 **RBAC**
 
 * [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
