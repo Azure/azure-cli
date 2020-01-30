@@ -26,6 +26,7 @@ Release History
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
 * Fix issue #9916: Improve the error message of the conflict between tag and other filter conditions for `az resource list` command
+* Add new parameter `--managed-by` to support adding managedBy information for command `az group create`
 
 **Azure Red Hat OpenShift**
 
