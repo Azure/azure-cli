@@ -63,7 +63,7 @@ Release History
 
 **SQL**
 
-* Update Managed Instance cmdlet `az sql mi update` with two new parameters: tier and family.
+* Update SQL Managed Instance cmdlet `az sql mi update` with two new parameters: tier and family.
 
 2.0.80
 ++++++
