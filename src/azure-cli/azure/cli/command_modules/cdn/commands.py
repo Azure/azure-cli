@@ -9,6 +9,7 @@ from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profile
                               cf_edge_nodes)
 
 
+# pylint: disable=too-many-statements
 def load_command_table(self, _):
 
     def _not_found(message):
@@ -90,6 +91,27 @@ def load_command_table(self, _):
                                  custom_func_name='update_endpoint',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)
+
+    with self.command_group('cdn endpoint rule', cdn_endpoints_sdk, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.custom_command('add', 'add_rule', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+        g.custom_command('remove', 'remove_rule', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+
+    with self.command_group('cdn endpoint rule condition', cdn_endpoints_sdk, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.custom_command('add', 'add_condition', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+        g.custom_command('remove', 'remove_condition', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+
+    with self.command_group('cdn endpoint rule action', cdn_endpoints_sdk, is_preview=True) as g:
+        g.show_command('show', 'get')
+        g.custom_command('add', 'add_action', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
+        g.custom_command('remove', 'remove_action', client_factory=cf_cdn,
+                         doc_string_source='azure.mgmt.cdn.models#Endpoint')
 
     with self.command_group('cdn profile', cdn_profiles_sdk) as g:
         g.show_command('show', 'get')
