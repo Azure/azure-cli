@@ -296,8 +296,8 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
                              .format(var_name=var_name, curve_name=curve_names[ec_curve]))
             else:  # Should be imported (Have already been generated offline)
                 self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
-                self.cmd('keyvault key import --vault-name {{kv}} -n {var_name} --pem-file "{pem_filename}"'
-                         .format(var_name=var_name, pem_filename='{' + var_name + '}'))
+                self.cmd('keyvault key import --vault-name {{kv}} -n {var_name} --pem-file "{{{var_name}}}"'
+                         .format(var_name=var_name))
 
             der_downloaded_filename = var_name + '.der'
             pem_downloaded_filename = var_name + '.pem'
