@@ -296,9 +296,11 @@ def _configure_db_dw_params(arg_ctx):
                      arg_group=creation_arg_group,
                      arg_type=get_enum_type(CatalogCollationType))
 
-    arg_ctx.argument('sample_name',
-                     arg_group=creation_arg_group,
-                     arg_type=get_enum_type(SampleName))
+    # WideWorldImportersStd and WideWorldImportersFull cannot be successfully created.
+    # AdventureWorksLT is the only sample name that is actually supported.
+        c.argument('sample_name',
+                   arg_group=creation_arg_group,
+                   arg_type=get_enum_type([SampleName.adventure_works_lt]))
 
     arg_ctx.argument('license_type',
                      arg_type=get_enum_type(DatabaseLicenseType))
