@@ -21,7 +21,7 @@ Version:        %{version}
 Release:        %{release}
 Url:            https://docs.microsoft.com/cli/azure/install-azure-cli
 BuildArch:      x86_64
-Requires:       %{python_cmd}
+Requires:       %{python_cmd} python3-brotli
 
 BuildRequires:  gcc, libffi-devel, openssl-devel, perl
 BuildRequires:  %{python_cmd}-devel
