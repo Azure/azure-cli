@@ -2748,22 +2748,22 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         # test update sql managed instance hardware generation
         self.cmd('sql mi update -g {} -n {} --family {}'
-                .format(resource_group_1, managed_instance_name_1, families[1]),
-                checks=[
-                    JMESPathCheck('name', managed_instance_name_1),
-                    JMESPathCheck('resourceGroup', resource_group_1),
-                    JMESPathCheck('administratorLogin', user),
-                    JMESPathCheck('vCores', v_cores),
-                    JMESPathCheck('storageSizeInGb', storage_size_in_gb),
-                    JMESPathCheck('licenseType', license_type),
-                    JMESPathCheck('sku.tier', edition),
-                    JMESPathCheck('sku.family', families[1]),
-                    JMESPathCheck('sku.capacity', v_cores),
-                    JMESPathCheck('identity.type', 'SystemAssigned'),
-                    JMESPathCheck('collation', collation),
-                    JMESPathCheck('proxyOverride', proxy_override),
-                    JMESPathCheck('publicDataEndpointEnabled', 'True'),
-                    JMESPathCheck('timezoneId', timezone_id)]).get_output_in_json()
+                 .format(resource_group_1, managed_instance_name_1, families[1]),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('vCores', v_cores),
+                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                     JMESPathCheck('licenseType', license_type),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', families[1]),
+                     JMESPathCheck('sku.capacity', v_cores),
+                     JMESPathCheck('identity.type', 'SystemAssigned'),
+                     JMESPathCheck('collation', collation),
+                     JMESPathCheck('proxyOverride', proxy_override),
+                     JMESPathCheck('publicDataEndpointEnabled', 'True'),
+                     JMESPathCheck('timezoneId', timezone_id)]).get_output_in_json()
 
         # test update without identity parameter, validate identity still exists
         # also use --id instead of -g/-n
