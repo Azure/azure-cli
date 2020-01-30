@@ -230,7 +230,7 @@ If you would like to write multiple history notes for one PR, please write the n
 Other than that, you can put any reasonable information in the description above the `History Notes` part.
 
 ### Only Modify HISTORY.rst for Hotfix
-As described above, history notes will be auto-generated and insert into `HISTORY.rst` during release. When submitting a normal PR, you don't need to modify `HISTORY.rst` manually. In the case of hotfix, you should create a hotfix branch based on release branch and submit a PR to merge hotfix into release. In this PR, if you have customer-facing changes, you need to modify `HISTORY.rst` to add history notes. Later on you also need to merge the hotfix branch into dev branch and the second part of the PR title should be `Hotfix`. The auto-generation of history notes for the next release will ignore the commit that contains `Hotfix`.
+As described above, history notes will be auto-generated and inserted into `HISTORY.rst` during release. When submitting a normal PR, you don't need to modify `HISTORY.rst` manually. In the case of hotfix, you should create a hotfix branch based on release branch and submit a PR to merge hotfix into release. In this PR, if you have customer-facing changes, you need to modify `HISTORY.rst` to add history notes. Later on you also need to merge the hotfix branch into dev branch and the second part of the PR title should be `Hotfix`. The auto-generation of history notes for the next release will ignore the commit that contains `Hotfix`.
 
 An example title of hotfix change PR:
 
