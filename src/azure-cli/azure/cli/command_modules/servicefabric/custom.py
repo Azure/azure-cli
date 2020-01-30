@@ -22,6 +22,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -188,10 +189,6 @@ def new_cluster(cmd,
         if file_extension is None or file_extension.lower() != '.pfx'.lower():
             raise CLIError('\'--certificate_file\' should be a valid pfx file')
 
-    import datetime
-    suffix = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    deployment_name = 'AzurePSDeployment-' + suffix
-
     vault_id = None
     certificate_uri = None
     cert_thumbprint = None
@@ -249,16 +246,7 @@ def new_cluster(cmd,
         cert_thumbprint = parameters[CERTIFICATE_THUMBPRINT]['value']
         template = get_file_json(template_file)
 
-    logger.info("Validating the deployment")
-    validate_result = _deploy_arm_template_core(
-        cli_ctx, resource_group_name, template, parameters, deployment_name, 'incremental', True)
-    if validate_result.error is not None:
-        errors_detailed = _build_detailed_error(validate_result.error, [])
-        errors_detailed.insert(0, "Error validating template. See below for more information.")
-        raise CLIError('\n'.join(errors_detailed))
-    logger.info("Deployment is valid, and begin to deploy")
-    _deploy_arm_template_core(cli_ctx, resource_group_name, template,
-                              parameters, deployment_name, 'incremental', False)
+    validate_and_deploy_arm_template(cmd, resource_group_name, template, parameters)
 
     output_dict = {}
     output_dict['vm_user_name'] = vm_user_name
