@@ -82,6 +82,7 @@ Release History
 **Network**
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
+* Bump azure-mgmt-network to 9.0.0
 
 **Policy**
 

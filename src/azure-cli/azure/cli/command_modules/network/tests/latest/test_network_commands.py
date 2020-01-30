@@ -122,9 +122,10 @@ class NetworkPrivateEndpoints(ScenarioTest):
 
         pe_connection_name = self.cmd('network private-link-service show -g {rg} -n {lks1}').get_output_in_json()['privateEndpointConnections'][0]['name']
         self.kwargs['pe_connect'] = pe_connection_name
-        self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected')
+        self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected --action-required "need action"')
         self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
-            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Rejected')
+            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Rejected'),
+            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.actionsRequired', "need action")
         ])
         self.cmd('network private-link-service connection delete -g {rg} -n {pe_connect} --service-name {lks1}')
         self.cmd('network private-link-service show -g {rg} -n {lks1}', checks=[
