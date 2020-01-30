@@ -56,9 +56,17 @@ Release History
 
 * `az account get-access-token`: Add `--tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
 
+**RBAC**
+
+* [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
+
 **Security**
 
 * Added new commands `az atp show` and `az atp update` to view and manage advanced threat protection settings for storage accounts.
+
+**SQL**
+
+* [BREAKING CHANGE] `az sql db create`: Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
 
 **Storage**
 

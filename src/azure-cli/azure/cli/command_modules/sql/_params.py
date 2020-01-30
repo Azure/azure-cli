@@ -419,9 +419,11 @@ def load_arguments(self, _):
                    arg_group=creation_arg_group,
                    arg_type=get_enum_type(CatalogCollationType))
 
+        # WideWorldImportersStd and WideWorldImportersFull cannot be successfully created.
+        # AdventureWorksLT is the only sample name that is actually supported.
         c.argument('sample_name',
                    arg_group=creation_arg_group,
-                   arg_type=get_enum_type(SampleName))
+                   arg_type=get_enum_type([SampleName.adventure_works_lt]))
 
         c.argument('license_type',
                    arg_type=get_enum_type(DatabaseLicenseType))
