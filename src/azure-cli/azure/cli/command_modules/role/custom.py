@@ -494,6 +494,8 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
         if resource_group_name:
             err = 'Resource group "{}" is redundant because scope is supplied'
             raise CLIError(err.format(resource_group_name))
+    elif scope == '':
+        raise CLIError('Invalid scope. Please use --help to view the valid format.')
     elif resource_group_name:
         scope = subscription_scope + '/resourceGroups/' + resource_group_name
     else:
