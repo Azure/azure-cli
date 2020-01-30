@@ -38,6 +38,12 @@ Release History
 * Add new commands group 'cdn endpoint rule' to manage rules
 * Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
 
+**Deployment Manager**
+
+* Add list operation for all resources.
+* Enhance step resource for new step type.
+* Update azure-mgmt-deploymentmanager package to use version 0.2.0.
+
 **IoT**
 
 * Deprecated 'IoT hub Job' commands.

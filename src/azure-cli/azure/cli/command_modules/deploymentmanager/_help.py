@@ -45,6 +45,15 @@ examples:
         az deploymentmanager artifact-source show -g rg1 -n contosoServiceArtifactSource
 """
 
+helps['deploymentmanager artifact-source list'] = """
+type: command
+short-summary: List all artifact sources in a resource group.
+examples:
+  - name: List artifact sources in the given resource group.
+    text: >
+        az deploymentmanager artifact-source list -g rg1
+"""
+
 helps['deploymentmanager artifact-source update'] = """
 type: command
 short-summary: Updates an artifact source.
@@ -83,6 +92,15 @@ examples:
   - name: Gets the specific retry attempt of a rollout. Shows the steps run during that attempt.
     text: >
         az deploymentmanager rollout show -g rg1 -n contosoServiceRollout --retry-attempt 1
+"""
+
+helps['deploymentmanager rollout list'] = """
+type: command
+short-summary: List all rollouts in a resource group
+examples:
+  - name: List all rollouts in the resource group
+    text: >
+        az deploymentmanager rollout list -g rg1
 """
 
 helps['deploymentmanager rollout stop'] = """
@@ -126,6 +144,15 @@ examples:
         az deploymentmanager service show -g rg1 --service-topology-name contosoServiceTopology -n contosoService1
 """
 
+helps['deploymentmanager service list'] = """
+type: command
+short-summary: List all services in a service topology.
+examples:
+  - name: List all the services under the given service topology.
+    text: >
+        az deploymentmanager service list -g rg1 --service-topology-name contosoServiceTopology
+"""
+
 helps['deploymentmanager service update'] = """
 type: command
 short-summary: Updates the service.
@@ -165,6 +192,15 @@ examples:
   - name: Get the service topology.
     text: >
         az deploymentmanager service-topology show -g rg1 -n contosoServiceTopology
+"""
+
+helps['deploymentmanager service-topology list'] = """
+type: command
+short-summary: List all service topologies in a resource group.
+examples:
+  - name: List all the service topologies in the resource group.
+    text: >
+        az deploymentmanager service-topology list -g rg1
 """
 
 helps['deploymentmanager service-topology update'] = """
@@ -217,6 +253,15 @@ examples:
         az deploymentmanager service-unit show -g rg1 --service-topology-name contosoServiceTopology --service-name contosoService1 -n ContosoService1Storage
 """
 
+helps['deploymentmanager service-unit list'] = """
+type: command
+short-summary: List all service units in a service.
+examples:
+  - name: List the service units in the given service topology and service.
+    text: >
+        az deploymentmanager service-unit list -g rg1 --service-topology-name contosoServiceTopology --service-name contosoService1
+"""
+
 helps['deploymentmanager service-unit update'] = """
 type: command
 short-summary: Updates the service unit.
@@ -239,9 +284,12 @@ helps['deploymentmanager step create'] = """
 type: command
 short-summary: Creates the step.
 examples:
-  - name: Creates a step.
+  - name: Creates a wait step.
     text: >
         az deploymentmanager step create -g rg1 -l location -n contosoServiceWaitStep --duration PT30M
+  - name: Creates a health check step from a JSON file. The step information is read from the file.
+    text: >
+        az deploymentmanager step create -g rg1 --step healthcheck_step.json
 """
 
 helps['deploymentmanager step show'] = """
@@ -251,6 +299,15 @@ examples:
   - name: Get the step.
     text: >
         az deploymentmanager step show -g rg1 -n contosoServiceWaitStep
+"""
+
+helps['deploymentmanager step list'] = """
+type: command
+short-summary: List all steps in a resource group.
+examples:
+  - name: List available steps in the given resource group.
+    text: >
+        az deploymentmanager step list -g rg1
 """
 
 helps['deploymentmanager step update'] = """
