@@ -22,9 +22,11 @@ Release History
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
 
 **ARM**
-
+* Fix issue #10246: `az resource tag` crashes when the parameter `--ids` passed in is resource group ID
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
+* Fix issue #9916: Improve the error message of the conflict between tag and other filter conditions for `az resource list` command
+* Add new parameter `--managed-by` to support adding managedBy information for command `az group create`
 
 **Azure Red Hat OpenShift**
 
@@ -36,6 +38,12 @@ Release History
 * Add new commands group 'cdn endpoint rule' to manage rules
 * Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
 
+**Deployment Manager**
+
+* Add list operation for all resources.
+* Enhance step resource for new step type.
+* Update azure-mgmt-deploymentmanager package to use version 0.2.0.
+
 **IoT**
 
 * Deprecated 'IoT hub Job' commands.
@@ -44,6 +52,10 @@ Release History
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
+**Key Vault**
+
+* Add a new command `az keyvault key download` for downloading keys.
+
 **Misc**
 
 * Fix #6371: Support filename and environment variable completion in Bash
@@ -51,6 +63,14 @@ Release History
 **Network**
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
+
+**Profile**
+
+* `az account get-access-token`: Add `--tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
+
+**RBAC**
+
+* [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
 
 **Security**
 
