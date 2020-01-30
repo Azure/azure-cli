@@ -281,8 +281,8 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
             if 'hsm' in key_name:  # Should be generated
                 if key_name.startswith('rsa'):
                     rsa_size = key_name.split('-')[1]
-                    self.cmd('keyvault key create --vault-name {kv} -n ' + var_name +
-                             ' -p hsm --kty RSA-HSM --size ' + rsa_size)
+                    self.cmd('keyvault key create --vault-name {{kv}} -n {var_name}'
+                             ' -p hsm --kty RSA-HSM --size {rsa_size}'.format(var_name=var_name, rsa_size=rsa_size))
                 elif key_name.startswith('ec'):
                     ec_curve = key_name.split('-')[1]
                     curve_names = {
@@ -291,18 +291,22 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
                         'p521': 'P-521',
                         'p256k': 'P-256K'
                     }
-                    self.cmd('keyvault key create --vault-name {kv} -n ' + var_name +
-                             ' -p hsm --kty EC-HSM --curve ' + curve_names[ec_curve])
+                    self.cmd('keyvault key create --vault-name {{kv}} -n {var_name}'
+                             ' -p hsm --kty EC-HSM --curve {curve_name}'
+                             .format(var_name=var_name, curve_name=curve_names[ec_curve]))
             else:  # Should be imported (Have already been generated offline)
                 self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
-                self.cmd('keyvault key import --vault-name {kv} -n ' + var_name + ' --pem-file "{' + var_name + '}"')
+                self.cmd('keyvault key import --vault-name {{kv}} -n {var_name} --pem-file "{pem_filename}"'
+                         .format(var_name=var_name, pem_filename='{' + var_name + '}'))
 
             der_downloaded_filename = var_name + '.der'
             pem_downloaded_filename = var_name + '.pem'
 
             try:
-                self.cmd('keyvault key download --vault-name {kv} -n ' + var_name + ' -f "' + der_downloaded_filename + '" -e DER')
-                self.cmd('keyvault key download --vault-name {kv} -n ' + var_name + ' -f "' + pem_downloaded_filename + '" -e PEM')
+                self.cmd('keyvault key download --vault-name {{kv}} -n {var_name} -f "{filename}" -e DER'
+                         .format(var_name=var_name, filename=der_downloaded_filename))
+                self.cmd('keyvault key download --vault-name {{kv}} -n {var_name} -f "{filename}" -e PEM'
+                         .format(var_name=var_name, filename=pem_downloaded_filename))
 
                 if 'hsm' in key_name:  # TODO: Currently we haven't found a good way to verify online generated keys
                     continue
