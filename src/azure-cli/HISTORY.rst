@@ -56,6 +56,10 @@ Release History
 
 * Added new commands `az atp show` and `az atp update` to view and manage advanced threat protection settings for storage accounts.
 
+**SQL**
+
+* [BREAKING CHANGE] `az sql db create`: Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
+
 **Storage**
 
 * Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
