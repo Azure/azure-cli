@@ -3,12 +3,6 @@
 Release History
 ===============
 
-**Deployment Manager**
-
-* Adds list operation for all resources.
-* Enhance step resource for new step type.
-* Updated azure-mgmt-deploymentmanager package to use version 0.2.0.
-
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
@@ -25,6 +19,12 @@ Release History
 
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
+
+**Deployment Manager**
+
+* Add list operation for all resources.
+* Enhance step resource for new step type.
+* Update azure-mgmt-deploymentmanager package to use version 0.2.0.
 
 **IoT Central**
 
