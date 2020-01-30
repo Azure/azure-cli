@@ -46,6 +46,9 @@ Release History
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
 
+**SQL**
+* [BREAKING CHANGE] `az sql db create`: Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
+
 **Storage**
 
 * Add a new command group `az storage share-rm` to use the Microsoft.Storage resource provider for Azure file share management operations.
@@ -251,7 +254,6 @@ Release History
 **SQL**
 
 * Added "--read-scale" and "--read-replicas" parameters to sql db create and update commands, to support read scale management.
-* Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
 
 **SQL VM**
 
