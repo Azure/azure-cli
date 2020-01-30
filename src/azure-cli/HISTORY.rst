@@ -9,6 +9,10 @@ Release History
 * [BREAKING CHANGE] 'az acr task delete' will prompt
 * Add a new command group 'az acr taskrun show/list/delete' for taskrun management
 
+**AKS**
+
+* Each cluster gets a separate service principal to improve isolation
+
 **AppConfig**
 
 * Support import/export of keyvault references from/to appservice

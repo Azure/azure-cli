@@ -2811,34 +2811,29 @@ def _ensure_aks_service_principal(cli_ctx,
                                   dns_name_prefix=None,
                                   location=None,
                                   name=None):
-    file_name_aks = 'aksServicePrincipal.json'
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
-        # --service-principal not specified, try to load it from local disk
-        principal_obj = load_acs_service_principal(subscription_id, file_name=file_name_aks)
-        if principal_obj:
-            service_principal = principal_obj.get('service_principal')
-            client_secret = principal_obj.get('client_secret')
-        else:
-            # Nothing to load, make one.
-            if not client_secret:
-                client_secret = _create_client_secret()
-            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        # --service-principal not specified, make one.
+        if not client_secret:
+            client_secret = _create_client_secret()
+        salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-            service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
-            if not service_principal:
-                raise CLIError('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
-            logger.info('Created a service principal: %s', service_principal)
-            # We don't need to add role assignment for this created SPN
+        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        if not service_principal:
+            raise CLIError('Could not create a service principal with the right permissions. '
+                           'Are you an Owner on this project?')
+        logger.info('Created a service principal: %s', service_principal)
+        # We don't need to add role assignment for this created SPN
     else:
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
-    store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
-    return load_acs_service_principal(subscription_id, file_name=file_name_aks)
+    return {
+        'client_secret': client_secret,
+        'service_principal': service_principal,
+    }
 
 
 def _ensure_osa_aad(cli_ctx,
@@ -2912,33 +2907,30 @@ def _ensure_service_principal(cli_ctx,
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
-        # --service-principal not specified, try to load it from local disk
-        principal_obj = load_acs_service_principal(subscription_id)
-        if principal_obj:
-            service_principal = principal_obj.get('service_principal')
-            client_secret = principal_obj.get('client_secret')
-        else:
-            # Nothing to load, make one.
-            if not client_secret:
-                client_secret = _create_client_secret()
-            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        # --service-principal not specified, make one.
+        if not client_secret:
+            client_secret = _create_client_secret()
+        salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-            service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
-            if not service_principal:
-                raise CLIError('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
-            logger.info('Created a service principal: %s', service_principal)
-            # add role first before save it
-            if not _add_role_assignment(cli_ctx, 'Contributor', service_principal):
-                logger.warning('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
+        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        if not service_principal:
+            raise CLIError('Could not create a service principal with the right permissions. '
+                           'Are you an Owner on this project?')
+        logger.info('Created a service principal: %s', service_principal)
+        # add role first before save it
+        if not _add_role_assignment(cli_ctx, 'Contributor', service_principal):
+            logger.warning('Could not create a service principal with the right permissions. '
+                           'Are you an Owner on this project?')
     else:
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
-    store_acs_service_principal(subscription_id, client_secret, service_principal)
-    return load_acs_service_principal(subscription_id)
+
+    return {
+        'client_secret': client_secret,
+        'service_principal': service_principal,
+    }
 
 
 def _create_client_secret():
