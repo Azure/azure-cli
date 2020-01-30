@@ -150,7 +150,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     tags = tags or {}
     sku_tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
-    http_listener_protocol = 'https' if cert_data else 'http'
+    http_listener_protocol = 'https' if (cert_data or key_vault_secret_id) else 'http'
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     virtual_network_name = virtual_network_name or '{}Vnet'.format(application_gateway_name)
 
