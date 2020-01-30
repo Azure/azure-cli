@@ -30,6 +30,12 @@ Release History
 
 * Add `monitor` subgroup to manage Log Analytics monitoring in Azure Red Hat OpensShift cluster
 
+**CDN**
+
+* Add support for rulesEngine feature
+* Add new commands group 'cdn endpoint rule' to manage rules
+* Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
+
 **IoT**
 
 * Deprecated 'IoT hub Job' commands.
@@ -49,6 +55,10 @@ Release History
 **RBAC**
 
 * [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
+
+**Security**
+
+* Added new commands `az atp show` and `az atp update` to view and manage advanced threat protection settings for storage accounts.
 
 **Storage**
 
