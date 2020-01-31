@@ -1246,6 +1246,11 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
 
 
+def update_av_set(instance, resource_group_name, ppg=None):
+    if ppg is not None:
+        instance.
+
+
 def list_av_sets(cmd, resource_group_name=None):
     op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
     if resource_group_name:
