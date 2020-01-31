@@ -2054,14 +2054,15 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
                                                 certificate_envelope=kv_cert_def)
 
 
-def create_managed_ssl_cert(cmd, resource_group_name, name, hostname):
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None):
     Certificate = cmd.get_models('Certificate')
     hostname = hostname.lower()
     client = web_client_factory(cmd.cli_ctx)
-    webapp = client.web_apps.get(resource_group_name, name)
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
-        raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
-    hostname_bindings = client.web_apps.list_host_name_bindings(resource_group_name, name)
+        slot_text = "Deployment slot {} in ".format(slot)
+        raise CLIError("{0}app {1} doesn't exist in resource group {2}".format(slot_text, name, resource_group_name))
+    hostname_bindings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_host_name_bindings', slot)
     verified_hostname_found = False
     for hostname_binding in hostname_bindings:
         binding_name = hostname_binding.name.split('/')[-1]
@@ -2069,10 +2070,11 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname):
             verified_hostname_found = True
 
     if not verified_hostname_found:
+        slot_text = " --slot {}".format(slot) if slot else ""
         raise CLIError("Hostname (custom domain) '{0}' is not registered with {1}. "
                        "Use 'az webapp config hostname add --resource-group {2} "
-                       "--webapp-name {1} --hostname {0}' "
-                       "to register the hostname.".format(hostname, name, resource_group_name))
+                       "--webapp-name {1}{3} --hostname {0}' "
+                       "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
 
     server_farm_id = webapp.server_farm_id
     location = webapp.location
