@@ -29,6 +29,7 @@ Release History
 **AppService**
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+* functionapp: Add ability to create Java function apps in Linux
 
 **ARM**
 
