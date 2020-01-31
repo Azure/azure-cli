@@ -305,3 +305,29 @@ def create_security_workspace_setting(client, resource_name, target_workspace):
 def delete_security_workspace_setting(client, resource_name):
 
     client.delete(resource_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Security ATP
+# --------------------------------------------------------------------------------------------
+
+def get_atp_setting(client, resource_group_name, storage_account_name):
+
+    return client.get(_construct_resource_id(client, resource_group_name, storage_account_name))
+
+
+def update_atp_setting(client, resource_group_name, storage_account_name, is_enabled):
+
+    return client.create(_construct_resource_id(client, resource_group_name, storage_account_name),
+                         is_enabled=is_enabled)
+
+
+def _construct_resource_id(client, resource_group_name, storage_account_name):
+
+    from msrestazure.tools import resource_id
+    return resource_id(
+        subscription=client.config.subscription_id,
+        resource_group=resource_group_name,
+        namespace='Microsoft.Storage',
+        type='storageAccounts',
+        name=storage_account_name)

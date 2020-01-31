@@ -45,7 +45,7 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].sku.name', 'B1'),
             JMESPathCheck('[0].perSiteScaling', True)
         ])
-        self.cmd('appservice plan list', checks=[
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, resource_group), 1)
         ])
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
@@ -348,10 +348,22 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
 
         # site azure storage account configurations tests
+        runtime = 'node|6.6'
+        linux_plan = self.create_random_name(prefix='webapp-linux-plan', length=24)
+        linux_webapp = self.create_random_name(prefix='webapp-linux', length=24)
+        self.cmd('appservice plan create -g {} -n {} -l eastus --sku S1 --is-linux'.format(resource_group, linux_plan),
+                 checks=[
+                     JMESPathCheck('reserved', True),  # this weird field means it is a linux
+                     JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, linux_webapp, linux_plan, runtime),
+                 checks=[
+                     JMESPathCheck('name', linux_webapp),
+        ])
         # add
         self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
-                 '--share-name sharename --access-key key --mount-path /path/to/mount').format(resource_group, webapp_name))
-        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+                 '--share-name sharename --access-key key --mount-path /path/to/mount').format(resource_group, linux_webapp))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck('length(@)', 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
             JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
@@ -360,8 +372,8 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
         # update
         self.cmd('webapp config storage-account update -g {} -n {} --custom-id Id --mount-path /different/path'
-                 .format(resource_group, webapp_name))
-        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+                 .format(resource_group, linux_webapp))
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("length(@)", 1),
             JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
             JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
@@ -369,18 +381,18 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
             JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/different/path")])
         # list
-        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("length(@)", 1),
             JMESPathCheck('[0].name', 'Id')])
         # delete
-        self.cmd('webapp config storage-account delete -g {} -n {} --custom-id Id'.format(resource_group, webapp_name)).assert_with_checks([
+        self.cmd('webapp config storage-account delete -g {} -n {} --custom-id Id'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("length(@)", 0)])
 
         # site connection string tests
         self.cmd('webapp config connection-string set -t mysql -g {} -n {} --settings c1="conn1" c2=conn2 '
-                 '--slot-settings c3=conn3'.format(resource_group, webapp_name))
+                 '--slot-settings c3=conn3'.format(resource_group, linux_webapp))
         self.cmd('webapp config connection-string list -g {} -n {}'
-                 .format(resource_group, webapp_name)).assert_with_checks([
+                 .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 3),
                      JMESPathCheck("[?name=='c1']|[0].slotSetting", False),
                      JMESPathCheck("[?name=='c1']|[0].value.type", 'MySql'),
@@ -388,9 +400,9 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck("[?name=='c2']|[0].slotSetting", False),
                      JMESPathCheck("[?name=='c3']|[0].slotSetting", True)])
         self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'
-                 .format(resource_group, webapp_name))
+                 .format(resource_group, linux_webapp))
         self.cmd('webapp config connection-string list -g {} -n {}'
-                 .format(resource_group, webapp_name)).assert_with_checks([
+                 .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 1),
                      JMESPathCheck('[0].slotSetting', False),
                      JMESPathCheck('[0].name', 'c2')])
@@ -683,7 +695,7 @@ class WebappACRScenarioTest(ScenarioTest):
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime))
-        creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        creds = self.cmd('acr credential show -n {} -g {}'.format(acr_registry_name, resource_group)).get_output_in_json()
         self.cmd('webapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
             resource_group, webapp, acr_registry_name), checks=[
                 JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
@@ -702,7 +714,7 @@ class FunctionappACRScenarioTest(ScenarioTest):
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
         self.cmd('functionapp create -g {} -n {} -s {} --plan {} --runtime {}'.format(resource_group, functionapp, storage_account, plan, runtime))
-        creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        creds = self.cmd('acr credential show -n {} -g {}'.format(acr_registry_name, resource_group)).get_output_in_json()
         self.cmd('functionapp config container set -g {0} -n {1} --docker-custom-image-name {2}.azurecr.io/image-name:latest --docker-registry-server-url https://{2}.azurecr.io'.format(
             resource_group, functionapp, acr_registry_name), checks=[
                 JMESPathCheck("[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", creds['username'])
@@ -737,7 +749,7 @@ class FunctionAppCreateUsingACR(ScenarioTest):
         runtime = 'node'
         acr_registry_name = functionapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
-        acr_creds = self.cmd('acr credential show -n {}'.format(acr_registry_name)).get_output_in_json()
+        acr_creds = self.cmd('acr credential show -n {} -g {}'.format(acr_registry_name, resource_group)).get_output_in_json()
         username = acr_creds['username']
         password = acr_creds['passwords'][0]['value']
         self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
@@ -811,7 +823,7 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
         self.cmd('functionapp config set -g {} -n {} --prewarmed-instance-count 4'
                  .format(resource_group, functionapp_name)).assert_with_checks([
-                     JMESPathCheck('reservedInstanceCount', 4)])
+                     JMESPathCheck('preWarmedInstanceCount', 4)])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
 
@@ -1056,7 +1068,7 @@ class WebappSSLImportCertTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan_name))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
         self.cmd('keyvault create -g {} -n {}'.format(resource_group, kv_name))
-        self.cmd('keyvault set-policy --name {} --spn {} --secret-permissions get'.format(kv_name, 'Microsoft.Azure.WebSites'))
+        self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(resource_group, kv_name, 'Microsoft.Azure.WebSites'))
         self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(cert_name, kv_name, pfx_file, cert_password))
 
         self.cmd('webapp config ssl import --resource-group {} --name {}  --key-vault {} --key-vault-certificate-name {}'.format(resource_group, webapp_name, kv_name, cert_name), checks=[
@@ -1103,6 +1115,29 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         ])
         self.cmd('functionapp create -g {} -n {} -p {} -s {}'.format(resource_group2, functionapp_name2, plan_id, storage_account_id2))
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_app_service_java(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan), checks=[
+            JMESPathCheck('reserved', True),  # this weird field means it is a linux
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime java'
+                 .format(resource_group, functionapp, plan, storage_account),
+                 checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+        result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].name', functionapp)
+        ]).get_output_in_json()
+        self.assertTrue('functionapp,linux' in result[0]['kind'])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/java:2.0-java8-appservice')])
 
 
 class FunctionUpdatePlan(ScenarioTest):
@@ -1204,7 +1239,21 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node')])
 
-        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+    @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_consumption_linux_java(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionapplinuxconsumption', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Linux --runtime java'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('reserved', True),
+                     JMESPathCheck('kind', 'functionapp,linux'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
 
 class FunctionAppOnWindowsWithRuntime(ScenarioTest):
@@ -1720,7 +1769,7 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             JMESPathCheck('[0].sku.tier', 'PremiumContainer'),
             JMESPathCheck('[0].sku.name', 'PC2')
         ])
-        self.cmd('appservice plan list', checks=[
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
             JMESPathCheck("length([?name=='{}' && resourceGroup=='{}'])".format(plan, resource_group), 1)
         ])
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
