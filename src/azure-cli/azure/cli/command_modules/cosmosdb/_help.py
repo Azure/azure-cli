@@ -601,7 +601,7 @@ type: command
 short-summary: Show the details of a SQL user defined function under an Azure Cosmos DB SQL container.
 """
 
-helps['cosmosdb sql stored_procedure'] = """
+helps['cosmosdb sql container'] = """
 type: group
 short-summary: Manage Azure Cosmos DB SQL containers.
 """
