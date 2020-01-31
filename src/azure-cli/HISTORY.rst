@@ -144,6 +144,11 @@ Release History
 2.0.80
 ++++++
 
+**AMS**
+
+* az ams is now GA.
+
+
 **Compute**
 
 * disk update: Add --disk-encryption-set and --encryption-type
