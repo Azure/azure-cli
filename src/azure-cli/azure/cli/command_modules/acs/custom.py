@@ -1544,7 +1544,9 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     else:
         protocol = 'http'
 
-    proxy_url = '{0}://{1}:{2}/'.format(protocol, listen_address, listen_port)
+    proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
+    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy'.format(proxy_url,
+                                                                                                       protocol)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
         # TODO: better error handling here.
@@ -1560,19 +1562,17 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
 
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
-        wait_then_open_async(proxy_url)
+        wait_then_open_async(dashboardURL)
     try:
         try:
-            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                     "port-forward", "--address", listen_address, dashboard_pod,
-                                     "{0}:{1}".format(listen_port, dashboard_port)], stderr=subprocess.STDOUT)
+            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
+                                     listen_address, "--port", listen_port], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
             if err.output.find(b'unknown flag: --address'):
                 if listen_address != '127.0.0.1':
                     logger.warning('"--address" is only supported in kubectl v1.13 and later.')
                     logger.warning('The "--listen-address" argument will be ignored.')
-                subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                 "port-forward", dashboard_pod, "{0}:{1}".format(listen_port, dashboard_port)])
+                subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy", "--port", listen_port])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
