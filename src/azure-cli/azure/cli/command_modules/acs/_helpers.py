@@ -5,7 +5,7 @@
 
 from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 # pylint: disable=no-name-in-module,import-error
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAPIServerAccessProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAPIServerAccessProfile
 
 
 def _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=None):
