@@ -1434,6 +1434,14 @@ def db_audit_policy_update(
     if audit_actions_and_groups:
         instance.audit_actions_and_groups = audit_actions_and_groups
 
+    # If auditing is enabled, make sure that the actions and groups are set to default
+    # value in case they were removed previously (When disabling auditing)
+    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
+        instance.audit_actions_and_groups = [
+            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+            "FAILED_DATABASE_AUTHENTICATION_GROUP",
+            "BATCH_COMPLETED_GROUP"]
+
     if retention_days:
         instance.retention_days = retention_days
 
