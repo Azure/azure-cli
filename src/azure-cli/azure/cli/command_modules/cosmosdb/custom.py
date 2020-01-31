@@ -364,11 +364,11 @@ def cli_cosmosdb_sql_user_defined_function_create_update(client,
         options={})
 
     return client.create_update_sql_user_defined_function(resource_group_name,
-                                                         account_name,
-                                                         database_name,
-                                                         container_name,
-                                                         user_defined_function_name,
-                                                         sql_user_defined_function_create_update_resource)
+                                                          account_name,
+                                                          database_name,
+                                                          container_name,
+                                                          user_defined_function_name,
+                                                          sql_user_defined_function_create_update_resource)
 
 def _populate_sql_trigger_definition(sql_trigger_resource,
                                      trigger_body,
