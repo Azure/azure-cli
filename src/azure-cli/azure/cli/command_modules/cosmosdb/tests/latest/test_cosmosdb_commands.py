@@ -455,7 +455,7 @@ class CosmosDBTests(ScenarioTest):
         sproc_name = self.create_random_name(prefix='cli', length=15)
         body = "sampleBody"
         nbody = "sampleBody2"
-        
+
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
             'db_name': db_name,
@@ -495,7 +495,7 @@ class CosmosDBTests(ScenarioTest):
         udf_name = self.create_random_name(prefix='cli', length=15)
         body = "sampleBody"
         nbody = "sampleBody2"
-        
+
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
             'db_name': db_name,
@@ -537,7 +537,7 @@ class CosmosDBTests(ScenarioTest):
         trigger_type = "Pre"
         trigger_operation = "Delete"
         nbody = "sampleBody2"
-        
+
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
             'db_name': db_name,
@@ -545,8 +545,8 @@ class CosmosDBTests(ScenarioTest):
             'part': partition_key,
             'trigger_name': trigger_name,
             'body': body,
-            'type' : trigger_type,
-            'op' : trigger_operation,
+            'type': trigger_type,
+            'op': trigger_operation,
             'nbody': nbody
         })
 

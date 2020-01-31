@@ -288,6 +288,7 @@ def cli_cosmosdb_sql_container_create(client,
                                               container_name,
                                               sql_container_create_update_resource)
 
+
 def cli_cosmosdb_sql_container_update(client,
                                       resource_group_name,
                                       account_name,
@@ -324,6 +325,7 @@ def cli_cosmosdb_sql_container_update(client,
                                               container_name,
                                               sql_container_create_update_resource)
 
+
 def cli_cosmosdb_sql_stored_procedure_create_update(client,
                                                     resource_group_name,
                                                     account_name,
@@ -346,6 +348,7 @@ def cli_cosmosdb_sql_stored_procedure_create_update(client,
                                                      container_name,
                                                      stored_procedure_name,
                                                      sql_stored_procedure_create_update_resource)
+
 
 def cli_cosmosdb_sql_user_defined_function_create_update(client,
                                                          resource_group_name,
@@ -370,6 +373,7 @@ def cli_cosmosdb_sql_user_defined_function_create_update(client,
                                                           user_defined_function_name,
                                                           sql_user_defined_function_create_update_resource)
 
+
 def _populate_sql_trigger_definition(sql_trigger_resource,
                                      trigger_body,
                                      trigger_operation,
@@ -388,6 +392,7 @@ def _populate_sql_trigger_definition(sql_trigger_resource,
         sql_trigger_resource.trigger_type = trigger_type
 
     return True
+
 
 def cli_cosmosdb_sql_trigger_create(client,
                                     resource_group_name,
@@ -421,6 +426,7 @@ def cli_cosmosdb_sql_trigger_create(client,
                                             container_name,
                                             trigger_name,
                                             sql_trigger_create_update_resource)
+
 
 def cli_cosmosdb_sql_trigger_update(client,
                                     resource_group_name,
@@ -457,6 +463,7 @@ def cli_cosmosdb_sql_trigger_update(client,
                                             container_name,
                                             trigger_name,
                                             sql_trigger_create_update_resource)
+
 
 def cli_cosmosdb_gremlin_database_create(client,
                                          resource_group_name,
