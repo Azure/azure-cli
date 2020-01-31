@@ -20,7 +20,8 @@ from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodes_count,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
-    validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr)
+    validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr,
+    validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout)
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
@@ -175,6 +176,8 @@ def load_arguments(self, _):
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
+        c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
+        c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('enable_cluster_autoscaler', action='store_true')
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
@@ -209,6 +212,8 @@ def load_arguments(self, _):
         c.argument('load_balancer_managed_outbound_ip_count', type=int)
         c.argument('load_balancer_outbound_ips', type=str, validator=validate_load_balancer_outbound_ips)
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
+        c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
+        c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
 
     with self.argument_context('aks disable-addons') as c:
@@ -322,6 +327,9 @@ def load_arguments(self, _):
         c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
         c.argument('customer_admin_group_id', options_list=['--customer-admin-group-id'])
         c.argument('workspace_id')
+
+    with self.argument_context('openshift monitor enable') as c:
+        c.argument('workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')
 
 
 def _get_default_install_location(exe_name):
