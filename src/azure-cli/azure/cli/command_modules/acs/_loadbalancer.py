@@ -22,7 +22,7 @@ def set_load_balancer_sku(sku, kubernetes_version):
         return sku
     if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.13.0"):
         logger.warning('Setting load_balancer_sku to basic as it is not specified and kubernetes \
-        version(%s) less than 1.13.0 only supports basic load balancer SKU\n' % (kubernetes_version))
+        version({}) less than 1.13.0 only supports basic load balancer SKU\n'.format(kubernetes_version))
         return "basic"
     return "standard"
 
