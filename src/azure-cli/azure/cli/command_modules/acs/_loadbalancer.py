@@ -12,12 +12,16 @@ from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBal
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
 from azure.mgmt.containerservice.v2019_11_01.models import ResourceReference
 
+from knack.log import get_logger
+
+logger = get_logger(__name__)
+
 
 def set_load_balancer_sku(sku, kubernetes_version):
     if sku:
         return sku
     if kubernetes_version and StrictVersion(kubernetes_version) < StrictVersion("1.13.0"):
-        print('Setting load_balancer_sku to basic as it is not specified and kubernetes \
+        logger.warning('Setting load_balancer_sku to basic as it is not specified and kubernetes \
         version(%s) less than 1.13.0 only supports basic load balancer SKU\n' % (kubernetes_version))
         return "basic"
     return "standard"
