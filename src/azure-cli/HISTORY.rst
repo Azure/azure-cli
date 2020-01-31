@@ -49,6 +49,11 @@ Release History
 * Enhance step resource for new step type.
 * Update azure-mgmt-deploymentmanager package to use version 0.2.0.
 
+**BotService**
+
+* Fix issue #11697: `az bot create` is not idempotent
+* Change name-correcting tests to run in Live-mode only
+
 **IoT**
 
 * Deprecated 'IoT hub Job' commands.

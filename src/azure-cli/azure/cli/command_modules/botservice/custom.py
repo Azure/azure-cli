@@ -21,6 +21,7 @@ from azure.mgmt.botservice.models import (
     ConnectionSetting,
     ConnectionSettingProperties,
     ConnectionSettingParameter,
+    ErrorException,
     Sku)
 
 from knack.util import CLIError
@@ -75,6 +76,28 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
             f.write(json.dumps(existing))
 
 
+def __handle_failed_name_check(name_response, cmd, client, resource_group_name, resource_name):
+    # Creates should be idempotent, verify if the bot already exists inside of the provided Resource Group
+    logger.debug('Failed name availability check for provided bot name "%s".\n'
+                 'Checking if bot exists in Resource Group "%s".', resource_name, resource_group_name)
+    try:
+        # If the bot exists, return the bot's information to the user
+        existing_bot = get_bot(cmd, client, resource_group_name, resource_name)
+        logger.warning('Provided bot name already exists in Resource Group. Returning bot information:')
+        return existing_bot
+    except ErrorException as e:
+        if e.error.error.code == 'ResourceNotFound':
+            code = e.error.error.code
+            message = e.error.error.message
+
+            logger.debug('Bot "%s" not found in Resource Group "%s".\n  Code: "%s"\n  Message: '
+                         '"%s"', resource_name, resource_group_name, code, message)
+            raise CLIError('Unable to create bot.\nReason: "{}"'.format(name_response.message))
+
+        # For other error codes, raise them to the user
+        raise e
+
+
 def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password=None, language=None,  # pylint: disable=too-many-locals, too-many-statements, inconsistent-return-statements
            description=None, display_name=None, endpoint=None, tags=None, location='Central US',
            sku_name='F0', deploy_echo=None):
@@ -91,9 +114,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
     # Check the resource name availability for the bot.
     name_response = NameAvailability.check_name_availability(client, resource_name, kind)
     if not name_response.valid:
-        # If the name is unavailable, gracefully exit and log the reason for the user.
-        raise CLIError('Unable to create a bot with a name of "{0}".\nReason: {1}'
-                       .format(resource_name, name_response.message))
+        return __handle_failed_name_check(name_response, cmd, client, resource_group_name, resource_name)
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
