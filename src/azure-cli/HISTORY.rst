@@ -26,6 +26,7 @@ Release History
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
 
 **ARM**
+
 * Fix issue #10246: `az resource tag` crashes when the parameter `--ids` passed in is resource group ID
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
@@ -67,6 +68,11 @@ Release History
 **Network**
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
+
+**Policy**
+
+* Add new command `az policy metadata` to retrieve rich policy metadata resources
+* `az policy remediation create`: Specify whether compliance should be re-evaluated prior to remediation with the `--resource-discovery-mode` parameter
 
 **Profile**
 
@@ -299,7 +305,7 @@ Release History
 
 **Policy**
 
-* Support for Policy API version 2019-09-01.
+* Support for Policy API version 2019-09-01
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
 
 **Redis**
