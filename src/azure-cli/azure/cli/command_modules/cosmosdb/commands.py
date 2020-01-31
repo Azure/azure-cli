@@ -77,7 +77,7 @@ def load_command_table(self, _):
         g.command('list', 'list_sql_containers')
         g.command('show', 'get_sql_container')
         g.command('delete', 'delete_sql_container')
-    
+
     with self.command_group('cosmosdb sql stored_procedure', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
         g.custom_command('create', 'cli_cosmosdb_sql_stored_procedure_create_update')
         g.custom_command('update', 'cli_cosmosdb_sql_stored_procedure_create_update')
