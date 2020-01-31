@@ -3,6 +3,9 @@
 Release History
 ===============
 
+2.0.81
+++++++
+
 **ACS**
 
 * Added support to set outbound allocated ports and idle timeouts on standard load balancer
