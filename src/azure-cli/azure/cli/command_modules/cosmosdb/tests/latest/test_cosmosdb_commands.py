@@ -447,6 +447,132 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_stored_procedure')
+    def test_cosmosdb_sql_stored_procedure(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        sproc_name = self.create_random_name(prefix='cli', length=15)
+        body = "sampleBody"
+        nbody = "sampleBody2"
+        
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'sproc_name': sproc_name,
+            'body': body,
+            'nbody': nbody
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} ').get_output_in_json()
+        sproc_create = self.cmd('az cosmosdb sql stored_procedure create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name} -b {body}').get_output_in_json()
+
+        assert sproc_create["name"] == sproc_name
+        assert sproc_create["resource"]["body"] == body
+
+        sproc_update = self.cmd('az cosmosdb sql stored_procedure update -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name} -b {nbody}').get_output_in_json()
+        assert sproc_update["resource"]["body"] == nbody
+
+        sproc_show = self.cmd('az cosmosdb sql stored_procedure show -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name}').get_output_in_json()
+        assert sproc_show["name"] == sproc_name
+
+        sproc_list = self.cmd('az cosmosdb sql stored_procedure list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        assert len(sproc_list) == 1
+
+        self.cmd('az cosmosdb sql stored_procedure delete -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name}')
+        sproc_list = self.cmd('az cosmosdb sql stored_procedure list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        assert len(sproc_list) == 0
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_user_defined_function')
+    def test_cosmosdb_sql_user_defined_function(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        udf_name = self.create_random_name(prefix='cli', length=15)
+        body = "sampleBody"
+        nbody = "sampleBody2"
+        
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'udf_name': udf_name,
+            'body': body,
+            'nbody': nbody
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} ').get_output_in_json()
+        udf_create = self.cmd('az cosmosdb sql user_defined_function create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name} -b {body}').get_output_in_json()
+
+        assert udf_create["name"] == udf_name
+        assert udf_create["resource"]["body"] == body
+
+        udf_update = self.cmd('az cosmosdb sql user_defined_function update -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name} -b {nbody}').get_output_in_json()
+        assert udf_update["resource"]["body"] == nbody
+
+        udf_show = self.cmd('az cosmosdb sql user_defined_function show -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name}').get_output_in_json()
+        assert udf_show["name"] == udf_name
+
+        udf_list = self.cmd('az cosmosdb sql user_defined_function list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        assert len(udf_list) == 1
+
+        self.cmd('az cosmosdb sql user_defined_function delete -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name}')
+        udf_list = self.cmd('az cosmosdb sql user_defined_function list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        assert len(udf_list) == 0
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_trigger')
+    def test_cosmosdb_sql_trigger(self, resource_group):
+        db_name = self.create_random_name(prefix='cli', length=15)
+        ctn_name = self.create_random_name(prefix='cli', length=15)
+        partition_key = "/thePartitionKey"
+        trigger_name = self.create_random_name(prefix='cli', length=15)
+        body = "sampleBody"
+        trigger_type = "Pre"
+        trigger_operation = "Delete"
+        nbody = "sampleBody2"
+        
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': db_name,
+            'ctn_name': ctn_name,
+            'part': partition_key,
+            'trigger_name': trigger_name,
+            'body': body,
+            'type' : trigger_type,
+            'op' : trigger_operation,
+            'nbody': nbody
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} ').get_output_in_json()
+        trigger_create = self.cmd('az cosmosdb sql trigger create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {trigger_name} -b {body}').get_output_in_json()
+
+        assert trigger_create["name"] == trigger_name
+        assert trigger_create["resource"]["body"] == body
+
+        trigger_update = self.cmd('az cosmosdb sql trigger update -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {trigger_name} -b {nbody} --operation {op} -t {type}').get_output_in_json()
+        assert trigger_update["resource"]["body"] == nbody
+        assert trigger_update["resource"]["triggerOperation"] == trigger_operation
+        assert trigger_update["resource"]["triggerType"] == trigger_type
+
+        trigger_show = self.cmd('az cosmosdb sql trigger show -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {trigger_name}').get_output_in_json()
+        assert trigger_show["name"] == trigger_name
+
+        trigger_list = self.cmd('az cosmosdb sql trigger list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        assert len(trigger_list) == 1
+
+        self.cmd('az cosmosdb sql trigger delete -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {trigger_name}')
+        trigger_list = self.cmd('az cosmosdb sql trigger list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        assert len(trigger_list) == 0
+
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_database')
     def test_cosmosdb_mongodb_database(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)

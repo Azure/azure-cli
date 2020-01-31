@@ -77,6 +77,27 @@ def load_command_table(self, _):
         g.command('list', 'list_sql_containers')
         g.command('show', 'get_sql_container')
         g.command('delete', 'delete_sql_container')
+    
+    with self.command_group('cosmosdb sql stored_procedure', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_sql_stored_procedure_create_update')
+        g.custom_command('update', 'cli_cosmosdb_sql_stored_procedure_create_update')
+        g.command('list', 'list_sql_stored_procedures')
+        g.command('show', 'get_sql_stored_procedure')
+        g.command('delete', 'delete_sql_stored_procedure')
+
+    with self.command_group('cosmosdb sql trigger', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_sql_trigger_create')
+        g.custom_command('update', 'cli_cosmosdb_sql_trigger_update')
+        g.command('list', 'list_sql_triggers')
+        g.command('show', 'get_sql_trigger')
+        g.command('delete', 'delete_sql_trigger')
+
+    with self.command_group('cosmosdb sql user_defined_function', cosmosdb_sql_sdk, client_factory=cf_sql_resources) as g:
+        g.custom_command('create', 'cli_cosmosdb_sql_user_defined_function_create_update')
+        g.custom_command('update', 'cli_cosmosdb_sql_user_defined_function_create_update')
+        g.command('list', 'list_sql_user_defined_functions')
+        g.command('show', 'get_sql_user_defined_function')
+        g.command('delete', 'delete_sql_user_defined_function')
 
     # MongoDB api
     with self.command_group('cosmosdb mongodb', is_preview=True):

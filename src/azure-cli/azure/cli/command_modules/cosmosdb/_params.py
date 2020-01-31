@@ -115,6 +115,32 @@ def load_arguments(self, _):
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('throughput', help='The throughput of SQL container (RU/s). Default value is 400')
 
+# SQL stored procedure
+    with self.argument_context('cosmosdb sql stored_procedure') as c:
+        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
+        c.argument('container_name', options_list=['--container-name', '-c'], help="Container name")
+        c.argument('stored_procedure_name', options_list=['--name', '-n'], help="StoredProcedure name")
+        c.argument('stored_procedure_body', options_list=['--body', '-b'], help="StoredProcedure body")
+
+# SQL trigger
+    with self.argument_context('cosmosdb sql trigger') as c:
+        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
+        c.argument('container_name', options_list=['--container', '-c'], help="Container name")
+        c.argument('trigger_name', options_list=['--name', '-n'], help="Trigger name")
+        c.argument('trigger_body', options_list=['--body', '-b'], help="Trigger body")
+        c.argument('trigger_type', options_list=['--type', '-t'], help="Trigger type, values can be: Pre or Post")
+        c.argument('trigger_operation', options_list=['--operation'], help="The operation of the trigger. Values can be: All, Create, Update, Delete, Replace")
+
+# SQL user defined function
+    with self.argument_context('cosmosdb sql user_defined_function') as c:
+        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
+        c.argument('container_name', options_list=['--container', '-c'], help="Container name")
+        c.argument('user_defined_function_name', options_list=['--name', '-n'], help="UserDefinedFunction name")
+        c.argument('user_defined_function_body', options_list=['--body', '-b'], help="UserDefinedFunction body")
+
 # MongoDB
     with self.argument_context('cosmosdb mongodb database') as c:
         c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
