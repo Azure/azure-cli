@@ -224,3 +224,8 @@ def validate_taints(namespace):
 def validate_acr(namespace):
     if namespace.attach_acr and namespace.detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+
+def validate_vnet_subnet_id(namespace):
+    from msrestazure.tools import is_valid_resource_id
+    if not is_valid_resource_id(namespace.vnet_subnet_id):
+        raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
