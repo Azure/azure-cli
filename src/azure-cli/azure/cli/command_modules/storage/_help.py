@@ -909,6 +909,15 @@ type: group
 short-summary: Manage file copy operations.
 """
 
+helps['storage file copy start'] = """
+type: command
+short-summary: Copy a file asynchronously.
+examples:
+    - name: Copy a file asynchronously.
+    - text: |
+        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path mypath --source-share srcshare --destination-path destpath --destination-share myshare --account-name destaccount --account-key 00000000
+"""
+
 helps['storage file copy start-batch'] = """
 type: command
 short-summary: Copy multiple files or blobs to a file share.
