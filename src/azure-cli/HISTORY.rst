@@ -21,6 +21,10 @@ Release History
 
 * Each cluster gets a separate service principal to improve isolation
 
+**AMS**
+
+* az ams is now GA.
+
 **AppConfig**
 
 * Support import/export of keyvault references from/to appservice
@@ -143,11 +147,6 @@ Release History
 
 2.0.80
 ++++++
-
-**AMS**
-
-* az ams is now GA.
-
 
 **Compute**
 
