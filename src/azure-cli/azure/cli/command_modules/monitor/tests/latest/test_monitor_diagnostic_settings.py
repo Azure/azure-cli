@@ -17,6 +17,10 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
         })
         self.cmd('network nsg create -n {nsg} -g {rg}')
 
+        self.cmd('monitor diagnostic-settings categories list -g {rg} --resource-type Microsoft.Network/networkSecurityGroups --resource {nsg}', checks=[
+            self.check('length(value)', 2)
+        ])
+
         self.kwargs['log_config'] = json.dumps([
             {
                 "category": "NetworkSecurityGroupEvent",
