@@ -12,7 +12,7 @@ def load_command_table(self, _):
     from ._client_factory import (
         cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts, cf_log_analytics_workspace)
+        cf_metric_alerts, cf_log_analytics_workspace, cf_diagnostics_category)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace
@@ -83,7 +83,7 @@ def load_command_table(self, _):
 
     diagnostics_categories_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsCategoryOperations.{}',
-        client_factory=cf_diagnostics,
+        client_factory=cf_diagnostics_category,
         operation_group='diagnostic_settings_category',
         exception_handler=monitor_exception_handler)
 
