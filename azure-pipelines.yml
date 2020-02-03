@@ -38,13 +38,13 @@ jobs:
   pool:
     vmImage: "windows-2019"
   steps:
-    - task: Credential Scanner@2
+    - task: ms-codeanalysis.vss-microsoft-security-code-analysis.build-task-credscan.CredScan@2
       displayName: 'CredScan'
       inputs:
         toolVersion: 'Latest'
         suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-    - task: 18ff34ab-7385-4b57-b5d5-a0fcc7b5b274@1
-      displayName: 'PostAnalysis'
+    - task: ms-codeanalysis.vss-microsoft-security-code-analysis.build-task-postanalysis.PostAnalysis@1
+      displayName: 'Post Analysis'
       inputs:
         AllTools: false
         BinSkim: false
