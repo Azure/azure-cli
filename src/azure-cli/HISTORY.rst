@@ -7,6 +7,13 @@ Release History
 
 * az ams is now GA.
 
+**Profile**
+
+* [Preview] Add new attributes `homeTenantId` and `managedByTenants` to subscription accounts.
+  Please re-run `az login` for the changes to take effect
+* `az login`: Show a warning when a subscription is listed from more than one tenants and default to the first one.
+  To select a specific tenant when accessing this subscription, please include `--tenant` in `az login`
+
 2.0.81
 ++++++
 
