@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from enum import Enum
 
 from argcomplete.completers import FilesCompleter
 
@@ -40,6 +41,17 @@ def load_arguments(self, _):
          'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          resource_type=ResourceType.DATA_KEYVAULT)
+
+    class CLIJsonWebKeyOperation(str, Enum):
+        encrypt = "encrypt"
+        decrypt = "decrypt"
+        sign = "sign"
+        verify = "verify"
+        wrap_key = "wrapKey"
+        unwrap_key = "unwrapKey"
+        import_ = "import"
+
+    JsonWebKeyOperation = CLIJsonWebKeyOperation  # TODO: Remove this patch when new SDK is released
 
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
@@ -138,7 +150,8 @@ def load_arguments(self, _):
 
     # region keys
     with self.argument_context('keyvault key') as c:
-        c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*', help='Space-separated list of permitted JSON web key operations.')
+        c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*',
+                   help='Space-separated list of permitted JSON web key operations.')
 
     for scope in ['keyvault key create', 'keyvault key import']:
         with self.argument_context(scope) as c:

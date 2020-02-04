@@ -134,7 +134,6 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
     def test_keyvault_key(self, resource_group):
         self.kwargs.update({
@@ -236,6 +235,20 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
         self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password}',
                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
+
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'loc': 'eastus2euap'
+        })
+        _create_keyvault(self, self.kwargs)
+
+        # create KEK
+        self.cmd('keyvault key create --vault-name {kv} --name key1 --kty RSA-HSM --size 2048 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+        self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 3072 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+        self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 4096 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
 
 class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
