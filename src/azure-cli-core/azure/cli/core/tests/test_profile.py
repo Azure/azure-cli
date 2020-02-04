@@ -44,14 +44,14 @@ class TestProfile(unittest.TestCase):
                                                  tenant_id=cls.tenant_id,
                                                  managed_by_tenants=cls.managed_by_tenants)
         # Dummy result of azure.cli.core._profile.SubscriptionFinder._find_using_specific_tenant
-        # subscription_tenant_id is mapped from tenant_id
+        # home_tenant_id is mapped from tenant_id
         # tenant_id denotes token tenant
         cls.subscription1 = SubscriptionStub(cls.id1,
                                              cls.display_name1,
                                              cls.state1,
                                              tenant_id=cls.tenant_id,
                                              managed_by_tenants=cls.managed_by_tenants,
-                                             subscription_tenant_id=cls.tenant_id)
+                                             home_tenant_id=cls.tenant_id)
         # Dummy result of azure.cli.core._profile.Profile._normalize_properties
         cls.subscription1_normalized = {
             'environmentName': 'AzureCloud',
@@ -64,7 +64,7 @@ class TestProfile(unittest.TestCase):
             },
             'isDefault': False,
             'tenantId': cls.tenant_id,
-            'subscriptionTenantId': cls.tenant_id,
+            'homeTenantId': cls.tenant_id,
             'managedByTenants': [
                 {
                     "tenantId": "00000003-0000-0000-0000-000000000000"
@@ -102,7 +102,7 @@ class TestProfile(unittest.TestCase):
                                              cls.display_name2,
                                              cls.state2,
                                              tenant_id=cls.tenant_id,
-                                             subscription_tenant_id=cls.tenant_id)
+                                             home_tenant_id=cls.tenant_id)
         cls.subscription2_normalized = {
             'environmentName': 'AzureCloud',
             'id': '2',
@@ -114,7 +114,7 @@ class TestProfile(unittest.TestCase):
             },
             'isDefault': False,
             'tenantId': cls.tenant_id,
-            'subscriptionTenantId': cls.tenant_id,
+            'homeTenantId': cls.tenant_id,
             'managedByTenants': [],
         }
         cls.test_msi_tenant = '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
@@ -1796,7 +1796,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
     def test_find_using_specific_tenant(self, _get_authorization_code_mock, mock_auth_context):
-        """ Test tenant_id -> subscription_tenant_id mapping and token tenant attachment
+        """ Test tenant_id -> home_tenant_id mapping and token tenant attachment
         """
         import adal
         cli = DummyCli()
@@ -1813,7 +1813,7 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(len(all_subscriptions), 1)
         self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
-        self.assertEqual(all_subscriptions[0].subscription_tenant_id, home_tenant)
+        self.assertEqual(all_subscriptions[0].home_tenant_id, home_tenant)
 
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
@@ -1830,7 +1830,7 @@ class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[], subscription_tenant_id=None):  # pylint: disable=redefined-builtin
+    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[], home_tenant_id=None):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
@@ -1843,9 +1843,9 @@ class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
         # for a _find_using_specific_tenant Subscription, tenant_id means token tenant id
         self.tenant_id = tenant_id
         self.managed_by_tenants = managed_by_tenants
-        # if subscription_tenant_id is None, this denotes a Subscription from SDK
-        if subscription_tenant_id:
-            self.subscription_tenant_id = subscription_tenant_id
+        # if home_tenant_id is None, this denotes a Subscription from SDK
+        if home_tenant_id:
+            self.home_tenant_id = home_tenant_id
 
 
 class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-methods

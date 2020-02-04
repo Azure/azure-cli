@@ -38,7 +38,7 @@ _SUBSCRIPTION_NAME = 'name'
 _TENANT_ID = 'tenantId'
 # Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'
 # https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
-_SUBSCRIPTION_TENANT_ID = 'subscriptionTenantId'
+_HOME_TENANT_ID = 'homeTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
@@ -267,8 +267,8 @@ class Profile(object):
             }
             # for Subscriptions - List REST API 2019-06-01's subscription account
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
-                if hasattr(s, 'subscription_tenant_id'):
-                    subscription_dict[_SUBSCRIPTION_TENANT_ID] = s.subscription_tenant_id
+                if hasattr(s, 'home_tenant_id'):
+                    subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
                 if hasattr(s, 'managed_by_tenants'):
                     subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
 
@@ -905,9 +905,9 @@ class SubscriptionFinder(object):
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
-            # map tenantId from REST API to subscriptionTenantId
+            # map tenantId from REST API to homeTenantId
             if hasattr(s, "tenant_id"):
-                setattr(s, 'subscription_tenant_id', s.tenant_id)
+                setattr(s, 'home_tenant_id', s.tenant_id)
             setattr(s, 'tenant_id', tenant)
             all_subscriptions.append(s)
         self.tenants.append(tenant)
