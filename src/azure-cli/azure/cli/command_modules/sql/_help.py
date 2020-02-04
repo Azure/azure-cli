@@ -609,7 +609,7 @@ type: command
 short-summary: Shows restorable deleted managed database.
 examples:
   - name: Shows specific restorable deleted managed database.
-    text: az sql midb list-deleted -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22"
+    text: az sql midb show-deleted -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22"
 """
 
 helps['sql midb restore'] = """
