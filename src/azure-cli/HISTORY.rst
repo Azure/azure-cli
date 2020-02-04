@@ -3,10 +3,6 @@
 Release History
 ===============
 
-**Compute**
-
-* vmss create: Add --data-disk-iops and --data-disk-mbps.
-
 **IoT Central**
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
@@ -27,7 +23,6 @@ Release History
 
 * Upgrade azure-mgmt-storage version to 7.1.0
 * `az storage account create`: Add `--encryption-key-type-for-table` and `--encryption-key-type-for-queue` to support Table and Queue Encryption Service
->>>>>>> 49a3c3e1347136efbc1b67dba7c4893336a059a8
 
 2.0.79
 ++++++
