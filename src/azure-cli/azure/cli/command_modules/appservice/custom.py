@@ -2062,14 +2062,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     if not webapp:
         slot_text = "Deployment slot {} in ".format(slot)
         raise CLIError("{0}app {1} doesn't exist in resource group {2}".format(slot_text, name, resource_group_name))
-    hostname_bindings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_host_name_bindings', slot)
-    verified_hostname_found = False
-    for hostname_binding in hostname_bindings:
-        binding_name = hostname_binding.name.split('/')[-1]
-        if binding_name.lower() == hostname and hostname_binding.host_name_type == 'Verified':
-            verified_hostname_found = True
 
-    if not verified_hostname_found:
+    if not _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot):
         slot_text = " --slot {}".format(slot) if slot else ""
         raise CLIError("Hostname (custom domain) '{0}' is not registered with {1}. "
                        "Use 'az webapp config hostname add --resource-group {2} "
@@ -3380,3 +3374,15 @@ def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
         namespace='Microsoft.KeyVault',
         type='vaults',
         name=key_vault)
+
+
+def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None):
+    hostname_bindings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                'list_host_name_bindings', slot)
+    verified_hostname_found = False
+    for hostname_binding in hostname_bindings:
+        binding_name = hostname_binding.name.split('/')[-1]
+        if binding_name.lower() == hostname and hostname_binding.host_name_type == 'Verified':
+            verified_hostname_found = True
+
+    return verified_hostname_found

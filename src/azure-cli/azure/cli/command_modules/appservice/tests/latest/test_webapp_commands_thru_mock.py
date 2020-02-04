@@ -26,7 +26,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          validate_container_app_create_options,
                                                          restore_deleted_webapp,
                                                          list_snapshots,
-                                                         restore_snapshot)
+                                                         restore_snapshot,
+                                                         create_managed_ssl_cert)
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
@@ -402,6 +403,39 @@ class TestWebappMocked(unittest.TestCase):
         self.assertFalse(validate_container_app_create_options(some_runtime, test_docker_image, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, None, None))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_import_ssl_cert_from_key_vault(self, generic_site_op_mock, client_factory_mock, verify_binding_mock):
+        webapp_name = 'someWebAppName'
+        rg_name = 'someRgName'
+        farm_id = 'someFarm'
+        host_name = 'www.contoso.com'
+
+        client = mock.Mock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        verify_binding_mock.return_value = False
+        with self.assertRaises(CLIError):
+            create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None)
+
+        verify_binding_mock.return_value = True
+        Site, Certificate = cmd_mock.get_models('Site', 'Certificate')
+        site = Site(name=webapp_name, location='westeurope')
+        site.server_farm_id = farm_id
+        generic_site_op_mock.return_value = site
+
+        create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None)
+
+        cert_def = Certificate(location='westeurope', canonical_name=host_name,
+                               server_farm_id=farm_id, password='')
+        client.certificates.create_or_update.assert_called_once_with(name=host_name, resource_group_name=rg_name,
+                                                                     certificate_envelope=cert_def)
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods
