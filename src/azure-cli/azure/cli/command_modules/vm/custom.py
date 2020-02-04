@@ -1248,7 +1248,8 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
 
 def update_av_set(instance, resource_group_name, ppg=None):
     if ppg is not None:
-        instance.
+        instance.proximity_placement_group = {'id': ppg}
+    return instance
 
 
 def list_av_sets(cmd, resource_group_name=None):

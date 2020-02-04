@@ -3506,7 +3506,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        self.kwargs['ppg_id'] = self.cmd('ppg create -n {ppg} -t standard -g {rg}').get_output_in_json()['id']
+        self.kwargs['ppg_id'] = self.cmd('ppg create -g {rg} -n {ppg} -t standard').get_output_in_json()['id']
 
         self.cmd('vmss create -g {rg} -n {vmss} --image debian --admin-username debian --ssh-key-value \'{ssh_key}\'')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
@@ -3520,13 +3520,13 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         time.sleep(30)
         self.cmd('vm update -g {rg} -n {vm} --ppg {ppg_id}')
 
-        # self.kwargs['avset_id'] = self.cmd('vm availability-set create -g {rg} -n {avset}').get_output_in_json()['id']
-        # self.cmd('vm availability-set update -g {rg} -n {avset} --ppg {ppg_id}')
+        self.kwargs['avset_id'] = self.cmd('vm availability-set create -g {rg} -n {avset}').get_output_in_json()['id']
+        self.cmd('vm availability-set update -g {rg} -n {avset} --ppg {ppg_id}')
 
         ppg_resource = self.cmd('ppg show -n {ppg} -g {rg}').get_output_in_json()
 
-        # self._assert_ids_equal(ppg_resource['availabilitySets'][0]['id'], self.kwargs['avset_id'],
-        #                        rg_prefix='cli_test_ppg_update_')
+        self._assert_ids_equal(ppg_resource['availabilitySets'][0]['id'], self.kwargs['avset_id'],
+                               rg_prefix='cli_test_ppg_update_')
         self._assert_ids_equal(ppg_resource['virtualMachines'][0]['id'], self.kwargs['vm_id'],
                                rg_prefix='cli_test_ppg_update_')
         self._assert_ids_equal(ppg_resource['virtualMachineScaleSets'][0]['id'], self.kwargs['vmss_id'],
