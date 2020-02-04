@@ -22,7 +22,8 @@ LINUX_SKU_DEFAULT = "P1V2"
 RUNTIME_TO_DEFAULT_VERSION = {
     'node': '8',
     'dotnet': '2',
-    'python': '3.6'
+    'python': '3.6',
+    'java': '8'
 }
 
 RUNTIME_TO_IMAGE_FUNCTIONAPP = {
@@ -36,5 +37,8 @@ RUNTIME_TO_IMAGE_FUNCTIONAPP = {
     },
     'dotnet': {
         '2': 'mcr.microsoft.com/azure-functions/dotnet:2.0-appservice'
+    },
+    'java': {
+        '8': 'mcr.microsoft.com/azure-functions/java:2.0-java8-appservice'
     }
 }

@@ -3,6 +3,18 @@
 Release History
 ===============
 
+**AMS**
+
+* az ams is now GA.
+
+2.0.81
+++++++
+
+**ACS**
+
+* Added support to set outbound allocated ports and idle timeouts on standard load balancer
+* Update to API Version 2019-11-01
+
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
@@ -24,8 +36,10 @@ Release History
 **AppService**
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+* functionapp: Add ability to create Java function apps in Linux
 
 **ARM**
+
 * Fix issue #10246: `az resource tag` crashes when the parameter `--ids` passed in is resource group ID
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
@@ -48,6 +62,11 @@ Release History
 * Enhance step resource for new step type.
 * Update azure-mgmt-deploymentmanager package to use version 0.2.0.
 
+**BotService**
+
+* Fix issue #11697: `az bot create` is not idempotent
+* Change name-correcting tests to run in Live-mode only
+
 **IoT**
 
 * Deprecated 'IoT hub Job' commands.
@@ -68,6 +87,11 @@ Release History
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
 
+**Policy**
+
+* Add new command `az policy metadata` to retrieve rich policy metadata resources
+* `az policy remediation create`: Specify whether compliance should be re-evaluated prior to remediation with the `--resource-discovery-mode` parameter
+
 **Profile**
 
 * `az account get-access-token`: Add `--tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
@@ -82,8 +106,10 @@ Release History
 
 **SQL**
 
+* `sql dw create`: deprecated `--zone-redundant` and `--read-replica-count` parameters. These parameters do not apply to DataWarehouse.
 * [BREAKING CHANGE] `az sql db create`: Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
 * Add New commands `sql db classification show/list/update/delete` and `sql db classification recommendation list/enable/disable` to manage sensitivity classifications for SQL databases.
+* `az sql db audit-policy`: Fix for empty audit actions and groups
 
 **Storage**
 
@@ -299,7 +325,7 @@ Release History
 
 **Policy**
 
-* Support for Policy API version 2019-09-01.
+* Support for Policy API version 2019-09-01
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
 
 **Redis**
