@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AMS**
+
+* az ams is now GA.
+
 2.0.81
 ++++++
 
@@ -20,10 +24,6 @@ Release History
 **AKS**
 
 * Each cluster gets a separate service principal to improve isolation
-
-**AMS**
-
-* az ams is now GA.
 
 **AppConfig**
 
