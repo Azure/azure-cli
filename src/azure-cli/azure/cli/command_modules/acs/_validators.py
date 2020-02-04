@@ -225,6 +225,7 @@ def validate_acr(namespace):
     if namespace.attach_acr and namespace.detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
 
+
 def validate_vnet_subnet_id(namespace):
     if namespace.vnet_subnet_id is not None:
         if namespace.vnet_subnet_id == '':
