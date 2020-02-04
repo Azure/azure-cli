@@ -45,8 +45,13 @@ from knack.log import get_logger
 from ._util import (
     get_sql_capabilities_operations,
     get_sql_servers_operations,
-    get_sql_managed_instances_operations
+    get_sql_managed_instances_operations,
+    get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
 )
+
+from datetime import datetime
+from dateutil.parser import parse
+import calendar
 
 logger = get_logger(__name__)
 
@@ -65,6 +70,18 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
     return server_client.get(
         server_name=server_name,
         resource_group_name=resource_group_name).location
+
+
+def _get_managed_restorable_dropped_database_backup_short_term_retention_client(cli_ctx):
+    '''
+    Returns the location (i.e. Azure region) that the specified server is in.
+    '''
+
+    server_client = \
+        get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(cli_ctx, None)
+
+    # pylint: disable=no-member
+    return server_client
 
 
 def _get_managed_instance_location(cli_ctx, managed_instance_name, resource_group_name):
@@ -455,6 +472,45 @@ def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_n
         quote(resource_group_name),
         quote(managed_instance_name),
         quote(database_name))
+
+
+def _to_filetimeutc(dateTime):
+    NET_epoch = datetime(1601, 1, 1)
+    UNIX_epoch = datetime(1970, 1, 1)
+
+    epoch_delta = (UNIX_epoch - NET_epoch)
+
+    log_time = parse(dateTime)
+
+    net_ts = calendar.timegm((log_time + epoch_delta).timetuple())
+
+    # units of seconds since NET epoch
+    filetime_utc_ts = net_ts * (10**7) + log_time.microsecond * 10
+
+    return filetime_utc_ts
+
+
+def _get_managed_dropped_db_resource_id(
+        cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        deletion_date):
+    '''
+    Gets the Managed db resource id in this Azure environment.
+    '''
+
+    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+    from six.moves.urllib.parse import quote  # pylint: disable=import-error
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    return ('/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/managedInstances/'
+            '{}/restorableDroppedDatabases/{},{}'.format(
+                quote(get_subscription_id(cli_ctx)),
+                quote(resource_group_name),
+                quote(managed_instance_name),
+                quote(database_name),
+                _to_filetimeutc(deletion_date)))
 
 
 def db_show_conn_str(
@@ -2479,6 +2535,7 @@ def managed_db_restore(
         target_managed_database_name,
         target_managed_instance_name=None,
         target_resource_group_name=None,
+        deletion_date=None,
         **kwargs):
     '''
     Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
@@ -2498,11 +2555,20 @@ def managed_db_restore(
         resource_group_name=resource_group_name)
 
     kwargs['create_mode'] = CreateMode.point_in_time_restore.value
-    kwargs['source_database_id'] = _get_managed_db_resource_id(
-        cmd.cli_ctx,
-        resource_group_name,
-        managed_instance_name,
-        database_name)
+
+    if deletion_date:
+        kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+            cmd.cli_ctx,
+            resource_group_name,
+            managed_instance_name,
+            database_name,
+            deletion_date)
+    else:
+        kwargs['source_database_id'] = _get_managed_db_resource_id(
+            cmd.cli_ctx,
+            resource_group_name,
+            managed_instance_name,
+            database_name)
 
     return client.create_or_update(
         database_name=target_managed_database_name,
@@ -2510,10 +2576,107 @@ def managed_db_restore(
         resource_group_name=target_resource_group_name,
         parameters=kwargs)
 
+
+def update_short_term_retention_mi(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        retention_days,
+        deletion_date=None):
+    '''
+    Updates short term retention for database
+
+    Custom function makes create mode more convenient.
+    '''
+
+    if deletion_date:
+        database_name = '{},{}'.format(
+            database_name,
+            _to_filetimeutc(deletion_date))
+
+        client = \
+            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
+                cmd.cli_ctx,
+                None)
+
+        policy = client.create_or_update(
+            restorable_dropped_database_id=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            retention_days=retention_days)
+    else:
+        policy = client.create_or_update(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            retention_days=retention_days)
+
+    return policy
+
+
+def get_short_term_retention_mi(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        deletion_date=None):
+    '''
+    Gets short term retention for database
+
+    Custom function makes create mode more convenient.
+    '''
+
+    if deletion_date:
+        database_name = '{},{}'.format(
+            database_name,
+            _to_filetimeutc(deletion_date))
+
+        client = \
+            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
+                cmd.cli_ctx,
+                None)
+
+        policy = client.get(
+            restorable_dropped_database_id=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name)
+    else:
+        policy = client.get(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name)
+
+    return policy
+
+
+def show_deleted_database_mi(
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        deletion_date):
+    '''
+    Updates short term retention for database
+
+    Custom function makes create mode more convenient.
+    '''
+
+    restorable_dropped_database_id = '{},{}'.format(
+        database_name,
+        _to_filetimeutc(deletion_date))
+
+    return client.get(
+        restorable_dropped_database_id=restorable_dropped_database_id,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+
 ###############################################
 #              sql failover-group             #
 ###############################################
-
 
 def failover_group_create(
         cmd,

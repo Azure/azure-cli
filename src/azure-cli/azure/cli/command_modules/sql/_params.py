@@ -1408,10 +1408,16 @@ def load_arguments(self, _):
     with self.argument_context('sql midb restore') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
+                'deletion_date',
                 'target_managed_database_name',
                 'target_managed_instance_name',
                 'restore_point_in_time'
             ])
+
+        c.argument('deletion_date',
+                   options_list=['--deletion-date'],
+                   help='If specified, restore from a deleted database instead of from an existing database.'
+                   ' Must match the deleted time of a deleted database on the source Managed Instance.')
 
         c.argument('target_managed_database_name',
                    options_list=['--dest-name'],
@@ -1439,8 +1445,33 @@ def load_arguments(self, _):
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. ' + time_format_help)
 
-    with self.argument_context('sql midb list') as c:
-        c.argument('managed_instance_name', id_part=None)
+    with self.argument_context('sql midb update-retention') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'deletion_date',
+                'retention_days'
+            ])
+
+        c.argument('deletion_date',
+                   options_list=['--deletion-date'],
+                   help='If specified, updates retention days for a deleted database, instead of an existing database.'
+                   'Must match the deleted time of a deleted database on the source Managed Instance.')
+
+        c.argument('retention_days',
+                   options_list=['--retention-days'],
+                   required=True,
+                   help='New retention policy in days.')
+
+    with self.argument_context('sql midb show-retention') as c:
+        c.argument('deletion_date',
+                   options_list=['--deletion-date'],
+                   help='If specified, shows retention days for a deleted database, instead of an existing database.'
+                   'Must match the deleted time of a deleted database on the source Managed Instance.')
+
+    with self.argument_context('sql midb show-deleted') as c:
+        c.argument('deletion_date',
+                   options_list=['--deletion-date'],
+                   help='Exact deletion for restorable dropped database')
 
     ###############################################
     #                sql virtual cluster          #
