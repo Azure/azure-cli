@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.80"
+VERSION = "2.0.81"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -78,7 +78,7 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry~=3.0.0rc8',
-    'azure-mgmt-containerservice~=8.0.0',
+    'azure-mgmt-containerservice~=8.1.0',
     'azure-mgmt-cosmosdb~=0.11.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
@@ -105,7 +105,7 @@ DEPENDENCIES = [
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.7.0',
     'azure-mgmt-network~=7.0.0',
-    'azure-mgmt-policyinsights~=0.3.1',
+    'azure-mgmt-policyinsights~=0.4.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=1.8',
     'azure-mgmt-recoveryservices~=0.4.0',

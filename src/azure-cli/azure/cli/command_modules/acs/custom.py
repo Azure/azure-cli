@@ -26,8 +26,6 @@ import webbrowser
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
-from ._helpers import _populate_api_server_access_profile, _set_load_balancer_sku, _set_vm_set_type
-
 # pylint: disable=import-error
 import yaml
 import dateutil.parser
@@ -56,22 +54,17 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceStorageProfileTypes
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
-from azure.mgmt.containerservice.v2019_08_01.models import AgentPool
-from azure.mgmt.containerservice.v2019_08_01.models import ResourceReference
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_11_01.models import AgentPool
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -90,6 +83,11 @@ from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
+
+from ._helpers import _populate_api_server_access_profile, _set_vm_set_type
+
+from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
+                            update_load_balancer_profile, create_load_balancer_profile)
 
 logger = get_logger(__name__)
 
@@ -1544,7 +1542,9 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     else:
         protocol = 'http'
 
-    proxy_url = '{0}://{1}:{2}/'.format(protocol, listen_address, listen_port)
+    proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
+    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy'.format(proxy_url,
+                                                                                                       protocol)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
         # TODO: better error handling here.
@@ -1560,19 +1560,17 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
 
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
-        wait_then_open_async(proxy_url)
+        wait_then_open_async(dashboardURL)
     try:
         try:
-            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                     "port-forward", "--address", listen_address, dashboard_pod,
-                                     "{0}:{1}".format(listen_port, dashboard_port)], stderr=subprocess.STDOUT)
+            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
+                                     listen_address, "--port", listen_port], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
             if err.output.find(b'unknown flag: --address'):
                 if listen_address != '127.0.0.1':
                     logger.warning('"--address" is only supported in kubectl v1.13 and later.')
                     logger.warning('The "--listen-address" argument will be ignored.')
-                subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                 "port-forward", dashboard_pod, "{0}:{1}".format(listen_port, dashboard_port)])
+                subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy", "--port", listen_port])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
@@ -1624,6 +1622,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
+               load_balancer_outbound_ports=None,
+               load_balancer_idle_timeout=None,
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
@@ -1651,7 +1651,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         location = rg_location
 
     vm_set_type = _set_vm_set_type(vm_set_type, kubernetes_version)
-    load_balancer_sku = _set_load_balancer_sku(load_balancer_sku, kubernetes_version)
+    load_balancer_sku = set_load_balancer_sku(load_balancer_sku, kubernetes_version)
 
     if api_server_authorized_ip_ranges and load_balancer_sku == "basic":
         raise CLIError('--api-server-authorized-ip-ranges can only be used with standard load balancer')
@@ -1696,10 +1696,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             logger.warning('Could not create a role assignment for subnet. '
                            'Are you an Owner on this subscription?')
 
-    load_balancer_profile = _get_load_balancer_profile(
+    load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes)
+        load_balancer_outbound_ip_prefixes,
+        load_balancer_outbound_ports,
+        load_balancer_idle_timeout)
 
     if attach_acr:
         _ensure_aks_acr(cmd.cli_ctx,
@@ -1966,14 +1968,18 @@ def aks_update(cmd, client, resource_group_name, name,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
+               load_balancer_outbound_ports=None,
+               load_balancer_idle_timeout=None,
                attach_acr=None,
                detach_acr=None,
                api_server_authorized_ip_ranges=None,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
-
-    update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
-        load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
+    update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
+                                                          load_balancer_outbound_ips,
+                                                          load_balancer_outbound_ip_prefixes,
+                                                          load_balancer_outbound_ports,
+                                                          load_balancer_idle_timeout)
 
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
@@ -1982,10 +1988,12 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--load-balancer-managed-outbound-ip-count",'
-                       '"--load-balancer-outbound-ips",'
-                       '"--load-balancer-outbound-ip-prefixes",'
-                       '"--attach-acr" or "--dettach-acr",'
+                       '"--load-balancer-managed-outbound-ip-count" or'
+                       '"--load-balancer-outbound-ips" or '
+                       '"--load-balancer-outbound-ip-prefixes" or'
+                       '"--load-balancer-outbound-ports" or'
+                       '"--load-balancer-idle-timeout" or'
+                       '"--attach-acr" or "--dettach-acr" or'
                        '"--"api-server-authorized-ip-ranges')
 
     instance = client.get(resource_group_name, name)
@@ -2043,13 +2051,14 @@ def aks_update(cmd, client, resource_group_name, name,
                         subscription_id=subscription_id,
                         detach=True)
 
-    load_balancer_profile = _get_load_balancer_profile(
-        load_balancer_managed_outbound_ip_count,
-        load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes)
-
-    if load_balancer_profile:
-        instance.network_profile.load_balancer_profile = load_balancer_profile
+    if update_lb_profile:
+        instance.network_profile.load_balancer_profile = update_load_balancer_profile(
+            load_balancer_managed_outbound_ip_count,
+            load_balancer_outbound_ips,
+            load_balancer_outbound_ip_prefixes,
+            load_balancer_outbound_ports,
+            load_balancer_idle_timeout,
+            instance.network_profile.load_balancer_profile)
 
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
@@ -3270,50 +3279,3 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
-
-
-def _get_load_balancer_outbound_ips(load_balancer_outbound_ips):
-    """parse load balancer profile outbound IP ids and return an array of references to the outbound IP resources"""
-    load_balancer_outbound_ip_resources = None
-    if load_balancer_outbound_ips:
-        load_balancer_outbound_ip_resources = \
-            [ResourceReference(id=x.strip()) for x in load_balancer_outbound_ips.split(',')]
-    return load_balancer_outbound_ip_resources
-
-
-def _get_load_balancer_outbound_ip_prefixes(load_balancer_outbound_ip_prefixes):
-    """parse load balancer profile outbound IP prefix ids and return an array \
-    of references to the outbound IP prefix resources"""
-    load_balancer_outbound_ip_prefix_resources = None
-    if load_balancer_outbound_ip_prefixes:
-        load_balancer_outbound_ip_prefix_resources = \
-            [ResourceReference(id=x.strip()) for x in load_balancer_outbound_ip_prefixes.split(',')]
-    return load_balancer_outbound_ip_prefix_resources
-
-
-def _get_load_balancer_profile(load_balancer_managed_outbound_ip_count,
-                               load_balancer_outbound_ips,
-                               load_balancer_outbound_ip_prefixes):
-    """parse and build load balancer profile"""
-    load_balancer_outbound_ip_resources = _get_load_balancer_outbound_ips(load_balancer_outbound_ips)
-    load_balancer_outbound_ip_prefix_resources = _get_load_balancer_outbound_ip_prefixes(
-        load_balancer_outbound_ip_prefixes)
-
-    load_balancer_profile = None
-    if any([load_balancer_managed_outbound_ip_count,
-            load_balancer_outbound_ip_resources,
-            load_balancer_outbound_ip_prefix_resources]):
-        load_balancer_profile = ManagedClusterLoadBalancerProfile()
-        if load_balancer_managed_outbound_ip_count:
-            load_balancer_profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
-                count=load_balancer_managed_outbound_ip_count
-            )
-        if load_balancer_outbound_ip_resources:
-            load_balancer_profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
-                public_ips=load_balancer_outbound_ip_resources
-            )
-        if load_balancer_outbound_ip_prefix_resources:
-            load_balancer_profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
-                public_ip_prefixes=load_balancer_outbound_ip_prefix_resources
-            )
-    return load_balancer_profile
