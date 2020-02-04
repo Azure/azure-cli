@@ -609,7 +609,7 @@ type: command
 short-summary: Shows restorable deleted managed database.
 examples:
   - name: Shows specific restorable deleted managed database.
-    text: az sql midb list-deleted -g mygroup --mi myinstance -n midbname --deletion-date "2018-05-20T05:34:22"
+    text: az sql midb list-deleted -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22"
 """
 
 helps['sql midb restore'] = """
@@ -639,9 +639,9 @@ type: command
 short-summary: Shows short term retention for automated backups on a single database.
 examples:
   - name: Shows backup short term retention for live managed database.
-    text: az sql midb update-retention -g mygroup --mi myinstance -n mymanageddb
+    text: az sql midb show-retention -g mygroup --mi myinstance -n mymanageddb
   - name: Shows backup short term retention for dropped managed database.
-    text: az sql midb update-retention -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22"
+    text: az sql midb show-retention -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22"
 """
 
 helps['sql midb show'] = """
