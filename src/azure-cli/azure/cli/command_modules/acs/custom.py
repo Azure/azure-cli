@@ -2120,7 +2120,8 @@ DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
 DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces.custom'
 
 
-def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None, endpoint_type=None, prompt=False):
+def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None,
+                       endpoint_type='Public', prompt=False):
     """
     Use Azure Dev Spaces with a managed Kubernetes cluster.
 
@@ -2131,7 +2132,8 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     :type resource_group_name: String
     :param update: Update to the latest Azure Dev Spaces client components.
     :type update: bool
-    :param space_name: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+    :param space_name: Name of the new or existing dev space to select. Defaults to an \
+    interactive selection experience.
     :type space_name: String
     :param endpoint_type: The endpoint type to be used for a Azure Dev Spaces controller. \
     See https://aka.ms/azds-networking for more information.
