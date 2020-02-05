@@ -2966,8 +2966,8 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
             'vnet_name': 'vcCliTestVnet',
             'subnet_name': 'vcCliTestSubnet',
             'route_table_name': 'vcCliTestRouteTable',
-            'route_name_default': 'default',
-            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
+            'route_name_internet': 'vcCliTestRouteInternet',
+            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
             'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
             'database_name': self.create_random_name(resource_prefix, 50),
             'vault_name': self.create_random_name(resource_prefix, 50),
@@ -2986,8 +2986,8 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
 
         # Create and prepare VNet and subnet for new virtual cluster
         self.cmd('network route-table create -g {rg} -n {route_table_name}')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
         self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
         subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
@@ -3078,8 +3078,8 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
             'vnet_name': 'vcCliTestVnet',
             'subnet_name': 'vcCliTestSubnet',
             'route_table_name': 'vcCliTestRouteTable',
-            'route_name_default': 'default',
-            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
+            'route_name_internet': 'vcCliTestRouteInternet',
+            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
             'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
             'database_name': self.create_random_name(resource_prefix, 50),
             'restored_database_name': self.create_random_name(resource_prefix, 50),
@@ -3099,8 +3099,8 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 
         # Create and prepare VNet and subnet for new virtual cluster
         self.cmd('network route-table create -g {rg} -n {route_table_name}')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
         self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
         subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
