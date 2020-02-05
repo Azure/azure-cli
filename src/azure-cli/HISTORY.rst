@@ -10,6 +10,7 @@ Release History
 **AppConfig**
 
 * Revise help message to exclude unsupported key/label filters.
+* Remove preview tag for most commands excluding managed identity and feature flags.
 
 2.0.81
 ++++++
