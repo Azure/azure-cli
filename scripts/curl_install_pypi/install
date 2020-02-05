@@ -24,13 +24,19 @@ then
   echo "$INSTALL_SCRIPT_SHA256  $install_script" | shasum -a 256 -c - || exit
 fi
 
-if ! command -v python >/dev/null 2>&1
+python_cmd=python3
+if ! command -v python3 >/dev/null 2>&1
 then
-  echo "ERROR: Python not found. 'command -v python' returned failure."
-  echo "If python is available on the system, add it to PATH. For example 'sudo ln -s /usr/bin/python3 /usr/bin/python'"
-  exit 1
+  if ! command -v python >/dev/null 2>&1
+  then
+    echo "ERROR: python3 or python not found."
+    echo "If python is available on the system, add it to PATH."
+    exit 1
+  else
+    python_cmd=python
+  fi
 fi
 
 chmod 775 $install_script
 echo "Running install script."
-$install_script < $_TTY
+$python_cmd $install_script < $_TTY
