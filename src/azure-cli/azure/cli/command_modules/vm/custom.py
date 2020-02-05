@@ -1919,7 +1919,7 @@ def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd
     DataDisk, DiskCreateOptionTypes, VirtualHardDisk = cmd.get_models(
         'DataDisk', 'DiskCreateOptionTypes', 'VirtualHardDisk')
     if not new and not disk_name:
-        raise CLIError('Pleae provide the name of the existing disk to attach')
+        raise CLIError('Please provide the name of the existing disk to attach')
     create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
 
     vm = get_vm(cmd, resource_group_name, vm_name)
