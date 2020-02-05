@@ -981,6 +981,10 @@ def load_arguments(self, _):
                    help='The compute generation component of the sku. '
                    'Allowed value: Gen5')
 
+        c.argument('license_type',
+                   arg_type=get_enum_type(DatabaseLicenseType),
+                   help='The license type to apply for this instance pool.')
+
     with self.argument_context('sql instance-pool create') as c:
         # Create args that will be used to build up the InstancePool object
         create_args_for_complex_type(
