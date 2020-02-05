@@ -1516,6 +1516,15 @@ examples:
         az webapp deployment user set --user-name MyUserName
 """
 
+helps['webapp deployment user show'] = """
+type: command
+short-summary: Get deployment publishing user.
+examples:
+  - name: Get publishing user information.
+    text: >
+        az webapp deployment user show
+"""
+
 helps['webapp hybrid-connection'] = """
 type: group
 short-summary: methods that list, add and remove hybrid-connections from webapps
@@ -1721,7 +1730,8 @@ type: command
 short-summary: >
     Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder
     where the code is present. Current support includes Node, Python, .NET Core and ASP.NET. Node,
-    Python apps are created as Linux apps. .Net Core, ASP.NET apps are created as Windows apps.
+    Python apps are created as Linux apps. .Net Core, ASP.NET, and static HTML apps are created as Windows apps.
+    Append the html flag to deploy as a static HTML app.
 examples:
   - name: View the details of the app that will be created, without actually running the operation
     text: >
@@ -1738,6 +1748,9 @@ examples:
   - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
     text: >
         az webapp up -n MyUniqueAppName --logs
+  - name: Create a web app and deploy as a static HTML app.
+    text: >
+        az webapp up -n MyUniqueAppName --html
 """
 
 helps['webapp update'] = """

@@ -29,7 +29,7 @@ AUTH_TYPES = {
 MULTI_CONTAINER_TYPES = ['COMPOSE', 'KUBE']
 FTPS_STATE_TYPES = ['AllAllowed', 'FtpsOnly', 'Disabled']
 OS_TYPES = ['Windows', 'Linux']
-LINUX_RUNTIMES = ['dotnet', 'node', 'python']
+LINUX_RUNTIMES = ['dotnet', 'node', 'python', 'java']
 WINDOWS_RUNTIMES = ['dotnet', 'node', 'java', 'powershell']
 ACCESS_RESTRICTION_ACTION_TYPES = ['Allow', 'Deny']
 ASE_LOADBALANCER_MODES = ['Internal', 'External']
@@ -231,7 +231,7 @@ def load_arguments(self, _):
             c.argument('windows_fx_version', help="A docker image name used for your windows container web app, e.g., microsoft/nanoserver:ltsc2016", is_preview=True)
             if scope == 'functionapp':
                 c.ignore('windows_fx_version')
-            c.argument('reserved_instance_count', options_list=['--prewarmed-instance-count'], help="Number of pre-warmed instances a function app has")
+            c.argument('pre_warmed_instance_count', options_list=['--prewarmed-instance-count'], help="Number of pre-warmed instances a function app has")
             if scope == 'webapp':
                 c.ignore('reserved_instance_count')
             c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
@@ -420,6 +420,7 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('launch_browser', help="Launch the created app using the default browser", default=False, action='store_true', options_list=['--launch-browser', '-b'])
         c.argument('logs', help="Configure default logging required to enable viewing log stream immediately after launching the webapp", default=False, action='store_true')
+        c.argument('html', help="Ignore app detection and deploy as an html app", default=False, action='store_true')
 
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
