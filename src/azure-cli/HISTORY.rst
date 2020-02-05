@@ -7,6 +7,10 @@ Release History
 
 * az ams is now GA.
 
+**AppConfig**
+
+* Revise help message to exclude unsupported key/label filters.
+
 **Profile**
 
 * [Preview] Add new attributes `homeTenantId` and `managedByTenants` to subscription accounts.
