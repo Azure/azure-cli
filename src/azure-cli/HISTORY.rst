@@ -11,6 +11,14 @@ Release History
 
 * Revise help message to exclude unsupported key/label filters.
 
+**ARM**
+
+* Added new command groups
+    - Added `az deployment group` and `az deployment operation group` for template deployment at resource groups. This is a duplicate of `az group deployment` and `az group deployment operation`. 
+    - Added `az deployment sub` and `az deployment operation sub` for template deployment at subscription scope. This is a duplicate of `az deployment` and `az deployment operation`.
+    - Added `az deployment mg` and `az deployment operation mg` for template deployment at management groups. 
+    - Added `az deployment tenant` and `az deployment operation tenant` for template deployment at tenant scope.
+
 2.0.81
 ++++++
 
@@ -184,11 +192,6 @@ Release History
 **ARM**
 
 * Fix `az resource tag`: Recovery Services Vault tags cannot be updated
-* Added new command groups
-    - Added `az deployment group` and `az deployment operation group` for template deployment at resource groups. This is a duplicate of `az group deployment` and `az group deployment operation`. 
-    - Added `az deployment sub` and `az deployment operation sub` for template deployment at subscription scope. This is a duplicate of `az deployment` and `az deployment operation`.
-    - Added `az deployment mg` and `az deployment operation mg` for template deployment at management groups. 
-    - Added `az deployment tenant` and `az deployment operation tenant` for template deployment at tenant scope.
 
 **Backup**
 
