@@ -760,6 +760,9 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('enforcementMode', '{em}')
         ])
 
+        # ensure the policy assignment shows up in the list result
+        self.cmd('policy assignment list --scope {scope}', checks=self.check("length([?name=='{pan}'])", 1))
+
         # delete the assignment and validate it's gone
         self.cmd('policy assignment delete -n {pan} --scope {scope}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
@@ -778,6 +781,7 @@ class PolicyScenarioTest(ScenarioTest):
             'metadata': 'test',
             'updated_metadata': 'test2',
         })
+
         if (management_group):
             self.kwargs.update({'mg': management_group})
         if (subscription):
@@ -931,6 +935,9 @@ class PolicyScenarioTest(ScenarioTest):
                 self.check('sku.name', 'A0'),
                 self.check('sku.tier', 'Free'),
             ])
+
+            # ensure the assignment appears in the list results
+            self.cmd('policy assignment list --resource-group {rg}', checks=self.check("length([?name=='{pan}'])", 1))
 
             # delete the assignment and validate it's gone
             self.cmd('policy assignment delete -n {pan} -g {rg}')
