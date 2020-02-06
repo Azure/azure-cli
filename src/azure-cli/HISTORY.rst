@@ -7,10 +7,6 @@ Release History
 
 * az ams is now GA.
 
-**AppConfig**
-
-* Revise help message to exclude unsupported key/label filters.
-
 2.0.81
 ++++++
 
