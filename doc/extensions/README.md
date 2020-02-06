@@ -28,11 +28,11 @@ What an Extension is not
 How to find and install an Extension
 ------------------------
 
-- List all available extensions: `az extensino list-available`
+- List all available extensions: `az extension list-available`
 
 - Install an extension: `az extension install --name <extension-name>`
 
-More details on usage in [Extensions for Azure CLI 2.0](https://github.com/MicrosoftDocs/azure-docs-cli/blob/master/docs-ref-conceptual/azure-cli-extensions-overview.md#install-extensions) 
+More details on usage in [Extensions for Azure CLI 2.0](https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview?view=azure-cli-latest#install-extensions)
 
 
 Doc Sections
