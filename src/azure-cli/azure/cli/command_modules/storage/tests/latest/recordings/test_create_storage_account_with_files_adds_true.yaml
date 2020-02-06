@@ -24,11 +24,11 @@ interactions:
         --domain-guid --domain-sid --azure-storage-sid
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002?api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002?api-version=2019-06-01
   response:
     body:
       string: ''
@@ -40,11 +40,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Mon, 28 Oct 2019 16:06:53 GMT
+      - Fri, 27 Dec 2019 04:29:13 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2euap/asyncoperations/ec8d2d96-1d51-4e72-8b81-56d0fd9a4a52?monitor=true&api-version=2019-04-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2euap/asyncoperations/d5c631e2-e737-4f54-b026-3500f42361e4?monitor=true&api-version=2019-06-01
       pragma:
       - no-cache
       server:
@@ -54,7 +54,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1194'
     status:
       code: 202
       message: Accepted
@@ -74,21 +74,21 @@ interactions:
         --domain-guid --domain-sid --azure-storage-sid
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/5.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2euap/asyncoperations/ec8d2d96-1d51-4e72-8b81-56d0fd9a4a52?monitor=true&api-version=2019-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus2euap/asyncoperations/d5c631e2-e737-4f54-b026-3500f42361e4?monitor=true&api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","name":"cli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"azureFilesIdentityBasedAuthentication":{"directoryServiceOptions":"AD","activeDirectoryProperties":{"domainName":"mydomain.com","netBiosDomainName":"mydomain.com","forestName":"mydomain.com","domainGuid":"12345678-1234-1234-1234-123456789012","domainSid":"S-1-5-21-1234567890-1234567890-1234567890","azureStorageSid":"S-1-5-21-1234567890-1234567890-1234567890-1234"}},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-10-28T16:06:31.4541110Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-10-28T16:06:31.4541110Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-10-28T16:06:31.3760120Z","primaryEndpoints":{"blob":"https://cli000002.blob.core.windows.net/","queue":"https://cli000002.queue.core.windows.net/","table":"https://cli000002.table.core.windows.net/","file":"https://cli000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"blob":"https://cli000002-secondary.blob.core.windows.net/","queue":"https://cli000002-secondary.queue.core.windows.net/","table":"https://cli000002-secondary.table.core.windows.net/"}}}'
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/cli000002","name":"cli000002","type":"Microsoft.Storage/storageAccounts","location":"eastus2euap","tags":{},"properties":{"privateEndpointConnections":[],"azureFilesIdentityBasedAuthentication":{"directoryServiceOptions":"AD","activeDirectoryProperties":{"domainName":"mydomain.com","netBiosDomainName":"mydomain.com","forestName":"mydomain.com","domainGuid":"12345678-1234-1234-1234-123456789012","domainSid":"S-1-5-21-1234567890-1234567890-1234567890","azureStorageSid":"S-1-5-21-1234567890-1234567890-1234567890-1234"}},"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-12-27T04:29:14.0996147Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2019-12-27T04:29:14.0996147Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-12-27T04:29:14.0370806Z","primaryEndpoints":{"blob":"https://cli000002.blob.core.windows.net/","queue":"https://cli000002.queue.core.windows.net/","table":"https://cli000002.table.core.windows.net/","file":"https://cli000002.file.core.windows.net/"},"primaryLocation":"eastus2euap","statusOfPrimary":"available","secondaryLocation":"centraluseuap","statusOfSecondary":"available","secondaryEndpoints":{"blob":"https://cli000002-secondary.blob.core.windows.net/","queue":"https://cli000002-secondary.queue.core.windows.net/","table":"https://cli000002-secondary.table.core.windows.net/"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1869'
+      - '1941'
       content-type:
       - application/json
       date:
-      - Mon, 28 Oct 2019 16:07:11 GMT
+      - Fri, 27 Dec 2019 04:29:32 GMT
       expires:
       - '-1'
       pragma:

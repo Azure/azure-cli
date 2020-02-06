@@ -190,6 +190,18 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         create_cmd = 'az storage account create -n {} -g {} --kind StorageV2 --hns false'.format(name, resource_group)
         self.cmd(create_cmd, checks=[JMESPathCheck('isHnsEnabled', False)])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='cli_storage_account_encryption')
+    def test_storage_create_with_encryption_key_type(self, resource_group):
+        name = self.create_random_name(prefix='cliencryption', length=24)
+        create_cmd = 'az storage account create -n {} -g {} --kind StorageV2 -t Account -q Service'.format(
+            name, resource_group)
+        self.cmd(create_cmd, checks=[
+            JMESPathCheck('encryption.services.queue', None),
+            JMESPathCheck('encryption.services.table.enabled', True),
+            JMESPathCheck('encryption.services.table.keyType', 'Account'),
+        ])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
@@ -643,3 +655,46 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
 
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['changeFeed']['enabled'], True)
+
+    @ResourceGroupPreparer(name_prefix='cli_storage_account_update_delete_retention_policy')
+    @StorageAccountPreparer()
+    def test_storage_account_update_delete_retention_policy(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account blob-service-properties update'
+        })
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention false --delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days -1 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 0 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 366 -n {sa} -g {rg}')
+
+        result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], 1)
+
+        result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 100 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], 100)
+
+        result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], 365)
+
+        result = self.cmd('{cmd} --enable-delete-retention false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], None)

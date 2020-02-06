@@ -13,13 +13,14 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, too-many-statements
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
                            enable_files_aadds=None, bypass=None, default_action=None, assign_identity=False,
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
-                           azure_storage_sid=None, enable_hierarchical_namespace=None):
+                           azure_storage_sid=None, enable_hierarchical_namespace=None,
+                           encryption_key_type_for_table=None, encryption_key_type_for_queue=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -85,6 +86,18 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
                                                  virtual_network_rules=None)
+
+    if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
+        EncryptionServices = cmd.get_models('EncryptionServices')
+        EncryptionService = cmd.get_models('EncryptionService')
+        params.encryption = Encryption()
+        params.encryption.services = EncryptionServices()
+        if encryption_key_type_for_table is not None:
+            table_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_table)
+            params.encryption.services.table = table_encryption_service
+        if encryption_key_type_for_queue is not None:
+            queue_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_queue)
+            params.encryption.services.queue = queue_encryption_service
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -337,8 +350,16 @@ def update_management_policies(client, resource_group_name, account_name, parame
     return client.create_or_update(resource_group_name, account_name, policy=parameters)
 
 
-# TODO: support updating other properties besides 'enable_change_feed'
-def update_blob_service_properties(cmd, instance, enable_change_feed=None):
+# TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
+def update_blob_service_properties(cmd, instance, enable_change_feed=None, enable_delete_retention=None,
+                                   delete_retention_days=None):
     if enable_change_feed is not None:
         instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
+
+    if enable_delete_retention is not None:
+        if enable_delete_retention is False:
+            delete_retention_days = None
+        instance.delete_retention_policy = cmd.get_models('DeleteRetentionPolicy')(
+            enabled=enable_delete_retention, days=delete_retention_days)
+
     return instance

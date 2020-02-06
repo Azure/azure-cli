@@ -8,6 +8,7 @@ def add_tags(command, tags):
     return command + ' --tags {}'.format(tags)
 
 
+# pylint: disable=too-many-public-methods
 class CdnScenarioMixin(object):
     def profile_create_cmd(self, group, name, tags=None, checks=None, options=None, sku=None):
         command = 'cdn profile create -g {} -n {}'.format(group, name)
@@ -86,6 +87,55 @@ class CdnScenarioMixin(object):
                              name,
                              profile_name,
                              ' '.join(content_paths))
+        return self.cmd(command, checks)
+
+    def endpoint_add_rule_cmd(self, group, name, profile_name, checks=None):
+        msg = 'az cdn endpoint rule add -g {} -n {} --profile-name {} --order 1 --rule-name r1\
+               --match-variable RemoteAddress --operator GeoMatch --match-values "TH"\
+               --action-name CacheExpiration --cache-behavior BypassCache'
+        command = msg.format(group,
+                             name,
+                             profile_name)
+        return self.cmd(command, checks)
+
+    def endpoint_add_condition_cmd(self, group, name, profile_name, checks=None, options=None):
+        command = 'cdn endpoint rule condition add -g {} -n {} --profile-name {}'.format(group,
+                                                                                         name,
+                                                                                         profile_name)
+        if options:
+            command = command + ' ' + options
+        return self.cmd(command, checks)
+
+    def endpoint_add_action_cmd(self, group, name, profile_name, checks=None, options=None):
+        command = 'cdn endpoint rule action add -g {} -n {} --profile-name {}'.format(group,
+                                                                                      name,
+                                                                                      profile_name)
+        if options:
+            command = command + ' ' + options
+        return self.cmd(command, checks)
+
+    def endpoint_remove_rule_cmd(self, group, name, profile_name, checks=None, options=None):
+        command = 'cdn endpoint rule remove -g {} -n {} --profile-name {}'.format(group,
+                                                                                  name,
+                                                                                  profile_name)
+        if options:
+            command = command + ' ' + options
+        return self.cmd(command, checks)
+
+    def endpoint_remove_condition_cmd(self, group, name, profile_name, checks=None, options=None):
+        command = 'cdn endpoint rule condition remove -g {} -n {} --profile-name {}'.format(group,
+                                                                                            name,
+                                                                                            profile_name)
+        if options:
+            command = command + ' ' + options
+        return self.cmd(command, checks)
+
+    def endpoint_remove_action_cmd(self, group, name, profile_name, checks=None, options=None):
+        command = 'cdn endpoint rule action remove -g {} -n {} --profile-name {}'.format(group,
+                                                                                         name,
+                                                                                         profile_name)
+        if options:
+            command = command + ' ' + options
         return self.cmd(command, checks)
 
     def endpoint_purge_cmd(self, group, name, profile_name, content_paths, checks=None):

@@ -1606,6 +1606,18 @@ examples:
 
 """
 
+helps['vm reapply'] = """
+type: command
+short-summary: Reapply VMs.
+examples:
+  - name: Reapply a VM.
+    text: az vm reapply -g MyResourceGroup -n MyVm
+  - name: Reapply all VMs in a resource group.
+    text: >
+        az vm reapply --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
+
+"""
+
 helps['vm redeploy'] = """
 type: command
 short-summary: Redeploy an existing VM.
@@ -2397,7 +2409,10 @@ examples:
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 --protect-from-scale-set-actions False --protect-from-scale-in
   - name: Update a VM instance's protection policies.
     text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --instance-id 4 --set protectionPolicy.protectFromScaleIn=True protectionPolicy.protectFromScaleSetActions=False
-
+  - name: Update a VM instance's Read-Write IOPS of the managed disk.
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.dataDisks[0].diskIOPSReadWrite=444
+  - name: Update a VM instance's bandwidth in MB per second of the managed disk.
+    text: az vmss update --name MyScaleSet --resource-group MyResourceGroup --set virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite=66
 """
 
 helps['vmss update-instances'] = """

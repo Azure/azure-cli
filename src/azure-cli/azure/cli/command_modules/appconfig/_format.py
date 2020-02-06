@@ -14,6 +14,10 @@ def configstore_output_format(result):
     return _output_format(result, _configstore_format_group)
 
 
+def configstore_identity_format(result):
+    return _output_format(result, _configstore_identity_format_group)
+
+
 def configstore_credential_format(result):
     return _output_format(result, _configstore_credential_format_group)
 
@@ -47,13 +51,21 @@ def _configstore_format_group(item):
         sku = ""
 
     return OrderedDict([
-        ('CREATIONDATE', _format_datetime(_get_value(item, 'creationDate'))),
+        ('CREATION DATE', _format_datetime(_get_value(item, 'creationDate'))),
         ('ENDPOINT', _get_value(item, 'endpoint')),
         ('LOCATION', _get_value(item, 'location')),
         ('NAME', _get_value(item, 'name')),
-        ('PROVISIONINGSTATE', _get_value(item, 'provisioningState')),
-        ('RESOURCEGROUP', _get_value(item, 'resourceGroup')),
+        ('PROVISIONING STATE', _get_value(item, 'provisioningState')),
+        ('RESOURCE GROUP', _get_value(item, 'resourceGroup')),
         ('SKU', sku)
+    ])
+
+
+def _configstore_identity_format_group(item):
+    return OrderedDict([
+        ('PRINCIPAL ID', _format_datetime(_get_value(item, 'principalId'))),
+        ('TENANT ID', _get_value(item, 'tenantId')),
+        ('TYPE', _get_value(item, 'type'))
     ])
 
 

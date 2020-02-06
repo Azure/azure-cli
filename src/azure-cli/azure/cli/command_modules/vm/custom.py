@@ -327,7 +327,11 @@ def list_managed_disks(cmd, resource_group_name=None):
     return client.disks.list()
 
 
-def update_managed_disk(cmd, instance, size_gb=None, sku=None, disk_iops_read_write=None, disk_mbps_read_write=None):
+def update_managed_disk(cmd, resource_group_name, instance, size_gb=None, sku=None, disk_iops_read_write=None,
+                        disk_mbps_read_write=None, encryption_type=None, disk_encryption_set=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
     if size_gb is not None:
         instance.disk_size_gb = size_gb
     if sku is not None:
@@ -336,6 +340,17 @@ def update_managed_disk(cmd, instance, size_gb=None, sku=None, disk_iops_read_wr
         instance.disk_iops_read_write = disk_iops_read_write
     if disk_mbps_read_write is not None:
         instance.disk_mbps_read_write = disk_mbps_read_write
+    if disk_encryption_set is not None:
+        if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
+                encryption_type != 'EncryptionAtRestWithCustomerKey':
+            raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
+        if not is_valid_resource_id(disk_encryption_set):
+            disk_encryption_set = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+        instance.encryption.disk_encryption_set_id = disk_encryption_set
+    if encryption_type is not None:
+        instance.encryption.type = encryption_type
     return instance
 # endregion
 
@@ -408,12 +423,18 @@ def list_images(cmd, resource_group_name=None):
 
 
 # region Snapshots
+# pylint: disable=unused-argument,too-many-locals
 def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size_gb=None, sku='Standard_LRS',
-                    source=None, for_upload=None, incremental=None,  # pylint: disable=unused-argument
+                    source=None, for_upload=None, incremental=None,
                     # below are generated internally from 'source'
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
-                    hyper_v_generation=None, tags=None, no_wait=False):
-    Snapshot, CreationData, DiskCreateOption = cmd.get_models('Snapshot', 'CreationData', 'DiskCreateOption')
+                    hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
+                    encryption_type=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    Snapshot, CreationData, DiskCreateOption, Encryption = cmd.get_models(
+        'Snapshot', 'CreationData', 'DiskCreateOption', 'Encryption')
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
@@ -432,8 +453,22 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
+
+    if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
+        disk_encryption_set = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+            namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+
+    if disk_encryption_set is not None and encryption_type is None:
+        raise CLIError('usage error: Please specify --encryption-type.')
+    if encryption_type is not None:
+        encryption = Encryption(type=encryption_type, disk_encryption_set_id=disk_encryption_set)
+    else:
+        encryption = None
+
     snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
-                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental)
+                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb, incremental=incremental,
+                        encryption=encryption)
     if hyper_v_generation:
         snapshot.hyper_vgeneration = hyper_v_generation
 
@@ -453,9 +488,23 @@ def list_snapshots(cmd, resource_group_name=None):
     return client.snapshots.list()
 
 
-def update_snapshot(cmd, instance, sku=None):
+def update_snapshot(cmd, resource_group_name, instance, sku=None, disk_encryption_set=None, encryption_type=None):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
     if sku is not None:
         _set_sku(cmd, instance, sku)
+    if disk_encryption_set is not None:
+        if instance.encryption.type != 'EncryptionAtRestWithCustomerKey' and \
+                encryption_type != 'EncryptionAtRestWithCustomerKey':
+            raise CLIError('usage error: Please set --encryption-type to EncryptionAtRestWithCustomerKey')
+        if not is_valid_resource_id(disk_encryption_set):
+            disk_encryption_set = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
+                namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+        instance.encryption.disk_encryption_set_id = disk_encryption_set
+    if encryption_type is not None:
+        instance.encryption.type = encryption_type
     return instance
 # endregion
 
@@ -558,8 +607,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment,
-                                                                build_vm_mmaExtension_resource,
-                                                                build_vm_daExtensionName_resource)
+                                                                build_vm_linux_log_analytics_workspace_agent,
+                                                                build_vm_daExtension_resource,
+                                                                build_vm_windows_log_analytics_workspace_agent)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -716,10 +766,16 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
         master_template.add_secure_parameter('workspaceId', workspace_id)
-        vm_mmaExtension_resource = build_vm_mmaExtension_resource(cmd, vm_name, location)
-        vm_daExtensionName_resource = build_vm_daExtensionName_resource(cmd, vm_name, location)
-        master_template.add_resource(vm_mmaExtension_resource)
-        master_template.add_resource(vm_daExtensionName_resource)
+        if os_type.lower() == 'linux':
+            vm_mmaExtension_resource = build_vm_linux_log_analytics_workspace_agent(cmd, vm_name, location)
+            vm_daExtensionName_resource = build_vm_daExtension_resource(cmd, vm_name, location)
+            master_template.add_resource(vm_mmaExtension_resource)
+            master_template.add_resource(vm_daExtensionName_resource)
+        elif os_type.lower() == 'windows':
+            vm_mmaExtension_resource = build_vm_windows_log_analytics_workspace_agent(cmd, vm_name, location)
+            master_template.add_resource(vm_mmaExtension_resource)
+        else:
+            logger.warning("Unsupported OS type. Skip the connection step for log analytics workspace.")
 
     master_template.add_resource(vm_resource)
 
@@ -753,6 +809,10 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             _show_missing_access_warning(resource_group_name, vm_name, 'vm')
         setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
                                                          vm.identity.user_assigned_identities))
+
+    if workspace is not None:
+        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id)
+
     return vm
 
 
@@ -997,7 +1057,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
-              priority=None, max_price=None, **kwargs):
+              priority=None, max_price=None, proximity_placement_group=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1038,6 +1098,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         else:
             vm.billing_profile.max_price = max_price
 
+    if proximity_placement_group is not None:
+        vm.proximity_placement_group = {'id': proximity_placement_group}
+
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
 
@@ -1071,6 +1134,45 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
     else:
         workspace_id = workspace
     return workspace_id
+
+
+def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id):
+    from ._client_factory import cf_log_analytics_data_sources
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.mgmt.loganalytics.models import DataSource
+    from msrestazure.tools import parse_resource_id
+    from msrestazure.azure_exceptions import CloudError
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    data_sources_client = cf_log_analytics_data_sources(cmd.cli_ctx, subscription_id)
+    workspace_name = parse_resource_id(workspace_id)['name']
+    data_source_name_template = "DataSource_{}_{}"
+
+    default_data_sources = None
+    if os_type.lower() == 'linux':
+        from ._workspace_data_source_settings import default_linux_data_sources
+        default_data_sources = default_linux_data_sources
+    elif os_type.lower() == 'windows':
+        from ._workspace_data_source_settings import default_windows_data_sources
+        default_data_sources = default_windows_data_sources
+
+    if default_data_sources is not None:
+        for data_source_kind, data_source_settings in default_data_sources.items():
+            for data_source_setting in data_source_settings:
+                data_source = DataSource(kind=data_source_kind,
+                                         properties=data_source_setting)
+                data_source_name = data_source_name_template.format(data_source_kind, _gen_guid())
+                try:
+                    data_sources_client.create_or_update(resource_group_name,
+                                                         workspace_name,
+                                                         data_source_name,
+                                                         data_source)
+                except CloudError as ex:
+                    logger.warning("Failed to set data source due to %s. "
+                                   "Skip this step and need manual work later.", ex.message)
+    else:
+        logger.warning("Unsupported OS type. Skip the default settings for log analytics workspace.")
+
 # endregion
 
 
@@ -1142,6 +1244,12 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
                                                   resource_group_name, deployment_name, properties))
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+
+
+def update_av_set(instance, resource_group_name, proximity_placement_group=None):
+    if proximity_placement_group is not None:
+        instance.proximity_placement_group = {'id': proximity_placement_group}
+    return instance
 
 
 def list_av_sets(cmd, resource_group_name=None):
@@ -1820,7 +1928,7 @@ def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd
     DataDisk, DiskCreateOptionTypes, VirtualHardDisk = cmd.get_models(
         'DataDisk', 'DiskCreateOptionTypes', 'VirtualHardDisk')
     if not new and not disk_name:
-        raise CLIError('Pleae provide the name of the existing disk to attach')
+        raise CLIError('Please provide the name of the existing disk to attach')
     create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
 
     vm = get_vm(cmd, resource_group_name, vm_name)
@@ -2040,7 +2148,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
-                os_disk_encryption_set=None, data_disk_encryption_sets=None):
+                os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2268,7 +2376,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
             terminate_notification_time=terminate_notification_time, max_price=max_price,
             scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
-            data_disk_encryption_sets=data_disk_encryption_sets)
+            data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
+            data_disk_mbps=data_disk_mbps)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2518,7 +2627,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
-                scale_in_policy=None, priority=None, max_price=None, **kwargs):
+                scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None, **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -2579,6 +2688,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
         else:
             vmss.virtual_machine_profile.billing_profile.max_price = max_price
+
+    if proximity_placement_group is not None:
+        vmss.proximity_placement_group = {'id': proximity_placement_group}
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)
