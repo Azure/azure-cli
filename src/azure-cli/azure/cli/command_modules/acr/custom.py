@@ -129,12 +129,33 @@ def acr_login(cmd,
               resource_group_name=None,  # pylint: disable=unused-argument
               tenant_suffix=None,
               username=None,
-              password=None):
+              password=None,
+              expose_token=False):
+    if expose_token:
+        login_server, username, password = get_login_credentials(
+            cmd=cmd,
+            registry_name=registry_name,
+            tenant_suffix=tenant_suffix,
+            username=username,
+            password=password)
+        logger.warning("You can perform manual login with the ouput access token, for example: 'docker login loginServer -u GUID -p accessToken'")
+        token_info = {
+            "loginServer" : login_server,
+            "GUID" : username,
+            "accessToken" : password
+        }
+        return token_info
+    
+    tips = "You may want to use 'az acr login -n MyRegistry --expose-token' to get an access token, which does not require Docker to be installed."
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
-        raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
+        raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.' + tips)
 
-    docker_command, _ = get_docker_command()
+    try:
+        docker_command, _ = get_docker_command()
+    except CLIError as e:
+        logger.warning(tips)
+        raise e
 
     login_server, username, password = get_login_credentials(
         cmd=cmd,
