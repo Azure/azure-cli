@@ -348,10 +348,10 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
 
 
 class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret_soft_delete')
     def test_keyvault_secret_soft_delete(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-secret-softdelete-', 24),
+            'kv': self.create_random_name('cli-test-keyvault-secret-soft-delete-', 24),
             'loc': 'westus',
             'sec': 'secret1'
         })
