@@ -2817,7 +2817,8 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     @record_only()
     def test_sql_instance_pool(self):
 
-        instance_pool_name = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
+        instance_pool_name_1 = "clitestipbwikkrkamao"
+        instance_pool_name_2 = "clitestipbwikkrkamao2"
         license_type = 'LicenseIncluded'
         location = 'northcentralus'
         v_cores = 8
@@ -2826,18 +2827,14 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         resource_group = 'billingPools'
         vnet_name = 'vnet-billingPool1'
         subnet_name = 'InstancePool'
+        subnet = self.cmd('network vnet subnet show -g {} --vnet-name {} -n {}'.format(resource_group, vnet_name, subnet_name)).get_output_in_json()['id']
 
-        is_playback = os.path.exists(self.recording_file)
-        if is_playback:
-            subnet = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/billingPools/providers/Microsoft.Network/virtualNetworks/vnet-billingpool1/subnets/InstancePool"
-        else:
-            subnet = self.cmd('network vnet subnet show -g {} --vnet-name {} -n {}'.format(resource_group, vnet_name, subnet_name)).get_output_in_json()['id']
         # test create sql managed_instance
         self.cmd(
             'sql instance-pool create -g {} -n {} -l {} '
             '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
-                resource_group, instance_pool_name, location, subnet, license_type, v_cores, edition, family), checks=[
-                JMESPathCheck('name', instance_pool_name),
+                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family), checks=[
+                JMESPathCheck('name', instance_pool_name_1),
                 JMESPathCheck('resourceGroup', resource_group),
                 JMESPathCheck('vCores', v_cores),
                 JMESPathCheck('licenseType', license_type),
@@ -2846,36 +2843,82 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
 
         # test show sql instance pool
         self.cmd('sql instance-pool show -g {} -n {}'
-                 .format(resource_group, instance_pool_name),
+                 .format(resource_group, instance_pool_name_1),
                  checks=[
-                     JMESPathCheck('name', instance_pool_name),
+                     JMESPathCheck('name', instance_pool_name_1),
                      JMESPathCheck('resourceGroup', resource_group)])
 
         # test updating tags of an instance pool
         tag1 = "bar=foo"
         tag2 = "foo=bar"
         self.cmd('sql instance-pool update -g {} -n {} --tags {} {}'
-                 .format(resource_group, instance_pool_name, tag1, tag2),
+                 .format(resource_group, instance_pool_name_1, tag1, tag2),
                  checks=[
-                     JMESPathCheck('name', instance_pool_name),
+                     JMESPathCheck('name', instance_pool_name_1),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', "{'bar': 'foo', 'foo': 'bar'}")])
 
         # test updating instance pool to clear tags by passing ""
         self.cmd('sql instance-pool update -g {} -n {} --tags ""'
-                 .format(resource_group, instance_pool_name),
+                 .format(resource_group, instance_pool_name_1),
                  checks=[
-                     JMESPathCheck('name', instance_pool_name),
+                     JMESPathCheck('name', instance_pool_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('tags', {})])
+
+        # Instance Pool 2
+        self.cmd(
+            'sql instance-pool create -g {} -n {} -l {} '
+            '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
+                resource_group, instance_pool_name_2, location, subnet, license_type, v_cores, edition, family), checks=[
+                JMESPathCheck('name', instance_pool_name_2),
+                JMESPathCheck('resourceGroup', resource_group),
+                JMESPathCheck('vCores', v_cores),
+                JMESPathCheck('licenseType', license_type),
+                JMESPathCheck('sku.tier', edition),
+                JMESPathCheck('sku.family', family)])
+
+        # test show sql instance pool
+        self.cmd('sql instance-pool show -g {} -n {}'
+                 .format(resource_group, instance_pool_name_2),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # test updating tags of an instance pool
+        tag1 = "bar=foo"
+        tag2 = "foo=bar"
+        self.cmd('sql instance-pool update -g {} -n {} --tags {} {}'
+                 .format(resource_group, instance_pool_name_2, tag1, tag2),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('tags', "{'bar': 'foo', 'foo': 'bar'}")])
+
+        # test updating instance pool to clear tags by passing ""
+        self.cmd('sql instance-pool update -g {} -n {} --tags ""'
+                 .format(resource_group, instance_pool_name_2),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
 
         # test delete sql managed instance
         self.cmd('sql instance-pool delete -g {} -n {} --yes'
-                 .format(resource_group, instance_pool_name), checks=NoneCheck())
+                 .format(resource_group, instance_pool_name_1), checks=NoneCheck())
+
+        # test delete sql managed instance
+        self.cmd('sql instance-pool delete -g {} -n {} --yes'
+                 .format(resource_group, instance_pool_name_2), checks=NoneCheck())
 
         # test show sql managed instance doesn't return anything
         self.cmd('sql instance-pool show -g {} -n {}'
-                 .format(resource_group, instance_pool_name),
+                 .format(resource_group, instance_pool_name_1),
+                 expect_failure=True)
+
+        # test show sql managed instance doesn't return anything
+        self.cmd('sql instance-pool show -g {} -n {}'
+                 .format(resource_group, instance_pool_name_2),
                  expect_failure=True)
 
 
