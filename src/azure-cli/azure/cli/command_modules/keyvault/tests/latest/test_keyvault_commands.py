@@ -552,10 +552,8 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
 
 
 class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_pending')
     def test_keyvault_pending_certificate(self, resource_group):
-
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-cr-pe-', 24),
             'loc': 'westus',
@@ -592,7 +590,6 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
 class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_download')
     def test_keyvault_certificate_download(self, resource_group):
         import OpenSSL.crypto
