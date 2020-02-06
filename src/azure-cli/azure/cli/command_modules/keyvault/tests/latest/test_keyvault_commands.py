@@ -257,7 +257,7 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
         import OpenSSL.crypto
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-keydownload-', 24),
+            'kv': self.create_random_name('cli-test-keyvault-key-download-', 24),
             'loc': 'eastus2'
         })
         _create_keyvault(self, self.kwargs)
