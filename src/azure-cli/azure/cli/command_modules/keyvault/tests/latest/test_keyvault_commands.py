@@ -929,7 +929,7 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sa')
     def test_keyvault_storage_account(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-storageaccount-', 24),
+            'kv': self.create_random_name('cli-test-keyvault-storage-account-', 24),
             'sa': 'clitestkvsa0000002',
             'loc': 'westus'
         })
