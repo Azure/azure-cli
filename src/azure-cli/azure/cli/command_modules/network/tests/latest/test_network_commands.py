@@ -139,10 +139,6 @@ class NetworkPrivateLinkService(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_link_service')
     def test_network_private_link_service(self, resource_group):
 
-        # unable to create resource so we can only verify the commands don't fail (or fail expectedly)
-        self.cmd('network private-endpoint list')
-        self.cmd('network private-endpoint list -g {rg}')
-
         self.kwargs.update({
             'lb': 'lb1',
             'sku': 'Standard',
@@ -161,15 +157,17 @@ class NetworkPrivateLinkService(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
-        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
+        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}  --enable-proxy-protocol', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),
-            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+            self.check('length(loadBalancerFrontendIpConfigurations)', 1),
+            self.check('enableProxyProtocol', True)
         ])
 
-        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}', checks=[
+        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}  --enable-proxy-protocol False', checks=[
             self.check('length(visibility.subscriptions)', 2),
-            self.check('length(autoApproval.subscriptions)', 2)
+            self.check('length(autoApproval.subscriptions)', 2),
+            self.check('enableProxyProtocol', False)
         ])
         self.cmd('network private-link-service list -g {rg}', checks=[
             self.check('length(@)', 1),
