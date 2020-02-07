@@ -54,8 +54,8 @@ class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_plr')
     def test_keyvault_private_link_resource(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-keyvault-', 24),
-            'loc': 'eastus2euap'
+            'kv': self.create_random_name('cli-test-kv-plr-', 24),
+            'loc': 'centraluseuap'
         })
 
         _create_keyvault(self, self.kwargs)
@@ -66,7 +66,7 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
     def test_keyvault_private_endpoint(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-pe-', 24),
             'loc': 'centraluseuap',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
