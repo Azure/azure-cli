@@ -13,6 +13,5 @@ Starting from version 2.1.0, Azure CLI updates:
 ## Backward Compatibility
 Considering Azure CLI is a command line tool for Azure Services, we tend to just bump the MINOR verison for breaking changes in a service module command. All breaking changes for a command will be marked as **BREAKING CHANGE** in [release notes](https://docs.microsoft.com/cli/azure/release-notes-azure-cli?view=azure-cli-latest).
 
-From command level, packages only upgrading PATCH version guanrantees backward compatibilty.
-
+At command level, packages only upgrading the PATCH version guarantee backward compatibility.
 
