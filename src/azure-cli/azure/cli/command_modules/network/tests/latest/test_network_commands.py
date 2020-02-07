@@ -3189,7 +3189,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log2', location='canadaeast')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast', kind='StorageV2')
     def test_network_watcher_flow_log2(self, resource_group, resource_group_location, storage_account):
 
         self.kwargs.update({
