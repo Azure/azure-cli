@@ -254,6 +254,10 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --tags key1=value1 key2=value2
   - name: Upgrade sku of an App Configuration to standard
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Standard
+  - name: Enable customer encryption key with system assigned identity
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net 
+  - name: Remove customer encryption key
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
 """
 
 helps['appconfig feature'] = """

@@ -79,6 +79,12 @@ def load_arguments(self, _):
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
 
+    with self.argument_context('appconfig update', arg_group='Customer Managed Key', is_preview=True) as c:
+        c.argument('encryption_key_name', help='The name of the KeyVault key.')
+        c.argument('encryption_key_vault', help='The Uri of the KeyVault.')
+        c.argument('encryption_key_version', help='The version of the KeyVault key. Use the latest version by default.')
+        c.argument('identity_client_id', help='Client id of the managed identity with wrap and unwrap access to encryption key. Use system assigned identity by default.')
+
     with self.argument_context('appconfig identity assign') as c:
         c.argument('identities', arg_type=identities_arg_type)
 
