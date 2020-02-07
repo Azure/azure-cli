@@ -2,7 +2,7 @@ Azure CLI Version Management
 ============================
 
 ## History
-Azure CLI 2 was used for branding as compared to Azure classic CLI. A regular release only updates the PATCH version, which was confusing.
+Azure CLI 2 was used for branding as compared to Azure classic CLI. We intended to keep the MAJOR version fixed at 2 for a while. A regular release only updates the PATCH version, which was a little confusing.
 
 ## Current Norm
 Starting from version 2.1.0, Azure CLI updates:  
