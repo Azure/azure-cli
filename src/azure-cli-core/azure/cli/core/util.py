@@ -608,6 +608,7 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     try:
         r = requests.request(method, uri, params=uri_parameters, data=body, headers=headers,
                              verify=not should_disable_connection_verify())
+        logger.debug("Response Header : %s", r.headers if r else None)
     except Exception as ex:  # pylint: disable=broad-except
         raise CLIError(ex)
 
