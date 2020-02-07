@@ -225,12 +225,12 @@ An example title of non-customer-facing change PR:
 
 ### Format PR Description
 
-If you would like to write multiple history notes for one PR, please write the notes under `History Notes` section in the PR description, following the same format described above. The PR template already has the history note template generated, just change it if needed. In this case, the PR title should be a summary of all the changes in this PR and will not be put into `HISTORY.rst`. You can delete the `History Notes` section if not needed.
+If you would like to write multiple history notes for one PR, please write the notes under `History Notes` section in the PR description, following the same format described above. The PR template already contains the history note template, just change it if needed. In this case, the PR title should be a summary of all the changes in this PR and will not be put into `HISTORY.rst`. You can delete the `History Notes` section if not needed.
 
 Other than that, you can put any reasonable information in the description above the `History Notes` part.
 
 ### Submit Hotfix
-In the case of hotfix, you should create a hotfix branch based on release branch and submit a PR to merge hotfix into release. In this PR, the second part of the PR title should be `Hotfix`. If you have customer-facing changes, you need to modify `HISTORY.rst` to add history notes. The auto generated history notes for the next release will ignore the PR that contains `Hotfix`. You also need to submit a PR to merge the release branch back into dev branch before next release. Do **NOT** squash and merge this PR. After your PR gets approved by code owners, you should fast forward dev to release on your local machine and then push dev to upstream repository. 
+In the case of hotfix, you should create a hotfix branch based on release branch and submit a PR to merge hotfix into release. In this PR, the second part of the PR title should be `Hotfix`. If you have customer-facing changes, you need to modify `HISTORY.rst` to add history notes. The auto generated history notes for the next release will ignore the PR that contains `Hotfix`. You also need to submit a PR to merge the release branch back into dev branch before next release. Do **NOT** squash and merge this PR. After the PR gets approved by code owners, you should fast forward dev to release on your local machine and then push dev to upstream repository. 
 
 An example title of hotfix change PR:
 
