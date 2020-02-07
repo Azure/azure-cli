@@ -6,7 +6,7 @@ Azure CLI 2 was used for branding as compared to Azure classic CLI. We intended 
 
 ## Current Norm
 Starting from version 2.1.0, Azure CLI updates:  
-* MAJOR version for core changes that break commands behavior globally;  
+* MAJOR version for core changes that break commands' behavior globally;  
 * MINOR version for general backward compatible feature changes and service command breaking changes;  
 * PATCH verison for bug fixes.
 
