@@ -79,6 +79,10 @@ Release History
 
 * Fix #6371: Support filename and environment variable completion in Bash
 
+**NetAppFiles**
+
+* Modified volume create to allow data protection volumes and added cmdlets for replication operations, approve, pause, resume and remove.
+
 **Network**
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.

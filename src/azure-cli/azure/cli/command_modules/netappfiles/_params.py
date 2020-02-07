@@ -54,6 +54,12 @@ def load_arguments(self, _):
         c.argument('pool_name', pool_name_type, id_part=None)
         c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
 
+    with self.argument_context('netappfiles volume replication approve') as c:
+        c.argument('account_name', id_part=None)
+        c.argument('pool_name', pool_name_type, id_part=None)
+        c.argument('volume_name', volume_name_type, options_list=['--volume-name', '-v', '--name', '-n'], id_part=None)
+        c.argument('remote_volume_resource_id', help='The id of the destination replication volume', id_part=None)
+
     with self.argument_context('netappfiles volume export-policy add') as c:
         c.argument('unix_read_only', help="Indication of read only access", arg_type=get_three_state_flag())
         c.argument('unix_read_write', help="Indication of read and write access", arg_type=get_three_state_flag())
