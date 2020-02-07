@@ -6,6 +6,7 @@
 # --------------------------------------------------------------------------------------------
 
 import datetime
+import fileinput
 import json
 import re
 import requests
@@ -20,7 +21,7 @@ days_before = 45
 history_notes = {}
 
 
-def generate_history_notes() -> str:
+def generate_history_notes():
     release_head_sha = get_release_head()
     dev_commits = get_commits()
     for commit in dev_commits:
@@ -33,13 +34,52 @@ def generate_history_notes() -> str:
         else:
             process_commit(commit)
 
-    history = ''
+    cli_history = ''
+    core_history = ''
     for component in sorted(history_notes, key=str.casefold):
-        history += '**{}**\n\n'.format(component)
-        for note in history_notes[component]:
-            history += '* {}\n'.format(note)
-        history += '\n'
+        if component == 'Core':
+            core_history += construct_core_history(component)
+        else:
+            cli_history += construct_cli_history(component)
+    if core_history == '':
+        core_history = '* Minor fixes'
+
+    print("azure-cli history notes:")
+    print(cli_history)
+    print("azure-cli-core history notes:")
+    print(core_history)
+
+    cli_history = cli_history[:-2]  # remove last two \n
+    with fileinput.FileInput('src/azure-cli/HISTORY.rst', inplace=True, backup='.bak') as file:
+        for line in file:
+            if line == '===============\n':
+                print(line.replace('===============', '===============\n\n'+ cli_history), end='')
+            else:
+                print(line, end='')
+
+    with fileinput.FileInput('src/azure-cli-core/HISTORY.rst', inplace=True, backup='.bak') as file:
+        for line in file:
+            if line == '===============\n':
+                print(line.replace('===============', '===============\n\n'+ core_history), end='')
+            else:
+                print(line, end='')
+
+
+def construct_cli_history(component: str):
+    history = '**{}**\n\n'.format(component)
+    for note in history_notes[component]:
+        history += '* {}\n'.format(note)
+    history += '\n'
     return history
+
+
+def construct_core_history(component: str):
+    history = ''
+    for note in history_notes[component]:
+        history += '* {}\n'.format(note)
+    history += '\n'
+    return history
+
 
 def get_release_head() -> str:
     response = requests.get(release_head_url)

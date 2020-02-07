@@ -3,10 +3,6 @@
 Release History
 ===============
 
-**AMS**
-
-* az ams is now GA.
-
 2.0.81
 ++++++
 
