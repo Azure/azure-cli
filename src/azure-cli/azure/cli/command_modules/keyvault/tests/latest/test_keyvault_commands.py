@@ -99,6 +99,11 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
         self.cmd('keyvault private-endpoint show -n {kv} --connection-name {kv_pe_name}',
                  checks=self.check('name', '{kv_pe_name}'))
 
+        # Try running `set-policy` on the linked vault
+        self.kwargs['policy_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
+                 checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
+
         # Test approval/rejection
         self.kwargs.update({
             'approval_desc': 'You are approved!',
