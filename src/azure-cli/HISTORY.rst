@@ -3,14 +3,6 @@
 Release History
 ===============
 
-**AMS**
-
-* az ams is now GA.
-
-**AppConfig**
-
-* Revise help message to exclude unsupported key/label filters.
-
 **ARM**
 
 * Added new command groups

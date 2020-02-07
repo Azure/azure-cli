@@ -380,7 +380,7 @@ def verify_native_dependencies():
         verify_cmd_args = ['rpm', '-q']
         install_cmd_args = ['zypper', 'refresh', '&&', 'zypper', '--non-interactive', 'install']
         python_dep = 'python3-devel' if is_python3 else 'python-devel'
-        dep_list = ['gcc', 'libffi-devel', python_dep, 'openssl-devel']
+        dep_list = ['gcc', 'libffi-devel', python_dep, 'libopenssl-devel']
 
     if verify_cmd_args and install_cmd_args and dep_list:
         _native_dependencies_for_dist(verify_cmd_args, install_cmd_args, dep_list)
