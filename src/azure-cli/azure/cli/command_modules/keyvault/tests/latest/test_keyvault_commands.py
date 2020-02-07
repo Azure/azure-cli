@@ -28,6 +28,7 @@ def _asn1_to_iso8601(asn1_date):
 
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
 
 def _create_keyvault(test, kwargs, additional_args=None):
@@ -133,7 +134,6 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
     def test_keyvault_key(self, resource_group):
         self.kwargs.update({
@@ -236,6 +236,116 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password}',
                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
 
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'loc': 'eastus2euap'
+        })
+        _create_keyvault(self, self.kwargs)
+
+        # create KEK
+        self.cmd('keyvault key create --vault-name {kv} --name key1 --kty RSA-HSM --size 2048 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+        self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 3072 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+        self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 4096 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+
+
+class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_key_download')
+    def test_keyvault_key_download(self, resource_group):
+        import OpenSSL.crypto
+
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'loc': 'eastus2'
+        })
+        _create_keyvault(self, self.kwargs)
+
+        key_names = [
+            'ec-p256.pem',
+            'ec-p384.pem',
+            'ec-p521.pem',
+            'ec-p256k.pem',
+            'rsa-2048.pem',
+            'rsa-3072.pem',
+            'rsa-4096.pem',
+            'ec-p256-hsm.pem',
+            'ec-p384-hsm.pem',
+            'ec-p521-hsm.pem',
+            'ec-p256k-hsm.pem',
+            'rsa-2048-hsm.pem',
+            'rsa-3072-hsm.pem',
+            'rsa-4096-hsm.pem'
+        ]
+
+        # RSA Keys
+        # * Generate: `openssl genrsa -out rsa-4096.pem 4096`
+        # * Extract public key: `openssl rsa -in rsa-4096.pem -pubout > rsa-4096.pub.pem`
+        # * Public key PEM to DER: `openssl rsa -pubin -inform PEM -in rsa-4096.pub.pem -outform DER -out rsa-4096.pub.der`
+
+        # EC Keys
+        # * Generate: `openssl ecparam -genkey -name secp521r1 -out ec521.key`
+        # * Extract public key (PEM): `openssl ec -in ec-p521.pem -pubout -out ec-p521.pub.pem`
+        # * Extract public key (DER): `openssl ec -in ec-p521.pem -pubout -outform DER -out ec-p521.pub.der`
+
+        for key_name in key_names:
+            var_name = key_name.split('.')[0] + '-file'
+            if 'hsm' in key_name:  # Should be generated
+                if key_name.startswith('rsa'):
+                    rsa_size = key_name.split('-')[1]
+                    self.cmd('keyvault key create --vault-name {{kv}} -n {var_name}'
+                             ' -p hsm --kty RSA-HSM --size {rsa_size}'.format(var_name=var_name, rsa_size=rsa_size))
+                elif key_name.startswith('ec'):
+                    ec_curve = key_name.split('-')[1]
+                    curve_names = {
+                        'p256': 'P-256',
+                        'p384': 'P-384',
+                        'p521': 'P-521',
+                        'p256k': 'P-256K'
+                    }
+                    self.cmd('keyvault key create --vault-name {{kv}} -n {var_name}'
+                             ' -p hsm --kty EC-HSM --curve {curve_name}'
+                             .format(var_name=var_name, curve_name=curve_names[ec_curve]))
+            else:  # Should be imported (Have already been generated offline)
+                self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
+                self.cmd('keyvault key import --vault-name {{kv}} -n {var_name} --pem-file "{{{var_name}}}"'
+                         .format(var_name=var_name))
+
+            der_downloaded_filename = var_name + '.der'
+            pem_downloaded_filename = var_name + '.pem'
+
+            try:
+                self.cmd('keyvault key download --vault-name {{kv}} -n {var_name} -f "{filename}" -e DER'
+                         .format(var_name=var_name, filename=der_downloaded_filename))
+                self.cmd('keyvault key download --vault-name {{kv}} -n {var_name} -f "{filename}" -e PEM'
+                         .format(var_name=var_name, filename=pem_downloaded_filename))
+
+                if 'hsm' in key_name:  # TODO: Currently we haven't found a good way to verify online generated keys
+                    continue
+
+                expected_pem = []
+                pem_pub_filename = os.path.join(KEYS_DIR, key_name.split('.')[0] + '.pub.pem')
+                with open(pem_pub_filename, 'r') as pem_file:
+                    expected_pem = pem_file.readlines()
+                expected_pem = ''.join(expected_pem).replace('\n', '')
+
+                def verify(path, file_type):
+                    with open(path, 'rb') as f:
+                        pub_key = OpenSSL.crypto.load_publickey(file_type, f.read())
+                        actual_pem = OpenSSL.crypto.dump_publickey(OpenSSL.crypto.FILETYPE_PEM, pub_key)
+                        if isinstance(actual_pem, bytes):
+                            actual_pem = actual_pem.decode("utf-8")
+                        self.assertIn(expected_pem, actual_pem.replace('\n', ''))
+
+                    verify(der_downloaded_filename, OpenSSL.crypto.FILETYPE_ASN1)
+                    verify(pem_downloaded_filename, OpenSSL.crypto.FILETYPE_PEM)
+            finally:
+                if os.path.exists(der_downloaded_filename):
+                    os.remove(der_downloaded_filename)
+                if os.path.exists(pem_downloaded_filename):
+                    os.remove(pem_downloaded_filename)
+
 
 class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
@@ -266,7 +376,6 @@ class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
 
 
 class KeyVaultSecretScenarioTest(ScenarioTest):
-
     def _test_download_secret(self):
         secret_path = os.path.join(TEST_DIR, 'test_secret.txt')
         self.kwargs['src_path'] = secret_path

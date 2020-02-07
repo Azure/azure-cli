@@ -827,3 +827,69 @@ examples:
   - name: Get the details for a virtual cluster
     text: az sql virtual-cluster show -g mygroup -n mycluster
 """
+
+helps['sql db classification'] = """
+type: group
+short-summary: Manage sensitivity classifications.
+"""
+
+helps['sql db classification update'] = """
+type: command
+short-summary: Update a columns's sensitivity classification.
+examples:
+  - name: Update sensitivity classification for a given column.
+    text: az sql db classification update -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn --information-type Name --label "Confidential - GDPR"
+"""
+
+helps['sql db classification list'] = """
+type: command
+short-summary: Get the sensitivity classifications of a given database.
+examples:
+  - name: List the sensitivity classification of a given database.
+    text: az sql db classification list -g mygroup -s myserver -n mydb
+"""
+
+helps['sql db classification show'] = """
+type: command
+short-summary: Get the sensitivity classification of a given column.
+examples:
+  - name: Get the sensitivity classification of a given column.
+    text: az sql db classification show -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
+"""
+
+helps['sql db classification delete'] = """
+type: command
+short-summary: Delete the sensitivity classification of a given column.
+examples:
+  - name: Delete the sensitivity classification of a given column.
+    text: az sql db classification delete -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
+"""
+
+helps['sql db classification recommendation'] = """
+type: group
+short-summary: Manage sensitivity classification recommendations.
+"""
+
+helps['sql db classification recommendation list'] = """
+type: command
+short-summary: List the recommended sensitivity classifications of a given database.
+examples:
+  - name: List the recommended sensitivity classifications of a given database.
+    text: az sql db classification recommendation list -g mygroup -s myserver -n mydb
+"""
+
+helps['sql db classification recommendation enable'] = """
+type: command
+short-summary: Enable sensitivity recommendations for a given column (recommendations are enabled by default on all columns).
+examples:
+  - name: Enable sensitivity recommendations for a given column.
+    text: az sql db classification recommendation enable -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
+"""
+
+helps['sql db classification recommendation disable'] = """
+type: command
+short-summary: Disable sensitivity recommendations for a given column (recommendations are enabled by default on all columns).
+examples:
+  - name: Disable sensitivity recommendations for a given column.
+    text: az sql db classification recommendation disable -g mygroup -s myserver -n mydb --schema dbo --table mytable --column mycolumn
+"""

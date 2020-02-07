@@ -254,12 +254,67 @@ class Engine(Enum):  # pylint: disable=too-few-public-methods
     dw = 'dw'
 
 
-def _configure_db_create_params(
+def _configure_db_dw_params(arg_ctx):
+    """
+    Configures params that are based on `Database` resource and therefore apply to one or more DB/DW create/update
+    commands. The idea is that this does some basic configuration of each property. Each command can then potentially
+    build on top of this (e.g. to give a parameter more specific help text) and .ignore() parameters that aren't
+    applicable.
+
+    Normally these param configurations would be implemented at the command group level, but these params are used
+    across 2 different param groups - `sql db` and `sql dw`. So extracting it out into this common function prevents
+    duplication.
+    """
+
+    arg_ctx.argument('max_size_bytes',
+                     arg_type=max_size_bytes_param_type)
+
+    arg_ctx.argument('elastic_pool_id',
+                     arg_type=elastic_pool_id_param_type)
+
+    arg_ctx.argument('compute_model',
+                     arg_type=compute_model_param_type)
+
+    arg_ctx.argument('auto_pause_delay',
+                     arg_type=auto_pause_delay_param_type)
+
+    arg_ctx.argument('min_capacity',
+                     arg_type=min_capacity_param_type)
+
+    arg_ctx.argument('read_scale',
+                     arg_type=read_scale_param_type)
+
+    arg_ctx.argument('read_replica_count',
+                     arg_type=read_replicas_param_type)
+
+    creation_arg_group = 'Creation'
+
+    arg_ctx.argument('collation',
+                     arg_group=creation_arg_group)
+
+    arg_ctx.argument('catalog_collation',
+                     arg_group=creation_arg_group,
+                     arg_type=get_enum_type(CatalogCollationType))
+
+    # WideWorldImportersStd and WideWorldImportersFull cannot be successfully created.
+    # AdventureWorksLT is the only sample name that is actually supported.
+    arg_ctx.argument('sample_name',
+                     arg_group=creation_arg_group,
+                     arg_type=get_enum_type([SampleName.adventure_works_lt]))
+
+    arg_ctx.argument('license_type',
+                     arg_type=get_enum_type(DatabaseLicenseType))
+
+    arg_ctx.argument('zone_redundant',
+                     arg_type=zone_redundant_param_type)
+
+
+def _configure_db_dw_create_params(
         arg_ctx,
         engine,
         create_mode):
     """
-    Configures params for db/dw create/update commands.
+    Configures params for db/dw create commands.
 
     The PUT database REST API has many parameters and many modes (`create_mode`) that control
     which parameters are valid. To make it easier for CLI users to get the param combinations
@@ -270,13 +325,20 @@ def _configure_db_create_params(
     DataWarehouse. For this reason, regular database commands are separated from datawarehouse
     commands (`db` vs `dw`.)
 
-    As a result, the param combination matrix is a little complicated. This function configures
-    which params are ignored for a PUT database command based on a command's SQL engine type and
-    create mode.
+    As a result, the param combination matrix is a little complicated. When adding a new param,
+    we want to make sure that the param is visible for the appropriate commands. We also want to
+    avoid duplication. Instead of spreading out & duplicating the param definitions across all
+    the different commands, it has been more effective to define this reusable function.
+
+    The main task here is to create extra params based on the `Database` model, then .ignore() the params that
+    aren't applicable to the specified engine and create mode. There is also some minor tweaking of help text
+    to make the help text more specific to creation.
 
     engine: Engine enum value (e.g. `db`, `dw`)
     create_mode: Valid CreateMode enum value (e.g. `default`, `copy`, etc)
     """
+
+    # *** Step 0: Validation ***
 
     # DW does not support all create modes. Check that engine and create_mode are consistent.
     if engine == Engine.dw and create_mode not in [
@@ -285,7 +347,38 @@ def _configure_db_create_params(
             CreateMode.restore]:
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
 
+    # *** Step 1: Create extra params ***
+
     # Create args that will be used to build up the Database object
+    #
+    # IMPORTANT: It is very easy to add a new parameter and accidentally forget to .ignore() it in
+    # some commands that it is not applicable to. Therefore, when adding a new param, you should compare
+    # command help before & after your change.
+    # e.g.:
+    #
+    #   # Get initial help text
+    #   git checkout dev
+    #   $file = 'help_original.txt'
+    #   az sql db create -h >> $file
+    #   az sql db copy -h >> $file
+    #   az sql db restore -h >> $file
+    #   az sql db replica create -h >> $file
+    #   az sql db update -h >> $file
+    #   az sql dw create -h >> $file
+    #   az sql dw update -h >> $file
+    #
+    #   # Get updated help text
+    #   git checkout mybranch
+    #   $file = 'help_updated.txt'
+    #   az sql db create -h >> $file
+    #   az sql db copy -h >> $file
+    #   az sql db restore -h >> $file
+    #   az sql db replica create -h >> $file
+    #   az sql db update -h >> $file
+    #   az sql dw create -h >> $file
+    #   az sql dw update -h >> $file
+    #
+    # Then compare 'help_original.txt' <-> 'help_updated.txt' in your favourite text diff tool.
     create_args_for_complex_type(
         arg_ctx, 'parameters', Database, [
             'catalog_collation',
@@ -316,6 +409,8 @@ def _configure_db_create_params(
             'tier',
         ])
 
+    # *** Step 2: Apply customizations specific to create (as opposed to update) ***
+
     arg_ctx.argument('name',  # Note: this is sku name, not database name
                      options_list=['--service-objective'],
                      arg_group=sku_arg_group,
@@ -324,23 +419,9 @@ def _configure_db_create_params(
                      (db_service_objective_examples if engine == Engine.db else dw_service_objective_examples))
 
     arg_ctx.argument('elastic_pool_id',
-                     arg_type=elastic_pool_id_param_type,
                      help='The name or resource id of the elastic pool to create the database in.')
 
-    arg_ctx.argument('compute_model',
-                     arg_type=compute_model_param_type)
-
-    arg_ctx.argument('auto_pause_delay',
-                     arg_type=auto_pause_delay_param_type)
-
-    arg_ctx.argument('min_capacity',
-                     arg_type=min_capacity_param_type)
-
-    arg_ctx.argument('read_scale',
-                     arg_type=read_scale_param_type)
-
-    arg_ctx.argument('read_replicas',
-                     arg_type=read_replicas_param_type)
+    # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
@@ -383,8 +464,18 @@ def _configure_db_create_params(
         arg_ctx.ignore('compute_model')
 
         # ReadScale properties are not valid for DataWarehouse
+        # --read-replica-count was accidentally included in previous releases and
+        # therefore is hidden using `deprecate_info` instead of `ignore`
         arg_ctx.ignore('read_scale')
-        arg_ctx.ignore('read_replicas')
+        arg_ctx.argument('read_replica_count',
+                         options_list=['--read-replica-count'],
+                         deprecate_info=arg_ctx.deprecate(hide=True))
+
+        # Zone redundant was accidentally included in previous releases and
+        # therefore is hidden using `deprecate_info` instead of `ignore`
+        arg_ctx.argument('zone_redundant',
+                         options_list=['--zone-redundant'],
+                         deprecate_info=arg_ctx.deprecate(hide=True))
 
 
 # pylint: disable=too-many-statements
@@ -398,6 +489,8 @@ def load_arguments(self, _):
                    help='If specified, the failover operation will allow data loss.')
 
     with self.argument_context('sql db') as c:
+        _configure_db_dw_params(c)
+
         c.argument('server_name',
                    arg_type=server_param_type)
 
@@ -407,34 +500,9 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-        c.argument('max_size_bytes',
-                   arg_type=max_size_bytes_param_type)
-
-        creation_arg_group = 'Creation'
-
-        c.argument('collation',
-                   arg_group=creation_arg_group)
-
-        c.argument('catalog_collation',
-                   arg_group=creation_arg_group,
-                   arg_type=get_enum_type(CatalogCollationType))
-
-        c.argument('sample_name',
-                   arg_group=creation_arg_group,
-                   arg_type=get_enum_type(SampleName))
-
-        c.argument('license_type',
-                   arg_type=get_enum_type(DatabaseLicenseType))
-
-        c.argument('read_scale',
-                   arg_type=read_scale_param_type)
-
-        c.argument('read_replica_count',
-                   arg_type=read_replicas_param_type)
-
-        c.argument('zone_redundant',
-                   arg_type=zone_redundant_param_type)
-
+        # SKU-related params are different from DB versus DW, so we want this configuration to apply here
+        # in 'sql db' group but not in 'sql dw' group. If we wanted to apply to both, we would put the
+        # configuration into _configure_db_dw_params().
         c.argument('tier',
                    arg_type=tier_param_type,
                    help='The edition component of the sku. Allowed values include: Basic, Standard, '
@@ -451,10 +519,10 @@ def load_arguments(self, _):
                    'Allowed values include: Gen4, Gen5.')
 
     with self.argument_context('sql db create') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.default)
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
 
     with self.argument_context('sql db copy') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.copy)
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.copy)
 
         c.argument('dest_name',
                    help='Name of the database that will be created as the copy destination.')
@@ -474,7 +542,7 @@ def load_arguments(self, _):
                    help='The new name that the database will be renamed to.')
 
     with self.argument_context('sql db restore') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.point_in_time_restore)
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.point_in_time_restore)
 
         c.argument('dest_name',
                    help='Name of the database that will be created as the restore destination.')
@@ -546,19 +614,9 @@ def load_arguments(self, _):
                    ' the pool.')
 
         c.argument('elastic_pool_id',
-                   arg_type=elastic_pool_id_param_type,
                    help='The name or resource id of the elastic pool to move the database into.')
 
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
-
-        c.argument('compute_model',
-                   arg_type=compute_model_param_type)
-
-        c.argument('auto_pause_delay',
-                   arg_type=auto_pause_delay_param_type)
-
-        c.argument('min_capacity',
-                   arg_type=min_capacity_param_type)
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportRequest object
@@ -646,7 +704,7 @@ def load_arguments(self, _):
     #           sql db replica
     #####
     with self.argument_context('sql db replica create') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.secondary)
+        _configure_db_dw_create_params(c, Engine.db, CreateMode.secondary)
 
         c.argument('partner_resource_group_name',
                    options_list=['--partner-resource-group'],
@@ -774,6 +832,8 @@ def load_arguments(self, _):
     #                sql dw                       #
     ###############################################
     with self.argument_context('sql dw') as c:
+        _configure_db_dw_params(c)
+
         c.argument('server_name',
                    arg_type=server_param_type)
 
@@ -783,9 +843,6 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-        c.argument('max_size_bytes',
-                   arg_type=max_size_bytes_param_type)
-
         c.argument('service_objective',
                    help='The service objective of the data warehouse. For example: ' +
                    dw_service_objective_examples)
@@ -794,7 +851,7 @@ def load_arguments(self, _):
                    help='The collation of the data warehouse.')
 
     with self.argument_context('sql dw create') as c:
-        _configure_db_create_params(c, Engine.dw, CreateMode.default)
+        _configure_db_dw_create_params(c, Engine.dw, CreateMode.default)
 
     with self.argument_context('sql dw show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -1437,3 +1494,34 @@ def load_arguments(self, _):
 
         c.argument('allow_data_loss',
                    arg_type=allow_data_loss_param_type)
+
+    ###################################################
+    #             sql sensitivity classification      #
+    ###################################################
+    with self.argument_context('sql db classification') as c:
+        c.argument('schema_name',
+                   required=True,
+                   help='The name of the schema.',
+                   options_list=['--schema'])
+
+        c.argument('table_name',
+                   required=True,
+                   help='The name of the table.',
+                   options_list=['--table'])
+
+        c.argument('column_name',
+                   required=True,
+                   help='The name of the column.',
+                   options_list=['--column'])
+
+        c.argument('information_type',
+                   required=False,
+                   help='The information type.')
+
+        c.argument('label_name',
+                   required=False,
+                   help='The label name.',
+                   options_list=['--label'])
+
+    with self.argument_context('sql db classification recommendation list') as c:
+        c.ignore('skip_token')

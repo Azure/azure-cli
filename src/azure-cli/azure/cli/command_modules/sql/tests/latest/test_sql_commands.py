@@ -3620,3 +3620,142 @@ class SqlInstanceFailoverGroupMgmtScenarioTest(ScenarioTest):
         self.cmd('sql instance-failover-group show -g {} -l {} -n {}'
                  .format(resource_group_name, mi2_location, failover_group_name),
                  expect_failure=True)
+
+
+class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
+    def _get_storage_endpoint(self, storage_account, resource_group):
+        return self.cmd('storage account show -g {} -n {}'
+                        ' --query primaryEndpoints.blob'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    def _get_storage_key(self, storage_account, resource_group):
+        return self.cmd('storage account keys list -g {} -n {} --query [0].value'
+                        .format(resource_group, storage_account)).get_output_in_json()
+
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
+    @StorageAccountPreparer(location='westus')
+    def test_sql_db_sensitivity_classifications(self, resource_group, resource_group_location, server, storage_account):
+        from azure.mgmt.sql.models import SampleName
+
+        database_name = "sensitivityclassificationsdb01"
+
+        # create db
+        self.cmd('sql db create -g {} -s {} -n {} --sample-name {}'
+                 .format(resource_group, server, database_name, SampleName.adventure_works_lt),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
+
+        # list current sensitivity classifications
+        self.cmd('sql db classification list -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)])  # No classifications are set at the beginning
+
+        # get storage account endpoint and key
+        storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
+        key = self._get_storage_key(storage_account, resource_group)
+
+        # enable ADS - (required to use data classification)
+        disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
+        disabled_alerts_expected = 'Sql_Injection_Vulnerability;Access_Anomaly'
+        email_addresses_input = 'test1@example.com test2@example.com'
+        email_addresses_expected = 'test1@example.com;test2@example.com'
+        email_account_admins = 'Enabled'
+        state_enabled = 'Enabled'
+        retention_days = 30
+
+        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
+                 ' --state {} --storage-key {} --storage-endpoint {}'
+                 ' --retention-days {} --email-addresses {} --disabled-alerts {}'
+                 ' --email-account-admins {}'
+                 .format(resource_group, server, database_name, state_enabled, key,
+                         storage_endpoint, retention_days, email_addresses_input,
+                         disabled_alerts_input, email_account_admins),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', key),
+                     JMESPathCheck('storageEndpoint', storage_endpoint),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('emailAddresses', email_addresses_expected),
+                     JMESPathCheck('disabledAlerts', disabled_alerts_expected),
+                     JMESPathCheck('emailAccountAdmins', email_account_admins)])
+
+        # list recommended sensitivity classifications
+        expected_recommended_sensitivityclassifications_count = 15
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
+
+        schema_name = 'SalesLT'
+        table_name = 'Customer'
+        column_name = 'FirstName'
+
+        # disable the recommendation for SalesLT/Customer/FirstName
+        self.cmd('sql db classification recommendation disable -g {} -s {} -n {} --schema {} --table {} --column {}'
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name))
+
+        # list recommended sensitivity classifications
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
+
+        # re-enable the disabled recommendation
+        self.cmd('sql db classification recommendation enable -g {} -s {} -n {} --schema {} --table {} --column {}'
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name))
+
+        # lits recommended sensitivity classifications
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
+
+        # update the sensitivity classification
+        information_type = 'Name'
+        label_name = 'Confidential - GDPR'
+        information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
+        label_id = 'bf91e08c-f4f0-478a-b016-25164b2a65ff'
+
+        self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
+                 checks=[
+                     JMESPathCheck('informationType', information_type),
+                     JMESPathCheck('labelName', label_name),
+                     JMESPathCheck('informationTypeId', information_type_id),
+                     JMESPathCheck('labelId', label_id)])
+
+        # get the classified column
+        self.cmd('sql db classification show -g {} -s {} -n {} --schema {} --table {} --column {}'
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type),
+                 checks=[
+                     JMESPathCheck('informationType', information_type),
+                     JMESPathCheck('labelName', label_name),
+                     JMESPathCheck('informationTypeId', information_type_id),
+                     JMESPathCheck('labelId', label_id)])
+
+        # list recommended classifications
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
+
+        # list current classifications
+        self.cmd('sql db classification list -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1)])
+
+        # delete the label
+        self.cmd('sql db classification delete -g {} -s {} -n {} --schema {} --table {} --column {}'
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name))
+
+        # list current labels
+        self.cmd('sql db classification list -g {} -s {} -n {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)])

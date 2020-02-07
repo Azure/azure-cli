@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.80"
+VERSION = "2.0.81"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -78,12 +78,12 @@ DEPENDENCIES = [
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry~=3.0.0rc8',
-    'azure-mgmt-containerservice~=8.0.0',
+    'azure-mgmt-containerservice~=8.1.0',
     'azure-mgmt-cosmosdb~=0.11.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
-    'azure-mgmt-deploymentmanager~=0.1.0',
+    'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=2.2',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
@@ -104,8 +104,8 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=0.7.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.7.0',
-    'azure-mgmt-network~=7.0.0',
-    'azure-mgmt-policyinsights~=0.3.1',
+    'azure-mgmt-network~=8.0.0',
+    'azure-mgmt-policyinsights~=0.4.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=1.8',
     'azure-mgmt-recoveryservices~=0.4.0',
@@ -114,11 +114,11 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource~=6.0',
+    'azure-mgmt-resource~=8.0.1',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',
     'azure-mgmt-servicebus~=0.6.0',
-    'azure-mgmt-servicefabric~=0.2.0',
+    'azure-mgmt-servicefabric~=0.4.0',
     'azure-mgmt-signalr~=0.3.0',
     'azure-mgmt-sql~=0.15.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
@@ -182,9 +182,11 @@ setup(
         'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
         'azure.cli.command_modules.servicefabric': [
             'template/windows/template.json',
-            'template/linux/template.json',
             'template/windows/parameter.json',
+            'template/linux/template.json',
             'template/linux/parameter.json',
+            'template/service/template.json',
+            'template/service/parameter.json'
         ],
     },
     cmdclass=cmdclass

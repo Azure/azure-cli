@@ -197,6 +197,22 @@ def validate_load_balancer_outbound_ip_prefixes(namespace):
             raise CLIError("--load-balancer-outbound-ip-prefixes cannot contain whitespace")
 
 
+def validate_load_balancer_outbound_ports(namespace):
+    """validate load balancer profile outbound allocated ports"""
+    if namespace.load_balancer_outbound_ports is not None:
+        if namespace.load_balancer_outbound_ports % 8 != 0:
+            raise CLIError("--load-balancer-allocated-ports must be a multiple of 8")
+        if namespace.load_balancer_outbound_ports < 0 or namespace.load_balancer_outbound_ports > 64000:
+            raise CLIError("--load-balancer-allocated-ports must be in the range [0,64000]")
+
+
+def validate_load_balancer_idle_timeout(namespace):
+    """validate load balancer profile idle timeout"""
+    if namespace.load_balancer_idle_timeout is not None:
+        if namespace.load_balancer_idle_timeout < 4 or namespace.load_balancer_idle_timeout > 120:
+            raise CLIError("--load-balancer-idle-timeout must be in the range [4,120]")
+
+
 def validate_nodes_count(namespace):
     """Validates that min_count and max_count is set between 1-100"""
     if namespace.min_count is not None:
@@ -224,3 +240,12 @@ def validate_taints(namespace):
 def validate_acr(namespace):
     if namespace.attach_acr and namespace.detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+
+
+def validate_vnet_subnet_id(namespace):
+    if namespace.vnet_subnet_id is not None:
+        if namespace.vnet_subnet_id == '':
+            return
+        from msrestazure.tools import is_valid_resource_id
+        if not is_valid_resource_id(namespace.vnet_subnet_id):
+            raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
