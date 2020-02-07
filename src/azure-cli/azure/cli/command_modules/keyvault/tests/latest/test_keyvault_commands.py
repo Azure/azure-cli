@@ -67,7 +67,7 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
     def test_keyvault_private_endpoint(self, resource_group):
         self.kwargs.update({
             'kv': self.create_random_name('cli-keyvault-', 24),
-            'loc': 'eastus2euap',
+            'loc': 'centraluseuap',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
