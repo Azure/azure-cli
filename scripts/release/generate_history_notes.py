@@ -17,6 +17,7 @@ release_head_url = '{}/git/ref/heads/release'.format(base_url)
 dev_commits_url = '{}/commits?sha=dev'.format(base_url)
 commit_pr_url = '{}/commits/commit_id/pulls'.format(base_url)
 
+history_line_breaker = '==============='
 days_before = 45
 history_notes = {}
 
@@ -50,17 +51,17 @@ def generate_history_notes():
     print(core_history)
 
     cli_history = cli_history[:-2]  # remove last two \n
-    with fileinput.FileInput('src/azure-cli/HISTORY.rst', inplace=True, backup='.bak') as file:
+    with fileinput.FileInput('src/azure-cli/HISTORY.rst', inplace=True) as file:
         for line in file:
-            if line == '===============\n':
-                print(line.replace('===============', '===============\n\n'+ cli_history), end='')
+            if line == '{}\n'.format(history_line_breaker):
+                print(line.replace(history_line_breaker, '{}\n\n{}'.format(history_line_breaker, cli_history)), end='')
             else:
                 print(line, end='')
 
-    with fileinput.FileInput('src/azure-cli-core/HISTORY.rst', inplace=True, backup='.bak') as file:
+    with fileinput.FileInput('src/azure-cli-core/HISTORY.rst', inplace=True) as file:
         for line in file:
-            if line == '===============\n':
-                print(line.replace('===============', '===============\n\n'+ core_history), end='')
+            if line == '{}\n'.format(history_line_breaker):
+                print(line.replace(history_line_breaker, '{}\n\n{}'.format(history_line_breaker, core_history)), end='')
             else:
                 print(line, end='')
 
