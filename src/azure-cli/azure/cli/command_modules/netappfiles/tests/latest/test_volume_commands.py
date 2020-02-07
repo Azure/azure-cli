@@ -112,7 +112,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         self.cmd("az group delete --yes -n %s" % (subnet_rg))
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def btest_perform_replication(self):
+    def test_perform_replication(self):
         # create source volume
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         account_name_r = self.create_random_name(prefix='cli-acc-', length=24)
@@ -166,7 +166,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         time.sleep(2)
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def btest_list_volumes(self):
+    def test_list_volumes(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name1 = self.create_random_name(prefix='cli-vol-', length=24)
@@ -183,7 +183,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert len(volume_list) == 1
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def btest_get_volume_by_name(self):
+    def test_get_volume_by_name(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
@@ -208,7 +208,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume_from_id['name'] == account_name + '/' + pool_name + '/' + volume_name
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def btest_update_volume(self):
+    def test_update_volume(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
@@ -232,7 +232,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert volume['exportPolicy']['rules'][0]['ruleIndex'] == 1
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def btest_export_policy(self):
+    def test_export_policy(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)
         volume_name = self.create_random_name(prefix='cli-vol-', length=24)
@@ -266,7 +266,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert len(vol_with_export_policy['exportPolicy']['rules']) == 2
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_')
-    def btest_export_policy_non_default(self):
+    def test_export_policy_non_default(self):
         # tests that adding export policy works with non-default service level/usage threshold
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
         pool_name = self.create_random_name(prefix='cli-pool-', length=24)

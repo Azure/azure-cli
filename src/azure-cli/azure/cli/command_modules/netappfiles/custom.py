@@ -95,7 +95,6 @@ def patch_pool(cmd, instance, size=None, service_level=None, tags=None):
 
 # -- volume --
 
-# TBD need some additions for the replication
 def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None, endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
