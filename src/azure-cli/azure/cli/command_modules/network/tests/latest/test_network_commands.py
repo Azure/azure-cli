@@ -2648,6 +2648,7 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
 class NetworkVirtualRouter(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
+    @unittest.skip('Skip as service has bug')
     def test_network_virtual_router_scenario(self, resource_group, resource_group_location):
 
         self.kwargs.update({
