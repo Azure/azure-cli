@@ -68,11 +68,12 @@ def update_configstore(cmd,
                        encryption_key_vault=None,
                        encryption_key_version=None,
                        identity_client_id=None):
+    __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_resource_group(cmd, name)
 
-    update_params = ConfigurationStoreUpdateParameters(tags=tags, sku=sku)
-    __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
+    update_params = ConfigurationStoreUpdateParameters(tags=tags if tags else None,
+                                                       sku=Sku(name=sku) if sku else None)
 
     if encryption_key_name is not None:
         key_vault_properties = KeyVaultProperties()
@@ -83,7 +84,6 @@ def update_configstore(cmd,
 
         update_params.encryption = EncryptionProperties(key_vault_properties=key_vault_properties)
 
-    print (update_params)
     return client.update(resource_group_name=resource_group_name,
                          config_store_name=name,
                          config_store_update_parameters=update_params)

@@ -66,10 +66,11 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         updated_tag = tag_key + '=' + tag_value
         structered_tag = {tag_key: tag_value}
         self.kwargs.update({
-            'updated_tag': updated_tag
+            'updated_tag': updated_tag,
+            'update_sku': sku   # we currently only can test on standard sku
         })
 
-        self.cmd('appconfig update -n {config_store_name} -g {rg} --tags {updated_tag}',
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --tags {updated_tag} --sku {update_sku}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
@@ -1035,40 +1036,6 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                                          self.check('[0].label', null_label)]).get_output_in_json()
         assert len(list_features) == 1
 
-        # List all features ending with Beta, any label
-        suffix_feature_pattern = '*Beta'
-        self.kwargs.update({
-            'feature': suffix_feature_pattern
-        })
-
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}').get_output_in_json()
-        assert len(list_features) == 3
-
-        # List all features ending with Beta, null label
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
-                                 checks=[self.check('[0].key', suffix_feature),
-                                         self.check('[0].label', null_label)]).get_output_in_json()
-        assert len(list_features) == 1
-
-        # List all features containing Beta, any label
-        contains_feature_pattern = '*Beta*'
-        self.kwargs.update({
-            'feature': contains_feature_pattern
-        })
-
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}').get_output_in_json()
-        assert len(list_features) == 5
-
-        # List all features containing Beta, null label
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
-                                 checks=[self.check('[0].key', prefix_feature),
-                                         self.check('[0].label', null_label),
-                                         self.check('[1].key', suffix_feature),
-                                         self.check('[1].label', null_label),
-                                         self.check('[2].key', contains_feature),
-                                         self.check('[2].label', null_label)]).get_output_in_json()
-        assert len(list_features) == 3
-
         # Invalid Pattern - contains comma
         comma_pattern = 'Beta,Alpha'
         self.kwargs.update({
@@ -1110,25 +1077,6 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                                    self.check('[0].label', updated_label),
                                    self.check('[0].state', default_state)]).get_output_in_json()
         assert len(deleted) == 1
-
-        # Delete by pattern - this should delete 2 features Beta (label v1) and SuffixBeta
-        self.kwargs.update({
-            'feature': suffix_feature_pattern,
-            'label': any_label_pattern
-        })
-
-        deleted = self.cmd('appconfig feature delete --connection-string {connection_string}  --feature {feature} --label {label} -y',
-                           checks=[self.check('[0].locked', default_locked),
-                                   self.check('[0].key', entry_feature),
-                                   self.check('[0].description', updated_entry_description),
-                                   self.check('[0].label', entry_label),
-                                   self.check('[0].state', default_state),
-                                   self.check('[1].locked', default_locked),
-                                   self.check('[1].key', suffix_feature),
-                                   self.check('[1].description', default_description),
-                                   self.check('[1].label', null_label),
-                                   self.check('[1].state', default_state)]).get_output_in_json()
-        assert len(deleted) == 2
 
         # Lock feature - ThisBetaVersion
         self.kwargs.update({
@@ -1175,7 +1123,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
-        assert len(list_features) == 2
+        assert len(list_features) == 4
 
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
