@@ -3374,7 +3374,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_virtual_cluster_mgmt(self, resource_group, resource_group_location):
         self.kwargs.update({
             'loc': resource_group_location,
