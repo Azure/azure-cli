@@ -166,7 +166,7 @@ def parse_message(message: str) ->(str, str):
         note = m.group(2).strip()
         #remove appended PR number in commit message
         note = re.sub(r' \(#[0-9]+\)$', '', note)
-        note = re.sub('BREAKING CHANGE', '[BREAKING CHANGE]', note, flags=re.IGNORECASE)
+        note = re.sub('BREAKING CHANGE:', '[BREAKING CHANGE]', note, flags=re.IGNORECASE)
         return component, note
     return None, None
 
