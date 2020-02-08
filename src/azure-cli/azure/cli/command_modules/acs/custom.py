@@ -1399,7 +1399,8 @@ def create_role_assignment(cli_ctx, role, assignee, isServicePrincipal, resource
     return _create_role_assignment(cli_ctx, role, assignee, isServicePrincipal, resource_group_name, scope)
 
 
-def _create_role_assignment(cli_ctx, role, assignee, isServicePrincipal, resource_group_name=None, scope=None, resolve_assignee=True):
+def _create_role_assignment(cli_ctx, role, assignee, isServicePrincipal,
+                            resource_group_name=None, scope=None, resolve_assignee=True):
     from azure.cli.core.profiles import ResourceType, get_sdk
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
@@ -1409,7 +1410,8 @@ def _create_role_assignment(cli_ctx, role, assignee, isServicePrincipal, resourc
 
     role_id = _resolve_role_id(role, scope, definitions_client)
 
-    # If the cluster has service principal resolve the service principal client id to get the object id, if not use MSI object id.
+    # If the cluster has service principal resolve the service principal client id to get the object id,
+    # if not use MSI object id.
     if isServicePrincipal:
         object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
     else:
@@ -1817,14 +1819,19 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 service_principal_msi_id = None
                 # Check if service principal exists, if it does, assign permissions to service principal
                 # Else, provide permissions to MSI
-                if hasattr(result, 'service_principal_profile') and hasattr(result.service_principal_profile, 'client_id'):
+                if (
+                        hasattr(result, 'service_principal_profile') and
+                        hasattr(result.service_principal_profile, 'client_id')
+                ):
                     logger.warning('service principal exists, using it')
                     service_principal_msi_id = result.service_principal_profile.client_id
                     isServicePrincipal = True
-                elif ((hasattr(result, 'addon_profiles')) and
-                     ('omsagent' in result.addon_profiles) and
-                     (hasattr(result.addon_profiles['omsagent'], 'identity')) and
-                     (hasattr(result.addon_profiles['omsagent'].identity, 'object_id'))):
+                elif (
+                        (hasattr(result, 'addon_profiles')) and
+                        ('omsagent' in result.addon_profiles) and
+                        (hasattr(result.addon_profiles['omsagent'], 'identity')) and
+                        (hasattr(result.addon_profiles['omsagent'].identity, 'object_id'))
+                ):
                     logger.warning('omsagent MSI exists, using it')
                     service_principal_msi_id = result.addon_profiles['omsagent'].identity.object_id
                     isServicePrincipal = False
@@ -1872,10 +1879,12 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
 
     if 'omsagent' in instance.addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
-        
     # send the managed cluster representation to update the addon profiles
-    result = sdk_no_wait(no_wait, client.create_or_update,
-                          resource_group_name, name, instance)
+    result = sdk_no_wait(
+        no_wait, client.create_or_update,
+        resource_group_name, name, instance
+    )
+
     result = LongRunningOperation(cmd.cli_ctx)(result)
 
     if 'omsagent' in instance.addon_profiles:
@@ -1896,10 +1905,12 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
             logger.warning('service principal exists, using it')
             service_principal_msi_id = result.service_principal_profile.client_id
             isServicePrincipal = True
-        elif ((hasattr(result, 'addon_profiles')) and
-             ('omsagent' in result.addon_profiles) and
-             (hasattr(result.addon_profiles['omsagent'], 'identity')) and
-             (hasattr(result.addon_profiles['omsagent'].identity, 'object_id'))):
+        elif (
+                (hasattr(result, 'addon_profiles')) and
+                ('omsagent' in result.addon_profiles) and
+                (hasattr(result.addon_profiles['omsagent'], 'identity')) and
+                (hasattr(result.addon_profiles['omsagent'].identity, 'object_id'))
+        ):
             logger.warning('omsagent MSI exists, using it')
             service_principal_msi_id = result.addon_profiles['omsagent'].identity.object_id
             isServicePrincipal = False
@@ -1907,8 +1918,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
         if service_principal_msi_id is not None:
             if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
                                         service_principal_msi_id, isServicePrincipal, scope=cluster_resource_id):
-                logger.warning('Could not create a role assignment for Monitoring addon. '
-                    'Are you an Owner on this subscription?')
+                logger.warning(
+                    'Could not create a role assignment for Monitoring addon. '
+                    'Are you an Owner on this subscription?'
+                )
 
     return result
 
