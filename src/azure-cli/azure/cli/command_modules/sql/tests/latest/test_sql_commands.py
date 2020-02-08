@@ -2366,8 +2366,8 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         vnet_rule_1 = 'rule1'
         vnet_rule_2 = 'rule2'
@@ -3374,7 +3374,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     def test_sql_virtual_cluster_mgmt(self, resource_group, resource_group_location):
         self.kwargs.update({
             'loc': resource_group_location,
