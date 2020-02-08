@@ -63,7 +63,7 @@ _python_argcomplete() {
         unset COMPREPLY
     fi
 }
-complete -o nospace -F _python_argcomplete "az"
+complete -o nospace -o default -o bashdefault -F _python_argcomplete "az"
 """
 
 
@@ -368,7 +368,7 @@ def verify_native_dependencies():
         python_dep = 'python3-dev' if is_python3 else 'python-dev'
         if distname == 'ubuntu' and version in ['12.04', '14.04'] or distname == 'debian' and version.startswith('7'):
             dep_list = ['libssl-dev', 'libffi-dev', python_dep]
-        elif distname == 'ubuntu' and version in ['15.10', '16.04']or distname == 'debian' and version.startswith('8'):
+        elif distname == 'ubuntu' and version in ['15.10', '16.04', '18.04']or distname == 'debian' and version.startswith('8'):
             dep_list = ['libssl-dev', 'libffi-dev', python_dep, 'build-essential']
     elif any(x in distname for x in ['centos', 'rhel', 'red hat']):
         verify_cmd_args = ['rpm', '-q']
