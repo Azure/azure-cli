@@ -52,19 +52,25 @@ def generate_history_notes():
 
     cli_history = cli_history[:-2]  # remove last two \n
     with fileinput.FileInput('src/azure-cli/HISTORY.rst', inplace=True) as file:
-        for line in file:
-            if line == '{}\n'.format(history_line_breaker):
-                print(line.replace(history_line_breaker, '{}\n\n{}'.format(history_line_breaker, cli_history)), end='')
-            else:
-                print(line, end='')
+        modify_history_file(file, cli_history)
 
     with fileinput.FileInput('src/azure-cli-core/HISTORY.rst', inplace=True) as file:
-        for line in file:
-            if line == '{}\n'.format(history_line_breaker):
-                print(line.replace(history_line_breaker, '{}\n\n{}'.format(history_line_breaker, core_history)), end='')
-            else:
-                print(line, end='')
+        modify_history_file(file, core_history)
 
+
+def modify_history_file(file: fileinput.FileInput, new_history: str):
+    write = True
+    for line in file:
+        if line == '{}\n'.format(history_line_breaker):
+            print(line.replace(history_line_breaker, '{}\n\n{}'.format(history_line_breaker, new_history)))
+            write = False
+        else:
+            # remove any history notes written above previous release version
+            # make the generation of history notes idemponent
+            if re.match(r'^[0-9]+\.[0-9]+\.[0-9]+$', line):
+                write = True
+            if write:
+                print(line, end='')
 
 def construct_cli_history(component: str):
     history = '**{}**\n\n'.format(component)
@@ -116,7 +122,14 @@ def get_prs_for_commit(commit: str):
 
 def process_pr(pr):
     lines = [pr['title']]
-    lines.extend(pr['body'].splitlines())
+    body = pr['body']
+    search_result = re.search(r'\*\*History Notes:\*\*(.*)---', body, flags=re.DOTALL)
+    if search_result is None:
+        search_result = re.search(r'\*\*History Notes:\*\*(.*)', body, flags=re.DOTALL)
+        if search_result is None:
+            return
+    body = search_result.group(1)
+    lines.extend(body.splitlines())
     process_lines(lines)
 
 
@@ -147,7 +160,7 @@ def parse_message(message: str) ->(str, str):
     # do not include template
     if message.startswith('[Component Name'):
         return None, None
-    m = re.search(r'^\[(.*)\](.*)$', message)
+    m = re.search(r'^\[(.+)\](.+)$', message)
     if m is not None:
         component = m.group(1)
         note = m.group(2).strip()
