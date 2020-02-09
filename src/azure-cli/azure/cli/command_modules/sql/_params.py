@@ -239,7 +239,7 @@ read_replicas_param_type = CLIArgumentType(
     help='The number of readonly replicas to provision for the database. '
     'Only settable for Hyperscale edition.')
 
-db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2, GP_Gen5_S_8.'
+db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_Gen5_S_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
 
@@ -506,7 +506,7 @@ def load_arguments(self, _):
         c.argument('tier',
                    arg_type=tier_param_type,
                    help='The edition component of the sku. Allowed values include: Basic, Standard, '
-                   'Premium, GeneralPurpose, BusinessCritical.')
+                   'Premium, GeneralPurpose, BusinessCritical, Hyperscale.')
 
         c.argument('capacity',
                    arg_type=capacity_param_type,
