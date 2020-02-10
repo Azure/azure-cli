@@ -203,7 +203,8 @@ AZURE_API_PROFILES = {
         # Full MultiAPI support is not done in AppService, the line below is merely
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
-        ResourceType.MGMT_APPSERVICE: '2018-02-01'
+        ResourceType.MGMT_APPSERVICE: '2018-02-01',
+        ResourceType.MGMT_EVENTHUB: '2017-04-01'
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
