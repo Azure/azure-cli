@@ -240,7 +240,7 @@ read_replicas_param_type = CLIArgumentType(
     help='The number of readonly replicas to provision for the database. '
     'Only settable for Hyperscale edition.')
 
-db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2, GP_Gen5_S_8.'
+db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_Gen5_S_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
 
@@ -507,7 +507,7 @@ def load_arguments(self, _):
         c.argument('tier',
                    arg_type=tier_param_type,
                    help='The edition component of the sku. Allowed values include: Basic, Standard, '
-                   'Premium, GeneralPurpose, BusinessCritical.')
+                   'Premium, GeneralPurpose, BusinessCritical, Hyperscale.')
 
         c.argument('capacity',
                    arg_type=capacity_param_type,
@@ -1281,7 +1281,8 @@ def load_arguments(self, _):
 
         c.argument('tier',
                    arg_type=tier_param_type,
-                   help='The edition component of the sku. Allowed values: GeneralPurpose, BusinessCritical.')
+                   help='The edition component of the sku. Allowed values include: '
+                   'GeneralPurpose, BusinessCritical.')
 
         c.argument('family',
                    arg_type=family_param_type,
@@ -1300,7 +1301,7 @@ def load_arguments(self, _):
 
         c.argument('vcores',
                    arg_type=capacity_param_type,
-                   help='The capacity of the managed instance in vcores.')
+                   help='The capacity of the managed instance in integer number of vcores.')
 
         c.argument('collation',
                    help='The collation of the managed instance.')
@@ -1385,6 +1386,16 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
+
+        # Create args that will be used to build up the Managed Instance's Sku object
+        create_args_for_complex_type(
+            c, 'sku', Sku, [
+                'family',
+                'name',
+                'tier',
+            ])
+
+        c.ignore('name')  # Hide sku name
 
     #####
     #           sql managed instance key

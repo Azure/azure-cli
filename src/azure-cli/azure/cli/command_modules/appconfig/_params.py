@@ -74,7 +74,7 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig create') as c:
         c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('assign_identity', arg_type=identities_arg_type)
+        c.argument('assign_identity', arg_type=identities_arg_type, is_preview=True)
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)

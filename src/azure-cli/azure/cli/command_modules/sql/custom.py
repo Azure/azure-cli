@@ -2278,19 +2278,17 @@ def encryption_protector_update(
 ###############################################
 
 
-def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
+def _find_managed_instance_sku_from_capabilities(
+        cli_ctx,
+        location,
+        sku):
     '''
     Given a requested sku which may have some properties filled in
-    (e.g. tier and capacity), finds the canonical matching sku
+    (e.g. tier and family), finds the canonical matching sku
     from the given location's capabilities.
     '''
 
     logger.debug('_find_managed_instance_sku_from_capabilities input: %s', sku)
-
-    if sku.name:
-        # User specified sku.name, so nothing else needs to be resolved.
-        logger.debug('_find_managed_instance_sku_from_capabilities return sku as is')
-        return sku
 
     if not _any_sku_values_specified(sku):
         # User did not request any properties of sku, so just wipe it out.
@@ -2362,6 +2360,7 @@ def managed_instance_list(
 
 
 def managed_instance_update(
+        cmd,
         instance,
         administrator_login_password=None,
         license_type=None,
@@ -2369,7 +2368,9 @@ def managed_instance_update(
         storage_size_in_gb=None,
         assign_identity=False,
         proxy_override=None,
-        public_data_endpoint_enabled=None):
+        public_data_endpoint_enabled=None,
+        tier=None,
+        family=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2389,6 +2390,16 @@ def managed_instance_update(
         storage_size_in_gb or instance.storage_size_in_gb)
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
+
+    instance.sku.name = None
+    instance.sku.tier = (
+        tier or instance.sku.tier)
+    instance.sku.family = (
+        family or instance.sku.family)
+    instance.sku = _find_managed_instance_sku_from_capabilities(
+        cmd.cli_ctx,
+        instance.location,
+        instance.sku)
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
