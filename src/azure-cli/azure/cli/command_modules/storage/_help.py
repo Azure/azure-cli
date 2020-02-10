@@ -914,8 +914,11 @@ type: command
 short-summary: Copy a file asynchronously.
 examples:
     - name: Copy a file asynchronously.
-    - text: |
-        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path mypath --source-share srcshare --destination-path destpath --destination-share myshare --account-name destaccount --account-key 00000000
+      text: |
+        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --account-key 00000000
+    - name: Copy a file asynchronously from source uri to destination storage account with sas token.
+      text: |
+        az storage file copy start --source-uri "https://srcaccount.file.core.windows.net/myshare/mydir/myfile?<sastoken>" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
 """
 
 helps['storage file copy start-batch'] = """
@@ -954,6 +957,13 @@ parameters:
   - name: --source-sas
     type: string
     short-summary: The shared access signature for the source storage account.
+examples:
+  - name: Copy all files in a file share to another storage account.
+    text: |
+        az storage file copy start-batch --source-account-name srcaccount --source-account-key 00000000 --source-share srcshare --destination-path <destpath-to-directory> --destination-share destshare --account-name destaccount --account-key 00000000
+  - name: Copy all files in a file share to another storage account. with sas token.
+    text: |
+        az storage file copy start-batch --source-uri "https://srcaccount.file.core.windows.net/myshare?<sastoken>" --destination-path <destpath-to-directory> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
 """
 
 helps['storage file delete-batch'] = """
