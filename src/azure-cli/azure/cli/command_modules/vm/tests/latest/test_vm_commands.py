@@ -4026,7 +4026,6 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
 
-<<<<<<< Updated upstream
 class VMSSCreateDiskOptionTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disk_iops_mbps_', location='eastus')
@@ -4057,7 +4056,8 @@ class VMSSCreateDiskOptionTest(ScenarioTest):
                      self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskMbpsReadWrite', '66'),
                      self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskMbpsReadWrite', '77'),
                  ])
-=======
+
+
 class VMCreateAutoCreateSubnetScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_subnet')
@@ -4089,7 +4089,6 @@ class VMCreateAutoCreateSubnetScenarioTest(ScenarioTest):
         self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
             self.check('subnets[0].name', '{vm}Subnet')
         ])
->>>>>>> Stashed changes
 
 
 if __name__ == '__main__':
