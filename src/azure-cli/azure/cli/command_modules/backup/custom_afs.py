@@ -168,9 +168,10 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
         target_details = TargetAFSRestoreInfo()
         target_details.name = target_file_share_name
         target_details.target_resource_id = target_resource_id
-        afs_restore_request.restore_file_specs = restore_file_specs
         afs_restore_request.target_details = target_details
-
+    
+    afs_restore_request.restore_file_specs = restore_file_specs
+    
     trigger_restore_request = RestoreRequestResource(properties=afs_restore_request)
 
     result = sdk_no_wait(True, client.trigger, vault_name, resource_group_name, fabric_name,
