@@ -660,11 +660,34 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         nic_dependencies = []
         if vnet_type == 'new':
-            vnet_name = vnet_name or '{}VNET'.format(vm_name)
             subnet = subnet or '{}Subnet'.format(vm_name)
-            nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-            master_template.add_resource(build_vnet_resource(
-                cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
+            vnet_exists = False
+            if vnet_name:
+                from azure.cli.command_modules.vm._vm_utils import check_existence
+                vnet_exists = \
+                    check_existence(cmd.cli_ctx, vnet_name, resource_group_name, 'Microsoft.Network', 'virtualNetworks')
+                if vnet_exists:
+                    from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection
+                    from azure.cli.command_modules.vm._validators import get_network_client
+                    client = get_network_client(cmd.cli_ctx).virtual_networks
+                    vnet = cached_get(cmd, client.get, resource_group_name, vnet_name)
+
+                    Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_NETWORK)
+                    subnet_obj = Subnet(
+                        name=subnet,
+                        address_prefixes=[subnet_address_prefix],
+                        address_prefix=subnet_address_prefix
+                    )
+                    upsert_to_collection(vnet, 'subnets', subnet_obj, 'name')
+                    vnet = cached_put(cmd, client.create_or_update, vnet, resource_group_name, vnet_name).result()
+                    subnet_created = next((x for x in vnet.subnets if x.name.lower() == subnet.lower()), None)
+                    if not subnet_created:
+                        raise CLIError('Create subnet failed')
+            if not vnet_exists:
+                vnet_name = vnet_name or '{}VNET'.format(vm_name)
+                nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+                master_template.add_resource(build_vnet_resource(
+                    cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
 
         if nsg_type == 'new':
             nsg_rule_type = 'rdp' if os_type.lower() == 'windows' else 'ssh'
