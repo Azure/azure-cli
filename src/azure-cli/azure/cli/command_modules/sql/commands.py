@@ -354,7 +354,7 @@ def load_command_table(self, _):
     instance_pools_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#InstancePoolsOperations.{}',
         client_factory=get_sql_instance_pools_operations)
-    with self.command_group('sql instance-pool', instance_pools_operations, client_factory=get_sql_instance_pools_operations) as g:
+    with self.command_group('sql instance-pool', instance_pools_operations, client_factory=get_sql_instance_pools_operations, is_preview=True) as g:
         g.command('show', 'get',
                   table_transformer=instance_pool_table_format)
         g.custom_command('list', 'instance_pool_list',
