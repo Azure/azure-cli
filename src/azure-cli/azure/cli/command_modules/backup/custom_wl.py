@@ -7,6 +7,8 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
 # pylint: disable=import-error
 # pylint: disable=broad-except
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 
 from uuid import uuid4
 from azure.cli.command_modules.backup._validators import datetime_type
@@ -520,9 +522,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                 Target Item must be either of type HANAInstance or SQLInstance.
                 """)
 
-    if restore_mode == 'RestoreAsFiles':
-        if target_container is None:
-            raise CLIError("Target Container must be provided.")
+    if restore_mode == 'RestoreAsFiles' and target_container is None:
+        raise CLIError("Target Container must be provided.")
 
     if rp_name is None and log_point_in_time is None:
         raise CLIError(
