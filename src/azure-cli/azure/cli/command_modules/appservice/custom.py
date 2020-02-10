@@ -2063,6 +2063,11 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
         slot_text = "Deployment slot {} in ".format(slot)
         raise CLIError("{0}app {1} doesn't exist in resource group {2}".format(slot_text, name, resource_group_name))
 
+    parsed_plan_id = parse_resource_id(webapp.server_farm_id)
+    plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    if plan_info.sku.tier.upper() == 'FREE' or plan_info.sku.tier.upper() == 'SHARED':
+        raise CLIError('Managed Certificate is not supported on Free and Shared tier.')
+
     if not _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot):
         slot_text = " --slot {}".format(slot) if slot else ""
         raise CLIError("Hostname (custom domain) '{0}' is not registered with {1}. "
