@@ -531,7 +531,7 @@ def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
 
 def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
                      body=None, skip_authorization_header=False, resource=None, output_file=None,
-                     generated_client_request_id_name='x-ms-client-request-id'):
+                     generated_client_request_id_name='x-ms-client-request-id', include_headers=None):
     import uuid
     import requests
     from azure.cli.core.commands.client_factory import UA_AGENT
@@ -584,6 +584,10 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     if '{subscriptionId}' in uri:
         uri = uri.replace('{subscriptionId}', profile.get_subscription_id())
 
+    # Dump custom request headers before adding Authorization header
+    logger.info("Request headers:")
+    logger.info(json.dumps(dict(headers), indent=2))
+
     if not skip_authorization_header and uri.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
@@ -608,7 +612,10 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     try:
         r = requests.request(method, uri, params=uri_parameters, data=body, headers=headers,
                              verify=not should_disable_connection_verify())
-        logger.debug("Response Header : %s", r.headers if r else '')
+
+        logger.info("Response status: %d %s", r.status_code, r.reason)
+        logger.info("Response headers:")
+        logger.info(json.dumps(dict(r.headers), indent=2))
     except Exception as ex:  # pylint: disable=broad-except
         raise CLIError(ex)
 
