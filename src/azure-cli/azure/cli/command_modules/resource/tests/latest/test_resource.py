@@ -495,7 +495,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
 
 
 class DeploymentTestAtResourceGroup(ScenarioTest):
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_resource_group_deployment')
     def test_resource_group_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
