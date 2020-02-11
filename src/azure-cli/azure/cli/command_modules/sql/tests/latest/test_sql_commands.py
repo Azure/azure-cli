@@ -2366,8 +2366,8 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         vnet_rule_1 = 'rule1'
         vnet_rule_2 = 'rule2'
