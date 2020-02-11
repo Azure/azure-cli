@@ -1002,17 +1002,17 @@ def load_arguments(self, _):
         c.argument('network_watcher_name', arg_type=ignore_type, options_list=['--__NETWORK_WATCHER_NAME'])
         c.argument('connection_monitor_name', name_arg_type, help='Connection monitor name.')
 
-    with self.argument_context('network watcher connection-monitor create') as c:
-        c.argument('monitoring_interval', help='Monitoring interval in seconds.', type=int)
-        c.argument('do_not_start', action='store_true', help='Create the connection monitor but do not start it immediately.')
-        c.argument('source_resource', help='Name or ID of the resource from which to originate traffic.')
+    with self.argument_context('network watcher connection-monitor', arg_group='V1 Endpoint') as c:
+        c.argument('source_resource', help='Name or ID of the resource from which to originate traffic. '
+                                           'Currently only Virtual Machines are supported.')
         c.argument('source_port', help='Port number from which to originate traffic.')
-        c.ignore('location')
-
-    with self.argument_context('network watcher connection-monitor', arg_group='Destination') as c:
-        c.argument('dest_resource', help='Name of ID of the resource to receive traffic.')
+        c.argument('dest_resource', help='Name of ID of the resource to receive traffic. '
+                                         'Currently only Virtual Machines are supported.')
         c.argument('dest_port', help='Port number on which to receive traffic.')
         c.argument('dest_address', help='The IP address or URI at which to receive traffic.')
+        c.argument('monitoring_interval', help='Monitoring interval in seconds.', type=int, default=60)
+        c.argument('do_not_start', action='store_true',
+                   help='Create the connection monitor but do not start it immediately.')
 
     nw_validator = get_network_watcher_from_location(remove=True, watcher_name='network_watcher_name', rg_name='resource_group_name')
     for scope in ['list', 'show', 'start', 'stop', 'delete', 'query']:
