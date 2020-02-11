@@ -28,6 +28,7 @@ def _asn1_to_iso8601(asn1_date):
 
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
+KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
 
 def _create_keyvault(test, kwargs, additional_args=None):
@@ -51,12 +52,11 @@ class DateTimeParseTest(unittest.TestCase):
 class KeyVaultMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
     def test_keyvault_mgmt(self, resource_group):
-
         self.kwargs.update({
-            'kv': self.create_random_name('cli-keyvault-', 24),
-            'kv2': self.create_random_name('cli-keyvault-', 24),
-            'kv3': self.create_random_name('cli-keyvault-', 24),
-            'kv4': self.create_random_name('cli-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'kv2': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'kv3': self.create_random_name('cli-test-kv-mgmt-', 24),
+            'kv4': self.create_random_name('cli-test-kv-mgmt-', 24),
             'loc': 'westus'
         })
 
@@ -133,15 +133,13 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
 
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
     def test_keyvault_key(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-key-', 24),
             'loc': 'westus',
             'key': 'key1'
         })
-
         _create_keyvault(self, self.kwargs)
 
         # create a key
@@ -157,17 +155,25 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 1))
 
         # create a new key version
-        key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software --disabled --ops encrypt decrypt --tags test=foo', checks=[
-            self.check('attributes.enabled', False),
-            self.check('length(key.keyOps)', 2),
-            self.check('tags', {'test': 'foo'})
-        ]).get_output_in_json()
+        key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software --disabled --ops encrypt decrypt '
+                       '--tags test=foo',
+                       checks=[
+                           self.check('attributes.enabled', False),
+                           self.check('length(key.keyOps)', 2),
+                           self.check('tags', {'test': 'foo'})
+                       ]).get_output_in_json()
         second_kid = key['key']['kid']
+        pure_kid = '/'.join(second_kid.split('/')[:-1])  # Remove version field
+        self.kwargs['kid'] = second_kid
+        self.kwargs['pkid'] = pure_kid
+
         # list key versions
         self.cmd('keyvault key list-versions --vault-name {kv} -n {key}',
                  checks=self.check('length(@)', 2))
         self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
                  checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --id {kid}', checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --id {pkid}', checks=self.check('length(@)', 2))
 
         # show key (latest)
         self.cmd('keyvault key show --vault-name {kv} -n {key}',
@@ -236,12 +242,122 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password}',
                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
 
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-key-', 24),
+            'loc': 'eastus2euap'
+        })
+        _create_keyvault(self, self.kwargs)
+
+        # create KEK
+        self.cmd('keyvault key create --vault-name {kv} --name key1 --kty RSA-HSM --size 2048 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+        self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 3072 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+        self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 4096 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+
+
+class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_key_download')
+    def test_keyvault_key_download(self, resource_group):
+        import OpenSSL.crypto
+
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-key-d-', 24),
+            'loc': 'eastus2'
+        })
+        _create_keyvault(self, self.kwargs)
+
+        key_names = [
+            'ec-p256.pem',
+            'ec-p384.pem',
+            'ec-p521.pem',
+            'ec-p256k.pem',
+            'rsa-2048.pem',
+            'rsa-3072.pem',
+            'rsa-4096.pem',
+            'ec-p256-hsm.pem',
+            'ec-p384-hsm.pem',
+            'ec-p521-hsm.pem',
+            'ec-p256k-hsm.pem',
+            'rsa-2048-hsm.pem',
+            'rsa-3072-hsm.pem',
+            'rsa-4096-hsm.pem'
+        ]
+
+        # RSA Keys
+        # * Generate: `openssl genrsa -out rsa-4096.pem 4096`
+        # * Extract public key: `openssl rsa -in rsa-4096.pem -pubout > rsa-4096.pub.pem`
+        # * Public key PEM to DER: `openssl rsa -pubin -inform PEM -in rsa-4096.pub.pem -outform DER -out rsa-4096.pub.der`
+
+        # EC Keys
+        # * Generate: `openssl ecparam -genkey -name secp521r1 -out ec521.key`
+        # * Extract public key (PEM): `openssl ec -in ec-p521.pem -pubout -out ec-p521.pub.pem`
+        # * Extract public key (DER): `openssl ec -in ec-p521.pem -pubout -outform DER -out ec-p521.pub.der`
+
+        for key_name in key_names:
+            var_name = key_name.split('.')[0] + '-file'
+            if 'hsm' in key_name:  # Should be generated
+                if key_name.startswith('rsa'):
+                    rsa_size = key_name.split('-')[1]
+                    self.cmd('keyvault key create --vault-name {{kv}} -n {var_name}'
+                             ' -p hsm --kty RSA-HSM --size {rsa_size}'.format(var_name=var_name, rsa_size=rsa_size))
+                elif key_name.startswith('ec'):
+                    ec_curve = key_name.split('-')[1]
+                    curve_names = {
+                        'p256': 'P-256',
+                        'p384': 'P-384',
+                        'p521': 'P-521',
+                        'p256k': 'P-256K'
+                    }
+                    self.cmd('keyvault key create --vault-name {{kv}} -n {var_name}'
+                             ' -p hsm --kty EC-HSM --curve {curve_name}'
+                             .format(var_name=var_name, curve_name=curve_names[ec_curve]))
+            else:  # Should be imported (Have already been generated offline)
+                self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
+                self.cmd('keyvault key import --vault-name {{kv}} -n {var_name} --pem-file "{{{var_name}}}"'
+                         .format(var_name=var_name))
+
+            der_downloaded_filename = var_name + '.der'
+            pem_downloaded_filename = var_name + '.pem'
+
+            try:
+                self.cmd('keyvault key download --vault-name {{kv}} -n {var_name} -f "{filename}" -e DER'
+                         .format(var_name=var_name, filename=der_downloaded_filename))
+                self.cmd('keyvault key download --vault-name {{kv}} -n {var_name} -f "{filename}" -e PEM'
+                         .format(var_name=var_name, filename=pem_downloaded_filename))
+
+                if 'hsm' in key_name:  # TODO: Currently we haven't found a good way to verify online generated keys
+                    continue
+
+                expected_pem = []
+                pem_pub_filename = os.path.join(KEYS_DIR, key_name.split('.')[0] + '.pub.pem')
+                with open(pem_pub_filename, 'r') as pem_file:
+                    expected_pem = pem_file.readlines()
+                expected_pem = ''.join(expected_pem).replace('\n', '')
+
+                def verify(path, file_type):
+                    with open(path, 'rb') as f:
+                        pub_key = OpenSSL.crypto.load_publickey(file_type, f.read())
+                        actual_pem = OpenSSL.crypto.dump_publickey(OpenSSL.crypto.FILETYPE_PEM, pub_key)
+                        if isinstance(actual_pem, bytes):
+                            actual_pem = actual_pem.decode("utf-8")
+                        self.assertIn(expected_pem, actual_pem.replace('\n', ''))
+
+                    verify(der_downloaded_filename, OpenSSL.crypto.FILETYPE_ASN1)
+                    verify(pem_downloaded_filename, OpenSSL.crypto.FILETYPE_PEM)
+            finally:
+                if os.path.exists(der_downloaded_filename):
+                    os.remove(der_downloaded_filename)
+                if os.path.exists(pem_downloaded_filename):
+                    os.remove(pem_downloaded_filename)
+
 
 class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret_soft_delete')
     def test_keyvault_secret_soft_delete(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-se-sd-', 24),
             'loc': 'westus',
             'sec': 'secret1'
         })
@@ -266,7 +382,6 @@ class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
 
 
 class KeyVaultSecretScenarioTest(ScenarioTest):
-
     def _test_download_secret(self):
         secret_path = os.path.join(TEST_DIR, 'test_secret.txt')
         self.kwargs['src_path'] = secret_path
@@ -290,7 +405,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     def test_keyvault_secret(self, resource_group):
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-se-', 24),
             'loc': 'westus',
             'sec': 'secret1'
         })
@@ -365,12 +480,10 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 
 
 class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_contacts')
     def test_keyvault_certificate_contacts(self, resource_group):
-
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-co-', 24),
             'loc': 'westus'
         })
 
@@ -388,12 +501,10 @@ class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
 
 
 class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_issuer')
     def test_keyvault_certificate_issuers(self, resource_group):
-
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-is-', 24),
             'loc': 'westus'
         })
 
@@ -453,7 +564,7 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
     def test_keyvault_pending_certificate(self, resource_group):
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-cr-pe-', 24),
             'loc': 'westus',
             'policy_path': os.path.join(TEST_DIR, 'policy_pending.json')
         })
@@ -494,7 +605,7 @@ class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
         import OpenSSL.crypto
 
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-dl-', 24),
             'loc': 'eastus2'
         })
 
@@ -544,9 +655,7 @@ class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
 
 
 class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_default_policy')
-    def test_keyvault_certificate_get_default_policy(self, resource_group):
+    def test_keyvault_certificate_get_default_policy(self):
         result = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
         self.assertEqual(result['keyProperties']['keyType'], 'RSA')
         self.assertEqual(result['issuerParameters']['name'], 'Self')
@@ -562,12 +671,10 @@ class KeyVaultCertificateDefaultPolicyScenarioTest(ScenarioTest):
 
 
 class KeyVaultCertificateScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert')
     def test_keyvault_certificate_crud(self, resource_group):
-
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-', 24),
             'loc': 'westus'
         })
 
@@ -685,12 +792,10 @@ def _generate_certificate(path, keyfile=None, password=None):
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
 class KeyVaultCertificateImportScenario(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_cert_import')
     def test_keyvault_certificate_import(self, resource_group):
-
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-ct-im-', 24),
             'loc': 'eastus2'
         })
 
@@ -731,12 +836,10 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
 class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
     def test_keyvault_softdelete(self, resource_group):
-
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-sd-', 24),
             'loc': 'eastus2'
         })
 
@@ -815,7 +918,6 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
 
 
 class KeyVaultStorageAccountScenarioTest(ScenarioTest):
-
     def _create_managable_storage_account(self):
         storageacct = self.cmd('az storage account create -g {rg} -n {sa}').get_output_in_json()
         self.kwargs.update({
@@ -828,10 +930,10 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
         return storageacct
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sa')
+    @unittest.skip('We have to skip this as the service/SDK is buggy.')
     def test_keyvault_storage_account(self, resource_group):
-
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-sa-', 24),
             'sa': 'clitestkvsa0000002',
             'loc': 'westus'
         })
@@ -958,7 +1060,6 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
 
 
 class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
-
     def _create_subnet(test, kwargs, additional_args=None):
         test.cmd('network vnet create -g {rg} -n {vnet} -l {loc} ')
         test.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} --name {subnet} '
@@ -967,9 +1068,8 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_network_rule')
     def test_keyvault_network_rule(self, resource_group):
-
         self.kwargs.update({
-            'kv': self.create_random_name('cli-test-keyvault-', 24),
+            'kv': self.create_random_name('cli-test-kv-nr-', 24),
             'vnet': self.create_random_name('cli-test-vnet-', 24),
             'loc': 'eastus2',
             'subnet': self.create_random_name('cli-test-subnet-', 24),

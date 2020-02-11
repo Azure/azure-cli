@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.81
+++++++
+* `get_raw_token`: Add `tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
+
 2.0.80
 ++++++
 * No changes

