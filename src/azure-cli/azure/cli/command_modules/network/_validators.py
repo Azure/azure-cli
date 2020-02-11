@@ -1278,6 +1278,16 @@ def process_nw_cm_v2_test_group(cmd, namespace):
     return get_network_watcher_from_location()(cmd, namespace)
 
 
+def process_nw_cm_v2_output_namespace(cmd, namespace):
+    v2_output_optional_parameter_set = ['workspace_id']
+    if hasattr(namespace, 'out_type') and namespace.out_type is not None:
+        tmp = [p for p in v2_output_optional_parameter_set if getattr(namespace, p) is None]
+        if v2_output_optional_parameter_set == tmp:
+            raise CLIError('usage error: --type is specified but no other resource id provided')
+
+    return get_network_watcher_from_location()(cmd, namespace)
+
+
 # pylint: disable=protected-access,too-few-public-methods
 class NWConnectionMonitorEndpointFilterItemAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):

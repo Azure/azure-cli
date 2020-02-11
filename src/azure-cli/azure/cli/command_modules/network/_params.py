@@ -1262,6 +1262,16 @@ def load_arguments(self, _):
                    help='Value indicating whether test group is disabled. false is default.',
                    arg_type=get_three_state_flag())
 
+    with self.argument_context('network watcher connection-monitor output', min_api='2019-11-01') as c:
+        c.argument('connection_monitor_name',
+                   options_list=['--connection-monitor'],
+                   help='Connection monitor name.')
+        c.argument('out_type',
+                   options_list=['--type'],
+                   help='Connection monitor output destination type. Currently, only "Workspace" is supported',
+                   arg_type=get_enum_type(OutputType))
+        c.argument('workspace_id', help='The id of log analytics workspace')
+
     with self.argument_context('network watcher configure') as c:
         c.argument('locations', get_location_type(self.cli_ctx), options_list=['--locations', '-l'], nargs='+')
         c.argument('enabled', arg_type=get_three_state_flag())

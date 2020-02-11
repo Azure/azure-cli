@@ -4143,6 +4143,46 @@ def list_nw_connection_monitor_v2_test_group(client,
     return connection_monitor.test_groups
 
 
+def add_nw_connection_monitor_v2_output(cmd,
+                                        client,
+                                        watcher_rg,
+                                        watcher_name,
+                                        connection_monitor_name,
+                                        location,
+                                        out_type,
+                                        workspace_id=None):
+    output = _create_nw_connection_monitor_v2_output(cmd, out_type, workspace_id)
+
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    if connection_monitor.outputs is None:
+        connection_monitor.outputs = []
+
+    connection_monitor.outputs.append(output)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def remove_nw_connection_monitor_v2_output(client,
+                                           watcher_rg,
+                                           watcher_name,
+                                           connection_monitor_name,
+                                           location):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    connection_monitor.outputs = []
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def list_nw_connection_monitor_v2_output(client,
+                                         watcher_rg,
+                                         watcher_name,
+                                         connection_monitor_name,
+                                         location):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    return connection_monitor.outputs
+
+
 def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name=None,
                           target_vnet=None, target_subnet=None):  # pylint: disable=unused-argument
     TopologyParameters = cmd.get_models('TopologyParameters')

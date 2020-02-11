@@ -249,3 +249,36 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--connection-monitor {cmv2} '
                  '--location {location} ',
                  checks=self.check('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_output(self, resource_group, resource_group_location):
+        self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+
+        workspace = self.cmd('monitor log-analytics workspace create '
+                             '-g {rg} '
+                             '--location {location} '
+                             '--workspace-name MyLogAnalytics4321 ').get_output_in_json()
+
+        self.kwargs.update({
+            'workspace_id': workspace['id']
+        })
+
+        self.cmd('network watcher connection-monitor output add '
+                 '--location {location} '
+                 '--connection-monitor {cmv2} '
+                 '--type Workspace '
+                 '--workspace-id {workspace_id} ')
+
+        self.cmd('network watcher connection-monitor output list '
+                 '--location {location} '
+                 '--connection-monitor {cmv2} ')
+
+        self.cmd('network watcher connection-monitor output remove '
+                 '--location {location} '
+                 '--connection-monitor {cmv2} ')
+
+        self.cmd('network watcher connection-monitor output list '
+                 '--location {location} '
+                 '--connection-monitor {cmv2} ',
+                 checks=self.check('length(@)', 0))
