@@ -144,7 +144,7 @@ def load_command_table(self, _):
         g.custom_command('unbind', 'unbind_ssl_cert', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('delete', 'delete_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
-        g.custom_command('create-managed-certificate', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
+        g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('webapp config backup') as g:
         g.custom_command('list', 'list_backups')
@@ -286,7 +286,7 @@ def load_command_table(self, _):
         g.custom_command('unbind', 'unbind_ssl_cert')
         g.custom_command('delete', 'delete_ssl_cert')
         g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
-        g.custom_command('create-managed-certificate', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
+        g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('functionapp deployment source') as g:
         g.custom_command('config-local-git', 'enable_local_git')
