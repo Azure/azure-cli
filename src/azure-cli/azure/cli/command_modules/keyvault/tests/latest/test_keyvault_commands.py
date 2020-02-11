@@ -158,9 +158,9 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software --disabled --ops encrypt decrypt '
                        '--tags test=foo',
                        checks=[
-                            self.check('attributes.enabled', False),
-                            self.check('length(key.keyOps)', 2),
-                            self.check('tags', {'test': 'foo'})
+                           self.check('attributes.enabled', False),
+                           self.check('length(key.keyOps)', 2),
+                           self.check('tags', {'test': 'foo'})
                        ]).get_output_in_json()
         second_kid = key['key']['kid']
         pure_kid = '/'.join(second_kid.split('/')[:-1])  # Remove version field
