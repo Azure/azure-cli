@@ -1255,6 +1255,47 @@ def process_nw_cm_create_namespace(cmd, namespace):
     return process_nw_cm_v1_create_namespace(cmd, namespace)
 
 
+def process_nw_cm_v2_endpoint_namespace(cmd, namespace):
+    if hasattr(namespace, 'filter_type') or hasattr(namespace, 'filter_items'):
+        filter_type, filter_items = namespace.filter_type, namespace.filter_items
+        if (filter_type and not filter_items) or (not filter_type and filter_items):
+            raise CLIError('usage error: --filter-type and --filter-item must be present at the same time.')
+
+    if hasattr(namespace, 'dest_test_groups') or hasattr(namespace, 'source_test_groups'):
+        dest_test_groups, source_test_groups = namespace.dest_test_groups, namespace.source_test_groups
+        if dest_test_groups is None and source_test_groups is None:
+            raise CLIError('usage error: endpoint has to be referenced from at least one existing test group '
+                           'via --dest-test-groups/--source-test-groups')
+
+    return get_network_watcher_from_location()(cmd, namespace)
+
+
+# pylint: disable=protected-access,too-few-public-methods
+class NWConnectionMonitorEndpointFilterItemAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        ConnectionMonitorEndpointFilterItem = namespace._cmd.get_models('ConnectionMonitorEndpointFilterItem')
+
+        if not namespace.filter_items:
+            namespace.filter_items = []
+
+        filter_item = ConnectionMonitorEndpointFilterItem()
+
+        for item in values:
+            try:
+                key, val = item.split('=', 1)
+
+                if hasattr(filter_item, key):
+                    setattr(filter_item, key, val)
+                else:
+                    raise CLIError(
+                        "usage error: '{}' is not a valid property of ConnectionMonitorEndpointFilterItem".format(key))
+            except ValueError:
+                raise CLIError(
+                    'usage error: {} PropertyName=PropertyValue [PropertyName=PropertyValue ...]'.format(option_string))
+
+        namespace.filter_items.append(filter_item)
+
+
 def process_nw_test_connectivity_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 

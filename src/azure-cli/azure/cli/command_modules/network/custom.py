@@ -3808,6 +3808,93 @@ def _create_nw_connection_monitor_v2_output(cmd,
     return output
 
 
+def add_nw_connection_monitor_v2_endpoint(cmd,
+                                          client,
+                                          watcher_rg,
+                                          watcher_name,
+                                          connection_monitor_name,
+                                          location,
+                                          name,
+                                          source_test_groups=None,
+                                          dest_test_groups=None,
+                                          resource_id=None,
+                                          address=None,
+                                          filter_type=None,
+                                          filter_items=None):
+    ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
+        'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
+
+    endpoint = ConnectionMonitorEndpoint(name=name, resource_id=resource_id, address=address)
+
+    if filter_type and filter_items:
+        endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
+        endpoint.filter = endpoint_filter
+
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    connection_monitor.endpoints.append(endpoint)
+
+    src_test_groups, dst_test_groups = set(source_test_groups or []), set(dest_test_groups or [])
+    for test_group in connection_monitor.test_groups:
+        if test_group.name in src_test_groups:
+            test_group.sources.append(endpoint.name)
+        if test_group.name in dst_test_groups:
+            test_group.destinations.append(endpoint.name)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def remove_nw_connection_monitor_v2_endpoint(client,
+                                             watcher_rg,
+                                             watcher_name,
+                                             connection_monitor_name,
+                                             location,
+                                             name,
+                                             test_groups=None):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    # refresh endpoints
+    new_endpoints = [endpoint for endpoint in connection_monitor.endpoints if endpoint.name != name]
+    connection_monitor.endpoints = new_endpoints
+
+    # refresh test groups
+    if test_groups is not None:
+        temp_test_groups = [t for t in connection_monitor.test_groups if t.name in test_groups]
+    else:
+        temp_test_groups = connection_monitor.test_groups
+
+    for test_group in temp_test_groups:
+        if name in test_group.sources:
+            test_group.sources.remove(name)
+        if name in test_group.destinations:
+            test_group.destinations.remove(name)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def show_nw_connection_monitor_v2_endpoint(client,
+                                           watcher_rg,
+                                           watcher_name,
+                                           connection_monitor_name,
+                                           location,
+                                           name):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    for endpoint in connection_monitor.endpoints:
+        if endpoint.name == name:
+            return endpoint
+
+    raise CLIError('unknown endpoint: {}'.format(name))
+
+
+def list_nw_connection_monitor_v2_endpoint(client,
+                                           watcher_rg,
+                                           watcher_name,
+                                           connection_monitor_name,
+                                           location):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    return connection_monitor.endpoints
+
+
 def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name=None,
                           target_vnet=None, target_subnet=None):  # pylint: disable=unused-argument
     TopologyParameters = cmd.get_models('TopologyParameters')

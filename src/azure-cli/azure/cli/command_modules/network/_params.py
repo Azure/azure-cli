@@ -33,7 +33,8 @@ from azure.cli.command_modules.network._validators import (
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
-    validate_application_gateway_identity, validate_virtul_network_gateway)
+    validate_application_gateway_identity, validate_virtul_network_gateway,
+    NWConnectionMonitorEndpointFilterItemAction)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -1138,6 +1139,42 @@ def load_arguments(self, _):
         c.argument('workspace_ids',
                    help='Space-separated list of ids of log analytics workspace',
                    nargs='+')
+
+    # Argument Group for connection monitor V2 endpoint
+    with self.argument_context('network watcher connection-monitor endpoint', min_api='2019-11-01') as c:
+        c.argument('connection_monitor_name',
+                   options_list=['--connection-monitor'],
+                   help='Connection monitor name.')
+        c.argument('name',
+                   arg_type=name_arg_type,
+                   help='The name of the connection monitor endpoint')
+        c.argument('resource_id',
+                   help='Resource ID of the connection monitor endpoint')
+        c.argument('address',
+                   help='Address of the connection monitor endpoint (IP or domain name)')
+        c.argument('filter_type',
+                   arg_type=get_enum_type(ConnectionMonitorEndpointFilterType),
+                   help="The behavior of the endpoint filter. Currently only 'Include' is supported.")
+        c.argument('filter_items',
+                   options_list=['--filter-item'],
+                   action=NWConnectionMonitorEndpointFilterItemAction,
+                   nargs='+',
+                   help="List of property=value pairs to define filter items. "
+                        "Property currently include: type, address. "
+                        "Property value of type supports 'AgentAddress' only now.")
+
+    with self.argument_context('network watcher connection-monitor endpoint',
+                               min_api='2019-11-01',
+                               arg_group='V2 Test Group') as c:
+        c.argument('test_groups',
+                   nargs='+',
+                   help='Space-separated list of names of test group which only need to be affected if specified')
+        c.argument('source_test_groups',
+                   nargs='+',
+                   help='Space-separated list of names for test group to reference as source')
+        c.argument('dest_test_groups',
+                   nargs='+',
+                   help='Space-separated list of names for test group to reference as destination')
 
     with self.argument_context('network watcher configure') as c:
         c.argument('locations', get_location_type(self.cli_ctx), options_list=['--locations', '-l'], nargs='+')

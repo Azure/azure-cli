@@ -75,3 +75,43 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
         self.cmd('network watcher connection-monitor list -l {location}')
         self.cmd('network watcher connection-monitor show -l {location} -n {cmv2}')
         self.cmd('network watcher connection-monitor show -l {location} -n cmv2-01')
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_endpoint(self, resource_group, resource_group_location):
+        self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+
+        # add an endpoint as source
+        self.cmd('network watcher connection-monitor endpoint add '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--source-test-groups {test_group} '
+                 '--name vm02 '
+                 '--resource-id {vm2_id} '
+                 '--filter-type Include '
+                 '--filter-item type=AgentAddress address=10.0.0.1 '
+                 '--filter-item type=AgentAddress address=10.0.0.2 ')
+
+        # add an endpoint as destination
+        self.cmd('network watcher connection-monitor endpoint add '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--dest-test-groups {test_group} '
+                 '--name Github '
+                 '--address github.com ')
+
+        self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
+                 checks=self.check('length(@)', 4))
+        self.cmd('network watcher connection-monitor endpoint show '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name Github')
+
+        # remove one
+        self.cmd('network watcher connection-monitor endpoint remove '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name vm02 '
+                 '--test-groups DefaultTestGroup ')
+        self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
+                 checks=self.check('length(@)', 3))
