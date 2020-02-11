@@ -126,7 +126,7 @@ def load_arguments(self, _):
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
             c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
 
-        for cmd in ['backup', 'delete', 'download', 'set-attributes', 'show']:
+        for cmd in ['backup', 'delete', 'download', 'list-versions', 'set-attributes', 'show']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 try:
                     c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))

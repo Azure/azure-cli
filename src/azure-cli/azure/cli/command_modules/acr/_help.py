@@ -257,11 +257,14 @@ examples:
 helps['acr login'] = """
 type: command
 short-summary: Log in to an Azure Container Registry through the Docker CLI.
-long-summary: Docker must be installed on your machine. Once done, use 'docker logout <registry url>' to log out.
+long-summary: Docker must be installed on your machine. Once done, use 'docker logout <registry url>' to log out. (If you only need an access token and do not want to install Docker, specify '--expose-token')
 examples:
   - name: Log in to an Azure Container Registry
     text: >
         az acr login -n MyRegistry
+  - name: Get an Azure Container Registry access token
+    text: >
+        az acr login -n MyRegistry --expose-token
 """
 
 helps['acr network-rule'] = """

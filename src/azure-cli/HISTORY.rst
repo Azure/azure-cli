@@ -7,9 +7,9 @@ Release History
 
 * az ams is now GA.
 
-**AppConfig**
+**SQL**
 
-* Revise help message to exclude unsupported key/label filters.
+* Update SQL Managed Instance cmdlet `az sql mi update` with two new parameters: tier and family.
 
 2.0.81
 ++++++
