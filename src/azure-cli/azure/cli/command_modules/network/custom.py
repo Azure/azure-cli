@@ -3895,6 +3895,104 @@ def list_nw_connection_monitor_v2_endpoint(client,
     return connection_monitor.endpoints
 
 
+def add_nw_connection_monitor_v2_test_configuration(cmd,
+                                                    client,
+                                                    watcher_rg,
+                                                    watcher_name,
+                                                    connection_monitor_name,
+                                                    location,
+                                                    name,
+                                                    protocol,
+                                                    test_groups,
+                                                    frequency=None,
+                                                    threshold_failed_percent=None,
+                                                    threshold_round_trip_time=None,
+                                                    preferred_ip_version=None,
+                                                    tcp_port=None,
+                                                    tcp_disable_trace_route=None,
+                                                    icmp_disable_trace_route=None,
+                                                    http_port=None,
+                                                    http_method=None,
+                                                    http_path=None,
+                                                    http_valid_status_codes=None,
+                                                    http_prefer_https=None,
+                                                    http_request_headers=None):
+    new_test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
+                                                                          name,
+                                                                          frequency,
+                                                                          protocol,
+                                                                          threshold_failed_percent,
+                                                                          threshold_round_trip_time,
+                                                                          preferred_ip_version,
+                                                                          tcp_port,
+                                                                          tcp_disable_trace_route,
+                                                                          icmp_disable_trace_route,
+                                                                          http_port,
+                                                                          http_method,
+                                                                          http_path,
+                                                                          http_valid_status_codes,
+                                                                          http_prefer_https,
+                                                                          http_request_headers)
+
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    connection_monitor.test_configurations.append(new_test_config)
+
+    for test_group in connection_monitor.test_groups:
+        if test_group.name in test_groups:
+            test_group.test_configurations.append(new_test_config.name)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def remove_nw_connection_monitor_v2_test_configuration(client,
+                                                       watcher_rg,
+                                                       watcher_name,
+                                                       connection_monitor_name,
+                                                       location,
+                                                       name,
+                                                       test_groups=None):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    # refresh test configurations
+    new_test_configurations = [t for t in connection_monitor.test_configurations if t.name != name]
+    connection_monitor.test_configurations = new_test_configurations
+
+    if test_groups is not None:
+        temp_test_groups = [t for t in connection_monitor.test_groups if t.name in test_groups]
+    else:
+        temp_test_groups = connection_monitor.test_groups
+
+    # refresh test groups
+    for test_group in temp_test_groups:
+        test_group.test_configurations.remove(name)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def show_nw_connection_monitor_v2_test_configuration(client,
+                                                     watcher_rg,
+                                                     watcher_name,
+                                                     connection_monitor_name,
+                                                     location,
+                                                     name):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    for test_config in connection_monitor.test_configurations:
+        if test_config.name == name:
+            return test_config
+
+    raise CLIError('unknown test configuration: {}'.format(name))
+
+
+def list_nw_connection_monitor_v2_test_configuration(client,
+                                                     watcher_rg,
+                                                     watcher_name,
+                                                     connection_monitor_name,
+                                                     location):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    return connection_monitor.test_configurations
+
+
 def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name=None,
                           target_vnet=None, target_subnet=None):  # pylint: disable=unused-argument
     TopologyParameters = cmd.get_models('TopologyParameters')

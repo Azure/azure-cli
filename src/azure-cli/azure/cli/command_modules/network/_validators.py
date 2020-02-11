@@ -1270,6 +1270,10 @@ def process_nw_cm_v2_endpoint_namespace(cmd, namespace):
     return get_network_watcher_from_location()(cmd, namespace)
 
 
+def process_nw_cm_v2_test_configuration_namespace(cmd, namespace):
+    return get_network_watcher_from_location()(cmd, namespace)
+
+
 # pylint: disable=protected-access,too-few-public-methods
 class NWConnectionMonitorEndpointFilterItemAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -1294,6 +1298,30 @@ class NWConnectionMonitorEndpointFilterItemAction(argparse._AppendAction):
                     'usage error: {} PropertyName=PropertyValue [PropertyName=PropertyValue ...]'.format(option_string))
 
         namespace.filter_items.append(filter_item)
+
+
+# pylint: disable=protected-access,too-few-public-methods
+class NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        HTTPHeader = namespace._cmd.get_models('HTTPHeader')
+
+        if not namespace.http_request_headers:
+            namespace.http_request_headers = []
+
+        request_header = HTTPHeader()
+
+        for item in values:
+            try:
+                key, val = item.split('=', 1)
+                if hasattr(request_header, key):
+                    setattr(request_header, key, val)
+                else:
+                    raise CLIError("usage error: '{}' is not a value property of HTTPHeader".format(key))
+            except ValueError:
+                raise CLIError(
+                    'usage error: {} name=HTTPHeader value=HTTPHeaderValue'.format(option_string))
+
+        namespace.http_request_headers.append(request_header)
 
 
 def process_nw_test_connectivity_namespace(cmd, namespace):

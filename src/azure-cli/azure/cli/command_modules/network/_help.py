@@ -4925,6 +4925,66 @@ type: command
 short-summary: List all endpoints form a connection monitor
 """
 
+
+helps['network watcher connection-monitor test-configuration'] = """
+type: group
+short-summary: Manage test configuration of a connection monitor
+"""
+
+helps['network watcher connection-monitor test-configuration add'] = """
+type: command
+short-summary: Add a test configuration to a connection monitor
+examples:
+  - name: Add a test configuration with HTTP supported
+    text: >
+      az network watcher connection-monitor test-configuration add
+      --connection-monitor MyConnectionMonitor
+      --location westus
+      --name MyHTTPTestConfiguration
+      --test-groups DefaultTestGroup
+      --protocol Http
+      --http-request-header name=Host value=bing.com
+      --http-request-header name=UserAgent value=Edge
+  - name: Add a test configuration with TCP supported
+    text: >
+      az network watcher connection-monitor test-configuration add
+      --connection-monitor MyConnectionMonitor
+      --location westus
+      --name MyHTTPTestConfiguration
+      --test-groups TCPTestGroup DefaultTestGroup
+      --protocol Tcp
+      --tcp-port 4096
+"""
+
+helps['network watcher connection-monitor test-configuration remove'] = """
+type: command
+short-summary: Remove a test configuration from a connection monitor
+examples:
+  - name: Remove a test configuration from all test groups of a connection monitor
+    text: >
+      az network watcher connection-monitor test-configuration remove
+      --connection-monitor MyConnectionMonitor
+      --location westus
+      --name MyTCPTestConfiguration
+  - name: Remove a test configuration from two test groups of a connection monitor
+    text: >
+      az network watcher connection-monitor test-configuration remove
+      --connection-monitor MyConnectionMonitor
+      --location westus
+      --name MyHTTPTestConfiguration
+      --test-groups HTTPTestGroup DefaultTestGroup
+"""
+
+helps['network watcher connection-monitor test-configuration show'] = """
+type: command
+short-summary: Show a test configuration from a connection monitor
+"""
+
+helps['network watcher connection-monitor test-configuration list'] = """
+type: command
+short-summary: List all test configurations of a connection monitor
+"""
+
 helps['network watcher flow-log'] = """
 type: group
 short-summary: Manage network security group flow logging.

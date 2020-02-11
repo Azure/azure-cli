@@ -115,3 +115,55 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--test-groups DefaultTestGroup ')
         self.cmd('network watcher connection-monitor endpoint list --connection-monitor {cmv2} --location {location}',
                  checks=self.check('length(@)', 3))
+
+    @ResourceGroupPreparer(name_prefix='connection_monitor_v2_test_', location='eastus')
+    @AllowLargeResponse()
+    def test_nw_connection_monitor_v2_test_configuration(self, resource_group, resource_group_location):
+        self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
+
+        # add a HTTP test configuration
+        self.cmd('network watcher connection-monitor test-configuration add '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name HTTPConfig '
+                 '--test-groups DefaultTestGroup '
+                 '--protocol Http '
+                 '--frequency 90 '
+                 '--http-method Get '
+                 '--http-path "/" '
+                 '--http-valid-status-codes 200 301 '
+                 '--http-request-header name=Host value=azure.com '
+                 '--http-request-header name=UserAgent value=AzureCLITest ')
+        self.cmd('network watcher connection-monitor test-configuration list '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} ',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network watcher connection-monitor test-configuration show '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name HTTPConfig ')
+
+        # add a ICMP test configuration
+        self.cmd('network watcher connection-monitor test-configuration add '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name ICMPConfig '
+                 '--test-groups DefaultTestGroup '
+                 '--protocol Icmp ')
+        self.cmd('network watcher connection-monitor test-configuration list '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} ',
+                 checks=self.check('length(@)', 3))
+        self.cmd('network watcher connection-monitor test-configuration show '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name ICMPConfig ')
+
+        self.cmd('network watcher connection-monitor test-configuration remove '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} '
+                 '--name HTTPConfig ')
+        self.cmd('network watcher connection-monitor test-configuration list '
+                 '--connection-monitor {cmv2} '
+                 '--location {location} ',
+                 checks=self.check('length(@)', 2))
