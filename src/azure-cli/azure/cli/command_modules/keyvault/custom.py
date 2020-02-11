@@ -1157,68 +1157,42 @@ def restore_storage_account(client, vault_base_url, file_path):
 
 
 # region private_endpoint
-def show_private_endpoint_connection(client, resource_group_name, vault_name, connection_name,
-                                     connection_id=None):  # pylint: disable=unused-argument
-    """Show details of a private endpoint connection associated with a Key Vault."""
-    return client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                      private_endpoint_connection_name=connection_name)
+def _change_private_endpoint_connection_status(cmd, client, resource_group_name, vault_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None,
+                                               connection_id=None):  # pylint: disable=unused-argument
+    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
+                                                            resource_type=ResourceType.MGMT_KEYVAULT)
+
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    new_status = PrivateEndpointServiceConnectionStatus.approved \
+        if is_approved else PrivateEndpointServiceConnectionStatus.rejected
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+
+    return client.put(resource_group_name=resource_group_name,
+                      vault_name=vault_name,
+                      private_endpoint_connection_name=private_endpoint_connection_name,
+                      properties=private_endpoint_connection)
 
 
-def delete_private_endpoint_connection(client, resource_group_name, vault_name, connection_name,
-                                       connection_id=None):  # pylint: disable=unused-argument
-    """ Delete the specified private endpoint connection associated with a Key Vault."""
-    return client.delete(resource_group_name=resource_group_name, vault_name=vault_name,
-                         private_endpoint_connection_name=connection_name)
-
-
-def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, connection_name,
-                                        approval_description=None,
-                                        connection_id=None):  # pylint: disable=unused-argument
+def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+                                        approval_description=None, connection_id=None):
     """Approve a private endpoint connection request for a Key Vault."""
 
-    PrivateEndpointConnection = cmd.get_models('PrivateEndpointConnection', resource_type=ResourceType.MGMT_KEYVAULT)
-    PrivateLinkServiceConnectionState = cmd.get_models('PrivateLinkServiceConnectionState',
-                                                       resource_type=ResourceType.MGMT_KEYVAULT)
-
-    private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                                             private_endpoint_connection_name=connection_name)
-
-    return client.put(resource_group_name=resource_group_name,
-                      vault_name=vault_name,
-                      private_endpoint_connection_name=connection_name,
-                      private_endpoint=private_endpoint_connection.private_endpoint,
-                      properties=PrivateEndpointConnection(
-                          tags=private_endpoint_connection.tags,
-                          location=private_endpoint_connection.location,
-                          private_link_service_connection_state=PrivateLinkServiceConnectionState(
-                              status='Approved',
-                              description=approval_description
-                          )
-                      ))
+    return _change_private_endpoint_connection_status(
+        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=True,
+        description=approval_description, connection_id=connection_id
+    )
 
 
-def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, connection_name,
-                                       rejection_description=None,
-                                       connection_id=None):  # pylint: disable=unused-argument
+def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+                                       rejection_description=None, connection_id=None):
     """Reject a private endpoint connection request for a Key Vault."""
 
-    PrivateEndpointConnection = cmd.get_models('PrivateEndpointConnection', resource_type=ResourceType.MGMT_KEYVAULT)
-    PrivateLinkServiceConnectionState = cmd.get_models('PrivateLinkServiceConnectionState',
-                                                       resource_type=ResourceType.MGMT_KEYVAULT)
-
-    private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                                             private_endpoint_connection_name=connection_name)
-
-    return client.put(resource_group_name=resource_group_name,
-                      vault_name=vault_name,
-                      private_endpoint_connection_name=connection_name,
-                      private_endpoint=private_endpoint_connection.private_endpoint,
-                      properties=PrivateEndpointConnection(
-                          tags=private_endpoint_connection.tags,
-                          location=private_endpoint_connection.location,
-                          private_link_service_connection_state=PrivateLinkServiceConnectionState(
-                              status='Rejected',
-                              description=rejection_description
-                          )
-                      ))
+    return _change_private_endpoint_connection_status(
+        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=False,
+        description=rejection_description, connection_id=connection_id
+    )
 # endregion

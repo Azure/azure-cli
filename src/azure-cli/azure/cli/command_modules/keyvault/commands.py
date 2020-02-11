@@ -86,10 +86,8 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection',
                          validator=validate_private_endpoint_connection_id)
-        g.custom_command('delete', 'delete_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-        g.custom_show_command('show', 'show_private_endpoint_connection',
-                              validator=validate_private_endpoint_connection_id)
+        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
 
     with self.command_group('keyvault private-link-resource',
                             kv_private_link_resources_sdk,

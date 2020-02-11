@@ -58,7 +58,8 @@ class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
         })
 
         _create_keyvault(self, self.kwargs)
-        self.cmd('keyvault private-link-resource show -n {kv}', checks=self.check('value[0].groupId', 'vault'))
+        self.cmd('keyvault private-link-resource show --vault-name {kv}',
+                 checks=self.check('value[0].groupId', 'vault'))
 
 
 class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
@@ -95,7 +96,9 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
         self.cmd('keyvault private-endpoint show --connection-id {kv_pe_id}',
                  checks=self.check('id', '{kv_pe_id}'))
         self.kwargs['kv_pe_name'] = self.kwargs['kv_pe_id'].split('/')[-1]
-        self.cmd('keyvault private-endpoint show -n {kv} --connection-name {kv_pe_name}',
+        self.cmd('keyvault private-endpoint show --vault-name {kv} --connection-name {kv_pe_name}',
+                 checks=self.check('name', '{kv_pe_name}'))
+        self.cmd('keyvault private-endpoint show --vault-name {kv} -n {kv_pe_name}',
                  checks=self.check('name', '{kv_pe_name}'))
 
         # Try running `set-policy` on the linked vault
@@ -111,21 +114,37 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
         self.cmd('keyvault private-endpoint reject --connection-id {kv_pe_id} '
                  '--rejection-description "{rejection_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
+                     self.check('provisioningState', 'Updating')
                  ])
 
         max_retries = 20
         retries = 0
         while self.cmd('keyvault private-endpoint show --connection-id {kv_pe_id}').\
                 get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            time.sleep(5)
+            if self.is_live:
+                time.sleep(5)
             retries += 1
 
-        self.cmd('keyvault private-endpoint approve -n {kv} --connection-name {kv_pe_name} '
+        self.cmd('keyvault private-endpoint show --connection-id {kv_pe_id}',
+                 checks=self.check('provisioningState', 'Succeeded'))
+
+        self.cmd('keyvault private-endpoint approve --vault-name {kv} --connection-name {kv_pe_name} '
                  '--approval-description "{approval_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Approved'),
-                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}')
+                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
+                     self.check('provisioningState', 'Updating')
                  ])
+
+        retries = 0
+        while self.cmd('keyvault private-endpoint show --connection-id {kv_pe_id}'). \
+                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
+            if self.is_live:
+                time.sleep(5)
+            retries += 1
+
+        self.cmd('keyvault private-endpoint show --connection-id {kv_pe_id}',
+                 checks=self.check('provisioningState', 'Succeeded'))
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
