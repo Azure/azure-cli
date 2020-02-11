@@ -1157,7 +1157,7 @@ def restore_storage_account(client, vault_base_url, file_path):
 
 
 # region private_endpoint
-def _change_private_endpoint_connection_status(cmd, client, resource_group_name, vault_name,
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, vault_name,
                                                private_endpoint_connection_name, is_approved=True, description=None,
                                                connection_id=None):  # pylint: disable=unused-argument
     PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
@@ -1181,7 +1181,7 @@ def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_
                                         approval_description=None, connection_id=None):
     """Approve a private endpoint connection request for a Key Vault."""
 
-    return _change_private_endpoint_connection_status(
+    return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=True,
         description=approval_description, connection_id=connection_id
     )
@@ -1191,7 +1191,7 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_n
                                        rejection_description=None, connection_id=None):
     """Reject a private endpoint connection request for a Key Vault."""
 
-    return _change_private_endpoint_connection_status(
+    return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=False,
         description=rejection_description, connection_id=connection_id
     )
