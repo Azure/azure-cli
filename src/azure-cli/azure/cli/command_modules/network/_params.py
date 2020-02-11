@@ -1176,7 +1176,6 @@ def load_arguments(self, _):
                    nargs='+',
                    help='Space-separated list of names for test group to reference as destination')
 
-
     # Argument Group for connection monitor V2 test configuration
     with self.argument_context('network watcher connection-monitor test-configuration',
                                min_api='2019-11-01') as c:
@@ -1251,6 +1250,17 @@ def load_arguments(self, _):
                             'List of property=value pairs to define HTTP headers.',
                        nargs='+',
                        action=NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction)
+
+    with self.argument_context('network watcher connection-monitor test-group', min_api='2019-11-01') as c:
+        c.argument('connection_monitor_name',
+                   options_list=['--connection-monitor'],
+                   help='Connection monitor name.')
+        c.argument('name',
+                   arg_type=name_arg_type,
+                   help='The name of the connection monitor test group')
+        c.argument('disable',
+                   help='Value indicating whether test group is disabled. false is default.',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('network watcher configure') as c:
         c.argument('locations', get_location_type(self.cli_ctx), options_list=['--locations', '-l'], nargs='+')
