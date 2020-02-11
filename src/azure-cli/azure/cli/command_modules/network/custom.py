@@ -3471,27 +3471,64 @@ def configure_network_watcher(cmd, client, locations, resource_group_name=None, 
     return client.list_all()
 
 
-def create_nw_connection_monitor(cmd, client, connection_monitor_name, watcher_rg, watcher_name,  # pylint: disable=unused-argument
-                                 source_resource, resource_group_name=None, source_port=None, location=None,
-                                 dest_resource=None, dest_port=None, dest_address=None,
-                                 tags=None, do_not_start=None, monitoring_interval=60):
-    ConnectionMonitor, ConnectionMonitorSource, ConnectionMonitorDestination = cmd.get_models(
-        'ConnectionMonitor', 'ConnectionMonitorSource', 'ConnectionMonitorDestination')
-    connection_monitor = ConnectionMonitor(
-        location=location,
-        tags=tags,
-        source=ConnectionMonitorSource(
-            resource_id=source_resource,
-            port=source_port
-        ),
-        destination=ConnectionMonitorDestination(
-            resource_id=dest_resource,
-            port=dest_port,
-            address=dest_address
-        ),
-        auto_start=not do_not_start,
-        monitoring_interval_in_seconds=monitoring_interval)
-    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+def create_nw_connection_monitor(cmd,
+                                 client,
+                                 connection_monitor_name,
+                                 watcher_rg,
+                                 watcher_name,
+                                 resource_group_name=None,
+                                 location=None,
+                                 source_resource=None,
+                                 source_port=None,
+                                 dest_resource=None,
+                                 dest_port=None,
+                                 dest_address=None,
+                                 tags=None,
+                                 do_not_start=None,
+                                 monitoring_interval=None,
+                                 endpoint_source_name=None,
+                                 endpoint_source_resource_id=None,
+                                 endpoint_source_address=None,
+                                 endpoint_dest_name=None,
+                                 endpoint_dest_resource_id=None,
+                                 endpoint_dest_address=None,
+                                 test_config_name=None,
+                                 test_config_frequency=None,
+                                 test_config_protocol=None,
+                                 test_config_preferred_ip_version=None,
+                                 test_config_threshold_failed_percent=None,
+                                 test_config_threshold_round_trip_time=None,
+                                 test_config_tcp_disable_trace_route=None,
+                                 test_config_tcp_port=None,
+                                 test_config_icmp_disable_trace_route=None,
+                                 test_config_http_port=None,
+                                 test_config_http_method=None,
+                                 test_config_http_path=None,
+                                 test_config_http_valid_status_codes=None,
+                                 test_config_http_prefer_https=None,
+                                 test_group_name=None,
+                                 test_group_disable=None,
+                                 output_type=None,
+                                 workspace_ids=None,
+                                 notes=None):
+    # ConnectionMonitor, ConnectionMonitorSource, ConnectionMonitorDestination = cmd.get_models(
+    #     'ConnectionMonitor', 'ConnectionMonitorSource', 'ConnectionMonitorDestination')
+    # connection_monitor = ConnectionMonitor(
+    #     location=location,
+    #     tags=tags,
+    #     source=ConnectionMonitorSource(
+    #         resource_id=source_resource,
+    #         port=source_port
+    #     ),
+    #     destination=ConnectionMonitorDestination(
+    #         resource_id=dest_resource,
+    #         port=dest_port,
+    #         address=dest_address
+    #     ),
+    #     auto_start=not do_not_start,
+    #     monitoring_interval_in_seconds=monitoring_interval)
+    # return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+    pass
 
 
 def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name=None,
