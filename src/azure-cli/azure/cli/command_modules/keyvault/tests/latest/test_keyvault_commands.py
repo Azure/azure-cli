@@ -82,7 +82,7 @@ class KeyVaultPrivateEndpointScenarioTest(ScenarioTest):
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
-        # Create a private point connection
+        # Create a private endpoint connection
         pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
                       '--connection-name {pe_connection} --private-connection-resource-id {kv_id} '
                       '--group-ids vault').get_output_in_json()
