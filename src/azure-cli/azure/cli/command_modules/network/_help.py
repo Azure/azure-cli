@@ -4780,6 +4780,10 @@ long-summary: >
 helps['network watcher connection-monitor create'] = """
 type: command
 short-summary: Create a connection monitor.
+long-summary: |
+  This extension allow to create V1 and V2 version of connection monitor.
+  V1 connection monitor supports single source and destination endpoint which comes with V1 argument groups as usual.
+  V2 connection monitor supports multiple endpoints and several test protocol which comes with V2 argument groups.
 parameters:
   - name: --source-resource
     short-summary: >
@@ -4792,6 +4796,17 @@ examples:
     text: |
         az network watcher connection-monitor create -g MyResourceGroup -n MyConnectionMonitorName \\
             --source-resource MyVM
+  - name: Create a V2 connection monitor
+    text: >
+      az network watcher connection-monitor create
+      --name MyV2ConnectionMonitor
+      --endpoint-source-name "vm01"
+      --endpoint-source-resource-id MyVM01ResourceID
+      --endpoint-dest-name bing
+      --endpoint-dest-address bing.com
+      --test-config-name TCPTestConfig
+      --protocol Tcp
+      --tcp-port 2048
 """
 
 helps['network watcher connection-monitor delete'] = """
