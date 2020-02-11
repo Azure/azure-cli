@@ -76,8 +76,13 @@ def list_express_route_circuits(cmd, resource_group_name=None):
 
 
 def create_express_route_auth(cmd, resource_group_name, circuit_name, authorization_name):
+    ExpressRouteCircuitAuthorization = cmd.get_models('ExpressRouteCircuitAuthorization')
+
     client = network_client_factory(cmd.cli_ctx).express_route_circuit_authorizations
-    return client.create_or_update(resource_group_name, circuit_name, authorization_name)
+    return client.create_or_update(resource_group_name,
+                                   circuit_name,
+                                   authorization_name,
+                                   ExpressRouteCircuitAuthorization())
 
 
 def list_lbs(cmd, resource_group_name=None):
