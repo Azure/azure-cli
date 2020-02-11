@@ -1869,6 +1869,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     # send the managed cluster representation to update the addon profiles
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
+
 def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None,
                       subnet_name=None, no_wait=False):
     instance = client.get(resource_group_name, name)
