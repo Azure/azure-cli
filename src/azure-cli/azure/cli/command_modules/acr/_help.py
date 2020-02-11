@@ -257,11 +257,14 @@ examples:
 helps['acr login'] = """
 type: command
 short-summary: Log in to an Azure Container Registry through the Docker CLI.
-long-summary: Docker must be installed on your machine. Once done, use 'docker logout <registry url>' to log out.
+long-summary: Docker must be installed on your machine. Once done, use 'docker logout <registry url>' to log out. (If you only need an access token and do not want to install Docker, specify '--expose-token')
 examples:
   - name: Log in to an Azure Container Registry
     text: >
         az acr login -n MyRegistry
+  - name: Get an Azure Container Registry access token
+    text: >
+        az acr login -n MyRegistry --expose-token
 """
 
 helps['acr network-rule'] = """
@@ -892,6 +895,48 @@ examples:
   - name: Update an existing run to be archived.
     text: >
         az acr task update-run -r MyRegistry --run-id runId --no-archive false
+"""
+
+helps['acr taskrun'] = """
+type: group
+short-summary: Manage taskruns using Azure Container Registries.
+"""
+
+
+helps['acr taskrun delete'] = """
+type: command
+short-summary: Delete a taskrun from an Azure Container Registry.
+examples:
+  - name: Delete a taskrun from an Azure Container Registry.
+    text: >
+        az acr taskrun delete -r MyRegistry -n MyTaskRun -g MyResourceGroup
+"""
+
+helps['acr taskrun list'] = """
+type: command
+short-summary: List the taskruns for an Azure Container Registry.
+examples:
+  - name: List taskruns and show the results in a table.
+    text: >
+        az acr taskrun list -r MyRegistry -g MyResourceGroup -o table
+"""
+
+helps['acr taskrun show'] = """
+type: command
+short-summary: Get the properties of a named taskrun for an Azure Container Registry.
+examples:
+  - name: Get the properties of a taskrun, displaying the results in a table.
+    text: >
+        az acr taskrun show -r MyRegistry -n MyTaskRun -o table
+"""
+
+helps['acr taskrun logs'] = """
+type: command
+short-summary: Show run logs for a particular taskrun.
+examples:
+  - name: Show run logs for a particular taskrun.
+    text: >
+        az acr taskrun logs -r MyRegistry -n MyTaskRun
 """
 
 helps['acr token'] = """

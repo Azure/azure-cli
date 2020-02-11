@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from enum import Enum
 
 from argcomplete.completers import FilesCompleter
 
@@ -30,7 +31,7 @@ from ._validators import (
 # CUSTOM CHOICE LISTS
 
 secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_values
-certificate_format_values = ['PEM', 'DER']
+key_format_values = certificate_format_values = ['PEM', 'DER']
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
@@ -40,6 +41,17 @@ def load_arguments(self, _):
          'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
          resource_type=ResourceType.DATA_KEYVAULT)
+
+    class CLIJsonWebKeyOperation(str, Enum):
+        encrypt = "encrypt"
+        decrypt = "decrypt"
+        sign = "sign"
+        verify = "verify"
+        wrap_key = "wrapKey"
+        unwrap_key = "unwrapKey"
+        import_ = "import"
+
+    JsonWebKeyOperation = CLIJsonWebKeyOperation  # TODO: Remove this patch when new SDK is released
 
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions,
      NetworkRuleBypassOptions, NetworkRuleAction) = self.get_models(
@@ -114,7 +126,7 @@ def load_arguments(self, _):
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
             c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
 
-        for cmd in ['backup', 'delete', 'download', 'set-attributes', 'show']:
+        for cmd in ['backup', 'delete', 'download', 'list-versions', 'set-attributes', 'show']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 try:
                     c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
@@ -138,7 +150,8 @@ def load_arguments(self, _):
 
     # region keys
     with self.argument_context('keyvault key') as c:
-        c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*', help='Space-separated list of permitted JSON web key operations.')
+        c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*',
+                   help='Space-separated list of permitted JSON web key operations.')
 
     for scope in ['keyvault key create', 'keyvault key import']:
         with self.argument_context(scope) as c:
@@ -159,6 +172,10 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local file path in which to store key backup.')
+
+    with self.argument_context('keyvault key download') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the key contents.')
+        c.argument('encoding', arg_type=get_enum_type(key_format_values), options_list=['--encoding', '-e'], help='Encoding of the key, default: PEM', default='PEM')
 
     with self.argument_context('keyvault key restore') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local key backup from which to restore key.')

@@ -76,8 +76,13 @@ def list_express_route_circuits(cmd, resource_group_name=None):
 
 
 def create_express_route_auth(cmd, resource_group_name, circuit_name, authorization_name):
+    ExpressRouteCircuitAuthorization = cmd.get_models('ExpressRouteCircuitAuthorization')
+
     client = network_client_factory(cmd.cli_ctx).express_route_circuit_authorizations
-    return client.create_or_update(resource_group_name, circuit_name, authorization_name)
+    return client.create_or_update(resource_group_name,
+                                   circuit_name,
+                                   authorization_name,
+                                   ExpressRouteCircuitAuthorization())
 
 
 def list_lbs(cmd, resource_group_name=None):
@@ -150,7 +155,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     tags = tags or {}
     sku_tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
-    http_listener_protocol = 'https' if cert_data else 'http'
+    http_listener_protocol = 'https' if (cert_data or key_vault_secret_id) else 'http'
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     virtual_network_name = virtual_network_name or '{}Vnet'.format(application_gateway_name)
 
@@ -1945,6 +1950,8 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
+        logger.warning("The record set doesn't exist and is automatically created. "
+                       "In the future, an extra argument will be supported to confirm this auto creation.")
         RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
         record_set = RecordSet()
 
@@ -2452,7 +2459,8 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
                                 private_ip_address_version=None,
                                 virtual_network_name=None, public_ip_address=None,
                                 location=None, tags=None, load_balancer_name=None,
-                                visibility=None, auto_approval=None, fqdns=None):
+                                visibility=None, auto_approval=None, fqdns=None,
+                                enable_proxy_protocol=None):
     client = network_client_factory(cmd.cli_ctx).private_link_services
     FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
         cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
@@ -2474,13 +2482,14 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
         visbility=visibility,
         auto_approval=auto_approval,
         fqdns=fqdns,
-        tags=tags
+        tags=tags,
+        enable_proxy_protocol=enable_proxy_protocol
     )
     return client.create_or_update(resource_group_name, service_name, link_service)
 
 
 def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
-                                visibility=None, auto_approval=None, fqdns=None):
+                                visibility=None, auto_approval=None, fqdns=None, enable_proxy_protocol=None):
     FrontendIPConfiguration = cmd.get_models('FrontendIPConfiguration')
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
@@ -2490,6 +2499,7 @@ def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurat
         c.set_param('visibility', visibility)
         c.set_param('auto_approval', auto_approval)
         c.set_param('fqdns', fqdns)
+        c.set_param('enable_proxy_protocol', enable_proxy_protocol)
     return instance
 
 
@@ -2508,7 +2518,7 @@ def update_private_endpoint_connection(cmd, resource_group_name, service_name, p
     connection_state = PrivateLinkServiceConnectionState(
         status=connection_status,
         description=description,
-        action_required=action_required
+        actions_required=action_required
     )
     pe_connection = PrivateEndpointConnection(
         private_link_service_connection_state=connection_state

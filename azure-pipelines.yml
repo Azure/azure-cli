@@ -8,6 +8,20 @@ trigger:
     - '*'
 
 jobs:
+- job: CheckPullRequestTitle
+  displayName: "Check the Format of Pull Request Title"
+  condition: and(succeeded(), in(variables['System.PullRequest.TargetBranch'], 'dev', 'release'))
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - bash: |
+        echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
+        title=$(curl https://api.github.com/repos/Azure/azure-cli/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+        [[ $title =~ ^(\[.*\]|\{.*\}).* ]] && exit 0
+        echo "Pull Request title should follow https://aka.ms/submitAzPR"
+        exit 1
+
 - job: RejectPullRequestToMasterBranch
   displayName: "Reject Pull Request To Master Branch"
   condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'master'))
@@ -21,31 +35,23 @@ jobs:
 
 - job: CredScan
   displayName: "Credential Scan"
-
   pool:
     vmImage: "windows-2019"
   steps:
-  - task: CredScan@2
-    inputs:
-      toolMajorVersion: 'V2'
-      suppressionsFile: ./scripts/ci/credscan/CredScanSuppressions.json
-
-  - task: PostAnalysis@1
-    inputs:
-      AllTools: false
-      APIScan: false
-      BinSkim: false
-      CodesignValidation: false
-      CredScan: true
-      FortifySCA: false
-      FxCop: false
-      ModernCop: false
-      PoliCheck: false
-      RoslynAnalyzers: false
-      SDLNativeRules: false
-      Semmle: false
-      TSLint: false
-      ToolLogsNotFoundAction: 'Standard'
+    - task: ms-codeanalysis.vss-microsoft-security-code-analysis.build-task-credscan.CredScan@2
+      displayName: 'CredScan'
+      inputs:
+        toolVersion: 'Latest'
+        suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
+    - task: ms-codeanalysis.vss-microsoft-security-code-analysis.build-task-postanalysis.PostAnalysis@1
+      displayName: 'Post Analysis'
+      inputs:
+        AllTools: false
+        BinSkim: false
+        CredScan: true
+        RoslynAnalyzers: false
+        TSLint: false
+        ToolLogsNotFoundAction: 'Standard'
 
 - job: ExtractMetadata
   displayName: Extract Metadata
