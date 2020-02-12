@@ -1229,7 +1229,9 @@ def process_nw_cm_v2_create_namespace(cmd, namespace):
         if namespace.location is None:
             raise CLIError("Can not get location from --endpoint-source-resource-id")
 
-    v2_required_parameter_set = ['endpoint_source_name', 'endpoint_dest_name', 'test_config_name']
+    v2_required_parameter_set = [
+        'endpoint_source_resource_id', 'endpoint_source_name', 'endpoint_dest_name', 'test_config_name'
+    ]
     for p in v2_required_parameter_set:
         if not hasattr(namespace, p) or getattr(namespace, p) is None:
             raise CLIError(

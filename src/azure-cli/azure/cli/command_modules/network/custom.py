@@ -3524,23 +3524,29 @@ def create_nw_connection_monitor(cmd,
     ]
 
     if any(v1_required_parameter_set):  # V1 creation
-        raise CLIError('Will implement soon')
-        # connection_monitor = _create_nw_connection_monitor_v1(cmd,
-        #                                                       connection_monitor_name,
-        #                                                       watcher_rg,
-        #                                                       watcher_name,
-        #                                                       source_resource,
-        #                                                       resource_group_name,
-        #                                                       source_port,
-        #                                                       location,
-        #                                                       dest_resource,
-        #                                                       dest_port,
-        #                                                       dest_address,
-        #                                                       tags,
-        #                                                       do_not_start,
-        #                                                       monitoring_interval)
-        # from ._client_factory import cf_nw_connection_monitor_v1
-        # client = cf_nw_connection_monitor_v1(cmd.cli_ctx).connection_monitors  # overwrite to use 2019-06-01 API
+        connection_monitor = _create_nw_connection_monitor_v1(cmd,
+                                                              connection_monitor_name,
+                                                              watcher_rg,
+                                                              watcher_name,
+                                                              source_resource,
+                                                              resource_group_name,
+                                                              source_port,
+                                                              location,
+                                                              dest_resource,
+                                                              dest_port,
+                                                              dest_address,
+                                                              tags,
+                                                              do_not_start,
+                                                              monitoring_interval)
+        # from azure.cli.core.profiles import ResourceType
+        # from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        # client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK, api_version='2019-06-01').connection_monitors
+
+        from azure.cli.core.profiles import ResourceType
+        from azure.cli.core.commands.client_factory import get_mgmt_service_client
+        client = get_mgmt_service_client(cmd.cli_ctx,
+                                         ResourceType.MGMT_NETWORK,
+                                         api_version='2019-06-01').connection_monitors
     elif any(v2_required_parameter_set):  # V2 creation
         connection_monitor = _create_nw_connection_monitor_v2(cmd,
                                                               location,

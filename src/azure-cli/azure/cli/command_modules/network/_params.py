@@ -45,6 +45,7 @@ from azure.cli.core.util import get_json_object
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
+    from azure.cli.core.profiles import ResourceType
 
     (Access, ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol, AuthenticationMethod,
@@ -67,7 +68,8 @@ def load_arguments(self, _):
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType',
          'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState',
          'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
-         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType')
+         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType',
+        operation_group=ResourceType.MGMT_NETWORK)
 
     if self.supported_api_version(min_api='2018-02-01'):
         ExpressRoutePeeringType = self.get_models('ExpressRoutePeeringType')
