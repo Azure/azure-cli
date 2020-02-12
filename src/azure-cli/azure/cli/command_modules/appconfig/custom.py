@@ -79,7 +79,7 @@ def update_configstore(cmd,
         key_vault_properties = KeyVaultProperties()
         if encryption_key_name:
             # key identifier schema https://keyvaultname.vault-int.azure-int.net/keys/keyname/keyversion
-            key_identifier = "{}/keys/{}/{}".format(encryption_key_vault, encryption_key_name, encryption_key_version if encryption_key_version else "")
+            key_identifier = "{}/keys/{}/{}".format(encryption_key_vault.strip('/'), encryption_key_name, encryption_key_version if encryption_key_version else "")
             key_vault_properties = KeyVaultProperties(key_identifier=key_identifier, identity_client_id=identity_client_id)
 
         update_params.encryption = EncryptionProperties(key_vault_properties=key_vault_properties)
