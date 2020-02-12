@@ -79,7 +79,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', sku)])
 
         keyvault_name = self.create_random_name(prefix='MgmtTestKeyVault', length=24)
-        encryption_key = 'cmkkey'
+        encryption_key = self.create_random_name(prefix='EncryptionKey', length=24)
         system_assigned_identity_id = store['identity']['principalId']
         self.kwargs.update({
             'encryption_key': encryption_key,
@@ -95,12 +95,12 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
         self.cmd('appconfig update -n {config_store_name} -g {rg} --encryption-key-name {encryption_key} --encryption-key-vault {keyvault_uri}',
                  checks=[self.check('name', '{config_store_name}'),
-                 self.check('location', '{rg_loc}'),
-                 self.check('resourceGroup', resource_group),
-                 self.check('tags', structered_tag),
-                 self.check('provisioningState', 'Succeeded'),
-                 self.check('sku.name', sku),
-                 self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('tags', structered_tag),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
@@ -1421,7 +1421,7 @@ def _create_user_assigned_identity(test, kwargs):
 
 def _setup_key_vault(test, kwargs):
     key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-purge-protection --enable-soft-delete').get_output_in_json()
-    test.cmd('keyvault key create -n {encryption_key} --vault-name {keyvault_name}').get_output_in_json()
+    test.cmd('keyvault key create --vault-name {keyvault_name} -n {encryption_key}')
     test.cmd('keyvault set-policy -n {keyvault_name} --key-permissions get wrapKey unwrapKey --object-id {identity_id}')
 
     return key_vault
