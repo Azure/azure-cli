@@ -1010,6 +1010,9 @@ class PolicyScenarioTest(ScenarioTest):
             'em': 'DoNotEnforce'
         })
 
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('policy assignment create --policy \'test/error_policy\' -n {pan} -g {rg} --location {location} --assign-identity --enforcement-mode {em}')
+
         # create a policy assignment with managed identity using a built in policy definition
         assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --assign-identity --enforcement-mode {em}', checks=[
             self.check('name', '{pan}'),
