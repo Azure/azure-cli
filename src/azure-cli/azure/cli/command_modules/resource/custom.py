@@ -646,7 +646,15 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
     except (CloudError, HttpOperationError) as ex:
         status_code = ex.status_code if isinstance(ex, CloudError) else ex.response.status_code
         if status_code == 404:
-            return policy_operations.get_built_in(name)
+            try:
+                return policy_operations.get_built_in(name)
+            except CloudError as ex2:
+                # When the `--policy` parameter is neither a valid policy definition name nor conforms to the policy definition id format,
+                # an exception of "AuthorizationFailed" will be reported to mislead customers.
+                # So we need to modify the exception information thrown here.
+                if ex2.status_code == 403 and ex2.error and ex2.error.error == 'AuthorizationFailed':
+                    raise IncorrectUsageError('\'--policy\' should be a valid name or id of the policy definition')
+                raise ex2
         raise
 
 
