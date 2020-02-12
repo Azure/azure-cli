@@ -15,7 +15,7 @@ from copy import deepcopy
 
 from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import \
-    (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit)
+    (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
                                      ServicePrincipalAuth, _AUTH_CTX_FACTORY)
@@ -33,10 +33,48 @@ class TestProfile(unittest.TestCase):
         cls.id1 = 'subscriptions/1'
         cls.display_name1 = 'foo account'
         cls.state1 = SubscriptionState.enabled
+        cls.managed_by_tenants = [ManagedByTenantStub('00000003-0000-0000-0000-000000000000'),
+                                  ManagedByTenantStub('00000004-0000-0000-0000-000000000000')]
+        # Dummy Subscription from SDK azure.mgmt.resource.subscriptions.v2019_06_01.operations._subscriptions_operations.SubscriptionsOperations.list
+        # tenant_id denotes home tenant
+        # Must be deepcopied before used as mock_arm_client.subscriptions.list.return_value
+        cls.subscription1_raw = SubscriptionStub(cls.id1,
+                                                 cls.display_name1,
+                                                 cls.state1,
+                                                 tenant_id=cls.tenant_id,
+                                                 managed_by_tenants=cls.managed_by_tenants)
+        # Dummy result of azure.cli.core._profile.SubscriptionFinder._find_using_specific_tenant
+        # home_tenant_id is mapped from tenant_id
+        # tenant_id denotes token tenant
         cls.subscription1 = SubscriptionStub(cls.id1,
                                              cls.display_name1,
                                              cls.state1,
-                                             cls.tenant_id)
+                                             tenant_id=cls.tenant_id,
+                                             managed_by_tenants=cls.managed_by_tenants,
+                                             home_tenant_id=cls.tenant_id)
+        # Dummy result of azure.cli.core._profile.Profile._normalize_properties
+        cls.subscription1_normalized = {
+            'environmentName': 'AzureCloud',
+            'id': '1',
+            'name': cls.display_name1,
+            'state': cls.state1.value,
+            'user': {
+                'name': cls.user1,
+                'type': 'user'
+            },
+            'isDefault': False,
+            'tenantId': cls.tenant_id,
+            'homeTenantId': cls.tenant_id,
+            'managedByTenants': [
+                {
+                    "tenantId": "00000003-0000-0000-0000-000000000000"
+                },
+                {
+                    "tenantId": "00000004-0000-0000-0000-000000000000"
+                }
+            ],
+        }
+
         cls.raw_token1 = 'some...secrets'
         cls.token_entry1 = {
             "_clientId": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
@@ -56,10 +94,29 @@ class TestProfile(unittest.TestCase):
         cls.id2 = 'subscriptions/2'
         cls.display_name2 = 'bar account'
         cls.state2 = SubscriptionState.past_due
+        cls.subscription2_raw = SubscriptionStub(cls.id2,
+                                                 cls.display_name2,
+                                                 cls.state2,
+                                                 tenant_id=cls.tenant_id)
         cls.subscription2 = SubscriptionStub(cls.id2,
                                              cls.display_name2,
                                              cls.state2,
-                                             cls.tenant_id)
+                                             tenant_id=cls.tenant_id,
+                                             home_tenant_id=cls.tenant_id)
+        cls.subscription2_normalized = {
+            'environmentName': 'AzureCloud',
+            'id': '2',
+            'name': cls.display_name2,
+            'state': cls.state2.value,
+            'user': {
+                'name': cls.user2,
+                'type': 'user'
+            },
+            'isDefault': False,
+            'tenantId': cls.tenant_id,
+            'homeTenantId': cls.tenant_id,
+            'managedByTenants': [],
+        }
         cls.test_msi_tenant = '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a'
         cls.test_msi_access_token = ('eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1'
                                      'USIsImtpZCI6IlZXVkljMVdEMVRrc2JiMzAxc2FzTTVrT3E1USJ9.eyJhdWQiOiJodHRwczovL21hbmF'
@@ -91,18 +148,7 @@ class TestProfile(unittest.TestCase):
         consolidated = profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
-        expected = {
-            'environmentName': 'AzureCloud',
-            'id': '1',
-            'name': self.display_name1,
-            'state': self.state1.value,
-            'user': {
-                'name': self.user1,
-                'type': 'user'
-            },
-            'isDefault': False,
-            'tenantId': self.tenant_id
-        }
+        expected = self.subscription1_normalized
         self.assertEqual(expected, consolidated[0])
         # verify serialization works
         self.assertIsNotNone(json.dumps(consolidated[0]))
@@ -112,7 +158,7 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': None}
         test_display_name = 'sub' + chr(255)
         polished_display_name = 'sub?'
-        test_subscription = SubscriptionStub('sub1',
+        test_subscription = SubscriptionStub('subscriptions/sub1',
                                              test_display_name,
                                              SubscriptionState.enabled,
                                              'tenant1')
@@ -127,7 +173,7 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': None}
         test_display_name = None
         polished_display_name = ''
-        test_subscription = SubscriptionStub('sub1',
+        test_subscription = SubscriptionStub('subscriptions/sub1',
                                              test_display_name,
                                              SubscriptionState.enabled,
                                              'tenant1')
@@ -150,18 +196,9 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(len(storage_mock['subscriptions']), 1)
         subscription1 = storage_mock['subscriptions'][0]
-        self.assertEqual(subscription1, {
-            'environmentName': 'AzureCloud',
-            'id': '1',
-            'name': self.display_name1,
-            'state': self.state1.value,
-            'user': {
-                'name': self.user1,
-                'type': 'user'
-            },
-            'isDefault': True,
-            'tenantId': self.tenant_id
-        })
+        subscription1_is_default = deepcopy(self.subscription1_normalized)
+        subscription1_is_default['isDefault'] = True
+        self.assertEqual(subscription1, subscription1_is_default)
 
         # add the second and verify
         consolidated = profile._normalize_properties(self.user2,
@@ -171,18 +208,9 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(len(storage_mock['subscriptions']), 2)
         subscription2 = storage_mock['subscriptions'][1]
-        self.assertEqual(subscription2, {
-            'environmentName': 'AzureCloud',
-            'id': '2',
-            'name': self.display_name2,
-            'state': self.state2.value,
-            'user': {
-                'name': self.user2,
-                'type': 'user'
-            },
-            'isDefault': True,
-            'tenantId': self.tenant_id
-        })
+        subscription2_is_default = deepcopy(self.subscription2_normalized)
+        subscription2_is_default['isDefault'] = True
+        self.assertEqual(subscription2, subscription2_is_default)
 
         # verify the old one stays, but no longer active
         self.assertEqual(storage_mock['subscriptions'][0]['name'],
@@ -293,7 +321,7 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
 
         storage_mock = {'subscriptions': []}
@@ -362,7 +390,7 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
         cli = DummyCli()
         mock_arm_client = mock.MagicMock()
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
 
         storage_mock = {'subscriptions': []}
@@ -931,7 +959,7 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
         # action
@@ -996,7 +1024,7 @@ class TestProfile(unittest.TestCase):
         class ClientStub:
             def __init__(self, *args, **kwargs):
                 self.subscriptions = mock.MagicMock()
-                self.subscriptions.list.return_value = [TestProfile.subscription1]
+                self.subscriptions.list.return_value = [deepcopy(TestProfile.subscription1_raw)]
                 self.config = mock.MagicMock()
                 self._client = mock.MagicMock()
 
@@ -1072,7 +1100,7 @@ class TestProfile(unittest.TestCase):
         class ClientStub:
             def __init__(self, *args, **kwargs):
                 self.subscriptions = mock.MagicMock()
-                self.subscriptions.list.return_value = [TestProfile.subscription1]
+                self.subscriptions.list.return_value = [deepcopy(TestProfile.subscription1_raw)]
                 self.config = mock.MagicMock()
                 self._client = mock.MagicMock()
 
@@ -1159,7 +1187,7 @@ class TestProfile(unittest.TestCase):
         class ClientStub:
             def __init__(self, *args, **kwargs):
                 self.subscriptions = mock.MagicMock()
-                self.subscriptions.list.return_value = [TestProfile.subscription1]
+                self.subscriptions.list.return_value = [deepcopy(TestProfile.subscription1_raw)]
                 self.config = mock.MagicMock()
                 self._client = mock.MagicMock()
 
@@ -1205,7 +1233,7 @@ class TestProfile(unittest.TestCase):
         mock_acquire_token.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         cli.cloud.endpoints.active_directory = TEST_ADFS_AUTH_URL
         finder = SubscriptionFinder(cli, _AUTH_CTX_FACTORY, None, lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
@@ -1242,7 +1270,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.side_effect = lambda: just_raise(
             ValueError("'tenants.list' should not occur"))
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         # action
         subs = finder.find_from_user_account(self.user1, 'bar', self.tenant_id, 'http://someresource')
@@ -1258,7 +1286,7 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token_with_device_code.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
         # action
@@ -1280,7 +1308,7 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         token_cache = adal.TokenCache()
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
         _get_authorization_code_mock.return_value = {
@@ -1314,7 +1342,7 @@ class TestProfile(unittest.TestCase):
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.side_effect = lambda: just_raise(
             ValueError("'tenants.list' should not occur"))
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         # action
         subs = finder.find_through_interactive_flow(self.tenant_id, 'http://someresource')
@@ -1327,7 +1355,7 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         mock_auth_context.acquire_token_with_client_credentials.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
         # action
@@ -1346,7 +1374,7 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         mock_auth_context.acquire_token_with_client_certificate.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
 
@@ -1369,7 +1397,7 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         mock_auth_context.acquire_token_with_client_certificate.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
-        mock_arm_client.subscriptions.list.return_value = [self.subscription1]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         mgmt_resource = 'https://management.core.windows.net/'
 
@@ -1402,7 +1430,7 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token.return_value = self.token_entry1
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
-        mock_arm_client.subscriptions.list.return_value = deepcopy([self.subscription1, self.subscription2])
+        mock_arm_client.subscriptions.list.return_value = deepcopy([self.subscription1_raw, self.subscription2_raw])
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: mock_arm_client)
         # action
         profile.refresh_accounts(finder)
@@ -1742,6 +1770,51 @@ class TestProfile(unittest.TestCase):
         r = profile.auth_ctx_factory(cli, 'common', None)
         self.assertEqual(r.authority.url, aad_url + '/common')
 
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
+    def test_find_using_common_tenant(self, _get_authorization_code_mock, mock_auth_context):
+        """When a subscription can be listed by multiple tenants, only the first appearance is retained
+        """
+        import adal
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        tenant2 = "00000002-0000-0000-0000-000000000000"
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id), TenantStub(tenant2)]
+
+        # same subscription but listed from another tenant
+        subscription2_raw = SubscriptionStub(self.id1, self.display_name1, self.state1, self.tenant_id)
+        mock_arm_client.subscriptions.list.side_effect = [[deepcopy(self.subscription1_raw)], [subscription2_raw]]
+
+        mgmt_resource = 'https://management.core.windows.net/'
+        token_cache = adal.TokenCache()
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
+        all_subscriptions = finder._find_using_common_tenant(access_token="token1", resource=mgmt_resource)
+
+        self.assertEqual(len(all_subscriptions), 1)
+        self.assertEqual(all_subscriptions[0].tenant_id, self.tenant_id)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
+    def test_find_using_specific_tenant(self, _get_authorization_code_mock, mock_auth_context):
+        """ Test tenant_id -> home_tenant_id mapping and token tenant attachment
+        """
+        import adal
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        token_tenant = "00000001-0000-0000-0000-000000000000"
+        home_tenant = "00000002-0000-0000-0000-000000000000"
+
+        subscription_raw = SubscriptionStub(self.id1, self.display_name1, self.state1, tenant_id=home_tenant)
+        mock_arm_client.subscriptions.list.return_value = [subscription_raw]
+
+        token_cache = adal.TokenCache()
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
+        all_subscriptions = finder._find_using_specific_tenant(tenant=token_tenant, access_token="token1")
+
+        self.assertEqual(len(all_subscriptions), 1)
+        self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
+        self.assertEqual(all_subscriptions[0].home_tenant_id, home_tenant)
+
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
@@ -1757,14 +1830,27 @@ class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 
 class SubscriptionStub(Subscription):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, id, display_name, state, tenant_id):  # pylint: disable=redefined-builtin
+    def __init__(self, id, display_name, state, tenant_id, managed_by_tenants=[], home_tenant_id=None):  # pylint: disable=redefined-builtin
         policies = SubscriptionPolicies()
         policies.spending_limit = SpendingLimit.current_period_off
         policies.quota_id = 'some quota'
         super(SubscriptionStub, self).__init__(subscription_policies=policies, authorization_source='some_authorization_source')
         self.id = id
+        self.subscription_id = id.split('/')[1]
         self.display_name = display_name
         self.state = state
+        # for a SDK Subscription, tenant_id means home tenant id
+        # for a _find_using_specific_tenant Subscription, tenant_id means token tenant id
+        self.tenant_id = tenant_id
+        self.managed_by_tenants = managed_by_tenants
+        # if home_tenant_id is None, this denotes a Subscription from SDK
+        if home_tenant_id:
+            self.home_tenant_id = home_tenant_id
+
+
+class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-methods
+
+    def __init__(self, tenant_id):  # pylint: disable=redefined-builtin
         self.tenant_id = tenant_id
 
 

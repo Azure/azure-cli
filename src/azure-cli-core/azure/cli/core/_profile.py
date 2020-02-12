@@ -34,7 +34,12 @@ logger = get_logger(__name__)
 _IS_DEFAULT_SUBSCRIPTION = 'isDefault'
 _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
+# Tenant of the token which is used to list the subscription
 _TENANT_ID = 'tenantId'
+# Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'
+# https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+_HOME_TENANT_ID = 'homeTenantId'
+_MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
 _CLOUD_SHELL_ID = 'cloudShellID'
@@ -248,7 +253,7 @@ class Profile(object):
             except (UnicodeEncodeError, UnicodeDecodeError):  # mainly for Python 2.7 with ascii as the default encoding
                 display_name = re.sub(r'[^\x00-\x7f]', lambda x: '?', display_name)
 
-            consolidated.append({
+            subscription_dict = {
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
                 _SUBSCRIPTION_NAME: display_name,
                 _STATE: s.state.value,
@@ -259,7 +264,15 @@ class Profile(object):
                 _IS_DEFAULT_SUBSCRIPTION: False,
                 _TENANT_ID: s.tenant_id,
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
-            })
+            }
+            # for Subscriptions - List REST API 2019-06-01's subscription account
+            if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
+                if hasattr(s, 'home_tenant_id'):
+                    subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
+                if hasattr(s, 'managed_by_tenants'):
+                    subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
+
+            consolidated.append(subscription_dict)
 
             if cert_sn_issuer_auth:
                 consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
@@ -866,7 +879,21 @@ class SubscriptionFinder(object):
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,
                 temp_credentials[_ACCESS_TOKEN])
-            all_subscriptions.extend(subscriptions)
+
+            # When a subscription can be listed by multiple tenants, only the first appearance is retained
+            for sub_to_add in subscriptions:
+                add_sub = True
+                for sub_to_compare in all_subscriptions:
+                    if sub_to_add.subscription_id == sub_to_compare.subscription_id:
+                        logger.warning("Subscription %s '%s' can be accessed from tenants %s(default) and %s. "
+                                       "To select a specific tenant when accessing this subscription, "
+                                       "please include --tenant in 'az login'.",
+                                       sub_to_add.subscription_id, sub_to_add.display_name,
+                                       sub_to_compare.tenant_id, sub_to_add.tenant_id)
+                        add_sub = False
+                        break
+                if add_sub:
+                    all_subscriptions.append(sub_to_add)
 
         return all_subscriptions
 
@@ -878,6 +905,9 @@ class SubscriptionFinder(object):
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
+            # map tenantId from REST API to homeTenantId
+            if hasattr(s, "tenant_id"):
+                setattr(s, 'home_tenant_id', s.tenant_id)
             setattr(s, 'tenant_id', tenant)
             all_subscriptions.append(s)
         self.tenants.append(tenant)
