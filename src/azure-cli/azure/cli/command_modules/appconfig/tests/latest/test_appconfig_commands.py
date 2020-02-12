@@ -78,8 +78,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku)])
 
-        keyvault_name = self.create_random_name(prefix='MgmtTestKeyVault', length=24)
-        encryption_key = self.create_random_name(prefix='EncryptionKey', length=24)
+        keyvault_name = self.create_random_name(prefix='cmk-test-keyvault', length=24)
+        encryption_key = 'key'
         system_assigned_identity_id = store['identity']['principalId']
         self.kwargs.update({
             'encryption_key': encryption_key,
