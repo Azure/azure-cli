@@ -52,6 +52,8 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
         matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', scope)
         if matched:
             subscription_id = matched.groupdict()['subscription']
+        else:
+            raise CLIError("{} does not contain subscription Id.".format(scope))
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
 
 
