@@ -2301,8 +2301,9 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    os_type=None, functions_version=None, runtime=None, runtime_version=None, consumption_plan_location=None,
-                    app_insights=None, app_insights_key=None, disable_app_insights=None, deployment_source_url=None,
+                    os_type=None, functions_version=None, runtime=None, runtime_version=None,
+                    consumption_plan_location=None, app_insights=None, app_insights_key=None,
+                    disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
                     deployment_container_image_name=None, tags=None):
@@ -2393,12 +2394,15 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                 if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version].keys():
                     raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
         if deployment_container_image_name is None:
-            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, functions_version, runtime, runtime_version)
+            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption,
+                                                                     functions_version,
+                                                                     runtime,
+                                                                     runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
-                                                  value=_get_functions_extension_version_functionapp(functions_version)))
+                                                  value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION',
@@ -2455,7 +2459,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     return functionapp
 
 
-def _get_functions_extension_version_functionapp(functions_version):
+def _get_extension_version_functionapp(functions_version):
     if functions_version is not None:
         return '~{}'.format(functions_version)
     return '~2'
