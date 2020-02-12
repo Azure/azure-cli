@@ -379,6 +379,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import BlobRangeAddAction
         c.argument('blob_ranges', options_list=['--blob-range', '-r'], action=BlobRangeAddAction, nargs='+')
+        c.argument('time_to_restore', options_list=['--time-to-restore', '-t'])
 
     with self.argument_context('storage blob update') as c:
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
