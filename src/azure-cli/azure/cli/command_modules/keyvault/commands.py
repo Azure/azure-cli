@@ -77,7 +77,7 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_network_rule')
         g.custom_command('list', 'list_network_rules')
 
-    with self.command_group('keyvault private-endpoint',
+    with self.command_group('keyvault private-endpoint-connection',
                             kv_private_endpoint_connections_sdk,
                             min_api='2018-02-14',
                             client_factory=keyvault_client_private_endpoint_connections_factory,
