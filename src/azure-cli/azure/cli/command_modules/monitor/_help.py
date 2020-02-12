@@ -1201,3 +1201,9 @@ examples:
         az monitor metrics list-definitions --resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Network/networkSecurityGroups/ADDS-NSG
     crafted: true
 """
+
+helps['monitor clone'] = """
+type: command
+short-summary: Clone alert rules from one resource to another.
+long-summary: Due to the service limitation, this command would only clone the alert rules in the current subscription.
+"""
