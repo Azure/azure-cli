@@ -7,6 +7,10 @@ Release History
 
 * az ams is now GA.
 
+**SQL**
+
+* Update SQL Managed Instance cmdlet `az sql mi update` with two new parameters: tier and family.
+
 2.0.81
 ++++++
 
