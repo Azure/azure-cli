@@ -376,6 +376,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
 
+    with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
+        from ._validators import BlobRangeAddAction
+        c.argument('blob_ranges', options_list=['--blob-range', '-r'], action=BlobRangeAddAction, nargs='+')
+
     with self.argument_context('storage blob update') as c:
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=True)

@@ -5,6 +5,10 @@
 
 # pylint: disable=protected-access
 
+import argparse
+
+from knack.util import CLIError
+
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -1159,3 +1163,21 @@ def validator_delete_retention_days(namespace):
         if namespace.delete_retention_days > 365:
             raise ValueError(
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
+
+
+# pylint: disable=too-few-public-methods
+class BlobRangeAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.blob_ranges:
+            namespace.blob_ranges = []
+        if isinstance(values, list):
+            values = ' '.join(values)
+        BlobRange = namespace._cmd.get_models('BlobRestoreRange', resource_type=ResourceType.MGMT_STORAGE)
+        try:
+            start_range, end_range = values.split(' ')
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --blob-range VARIABLE OPERATOR VALUE')
+        namespace.blob_ranges.append(BlobRange(
+            start_range=start_range,
+            end_range=end_range
+        ))
