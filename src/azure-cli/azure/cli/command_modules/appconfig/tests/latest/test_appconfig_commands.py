@@ -106,7 +106,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
 
 class AppConfigCredentialScenarioTest(ScenarioTest):
-    
+
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_credential(self, resource_group, location):
 
