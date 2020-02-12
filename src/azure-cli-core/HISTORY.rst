@@ -3,8 +3,6 @@
 Release History
 ===============
 
-* Fix #7878: Support `--output yamlc` for colorized YAML
-
 2.0.80
 ++++++
 * No changes
@@ -201,8 +199,8 @@ Release History
 ++++++
 * Minor fixes
 
-2.0.36	
-++++++	
+2.0.36
+++++++
 * Minor fixes
 
 2.0.35
