@@ -218,7 +218,7 @@ History notes are auto-generated based on PR titles and descriptions starting fr
 Examples of customer-facing change PR title:
 
 >[Storage] BREAKING CHANGE: az storage remove: remove --auth-mode argument  
->[ARM] Fix issue #10246: az resource tag crashes when the parameter --ids passed in is resource group ID
+>[ARM] Fix #10246: az resource tag crashes when the parameter --ids passed in is resource group ID
 
 An example of non-customer-facing change PR title:
 
