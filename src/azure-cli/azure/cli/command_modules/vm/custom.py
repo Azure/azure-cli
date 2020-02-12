@@ -679,10 +679,13 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                         address_prefix=subnet_address_prefix
                     )
                     upsert_to_collection(vnet, 'subnets', subnet_obj, 'name')
-                    vnet = cached_put(cmd, client.create_or_update, vnet, resource_group_name, vnet_name).result()
-                    subnet_created = next((x for x in vnet.subnets if x.name.lower() == subnet.lower()), None)
-                    if not subnet_created:
-                        raise CLIError('Create subnet failed')
+                    try:
+                        cached_put(cmd, client.create_or_update, vnet, resource_group_name, vnet_name)
+                    except Exception:
+                        raise CLIError('Subnet({}) does not exist, fail to create new subnet with address prefix {}. '
+                                       'It may be caused by name or address prefix conflict. Please specify an '
+                                       'appropriate subnet name with --subnet or an valid address prefix value with '
+                                       '--subnet-address-prefix.'.format(subnet, subnet_address_prefix))
             if not vnet_exists:
                 vnet_name = vnet_name or '{}VNET'.format(vm_name)
                 nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
