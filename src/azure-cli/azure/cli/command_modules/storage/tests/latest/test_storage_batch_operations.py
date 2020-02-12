@@ -390,7 +390,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         # delete recursively with if-modified-since
         src_container = create_and_populate_container()
         self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {} --dryrun',
-                                  storage_account_info, src_container, datetime.min.strftime('%Y-%m-%dT%H:%MZ'))
+                         storage_account_info, src_container, datetime.min.strftime('%Y-%m-%dT%H:%MZ'))
         self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {}',
                          storage_account_info, src_container, datetime.min.strftime('%Y-%m-%dT%H:%MZ'))
         self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
@@ -457,7 +457,6 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         for path in ['apple', 'butter', 'butter/charlie', 'duff/edward']:
             self.storage_cmd('storage file list -s {} -p {} --exclude-dir', storage_account_info,
                              src_share, path).assert_with_checks(JMESPathCheck('length(@)', 10))
-
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
