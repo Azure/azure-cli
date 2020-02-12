@@ -7,14 +7,15 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
 VOLUME_DEFAULT = "--service-level 'Premium' --usage-threshold 100"
-LOCATION = "westus2"
+RG_LOCATION = "westus2"
+ANF_LOCATION = "westus2stage"
 
 # No tidy up of tests required. The resource group is automatically removed
 
 
 class AzureNetAppFilesMountTargetServiceScenarioTest(ScenarioTest):
     def setup_vnet(self, rg, vnet_name, subnet_name):
-        self.cmd("az network vnet create -n %s --resource-group %s -l %s" % (vnet_name, rg, LOCATION))
+        self.cmd("az network vnet create -n %s --resource-group %s -l %s" % (vnet_name, rg, RG_LOCATION))
         self.cmd("az network vnet subnet create -n %s --vnet-name %s --address-prefixes '10.0.0.0/24' --delegations 'Microsoft.Netapp/volumes' -g %s" % (subnet_name, vnet_name, rg))
 
     def current_subscription(self):
@@ -28,9 +29,9 @@ class AzureNetAppFilesMountTargetServiceScenarioTest(ScenarioTest):
         tag = "--tags %s" % tags if tags is not None else ""
 
         self.setup_vnet(rg, vnet_name, subnet_name)
-        self.cmd("az netappfiles account create -g %s -a '%s' -l %s" % (rg, account_name, LOCATION)).get_output_in_json()
-        self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s %s" % (rg, account_name, pool_name, LOCATION, POOL_DEFAULT, tag)).get_output_in_json()
-        volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s %s" % (rg, account_name, pool_name, volume_name1, LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_name, tag)).get_output_in_json()
+        self.cmd("az netappfiles account create -g %s -a '%s' -l %s" % (rg, account_name, ANF_LOCATION)).get_output_in_json()
+        self.cmd("az netappfiles pool create -g %s -a %s -p %s -l %s %s %s" % (rg, account_name, pool_name, ANF_LOCATION, POOL_DEFAULT, tag)).get_output_in_json()
+        volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s %s" % (rg, account_name, pool_name, volume_name1, ANF_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_name, tag)).get_output_in_json()
 
         return volume1
 

@@ -338,6 +338,14 @@ parameters:
     short-summary: The ARM Id or name of the subnet for the vnet. If omitted 'default' will be used
   - name: --protocol-types
     short-summary: Space seperated list of protocols that the volume can use
+  - name: --volume-type
+    short-summary: Whether the volume should be a data protection volume ("DataProtection")
+  - name: --endpoint-type
+    short-summary: Whether the volume is source ("src") or destination ("dst")
+  - name: --remote-volume-resource-id
+    short-summary: The volume id of the remote volume of the replication (the destination for "src" volume endpoints and the source for "dst" endpoints)
+  - name: --replication-schedule
+    short-summary: The replication schedule, e.g. "_10minutely"
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
 examples:
@@ -360,6 +368,93 @@ examples:
   - name: Delete an ANF volume
     text: >
         az netappfiles volume delete -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
+"""
+
+helps['netappfiles volume replication'] = """
+type: group
+short-summary: Manage Azure NetApp Files (ANF) Volume replication operations.
+"""
+
+helps['netappfiles volume replication approve'] = """
+type: command
+short-summary: Authorize a volume as a replication destination for a specified source.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the replication source volume
+  - name: --data-protection-volume-id -d
+    short-summary: The resource id of replication destination volume
+examples:
+  - name: Authorize the volume as the replication destination for the source
+    text: >
+        az netappfiles volume replication approve -g mygroup --account-name myaccname --pool-name mypoolname --name mysourcevolname --data-protection-volume-id /subscriptions/69a75bda-882e-44d5-8431-63421204131c/resourceGroups/mygroup1/providers/Microsoft.NetApp/netAppAccounts/myaccount1/capacityPools/mypool1/volumes/mydestinationvolume
+"""
+
+helps['netappfiles volume replication pause'] = """
+type: command
+short-summary: Break a volume replication for the specified destination volume. The replication process is paused until resumed or deleted.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the replication destination volume
+examples:
+  - name: Pause the replication process
+    text: >
+        az netappfiles volume replication pause -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
+"""
+
+helps['netappfiles volume replication resume'] = """
+type: command
+short-summary: Resync a volume replication for the specified destination volume. The replication process is resumed from source to destination.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the replication destination volume
+examples:
+  - name: Resume the replication process
+    text: >
+        az netappfiles volume replication resume -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
+"""
+
+helps['netappfiles volume replication remove'] = """
+type: command
+short-summary: Delete a volume replication for the specified destination volume. The data replication objects of source and destination volumes will be removed.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the replication destination volume
+examples:
+  - name: Delete the replication objects of the paired volumes
+    text: >
+        az netappfiles volume replication remove -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
+"""
+
+helps['netappfiles volume replication status'] = """
+type: command
+short-summary: Get the replication status for the specified replication volume.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the replication destination volume
+examples:
+  - name: Get the replication status for the volume. Returns whether the replication is healthy, the replication schedule and the mirror state (whether replication is paused/broken or synced/mirrored)
+    text: >
+        az netappfiles volume replication remove -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
 
 helps['netappfiles volume export-policy'] = """
