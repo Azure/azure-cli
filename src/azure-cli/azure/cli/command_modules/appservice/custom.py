@@ -2060,7 +2060,7 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
-        slot_text = "Deployment slot {} in ".format(slot)
+        slot_text = "Deployment slot {} in ".format(slot) if slot else ''
         raise CLIError("{0}app {1} doesn't exist in resource group {2}".format(slot_text, name, resource_group_name))
 
     parsed_plan_id = parse_resource_id(webapp.server_farm_id)
