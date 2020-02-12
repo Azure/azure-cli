@@ -680,7 +680,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                     )
                     upsert_to_collection(vnet, 'subnets', subnet_obj, 'name')
                     try:
-                        cached_put(cmd, client.create_or_update, vnet, resource_group_name, vnet_name)
+                        cached_put(cmd, client.create_or_update, vnet, resource_group_name, vnet_name).result()
                     except Exception:
                         raise CLIError('Subnet({}) does not exist, but failed to create a new subnet with address '
                                        'prefix {}. It may be caused by name or address prefix conflict. Please specify '
