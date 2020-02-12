@@ -12,7 +12,7 @@ class TestCoreCLIOutput(unittest.TestCase):
         from azure.cli.core.mock import DummyCli
 
         output_producer = AzOutputProducer(DummyCli())
-        self.assertEqual(6, len(output_producer._FORMAT_DICT))  # six types: json, jsonc, table, tsv, yaml, none
+        self.assertEqual(7, len(output_producer._FORMAT_DICT))  # six types: json, jsonc, table, tsv, yaml, yamlc, none
         self.assertIn('yaml', output_producer._FORMAT_DICT)
         self.assertIn('none', output_producer._FORMAT_DICT)
 
