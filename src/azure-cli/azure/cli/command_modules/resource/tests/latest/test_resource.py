@@ -1108,6 +1108,10 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('account management-group create -n ' + management_group_name)
         try:
             self.resource_policy_operations(resource_group, management_group_name)
+
+            # Attempt to get a policy definition at an invalid management group scope
+            with self.assertRaises(IncorrectUsageError):
+                self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)
 

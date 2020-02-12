@@ -623,8 +623,15 @@ def _parse_management_group_reference(name):
         parts = name.split('/')
         if len(parts) >= 9:
             return parts[4], parts[8]
-        return parts[4], None
     return None, name
+
+
+def _parse_management_group_id(scope):
+    if _is_management_group_scope(scope):
+        parts = scope.split('/')
+        if len(parts) >= 5:
+            return parts[4]
+    return None
 
 
 def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, management_group=None, for_policy_set=False):
@@ -641,7 +648,7 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
         if cmd.supported_api_version(min_api='2018-03-01'):
             if not management_group:
                 management_group, name = _parse_management_group_reference(name)
-            if management_group and name:
+            if management_group:
                 return policy_operations.get_at_management_group(name, management_group)
         return policy_operations.get(name)
     except (CloudError, HttpOperationError) as ex:
@@ -1389,9 +1396,9 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     resource_group = id_parts.get('resource_group')
     resource_type = id_parts.get('child_type_1') or id_parts.get('type')
     resource_name = id_parts.get('child_name_1') or id_parts.get('name')
+    management_group = _parse_management_group_id(scope)
 
-    if _is_management_group_scope(scope):
-        management_group, _ = _parse_management_group_reference(scope)
+    if management_group:
         result = policy_client.policy_assignments.list_for_management_group(management_group_id=management_group, filter='atScope()')
     elif all([resource_type, resource_group, subscription]):
         namespace = id_parts.get('namespace')
