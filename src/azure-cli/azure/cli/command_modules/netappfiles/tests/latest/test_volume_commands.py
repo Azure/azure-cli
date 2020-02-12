@@ -138,7 +138,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subs_id, rg_r, vnet_name, subnet_name)
 
-        #volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s" % (rg_r, account_name_r, pool_name_r, volume_name_r, DP_ANF_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_id)).get_output_in_json()
+        # volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s" % (rg_r, account_name_r, pool_name_r, volume_name_r, DP_ANF_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_id)).get_output_in_json()
 
         dst_volume = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s --volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --volume-type %s --endpoint-type %s --replication-schedule %s --remote-volume-resource-id %s" % (rg_r, account_name_r, pool_name_r, volume_name_r, DP_ANF_LOCATION, VOLUME_DEFAULT, file_path, vnet_name, subnet_id, "DataProtection", "dst", "_10minutely", src_volume['id'])).get_output_in_json()
         assert dst_volume['dataProtection'] is not None

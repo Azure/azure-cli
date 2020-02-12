@@ -94,7 +94,7 @@ def patch_pool(cmd, instance, size=None, service_level=None, tags=None):
 
 
 # -- volume --
-
+# pylint: disable=too-many-locals
 def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None, endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
@@ -128,8 +128,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     # if we have a data protection volume requested then build the component
     if volume_type == "DataProtection":
         replication = ReplicationObject(
-            endpoint_type = endpoint_type,
-            replication_schedule = replication_schedule,
+            endpoint_type=endpoint_type,
+            replication_schedule=replication_schedule,
             remote_volume_resource_id=remote_volume_resource_id
         )
 

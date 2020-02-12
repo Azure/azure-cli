@@ -385,12 +385,12 @@ parameters:
     short-summary: The name of the ANF pool
   - name: --name --volume-name -n -v
     short-summary: The name of the replication source volume
-  - name: --data-protection-volume-id -d
-    short-summary: The resource id of replication destination volume
+  - name: --remote-volume-resource-id -d
+    short-summary: The resource id of the destination replication volume
 examples:
   - name: Authorize the volume as the replication destination for the source
     text: >
-        az netappfiles volume replication approve -g mygroup --account-name myaccname --pool-name mypoolname --name mysourcevolname --data-protection-volume-id /subscriptions/69a75bda-882e-44d5-8431-63421204131c/resourceGroups/mygroup1/providers/Microsoft.NetApp/netAppAccounts/myaccount1/capacityPools/mypool1/volumes/mydestinationvolume
+        az netappfiles volume replication approve -g mygroup --account-name myaccname --pool-name mypoolname --name mysourcevolname --remote-volume-resource-id /subscriptions/69a75bda-882e-44d5-8431-63421204131c/resourceGroups/mygroup1/providers/Microsoft.NetApp/netAppAccounts/myaccount1/capacityPools/mypool1/volumes/mydestinationvolume
 """
 
 helps['netappfiles volume replication pause'] = """
@@ -454,7 +454,7 @@ parameters:
 examples:
   - name: Get the replication status for the volume. Returns whether the replication is healthy, the replication schedule and the mirror state (whether replication is paused/broken or synced/mirrored)
     text: >
-        az netappfiles volume replication remove -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
+        az netappfiles volume replication status -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
 
 helps['netappfiles volume export-policy'] = """
