@@ -27,6 +27,10 @@ def cf_diagnostics(cli_ctx, _):
     return cf_monitor(cli_ctx, _).diagnostic_settings
 
 
+def cf_diagnostics_category(cli_ctx, _):
+    return cf_monitor(cli_ctx, _).diagnostic_settings_category
+
+
 def cf_log_profiles(cli_ctx, _):
     return cf_monitor(cli_ctx, _).log_profiles
 

@@ -283,7 +283,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_av_sets')
         g.command('list-sizes', 'list_available_sizes')
         g.show_command('show', 'get')
-        g.generic_update_command('update')
+        g.generic_update_command('update', custom_func_name='update_av_set')
 
     with self.command_group('vm boot-diagnostics', compute_vm_sdk) as g:
         g.custom_command('disable', 'disable_boot_diagnostics')
