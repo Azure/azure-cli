@@ -302,6 +302,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    min_api='2018-07-01')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
                    validator=validator_delete_retention_days, min_api='2018-07-01')
+        c.argument('enable_restore_policy', arg_type=get_three_state_flag(), arg_group='Restore Policy',
+                   min_api='2019-06-01', help="Enable blob restore policy when it set to true.")
+        c.argument('restore_days', type=int, arg_group='Restore Policy',
+                   min_api='2019-06-01', help="The number of days for the blob can be restored. It should be greater "
+                   "than zero and less than Delete Retention Days.")
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
