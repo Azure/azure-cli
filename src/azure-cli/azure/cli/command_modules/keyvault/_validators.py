@@ -109,6 +109,19 @@ def process_secret_set_namespace(cmd, namespace):
     namespace.value = content
 
 
+def process_vault_and_hsm_name(ns):
+    vault_base_url = ns.vault_base_url
+    hsm_base_url = ns.hsm_base_url
+    if vault_base_url and hsm_base_url:
+        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
+
+    if not vault_base_url and not hsm_base_url:
+        raise CLIError('Please specify --vault-name or --hsm-name.')
+
+    if not vault_base_url:
+        ns.vault_base_url = hsm_base_url
+
+
 # PARAMETER NAMESPACE VALIDATORS
 
 
@@ -285,14 +298,27 @@ def datetime_type(string):
     raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
 
 
+def _get_base_url_type(cli_ctx, service):
+    prefix = ''
+    suffix = ''
+    if service == 'vault':
+        suffix = cli_ctx.cloud.suffixes.keyvault_dns
+    elif service == 'hsm':
+        prefix = 'eastus.'
+        suffix = '.managedhsm-preview.azure.net'
+
+    def base_url_type(name):
+        return 'https://{}{}{}'.format(prefix, name, suffix)
+
+    return base_url_type
+
+
 def get_vault_base_url_type(cli_ctx):
+    return _get_base_url_type(cli_ctx, service='vault')
 
-    suffix = cli_ctx.cloud.suffixes.keyvault_dns
 
-    def vault_base_url_type(name):
-        return 'https://{}{}'.format(name, suffix)
-
-    return vault_base_url_type
+def get_hsm_base_url_type(cli_ctx):
+    return _get_base_url_type(cli_ctx, service='hsm')
 
 
 def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):

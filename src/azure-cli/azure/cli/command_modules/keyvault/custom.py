@@ -690,7 +690,8 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 
 # region KeyVault Key
-def create_key(cmd, client, vault_base_url, key_name, protection=None,  # pylint: disable=unused-argument
+def create_key(cmd, client, key_name, vault_base_url=None,
+               hsm_base_url=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, kty=None, curve=None):
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
@@ -759,7 +760,8 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
+def import_key(cmd, client, key_name, vault_base_url=None, hsm_base_url=None,  # pylint: disable=unused-argument
+               protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
                byok_string=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files or strings.

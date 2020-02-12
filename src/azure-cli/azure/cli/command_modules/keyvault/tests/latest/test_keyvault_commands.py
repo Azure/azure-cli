@@ -268,6 +268,40 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=self.check('properties.enableRbacAuthorization', True))
 
 
+class KeyVaultManagedHSMScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mhsm')
+    def test_keyvault_managed_hsm(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-mhsm-', 24),
+            'loc': 'eastus',
+            'hsm': 'clitest',
+            'hsm_id': 'https://eastus.clitest.managedhsm-preview.azure.net'
+        })
+        _create_keyvault(self, self.kwargs)
+
+        keys = {
+            'AES-HSM': ['128', '192', '256'],
+            'EC-HSM': ['P-256', 'P-256K', 'P-384', 'P-521'],
+            'RSA-HSM': ['2048', '3072', '4096']
+        }
+
+        # create a key
+        for kty, args in keys.items():
+            for arg in args:
+                k_name = kty + '-' + arg
+                extra = ''
+                if kty in ['AES-HSM', 'RSA-HSM']:
+                    extra = '--size {}'.format(arg)
+                elif kty == 'EC-HSM':
+                    extra = '--curve {}'.format(arg)
+
+                self.cmd('keyvault key create --hsm-name {{hsm}} -n {k_name} -p hsm --kty {kty} {extra}'.format(
+                    k_name=k_name,
+                    kty=kty,
+                    extra=extra
+                ))
+
+
 class KeyVaultKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
     def test_keyvault_key(self, resource_group):
