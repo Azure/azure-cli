@@ -3538,12 +3538,6 @@ def create_nw_connection_monitor(cmd,
                                                               tags,
                                                               do_not_start,
                                                               monitoring_interval)
-        # from azure.cli.core.profiles import ResourceType
-        # from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        # client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK, api_version='2019-06-01').connection_monitors
-
-        from azure.cli.core.profiles import ResourceType
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
         client = get_mgmt_service_client(cmd.cli_ctx,
                                          ResourceType.MGMT_NETWORK,
                                          api_version='2019-06-01').connection_monitors
@@ -3704,7 +3698,7 @@ def _create_nw_connection_monitor_v2(cmd,
 
 def _create_nw_connection_monitor_v2_endpoint(cmd,
                                               name,
-                                              resource_id=None,
+                                              endpoint_resource_id=None,
                                               address=None,
                                               filter_type=None,
                                               filter_items=None):
@@ -3715,7 +3709,7 @@ def _create_nw_connection_monitor_v2_endpoint(cmd,
     ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
         'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
 
-    endpoint = ConnectionMonitorEndpoint(name=name, resource_id=resource_id, address=address)
+    endpoint = ConnectionMonitorEndpoint(name=name, resource_id=endpoint_resource_id, address=address)
 
     if filter_type and filter_items:
         endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
@@ -3823,14 +3817,14 @@ def add_nw_connection_monitor_v2_endpoint(cmd,
                                           name,
                                           source_test_groups=None,
                                           dest_test_groups=None,
-                                          resource_id=None,
+                                          endpoint_resource_id=None,
                                           address=None,
                                           filter_type=None,
                                           filter_items=None):
     ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
         'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
 
-    endpoint = ConnectionMonitorEndpoint(name=name, resource_id=resource_id, address=address)
+    endpoint = ConnectionMonitorEndpoint(name=name, resource_id=endpoint_resource_id, address=address)
 
     if filter_type and filter_items:
         endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
@@ -3997,7 +3991,6 @@ def list_nw_connection_monitor_v2_test_configuration(client,
                                                      location):
     connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
     return connection_monitor.test_configurations
-
 
 
 def add_nw_connection_monitor_v2_test_group(cmd,

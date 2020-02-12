@@ -45,7 +45,6 @@ from azure.cli.core.util import get_json_object
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
 def load_arguments(self, _):
-    from azure.cli.core.profiles import ResourceType
 
     (Access, ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, ApplicationGatewaySslProtocol, AuthenticationMethod,
@@ -1149,7 +1148,8 @@ def load_arguments(self, _):
         c.argument('name',
                    arg_type=name_arg_type,
                    help='The name of the connection monitor endpoint')
-        c.argument('resource_id',
+        c.argument('endpoint_resource_id',
+                   options_list=['--resource-id'],
                    help='Resource ID of the connection monitor endpoint')
         c.argument('address',
                    help='Address of the connection monitor endpoint (IP or domain name)')
