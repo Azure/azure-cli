@@ -18,13 +18,13 @@ PYTHON_VERSIONS = ['3.7', '3.6', '2.7']
 NETCORE_VERSIONS = ['1.0', '1.1', '2.1', '2.2']
 DOTNET_VERSIONS = ['3.5', '4.7']
 LINUX_SKU_DEFAULT = "P1V2"
-HOST_VERSIONS_FUNCTIONAPP = ['2', '3']
-# host version : default node version
+FUNCTIONS_VERSIONS_FUNCTIONAPP = ['2', '3']
+# functions version : default node version
 NODE_VERSION_DEFAULT_FUNCTIONAPP = {
     '2': '~10',
     '3': '~12'
 }
-# host version -> runtime : default runtime version
+# functions version -> runtime : default runtime version
 RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP = {
     '2': {
         'node': '8',
@@ -39,7 +39,7 @@ RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP = {
         'java': '8'
     }
 }
-# host version -> runtime -> runtime version : container image
+# functions version -> runtime -> runtime version : container image
 RUNTIME_TO_IMAGE_FUNCTIONAPP = {
     '2': {
         'node': {

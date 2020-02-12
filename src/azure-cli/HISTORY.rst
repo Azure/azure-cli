@@ -33,7 +33,7 @@ Release History
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
 * functionapp: Add ability to create Java function apps in Linux
-* functionapp: Added --version property to 'az functionapp create'
+* functionapp: Added --functions-version property to 'az functionapp create'
 * functionapp: Added support for node 12 for v3 function apps
 * functionapp: Added support for python 3.8 for v3 function apps
 * functionapp: Changed python default version to 3.7 for v2 and v3 function apps

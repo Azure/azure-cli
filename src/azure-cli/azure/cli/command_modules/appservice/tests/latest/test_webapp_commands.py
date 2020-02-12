@@ -1301,9 +1301,9 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
     @ResourceGroupPreparer(location='westus')
     @StorageAccountPreparer()
-    def test_functionapp_windows_runtime_host_version(self, resource_group, storage_account):
+    def test_functionapp_windows_runtime_functions_version(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
-        self.cmd('functionapp create -g {} -n {} -c westus -s {} -v 3 --os-type Windows --runtime node'
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --functions-version 3 --os-type Windows --runtime node'
                  .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1460,14 +1460,14 @@ class FunctionAppOnLinux(ScenarioTest):
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
-    def test_functionapp_on_linux_host_version(self, resource_group, storage_account):
+    def test_functionapp_on_linux_functions_version(self, resource_group, storage_account):
         plan = self.create_random_name(prefix='funcapplinplan', length=24)
         functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
             JMESPathCheck('reserved', True),  # this weird field means it is a linux
             JMESPathCheck('sku.name', 'S1')
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} -v 3 --runtime node'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'
                  .format(resource_group, functionapp, plan, storage_account), checks=[
                      JMESPathCheck('name', functionapp)
                  ])
@@ -1482,9 +1482,9 @@ class FunctionAppOnLinux(ScenarioTest):
 
     @ResourceGroupPreparer(location='westus')
     @StorageAccountPreparer()
-    def test_functionapp_on_linux_host_version_consumption(self, resource_group, storage_account):
+    def test_functionapp_on_linux_functions_version_consumption(self, resource_group, storage_account):
         functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
-        self.cmd('functionapp create -g {} -n {} -c westus -s {} -v 3 --runtime node --os-type linux'
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --functions-version 3 --runtime node --os-type linux'
                  .format(resource_group, functionapp, storage_account), checks=[
                      JMESPathCheck('name', functionapp)
                  ])
