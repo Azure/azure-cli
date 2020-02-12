@@ -20,6 +20,8 @@ Release History
 **AKS**
 
 * Each cluster gets a separate service principal to improve isolation
+* Add --nodepool-tags to node pool when creating azure kubernetes cluster
+* Add --tags when adding or updating a nodepool to cluster
 
 **AppConfig**
 

@@ -13,6 +13,7 @@ from ipaddress import ip_network
 # pylint: disable=no-name-in-module,import-error
 from knack.log import get_logger
 
+from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 import azure.cli.core.keys as keys
 
@@ -240,3 +241,12 @@ def validate_taints(namespace):
 def validate_acr(namespace):
     if namespace.attach_acr and namespace.detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+
+
+def validate_nodepool_tags(ns):
+    """ Extracts multiple space-separated tags in key[=value] format """
+    if isinstance(ns.nodepool_tags, list):
+        tags_dict = {}
+        for item in ns.nodepool_tags:
+            tags_dict.update(validate_tag(item))
+        ns.nodepool_tags = tags_dict
