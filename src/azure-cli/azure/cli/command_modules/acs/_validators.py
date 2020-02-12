@@ -265,7 +265,7 @@ def validate_cluster_autoscaler_profile(namespace):
 
 def _validate_cluster_autoscaler_key(key):
     if not key:
-        raise CLIError('Empty key specified for cluster-autoscaler parameter')
+        raise CLIError('Empty key specified for cluster-autoscaler-profile')
 
 
 def _extract_cluster_autoscaler_params(namespace):

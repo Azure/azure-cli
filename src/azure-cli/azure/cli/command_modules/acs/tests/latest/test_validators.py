@@ -65,7 +65,7 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
     def test_empty_key_empty_value(self):
         cluster_autoscaler_profile = ["="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
-        err = "Empty key specified for cluster-autoscaler parameter"
+        err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
             validators.validate_cluster_autoscaler_profile(namespace)
@@ -80,7 +80,7 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
     def test_two_empty_keys_empty_value(self):
         cluster_autoscaler_profile = ["=", "="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
-        err = "Empty key specified for cluster-autoscaler parameter"
+        err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
             validators.validate_cluster_autoscaler_profile(namespace)
@@ -89,7 +89,7 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
     def test_one_empty_key_in_pair_one_non_empty(self):
         cluster_autoscaler_profile = ["scan-interval=20s", "="]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
-        err = "Empty key specified for cluster-autoscaler parameter"
+        err = "Empty key specified for cluster-autoscaler-profile"
 
         with self.assertRaises(CLIError) as cm:
             validators.validate_cluster_autoscaler_profile(namespace)
