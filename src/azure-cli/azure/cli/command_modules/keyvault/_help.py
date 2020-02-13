@@ -146,17 +146,17 @@ type: group
 short-summary: Manage vault network ACLs.
 """
 
-helps['keyvault private-endpoint'] = """
+helps['keyvault private-endpoint-connection'] = """
 type: group
 short-summary: Manage vault private endpoint connections.
 """
 
-helps['keyvault private-endpoint delete'] = """
+helps['keyvault private-endpoint-connection delete'] = """
 type: command
 short-summary: Delete the specified private endpoint connection associated with a Key Vault.
 """
 
-helps['keyvault private-endpoint show'] = """
+helps['keyvault private-endpoint-connection show'] = """
 type: command
 short-summary: Show details of a private endpoint connection associated with a Key Vault.
 """
