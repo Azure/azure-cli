@@ -1775,3 +1775,49 @@ def get_header_configuration_validator(dest):
             })
         setattr(namespace, dest, results)
     return validator
+
+
+def process_private_link_resource_id_argument(namespace):
+    if all([namespace.resource_group_name,
+            namespace.name,
+            namespace.resource_provider]):
+        logger.warning("Resource ID will be ignored since other three arguments have been provided.")
+        del namespace.id
+        return
+
+    if not (namespace.id or all([namespace.resource_group_name,
+                             namespace.name,
+                             namespace.resource_provider])):
+        raise CLIError("usage error: --id / -g -n --type")
+
+    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    if not is_valid_resource_id(namespace.id):
+        raise CLIError("Resource ID is not invalid. Please check it.")
+    split_resource_id = parse_resource_id(namespace.id)
+    namespace.resource_group_name = split_resource_id['resource_group']
+    namespace.name = split_resource_id['name']
+    namespace.resource_provider = '{}/{}'.format(split_resource_id['namespace'], split_resource_id['type'])
+    del namespace.id
+
+
+def process_private_endpoint_connection_id_argument(namespace):
+    if all([namespace.resource_group_name,
+            namespace.name,
+            namespace.resource_provider,
+            namespace.service_name]):
+        logger.warning("Resource ID will be ignored since other three arguments have been provided.")
+        del namespace.connection_id
+        return
+
+    if not (namespace.connection_id or all([namespace.resource_group_name,
+                                            namespace.name,
+                                            namespace.resource_provider,
+                                            namespace.service_name])):
+        raise CLIError("usage error: --id / -g -n --type --service-name")
+
+    id_parts = namespace.connection_id.split('/')
+    namespace.resource_group_name = id_parts[-7]
+    namespace.service_name = id_parts[-3]
+    namespace.resource_provider = '{}/{}'.format(id_parts[-5], id_parts[-4])
+    namespace.name = id_parts[-1]
+    del namespace.connection_id

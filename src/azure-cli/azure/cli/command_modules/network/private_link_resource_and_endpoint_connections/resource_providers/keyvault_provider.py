@@ -27,7 +27,7 @@ class KeyVaultPrivateEndpointClient(PrivateEndpointClient):
                           private_endpoint_connection_name=private_endpoint_connection_name,
                           properties=private_endpoint_connection)
 
-    def show_private_link_resource(self, cmd, resource_group_name, name):
+    def list_private_link_resource(self, cmd, resource_group_name, name):
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_link_resources
         return client.list_by_vault(resource_group_name, name)
 
@@ -54,3 +54,7 @@ class KeyVaultPrivateEndpointClient(PrivateEndpointClient):
     def remove_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_endpoint_connections
         return client.delete(resource_group_name, service_name, name)
+
+    def show_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):
+        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_endpoint_connections
+        return client.get(resource_group_name, service_name, name)
