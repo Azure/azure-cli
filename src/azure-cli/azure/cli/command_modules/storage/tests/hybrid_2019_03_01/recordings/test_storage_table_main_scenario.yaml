@@ -1,156 +1,5 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-03-19T16:38:24Z"}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '110'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - --location --name --tag
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-03-19T16:38:24Z"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '384'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 19 Mar 2019 16:38:25 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: '{"sku": {"name": "Standard_RAGRS"}, "kind": "Storage", "location": "westus",
-      "properties": {"supportsHttpsTrafficOnly": false}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '127'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.60
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      content-type:
-      - text/plain; charset=utf-8
-      date:
-      - Tue, 19 Mar 2019 16:38:26 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/84577ca8-fda6-4c47-8e4c-ea825fcfb4dc?monitor=true&api-version=2017-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1196'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g -l --sku
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.60
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/84577ca8-fda6-4c47-8e4c-ea825fcfb4dc?monitor=true&api-version=2017-10-01
-  response:
-    body:
-      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-03-19T16:38:26.8500951Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-03-19T16:38:26.8500951Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-03-19T16:38:26.6469570Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"blob":"https://clitest000002-secondary.blob.core.windows.net/","queue":"https://clitest000002-secondary.queue.core.windows.net/","table":"https://clitest000002-secondary.table.core.windows.net/"}}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1484'
-      content-type:
-      - application/json
-      date:
-      - Tue, 19 Mar 2019 16:38:44 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
     body: null
     headers:
       Accept:
@@ -166,8 +15,8 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.60
+      - python/3.8.1 (Windows-10-10.0.17763-SP0) msrest/0.6.11 msrest_azure/0.6.2
+        azure-mgmt-storage/7.2.0 Azure-SDK-For-Python AZURECLI/2.0.81
       accept-language:
       - en-US
     method: POST
@@ -183,7 +32,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 19 Mar 2019 16:38:45 GMT
+      - Thu, 13 Feb 2020 14:08:37 GMT
       expires:
       - '-1'
       pragma:
@@ -198,66 +47,13 @@ interactions:
       - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11996'
     status:
       code: 200
       message: OK
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - storage account keys list
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -g --query -o
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 azure-mgmt-storage/3.1.1
-        Azure-SDK-For-Python AZURECLI/2.0.60
-      accept-language:
-      - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
-  response:
-    body:
-      string: '{"keys":[{"keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '288'
-      content-type:
-      - application/json
-      date:
-      - Tue, 19 Mar 2019 16:38:45 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"TableName": "table000003"}'''
+    body: '{"TableName": "table000003"}'
     headers:
       Accept:
       - application/json;odata=minimalmetadata
@@ -274,9 +70,9 @@ interactions:
       Prefer:
       - return-no-content
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:46 GMT
+      - Thu, 13 Feb 2020 14:08:32 GMT
       x-ms-version:
       - '2017-04-17'
     method: POST
@@ -290,9 +86,9 @@ interactions:
       content-length:
       - '0'
       dataserviceid:
-      - https://clitest2bvccety6rrdog5pk.table.core.windows.net/Tables('table4ci6upi4errvt7gwq2f')
+      - https://clitestgild7ouxcwlie2dci.table.core.windows.net/Tables('tablenaqrukhscg7pikyutn5')
       date:
-      - Tue, 19 Mar 2019 16:38:46 GMT
+      - Thu, 13 Feb 2020 14:08:41 GMT
       location:
       - https://clitest000002.table.core.windows.net/Tables('table000003')
       preference-applied:
@@ -318,9 +114,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81 AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:47 GMT
+      - Thu, 13 Feb 2020 14:09:11 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -334,7 +130,7 @@ interactions:
       content-type:
       - application/json;odata=nometadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:38:46 GMT
+      - Thu, 13 Feb 2020 14:09:20 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -358,9 +154,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:47 GMT
+      - Thu, 13 Feb 2020 14:09:15 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -374,7 +170,7 @@ interactions:
       content-type:
       - application/json;odata=nometadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:38:47 GMT
+      - Thu, 13 Feb 2020 14:09:21 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -388,7 +184,7 @@ interactions:
       message: OK
 - request:
     body: '{"name": "test", "value": "something", "binaryProperty": "AAECAwQF", "binaryProperty@odata.type":
-      "Edm.Binary", "PartitionKey": "001", "RowKey": "001"}'
+      "Edm.Binary", "RowKey": "001", "PartitionKey": "001"}'
     headers:
       Accept:
       - application/json;odata=minimalmetadata
@@ -405,9 +201,9 @@ interactions:
       Prefer:
       - return-no-content
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:47 GMT
+      - Thu, 13 Feb 2020 14:09:16 GMT
       x-ms-version:
       - '2017-04-17'
     method: POST
@@ -421,11 +217,11 @@ interactions:
       content-length:
       - '0'
       dataserviceid:
-      - https://clitest2bvccety6rrdog5pk.table.core.windows.net/table4ci6upi4errvt7gwq2f(PartitionKey='001',RowKey='001')
+      - https://clitestgild7ouxcwlie2dci.table.core.windows.net/tablenaqrukhscg7pikyutn5(PartitionKey='001',RowKey='001')
       date:
-      - Tue, 19 Mar 2019 16:38:47 GMT
+      - Thu, 13 Feb 2020 14:09:31 GMT
       etag:
-      - W/"datetime'2019-03-19T16%3A38%3A48.1610953Z'"
+      - W/"datetime'2020-02-13T14%3A09%3A32.4522556Z'"
       location:
       - https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
       preference-applied:
@@ -451,25 +247,25 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:48 GMT
+      - Thu, 13 Feb 2020 14:09:27 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2019-03-19T16%3A38%3A48.1610953Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2019-03-19T16:38:48.1610953Z","name":"test","value":"something","binaryProperty@odata.type":"Edm.Binary","binaryProperty":"AAECAwQF"}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2020-02-13T14%3A09%3A32.4522556Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-02-13T14:09:32.4522556Z","name":"test","value":"something","binaryProperty@odata.type":"Edm.Binary","binaryProperty":"AAECAwQF"}'
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/json;odata=minimalmetadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:38:47 GMT
+      - Thu, 13 Feb 2020 14:09:36 GMT
       etag:
-      - W/"datetime'2019-03-19T16%3A38%3A48.1610953Z'"
+      - W/"datetime'2020-02-13T14%3A09%3A32.4522556Z'"
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -493,25 +289,25 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:48 GMT
+      - Thu, 13 Feb 2020 14:09:31 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')?%24select=name
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element&$select=name","odata.etag":"W/\"datetime''2019-03-19T16%3A38%3A48.1610953Z''\"","name":"test"}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element&$select=name","odata.etag":"W/\"datetime''2020-02-13T14%3A09%3A32.4522556Z''\"","name":"test"}'
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/json;odata=minimalmetadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:38:48 GMT
+      - Thu, 13 Feb 2020 14:09:37 GMT
       etag:
-      - W/"datetime'2019-03-19T16%3A38%3A48.1610953Z'"
+      - W/"datetime'2020-02-13T14%3A09%3A32.4522556Z'"
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -524,7 +320,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"name": "test", "value": "newval", "PartitionKey": "001", "RowKey": "001"}'
+    body: '{"name": "test", "value": "newval", "RowKey": "001", "PartitionKey": "001"}'
     headers:
       Accept:
       - application/json;odata=minimalmetadata
@@ -541,9 +337,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:49 GMT
+      - Thu, 13 Feb 2020 14:09:33 GMT
       x-ms-version:
       - '2017-04-17'
     method: MERGE
@@ -557,9 +353,9 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:38:48 GMT
+      - Thu, 13 Feb 2020 14:09:53 GMT
       etag:
-      - W/"datetime'2019-03-19T16%3A38%3A49.2317554Z'"
+      - W/"datetime'2020-02-13T14%3A09%3A53.9665758Z'"
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-content-type-options:
@@ -581,25 +377,25 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:49 GMT
+      - Thu, 13 Feb 2020 14:09:48 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2019-03-19T16%3A38%3A49.2317554Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2019-03-19T16:38:49.2317554Z","binaryProperty@odata.type":"Edm.Binary","binaryProperty":"AAECAwQF","name":"test","value":"newval"}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2020-02-13T14%3A09%3A53.9665758Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-02-13T14:09:53.9665758Z","binaryProperty@odata.type":"Edm.Binary","binaryProperty":"AAECAwQF","name":"test","value":"newval"}'
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/json;odata=minimalmetadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:38:49 GMT
+      - Thu, 13 Feb 2020 14:09:54 GMT
       etag:
-      - W/"datetime'2019-03-19T16%3A38%3A49.2317554Z'"
+      - W/"datetime'2020-02-13T14%3A09%3A53.9665758Z'"
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -612,7 +408,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"cat": "hat", "PartitionKey": "001", "RowKey": "001"}'
+    body: '{"cat": "hat", "RowKey": "001", "PartitionKey": "001"}'
     headers:
       Accept:
       - application/json;odata=minimalmetadata
@@ -629,9 +425,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81 AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:49 GMT
+      - Thu, 13 Feb 2020 14:10:44 GMT
       x-ms-version:
       - '2017-04-17'
     method: PUT
@@ -645,9 +441,9 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:38:49 GMT
+      - Thu, 13 Feb 2020 14:10:50 GMT
       etag:
-      - W/"datetime'2019-03-19T16%3A38%3A49.9704498Z'"
+      - W/"datetime'2020-02-13T14%3A10%3A50.7176043Z'"
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-content-type-options:
@@ -669,25 +465,25 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:50 GMT
+      - Thu, 13 Feb 2020 14:10:45 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2019-03-19T16%3A38%3A49.9704498Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2019-03-19T16:38:49.9704498Z","cat":"hat"}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003/@Element","odata.etag":"W/\"datetime''2020-02-13T14%3A10%3A50.7176043Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-02-13T14:10:50.7176043Z","cat":"hat"}'
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/json;odata=minimalmetadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:38:50 GMT
+      - Thu, 13 Feb 2020 14:10:51 GMT
       etag:
-      - W/"datetime'2019-03-19T16%3A38%3A49.9704498Z'"
+      - W/"datetime'2020-02-13T14%3A10%3A50.7176043Z'"
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -715,9 +511,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:50 GMT
+      - Thu, 13 Feb 2020 14:10:46 GMT
       x-ms-version:
       - '2017-04-17'
     method: DELETE
@@ -731,7 +527,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:38:50 GMT
+      - Thu, 13 Feb 2020 14:10:58 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-content-type-options:
@@ -753,9 +549,10 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81 AZURECLI/2.0.81
+        AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:50 GMT
+      - Thu, 13 Feb 2020 14:12:15 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -763,14 +560,14 @@ interactions:
   response:
     body:
       string: '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
-        specified resource does not exist.\nRequestId:dfcb288d-4002-002e-0d72-dee642000000\nTime:2019-03-19T16:38:51.1923239Z"}}}'
+        specified resource does not exist.\nRequestId:d388eac2-8002-00b5-7977-e23c9c000000\nTime:2020-02-13T14:12:24.5332197Z"}}}'
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/json;odata=minimalmetadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:38:50 GMT
+      - Thu, 13 Feb 2020 14:12:24 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -784,7 +581,7 @@ interactions:
       message: Not Found
 - request:
     body: '{"name": "test", "value": "something", "binaryProperty": "AAECAwQF", "binaryProperty@odata.type":
-      "Edm.Binary", "PartitionKey": "001", "RowKey": "001"}'
+      "Edm.Binary", "RowKey": "001", "PartitionKey": "001"}'
     headers:
       Accept:
       - application/json;odata=minimalmetadata
@@ -801,9 +598,9 @@ interactions:
       Prefer:
       - return-no-content
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:51 GMT
+      - Thu, 13 Feb 2020 14:12:20 GMT
       x-ms-version:
       - '2017-04-17'
     method: POST
@@ -817,11 +614,11 @@ interactions:
       content-length:
       - '0'
       dataserviceid:
-      - https://clitest2bvccety6rrdog5pk.table.core.windows.net/table4ci6upi4errvt7gwq2f(PartitionKey='001',RowKey='001')
+      - https://clitestgild7ouxcwlie2dci.table.core.windows.net/tablenaqrukhscg7pikyutn5(PartitionKey='001',RowKey='001')
       date:
-      - Tue, 19 Mar 2019 16:38:50 GMT
+      - Thu, 13 Feb 2020 14:12:30 GMT
       etag:
-      - W/"datetime'2019-03-19T16%3A38%3A51.5787565Z'"
+      - W/"datetime'2020-02-13T14%3A12%3A31.5395605Z'"
       location:
       - https://clitest000002.table.core.windows.net/table000003(PartitionKey='001',RowKey='001')
       preference-applied:
@@ -836,7 +633,7 @@ interactions:
       code: 204
       message: No Content
 - request:
-    body: '{"name": "test2", "value": "something2", "PartitionKey": "002", "RowKey":
+    body: '{"name": "test2", "value": "something2", "RowKey": "002", "PartitionKey":
       "002"}'
     headers:
       Accept:
@@ -854,9 +651,9 @@ interactions:
       Prefer:
       - return-no-content
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:51 GMT
+      - Thu, 13 Feb 2020 14:12:26 GMT
       x-ms-version:
       - '2017-04-17'
     method: POST
@@ -870,11 +667,11 @@ interactions:
       content-length:
       - '0'
       dataserviceid:
-      - https://clitest2bvccety6rrdog5pk.table.core.windows.net/table4ci6upi4errvt7gwq2f(PartitionKey='002',RowKey='002')
+      - https://clitestgild7ouxcwlie2dci.table.core.windows.net/tablenaqrukhscg7pikyutn5(PartitionKey='002',RowKey='002')
       date:
-      - Tue, 19 Mar 2019 16:38:51 GMT
+      - Thu, 13 Feb 2020 14:12:32 GMT
       etag:
-      - W/"datetime'2019-03-19T16%3A38%3A52.0049124Z'"
+      - W/"datetime'2020-02-13T14%3A12%3A32.5298355Z'"
       location:
       - https://clitest000002.table.core.windows.net/table000003(PartitionKey='002',RowKey='002')
       preference-applied:
@@ -900,23 +697,23 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:52 GMT
+      - Thu, 13 Feb 2020 14:12:27 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003()?%24top=1
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003","value":[{"odata.etag":"W/\"datetime''2019-03-19T16%3A38%3A51.5787565Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2019-03-19T16:38:51.5787565Z","name":"test","value":"something","binaryProperty@odata.type":"Edm.Binary","binaryProperty":"AAECAwQF"}]}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003","value":[{"odata.etag":"W/\"datetime''2020-02-13T14%3A12%3A31.5395605Z''\"","PartitionKey":"001","RowKey":"001","Timestamp":"2020-02-13T14:12:31.5395605Z","name":"test","value":"something","binaryProperty@odata.type":"Edm.Binary","binaryProperty":"AAECAwQF"}]}'
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/json;odata=minimalmetadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:38:51 GMT
+      - Thu, 13 Feb 2020 14:12:35 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -944,23 +741,23 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:52 GMT
+      - Thu, 13 Feb 2020 14:12:30 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
     uri: https://clitest000002.table.core.windows.net/table000003()?NextPartitionKey=1%214%21MDAy&NextRowKey=1%214%21MDAy
   response:
     body:
-      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003","value":[{"odata.etag":"W/\"datetime''2019-03-19T16%3A38%3A52.0049124Z''\"","PartitionKey":"002","RowKey":"002","Timestamp":"2019-03-19T16:38:52.0049124Z","name":"test2","value":"something2"}]}'
+      string: '{"odata.metadata":"https://clitest000002.table.core.windows.net/$metadata#table000003","value":[{"odata.etag":"W/\"datetime''2020-02-13T14%3A12%3A32.5298355Z''\"","PartitionKey":"002","RowKey":"002","Timestamp":"2020-02-13T14:12:32.5298355Z","name":"test2","value":"something2"}]}'
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/json;odata=minimalmetadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:38:52 GMT
+      - Thu, 13 Feb 2020 14:12:36 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -982,9 +779,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:52 GMT
+      - Thu, 13 Feb 2020 14:12:32 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -997,7 +794,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:52 GMT
+      - Thu, 13 Feb 2020 14:12:38 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1017,9 +814,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:53 GMT
+      - Thu, 13 Feb 2020 14:12:34 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1032,7 +829,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:52 GMT
+      - Thu, 13 Feb 2020 14:12:41 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1056,9 +853,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:53 GMT
+      - Thu, 13 Feb 2020 14:12:36 GMT
       x-ms-version:
       - '2017-04-17'
     method: PUT
@@ -1070,7 +867,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:38:52 GMT
+      - Thu, 13 Feb 2020 14:12:42 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -1088,9 +885,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:53 GMT
+      - Thu, 13 Feb 2020 14:12:37 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1102,7 +899,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:53 GMT
+      - Thu, 13 Feb 2020 14:12:43 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1126,9 +923,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:53 GMT
+      - Thu, 13 Feb 2020 14:12:38 GMT
       x-ms-version:
       - '2017-04-17'
     method: PUT
@@ -1140,7 +937,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:38:54 GMT
+      - Thu, 13 Feb 2020 14:12:43 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -1158,9 +955,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:54 GMT
+      - Thu, 13 Feb 2020 14:12:39 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1172,7 +969,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:54 GMT
+      - Thu, 13 Feb 2020 14:12:50 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1196,9 +993,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:55 GMT
+      - Thu, 13 Feb 2020 14:12:46 GMT
       x-ms-version:
       - '2017-04-17'
     method: PUT
@@ -1210,7 +1007,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:38:55 GMT
+      - Thu, 13 Feb 2020 14:12:51 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -1228,9 +1025,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:56 GMT
+      - Thu, 13 Feb 2020 14:12:46 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1242,7 +1039,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:55 GMT
+      - Thu, 13 Feb 2020 14:13:01 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1266,9 +1063,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:56 GMT
+      - Thu, 13 Feb 2020 14:12:57 GMT
       x-ms-version:
       - '2017-04-17'
     method: PUT
@@ -1280,7 +1077,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:38:55 GMT
+      - Thu, 13 Feb 2020 14:13:02 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -1298,9 +1095,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:57 GMT
+      - Thu, 13 Feb 2020 14:12:58 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1312,7 +1109,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:56 GMT
+      - Thu, 13 Feb 2020 14:13:04 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1332,9 +1129,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:57 GMT
+      - Thu, 13 Feb 2020 14:13:00 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1346,7 +1143,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:57 GMT
+      - Thu, 13 Feb 2020 14:13:12 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1366,9 +1163,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:57 GMT
+      - Thu, 13 Feb 2020 14:13:07 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1380,7 +1177,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:57 GMT
+      - Thu, 13 Feb 2020 14:13:13 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1400,9 +1197,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:58 GMT
+      - Thu, 13 Feb 2020 14:13:09 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1414,7 +1211,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:58 GMT
+      - Thu, 13 Feb 2020 14:13:16 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1434,9 +1231,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:58 GMT
+      - Thu, 13 Feb 2020 14:13:16 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1448,7 +1245,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:58 GMT
+      - Thu, 13 Feb 2020 14:13:24 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1468,9 +1265,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:59 GMT
+      - Thu, 13 Feb 2020 14:13:20 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1482,7 +1279,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:59 GMT
+      - Thu, 13 Feb 2020 14:13:26 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1506,9 +1303,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:38:59 GMT
+      - Thu, 13 Feb 2020 14:13:21 GMT
       x-ms-version:
       - '2017-04-17'
     method: PUT
@@ -1520,7 +1317,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:38:59 GMT
+      - Thu, 13 Feb 2020 14:13:26 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -1538,9 +1335,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:39:00 GMT
+      - Thu, 13 Feb 2020 14:13:22 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1552,7 +1349,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:59 GMT
+      - Thu, 13 Feb 2020 14:13:43 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1572,9 +1369,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:39:00 GMT
+      - Thu, 13 Feb 2020 14:13:39 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1586,7 +1383,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:38:59 GMT
+      - Thu, 13 Feb 2020 14:13:45 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1610,9 +1407,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:39:00 GMT
+      - Thu, 13 Feb 2020 14:13:40 GMT
       x-ms-version:
       - '2017-04-17'
     method: PUT
@@ -1624,7 +1421,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:38:59 GMT
+      - Thu, 13 Feb 2020 14:13:45 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -1642,9 +1439,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:39:00 GMT
+      - Thu, 13 Feb 2020 14:13:40 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1656,7 +1453,7 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:39:06 GMT
+      - Thu, 13 Feb 2020 14:13:51 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1680,9 +1477,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:39:07 GMT
+      - Thu, 13 Feb 2020 14:13:47 GMT
       x-ms-version:
       - '2017-04-17'
     method: DELETE
@@ -1696,7 +1493,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 19 Mar 2019 16:39:06 GMT
+      - Thu, 13 Feb 2020 14:13:53 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       x-content-type-options:
@@ -1718,9 +1515,9 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:39:07 GMT
+      - Thu, 13 Feb 2020 14:13:49 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
@@ -1728,14 +1525,14 @@ interactions:
   response:
     body:
       string: '{"odata.error":{"code":"ResourceNotFound","message":{"lang":"en-US","value":"The
-        specified resource does not exist.\nRequestId:84454db6-e002-0067-7072-ded522000000\nTime:2019-03-19T16:39:07.7024323Z"}}}'
+        specified resource does not exist.\nRequestId:45b8a4dc-0002-0086-4d77-e265b1000000\nTime:2020-02-13T14:13:56.3744585Z"}}}'
     headers:
       cache-control:
       - no-cache
       content-type:
       - application/json;odata=nometadata;streaming=true;charset=utf-8
       date:
-      - Tue, 19 Mar 2019 16:39:07 GMT
+      - Thu, 13 Feb 2020 14:13:55 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1757,21 +1554,22 @@ interactions:
       MaxDataServiceVersion:
       - '3.0'
       User-Agent:
-      - Azure-CosmosDB/0.37.1 (Python CPython 3.7.2; Windows 10) AZURECLI/2.0.60
+      - Azure-CosmosDB/0.37.1 (Python CPython 3.8.1; Windows 10) AZURECLI/2.0.81 AZURECLI/2.0.81
       x-ms-date:
-      - Tue, 19 Mar 2019 16:39:07 GMT
+      - Thu, 13 Feb 2020 14:14:26 GMT
       x-ms-version:
       - '2017-04-17'
     method: GET
     uri: https://clitest000002-secondary.table.core.windows.net/?restype=service&comp=stats
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>unavailable</Status><LastSyncTime></LastSyncTime></GeoReplication></StorageServiceStats>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><StorageServiceStats><GeoReplication><Status>live</Status><LastSyncTime>Thu,
+        13 Feb 2020 14:11:57 GMT</LastSyncTime></GeoReplication></StorageServiceStats>"
     headers:
       content-type:
       - application/xml
       date:
-      - Tue, 19 Mar 2019 16:39:07 GMT
+      - Thu, 13 Feb 2020 14:14:34 GMT
       server:
       - Windows-Azure-Table/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -1781,51 +1579,4 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - group delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - --name --yes --no-wait
-      User-Agent:
-      - python/3.7.2 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.6.0 resourcemanagementclient/2.1.0
-        Azure-SDK-For-Python AZURECLI/2.0.60
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2018-05-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 19 Mar 2019 16:39:09 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdCSFVKRFhVVkFFVVlUREs2UE1TUDZBUzVXUjZTWlBPVFpMVnxDMTFFM0FCRUJDNDA1MEU3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2018-05-01
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
 version: 1

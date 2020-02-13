@@ -91,8 +91,8 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
                          '2016-01-01T00:00Z --expiry 2016-05-01T00:00Z', account_info, table_name)
 
         acl = self.storage_cmd('storage table policy list -t {}', account_info,
-                               table_name).get_output_in_json().keys()
-        self.assertSetEqual(set(acl), set(['test1', 'test2', 'test3', 'test4']))
+                               table_name).get_output_in_json()
+        self.assertSetEqual(set([entry['name'] for entry in acl]), set(['test1', 'test2', 'test3', 'test4']))
 
         self.storage_cmd('storage table policy show -t {} -n test1', account_info,
                          table_name).assert_with_checks(JMESPathCheck('permission', 'a'))
@@ -113,5 +113,5 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage table policy delete -t {} -n test1', account_info, table_name)
 
         acl = self.storage_cmd('storage table policy list -t {}', account_info,
-                               table_name).get_output_in_json().keys()
-        self.assertSetEqual(set(acl), set(['test2', 'test3', 'test4']))
+                               table_name).get_output_in_json()
+        self.assertSetEqual(set([entry['name'] for entry in acl]), set(['test2', 'test3', 'test4']))

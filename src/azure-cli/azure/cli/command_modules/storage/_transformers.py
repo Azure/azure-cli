@@ -130,4 +130,17 @@ def transform_url(result):
     result = re.sub('/', '//', result, count=1)
     return encode_url_path(result)
 
+
+def transform_storage_table_policy_list_output(result):
+    new_result = []
+    if result is None:
+        return new_result
+    for policy_name in result.keys():
+        new_entry = {'name': policy_name}
+        if result[policy_name] is not None:
+            for attr in result[policy_name].__dict__:
+                new_entry[attr] = getattr(result[policy_name], attr)
+        new_result.append(new_entry)
+    return new_result
+
 # endregion

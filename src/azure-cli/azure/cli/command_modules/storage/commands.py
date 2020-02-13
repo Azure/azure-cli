@@ -498,6 +498,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=get_custom_sdk('acl', table_data_service_factory)) as g:
         from ._format import transform_boolean_for_table
         from ._transformers import create_boolean_result_output_transformer
+        from ._transformers import transform_storage_table_policy_list_output
 
         g.storage_command('create', 'create_table', transform=create_boolean_result_output_transformer('created'),
                           table_transformer=transform_boolean_for_table)
@@ -516,8 +517,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('policy delete', 'delete_acl_policy')
         g.storage_custom_command(
             'policy show', 'get_acl_policy', exception_handler=show_exception_handler)
-        g.storage_custom_command(
-            'policy list', 'list_acl_policies', table_transformer=transform_acl_list_output)
+        g.storage_custom_command('policy list', 'list_acl_policies',
+                                 transform=transform_storage_table_policy_list_output,
+                                 table_transformer=transform_acl_list_output)
         g.storage_custom_command('policy update', 'set_acl_policy')
 
     with self.command_group('storage entity', table_sdk,
