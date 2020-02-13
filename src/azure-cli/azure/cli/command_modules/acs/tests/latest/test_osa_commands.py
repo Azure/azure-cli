@@ -167,25 +167,78 @@ class AzureOpenShiftServiceScenarioTest(ScenarioTest):
             'aad_client_app_id': aad_client_app_id,
             'aad_client_app_secret': aad_client_app_secret
         })
-        workspace = self.cmd("monitor log-analytics workspace create -g {resource_group} -n {osa_name}").get_output_in_json()
+        workspace = self.cmd("monitor log-analytics workspace create -g {resource_group} -n {name}").get_output_in_json()
         workspace_id = workspace["id"]
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
+        self.kwargs.update({            
+            'workspace_id': workspace_id,
+            'tenant_id': tenant_id
+        })
         # create
         create_cmd = 'openshift create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--compute-count=1 ' \
-                     '--aad-client-app-id {aad_client_app_id} --aad-client-app-secret {aad_client_app_secret}' \
-                     '--workspace-id {workspace_id}'
+                     '--aad-client-app-id {aad_client_app_id} --aad-client-app-secret {aad_client_app_secret} ' \
+                     '--aad-tenant-id {tenant_id} --workspace-id {workspace_id}'
 
-        self.cmd(create_cmd, checks=[
-            self.exists('fqdn'),
-            self.check('provisioningState', 'Succeeded'),
-            self.exists('monitorProfile')
-        ])
+        self.cmd(create_cmd, checks=[self.is_empty()])
         # show
         self.cmd('openshift show -g {resource_group} -n {name}', checks=[
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
-            self.exists('openShiftVersion')
+            self.exists('openShiftVersion'),
+            self.exists('monitorProfile')
         ])
+        # delete
+        self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitestosa', location='eastus')
+    @ManagedApplicationPreparer()
+    def test_openshift_monitoring_enable(self, resource_group, resource_group_location, aad_client_app_id, aad_client_app_secret):
+        # kwargs for string formatting
+        osa_name = self.create_random_name('clitestosa', 15)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': osa_name,
+            'location': resource_group_location,
+            'aad_client_app_id': aad_client_app_id,
+            'aad_client_app_secret': aad_client_app_secret
+        })
+        account = self.cmd("account show").get_output_in_json()
+        tenant_id = account["tenantId"]
+        self.kwargs.update({
+            'tenant_id': tenant_id
+        })
+
+        # create without monitoring
+        create_cmd = 'openshift create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--compute-count=1 ' \
+                     '--aad-client-app-id {aad_client_app_id} --aad-client-app-secret {aad_client_app_secret} ' \
+                     '--aad-tenant-id {tenant_id}'
+        self.cmd(create_cmd, checks=[self.is_empty()])
+
+        # show
+        self.cmd('openshift show -g {resource_group} -n {name}', checks=[
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.exists('openShiftVersion'),
+        ])
+
+        workspace = self.cmd("monitor log-analytics workspace create -g {resource_group} -n {name}").get_output_in_json()
+        workspace_id = workspace["id"]
+        self.kwargs.update({
+            'workspace_id': workspace_id,
+        })
+        monitor_enable_cmd = 'openshift monitor enable --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--workspace-id {workspace_id}'
+
+        self.cmd(monitor_enable_cmd, checks=[self.is_empty()])
+
+        self.cmd('openshift show -g {resource_group} -n {name}', checks=[
+            self.exists('monitorProfile')
+        ])
+
         # delete
         self.cmd('openshift delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 

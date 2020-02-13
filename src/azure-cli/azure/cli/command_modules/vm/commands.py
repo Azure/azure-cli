@@ -202,7 +202,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_managed_disk', setter_arg_name='disk', supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, client_factory=cf_disk_encryption_set, min_api='2019-07-01', is_preview=True) as g:
+    with self.command_group('disk-encryption-set', compute_disk_encryption_set_sdk, client_factory=cf_disk_encryption_set, min_api='2019-07-01') as g:
         g.custom_command('create', 'create_disk_encryption_set', supports_no_wait=True)
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='update_disk_encryption_set', setter_arg_name='disk_encryption_set')
@@ -272,6 +272,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
         g.command('start', 'start', supports_no_wait=True)
         g.command('stop', 'power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
+        g.command('reapply', 'reapply', supports_no_wait=True, min_api='2019-07-01')
         g.generic_update_command('update', setter_name='update_vm', setter_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
 
@@ -282,7 +283,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_av_sets')
         g.command('list-sizes', 'list_available_sizes')
         g.show_command('show', 'get')
-        g.generic_update_command('update')
+        g.generic_update_command('update', custom_func_name='update_av_set')
 
     with self.command_group('vm boot-diagnostics', compute_vm_sdk) as g:
         g.custom_command('disable', 'disable_boot_diagnostics')
@@ -358,7 +359,7 @@ def load_command_table(self, _):
         g.custom_command('reset-ssh', 'reset_linux_ssh')
 
     with self.command_group('vm host', compute_dedicated_host_sdk, client_factory=cf_dedicated_hosts,
-                            min_api='2019-03-01', is_preview=True) as g:
+                            min_api='2019-03-01') as g:
         g.show_command('show', 'get')
         g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
         g.custom_command('create', 'create_dedicated_host')
@@ -367,7 +368,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
-                            min_api='2019-03-01', is_preview=True) as g:
+                            min_api='2019-03-01') as g:
         g.show_command('show', 'get')
         g.custom_command('create', 'create_dedicated_host_group')
         g.custom_command('list', 'list_dedicated_host_groups')

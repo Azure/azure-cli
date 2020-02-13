@@ -494,6 +494,8 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
         if resource_group_name:
             err = 'Resource group "{}" is redundant because scope is supplied'
             raise CLIError(err.format(resource_group_name))
+    elif scope == '':
+        raise CLIError('Invalid scope. Please use --help to view the valid format.')
     elif resource_group_name:
         scope = subscription_scope + '/resourceGroups/' + resource_group_name
     else:
@@ -1040,7 +1042,9 @@ def _resolve_application(client, identifier):
             # it is either app id or object id, let us verify
             result = list(client.list(filter="appId eq '{}'".format(identifier)))
         else:
-            raise CLIError("Application '{}' doesn't exist".format(identifier))
+            error = CLIError("Application '{}' doesn't exist".format(identifier))
+            error.status_code = 404  # Make sure CLI returns 3
+            raise error
 
     return result[0].object_id if result else identifier
 
@@ -1194,7 +1198,9 @@ def _resolve_service_principal(client, identifier):
         return result[0].object_id
     if _is_guid(identifier):
         return identifier  # assume an object id
-    raise CLIError("service principal '{}' doesn't exist".format(identifier))
+    error = CLIError("Service principal '{}' doesn't exist".format(identifier))
+    error.status_code = 404  # Make sure CLI returns 3
+    raise error
 
 
 def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
@@ -1650,7 +1656,7 @@ def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
         if not result:
             result = list(client.service_principals.list(
                 filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-        if not result:  # assume an object id, let us verify it
+        if not result and _is_guid(assignee):  # assume an object id, let us verify it
             result = _get_object_stubs(client, [assignee])
 
         # 2+ matches should never happen, so we only check 'no match' here

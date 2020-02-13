@@ -204,6 +204,19 @@ def get_az_version_string():
     return version_string, updates_available
 
 
+def get_az_version_json():
+    from azure.cli.core.extension import get_extensions
+    versions = {'extensions': {}}
+
+    for dist in get_installed_cli_distributions():
+        versions[dist.key] = dist.version
+    extensions = get_extensions()
+    if extensions:
+        for ext in extensions:
+            versions['extensions'][ext.name] = ext.version or 'Unknown'
+    return versions
+
+
 def get_json_object(json_string):
     """ Loads a JSON string as an object and converts all keys to snake case """
 
@@ -595,6 +608,7 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     try:
         r = requests.request(method, uri, params=uri_parameters, data=body, headers=headers,
                              verify=not should_disable_connection_verify())
+        logger.debug("Response Header : %s", r.headers if r else '')
     except Exception as ex:  # pylint: disable=broad-except
         raise CLIError(ex)
 

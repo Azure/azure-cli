@@ -659,7 +659,7 @@ def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, stora
     return storage_resource
 
 
-# pylint: disable=too-many-locals, too-many-branches, too-many-statements
+# pylint: disable=too-many-locals, too-many-branches, too-many-statements, too-many-lines
 def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
@@ -671,7 +671,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
                         terminate_notification_time=None, max_price=None, scale_in_policy=None,
-                        os_disk_encryption_set=None, data_disk_encryption_sets=None):
+                        os_disk_encryption_set=None, data_disk_encryption_sets=None,
+                        data_disk_iops=None, data_disk_mbps=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -760,6 +761,16 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                 'usage error: Number of --data-disk-encryption-sets mismatches with number of data disks.')
         for i, data_disk in enumerate(data_disks):
             data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
+    if data_disk_iops:
+        if len(data_disk_iops) != len(data_disks):
+            raise CLIError('usage error: Number of --data-disk-iops mismatches with number of data disks.')
+        for i, data_disk in enumerate(data_disks):
+            data_disk['diskIOPSReadWrite'] = data_disk_iops[i]
+    if data_disk_mbps:
+        if len(data_disk_mbps) != len(data_disks):
+            raise CLIError('usage error: Number of --data-disk-mbps mismatches with number of data disks.')
+        for i, data_disk in enumerate(data_disks):
+            data_disk['diskMBpsReadWrite'] = data_disk_mbps[i]
     if data_disks:
         storage_properties['dataDisks'] = data_disks
 
@@ -915,8 +926,10 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
     return av_set
 
 
-# used for log analytics workspace
-def build_vm_mmaExtension_resource(_, vm_name, location):
+def build_vm_linux_log_analytics_workspace_agent(_, vm_name, location):
+    '''
+    This is used for log analytics workspace
+    '''
     mmaExtension_resource = {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
         'apiVersion': '2018-10-01',
@@ -941,8 +954,10 @@ def build_vm_mmaExtension_resource(_, vm_name, location):
     return mmaExtension_resource
 
 
-# used for log analytics workspace
-def build_vm_daExtensionName_resource(_, vm_name, location):
+def build_vm_daExtension_resource(_, vm_name, location):
+    '''
+    This is used for log analytics workspace
+    '''
     daExtensionName_resource = {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
         'apiVersion': '2018-10-01',
@@ -958,3 +973,31 @@ def build_vm_daExtensionName_resource(_, vm_name, location):
     daExtensionName_resource['location'] = location
     daExtensionName_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/{0}/extensions/OMSExtension'.format(vm_name)]  # pylint: disable=line-too-long
     return daExtensionName_resource
+
+
+def build_vm_windows_log_analytics_workspace_agent(_, vm_name, location):
+    '''
+    This function is used for log analytics workspace.
+    '''
+    mmaExtension_resource = {
+        'type': 'Microsoft.Compute/virtualMachines/extensions',
+        'apiVersion': '2018-10-01',
+        'properties': {
+            'publisher': 'Microsoft.EnterpriseCloud.Monitoring',
+            'type': 'MicrosoftMonitoringAgent',
+            'typeHandlerVersion': '1.0',
+            'autoUpgradeMinorVersion': 'true',
+            'settings': {
+                'workspaceId': "[reference(parameters('workspaceId'), '2015-11-01-preview').customerId]",
+                'stopOnMultipleConnections': 'true'
+            },
+            'protectedSettings': {
+                'workspaceKey': "[listKeys(parameters('workspaceId'), '2015-11-01-preview').primarySharedKey]"
+            }
+        }
+    }
+
+    mmaExtension_resource['name'] = vm_name + '/MicrosoftMonitoringAgent'
+    mmaExtension_resource['location'] = location
+    mmaExtension_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name]
+    return mmaExtension_resource

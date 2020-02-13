@@ -742,7 +742,7 @@ def load_arguments(self, _):
         c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.', id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
-        c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az network private-resource show to obtain the list of group ids."')
+        c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az keyvault(storage/etc) private-endpoint show" to obtain the list of group ids.')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
         c.argument('manual_request', help='Use manual request to establish the connection', arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
@@ -760,6 +760,7 @@ def load_arguments(self, _):
         c.argument('private_endpoint_connections', nargs='+', help='Space-separated list of private endpoint connections.')
         c.argument('fqdns', nargs='+', help='Space-separated list of FQDNs.')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('enable_proxy_protocol', help='Enable proxy protocol for private link service.', arg_type=get_three_state_flag(), min_api='2019-09-01')
 
     with self.argument_context('network private-link-service', arg_group='IP Configuration') as c:
         c.argument('private_ip_address', private_ip_address_type)
@@ -1280,7 +1281,7 @@ def load_arguments(self, _):
     with self.argument_context('network vnet peering') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('virtual_network_peering_name', options_list=['--name', '-n'], help='The name of the VNet peering.', id_part='child_name_1')
-        c.argument('remote_virtual_network', options_list=['--remote-vnet', c.deprecate(target='--remote-vnet-id', hide=True, expiration='2.1.0')], help='Resource ID or name of the remote VNet.')
+        c.argument('remote_virtual_network', options_list=['--remote-vnet', c.deprecate(target='--remote-vnet-id', hide=True, expiration='3.0.0')], help='Resource ID or name of the remote VNet.')
 
     with self.argument_context('network vnet peering create') as c:
         c.argument('allow_virtual_network_access', options_list='--allow-vnet-access', action='store_true', help='Allows access from the local VNet to the remote VNet.')
@@ -1308,7 +1309,7 @@ def load_arguments(self, _):
 
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:
-            c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='2.1.0'))
+            c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='3.0.0'))
             c.argument('virtual_network_name', id_part=None)
 
     # endregion

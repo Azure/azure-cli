@@ -146,6 +146,31 @@ type: group
 short-summary: Manage vault network ACLs.
 """
 
+helps['keyvault private-endpoint'] = """
+type: group
+short-summary: Manage vault private endpoint connections.
+"""
+
+helps['keyvault private-endpoint delete'] = """
+type: command
+short-summary: Delete the specified private endpoint connection associated with a Key Vault.
+"""
+
+helps['keyvault private-endpoint show'] = """
+type: command
+short-summary: Show details of a private endpoint connection associated with a Key Vault.
+"""
+
+helps['keyvault private-link-resource'] = """
+type: group
+short-summary: Manage vault private link resources.
+"""
+
+helps['keyvault private-link-resource show'] = """
+type: command
+short-summary: Show the private link resources supported for a Key Vault.
+"""
+
 helps['keyvault recover'] = """
 type: command
 short-summary: Recover a key vault.
@@ -212,22 +237,23 @@ type: command
 examples:
   - name: Add a sas-definition for an account sas-token
     text: |4
+        $sastoken = az storage account generate-sas --expiry 2020-01-01 --permissions rw --resource-types sco --services bfqt --https-only --account-name storageacct --account-key 00000000
 
-        $sastoken = az storage account generate-sas --expiry 2020-01-01 --permissions rw \\
-        --resource-types sco --services bfqt --https-only --account-name storageacct     \\
-        --account-key 00000000
-
-        az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \\
-        -n rwallserviceaccess --validity-period P2D --sas-type account --template-uri $sastoken
+        az keyvault storage sas-definition create --vault-name vault --account-name storageacct -n rwallserviceaccess --validity-period P2D --sas-type account --template-uri $sastoken
   - name: Add a sas-definition for a blob sas-token
     text: >4
-
-        $sastoken = az storage blob generate-sas --account-name storageacct --account-key 00000000 \\ -c container1 -n blob1 --https-only --permissions rw
+        $sastoken = az storage blob generate-sas --account-name storageacct --account-key 00000000 -c container1 -n blob1 --https-only --permissions rw
 
         $url = az storage blob url --account-name storageacct -c container1 -n blob1
 
+        az keyvault storage sas-definition create --vault-name vault --account-name storageacct -n rwblobaccess --validity-period P2D --sas-type service --template-uri $url?$sastoken
+  - name: Add a sas-definition for a container sas-token
+    text: >4
+        $sastoken = az storage container generate-sas --account-name storageacct --account-key 00000000 -n container1 --https-only --permissions rw
 
-        az keyvault storage sas-definition create --vault-name vault --account-name storageacct   \\ -n rwblobaccess --validity-period P2D --sas-type service --template-uri $url?$sastoken
+        $url = "https://{storage-account-name}.blob.core.windows.net/{container-name}"  # The prefix of your blob url
+
+        az keyvault storage sas-definition create --vault-name vault --account-name storageacct -n rwcontaineraccess --validity-period P2D --sas-type service --template-uri $url?$sastoken
 """
 
 helps['keyvault update'] = """

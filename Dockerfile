@@ -34,9 +34,9 @@ LABEL maintainer="Microsoft" \
 # pip wheel - required for CLI packaging
 # jmespath-terminal - we include jpterm as a useful tool
 # libintl and icu-libs - required by azure devops artifact (az extension add --name azure-devops)
-RUN apk add --no-cache bash openssh ca-certificates jq curl openssl git zip \
+RUN apk add --no-cache bash openssh ca-certificates jq curl openssl perl git zip \
  && apk add --no-cache --virtual .build-deps gcc make openssl-dev libffi-dev musl-dev linux-headers \
- && apk add --no-cache libintl icu-libs \
+ && apk add --no-cache libintl icu-libs libc6-compat \
  && update-ca-certificates
 
 ARG JP_VERSION="0.1.3"
