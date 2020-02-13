@@ -174,12 +174,12 @@ def validate_private_endpoint_connection_id(cmd, ns):
     if not connection_id:
         if not all([connection_name, vault_name]):
             raise argparse.ArgumentError(
-                None, 'specify both: --connection-name/-n and --vault-name')
+                None, 'specify both: --name/-n and --vault-name')
         ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
     else:
         if any([connection_name, vault_name]):
             raise argparse.ArgumentError(
-                None, 'you don\'t need to specify --connection-name/-n or --vault-name if --connection-id is specified')
+                None, 'you don\'t need to specify --name/-n or --vault-name if --id is specified')
 
         id_parts = connection_id.split('/')
         ns.private_endpoint_connection_name = id_parts[-1]
