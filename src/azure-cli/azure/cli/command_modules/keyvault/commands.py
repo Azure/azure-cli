@@ -107,7 +107,7 @@ def load_command_table(self, _):
 
     # Data Plane Commands
     with self.command_group('keyvault key', kv_data_sdk) as g:
-        g.keyvault_command('list', 'get_keys',
+        g.keyvault_command('list', 'get_keys', validator=process_vault_and_hsm_name,
                            transform=multi_transformers(
                                filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))
         g.keyvault_command('list-versions', 'get_key_versions', transform=extract_subresource_name(id_parameter='kid'))
@@ -122,8 +122,8 @@ def load_command_table(self, _):
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key', doc_string_source=data_doc_string.format('backup_key'))
         g.keyvault_custom('restore', 'restore_key', doc_string_source=data_doc_string.format('restore_key'))
-        g.keyvault_custom('import', 'import_key', validator=process_vault_and_hsm_name)
-        g.keyvault_custom('download', 'download_key')
+        g.keyvault_custom('import', 'import_key')
+        g.keyvault_custom('download', 'download_key', validator=process_vault_and_hsm_name)
 
     with self.command_group('keyvault secret', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_secrets',

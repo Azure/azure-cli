@@ -178,7 +178,6 @@ def load_arguments(self, _):
             c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
                        id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-            c.argument('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None)
             c.argument(item + '_version', options_list=['--version', '-v'],
                        help='The {} version. If omitted, uses the latest version.'.format(item), default='',
                        required=False, completer=get_keyvault_version_completion_list(item))
@@ -196,8 +195,11 @@ def load_arguments(self, _):
                            required=False)
                 c.argument('vault_base_url', vault_name_type, required=False,
                            help='Name of the Key Vault. Required if --id is not specified.')
-                c.argument('hsm_base_url', hsm_name_type, required=False,
-                           help='Name of the HSM. Required if --id is not specified.')
+                if item == 'key':
+                    c.argument('hsm_base_url', hsm_name_type, required=False,
+                               help='Name of the HSM. Required if --id is not specified. '
+                                    '(--hsm-name and --vault-name are mutually exclusive, '
+                                    'please specify just one of them)')
                 c.argument(item + '_version', required=False)
 
         for cmd in ['purge', 'recover', 'show-deleted']:
@@ -222,9 +224,16 @@ def load_arguments(self, _):
         c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*',
                    help='Space-separated list of permitted JSON web key operations.')
 
-    for item in ['create', 'import']:
+    for item in ['create', 'download']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            c.argument('vault_name', required=False, help='Name of the Key Vault.')
+            c.argument('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None)
+    for item in ['show']:
+        with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
+            c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None)
+
+    for item in ['create', 'delete', 'download', 'list', 'list-versions', 'purge', 'set-attributes', 'show',
+                 'show-deleted']:  # except for 'backup/restore', 'import', those are coming soon
+        with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
             c.argument('hsm_name', required=False, help='Name of the HSM.')
 
     for item in ['create', 'import']:

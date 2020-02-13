@@ -760,7 +760,7 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, key_name, vault_base_url=None, hsm_base_url=None,  # pylint: disable=unused-argument
+def import_key(cmd, client, key_name, vault_base_url,
                protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_string=None, pem_password=None, byok_file=None,
                byok_string=None):
@@ -888,8 +888,8 @@ def _extract_ec_public_key_from_jwk(jwk_dict):
     return public.public_key(default_backend())
 
 
-def download_key(client, file_path, vault_base_url=None, key_name=None, key_version='',
-                 encoding=None, identifier=None):  # pylint: disable=unused-argument
+def download_key(client, file_path, hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
+                 vault_base_url=None, key_name=None, key_version='', encoding=None):
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
