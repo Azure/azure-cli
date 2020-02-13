@@ -28,7 +28,7 @@ The commands to run to install the dependencies for some common distributions ar
 * [CoreOS](#coreos-stable-899150--beta-101010--alpha-101010)
 
 ### Ubuntu 12.04 LTS
-Python 2.7.3 should be already on the machine. Install Python 3.5+ if not exists.
+Python 2.7.3 should be already on the machine. Install Python 3.5+ if needed.
 ```
 sudo apt-get update && sudo apt-get install -y libssl-dev libffi-dev python-dev
 ```
