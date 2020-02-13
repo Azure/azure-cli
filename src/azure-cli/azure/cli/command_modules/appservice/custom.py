@@ -699,7 +699,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
 
 def list_runtimes(cmd, linux=False):
     client = web_client_factory(cmd.cli_ctx)
-    runtime_helper = _StackRuntimeHelper(client, linux)
+    runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
 
     return [s['displayName'] for s in runtime_helper.stacks]
 
