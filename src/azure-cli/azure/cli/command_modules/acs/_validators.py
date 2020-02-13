@@ -268,7 +268,7 @@ def validate_cluster_autoscaler_profile(namespace):
 def _validate_cluster_autoscaler_key(key):
     if not key:
         raise CLIError('Empty key specified for cluster-autoscaler-profile')
-    valid_keys = list(k.replace("_", "-") for k in ManagedClusterPropertiesAutoScalerProfile._attribute_map.keys())
+    valid_keys = list(k.replace("_", "-") for k in ManagedClusterPropertiesAutoScalerProfile._attribute_map.keys()) # pylint: disable=protected-access
     if key not in valid_keys:
         raise CLIError('Invalid key specified for cluster-autoscaler-profile: %s' % key)
 
