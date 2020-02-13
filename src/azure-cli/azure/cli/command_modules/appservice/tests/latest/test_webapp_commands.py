@@ -107,6 +107,9 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('httpsOnly', False),
         ])
 
+    def test_webapp_runtimes(self):
+        self.cmd('webapp list-runtimes')
+
 
 class WebappQuickCreateTest(ScenarioTest):
     @ResourceGroupPreparer()
