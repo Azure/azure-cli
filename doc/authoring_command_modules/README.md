@@ -201,12 +201,12 @@ Submitting Pull Requests
 
 ### Format PR Title
 
-History notes are auto-generated based on commit messages and descriptions starting from [S165](https://github.com/Azure/azure-cli/milestone/82). The commmit message for the squashed merge commit defaults to the PR title. Starting from 01/30/2020, we require all the PR titles to follow the below format:
-1. [**Mandatory**] Each commit message must start with `[Component Name]` or `{Component Name}`. 
+History notes are auto-generated based on PR titles and descriptions starting from [S165](https://github.com/Azure/azure-cli/milestone/82). Starting from 01/30/2020, we require all the PR titles to follow the below format:
+1. [**Mandatory**] Each PR title must start with `[Component Name]` or `{Component Name}`. 
     * `Component Name` shall be replaced by the real ones such as `Storage`, `Compute`. It could be the name of a command module, but in title case with necessary spaces for better readability, such as `API Management`, `Managed Service`. Other possible component names include but are not limited to: `Packaging`, `Misc.`, `Aladdin`.
     * `[]` means this change is customer-facing and the message will be put into `HISTORY.rst`. `{}` means this change is not customer-facing and the message will **NOT** be included in `HISTORY.rst`.
     * If the component name is `Core`, the message will be written in `src/azure-cli-core/HISTORY.rst`. Otherwise, the message will be written in `src/azure-cli/HISTORY.rst`.
-2. [**Mandatory**] If it's a breaking change, the second part should be `BREAKING CHANGE` followed by a colon. In the case of hotfix, put `Hotfix` in this part. For other cases, this part should be empty.
+2. [**Mandatory**] If it's a breaking change, the second part should be `BREAKING CHANGE` followed by a colon. In the case of hotfix, put `Hotfix` in this part. If it's related to fixing an issue, put `Fix #number` in this part. For other cases, this part could be empty.
 3. [**Recommendation**] If the change can be mapped into a command, then the next part could be the command name, followed by a colon.
 4. [**Recommendation**] Use the right verb with present-tense in original form to descibe what is done:
     * **Add** for new features.
@@ -215,22 +215,23 @@ History notes are auto-generated based on commit messages and descriptions start
     * **Remove** for deprecated features removed in this release.
     * **Fix** for any bug fixes.
 
-An example title of customer-facing change PR:
+Examples of customer-facing change PR title:
 
->[Storage] BREAKING CHANGE: az storage remove: remove --auth-mode argument
+>[Storage] BREAKING CHANGE: az storage remove: remove --auth-mode argument  
+>[ARM] Fix #10246: az resource tag crashes when the parameter --ids passed in is resource group ID
 
-An example title of non-customer-facing change PR:
+An example of non-customer-facing change PR title:
 
 >{Aladdin} Add help example for dns
 
 ### Format PR Description
 
-If you would like to write multiple history notes for one PR, please write the notes under `History Notes` section in the PR description,  following the same format described above. In this case, the PR title should be a summary of all the changes in this PR and will not be put into `HISTORY.rst`.
+If you would like to write multiple history notes for one PR, please write the notes under `History Notes` section in the PR description, following the same format described above. The PR template already contains the history note template, just change it if needed. In this case, the PR title should be a summary of all the changes in this PR and will not be put into `HISTORY.rst`. You can delete the `History Notes` section if not needed.
 
 Other than that, you can put any reasonable information in the description above the `History Notes` part.
 
-### Only Modify HISTORY.rst for Hotfix
-As described above, history notes will be auto-generated and inserted into `HISTORY.rst` during release. When submitting a normal PR, you don't need to modify `HISTORY.rst` manually. In the case of hotfix, you should create a hotfix branch based on release branch and submit a PR to merge hotfix into release. In this PR, if you have customer-facing changes, you need to modify `HISTORY.rst` to add history notes. Later on you also need to merge the hotfix branch into dev branch and the second part of the PR title should be `Hotfix`. The auto-generation of history notes for the next release will ignore the commit that contains `Hotfix`.
+### Submit Hotfix
+In the case of hotfix, you should create a hotfix branch based on release branch and submit a PR to merge hotfix into release. In this PR, the second part of the PR title should be `Hotfix`. If you have customer-facing changes, you need to modify `HISTORY.rst` to add history notes. The auto generated history notes for the next release will ignore the PR that contains `Hotfix`. You also need to submit a PR to merge the release branch back into dev branch before next release. Do **NOT** squash and merge this PR. After the PR gets approved by code owners, you should fast forward dev to release on your local machine and then push dev to upstream repository. 
 
 An example title of hotfix change PR:
 
