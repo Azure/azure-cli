@@ -87,6 +87,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(SkuName, default=SkuName.standard.value))
         c.argument('no_self_perms', arg_type=get_three_state_flag(), help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities. If omitted, assume true as default value.')
 
     with self.argument_context('keyvault recover') as c:
         c.argument('vault_name', help='Name of the deleted vault', required=True, completer=None,
