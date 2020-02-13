@@ -17,6 +17,8 @@ from azure.cli.core.commands.validators import validate_tag
 from azure.cli.core.util import CLIError
 import azure.cli.core.keys as keys
 
+from azure.mgmt.containerservice.v2020_02_01.models import ManagedClusterPropertiesAutoScalerProfile
+
 logger = get_logger(__name__)
 
 
@@ -255,7 +257,7 @@ def validate_vnet_subnet_id(namespace):
 def validate_cluster_autoscaler_profile(namespace):
     """ Validates that cluster autoscaler profile is acceptable by:
         1. Extracting the key[=value] format to map
-        2. Validating that the key isn't empty
+        2. Validating that the key isn't empty and that the key is valid
     """
     _extract_cluster_autoscaler_params(namespace)
     if namespace.cluster_autoscaler_profile is not None:
@@ -266,7 +268,9 @@ def validate_cluster_autoscaler_profile(namespace):
 def _validate_cluster_autoscaler_key(key):
     if not key:
         raise CLIError('Empty key specified for cluster-autoscaler-profile')
-
+    valid_keys = list(k.replace("_", "-") for k in ManagedClusterPropertiesAutoScalerProfile._attribute_map.keys())
+    if key not in valid_keys:
+        raise CLIError('Invalid key specified for cluster-autoscaler-profile: %s' % key)
 
 def _extract_cluster_autoscaler_params(namespace):
     """ Extracts multiple space-separated cluster autoscaler parameters in key[=value] format """

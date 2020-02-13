@@ -95,6 +95,15 @@ class TestClusterAutoscalerParamsValidators(unittest.TestCase):
             validators.validate_cluster_autoscaler_profile(namespace)
         self.assertEqual(str(cm.exception), err)
 
+    def test_invalid_key(self):
+        cluster_autoscaler_profile = ["bad-key=val"]
+        namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
+        err = "Invalid key specified for cluster-autoscaler-profile: bad-key"
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_cluster_autoscaler_profile(namespace)
+        self.assertEqual(str(cm.exception), err)
+
     def test_valid_parameters(self):
         cluster_autoscaler_profile = ["scan-interval=20s", "scale-down-delay-after-add=15m"]
         namespace = Namespace(cluster_autoscaler_profile=cluster_autoscaler_profile)
