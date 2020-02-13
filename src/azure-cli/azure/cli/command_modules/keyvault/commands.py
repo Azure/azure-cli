@@ -16,8 +16,8 @@ from ._transformers import (
     multi_transformers)
 
 from ._validators import (
-    process_secret_set_namespace, process_certificate_cancel_namespace, process_vault_and_hsm_name,
-    validate_private_endpoint_connection_id)
+    process_secret_set_namespace, process_certificate_cancel_namespace,
+    process_vault_and_hsm_name, validate_private_endpoint_connection_id)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -116,16 +116,16 @@ def load_command_table(self, _):
                            transform=extract_subresource_name(id_parameter='kid'))
         g.keyvault_custom('create', 'create_key', validator=process_vault_and_hsm_name,
                           doc_string_source=data_doc_string.format('create_key'))
-        g.keyvault_command('set-attributes', 'update_key', validator=process_vault_and_hsm_name)
-        g.keyvault_command('show', 'get_key', validator=process_vault_and_hsm_name)
-        g.keyvault_command('show-deleted', 'get_deleted_key', validator=process_vault_and_hsm_name)
-        g.keyvault_command('delete', 'delete_key', validator=process_vault_and_hsm_name)
-        g.keyvault_command('purge', 'purge_deleted_key', validator=process_vault_and_hsm_name)
-        g.keyvault_command('recover', 'recover_deleted_key', validator=process_vault_and_hsm_name)
+        g.keyvault_command('set-attributes', 'update_key')
+        g.keyvault_command('show', 'get_key')
+        g.keyvault_command('show-deleted', 'get_deleted_key')
+        g.keyvault_command('delete', 'delete_key')
+        g.keyvault_command('purge', 'purge_deleted_key')
+        g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key', doc_string_source=data_doc_string.format('backup_key'))
         g.keyvault_custom('restore', 'restore_key', doc_string_source=data_doc_string.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
-        g.keyvault_custom('download', 'download_key', validator=process_vault_and_hsm_name)
+        g.keyvault_custom('download', 'download_key')
 
     with self.command_group('keyvault secret', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_secrets',

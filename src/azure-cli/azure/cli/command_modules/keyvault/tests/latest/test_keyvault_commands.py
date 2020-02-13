@@ -47,8 +47,7 @@ def _clear_hsm(test, hsm_name):
     all_keys = test.cmd('keyvault key list --hsm-name {hsm_name} --query "[].kid"'
                         .format(hsm_name=hsm_name)).get_output_in_json()
     for key_id in all_keys:
-        test.cmd('keyvault key delete --id {key_id}'.format(
-            hsm_name=hsm_name, key_id=key_id))
+        test.cmd('keyvault key delete --id {key_id}'.format(key_id=key_id))
 
     if test.is_live:
         time.sleep(10)
@@ -56,8 +55,8 @@ def _clear_hsm(test, hsm_name):
     all_keys = test.cmd('keyvault key list-deleted --hsm-name {hsm_name} --query "[].kid"'
                         .format(hsm_name=hsm_name)).get_output_in_json()
     for key_id in all_keys:
-        test.cmd('keyvault key purge --id {key_id}'.format(
-            hsm_name=hsm_name, key_id=key_id))
+        test.cmd('keyvault key purge --id {key_id}'.format(key_id=key_id)
+                 .replace('/keys/', '/deletedkeys/'))
 
     if test.is_live:
         time.sleep(10)
@@ -467,7 +466,7 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
             self.cmd('keyvault key show-deleted --vault-name {kv} --hsm-name {hsm} -n {key}')
 
         # create a key
-        hsm_key = self.cmd('keyvault key create --hsm-name {hsm} -n {key} -p hsm --kty RSA-HSM',
+        hsm_key = self.cmd('keyvault key create --hsm-name {hsm} -n {key} -p hsm',
                            checks=self.check('attributes.enabled', True)).get_output_in_json()
         hsm_first_kid = hsm_key['key']['kid']
         hsm_first_version = hsm_first_kid.rsplit('/', 1)[1]

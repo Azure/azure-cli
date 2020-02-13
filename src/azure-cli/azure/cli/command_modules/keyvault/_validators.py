@@ -368,6 +368,8 @@ def validate_vault_and_hsm_id(entity_type):
         pure_entity_type = entity_type.replace('deleted', '')
         name = getattr(ns, pure_entity_type + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
+        if not vault:
+            vault = getattr(ns, 'hsm_base_url', None)
         identifier = getattr(ns, 'identifier', None)
 
         if identifier:

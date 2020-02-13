@@ -20,7 +20,8 @@ from ._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
 from ._validators import (
     datetime_type, certificate_type,
-    get_vault_base_url_type, get_hsm_base_url_type, validate_key_import_source,
+    get_vault_base_url_type, get_hsm_base_url_type,
+    process_vault_and_hsm_name, validate_key_import_source,
     validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
@@ -219,12 +220,29 @@ def load_arguments(self, _):
                    help='Space-separated list of permitted JSON web key operations.')
 
     # except for 'backup/restore', 'import', those are coming soon
+    hsm_base_url_desc1 = 'Name of the HSM. (--hsm-name and --vault-name are ' \
+                         'mutually exclusive, please specify just one of them)'
+    hsm_base_url_desc2 = 'Name of the HSM. Required if --id is not specified. (--hsm-name and --vault-name are ' \
+                         'mutually exclusive, please specify just one of them)'
+
+    hsm_base_url_descriptions = {
+        'create': hsm_base_url_desc1,
+        'list': hsm_base_url_desc1,
+        'list-deleted': hsm_base_url_desc1,
+        'delete': hsm_base_url_desc2,
+        'download': hsm_base_url_desc2,
+        'list-versions': hsm_base_url_desc2,
+        'purge': hsm_base_url_desc2,
+        'set-attributes': hsm_base_url_desc2,
+        'show': hsm_base_url_desc2,
+        'show-deleted': hsm_base_url_desc2
+    }
+
     # custom funtions
     for item in ['create', 'download']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
             c.argument('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
-                       help='Name of the HSM. Required if --id is not specified. (--hsm-name and --vault-name are '
-                            'mutually exclusive, please specify just one of them)')
+                       validator=process_vault_and_hsm_name, help=hsm_base_url_descriptions[item])
 
     # SDK functions
     for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'set-attributes', 'show', 'show-deleted']:
@@ -232,11 +250,8 @@ def load_arguments(self, _):
             if item in ['list', 'list-deleted']:
                 c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx),
                            required=False, help='Name of the Key Vault.')
-                c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None)
-            else:
-                c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
-                        help='Name of the HSM. Required if --id is not specified. (--hsm-name and --vault-name are '
-                             'mutually exclusive, please specify just one of them)')
+            c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
+                    validator=process_vault_and_hsm_name, help=hsm_base_url_descriptions[item])
 
     for item in ['create', 'import']:
         with self.argument_context('keyvault key {}'.format(item)) as c:
