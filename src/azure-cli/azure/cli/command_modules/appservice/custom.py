@@ -2054,6 +2054,35 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
                                                 certificate_envelope=kv_cert_def)
 
 
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None):
+    Certificate = cmd.get_models('Certificate')
+    hostname = hostname.lower()
+    client = web_client_factory(cmd.cli_ctx)
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not webapp:
+        slot_text = "Deployment slot {} in ".format(slot) if slot else ''
+        raise CLIError("{0}app {1} doesn't exist in resource group {2}".format(slot_text, name, resource_group_name))
+
+    parsed_plan_id = parse_resource_id(webapp.server_farm_id)
+    plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    if plan_info.sku.tier.upper() == 'FREE' or plan_info.sku.tier.upper() == 'SHARED':
+        raise CLIError('Managed Certificate is not supported on Free and Shared tier.')
+
+    if not _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot):
+        slot_text = " --slot {}".format(slot) if slot else ""
+        raise CLIError("Hostname (custom domain) '{0}' is not registered with {1}. "
+                       "Use 'az webapp config hostname add --resource-group {2} "
+                       "--webapp-name {1}{3} --hostname {0}' "
+                       "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
+
+    server_farm_id = webapp.server_farm_id
+    location = webapp.location
+    easy_cert_def = Certificate(location=location, canonical_name=hostname,
+                                server_farm_id=server_farm_id, password='')
+    return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+                                                certificate_envelope=easy_cert_def)
+
+
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
@@ -3363,3 +3392,15 @@ def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
         namespace='Microsoft.KeyVault',
         type='vaults',
         name=key_vault)
+
+
+def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None):
+    hostname_bindings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                'list_host_name_bindings', slot)
+    verified_hostname_found = False
+    for hostname_binding in hostname_bindings:
+        binding_name = hostname_binding.name.split('/')[-1]
+        if binding_name.lower() == hostname and hostname_binding.host_name_type == 'Verified':
+            verified_hostname_found = True
+
+    return verified_hostname_found
