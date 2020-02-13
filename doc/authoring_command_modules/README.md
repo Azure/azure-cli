@@ -206,7 +206,7 @@ History notes are auto-generated based on PR titles and descriptions starting fr
     * `Component Name` shall be replaced by the real ones such as `Storage`, `Compute`. It could be the name of a command module, but in title case with necessary spaces for better readability, such as `API Management`, `Managed Service`. Other possible component names include but are not limited to: `Packaging`, `Misc.`, `Aladdin`.
     * `[]` means this change is customer-facing and the message will be put into `HISTORY.rst`. `{}` means this change is not customer-facing and the message will **NOT** be included in `HISTORY.rst`.
     * If the component name is `Core`, the message will be written in `src/azure-cli-core/HISTORY.rst`. Otherwise, the message will be written in `src/azure-cli/HISTORY.rst`.
-2. [**Mandatory**] If it's a breaking change, the second part should be `BREAKING CHANGE` followed by a colon. In the case of hotfix, put `Hotfix` in this part. For other cases, this part should be empty.
+2. [**Mandatory**] If it's a breaking change, the second part should be `BREAKING CHANGE` followed by a colon. In the case of hotfix, put `Hotfix` in this part. If it's related to fixing an issue, put `Fix #number` in this part. For other cases, this part could be empty.
 3. [**Recommendation**] If the change can be mapped into a command, then the next part could be the command name, followed by a colon.
 4. [**Recommendation**] Use the right verb with present-tense in original form to descibe what is done:
     * **Add** for new features.
@@ -215,11 +215,12 @@ History notes are auto-generated based on PR titles and descriptions starting fr
     * **Remove** for deprecated features removed in this release.
     * **Fix** for any bug fixes.
 
-An example title of customer-facing change PR:
+Examples of customer-facing change PR title:
 
->[Storage] BREAKING CHANGE: az storage remove: remove --auth-mode argument
+>[Storage] BREAKING CHANGE: az storage remove: remove --auth-mode argument  
+>[ARM] Fix #10246: az resource tag crashes when the parameter --ids passed in is resource group ID
 
-An example title of non-customer-facing change PR:
+An example of non-customer-facing change PR title:
 
 >{Aladdin} Add help example for dns
 

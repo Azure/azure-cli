@@ -73,7 +73,7 @@ def modify_history_file(file: fileinput.FileInput, new_history: str):
             write = False
         else:
             # remove any history notes written above previous release version
-            # make the generation of history notes idemponent
+            # make the generation of history notes idempotent
             if re.match(r'^[0-9]+\.[0-9]+\.[0-9]+$', line):
                 write = True
             if write:
