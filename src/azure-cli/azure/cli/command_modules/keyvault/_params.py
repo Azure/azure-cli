@@ -122,20 +122,20 @@ def load_arguments(self, _):
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
-    with self.argument_context('keyvault private-endpoint', min_api='2018-02-14') as c:
+    with self.argument_context('keyvault private-endpoint-connection', min_api='2018-02-14') as c:
         c.argument('approval_description', help='Comments for the approval.')
-        c.argument('private_endpoint_connection_name', options_list=['--connection-name', '-n'], required=False,
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
                    help='The name of the private endpoint connection associated with the Key Vault. '
-                        'Required if --connection-id is not specified')
+                        'Required if --id is not specified')
         c.argument('vault_name', vault_name_type, required=False,
-                   help='Name of the Key Vault. Required if --connection-id is not specified')
+                   help='Name of the Key Vault. Required if --id is not specified')
         c.argument('rejection_description', help='Comments for the rejection.')
 
     for item in ['approve', 'reject', 'delete', 'show']:
-        with self.argument_context('keyvault private-endpoint {}'.format(item), min_api='2018-02-14') as c:
-            c.extra('connection_id', required=False,
+        with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
+            c.extra('connection_id', options_list=['--id'], required=False,
                     help='The ID of the private endpoint connection associated with the Key Vault. '
-                         'If specified --vault-name and --connection-name/-n, this should be omitted.')
+                         'If specified --vault-name and --name/-n, this should be omitted.')
 
     with self.argument_context('keyvault private-link-resource', min_api='2018-02-14') as c:
         c.argument('vault_name', vault_name_type, required=True, help='Name of the Key Vault.')
