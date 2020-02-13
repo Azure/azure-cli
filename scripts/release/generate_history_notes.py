@@ -4,30 +4,30 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+#
+# This script is used to generate history notes for the commits on dev branch since last release.
+# The history notes are generated based on the title/description of the Pull Requests for the commits.
+# Make sure you have added the remote repository as upstream and fetched the latest code, i.e. you
+# have done:
+# git remote add upstream git@github.com:Azure/azure-cli.git
+# git fetch upstream
 
-import datetime
 import fileinput
 import json
 import re
+import subprocess
 import requests
 
-
 base_url = 'https://api.github.com/repos/azure/azure-cli'
-release_head_url = '{}/git/ref/heads/release'.format(base_url)
-dev_commits_url = '{}/commits?sha=dev'.format(base_url)
 commit_pr_url = '{}/commits/commit_id/pulls'.format(base_url)
 
 history_line_breaker = '==============='
-days_before = 45
 history_notes = {}
 
 
 def generate_history_notes():
-    release_head_sha = get_release_head()
     dev_commits = get_commits()
     for commit in dev_commits:
-        if commit['sha'] == release_head_sha:
-            break
         prs = get_prs_for_commit(commit['sha'])
         # parse PR if one commit is mapped to one PR
         if len(prs) == 1:
@@ -38,23 +38,27 @@ def generate_history_notes():
     cli_history = ''
     core_history = ''
     for component in sorted(history_notes, key=str.casefold):
-        if component == 'Core':
+        if component.casefold() == 'core':
             core_history += construct_core_history(component)
         else:
             cli_history += construct_cli_history(component)
     if core_history == '':
-        core_history = '* Minor fixes'
+        core_history = '* Minor fixes\n'
+    else:
+        core_history = core_history[:-1]  # remove last \n
 
     print("azure-cli history notes:")
     print(cli_history)
     print("azure-cli-core history notes:")
     print(core_history)
 
-    cli_history = cli_history[:-2]  # remove last two \n
-    with fileinput.FileInput('src/azure-cli/HISTORY.rst', inplace=True) as file:
+    cli_history = cli_history[:-1]  # remove last \n
+    with fileinput.FileInput('src/azure-cli/HISTORY.rst',
+                             inplace=True) as file:
         modify_history_file(file, cli_history)
 
-    with fileinput.FileInput('src/azure-cli-core/HISTORY.rst', inplace=True) as file:
+    with fileinput.FileInput('src/azure-cli-core/HISTORY.rst',
+                             inplace=True) as file:
         modify_history_file(file, core_history)
 
 
@@ -62,7 +66,10 @@ def modify_history_file(file: fileinput.FileInput, new_history: str):
     write = True
     for line in file:
         if line == '{}\n'.format(history_line_breaker):
-            print(line.replace(history_line_breaker, '{}\n\n{}'.format(history_line_breaker, new_history)))
+            print(line.replace(
+                history_line_breaker,
+                '{}\n\n{}'.format(history_line_breaker, new_history)),
+                  end='')
             write = False
         else:
             # remove any history notes written above previous release version
@@ -71,6 +78,7 @@ def modify_history_file(file: fileinput.FileInput, new_history: str):
                 write = True
             if write:
                 print(line, end='')
+
 
 def construct_cli_history(component: str):
     history = '**{}**\n\n'.format(component)
@@ -88,25 +96,22 @@ def construct_core_history(component: str):
     return history
 
 
-def get_release_head() -> str:
-    response = requests.get(release_head_url)
-    if response.status_code != 200:
-        raise Exception("Request to {} failed with {}".format(release_head_url, response.status_code))
-
-    release_head_obj = json.loads(response.content.decode('utf-8'))
-    release_head_sha = release_head_obj['object']['sha']
-    return release_head_sha
-
-
 def get_commits():
-    today = datetime.date.today()
-    start_date = today - datetime.timedelta(days=days_before)
-    start_date_str = start_date.strftime('%Y-%m-%dT%H:%M:%SZ')
-    dev_since_url = '{}&since={}'.format(dev_commits_url, start_date_str)
-    response = requests.get(dev_since_url)
-    if response.status_code != 200:
-        raise Exception("Request to {} failed with {}".format(dev_since_url, response.status_code))
-    dev_commits = json.loads(response.content.decode('utf-8'))
+    out = subprocess.Popen([
+        'git', 'log', 'upstream/release...upstream/dev',
+        '--pretty=format:"%H %s"'
+    ],
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT)
+    stdout, _ = out.communicate()
+    dev_commits = []
+    for line in stdout.decode('utf-8').splitlines():
+        words = line.strip('"').split(None, 1)
+        sha = words[0]
+        subject = words[1]
+        if not subject.startswith('{'):
+            dev_commits.append({'sha': sha, 'subject': subject})
+    dev_commits.reverse()
     return dev_commits
 
 
@@ -115,7 +120,8 @@ def get_prs_for_commit(commit: str):
     url = commit_pr_url.replace('commit_id', commit)
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        raise Exception("Request to {} failed with {}".format(url, response.status_code))
+        raise Exception("Request to {} failed with {}".format(
+            url, response.status_code))
     prs = json.loads(response.content.decode('utf-8'))
     return prs
 
@@ -123,18 +129,23 @@ def get_prs_for_commit(commit: str):
 def process_pr(pr):
     lines = [pr['title']]
     body = pr['body']
-    search_result = re.search(r'\*\*History Notes:\*\*(.*)---', body, flags=re.DOTALL)
+    search_result = re.search(r'\*\*History Notes:\*\*(.*)---',
+                              body,
+                              flags=re.DOTALL)
     if search_result is None:
-        search_result = re.search(r'\*\*History Notes:\*\*(.*)', body, flags=re.DOTALL)
-        if search_result is None:
-            return
-    body = search_result.group(1)
+        search_result = re.search(r'\*\*History Notes:\*\*(.*)',
+                                  body,
+                                  flags=re.DOTALL)
+        if search_result is not None:
+            body = search_result.group(1)
+    else:
+        body = search_result.group(1)
     lines.extend(body.splitlines())
     process_lines(lines)
 
 
 def process_commit(commit):
-    lines = commit['commit']['message'].splitlines()
+    lines = commit['subject'].splitlines()
     process_lines(lines)
 
 
@@ -156,7 +167,7 @@ def process_lines(lines: [str]):
             history_notes.setdefault(component, []).append(note)
 
 
-def parse_message(message: str) ->(str, str):
+def parse_message(message: str) -> (str, str):
     # do not include template
     if message.startswith('[Component Name'):
         return None, None
@@ -166,7 +177,10 @@ def parse_message(message: str) ->(str, str):
         note = m.group(2).strip()
         #remove appended PR number in commit message
         note = re.sub(r' \(#[0-9]+\)$', '', note)
-        note = re.sub('BREAKING CHANGE:', '[BREAKING CHANGE]', note, flags=re.IGNORECASE)
+        note = re.sub('BREAKING CHANGE:',
+                      '[BREAKING CHANGE]',
+                      note,
+                      flags=re.IGNORECASE)
         if note.endswith('.'):
             note = note[:-1]
         return component, note
