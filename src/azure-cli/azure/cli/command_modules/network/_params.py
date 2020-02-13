@@ -1,4 +1,5 @@
-# --------------------------------------------------------------------------------------------
+# ---
+# --------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -35,7 +36,8 @@ from azure.cli.command_modules.network._validators import (
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
     validate_application_gateway_identity, validate_virtul_network_gateway, validate_private_dns_zone,
-    NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction)
+    NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
+    process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -1792,4 +1794,20 @@ def load_arguments(self, _):
         c.argument('security_provider_name', arg_type=get_enum_type(SecurityProviderName), help='The security provider name', options_list=['--provider'])
         c.argument('security_partner_provider_name', options_list=['--name', '-n'], help='Name of the Security Partner Provider.')
         c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
+
+    # region PrivateLinkResource and PrivateEndpointConnection
+    from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom import TYPE_CLIENT_MAPPING
+    with self.argument_context('network private-link-resource list') as c:
+        c.argument('name', required=False, help='Name of the resource', options_list=['--name', '-n'])
+        c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type', arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
+        c.argument('resource_group_name', required=False)
+        c.extra('id', help='ID of the resource', validator=process_private_link_resource_id_argument)
+    for scope in ['show', 'approve', 'reject', 'remove']:
+        with self.argument_context('network private-endpoint-connection {}'.format(scope)) as c:
+            c.argument('name', required=False, help='Name of the private endpoint connection', options_list=['--name', '-n'])
+            c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type',
+                       arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
+            c.argument('resource_group_name', required=False)
+            c.argument('service_name', required=False, help='Name of the resource')
+            c.extra('connection_id', help='ID of the private endpoint connection', validator=process_private_endpoint_connection_id_argument)
     # endregion
