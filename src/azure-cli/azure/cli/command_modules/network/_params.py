@@ -1702,6 +1702,9 @@ def load_arguments(self, _):
         c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type', arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
         c.argument('resource_group_name', required=False)
         c.extra('id', help='ID of the resource', validator=process_private_link_resource_id_argument)
+    with self.argument_context('network private-endpoint-connection'.format(scope)) as c:
+        c.argument('approval_description', help='Comments for the approval.')
+        c.argument('reject_description', help='Comments for the rejection.')
     for scope in ['show', 'approve', 'reject', 'remove']:
         with self.argument_context('network private-endpoint-connection {}'.format(scope)) as c:
             c.argument('name', required=False, help='Name of the private endpoint connection', options_list=['--name', '-n'])
