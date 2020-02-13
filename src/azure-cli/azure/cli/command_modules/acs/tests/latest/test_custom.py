@@ -59,6 +59,17 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
 
+    def test_add_role_assignment_msi_basic(self):
+        role = 'Owner'
+        sp = '1234567'
+        cli_ctx = mock.MagicMock()
+
+        with mock.patch(
+                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
+            ok = _add_role_assignment(cli_ctx, role, sp, False, delay=0)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, False, scope=None)
+            self.assertTrue(ok, 'Expected _add_role_assignment with msi to succeed')
+
     def test_add_role_assignment_exists(self):
         role = 'Owner'
         sp = '1234567'
