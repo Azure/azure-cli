@@ -110,16 +110,26 @@ def process_secret_set_namespace(cmd, namespace):
 
 
 def process_vault_and_hsm_name(ns):
-    vault_base_url = ns.vault_base_url
-    hsm_base_url = ns.hsm_base_url
-    if vault_base_url and hsm_base_url:
-        raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
+    try:
+        if ns.identifier:
+            items = ns.identifier.split('/')
+            ns.vault_base_url = '/'.join(items[:3])
+            ns.key_name = items[4]
+            if len(items) == 6:
+                ns.key_version = items[-1]
+    except:  # pylint: disable=bare-except
+        pass
+    finally:
+        vault_base_url = ns.vault_base_url
+        hsm_base_url = ns.hsm_base_url
+        if vault_base_url and hsm_base_url:
+            raise CLIError('--vault-name and --hsm-name are mutually exclusive.')
 
-    if not vault_base_url and not hsm_base_url:
-        raise CLIError('Please specify --vault-name or --hsm-name.')
+        if not vault_base_url and not hsm_base_url:
+            raise CLIError('Please specify --vault-name or --hsm-name.')
 
-    if not vault_base_url:
-        ns.vault_base_url = hsm_base_url
+        if not vault_base_url:
+            ns.vault_base_url = hsm_base_url
 
 
 # PARAMETER NAMESPACE VALIDATORS
@@ -351,7 +361,7 @@ def validate_subnet(cmd, namespace):
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
 
-def validate_vault_id(entity_type):
+def validate_vault_and_hsm_id(entity_type):
     def _validate(ns):
         from azure.keyvault.key_vault_id import KeyVaultIdentifier
 

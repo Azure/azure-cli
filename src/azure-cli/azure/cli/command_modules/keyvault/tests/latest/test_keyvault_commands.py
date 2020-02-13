@@ -43,6 +43,26 @@ def _create_keyvault(test, kwargs, additional_args=None):
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
 
 
+def _clear_hsm(test, hsm_name):
+    all_keys = test.cmd('keyvault key list --hsm-name {hsm_name} --query "[].kid"'
+                        .format(hsm_name=hsm_name)).get_output_in_json()
+    for key_id in all_keys:
+        test.cmd('keyvault key delete --id {key_id}'.format(
+            hsm_name=hsm_name, key_id=key_id))
+
+    if test.is_live:
+        time.sleep(10)
+
+    all_keys = test.cmd('keyvault key list-deleted --hsm-name {hsm_name} --query "[].kid"'
+                        .format(hsm_name=hsm_name)).get_output_in_json()
+    for key_id in all_keys:
+        test.cmd('keyvault key purge --id {key_id}'.format(
+            hsm_name=hsm_name, key_id=key_id))
+
+    if test.is_live:
+        time.sleep(10)
+
+
 class DateTimeParseTest(unittest.TestCase):
     def test_parse_asn1_date(self):
         expected = datetime(year=2017,
@@ -268,40 +288,6 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=self.check('properties.enableRbacAuthorization', True))
 
 
-class KeyVaultManagedHSMScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mhsm')
-    def test_keyvault_managed_hsm(self, resource_group):
-        self.kwargs.update({
-            'kv': self.create_random_name('cli-test-kv-mhsm-', 24),
-            'loc': 'eastus',
-            'hsm': 'clitest',
-            'hsm_id': 'https://eastus.clitest.managedhsm-preview.azure.net'
-        })
-        _create_keyvault(self, self.kwargs)
-
-        keys = {
-            'AES-HSM': ['128', '192', '256'],
-            'EC-HSM': ['P-256', 'P-256K', 'P-384', 'P-521'],
-            'RSA-HSM': ['2048', '3072', '4096']
-        }
-
-        # create a key
-        for kty, args in keys.items():
-            for arg in args:
-                k_name = kty + '-' + arg
-                extra = ''
-                if kty in ['AES-HSM', 'RSA-HSM']:
-                    extra = '--size {}'.format(arg)
-                elif kty == 'EC-HSM':
-                    extra = '--curve {}'.format(arg)
-
-                self.cmd('keyvault key create --hsm-name {{hsm}} -n {k_name} -p hsm --kty {kty} {extra}'.format(
-                    k_name=k_name,
-                    kty=kty,
-                    extra=extra
-                ))
-
-
 class KeyVaultKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
     def test_keyvault_key(self, resource_group):
@@ -362,8 +348,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=self.check('key.kid', '{kid1}'))
 
         # show key (by id)
-        self.cmd('keyvault key show --id {kid1}',
-                 checks=self.check('key.kid', '{kid1}'))
+        self.cmd('keyvault key show --id {kid1}', checks=self.check('key.kid', '{kid1}'))
 
         # set key attributes
         self.cmd('keyvault key set-attributes --vault-name {kv} -n {key} --enabled true', checks=[
@@ -399,7 +384,8 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
             'key_plain_file': os.path.join(TEST_DIR, 'mydomain.test.pem')
         })
         self.cmd('keyvault key import --vault-name {kv} -n import-key-plain --pem-file "{key_plain_file}" -p software')
-        self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password} -p hsm')
+        self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" '
+                 '--pem-password {key_enc_password} -p hsm')
 
         # import PEM from string
         with open(os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'), 'rb') as f:
@@ -427,9 +413,10 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
             'key_enc_password': 'pass1234',
             'key_plain_file': os.path.join(TEST_DIR, 'ec256.pem')
         })
-        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-plain --pem-file "{key_plain_file}" -p software',
-                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
-        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password}',
+        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-plain --pem-file "{key_plain_file}" '
+                 '-p software', checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
+        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" '
+                 '--pem-password {key_enc_password}',
                  checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
 
         self.kwargs.update({
@@ -444,6 +431,108 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 3072 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
         self.cmd('keyvault key create --vault-name {kv} --name key2 --kty RSA-HSM --size 4096 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+
+
+class KeyVaultHSMKeyScenarioTest(ScenarioTest):
+    def test_keyvault_hsm_key(self):
+        self.kwargs.update({
+            'kv': 'clitest',
+            'key': self.create_random_name('key-', 24),
+            'hsm': 'clitest'
+        })
+
+        _clear_hsm(self, hsm_name=self.kwargs['hsm'])
+
+        # test exception
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key create --vault-name {kv} --hsm-name {hsm} -n {key}')
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key delete --vault-name {kv} --hsm-name {hsm} -n {key}')
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key download --vault-name {kv} --hsm-name {hsm} -n {key} -f test.key')
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key list --vault-name {kv} --hsm-name {hsm}')
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key list-deleted --vault-name {kv} --hsm-name {hsm}')
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key list-versions --vault-name {kv} --hsm-name {hsm} -n {key}')
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key purge --vault-name {kv} --hsm-name {hsm} -n {key}')
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key set-attributes --vault-name {kv} --hsm-name {hsm} -n {key}')
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key show --vault-name {kv} --hsm-name {hsm} -n {key}')
+        with self.assertRaises(CLIError):
+            self.cmd('keyvault key show-deleted --vault-name {kv} --hsm-name {hsm} -n {key}')
+
+        # create a key
+        hsm_key = self.cmd('keyvault key create --hsm-name {hsm} -n {key} -p hsm --kty RSA-HSM',
+                           checks=self.check('attributes.enabled', True)).get_output_in_json()
+        hsm_first_kid = hsm_key['key']['kid']
+        hsm_first_version = hsm_first_kid.rsplit('/', 1)[1]
+
+        # list keys
+        self.cmd('keyvault key list --hsm-name {hsm}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('keyvault key list --hsm-name {hsm} --maxresults 10',
+                 checks=self.check('length(@)', 1))
+
+        # create a new key version
+        hsm_key = self.cmd('keyvault key create --hsm-name {hsm} -n {key} -p hsm --disabled --ops encrypt decrypt '
+                           '--kty RSA-HSM',
+                           checks=[
+                               self.check('attributes.enabled', False),
+                               self.check('length(key.keyOps)', 2)
+                           ]).get_output_in_json()
+        hsm_second_kid = hsm_key['key']['kid']
+        hsm_pure_kid = '/'.join(hsm_second_kid.split('/')[:-1])  # Remove version field
+        self.kwargs['hsm_kid'] = hsm_second_kid
+        self.kwargs['hsm_pkid'] = hsm_pure_kid
+
+        # list key versions
+        self.cmd('keyvault key list-versions --hsm-name {hsm} -n {key}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --hsm-name {hsm} -n {key} --maxresults 10',
+                 checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --id {hsm_kid}', checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --id {hsm_pkid}', checks=self.check('length(@)', 2))
+
+        # show key (latest)
+        self.cmd('keyvault key show --hsm-name {hsm} -n {key}',
+                 checks=self.check('key.kid', hsm_second_kid))
+
+        # show key (specific version)
+        self.kwargs.update({
+            'hsm_version1': hsm_first_version,
+            'hsm_kid1': hsm_first_kid,
+            'hsm_kid2': hsm_second_kid
+        })
+        self.cmd('keyvault key show --hsm-name {hsm} -n {key} -v {hsm_version1}',
+                 checks=self.check('key.kid', '{hsm_kid1}'))
+
+        # show key (by id)
+        self.cmd('keyvault key show --id {hsm_kid1}', checks=self.check('key.kid', '{hsm_kid1}'))
+
+        # set key attributes
+        self.cmd('keyvault key set-attributes --hsm-name {hsm} -n {key} --enabled true', checks=[
+            self.check('key.kid', '{hsm_kid2}'),
+            self.check('attributes.enabled', True)
+        ])
+
+        # create ec keys
+        self.cmd('keyvault key create --hsm-name {hsm} -n eckey1 --kty EC-HSM',
+                 checks=self.check('key.kty', 'EC-HSM'))
+        self.cmd('keyvault key create --hsm-name {hsm} -n eckey1 --kty EC-HSM --curve P-256',
+                 checks=[self.check('key.kty', 'EC-HSM'), self.check('key.crv', 'P-256')])
+        self.cmd('keyvault key delete --hsm-name {hsm} -n eckey1')
+
+        # create KEK
+        self.cmd('keyvault key create --hsm-name {hsm} --name key1 --kty RSA-HSM --size 2048 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+        self.cmd('keyvault key create --hsm-name {hsm} --name key2 --kty RSA-HSM --size 3072 --ops import',
+                 checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
+        self.cmd('keyvault key create --hsm-name {hsm} --name key2 --kty RSA-HSM --size 4096 --ops import',
                  checks=[self.check('key.kty', 'RSA-HSM'), self.check('key.keyOps', ['import'])])
 
 
@@ -465,14 +554,7 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
             'ec-p256k.pem',
             'rsa-2048.pem',
             'rsa-3072.pem',
-            'rsa-4096.pem',
-            'ec-p256-hsm.pem',
-            'ec-p384-hsm.pem',
-            'ec-p521-hsm.pem',
-            'ec-p256k-hsm.pem',
-            'rsa-2048-hsm.pem',
-            'rsa-3072-hsm.pem',
-            'rsa-4096-hsm.pem'
+            'rsa-4096.pem'
         ]
 
         # RSA Keys
@@ -487,26 +569,9 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
 
         for key_name in key_names:
             var_name = key_name.split('.')[0] + '-file'
-            if 'hsm' in key_name:  # Should be generated
-                if key_name.startswith('rsa'):
-                    rsa_size = key_name.split('-')[1]
-                    self.cmd('keyvault key create --vault-name {{kv}} -n {var_name}'
-                             ' -p hsm --kty RSA-HSM --size {rsa_size}'.format(var_name=var_name, rsa_size=rsa_size))
-                elif key_name.startswith('ec'):
-                    ec_curve = key_name.split('-')[1]
-                    curve_names = {
-                        'p256': 'P-256',
-                        'p384': 'P-384',
-                        'p521': 'P-521',
-                        'p256k': 'P-256K'
-                    }
-                    self.cmd('keyvault key create --vault-name {{kv}} -n {var_name}'
-                             ' -p hsm --kty EC-HSM --curve {curve_name}'
-                             .format(var_name=var_name, curve_name=curve_names[ec_curve]))
-            else:  # Should be imported (Have already been generated offline)
-                self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
-                self.cmd('keyvault key import --vault-name {{kv}} -n {var_name} --pem-file "{{{var_name}}}"'
-                         .format(var_name=var_name))
+            self.kwargs[var_name] = os.path.join(KEYS_DIR, key_name)
+            self.cmd('keyvault key import --vault-name {{kv}} -n {var_name} --pem-file "{{{var_name}}}"'
+                     .format(var_name=var_name))
 
             der_downloaded_filename = var_name + '.der'
             pem_downloaded_filename = var_name + '.pem'
@@ -516,9 +581,6 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
                          .format(var_name=var_name, filename=der_downloaded_filename))
                 self.cmd('keyvault key download --vault-name {{kv}} -n {var_name} -f "{filename}" -e PEM'
                          .format(var_name=var_name, filename=pem_downloaded_filename))
-
-                if 'hsm' in key_name:  # TODO: Currently we haven't found a good way to verify online generated keys
-                    continue
 
                 expected_pem = []
                 pem_pub_filename = os.path.join(KEYS_DIR, key_name.split('.')[0] + '.pub.pem')
@@ -536,6 +598,53 @@ class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
 
                     verify(der_downloaded_filename, OpenSSL.crypto.FILETYPE_ASN1)
                     verify(pem_downloaded_filename, OpenSSL.crypto.FILETYPE_PEM)
+            finally:
+                if os.path.exists(der_downloaded_filename):
+                    os.remove(der_downloaded_filename)
+                if os.path.exists(pem_downloaded_filename):
+                    os.remove(pem_downloaded_filename)
+
+
+class KeyVaultHSMKeyDownloadScenarioTest(ScenarioTest):
+    def test_keyvault_hsm_key_download(self):
+        self.kwargs.update({
+            'hsm': 'clitest'
+        })
+
+        key_names = [
+            'ec-p256-hsm.pem',
+            'ec-p384-hsm.pem',
+            'rsa-2048-hsm.pem',
+            'rsa-3072-hsm.pem',
+            'rsa-4096-hsm.pem'
+        ]
+
+        _clear_hsm(self, hsm_name=self.kwargs['hsm'])
+
+        for key_name in key_names:
+            var_name = key_name.split('.')[0] + '-file'
+            if key_name.startswith('rsa'):
+                rsa_size = key_name.split('-')[1]
+                self.cmd('keyvault key create --hsm-name {{hsm}} -n {var_name}'
+                         ' -p hsm --kty RSA-HSM --size {rsa_size}'.format(var_name=var_name, rsa_size=rsa_size))
+            elif key_name.startswith('ec'):
+                ec_curve = key_name.split('-')[1]
+                curve_names = {
+                    'p256': 'P-256',
+                    'p384': 'P-384'
+                }
+                self.cmd('keyvault key create --hsm-name {{hsm}} -n {var_name}'
+                         ' -p hsm --kty EC-HSM --curve {curve_name}'
+                         .format(var_name=var_name, curve_name=curve_names[ec_curve]))
+
+            der_downloaded_filename = var_name + '.der'
+            pem_downloaded_filename = var_name + '.pem'
+
+            try:
+                self.cmd('keyvault key download --hsm-name {{hsm}} -n {var_name} -f "{filename}" -e DER'
+                         .format(var_name=var_name, filename=der_downloaded_filename))
+                self.cmd('keyvault key download --hsm-name {{hsm}} -n {var_name} -f "{filename}" -e PEM'
+                         .format(var_name=var_name, filename=pem_downloaded_filename))
             finally:
                 if os.path.exists(der_downloaded_filename):
                     os.remove(der_downloaded_filename)
@@ -725,7 +834,8 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
             self.check('credentials.accountId', 'test_account')
         ])
         with self.assertRaises(CLIError):
-            self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name notexist --organization-id TestOrg --account-id test_account')
+            self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name notexist '
+                     '--organization-id TestOrg --account-id test_account')
         self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1 --account-id ""', checks=[
             self.check('provider', 'Test'),
             self.check('attributes.enabled', True),

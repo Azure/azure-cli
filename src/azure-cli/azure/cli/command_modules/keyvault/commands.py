@@ -110,16 +110,18 @@ def load_command_table(self, _):
         g.keyvault_command('list', 'get_keys', validator=process_vault_and_hsm_name,
                            transform=multi_transformers(
                                filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))
-        g.keyvault_command('list-versions', 'get_key_versions', transform=extract_subresource_name(id_parameter='kid'))
-        g.keyvault_command('list-deleted', 'get_deleted_keys', transform=extract_subresource_name(id_parameter='kid'))
+        g.keyvault_command('list-versions', 'get_key_versions', validator=process_vault_and_hsm_name,
+                           transform=extract_subresource_name(id_parameter='kid'))
+        g.keyvault_command('list-deleted', 'get_deleted_keys', validator=process_vault_and_hsm_name,
+                           transform=extract_subresource_name(id_parameter='kid'))
         g.keyvault_custom('create', 'create_key', validator=process_vault_and_hsm_name,
                           doc_string_source=data_doc_string.format('create_key'))
-        g.keyvault_command('set-attributes', 'update_key')
+        g.keyvault_command('set-attributes', 'update_key', validator=process_vault_and_hsm_name)
         g.keyvault_command('show', 'get_key', validator=process_vault_and_hsm_name)
-        g.keyvault_command('show-deleted', 'get_deleted_key')
-        g.keyvault_command('delete', 'delete_key')
-        g.keyvault_command('purge', 'purge_deleted_key')
-        g.keyvault_command('recover', 'recover_deleted_key')
+        g.keyvault_command('show-deleted', 'get_deleted_key', validator=process_vault_and_hsm_name)
+        g.keyvault_command('delete', 'delete_key', validator=process_vault_and_hsm_name)
+        g.keyvault_command('purge', 'purge_deleted_key', validator=process_vault_and_hsm_name)
+        g.keyvault_command('recover', 'recover_deleted_key', validator=process_vault_and_hsm_name)
         g.keyvault_custom('backup', 'backup_key', doc_string_source=data_doc_string.format('backup_key'))
         g.keyvault_custom('restore', 'restore_key', doc_string_source=data_doc_string.format('restore_key'))
         g.keyvault_custom('import', 'import_key')

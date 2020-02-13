@@ -24,9 +24,8 @@ from ._validators import (
     validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
-    validate_vault_id, validate_sas_definition_id,
-    validate_storage_account_id, validate_storage_disabled_attribute,
-    validate_deleted_vault_name)
+    validate_vault_and_hsm_id, validate_sas_definition_id, validate_storage_account_id,
+    validate_storage_disabled_attribute, validate_deleted_vault_name)
 
 # CUSTOM CHOICE LISTS
 
@@ -188,18 +187,13 @@ def load_arguments(self, _):
                     c.extra('identifier', options_list=['--id'],
                             help='Id of the {}. '
                                  'If specified all other \'Id\' arguments should be omitted.'.format(item),
-                            validator=validate_vault_id(item))
+                            validator=validate_vault_and_hsm_id(item))
                 except ValueError:
                     pass
                 c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item),
                            required=False)
                 c.argument('vault_base_url', vault_name_type, required=False,
                            help='Name of the Key Vault. Required if --id is not specified.')
-                if item == 'key':
-                    c.argument('hsm_base_url', hsm_name_type, required=False,
-                               help='Name of the HSM. Required if --id is not specified. '
-                                    '(--hsm-name and --vault-name are mutually exclusive, '
-                                    'please specify just one of them)')
                 c.argument(item + '_version', required=False)
 
         for cmd in ['purge', 'recover', 'show-deleted']:
@@ -207,7 +201,7 @@ def load_arguments(self, _):
                 c.extra('identifier', options_list=['--id'],
                         help='The recovery id of the {}. '
                              'If specified all other \'Id\' arguments should be omitted.'.format(item),
-                        validator=validate_vault_id('deleted' + item))
+                        validator=validate_vault_and_hsm_id('deleted' + item))
                 c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item),
                            required=False)
                 c.argument('vault_base_url', help='Name of the Key Vault. Required if --id is not specified.',
@@ -224,17 +218,25 @@ def load_arguments(self, _):
         c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*',
                    help='Space-separated list of permitted JSON web key operations.')
 
+    # except for 'backup/restore', 'import', those are coming soon
+    # custom funtions
     for item in ['create', 'download']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            c.argument('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None)
-    for item in ['show']:
-        with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None)
+            c.argument('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
+                       help='Name of the HSM. Required if --id is not specified. (--hsm-name and --vault-name are '
+                            'mutually exclusive, please specify just one of them)')
 
-    for item in ['create', 'delete', 'download', 'list', 'list-versions', 'purge', 'set-attributes', 'show',
-                 'show-deleted']:  # except for 'backup/restore', 'import', those are coming soon
+    # SDK functions
+    for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'set-attributes', 'show', 'show-deleted']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
-            c.argument('hsm_name', required=False, help='Name of the HSM.')
+            if item in ['list', 'list-deleted']:
+                c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx),
+                           required=False, help='Name of the Key Vault.')
+                c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None)
+            else:
+                c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
+                        help='Name of the HSM. Required if --id is not specified. (--hsm-name and --vault-name are '
+                             'mutually exclusive, please specify just one of them)')
 
     for item in ['create', 'import']:
         with self.argument_context('keyvault key {}'.format(item)) as c:
