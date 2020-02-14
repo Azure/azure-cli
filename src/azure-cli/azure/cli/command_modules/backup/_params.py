@@ -38,6 +38,7 @@ backup_type_help = """'Full, Differential, Log, Copy-only-full' for backup Item 
 retain_until_help = """The date until which this backed up copy will be available for retrieval, in UTC (d-m-Y). For SAPHANA and SQL workload, retain-until parameter value will be overridden by the underlying policy."""
 diskslist_help = """List of disks to be excluded or included."""
 disk_list_setting_help = """option to decide whether to include or exclude the disk or reset any previous settings to default behavior"""
+target_container_name_help = """The target container to which the DB recovery point should be downloaded as files."""
 
 vault_name_type = CLIArgumentType(help='Name of the Recovery services vault.', options_list=['--vault-name', '-v'], completer=get_resource_name_completion_list('Microsoft.RecoveryServices/vaults'))
 container_name_type = CLIArgumentType(help=container_name_help, options_list=['--container-name', '-c'])
@@ -48,7 +49,7 @@ rp_name_type = CLIArgumentType(help='Name of the recovery point.', options_list=
 backup_management_type = CLIArgumentType(help=backup_management_type_help, arg_type=get_enum_type(allowed_backup_management_types), options_list=['--backup-management-type'])
 workload_type = CLIArgumentType(help=workload_type_help, arg_type=get_enum_type(allowed_workload_types), options_list=['--workload-type'])
 restore_mode_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['OriginalLocation', 'AlternateLocation']), options_list=['--restore-mode'])
-restore_mode_workload_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['AlternateWorkloadRestore', 'OriginalWorkloadRestore']), options_list=['--restore-mode'])
+restore_mode_workload_type = CLIArgumentType(help=restore_mode_help, arg_type=get_enum_type(['AlternateWorkloadRestore', 'OriginalWorkloadRestore', 'RestoreAsFiles']), options_list=['--restore-mode'])
 resolve_conflict_type = CLIArgumentType(help=resolve_conflict_help, arg_type=get_enum_type(['Overwrite', 'Skip']), options_list=['--resolve-conflict'])
 resource_id_type = CLIArgumentType(help=resource_id_help, options_list=['--resource-id'])
 policy_type = CLIArgumentType(help=policy_help, options_list=['--policy'], completer=FilesCompleter(), type=file_type)
@@ -56,6 +57,9 @@ protectable_item_type = CLIArgumentType(help=workload_type_help, options_list=['
 target_server_type = CLIArgumentType(help=target_server_type_help, options_list=['--target-server-type'], arg_type=get_enum_type(allowed_protectable_item_type))
 protectable_item_name_type = CLIArgumentType(help=protectable_item_name_type_help, options_list=['--protectable-item-name'])
 diskslist_type = CLIArgumentType(nargs='+', help=diskslist_help)
+target_container_name_type = CLIArgumentType(options_list=['--target-container-name'], help=target_container_name_help)
+filepath_type = CLIArgumentType(options_list=['--filepath'], help="The path to which the DB should be restored as files.")
+from_full_rp_type = CLIArgumentType(options_list=['--from-full-rp-name'], help="Name of the starting Recovery point.")
 
 
 # pylint: disable=too-many-statements
@@ -272,6 +276,11 @@ def load_arguments(self, _):
         c.argument('target_server_type', target_server_type)
         c.argument('target_server_name', options_list=['--target-server-name'], help="""Specify the parent server name of the target item.""")
         c.argument('workload_type', workload_type)
+        c.argument('target_container_name', target_container_name_type)
+        c.argument('from_full_rp_name', from_full_rp_type)
+        c.argument('filepath', filepath_type)
+        c.argument('backup_management_type', backup_management_type)
+
     # Job
     with self.argument_context('backup job') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
