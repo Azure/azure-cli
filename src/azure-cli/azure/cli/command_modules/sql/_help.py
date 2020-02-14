@@ -598,18 +598,10 @@ examples:
 
 helps['sql midb list-deleted'] = """
 type: command
-short-summary: Lists restorable deleted managed databases.
+short-summary: List restorable deleted managed databases.
 examples:
   - name: List all restorable deleted managed databases on Managed Instance .
     text: az sql midb list-deleted -g mygroup --mi myinstance
-"""
-
-helps['sql midb show-deleted'] = """
-type: command
-short-summary: Shows restorable deleted managed database.
-examples:
-  - name: Shows specific restorable deleted managed database.
-    text: az sql midb show-deleted -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22"
 """
 
 helps['sql midb restore'] = """
@@ -626,7 +618,7 @@ examples:
 
 helps['sql midb update-retention'] = """
 type: command
-short-summary: Updates short term retention for automated backups on a single database.
+short-summary: Update short term retention for automated backups on a single database.
 examples:
   - name: Update backup short term retention for live managed database.
     text: az sql midb update-retention -g mygroup --mi myinstance -n mymanageddb --retention-days retentionindays
@@ -636,11 +628,11 @@ examples:
 
 helps['sql midb show-retention'] = """
 type: command
-short-summary: Shows short term retention for automated backups on a single database.
+short-summary: Show short term retention for automated backups on a single database.
 examples:
   - name: Shows backup short term retention for live managed database.
     text: az sql midb show-retention -g mygroup --mi myinstance -n mymanageddb
-  - name: Shows backup short term retention for dropped managed database.
+  - name: Show backup short term retention for dropped managed database.
     text: az sql midb show-retention -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22"
 """
 

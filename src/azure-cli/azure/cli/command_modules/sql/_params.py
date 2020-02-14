@@ -1468,11 +1468,6 @@ def load_arguments(self, _):
                    help='If specified, shows retention days for a deleted database, instead of an existing database.'
                    'Must match the deleted time of a deleted database on the source Managed Instance.')
 
-    with self.argument_context('sql midb show-deleted') as c:
-        c.argument('deletion_date',
-                   options_list=['--deletion-date'],
-                   help='Exact deletion for restorable dropped database')
-
     ###############################################
     #                sql virtual cluster          #
     ###############################################

@@ -231,7 +231,6 @@ def load_command_table(self, _):
                             client_factory=get_sql_restorable_dropped_managed_databases_operations) as g:
 
         g.command('list-deleted', 'list_by_instance')
-        g.custom_command('show-deleted', 'show_deleted_database_mi')
 
     database_blob_auditing_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseBlobAuditingPoliciesOperations.{}',
@@ -564,12 +563,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#ManagedBackupShortTermRetentionPoliciesOperations.{}',
         client_factory=get_sql_managed_backup_short_term_retention_policies_operations)
 
-    with self.command_group('sql midb',
+    with self.command_group('sql midb retention-policy',
                             managed_backup_short_term_retention_policies_operations,
                             client_factory=get_sql_managed_backup_short_term_retention_policies_operations) as g:
 
-        g.custom_command('update-retention', 'update_short_term_retention_mi', supports_no_wait=True)
-        g.custom_command('show-retention', 'get_short_term_retention_mi')
+        g.custom_command('update', 'update_short_term_retention_mi', supports_no_wait=True)
+        g.custom_command('show', 'get_short_term_retention_mi')
 
     ###############################################
     #                sql virtual cluster         #

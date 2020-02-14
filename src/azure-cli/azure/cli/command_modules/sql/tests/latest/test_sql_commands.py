@@ -764,6 +764,16 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
     return db
 
 
+def _wait_until_first_backup_midb(self):
+
+    earliest_restore_date_string = None
+
+    while earliest_restore_date_string is None:
+        db = self.cmd('sql midb show -g {rg} --mi {managed_instance_name} -n {database_name}',
+                      checks=[self.greater_than('length(@)', 0)])
+
+        earliest_restore_date_string = db.json_value['earliestRestorePoint'];
+
 class SqlServerDbRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
@@ -3025,20 +3035,19 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
                      self.check('status', 'Online')])
 
         # test update short term retention on live database
-        self.cmd('sql midb update-retention -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_inc}',
+        self.cmd('sql midb retention-policy update -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_inc}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_inc}')])
 
         # test get short term retention on live database
-        self.cmd('sql midb show-retention -g {rg} --mi {managed_instance_name} -n {database_name}',
+        self.cmd('sql midb retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_inc}')])
 
         # Wait for first backup before dropping
-        if self.in_recording:
-            time.sleep(300)
+        _wait_until_first_backup_midb(self);
 
         # Delete by group/server/name
         self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
@@ -3054,13 +3063,13 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
         })
 
         # test update short term retention on deleted database
-        self.cmd('sql midb update-retention -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deletion-date {deletion_date}',
+        self.cmd('sql midb retention-policy update -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deletion-date {deletion_date}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_dec}')])
 
         # test get short term retention on deleted database
-        self.cmd('sql midb show-retention -g {rg} --mi {managed_instance_name} -n {database_name} --deletion-date {deletion_date}',
+        self.cmd('sql midb retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deletion-date {deletion_date}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_dec}')])
@@ -3138,8 +3147,7 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
                      self.check('status', 'Online')])
 
         # Wait for first backup before dropping
-        if self.in_recording:
-            time.sleep(300)
+        _wait_until_first_backup_midb(self);
 
         # Delete by group/server/name
         self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
