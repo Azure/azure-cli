@@ -100,7 +100,7 @@ class ArmTemplateBuilder(object):
 
 def handle_template_based_exception(ex):
     try:
-        raise CLIError(ex.inner_exception.error.message)
+        raise CLIError(ex.inner_exception.error)
     except AttributeError:
         raise CLIError(ex)
 
