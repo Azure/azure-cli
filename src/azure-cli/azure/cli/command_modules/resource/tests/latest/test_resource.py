@@ -522,6 +522,34 @@ class DeploymentTest(ScenarioTest):
             self.check('[0].resourceGroup', '{rg}')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_large_params')
+    @AllowLargeResponse()
+    def test_group_deployment_with_large_params(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'large_tf': os.path.join(curr_dir, 'test-largesize-template.json').replace('\\', '\\\\'),
+            'large_params': os.path.join(curr_dir, 'test-largesize-parameters.json').replace('\\', '\\\\'),
+            'app_name': self.create_random_name('cli', 30)
+        })
+
+        self.cmd('group deployment validate -g {rg} --template-file {large_tf} --parameters @"{large_params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('group deployment validate -g {rg} --template-file {large_tf} --parameters "{large_params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('group deployment create -g {rg} --template-file {large_tf} --parameters @"{large_params}" --parameters function-app-name="{app_name}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('group deployment create -g {rg} --template-file {large_tf} --parameters "{large_params}" --parameters function-app-name="{app_name}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_on_error_deployment_lastsuccessful')
     def test_group_on_error_deployment_lastsuccessful(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))

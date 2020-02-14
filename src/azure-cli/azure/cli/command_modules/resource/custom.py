@@ -63,7 +63,11 @@ def _process_parameters(template_param_defs, parameter_lists):
             return None
 
     def _try_load_file_object(value):
-        if os.path.isfile(value):
+        try:
+            is_file = os.path.isfile(value)
+        except ValueError:
+            is_file = False
+        if is_file is True:
             parsed = get_file_json(value, throw_on_empty=False)
             return parsed.get('parameters', parsed)
         return None
