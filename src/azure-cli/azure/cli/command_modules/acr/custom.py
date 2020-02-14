@@ -14,7 +14,7 @@ from ._utils import (
     get_resource_group_name_by_registry_name,
     user_confirmation
 )
-from ._docker_utils import get_login_credentials
+from ._docker_utils import get_login_credentials, EMPTY_GUID
 from .network_rule import NETWORK_RULE_NOT_SUPPORTED
 
 logger = get_logger(__name__)
@@ -129,12 +129,39 @@ def acr_login(cmd,
               resource_group_name=None,  # pylint: disable=unused-argument
               tenant_suffix=None,
               username=None,
-              password=None):
+              password=None,
+              expose_token=False):
+    if expose_token:
+        login_server, _, password = get_login_credentials(
+            cmd=cmd,
+            registry_name=registry_name,
+            tenant_suffix=tenant_suffix,
+            username=username,
+            password=password)
+
+        logger.warning("You can perform manual login using the provided access token below, "
+                       "for example: 'docker login loginServer -u %s -p accessToken'", EMPTY_GUID)
+
+        token_info = {
+            "loginServer": login_server,
+            "accessToken": password
+        }
+
+        return token_info
+
+    tips = "You may want to use 'az acr login -n {} --expose-token' to get an access token, " \
+           "which does not require Docker to be installed.".format(registry_name)
+
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
-        raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
+        raise CLIError("This command requires running the docker daemon, "
+                       "which is not supported in Azure Cloud Shell. " + tips)
 
-    docker_command, _ = get_docker_command()
+    try:
+        docker_command, _ = get_docker_command()
+    except CLIError as e:
+        logger.warning(tips)
+        raise e
 
     login_server, username, password = get_login_credentials(
         cmd=cmd,
@@ -166,13 +193,16 @@ def acr_login(cmd,
                        login_server])
             p.wait()
         else:
+            stderr_messages = stderr.decode()
             if b'--password-stdin' in stderr:
-                errors = [err for err in stderr.decode().split('\n') if '--password-stdin' not in err]
-                stderr = '\n'.join(errors).encode()
+                errors = [err for err in stderr_messages.split('\n') if err and '--password-stdin' not in err]
+                # Will not raise CLIError if there is no error other than '--password-stdin'
+                if not errors:
+                    return None
+                stderr_messages = '\n'.join(errors)
+            raise CLIError('docker: ' + stderr_messages)
 
-            import sys
-            output = getattr(sys.stderr, 'buffer', sys.stderr)
-            output.write(stderr)
+    return None
 
 
 def acr_show_usage(cmd, client, registry_name, resource_group_name=None):

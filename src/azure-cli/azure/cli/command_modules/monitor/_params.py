@@ -263,11 +263,11 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
 
     with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
-        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='2.1.0'), help='OData filters. Will ignore other filter arguments.')
+        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='3.0.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
         c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')
-        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='2.1.0')])
+        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='3.0.0')])
         c.argument('caller')
         c.argument('status')
     # endregion
