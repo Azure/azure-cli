@@ -616,6 +616,19 @@ examples:
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --dest-mi targetmi --dest-resource-group targetrg
 """
 
+helps['sql midb show'] = """
+type: command
+short-summary: Get the details for a managed database.
+examples:
+  - name: Get the details for a managed database
+    text: az sql midb show -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql midb retention-policy'] = """
+type: group
+short-summary: Manage SQL managed instance database backup retention policy.
+"""
+
 helps['sql midb retention-policy update'] = """
 type: command
 short-summary: Update short term retention for automated backups on a single database.
@@ -634,14 +647,6 @@ examples:
     text: az sql midb retention-policy show -g mygroup --mi myinstance -n mymanageddb
   - name: Show backup short term retention for dropped managed database.
     text: az sql midb retention-policy show -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22"
-"""
-
-helps['sql midb show'] = """
-type: command
-short-summary: Get the details for a managed database.
-examples:
-  - name: Get the details for a managed database
-    text: az sql midb show -g mygroup --mi myinstance -n mymanageddb
 """
 
 helps['sql server'] = """
