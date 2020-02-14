@@ -7,6 +7,10 @@ Release History
 
 * az ams is now GA.
 
+**Backup**
+
+* Added restore as files support for SQL and SAP Databases.
+
 **SQL**
 
 * Update SQL Managed Instance cmdlet `az sql mi update` with two new parameters: tier and family.
