@@ -8,13 +8,13 @@ Release History
 
 **ACR**
 
-* Add a new argument '--expose-token' for 'az acr login'
+* Add a new argument `--expose-token` for `az acr login`
 * Fix the incorrect output of `az acr task identity show -n Name -r Registry -o table`
-* `az acr login`: Throw a CLIError if there are errors returned by docker command
+* az acr login: Throw a CLIError if there are errors returned by docker command
 
 **ACS**
 
-* aks create/update: add --vnet-subnet_id validation
+* aks create/update: add `--vnet-subnet-id` validation
 
 **Aladdin**
 
@@ -34,6 +34,7 @@ Release History
 
 * az webapp list-runtimes: Fix the bug for list-runtimes
 * Add az webapp|functionapp config ssl create
+* Add support for v3 function apps and node 12
 
 **ARM**
 
@@ -49,17 +50,13 @@ Release History
 
 * vm/vmss/availability-set update: add --ppg to allowing updating ProximityPlacementGroup
 * vmss create: add --data-disk-iops and --data-disk-mbps
-* `az vm host`: remove preview tag for `vm host` and `vm host group`
+* az vm host: remove preview tag for `vm host` and `vm host group`
 * [BREAKING CHANGE] Fix #10728: `az vm create`: create subnet automatically if vnet is specified and subnet not exists
 * Increase robustness of vm image list
 
 **Eventhub**
 
 * Azure Stack support for 2019-03-01-hybrid profile
-
-**functionapp**
-
-* Add support for v3 function apps and node 12
 
 **KeyVault**
 
@@ -69,8 +66,9 @@ Release History
 
 **Network**
 
-* Bump to azure-mgmt-network 8.0.0
+* Bump to azure-mgmt-network 9.0.0
 * az network private-link-service update/create: support --enable-proxy-protocol
+* Add connection Monitor V2 feature
 
 **Packaging**
 
@@ -79,7 +77,7 @@ Release History
 **Profile**
 
 * Preview: Add new attributes `homeTenantId` and `managedByTenants` to subscription accounts. Please re-run `az login` for the changes to take effect
-* `az login`: Show a warning when a subscription is listed from more than one tenants and default to the first one. To select a specific tenant when accessing this subscription, please include `--tenant` in `az login`
+* az login: Show a warning when a subscription is listed from more than one tenants and default to the first one. To select a specific tenant when accessing this subscription, please include `--tenant` in `az login`
 
 **Role**
 
@@ -91,7 +89,7 @@ Release History
 
 **Storage**
 
-* [BREAKING CHANGE] az storage account create: Change default storage account kind to StorageV2
+* [BREAKING CHANGE] `az storage account create`: Change default storage account kind to StorageV2
 
 2.0.81
 ++++++
