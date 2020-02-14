@@ -624,14 +624,37 @@ def _list_deleted_app(cli_ctx, resource_group_name=None, name=None, slot=None):
     return result
 
 
-def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None):
+def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None, identity_id=None):
     ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+    if identity_id:
+        UserAssignedIdentity = cmd.get_models('ManagedServiceIdentityUserAssignedIdentitiesValue')
 
     def getter():
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        def _get_type_string():
+            try:
+                return webapp.identity.type.value
+            except AttributeError:
+                return webapp.identity.type
+
+        if identity_id:
+            _type = 'UserAssigned'
+            if not webapp.identity:
+                _identity = {identity_id: UserAssignedIdentity()}
+            elif _get_type_string() == 'SystemAssigned':
+                _identity = {identity_id: UserAssignedIdentity()}
+            else:
+                # from copy import deepcopy
+                _identity = webapp.identity.user_assigned_identities
+                if not any(_id.casefold() == identity_id.casefold() for _id in _identity):
+                    _identity[identity_id] = UserAssignedIdentity()
+        else:
+            _type = 'SystemAssigned'
+            _identity = None
+
+        webapp.identity = ManagedServiceIdentity(type=_type, user_assigned_identities=_identity)
         poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 

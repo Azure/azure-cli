@@ -449,6 +449,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('identity_id', options_list=['--identity', '-i'],
+                   help="the full ARM resource id of a user assigned identity. Default to system assigned identity if not specified.")
     with self.argument_context('functionapp config hostname') as c:
         c.argument('webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
     with self.argument_context('functionapp create') as c:
