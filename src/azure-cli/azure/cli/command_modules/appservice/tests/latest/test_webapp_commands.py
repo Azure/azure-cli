@@ -107,6 +107,9 @@ class WebappBasicE2ETest(ScenarioTest):
             JMESPathCheck('httpsOnly', False),
         ])
 
+    def test_webapp_runtimes(self):
+        self.cmd('webapp list-runtimes')
+
 
 class WebappQuickCreateTest(ScenarioTest):
     @ResourceGroupPreparer()
@@ -1307,6 +1310,21 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
                  '--os-type Windows --runtime node --runtime-version 8.2'
                  .format(resource_group, functionapp_name, storage_account), expect_failure=True)
 
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_windows_runtime_functions_version(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --functions-version 3 --os-type Windows --runtime node'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+                 JMESPathCheck("[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~12')])
+
 
 class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
     @ResourceGroupPreparer(location='westus')
@@ -1450,6 +1468,45 @@ class FunctionAppOnLinux(ScenarioTest):
 
         self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime python --runtime-version 3.8'
                  .format(resource_group, functionapp, plan, storage_account), expect_failure=True)
+
+    @ResourceGroupPreparer(location='southcentralus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_functions_version(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
+            JMESPathCheck('reserved', True),  # this weird field means it is a linux
+            JMESPathCheck('sku.name', 'S1')
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 3 --runtime node'
+                 .format(resource_group, functionapp, plan, storage_account), checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:3.0-node12-appservice')
+        ])
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
+            JMESPathCheck("[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
+            JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~12')
+        ])
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_functions_version_consumption(self, resource_group, storage_account):
+        functionapp = self.create_random_name(prefix='functionapp-linux', length=24)
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --functions-version 3 --runtime node --os-type linux'
+                 .format(resource_group, functionapp, storage_account), checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'NODE|12')
+        ])
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
+            JMESPathCheck("[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
+            JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~12')
+        ])
 
 
 class FunctionAppServicePlan(ScenarioTest):
