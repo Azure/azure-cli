@@ -28,6 +28,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
+        tags = "key1=value1"
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -36,17 +37,20 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'service_principal': sp_name,
             'client_secret': sp_password,
+            'tags': tags,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret}'
+                     '--service-principal={service_principal} --client-secret={client_secret} --tags {tags}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
-            self.check('provisioningState', 'Succeeded')
+            self.check('provisioningState', 'Succeeded'),
+            StringContainCheck("key1"),
+            StringContainCheck("value1")
         ])
 
         # list
@@ -978,6 +982,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         aks_name = self.create_random_name('cliakstest', 16)
         nodepool1_name = "nodepool1"
         nodepool2_name = "nodepool2"
+        tags = "key1=value1"
+        new_tags = "key2=value2"
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -987,6 +993,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'tags': tags,
+            'new_tags': new_tags,
             'nodepool1_name': nodepool1_name,
             'nodepool2_name': nodepool2_name
         })
@@ -1036,7 +1044,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.remove(temp_path)
 
         # nodepool add
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=1',checks=[
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=1 --tags {tags}',checks=[
             self.check('provisioningState', 'Succeeded')
             ])
 
@@ -1045,7 +1053,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             StringContainCheck(aks_name),
             StringContainCheck(resource_group),
             StringContainCheck(nodepool1_name),
-            StringContainCheck(nodepool2_name)
+            StringContainCheck(nodepool2_name),
+            StringContainCheck("key1"),
+            StringContainCheck("value1")
         ])
         #nodepool list in tabular format
         self.cmd('aks nodepool list --resource-group={resource_group} --cluster-name={name} -o table', checks=[
@@ -1060,6 +1070,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         #nodepool show
         self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name}', checks=[
             self.check('count', 3)
+        ])
+
+        #nodepool update
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --tags {new_tags}', checks=[
+            StringContainCheck("key2"),
+            StringContainCheck("value2")
         ])
 
         # #nodepool delete
