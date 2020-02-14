@@ -464,17 +464,16 @@ def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_n
     '''
 
     # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-    from six.moves.urllib.parse import quote  # pylint: disable=import-error
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import resource_id
 
     return resource_id(
-                subscription=get_subscription_id(cli_ctx),
-                resource_group=resource_group_name,            
-                namespace='Microsoft.Sql', type='managedInstances',
-                name=managed_instance_name,
-                child_type_1 ='databases',
-                child_name_1=database_name)
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Sql', type='managedInstances',
+        name=managed_instance_name,
+        child_type_1='databases',
+        child_name_1=database_name)
 
 
 def _to_filetimeutc(dateTime):
@@ -509,14 +508,14 @@ def _get_managed_dropped_db_resource_id(
     from msrestazure.tools import resource_id
 
     return (resource_id(
-                subscription=get_subscription_id(cli_ctx),
-                resource_group=resource_group_name,            
-                namespace='Microsoft.Sql', type='managedInstances',
-                name=managed_instance_name,
-                child_type_1 ='restorableDroppedDatabases',
-                child_name_1='{},{}'.format(
-                    quote(database_name),
-                    _to_filetimeutc(deletion_date))))
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Sql', type='managedInstances',
+        name=managed_instance_name,
+        child_type_1='restorableDroppedDatabases',
+        child_name_1='{},{}'.format(
+            quote(database_name),
+            _to_filetimeutc(deletion_date))))
 
 
 def db_show_conn_str(

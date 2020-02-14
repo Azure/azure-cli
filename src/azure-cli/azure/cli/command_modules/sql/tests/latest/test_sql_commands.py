@@ -772,7 +772,8 @@ def _wait_until_first_backup_midb(self):
         db = self.cmd('sql midb show -g {rg} --mi {managed_instance_name} -n {database_name}',
                       checks=[self.greater_than('length(@)', 0)])
 
-        earliest_restore_date_string = db.json_value['earliestRestorePoint'];
+        earliest_restore_date_string = db.json_value['earliestRestorePoint']
+
 
 class SqlServerDbRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
@@ -3047,7 +3048,7 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
                      self.check('retentionDays', '{retention_days_inc}')])
 
         # Wait for first backup before dropping
-        _wait_until_first_backup_midb(self);
+        _wait_until_first_backup_midb(self)
 
         # Delete by group/server/name
         self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
@@ -3147,7 +3148,7 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
                      self.check('status', 'Online')])
 
         # Wait for first backup before dropping
-        _wait_until_first_backup_midb(self);
+        _wait_until_first_backup_midb(self)
 
         # Delete by group/server/name
         self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
