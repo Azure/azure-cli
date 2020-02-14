@@ -3079,17 +3079,17 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
                                          self.greater_than('length(@)', 0)])
 
         self.kwargs.update({
-            'deletion_date': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
+            'deleted_time': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
         })
 
         # test update short term retention on deleted database
-        self.cmd('sql midb retention-policy update -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deletion-date {deletion_date}',
+        self.cmd('sql midb retention-policy update -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deleted-time {deleted_time}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_dec}')])
 
         # test get short term retention on deleted database
-        self.cmd('sql midb retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deletion-date {deletion_date}',
+        self.cmd('sql midb retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deleted-time {deleted_time}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_dec}')])
@@ -3179,11 +3179,11 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
                                          self.greater_than('length(@)', 0)])
 
         self.kwargs.update({
-            'deletion_date': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
+            'deleted_time': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
         })
 
         # test restore deleted database
-        self.cmd('sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deletion-date {deletion_date} --time {deletion_date}',
+        self.cmd('sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('name', '{restored_database_name}'),

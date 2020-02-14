@@ -74,7 +74,7 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
 
 def _get_managed_restorable_dropped_database_backup_short_term_retention_client(cli_ctx):
     '''
-    Returns the location (i.e. Azure region) that the specified server is in.
+    Returns client for managed restorable dropped databases.
     '''
 
     server_client = \
@@ -477,6 +477,10 @@ def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_n
 
 
 def _to_filetimeutc(dateTime):
+    '''
+    Changes given datetime to filetimeutc string
+    '''
+
     NET_epoch = datetime(1601, 1, 1)
     UNIX_epoch = datetime(1970, 1, 1)
 
@@ -497,7 +501,7 @@ def _get_managed_dropped_db_resource_id(
         resource_group_name,
         managed_instance_name,
         database_name,
-        deletion_date):
+        deleted_time):
     '''
     Gets the Managed db resource id in this Azure environment.
     '''
@@ -515,7 +519,7 @@ def _get_managed_dropped_db_resource_id(
         child_type_1='restorableDroppedDatabases',
         child_name_1='{},{}'.format(
             quote(database_name),
-            _to_filetimeutc(deletion_date))))
+            _to_filetimeutc(deleted_time))))
 
 
 def db_show_conn_str(
@@ -2551,7 +2555,7 @@ def managed_db_restore(
         target_managed_database_name,
         target_managed_instance_name=None,
         target_resource_group_name=None,
-        deletion_date=None,
+        deleted_time=None,
         **kwargs):
     '''
     Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
@@ -2572,13 +2576,13 @@ def managed_db_restore(
 
     kwargs['create_mode'] = CreateMode.point_in_time_restore.value
 
-    if deletion_date:
+    if deleted_time:
         kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
             cmd.cli_ctx,
             resource_group_name,
             managed_instance_name,
             database_name,
-            deletion_date)
+            deleted_time)
     else:
         kwargs['source_database_id'] = _get_managed_db_resource_id(
             cmd.cli_ctx,
@@ -2600,17 +2604,15 @@ def update_short_term_retention_mi(
         managed_instance_name,
         resource_group_name,
         retention_days,
-        deletion_date=None):
+        deleted_time=None):
     '''
     Updates short term retention for database
-
-    Custom function makes create mode more convenient.
     '''
 
-    if deletion_date:
+    if deleted_time:
         database_name = '{},{}'.format(
             database_name,
-            _to_filetimeutc(deletion_date))
+            _to_filetimeutc(deleted_time))
 
         client = \
             get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
@@ -2638,17 +2640,15 @@ def get_short_term_retention_mi(
         database_name,
         managed_instance_name,
         resource_group_name,
-        deletion_date=None):
+        deleted_time=None):
     '''
     Gets short term retention for database
-
-    Custom function makes create mode more convenient.
     '''
 
-    if deletion_date:
+    if deleted_time:
         database_name = '{},{}'.format(
             database_name,
-            _to_filetimeutc(deletion_date))
+            _to_filetimeutc(deleted_time))
 
         client = \
             get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
@@ -2666,28 +2666,6 @@ def get_short_term_retention_mi(
             resource_group_name=resource_group_name)
 
     return policy
-
-
-def show_deleted_database_mi(
-        client,
-        database_name,
-        managed_instance_name,
-        resource_group_name,
-        deletion_date):
-    '''
-    Updates short term retention for database
-
-    Custom function makes create mode more convenient.
-    '''
-
-    restorable_dropped_database_id = '{},{}'.format(
-        database_name,
-        _to_filetimeutc(deletion_date))
-
-    return client.get(
-        restorable_dropped_database_id=restorable_dropped_database_id,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
 
 
 ###############################################

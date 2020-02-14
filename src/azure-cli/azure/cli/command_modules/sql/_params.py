@@ -1419,14 +1419,14 @@ def load_arguments(self, _):
     with self.argument_context('sql midb restore') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
-                'deletion_date',
+                'deleted_time',
                 'target_managed_database_name',
                 'target_managed_instance_name',
                 'restore_point_in_time'
             ])
 
-        c.argument('deletion_date',
-                   options_list=['--deletion-date'],
+        c.argument('deleted_time',
+                   options_list=['--deleted-time'],
                    help='If specified, restore from a deleted database instead of from an existing database.'
                    ' Must match the deleted time of a deleted database on the source Managed Instance.')
 
@@ -1459,12 +1459,12 @@ def load_arguments(self, _):
     with self.argument_context('sql midb retention-policy update') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
-                'deletion_date',
+                'deleted_time',
                 'retention_days'
             ])
 
-        c.argument('deletion_date',
-                   options_list=['--deletion-date'],
+        c.argument('deleted_time',
+                   options_list=['--deleted-time'],
                    help='If specified, updates retention days for a deleted database, instead of an existing database.'
                    'Must match the deleted time of a deleted database on the source Managed Instance.')
 
@@ -1474,8 +1474,8 @@ def load_arguments(self, _):
                    help='New retention policy in days.')
 
     with self.argument_context('sql midb retention-policy show') as c:
-        c.argument('deletion_date',
-                   options_list=['--deletion-date'],
+        c.argument('deleted_time',
+                   options_list=['--deleted-time'],
                    help='If specified, shows retention days for a deleted database, instead of an existing database.'
                    'Must match the deleted time of a deleted database on the source Managed Instance.')
 

@@ -616,7 +616,7 @@ examples:
   - name: Restore a live managed database using Point in time restore
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22"
   - name: Restore a dropped managed database using Point in time restore
-    text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --deletion-date "2018-05-20T05:34:22"
+    text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
   - name: Restore a live managed database using Point in time restore from another instance
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --dest-mi targetmi --dest-resource-group targetrg
 """
@@ -641,7 +641,7 @@ examples:
   - name: Update backup short term retention for live managed database.
     text: az sql midb retention-policy update -g mygroup --mi myinstance -n mymanageddb --retention-days retentionindays
   - name: Update backup short term retention for dropped managed database.
-    text: az sql midb retention-policy update -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22" --retention-days retentionindays
+    text: az sql midb retention-policy update -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22" --retention-days retentionindays
 """
 
 helps['sql midb retention-policy show'] = """
@@ -651,7 +651,7 @@ examples:
   - name: Shows backup short term retention for live managed database.
     text: az sql midb retention-policy show -g mygroup --mi myinstance -n mymanageddb
   - name: Show backup short term retention for dropped managed database.
-    text: az sql midb retention-policy show -g mygroup --mi myinstance -n mymanageddb --deletion-date "2018-05-20T05:34:22"
+    text: az sql midb retention-policy show -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22"
 """
 
 helps['sql server'] = """
