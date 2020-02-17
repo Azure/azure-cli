@@ -125,6 +125,7 @@ def load_command_table(self, _):
         g.keyvault_command('purge', 'purge_deleted_secret')
         g.keyvault_command('recover', 'recover_deleted_secret')
         g.keyvault_custom('download', 'download_secret')
+        g.keyvault_custom('download-all', 'download_all_secrets')
         g.keyvault_custom('backup', 'backup_secret', doc_string_source=data_doc_string.format('backup_secret'))
         g.keyvault_custom('restore', 'restore_secret', doc_string_source=data_doc_string.format('restore_secret'))
 
