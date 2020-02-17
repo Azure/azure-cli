@@ -21,27 +21,30 @@ class MonitorGeneralScenarios(ScenarioTest):
                            'testadmin --authentication-type password').get_output_in_json()
         vm2_json = self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --admin-password TestPassword11!! --admin-username '
                            'testadmin --authentication-type password').get_output_in_json()
+        vm3_json = self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --admin-password TestPassword11!! --admin-username '
+                           'testadmin --authentication-type password').get_output_in_json()
         self.kwargs.update({
             'vm1_id': vm1_json['id'],
-            'vm2_id': vm2_json['id']
+            'vm2_id': vm2_json['id'],
+            'vm3_id': vm3_json['id']
         })
         self.cmd('monitor action-group create -g {rg} -n {ag1}')
-        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm1_id} --action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"', checks=[
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {vm1_id} {vm2_id} --action {ag1} --condition "avg Percentage CPU > 90" --description "High CPU"', checks=[
             self.check('description', 'High CPU'),
             self.check('severity', 2),
             self.check('autoMitigate', None),
             self.check('windowSize', '0:05:00'),
             self.check('evaluationFrequency', '0:01:00'),
-            self.check('length(scopes)', 1)
+            self.check('length(scopes)', 2)
         ])
         with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
-            self.cmd('monitor clone --source-resource {vm1_id} --target-resource {vm2_id}', checks=[
+            self.cmd('monitor clone --source-resource {vm1_id} --target-resource {vm3_id}', checks=[
                 self.check('description', 'High CPU'),
                 self.check('severity', 2),
                 self.check('autoMitigate', None),
                 self.check('windowSize', '0:05:00'),
                 self.check('evaluationFrequency', '0:01:00'),
-                self.check('length(scopes)', 1)
+                self.check('length(scopes)', 3)
             ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
