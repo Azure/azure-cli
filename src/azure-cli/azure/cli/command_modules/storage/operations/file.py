@@ -37,6 +37,20 @@ def create_share_rm(cmd, client, resource_group_name, account_name, share_name, 
                          file_share=file_share)
 
 
+def update_share_rm(cmd, instance, metadata=None, share_quota=None, root_squash=None):
+
+    FileShare = cmd.get_models('FileShare', resource_type=ResourceType.MGMT_STORAGE)
+
+    params = FileShare(
+        share_quota=share_quota if share_quota is not None else instance.share_quota,
+        root_squash=root_squash if root_squash is not None else instance.root_squash,
+        metadata=metadata if metadata is not None else instance.metadata,
+        enabled_protocols=instance.enabled_protocols,
+    )
+
+    return params
+
+
 def create_share_url(client, share_name, unc=None, protocol=None):
     url = client.make_file_url(share_name, None, '', protocol=protocol).rstrip('/')
     if unc:

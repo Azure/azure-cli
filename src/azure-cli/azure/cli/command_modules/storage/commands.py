@@ -424,7 +424,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('exists', '_file_share_exists', transform=create_boolean_result_output_transformer('exists'))
         g.command('list', 'list')
         g.show_command('show', 'get')
-        g.command('update', 'update')
+        g.generic_update_command('update', setter_name='update', setter_arg_name='file_share', custom_func_name='update_share_rm')
 
     with self.command_group('storage share', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
