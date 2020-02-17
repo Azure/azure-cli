@@ -16,6 +16,24 @@ from azure.cli.command_modules.storage.url_quote_util import encode_for_url, mak
 from knack.log import get_logger
 
 
+def create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
+                    enabled_protocols=None, root_squash=None):
+    FileShare = cmd.get_models('FileShare')
+
+    file_share = FileShare()
+    if share_quota is not None:
+        file_share.share_quota = share_quota
+    if enabled_protocols is not None:
+        file_share.enabled_protocols = enabled_protocols
+    if root_squash is not None:
+        file_share.root_squash = root_squash
+    if metadata is not None:
+        file_share.metadata = metadata
+
+    return client.create(resource_group_name=resource_group_name, account_name=account_name, share_name=share_name,
+                         file_share=file_share)
+
+
 def create_share_url(client, share_name, unc=None, protocol=None):
     url = client.make_file_url(share_name, None, '', protocol=protocol).rstrip('/')
     if unc:
