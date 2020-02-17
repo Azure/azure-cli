@@ -689,6 +689,11 @@ examples:
     text: |
         az monitor autoscale rule create -g {myrg} --autoscale-name {myvmss} \\
           --scale in 50% --condition "Percentage CPU < 25 avg 15m"
+  - name: Create autoscale settings via a guest vm metric enabled from diagnostic extensions.
+          You can use counterSpecifier field retrieved from 'az vmss diagnostics get-default-config' in the `--condition`.
+    text: |
+        az monitor autoscale rule create -g {myrg} --autoscale-name test --scale out 1 --condition "/builtin/memory/percentavailablememory > 80 total 5m"
+
 """
 
 helps['monitor autoscale rule delete'] = """
