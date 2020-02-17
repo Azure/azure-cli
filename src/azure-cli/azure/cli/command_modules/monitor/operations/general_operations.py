@@ -43,7 +43,10 @@ def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource):
                 updated_alert_rules.append(alert_rule)
             else:
                 logger.warning('The target resource already has alert rule {}. Skip cloning this one.'.format(alert_rule.name))
-    return updated_alert_rules
+    if not updated_alert_rules:
+        return None
+    return updated_alert_rules if len(updated_alert_rules) > 1 else updated_alert_rules[0]
+
 
 def _is_resource_type_same(source_resource, target_resource):
     source_dict = parse_resource_id(source_resource)
