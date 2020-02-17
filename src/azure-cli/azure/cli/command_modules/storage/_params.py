@@ -663,7 +663,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     for item in ['create', 'delete', 'exists', 'list', 'show', 'update']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
-            c.argument('resource_group_name', required=False)
+            c.argument('resource_group_name', required=False, validator=process_resource_group)
             c.argument('account_name', storage_account_type)
             c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
             c.argument('share_quota', type=int, options_list='--quota')
