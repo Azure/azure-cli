@@ -343,3 +343,9 @@ def load_arguments(self, _):
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
     # endregion
+
+    # region monitor clone
+    with self.argument_context('monitor clone') as c:
+        c.argument('source_resource', help="Resource ID of the source resource.")
+        c.argument('target_resource', help="Resource ID of the target resource.")
+    # endregion

@@ -8,7 +8,7 @@
 def cf_monitor(cli_ctx, **kwargs):
     from azure.mgmt.monitor import MonitorManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, MonitorManagementClient)
+    return get_mgmt_service_client(cli_ctx, MonitorManagementClient, **kwargs)
 
 
 def cf_alert_rules(cli_ctx, _):
@@ -28,7 +28,7 @@ def cf_diagnostics(cli_ctx, _):
 
 
 def cf_diagnostics_category(cli_ctx, _):
-    return cf_monitor(cli_ctx, _).diagnostic_settings_category
+    return cf_monitor(cli_ctx).diagnostic_settings_category
 
 
 def cf_log_profiles(cli_ctx, _):
@@ -66,7 +66,7 @@ def cf_metric_alerts(cli_ctx, _):
 def _log_analytics_client_factory(cli_ctx, **kwargs):
     from azure.mgmt.loganalytics import LogAnalyticsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient)
+    return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient, **kwargs)
 
 
 def cf_log_analytics_workspace(cli_ctx, _):

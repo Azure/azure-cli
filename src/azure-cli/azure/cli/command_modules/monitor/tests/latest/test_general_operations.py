@@ -5,6 +5,7 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 import mock
 
+
 class MonitorGeneralScenarios(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     def test_monitor_clone_vm_metric_alerts_scenario(self, resource_group):
@@ -17,12 +18,12 @@ class MonitorGeneralScenarios(ScenarioTest):
             'rg': resource_group
         })
 
-        vm1_json = self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --admin-password TestPassword11!! --admin-username '
-                           'testadmin --authentication-type password').get_output_in_json()
-        vm2_json = self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --admin-password TestPassword11!! --admin-username '
-                           'testadmin --authentication-type password').get_output_in_json()
-        vm3_json = self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --admin-password TestPassword11!! --admin-username '
-                           'testadmin --authentication-type password').get_output_in_json()
+        vm1_json = self.cmd('vm create -g {rg} -n {vm1} --image UbuntuLTS --admin-password TestPassword11!! '
+                            '--admin-username testadmin --authentication-type password').get_output_in_json()
+        vm2_json = self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --admin-password TestPassword11!! '
+                            '--admin-username testadmin --authentication-type password').get_output_in_json()
+        vm3_json = self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --admin-password TestPassword11!! '
+                            '--admin-username testadmin --authentication-type password').get_output_in_json()
         self.kwargs.update({
             'vm1_id': vm1_json['id'],
             'vm2_id': vm2_json['id'],
@@ -94,7 +95,6 @@ class MonitorGeneralScenarios(ScenarioTest):
                 self.check('length(criteria.allOf[0].dimensions)', 2),
                 self.check('length(criteria.allOf[1].dimensions)', 1),
             ])
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
     def test_monitor_clone_public_ip_metric_alerts_scenario(self, resource_group):

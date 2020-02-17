@@ -55,6 +55,7 @@ def get_autoscale_scale_direction_map():
     return {'to': ScaleDirection.none, 'out': ScaleDirection.increase,
             'in': ScaleDirection.decrease}
 
+
 def _gen_guid():
     import uuid
     return uuid.uuid4()

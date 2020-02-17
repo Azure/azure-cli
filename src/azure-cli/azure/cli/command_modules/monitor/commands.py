@@ -253,4 +253,3 @@ def load_command_table(self, _):
 
     with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom) as g:
         g.custom_command('clone', 'clone_existed_settings')
-
