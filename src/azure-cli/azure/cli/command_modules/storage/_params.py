@@ -773,17 +773,28 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage share') as c:
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
 
-    for item in ['create', 'delete', 'exists', 'list', 'show', 'update']:
+    with self.argument_context('storage share-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('account_name', storage_account_type)
+        c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
+        c.ignore('filter', 'maxpagesize')
+
+    for item in ['create', 'update']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
-            c.argument('resource_group_name', required=False)
-            c.argument('account_name', storage_account_type)
-            c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
-            c.argument('share_quota', type=int, options_list='--quota')
+            t_enabled_protocols, t_root_squash = self.get_models('EnabledProtocols', 'RootSquashType',
+                                                                 resource_type=ResourceType.MGMT_STORAGE)
+            c.argument('share_quota', type=int, options_list=['--quota', '-q'],
+                       help='The maximum size of the share in gigabytes. Must be greater than 0, and less than or '
+                            'equal to 5TB (5120). For Large File Shares, the maximum size is 102400.')
             c.argument('metadata', nargs='+',
                        help='Metadata in space-separated key=value pairs that is associated with the share. '
                             'This overwrites any existing metadata',
                        validator=validate_metadata)
-            c.ignore('filter', 'maxpagesize', 'skip_token')
+            c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols, default="SMB"),
+                       min_api='2019-06-01', help='Immutable property for file shares protocol. NFS protocol will be '
+                       'only available for premium file shares (file shares in the FileStorage account type).')
+            c.argument('root_squash', arg_type=get_enum_type(t_root_squash),
+                       min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)

@@ -8,17 +8,20 @@ Commands for storage file share operations
 """
 
 import os
+from knack.log import get_logger
+
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
                                                     create_blob_service_from_storage_client,
                                                     create_short_lived_container_sas, create_short_lived_share_sas,
                                                     guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
-from knack.log import get_logger
+from azure.cli.core.profiles import ResourceType
 
 
 def create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
                     enabled_protocols=None, root_squash=None):
-    FileShare = cmd.get_models('FileShare')
+
+    FileShare = cmd.get_models('FileShare', resource_type=ResourceType.MGMT_STORAGE)
 
     file_share = FileShare()
     if share_quota is not None:
