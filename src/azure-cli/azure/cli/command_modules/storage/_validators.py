@@ -72,7 +72,7 @@ def parse_storage_account(cmd, namespace):
     if namespace.account_name and is_valid_resource_id(namespace.account_name):
         namespace.resource_group_name = parse_resource_id(namespace.account_name)['resource_group']
         namespace.account_name = parse_resource_id(namespace.account_name)['name']
-    elif not namespace.resource_group_name:
+    elif namespace.account_name and not namespace.resource_group_name:
         namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
 
 
