@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import knack.output
-
+import sys
 
 class AzOutputProducer(knack.output.OutputProducer):
     def __init__(self, cli_ctx=None):
@@ -38,6 +38,11 @@ class AzOutputProducer(knack.output.OutputProducer):
 
     def check_valid_format_type(self, format_type):
         return format_type in self._FORMAT_DICT
+
+    def get_formatter(self, format_type):
+        if not sys.stdout.isatty() and format_type in ['jsonc', 'yamlc']:
+            format_type = format_type[:-1]
+        return super(AzOutputProducer, self).get_formatter(format_type)
 
 
 def get_output_format(cli_ctx):
