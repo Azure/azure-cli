@@ -54,6 +54,13 @@ $ sudo rpm -ivh --nodeps azure-cli-$AZ_VERSION.x86_64.rpm
 ```
 
 
+Completion is not working
+-------------------------
+#### MacOS
+
+The Homebrew formula of Azure CLI installs a completion file named `az` in the Homebrew-managed completions directory (default location is `/usr/local/etc/bash_completion.d/`). To enable completion, please follow Homebrew's instructions [here](https://docs.brew.sh/Shell-Completion).
+
+
 Upgrade from 0.1.0b10 causes 'KeyError: Azure' error
 ----------------------------------------------------
 
