@@ -193,13 +193,14 @@ def acr_login(cmd,
                        login_server])
             p.wait()
         else:
+            stderr_messages = stderr.decode()
             if b'--password-stdin' in stderr:
-                errors = [err for err in stderr.decode().split('\n') if '--password-stdin' not in err]
-                stderr = '\n'.join(errors).encode()
-
-            import sys
-            output = getattr(sys.stderr, 'buffer', sys.stderr)
-            output.write(stderr)
+                errors = [err for err in stderr_messages.split('\n') if err and '--password-stdin' not in err]
+                # Will not raise CLIError if there is no error other than '--password-stdin'
+                if not errors:
+                    return None
+                stderr_messages = '\n'.join(errors)
+            raise CLIError('docker: ' + stderr_messages)
 
     return None
 

@@ -322,7 +322,7 @@ def load_command_table(self, _):
         g.command('list-skus', 'list_skus')
         g.custom_command('list', 'list_vm_images')
         g.custom_command('accept-terms', 'accept_market_ordering_terms',
-                         deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='2.0.82'))
+                         deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='2.2.0'))
         g.custom_show_command('show', 'show_vm_image')
 
     with self.command_group('vm image terms', compute_vm_image_term_sdk, validator=None) as g:
@@ -359,7 +359,7 @@ def load_command_table(self, _):
         g.custom_command('reset-ssh', 'reset_linux_ssh')
 
     with self.command_group('vm host', compute_dedicated_host_sdk, client_factory=cf_dedicated_hosts,
-                            min_api='2019-03-01', is_preview=True) as g:
+                            min_api='2019-03-01') as g:
         g.show_command('show', 'get')
         g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
         g.custom_command('create', 'create_dedicated_host')
@@ -368,7 +368,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
-                            min_api='2019-03-01', is_preview=True) as g:
+                            min_api='2019-03-01') as g:
         g.show_command('show', 'get')
         g.custom_command('create', 'create_dedicated_host_group')
         g.custom_command('list', 'list_dedicated_host_groups')

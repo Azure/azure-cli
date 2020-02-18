@@ -47,7 +47,10 @@ from azure.cli.command_modules.network._validators import (
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
-    process_nw_cm_create_namespace, process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
+    process_nw_cm_create_namespace,
+    process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
+    process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
+    process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
@@ -849,6 +852,49 @@ def load_command_table(self, _):
         g.command('start', 'start')
         g.command('query', 'query')
         g.command('list', 'list')
+
+    with self.command_group('network watcher connection-monitor endpoint',
+                            network_watcher_cm_sdk,
+                            min_api='2019-11-01',
+                            client_factory=cf_connection_monitor,
+                            is_preview=True,
+                            validator=process_nw_cm_v2_endpoint_namespace) as g:
+        g.custom_command('add', 'add_nw_connection_monitor_v2_endpoint')
+        g.custom_command('remove', 'remove_nw_connection_monitor_v2_endpoint')
+        g.custom_show_command('show', 'show_nw_connection_monitor_v2_endpoint')
+        g.custom_command('list', 'list_nw_connection_monitor_v2_endpoint')
+
+    with self.command_group('network watcher connection-monitor test-configuration',
+                            network_watcher_cm_sdk,
+                            min_api='2019-11-01',
+                            client_factory=cf_connection_monitor,
+                            is_preview=True,
+                            validator=process_nw_cm_v2_test_configuration_namespace) as c:
+        c.custom_command('add', 'add_nw_connection_monitor_v2_test_configuration')
+        c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_configuration')
+        c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_configuration')
+        c.custom_command('list', 'list_nw_connection_monitor_v2_test_configuration')
+
+    with self.command_group('network watcher connection-monitor test-group',
+                            network_watcher_cm_sdk,
+                            min_api='2019-11-01',
+                            client_factory=cf_connection_monitor,
+                            is_preview=True,
+                            validator=process_nw_cm_v2_test_group) as c:
+        c.custom_command('add', 'add_nw_connection_monitor_v2_test_group')
+        c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_group')
+        c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_group')
+        c.custom_command('list', 'list_nw_connection_monitor_v2_test_group')
+
+    with self.command_group('network watcher connection-monitor output',
+                            network_watcher_cm_sdk,
+                            min_api='2019-11-01',
+                            client_factory=cf_connection_monitor,
+                            is_preview=True,
+                            validator=process_nw_cm_v2_output_namespace) as c:
+        c.custom_command('add', 'add_nw_connection_monitor_v2_output')
+        c.custom_command('remove', 'remove_nw_connection_monitor_v2_output')
+        c.custom_command('list', 'list_nw_connection_monitor_v2_output')
 
     with self.command_group('network watcher packet-capture', network_watcher_pc_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_nw_packet_capture', client_factory=cf_packet_capture, validator=process_nw_packet_capture_create_namespace)
