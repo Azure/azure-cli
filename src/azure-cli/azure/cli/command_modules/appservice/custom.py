@@ -52,7 +52,7 @@ from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
-from .utils import _normalize_sku, get_sku_name
+from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            should_create_new_rg, set_location, does_app_already_exist, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
@@ -353,7 +353,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     headers = authorization
-    headers['content-type'] = 'application/octet-stream'
+    headers['Content-Type'] = 'application/octet-stream'
+    headers['Cache-Control'] = 'no-cache'
     headers['User-Agent'] = UA_AGENT
 
     import requests
@@ -380,54 +381,94 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
-    enable_oryx_build = None
     scm_do_build_during_deployment = None
     website_run_from_package = None
+    enable_oryx_build = None
+
+    app_settings_should_not_have = []
+    app_settings_should_contains = {}
+
     for keyval in settings:
         value = keyval['value'].lower()
-        if keyval['name'] == 'ENABLE_ORYX_BUILD':
-            enable_oryx_build = value in ('true', '1')
         if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
             scm_do_build_during_deployment = value in ('true', '1')
         if keyval['name'] == 'WEBSITE_RUN_FROM_PACKAGE':
             website_run_from_package = value
+        if keyval['name'] == 'ENABLE_ORYX_BUILD':
+            enable_oryx_build = value
 
-    if not ((enable_oryx_build is True) and (scm_do_build_during_deployment is True)):
-        logger.warning("Setting ENABLE_ORYX_BUILD to true")
+    if not (scm_do_build_during_deployment is True):
         logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to true")
         update_app_settings(cmd, resource_group_name, name, [
-            "ENABLE_ORYX_BUILD=true",
             "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
         ], slot)
-        time.sleep(5)
+        app_settings_should_contains['SCM_DO_BUILD_DURING_DEPLOYMENT'] = 'true'
 
-    if website_run_from_package is not None:
+    if website_run_from_package:
         logger.warning("Removing WEBSITE_RUN_FROM_PACKAGE app setting")
         delete_app_settings(cmd, resource_group_name, name, [
             "WEBSITE_RUN_FROM_PACKAGE"
         ], slot)
-        time.sleep(5)
+        app_settings_should_not_have.append('WEBSITE_RUN_FROM_PACKAGE')
+
+    if enable_oryx_build:
+        logger.warning("Removing ENABLE_ORYX_BUILD app setting")
+        delete_app_settings(cmd, resource_group_name, name, [
+            "ENABLE_ORYX_BUILD"
+        ], slot)
+        app_settings_should_not_have.append('ENABLE_ORYX_BUILD')
+
+    # Wait for scm site to get the latest app settings
+    if app_settings_should_not_have or app_settings_should_contains:
+        logger.warning("Waiting SCM site to be updated with the latest app settings")
+        scm_is_up_to_date = False
+        retries = 10
+        while not scm_is_up_to_date and retries >= 0:
+            scm_is_up_to_date = validate_app_settings_in_scm(
+                cmd, resource_group_name, name, slot,
+                to_contain=app_settings_should_contains,
+                to_not_have=app_settings_should_not_have)
+            retries -= 1
+            time.sleep(5)
+
+        if retries < 0:
+            logger.warning("App settings may not be propagated to the SCM site.")
 
 
 def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
-    enable_oryx_build = None
     scm_do_build_during_deployment = None
+
+    app_settings_should_contains = {}
+
     for keyval in settings:
         value = keyval['value'].lower()
-        if keyval['name'] == 'ENABLE_ORYX_BUILD':
-            enable_oryx_build = value in ('true', '1')
         if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
             scm_do_build_during_deployment = value in ('true', '1')
 
-    if not ((enable_oryx_build is False) and (scm_do_build_during_deployment is False)):
-        logger.warning("Setting ENABLE_ORYX_BUILD to false")
+    if not (scm_do_build_during_deployment is False):
         logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to false")
         update_app_settings(cmd, resource_group_name, name, [
-            "ENABLE_ORYX_BUILD=false",
             "SCM_DO_BUILD_DURING_DEPLOYMENT=false"
         ], slot)
-        time.sleep(5)
+        app_settings_should_contains = {
+            'SCM_DO_BUILD_DURING_DEPLOYMENT': 'false'
+        }
+
+    # Wait for scm site to get the latest app settings
+    if app_settings_should_contains:
+        logger.warning("Waiting SCM site to be updated with the latest app settings")
+        scm_is_up_to_date = False
+        retries = 10
+        while not scm_is_up_to_date and retries >= 0:
+            scm_is_up_to_date = validate_app_settings_in_scm(
+                cmd, resource_group_name, name, slot,
+                to_contain=app_settings_should_contains)
+            retries -= 1
+            time.sleep(5)
+
+        if retries < 0:
+            logger.warning("App settings may not be propagated to the SCM site")
 
 
 def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
@@ -751,6 +792,49 @@ def get_app_settings(cmd, resource_group_name, name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name, name).app_setting_names
     return _build_app_settings_output(result.properties, slot_app_setting_names)
+
+
+# Check if the app setting is propagated to the kudu site correctly
+# to_have [] is a list of app settings which are expected to be set
+# to_not_have [] is a list of app settings which are expected to be absent
+# to_contain {} is a dictionary of app settings which are expected to be set with precise values
+# Return True if validation succeeded
+def validate_app_settings_in_scm(cmd, resource_group_name, name, slot=None,
+                                 to_have=None, to_not_have=None, to_contain=None):
+    scm_settings = _get_app_settings_from_scm(cmd, resource_group_name, name, slot)
+    scm_setting_keys = set(scm_settings.keys())
+
+    # All to_have app settings should exist in scm_setting_keys
+    if to_have and set(to_have).issubset(scm_setting_keys):
+        return False
+
+    # All to_not_have app settings should not exist in scm_setting_keys
+    if to_not_have and not set(to_not_have).intersection(scm_setting_keys):
+        return False
+
+    # All to_contain app settings should have the exact same value
+    temp_setting = scm_settings.copy()
+    temp_setting.update(to_contain or {})
+    if to_contain and temp_setting != scm_settings:
+        return False
+
+    return True
+
+@retryable_method(3, 5)
+def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    settings_url = '{}/api/settings'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
+    headers = {
+        'Content-Type': 'application/octet-stream',
+        'Cache-Control': 'no-cache',
+        'User-Agent': UA_AGENT
+    }
+
+    import requests
+    response = requests.get(settings_url, headers=headers, auth=(username, password), timeout=3)
+
+    return response.json() or {}
 
 
 def get_connection_strings(cmd, resource_group_name, name, slot=None):
