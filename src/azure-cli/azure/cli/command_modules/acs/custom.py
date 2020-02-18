@@ -1842,7 +1842,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
 
-    if 'omsagent' in instance.addon_profiles:
+    if 'omsagent' in instance.addon_profiles and instance.addon_profiles['omsagent'].enabled:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
         cloud_name = cmd.cli_ctx.cloud.name
         # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
@@ -3041,10 +3041,11 @@ def _remove_nulls(managed_clusters):
         for attr in attrs:
             if getattr(managed_cluster, attr, None) is None:
                 delattr(managed_cluster, attr)
-        for ap_profile in managed_cluster.agent_pool_profiles:
-            for attr in ap_attrs:
-                if getattr(ap_profile, attr, None) is None:
-                    delattr(ap_profile, attr)
+        if managed_cluster.agent_pool_profiles is not None:
+            for ap_profile in managed_cluster.agent_pool_profiles:
+                for attr in ap_attrs:
+                    if getattr(ap_profile, attr, None) is None:
+                        delattr(ap_profile, attr)
         for attr in sp_attrs:
             if getattr(managed_cluster.service_principal_profile, attr, None) is None:
                 delattr(managed_cluster.service_principal_profile, attr)
