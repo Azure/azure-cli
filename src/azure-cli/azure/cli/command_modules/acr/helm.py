@@ -3,10 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
+import platform
+import sys
+import ssl
+
 from knack.util import CLIError
 from knack.log import get_logger
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
+from azure.cli.core.util import in_cloud_console
 from ._utils import user_confirmation
+
 from ._docker_utils import (
     get_access_credentials,
     request_data_from_registry,
@@ -175,6 +184,46 @@ def acr_helm_repo_add(cmd,
     p.wait()
 
 
+def acr_helm_install_cli(cmd, version=None, architecture='amd64'):
+    if version is None:
+        releases_url = "https://api.github.com/repos/helm/helm/releases/latest"
+        try:
+            with urlopen(releases_url) as response:
+                result = response.read().decode('UTF-8')
+                values = json.loads(result)
+                version = values['tag_name']
+        except URLError as e:
+            raise CLIError('{}'.format(e))
+
+    # filename="helm-$version-$system-$architecture.$extention"
+    filename_template = 'helm-{}-{}-{}.{}'
+    filename = ''
+
+    system = platform.system()
+    if system == 'Windows':
+        filename = filename_template.format(version, 'windows', architecture, 'zip')
+    elif system == 'Linux':
+        filename = filename_template.format(version, 'linux', architecture, 'tar.gz')
+    elif system == 'Darwin':
+        filename = filename_template.format(version, 'darwin', architecture, 'tar.gz')
+    else:
+        raise CLIError('This system is not supported yet')
+
+    try:
+        _install_helm_cli(filename)
+    except IOError as e:
+        raise CLIError('Error while installing {}: {}'.format(filename, e))
+
+
+
+def _install_helm_cli(filename):
+    source_url = 'https://get.helm.sh/{}'.format(filename)
+    with urlopen(source_url) as response:
+        # Open for writing in binary mode
+        with open(filename, "wb") as f:
+            f.write(response.read())
+
+
 def get_helm_command(is_diagnostics_context=False):
     from ._errors import HELM_COMMAND_ERROR
     helm_command = 'helm'
@@ -230,3 +279,13 @@ def _get_chart_package_name(chart, version, prov=False):
         return '{}.prov'.format(chart_package_name)
 
     return chart_package_name
+
+
+def _ssl_context():
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()

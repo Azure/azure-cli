@@ -267,6 +267,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_helm_delete')
         g.command('push', 'acr_helm_push')
         g.command('repo add', 'acr_helm_repo_add')
+        g.command('install-cli', 'acr_helm_install_cli')
 
     with self.command_group('acr network-rule', acr_network_rule_util) as g:
         g.command('list', 'acr_network_rule_list')
