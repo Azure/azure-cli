@@ -124,7 +124,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
-        ResourceType.MGMT_NETWORK: '2019-09-01',
+        ResourceType.MGMT_NETWORK: '2019-11-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2019-07-01', {
             'resource_skus': '2019-04-01',
             'disks': '2019-07-01',
@@ -136,7 +136,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_POLICY: '2019-09-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2019-07-01',
-        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
+        ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2018-02-14',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-09-01-preview', {
@@ -203,7 +203,8 @@ AZURE_API_PROFILES = {
         # Full MultiAPI support is not done in AppService, the line below is merely
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
-        ResourceType.MGMT_APPSERVICE: '2018-02-01'
+        ResourceType.MGMT_APPSERVICE: '2018-02-01',
+        ResourceType.MGMT_EVENTHUB: '2017-04-01'
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',

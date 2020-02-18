@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.0
+++++++
+* Support `--output yamlc` for colorized YAML
+
 2.0.81
 ++++++
 * `get_raw_token`: Add `tenant` parameter to acquire token for the tenant directly, needless to specify a subscription

@@ -11,6 +11,7 @@ class AzOutputProducer(knack.output.OutputProducer):
         super(AzOutputProducer, self).__init__(cli_ctx)
         additional_formats = {
             'yaml': self.format_yaml,
+            'yamlc': self.format_yaml_color,
             'none': self.format_none
         }
         super(AzOutputProducer, self)._FORMAT_DICT.update(additional_formats)
@@ -25,6 +26,11 @@ class AzOutputProducer(knack.output.OutputProducer):
         except representer.RepresenterError:
             # yaml.safe_dump fails when obj.result is an OrderedDict. knack's --query implementation converts the result to an OrderedDict. https://github.com/microsoft/knack/blob/af674bfea793ff42ae31a381a21478bae4b71d7f/knack/query.py#L46. # pylint: disable=line-too-long
             return safe_dump(json.loads(json.dumps(obj.result)), default_flow_style=False)
+
+    @staticmethod
+    def format_yaml_color(obj):
+        from pygments import highlight, lexers, formatters
+        return highlight(AzOutputProducer.format_yaml(obj), lexers.YamlLexer(), formatters.TerminalFormatter())  # pylint: disable=no-member
 
     @staticmethod
     def format_none(_):

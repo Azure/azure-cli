@@ -4026,5 +4026,70 @@ class DiskEncryptionSetTest(ScenarioTest):
         ])
 
 
+class VMSSCreateDiskOptionTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disk_iops_mbps_', location='eastus')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vmss_create_disk_iops_mbps(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1'
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image debian --data-disk-sizes-gb 10 10 --data-disk-iops 555 666 '
+                 '--data-disk-mbps 77 88 --ultra-ssd-enabled --zone 1 --vm-sku Standard_D2s_v3 '
+                 '--storage-sku UltraSSD_LRS --location eastus',
+                 checks=[
+                     self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[0].diskIOPSReadWrite', '555'),
+                     self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[1].diskIOPSReadWrite', '666'),
+                     self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite', '77'),
+                     self.check('vmss.virtualMachineProfile.storageProfile.dataDisks[1].diskMBpsReadWrite', '88')
+                 ])
+
+        self.cmd('vmss update -g {rg} -n {vmss} --set '
+                 'virtualMachineProfile.storageProfile.dataDisks[0].diskIOPSReadWrite=444 '
+                 'virtualMachineProfile.storageProfile.dataDisks[1].diskIOPSReadWrite=555 '
+                 'virtualMachineProfile.storageProfile.dataDisks[0].diskMBpsReadWrite=66 '
+                 'virtualMachineProfile.storageProfile.dataDisks[1].diskMBpsReadWrite=77 ',
+                 checks=[
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskIopsReadWrite', '444'),
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskIopsReadWrite', '555'),
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskMbpsReadWrite', '66'),
+                     self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskMbpsReadWrite', '77'),
+                 ])
+
+
+class VMCreateAutoCreateSubnetScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_subnet')
+    def test_vm_create_auto_create_subnet(self, resource_group):
+
+        self.kwargs.update({
+            'loc': 'eastus',
+            'vm': 'vm-subnet',
+            'vnet': 'myvnet'
+        })
+
+        # Expecting no results
+        self.cmd('vm list --resource-group {rg}',
+                 checks=self.is_empty())
+        self.cmd('network vnet list --resource-group {rg}',
+                 checks=self.is_empty())
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --location {loc}')
+        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --vnet-name {vnet}')
+
+        # Expecting one result, the one we created
+        self.cmd('vm list --resource-group {rg}', checks=[
+            self.check('length(@)', 1),
+            self.check('[0].resourceGroup', '{rg}'),
+            self.check('[0].name', '{vm}'),
+            self.check('[0].location', '{loc}')
+        ])
+
+        self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
+            self.check('subnets[0].name', '{vm}Subnet')
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
