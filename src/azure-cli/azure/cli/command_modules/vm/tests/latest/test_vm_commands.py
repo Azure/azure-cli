@@ -3468,6 +3468,8 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('location', '{loc}'),
         ])
 
+        self.cmd('ppg show -g {rg} -n {ppg1} --colocation')
+
     @ResourceGroupPreparer(name_prefix='cli_test_ppg_vm_vmss_')
     def test_ppg_with_related_resources(self, resource_group):
 
