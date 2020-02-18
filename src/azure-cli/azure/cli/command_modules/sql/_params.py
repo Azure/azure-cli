@@ -1471,7 +1471,8 @@ def load_arguments(self, _):
         c.argument('retention_days',
                    options_list=['--retention-days'],
                    required=True,
-                   help='New retention policy in days.')
+                   help='New backup short term retention policy in days.'
+                   'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
 
     with self.argument_context('sql midb retention-policy show') as c:
         c.argument('deleted_time',
