@@ -65,13 +65,15 @@ def _create_token_credential(cli_ctx):
 
 
 # region PARAMETER VALIDATORS
-def parse_storage_account(namespace):
+def parse_storage_account(cmd, namespace):
     """Parse storage account which can be either account name or account id"""
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
     if namespace.account_name and is_valid_resource_id(namespace.account_name):
         namespace.resource_group_name = parse_resource_id(namespace.account_name)['resource_group']
         namespace.account_name = parse_resource_id(namespace.account_name)['name']
+    elif namespace.account_name and not namespace.resource_group_name:
+        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
 
 
 def process_resource_group(cmd, namespace):
