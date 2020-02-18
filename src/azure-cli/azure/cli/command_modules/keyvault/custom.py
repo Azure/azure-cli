@@ -10,7 +10,7 @@ import math
 import os
 import time
 import struct
-
+import uuid
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -25,6 +25,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from azure.cli.core import telemetry
 from azure.cli.core.profiles import ResourceType
 
+from ._sdk_extensions import patch_akv_client
 from ._validators import _construct_vnet, secret_text_encoding_values
 
 logger = get_logger(__name__)
@@ -1350,4 +1351,12 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_n
         cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=False,
         description=description, no_wait=no_wait
     )
+# endregion
+
+
+# region role
+def list_role_definition(client, hsm_base_url=None, identifier=None):
+    """ List role definitions. """
+    patch_akv_client(client)
+    return client.list_role_definitions(client, vault_base_url=hsm_base_url, scope='')
 # endregion

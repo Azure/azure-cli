@@ -21,7 +21,7 @@ from ._completers import (
 from ._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, get_hsm_base_url_type,
-    process_vault_and_hsm_name, validate_key_import_source,
+    process_hsm_base_url, process_vault_and_hsm_name, validate_key_import_source,
     validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
@@ -493,4 +493,11 @@ def load_arguments(self, _):
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault certificate {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
+
+    with self.argument_context('keyvault role definition', arg_group='Id') as c:
+        c.argument('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), help='Name of the HSM.')
+        c.argument('identifier', options_list=['--id'],
+                   help='Id of the {}. If specified all other \'Id\' arguments should be omitted.'.format(item),
+                   validator=process_hsm_base_url)
+
     # endregion

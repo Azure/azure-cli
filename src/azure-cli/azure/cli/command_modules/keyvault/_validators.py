@@ -109,6 +109,11 @@ def process_secret_set_namespace(cmd, namespace):
     namespace.value = content
 
 
+def process_hsm_base_url(ns):
+    if ns.identifier:
+        ns.hsm_base_url = ns.identifier
+
+
 def process_vault_and_hsm_name(ns):
     try:
         if ns.identifier:

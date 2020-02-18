@@ -300,6 +300,18 @@ examples:
     crafted: true
 """
 
+helps['keyvault role'] = """
+type: group
+short-summary: Manage user roles for access control with Azure Active Directory and service principals.
+"""
+
+
+helps['keyvault role definition'] = """
+type: group
+short-summary: Manage role definitions.
+"""
+
+
 helps['keyvault secret'] = """
 type: group
 short-summary: Manage secrets.

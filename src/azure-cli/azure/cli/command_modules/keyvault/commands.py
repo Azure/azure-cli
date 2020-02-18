@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
-
+from collections import OrderedDict
 
 from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_client_private_endpoint_connections_factory,
@@ -18,6 +18,17 @@ from ._transformers import (
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
     process_vault_and_hsm_name, validate_private_endpoint_connection_id)
+
+
+def transform_assignment_list(result):
+    return [OrderedDict([('Principal', r['principalName']),
+                         ('Role', r['roleDefinitionName']),
+                         ('Scope', r['scope'])]) for r in result]
+
+
+def transform_definition_list(result):
+    return [OrderedDict([('Name', r['roleName']), ('Type', r['type']),
+                         ('Description', r['description'])]) for r in result]
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -185,6 +196,19 @@ def load_command_table(self, _):
         g.keyvault_custom('list', 'list_certificate_issuer_admins')
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
+
+    """
+    with self.command_group('keyvault role assignment', kv_data_sdk) as g:
+        g.custom_command('delete', 'delete_role_assignments')
+        g.custom_command('list', 'list_role_assignments', table_transformer=transform_assignment_list)
+        g.custom_command('create', 'create_role_assignment')
+    """
+
+    with self.command_group('keyvault role', kv_data_sdk, is_preview=True) as g:
+        pass
+
+    with self.command_group('keyvault role definition', kv_data_sdk) as g:
+        g.custom_command('list', 'list_role_definition', table_transformer=transform_definition_list)
 
     if data_api_version != '2016_10_01':
         with self.command_group('keyvault certificate', kv_data_sdk) as g:
