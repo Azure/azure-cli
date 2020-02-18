@@ -861,6 +861,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT']))
         c.argument('allowed_headers', nargs='+')
         c.argument('exposed_headers', nargs='+')
+        c.argument('input_file', options_list=['-i', '--input-file'], completer=FilesCompleter(), type=file_type)
 
     with self.argument_context('storage cors clear') as c:
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), required=True,

@@ -828,6 +828,17 @@ parameters:
     short-summary: Space-separated list of response headers allowed to be part of the cross-origin request.
   - name: --exposed-headers
     short-summary: Space-separated list of response headers to expose to CORS clients.
+  - name: --input-file -i
+    short-summary: The parameter file path of CORS rule. 
+    long-summary: You can use a JSON file to pass in the values corresponding to the parameters of --max-age, --origins, --methods, --allowed-headers, --exposed-headers, and the file path and above parameters cannot be passed in repeatedly.
+examples:
+  - name: Add CORS rules from a storage account.
+    text: |
+        az storage cors add --methods DELETE HEAD --origins MyOrigin --allowed-headers AllowedHeader \\
+            --exposed-headers ExposedHeader --max-age 1 --services bfqt --account-name MyAccount
+  - name: Add CORS rules by JSON file from a storage account.
+    text: |
+        az storage cors add --i input-file.json --services bfqt --account-name MyAccount
 """
 
 helps['storage cors clear'] = """
