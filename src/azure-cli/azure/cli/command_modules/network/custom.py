@@ -1650,6 +1650,7 @@ def _build_record(cmd, data):
 def import_zone(cmd, resource_group_name, zone_name, file_name):
     from azure.cli.core.util import read_file_content
     import sys
+    logger.warning("In the future, zone name will be case insensitive.")
     RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
     file_text = read_file_content(file_name)
