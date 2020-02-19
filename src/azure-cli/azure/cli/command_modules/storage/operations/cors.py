@@ -15,11 +15,10 @@ def list_cors(client, timeout=None):
 def add_cors(client, origins=None, methods=None, max_age=0, exposed_headers=None, allowed_headers=None, timeout=None,
              input_file=None):
 
-    # TODO
     # Because if the storage command adds a validator in commands.py,
     # it will result in not executing validate_client_parameters,
     # which will miss the logic for querying storage connection parameters.
-    # Therefore, the validator logic is temporarily written here and optimized before merge.
+    # Therefore, the validator logic is written here.
     if input_file is not None:
         if max_age:
             raise IncorrectUsageError("incorrect usage: "
