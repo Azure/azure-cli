@@ -397,7 +397,7 @@ def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
         if keyval['name'] == 'ENABLE_ORYX_BUILD':
             enable_oryx_build = value
 
-    if not (scm_do_build_during_deployment is True):
+    if not scm_do_build_during_deployment is True:
         logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to true")
         update_app_settings(cmd, resource_group_name, name, [
             "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
@@ -426,8 +426,8 @@ def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
         while not scm_is_up_to_date and retries >= 0:
             scm_is_up_to_date = validate_app_settings_in_scm(
                 cmd, resource_group_name, name, slot,
-                to_contain=app_settings_should_contains,
-                to_not_have=app_settings_should_not_have)
+                should_contain=app_settings_should_contains,
+                should_not_have=app_settings_should_not_have)
             retries -= 1
             time.sleep(5)
 
@@ -446,14 +446,12 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
         if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
             scm_do_build_during_deployment = value in ('true', '1')
 
-    if not (scm_do_build_during_deployment is False):
+    if not scm_do_build_during_deployment is False:
         logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to false")
         update_app_settings(cmd, resource_group_name, name, [
             "SCM_DO_BUILD_DURING_DEPLOYMENT=false"
         ], slot)
-        app_settings_should_contains = {
-            'SCM_DO_BUILD_DURING_DEPLOYMENT': 'false'
-        }
+        app_settings_should_contains['SCM_DO_BUILD_DURING_DEPLOYMENT'] = 'false'
 
     # Wait for scm site to get the latest app settings
     if app_settings_should_contains:
@@ -463,7 +461,7 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
         while not scm_is_up_to_date and retries >= 0:
             scm_is_up_to_date = validate_app_settings_in_scm(
                 cmd, resource_group_name, name, slot,
-                to_contain=app_settings_should_contains)
+                should_contain=app_settings_should_contains)
             retries -= 1
             time.sleep(5)
 
@@ -794,28 +792,25 @@ def get_app_settings(cmd, resource_group_name, name, slot=None):
     return _build_app_settings_output(result.properties, slot_app_setting_names)
 
 
-# Check if the app setting is propagated to the kudu site correctly
-# to_have [] is a list of app settings which are expected to be set
-# to_not_have [] is a list of app settings which are expected to be absent
-# to_contain {} is a dictionary of app settings which are expected to be set with precise values
+# Check if the app setting is propagated to the Kudu site correctly by calling api/settings endpoint
+# should_have [] is a list of app settings which are expected to be set
+# should_not_have [] is a list of app settings which are expected to be absent
+# should_contain {} is a dictionary of app settings which are expected to be set with precise values
 # Return True if validation succeeded
 def validate_app_settings_in_scm(cmd, resource_group_name, name, slot=None,
-                                 to_have=None, to_not_have=None, to_contain=None):
+                                 should_have=[], should_not_have=[], should_contain={}):
     scm_settings = _get_app_settings_from_scm(cmd, resource_group_name, name, slot)
     scm_setting_keys = set(scm_settings.keys())
 
-    # All to_have app settings should exist in scm_setting_keys
-    if to_have and set(to_have).issubset(scm_setting_keys):
+    if not set(should_have).issubset(scm_setting_keys):
         return False
 
-    # All to_not_have app settings should not exist in scm_setting_keys
-    if to_not_have and not set(to_not_have).intersection(scm_setting_keys):
+    if set(should_not_have).intersection(scm_setting_keys):
         return False
 
-    # All to_contain app settings should have the exact same value
     temp_setting = scm_settings.copy()
-    temp_setting.update(to_contain or {})
-    if to_contain and temp_setting != scm_settings:
+    temp_setting.update(should_contain)
+    if temp_setting != scm_settings:
         return False
 
     return True
