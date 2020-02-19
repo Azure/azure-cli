@@ -288,17 +288,20 @@ class TestFunctionappMocked(unittest.TestCase):
                                                              should_contain={'SCM_DO_BUILD_DURING_DEPLOYMENT': 'true'},
                                                              should_not_have=[])
 
-    @mock.patch('azure.cli.command_modules.appservice.custom.validate_app_settings_in_scm', return_value=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.validate_app_settings_in_scm',
+                return_value=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.delete_app_settings')
-    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[{
-        'name': 'WEBSITE_RUN_FROM_PACKAGE',
-        'value': 'https://microsoft.com'
-    },
-    {
-        'name': 'ENABLE_ORYX_BUILD',
-        'value': 'true'
-    }])
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[
+        {
+            'name': 'WEBSITE_RUN_FROM_PACKAGE',
+            'value': 'https://microsoft.com'
+        },
+        {
+            'name': 'ENABLE_ORYX_BUILD',
+            'value': 'true'
+        }
+    ])
     def test_add_remote_build_app_settings_remove_unnecessary_app_settings(self,
                                                                            get_app_settings_mock,
                                                                            delete_app_settings_mock,
@@ -378,7 +381,7 @@ class TestFunctionappMocked(unittest.TestCase):
         # action
         remove_remote_build_app_settings(cmd_mock, 'rg', 'name', slot=None)
 
-        #assert
+        # assert
         update_app_settings_mock.assert_called_with(cmd_mock, 'rg', 'name', ['SCM_DO_BUILD_DURING_DEPLOYMENT=false'], None)
         validate_app_settings_in_scm_mock.assert_called_with(cmd_mock, 'rg', 'name', None,
                                                              should_contain={'SCM_DO_BUILD_DURING_DEPLOYMENT': 'false'})
@@ -401,6 +404,6 @@ class TestFunctionappMocked(unittest.TestCase):
         # action
         remove_remote_build_app_settings(cmd_mock, 'rg', 'name', slot=None)
 
-        #assert
+        # assert
         update_app_settings_mock.assert_not_called()
         validate_app_settings_in_scm_mock.assert_not_called()

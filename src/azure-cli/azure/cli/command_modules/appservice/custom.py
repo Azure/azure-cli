@@ -397,7 +397,7 @@ def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
         if keyval['name'] == 'ENABLE_ORYX_BUILD':
             enable_oryx_build = value
 
-    if not scm_do_build_during_deployment is True:
+    if scm_do_build_during_deployment is not True:
         logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to true")
         update_app_settings(cmd, resource_group_name, name, [
             "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
@@ -446,7 +446,7 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
         if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
             scm_do_build_during_deployment = value in ('true', '1')
 
-    if not scm_do_build_during_deployment is False:
+    if scm_do_build_during_deployment is not False:
         logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to false")
         update_app_settings(cmd, resource_group_name, name, [
             "SCM_DO_BUILD_DURING_DEPLOYMENT=false"
@@ -798,22 +798,23 @@ def get_app_settings(cmd, resource_group_name, name, slot=None):
 # should_contain {} is a dictionary of app settings which are expected to be set with precise values
 # Return True if validation succeeded
 def validate_app_settings_in_scm(cmd, resource_group_name, name, slot=None,
-                                 should_have=[], should_not_have=[], should_contain={}):
+                                 should_have=None, should_not_have=None, should_contain=None):
     scm_settings = _get_app_settings_from_scm(cmd, resource_group_name, name, slot)
     scm_setting_keys = set(scm_settings.keys())
 
-    if not set(should_have).issubset(scm_setting_keys):
+    if should_have and not set(should_have).issubset(scm_setting_keys):
         return False
 
-    if set(should_not_have).intersection(scm_setting_keys):
+    if should_not_have and set(should_not_have).intersection(scm_setting_keys):
         return False
 
     temp_setting = scm_settings.copy()
-    temp_setting.update(should_contain)
+    temp_setting.update(should_contain or {})
     if temp_setting != scm_settings:
         return False
 
     return True
+
 
 @retryable_method(3, 5)
 def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
