@@ -35,6 +35,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_APIMANAGEMENT = ('azure.mgmt.apimanagement', 'ApiManagementClient')
     MGMT_KUSTO = ('azure.mgmt.kusto', 'KustoManagementClient')
     MGMT_KEYVAULT = ('azure.mgmt.keyvault', 'KeyVaultManagementClient')
+    MGMT_SYNAPSE = ('azure.mgmt.synapse', 'SynapseManagementClient')
     MGMT_STORAGE = ('azure.mgmt.storage', 'StorageManagementClient')
     MGMT_COMPUTE = ('azure.mgmt.compute', 'ComputeManagementClient')
     MGMT_NETWORK = ('azure.mgmt.network', 'NetworkManagementClient')
