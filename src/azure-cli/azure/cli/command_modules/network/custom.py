@@ -334,7 +334,7 @@ def update_ag_frontend_port(instance, parent, item_name, port=None):
 
 def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,
                             frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
-                            firewall_policy=None, no_wait=False):
+                            firewall_policy=None, no_wait=False, host_names=None):
     ApplicationGatewayHttpListener, SubResource = cmd.get_models('ApplicationGatewayHttpListener', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -347,7 +347,9 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         host_name=host_name,
         require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
-        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None)
+        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None,
+        hostnames=host_names
+    )
 
     if cmd.supported_api_version(min_api='2019-09-01'):
         new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
@@ -358,7 +360,7 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
 
 
 def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
-                            host_name=None, ssl_cert=None, firewall_policy=None):
+                            host_name=None, ssl_cert=None, firewall_policy=None, host_names=None):
     SubResource = cmd.get_models('SubResource')
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(id=frontend_ip)
@@ -377,6 +379,9 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
     if cmd.supported_api_version(min_api='2019-09-01'):
         if firewall_policy is not None:
             instance.firewall_policy = SubResource(id=firewall_policy)
+
+    if host_names is not None:
+        instance.hostnames = host_names or None
 
     instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
     return parent
