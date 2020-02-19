@@ -350,7 +350,7 @@ def load_arguments(self, _):
                    help='The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins".'
                         'If not specified, no cluster admin access will be granted.')
         c.argument('management_subnet_cidr', help='CIDR of subnet used to create PLS needed for management of the cluster. If provided, also set --private-cluster flag.')
-        c.argument('private_cluster', help='Create private Openshift cluster. If this flag is set, also supply --management-subnet-cidr.')
+        c.argument('private_cluster', arg_type=get_three_state_flag(), help='Create private Openshift cluster. If this flag is set, also supply --management-subnet-cidr.')
         c.argument('subnet_prefix', help='The CIDR used on the Subnet into which to deploy the cluster.')
         c.argument('vnet_peer',
                    help='Vnet peering is no longer supported during cluster creation, instead it is possible to edit vnet properties after cluster creation')
@@ -358,7 +358,7 @@ def load_arguments(self, _):
         c.argument('workspace_id', help='The resource id of an existing Log Analytics Workspace to use for storing monitoring data.')
 
     with self.argument_context('openshift update') as c:
-        c.argument('refresh_cluster', arg_type=get_three_state_flag(), options_list='--refresh-cluster',
+        c.argument('refresh_cluster', arg_type=get_three_state_flag(),
                    help='Allow the nodes to be rotated. This can be used to update DNS settings on the nodes')
 
     with self.argument_context('openshift monitor enable') as c:
