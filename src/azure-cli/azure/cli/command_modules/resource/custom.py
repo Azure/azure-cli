@@ -345,11 +345,11 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions)
 
-    deployments_operation_group = smc.deployments  # This solves the multi-api for you
+    deployment_client = smc.deployments  # This solves the multi-api for you
 
     # pylint: disable=protected-access
-    deployments_operation_group._serialize = JSONSerializer(
-        deployments_operation_group._serialize.dependencies
+    deployment_client._serialize = JSONSerializer(
+        deployment_client._serialize.dependencies
     )
 
     # Plug this as default HTTP pipeline
@@ -372,14 +372,14 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
         sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
     )
 
-    validation_result = deployments_operation_group.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=properties)
+    validation_result = deployment_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=properties)
 
     if validation_result and validation_result.error:
         raise CLIError(validation_result.error)
     if validate_only:
         return validation_result
 
-    return sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, deployment_client.create_or_update, resource_group_name, deployment_name, properties)
 
 
 class JsonCTemplate(object):
@@ -704,12 +704,12 @@ def _prepare_deployment_properties(cli_ctx, template_file=None, template_uri=Non
 
 def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False, aux_subscriptions=None):
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions)
-    deployments_operation_group = smc.deployments  # This solves the multi-api for you
+    deployment_client = smc.deployments  # This solves the multi-api for you
 
     if handle_extended_json_format:
         # pylint: disable=protected-access
-        deployments_operation_group._serialize = JSONSerializer(
-            deployments_operation_group._serialize.dependencies
+        deployment_client._serialize = JSONSerializer(
+            deployment_client._serialize.dependencies
         )
 
         # Plug this as default HTTP pipeline
@@ -732,7 +732,7 @@ def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False
             sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
         )
 
-    return deployments_operation_group
+    return deployment_client
 
 
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,
