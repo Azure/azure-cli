@@ -3370,7 +3370,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     else:
         monitor_profile = None
 
-    network_profile = NetworkProfile(vnet_cidr=vnet_prefix)
+    network_profile = NetworkProfile(vnet_cidr=vnet_prefix, management_subnet_cidr=management_subnet_cidr)
     osamc = OpenShiftManagedCluster(
         location=location, tags=tags,
         open_shift_version="v3.11",
@@ -3379,8 +3379,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         agent_pool_profiles=agent_pool_profiles,
         master_pool_profile=agent_master_pool_profile,
         router_profiles=[default_router_profile],
-        monitor_profile=monitor_profile,
-        management_subnet_cidr=management_subnet_cidr)
+        monitor_profile=monitor_profile)
 
     try:
         # long_running_operation_timeout=300
