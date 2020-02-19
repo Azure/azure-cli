@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**AppService**
+
+* functionapp: Fix an issue when using `az functionapp deployment source config-zip` to deploy on Linux app service / premium plan causing 5xx error
+
 2.1.0
 ++++++
 
