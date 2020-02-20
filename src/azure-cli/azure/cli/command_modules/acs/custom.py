@@ -1609,9 +1609,10 @@ def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
     # Else, provide permissions to MSI
     if (
             hasattr(result, 'service_principal_profile') and
-            hasattr(result.service_principal_profile, 'client_id')
+            hasattr(result.service_principal_profile, 'client_id') and
+            result.service_principal_profile.client_id != 'msi'
     ):
-        logger.info('service principal exists, using it')
+        logger.info('valid service principal exists, using it')
         service_principal_msi_id = result.service_principal_profile.client_id
         is_service_principal = True
     elif (
@@ -1679,7 +1680,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                api_server_authorized_ip_ranges=None,
                attach_acr=None,
                no_wait=False):
-
     _validate_ssh_key(no_ssh_key, ssh_key_value)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -1832,8 +1832,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                  resource_group_name=resource_group_name,
                                  resource_name=name, parameters=mc)
 
-            # adding a wait here since we rely on the result for role assignment
-
             # add cluster spn with Monitoring Metrics Publisher role assignment to the cluster resource
             # mdm metrics supported only in azure public cloud so add the  role assignment only in this cloud
             cloud_name = cmd.cli_ctx.cloud.name
@@ -1888,15 +1886,15 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
 
     if 'omsagent' in instance.addon_profiles:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
+
     # send the managed cluster representation to update the addon profiles
     result = sdk_no_wait(
         no_wait, client.create_or_update,
         resource_group_name, name, instance
     )
 
-    # result = LongRunningOperation(cmd.cli_ctx)(result)
-
     if 'omsagent' in instance.addon_profiles:
+        # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(result)
         cloud_name = cmd.cli_ctx.cloud.name
         # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
