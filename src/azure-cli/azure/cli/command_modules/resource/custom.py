@@ -370,7 +370,10 @@ def _deploy_arm_template_unmodified(cli_ctx, resource_group_name, template_file=
     )
 
     if validate_only:
-        return sdk_no_wait(no_wait, deployments_operation_group.validate, resource_group_name, deployment_name, properties)
+        response = sdk_no_wait(no_wait, deployments_operation_group.validate, resource_group_name, deployment_name, properties)
+        if response and response.error:
+            raise CLIError(response.error)
+        return response
     return sdk_no_wait(no_wait, deployments_operation_group.create_or_update, resource_group_name, deployment_name, properties)
 
 
@@ -469,8 +472,11 @@ def _deploy_arm_template_subscription_scope_unmodified(cli_ctx,
     )
 
     if validate_only:
-        return sdk_no_wait(no_wait, smc.deployments.validate_at_subscription_scope,
-                           deployment_name, properties, deployment_location)
+        response = sdk_no_wait(no_wait, smc.deployments.validate_at_subscription_scope,
+                               deployment_name, properties, deployment_location)
+        if response and response.error:
+            raise CLIError(response.error)
+        return response
     return sdk_no_wait(no_wait, smc.deployments.create_or_update_at_subscription_scope,
                        deployment_name, properties, deployment_location)
 
@@ -505,8 +511,11 @@ def _deploy_arm_template_subscription_scope(cli_ctx,
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
-        return sdk_no_wait(no_wait, smc.deployments.validate_at_subscription_scope,
-                           deployment_name, properties, deployment_location)
+        response = sdk_no_wait(no_wait, smc.deployments.validate_at_subscription_scope,
+                               deployment_name, properties, deployment_location)
+        if response and response.error:
+            raise CLIError(response.error)
+        return response
     return sdk_no_wait(no_wait, smc.deployments.create_or_update_at_subscription_scope,
                        deployment_name, properties, deployment_location)
 
