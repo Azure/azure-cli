@@ -211,29 +211,51 @@ def load_arguments(self, _):
     # endregion
 
     # region KeyVault Secret
-    with self.argument_context('keyvault secret set') as c:
-        c.argument('content_type', options_list=['--description'], help='Description of the secret contents (e.g. password, connection string, etc)')
-        c.attributes_argument('secret', SecretAttributes, create=True)
+    for item in ['set']:
+        with self.argument_context('keyvault secret {}'.format(item)) as c:
+            c.argument('content_type', options_list=['--description'],
+                       help='Description of the secret contents (e.g. password, connection string, etc)')
+            c.attributes_argument('secret', SecretAttributes, create=True)
 
-    with self.argument_context('keyvault secret set', arg_group='Content Source') as c:
-        c.argument('value', options_list=['--value'], help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False)
-        c.extra('file_path', options_list=['--file', '-f'], type=file_type, help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter())
-        c.extra('encoding', arg_type=get_enum_type(secret_encoding_values, default='utf-8'), options_list=['--encoding', '-e'], help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) and used during download to automatically encode the resulting file.')
+        with self.argument_context('keyvault secret {}'.format(item), arg_group='Content Source') as c:
+            c.argument('value', options_list=['--value'],
+                       help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False)
+            c.extra('file_path', options_list=['--file', '-f'], type=file_type,
+                    help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter())
+            c.extra('encoding', arg_type=get_enum_type(secret_encoding_values, default='utf-8'),
+                    options_list=['--encoding', '-e'],
+                    help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) '
+                         'and used during download to automatically encode the resulting file.')
 
-    with self.argument_context('keyvault secret set-attributes') as c:
-        c.attributes_argument('secret', SecretAttributes)
+    for item in ['set-attributes']:
+        with self.argument_context('keyvault secret {}'.format(item)) as c:
+            c.attributes_argument('secret', SecretAttributes)
 
-    with self.argument_context('keyvault secret download') as c:
-        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
-        c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'], help="Encoding of the secret. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None)
+    for item in ['download']:
+        with self.argument_context('keyvault secret {}'.format(item)) as c:
+            c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                       help='File to receive the secret contents.')
 
-    for scope in ['backup', 'restore']:
-        with self.argument_context('keyvault secret {}'.format(scope)) as c:
-            c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
+    for item in ['download-all']:
+        with self.argument_context('keyvault secret {}'.format(item)) as c:
+            c.argument('dir_path', options_list=['--dir', '-d'], help='Directory to receive all secret files.')
 
-    for scope in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault secret {}'.format(scope)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
+    for item in ['download', 'download-all']:
+        with self.argument_context('keyvault secret {}'.format(item)) as c:
+            c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'],
+                       help="Encoding of the secret. By default, will look for the 'file-encoding' tag on the secret. "
+                            "Otherwise will assume 'utf-8'.", default=None)
+
+    for item in ['backup', 'restore']:
+        with self.argument_context('keyvault secret {}'.format(item)) as c:
+            c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                       help='File to receive the secret contents.')
+
+    for item in ['download-all', 'list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault secret {}'.format(item)) as c:
+            c.argument('maxresults', options_list=['--maxresults'], type=int,
+                       help='Maximum number of results to return in a page. If not specified, '
+                            'the service will return up to 25 results.')
 
     # endregion
 

@@ -486,19 +486,51 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         with open(secret_path, 'r') as f:
             expected = f.read().replace('\r\n', '\n')
 
-        def _test_set_and_download(encoding):
-            self.kwargs['enc'] = encoding
+        def _test_set_and_download(enc):
+            self.kwargs['enc'] = enc
             self.cmd('keyvault secret set --vault-name {kv} -n download-{enc} --file "{src_path}" --encoding {enc}')
-            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
+            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(enc))
             self.kwargs['dest_path'] = dest_path
             self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}"')
-            with open(dest_path, 'r') as f:
-                actual = f.read().replace('\r\n', '\n')
-            self.assertEqual(actual, expected)
+            with open(dest_path, 'r') as dest_f:
+                actual = dest_f.read().replace('\r\n', '\n')
             os.remove(dest_path)
+            self.assertEqual(actual, expected)
 
         for encoding in secret_encoding_values:
             _test_set_and_download(encoding)
+
+    def _test_download_all_secrets(self):
+        secret_names = ['test_secret.txt', 'test_secret2.txt', 'test_secret3.txt']
+        for name in secret_names:
+            secret_pure_name = name.split('.')[0].replace('_', '-')
+            secret_path = os.path.join(TEST_DIR, name)
+            self.kwargs['src_path'] = secret_path
+
+            def _set_secret(secret_name_suffix, enc):
+                self.kwargs['enc'] = enc
+                self.kwargs['suffix'] = secret_name_suffix
+                self.cmd('keyvault secret set --vault-name {kv} -n download-all-{suffix}-{enc} '
+                         '--file "{src_path}" --encoding {enc}')
+
+            for encoding in secret_encoding_values:
+                _set_secret(secret_pure_name, encoding)
+
+        self.kwargs['dest_path'] = TEST_DIR
+        self.cmd('keyvault secret download-all --vault-name {kv} --dir "{dest_path}"')
+        for name in secret_names:
+            secret_pure_name = name.split('.')[0].replace('_', '-')
+            secret_path = os.path.join(TEST_DIR, name)
+            with open(secret_path, 'r') as f:
+                expected = f.read().replace('\r\n', '\n')
+
+            for encoding in secret_encoding_values:
+                downloaded_path = \
+                    os.path.join(TEST_DIR, 'download-all-{suffix}-{enc}'.format(suffix=secret_pure_name, enc=encoding))
+                with open(downloaded_path, 'r') as f:
+                    actual = f.read().replace('\r\n', '\n')
+                os.remove(downloaded_path)
+                self.assertEqual(actual, expected)
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     def test_keyvault_secret(self, resource_group):
@@ -524,11 +556,12 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.check('length(@)', 1))
 
         # create a new secret version
-        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value DEF456 --tags test=foo --description "test type"', checks=[
-            self.check('value', 'DEF456'),
-            self.check('tags', {'file-encoding': 'utf-8', 'test': 'foo'}),
-            self.check('contentType', 'test type')
-        ]).get_output_in_json()
+        secret = self.cmd('keyvault secret set --vault-name {kv} -n {sec} --value DEF456 --tags test=foo '
+                          '--description "test type"', checks=[
+                              self.check('value', 'DEF456'),
+                              self.check('tags', {'file-encoding': 'utf-8', 'test': 'foo'}),
+                              self.check('contentType', 'test type')
+                          ]).get_output_in_json()
         self.kwargs['sid2'] = secret['id']
 
         # list secret versions
@@ -574,6 +607,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
         self.cmd('keyvault secret list --vault-name {kv} --maxresults 10', checks=self.is_empty())
 
+        self._test_download_all_secrets()
         self._test_download_secret()
 
 
@@ -587,7 +621,8 @@ class KeyVaultCertificateContactsScenarioTest(ScenarioTest):
 
         _create_keyvault(self, self.kwargs)
 
-        self.cmd('keyvault certificate contact add --vault-name {kv} --email admin@contoso.com --name "John Doe" --phone 123-456-7890')
+        self.cmd('keyvault certificate contact add --vault-name {kv} --email admin@contoso.com '
+                 '--name "John Doe" --phone 123-456-7890')
         self.cmd('keyvault certificate contact add --vault-name {kv} --email other@contoso.com ')
         self.cmd('keyvault certificate contact list --vault-name {kv}',
                  checks=self.check('length(contactList)', 2))

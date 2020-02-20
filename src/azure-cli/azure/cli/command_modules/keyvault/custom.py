@@ -830,7 +830,7 @@ def download_key(client, file_path, vault_base_url=None, key_name=None, key_vers
 # region KeyVault Secret
 def download_secret(client, file_path, vault_base_url=None, secret_name=None, encoding=None,
                     secret_version='', identifier=None):  # pylint: disable=unused-argument
-    """ Download a secret from a KeyVault. """
+    """ Download a secret from a Key Vault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
@@ -859,6 +859,24 @@ def download_secret(client, file_path, vault_base_url=None, secret_name=None, en
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex
+
+
+def download_all_secrets(client, dir_path, vault_base_url, maxresults=None, encoding=None):
+    """ Download the latest version of all secrets from a Key Vault. """
+
+    if not os.path.exists(dir_path):
+        raise CLIError('Directory \'{}\' doesn\'t exist.'.format(dir_path))
+
+    if os.path.isfile(dir_path):
+        raise CLIError('--dir/-d needs to be a directory name not a file name.')
+
+    secrets = client.get_secrets(vault_base_url, maxresults=maxresults)
+    for secret in secrets:
+        secret_name = secret.id.split('/')[-1]
+        file_path = os.path.join(dir_path, secret_name)
+        if os.path.exists(file_path):
+            raise CLIError('File \'{}\' already exists.'.format(file_path))
+        download_secret(client, file_path, vault_base_url=vault_base_url, secret_name=secret_name, encoding=encoding)
 
 
 def backup_secret(client, file_path, vault_base_url=None,
