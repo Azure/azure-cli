@@ -3402,7 +3402,8 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
 def openshift_update(cmd, client, resource_group_name, name, refresh_cluster=None, no_wait=False):
     instance = client.get(resource_group_name, name)
-    instance.refresh_cluster = True
+    if refresh_cluster:
+        instance.refresh_cluster = True
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
