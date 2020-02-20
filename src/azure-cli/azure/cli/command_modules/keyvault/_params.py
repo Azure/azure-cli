@@ -490,14 +490,45 @@ def load_arguments(self, _):
         c.argument('admin_email')
         c.argument('admin_phone')
 
-    for scope in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault certificate {}'.format(scope)) as c:
+    for item in ['list', 'list-deleted', 'list-versions']:
+        with self.argument_context('keyvault certificate {}'.format(item)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
 
-    with self.argument_context('keyvault role definition', arg_group='Id') as c:
+    with self.argument_context('keyvault role') as c:
+        c.argument('scope', default='/',
+                   help='scope at which the role assignment or definition applies to, '
+                        'e.g., "/" or "/keys" or "/keys/{keyname}"')
+
+    with self.argument_context('keyvault role', arg_group='Id') as c:
         c.argument('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), help='Name of the HSM.')
         c.argument('identifier', options_list=['--id'],
-                   help='Id of the {}. If specified all other \'Id\' arguments should be omitted.'.format(item),
+                   help='Id of the HSM. If specified all other \'Id\' arguments should be omitted.',
                    validator=process_hsm_base_url)
 
+    with self.argument_context('keyvault role assignment') as c:
+        c.argument('assignee', help='represent a user, group, or service principal. '
+                                    'supported format: object id, user sign-in name, or service principal name')
+        c.argument('assignee_object_id',
+                   help='Use this parameter instead of \'--assignee\' to bypass graph permission issues. '
+                        'This parameter only works with object ids for users, groups, service principals, and '
+                        'managed identities. For managed identities use the principal id. For service principals, '
+                        'use the object id and not the app id.')
+        c.argument('ids', nargs='+', help='space-separated role assignment ids')
+        c.argument('role', help='role name or id')
+
+    class PrincipalType(str, Enum):  # Copied from azure.mgmt.authorization v2018_09_01_preview
+        user = "User"
+        group = "Group"
+        service_principal = "ServicePrincipal"
+        unknown = "Unknown"
+        directory_role_template = "DirectoryRoleTemplate"
+        foreign_group = "ForeignGroup"
+        application = "Application"
+        msi = "MSI"
+        directory_object_or_group = "DirectoryObjectOrGroup"
+        everyone = "Everyone"
+
+    with self.argument_context('keyvault role assignment create') as c:
+        c.argument('assignee_principal_type', arg_type=get_enum_type(PrincipalType),
+                   help='The principal type of assignee.')
     # endregion

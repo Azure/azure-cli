@@ -8,8 +8,9 @@ import codecs
 import json
 import math
 import os
-import time
+import re
 import struct
+import time
 import uuid
 
 from knack.log import get_logger
@@ -1355,8 +1356,68 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_n
 
 
 # region role
-def list_role_definition(client, hsm_base_url=None, identifier=None):
+def _is_guid(guid):
+    try:
+        uuid.UUID(guid)
+        return True
+    except ValueError:
+        return False
+
+
+def _resolve_role_id(client, role, hsm_base_url, scope):
+    role_id = None
+    if re.match(r'Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/.+', role, re.I):
+        last_part = role.split('/')[-1]
+        if _is_guid(last_part):
+            role_id = role
+    elif _is_guid(role):
+        role_id = 'Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/{}'.format(role)
+    else:
+        all_roles = list_role_definitions(client, hsm_base_url=hsm_base_url, scope=scope)
+        for _role in all_roles.get('value', []):
+            if _role.get('properties', {}).get('roleName') == role:
+                role_id = _role.get('id')
+                break
+    return role_id
+
+
+def create_role_assignment(cmd, client, role, hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
+                           scope=None, assignee=None, assignee_principal_type=None, principal_id=None):
+    """ Create a new role assignment for a user, group, or service principal. """
+    patch_akv_client(client)
+
+    from azure.cli.command_modules.role.custom import _resolve_object_id
+
+    if principal_id is None:
+        principal_id = _resolve_object_id(cmd.cli_ctx, assignee)
+        logger.info('resolved principal_id: {}'.format(principal_id))
+
+    role_definition_id = _resolve_role_id(client, role=role, hsm_base_url=hsm_base_url, scope=scope)
+    name = str(uuid.uuid4())
+
+    logger.info('hsm_base_url: {}'.format(hsm_base_url))
+    logger.info('scope: {}'.format(scope))
+    logger.info('assignee: {}'.format(assignee))
+    logger.info('assignee_principal_type: {}'.format(assignee_principal_type))
+    logger.info('principal_id: {}'.format(principal_id))
+    logger.info('role_definition_id: {}'.format(role_definition_id))
+    logger.info('name: {}'.format(name))
+
+    return client.create_role_assignment(
+        client, vault_base_url=hsm_base_url, scope=scope, name=name,
+        principal_id=principal_id, role_definition_id=role_definition_id
+    )
+
+
+def list_role_assignments(client, hsm_base_url=None,  scope=None,
+                          identifier=None, assignee=None, role=None):
+    """ List role assignments. """
+    patch_akv_client(client)
+    return client.list_role_assignments_for_scope(client, vault_base_url=hsm_base_url, scope=scope)
+
+
+def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
     """ List role definitions. """
     patch_akv_client(client)
-    return client.list_role_definitions(client, vault_base_url=hsm_base_url, scope='')
+    return client.list_role_definitions(client, vault_base_url=hsm_base_url, scope=scope)
 # endregion

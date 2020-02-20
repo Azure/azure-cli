@@ -197,18 +197,16 @@ def load_command_table(self, _):
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
-    """
-    with self.command_group('keyvault role assignment', kv_data_sdk) as g:
-        g.custom_command('delete', 'delete_role_assignments')
-        g.custom_command('list', 'list_role_assignments', table_transformer=transform_assignment_list)
-        g.custom_command('create', 'create_role_assignment')
-    """
-
-    with self.command_group('keyvault role', kv_data_sdk, is_preview=True) as g:
+    with self.command_group('keyvault role', kv_data_sdk, is_preview=True):
         pass
 
+    with self.command_group('keyvault role assignment', kv_data_sdk) as g:
+        # g.custom_command('delete', 'delete_role_assignments')
+        g.custom_command('list', 'list_role_assignments', table_transformer=transform_assignment_list)
+        g.custom_command('create', 'create_role_assignment')
+
     with self.command_group('keyvault role definition', kv_data_sdk) as g:
-        g.custom_command('list', 'list_role_definition', table_transformer=transform_definition_list)
+        g.custom_command('list', 'list_role_definitions', table_transformer=transform_definition_list)
 
     if data_api_version != '2016_10_01':
         with self.command_group('keyvault certificate', kv_data_sdk) as g:
