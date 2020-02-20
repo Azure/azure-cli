@@ -1409,8 +1409,22 @@ def create_role_assignment(cmd, client, role, hsm_base_url=None, identifier=None
     )
 
 
-def list_role_assignments(client, hsm_base_url=None,  scope=None,
-                          identifier=None, assignee=None, role=None):
+def delete_role_assignment(client, name, hsm_base_url=None, scope=None,
+                           identifier=None):  # pylint: disable=unused-argument
+    """ Delete a role assignment. """
+    patch_akv_client(client)
+    return client.delete_role_assignment(client, vault_base_url=hsm_base_url, scope=scope, name=name)
+
+
+def get_role_assignment(client, name, hsm_base_url=None, scope=None,
+                        identifier=None):  # pylint: disable=unused-argument
+    """ Get a role assignment. """
+    patch_akv_client(client)
+    return client.get_role_assignment(client, vault_base_url=hsm_base_url, scope=scope, name=name)
+
+
+def list_role_assignments(client, hsm_base_url=None, scope=None,
+                          identifier=None, assignee=None, role=None):  # pylint: disable=unused-argument
     """ List role assignments. """
     patch_akv_client(client)
     return client.list_role_assignments_for_scope(client, vault_base_url=hsm_base_url, scope=scope)

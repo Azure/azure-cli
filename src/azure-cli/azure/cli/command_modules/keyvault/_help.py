@@ -302,7 +302,13 @@ examples:
 
 helps['keyvault role'] = """
 type: group
-short-summary: Manage user roles for access control with Azure Active Directory and service principals.
+short-summary: Manage user roles for access control.
+"""
+
+
+helps['keyvault role assignment'] = """
+type: group
+short-summary: Manage role assignments.
 """
 
 

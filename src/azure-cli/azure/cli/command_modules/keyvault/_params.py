@@ -506,6 +506,7 @@ def load_arguments(self, _):
                    validator=process_hsm_base_url)
 
     with self.argument_context('keyvault role assignment') as c:
+        c.argument('name', options_list=['-n'], help='Name of the role assignment.')
         c.argument('assignee', help='represent a user, group, or service principal. '
                                     'supported format: object id, user sign-in name, or service principal name')
         c.argument('assignee_object_id',
