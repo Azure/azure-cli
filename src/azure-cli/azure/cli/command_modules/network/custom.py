@@ -2020,7 +2020,7 @@ def dict_matches_filter(d, filter_dict):
 
 def lists_match(l1, l2):
     try:
-        return Counter(l1) == Counter(l2)
+        return Counter(l1) == Counter(l2)  # pylint: disable=too-many-function-args
     except TypeError:
         return False
 # endregion
