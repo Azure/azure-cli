@@ -509,31 +509,31 @@ type: group
 short-summary: Manage SQL resources of Azure Cosmos DB account.
 """
 
-helps['cosmosdb sql stored_procedure'] = """
+helps['cosmosdb sql stored-procedure'] = """
 type: group
 short-summary: Manage Azure Cosmos DB SQL stored procedures.
 """
 
-helps['cosmosdb sql stored_procedure create'] = """
+helps['cosmosdb sql stored-procedure create'] = """
 type: command
 short-summary: Create an SQL stored procedure under an Azure Cosmos DB SQL container.
 examples:
   - name: Create an Azure Cosmos DB SQL stored procedure.
-    text: az cosmosdb sql stored_procedure create -g MyResourceGroup -a MyAccount -d MyDatabase -c MyContainer -n MyStoredProcedure -b StoredProcedureBody
+    text: az cosmosdb sql stored-procedure create -g MyResourceGroup -a MyAccount -d MyDatabase -c MyContainer -n MyStoredProcedure -b StoredProcedureBody
     crafted: true
 """
 
-helps['cosmosdb sql stored_procedure delete'] = """
+helps['cosmosdb sql stored-procedure delete'] = """
 type: command
 short-summary: Delete the SQL stored procedure under an Azure Cosmos DB SQL container.
 """
 
-helps['cosmosdb sql stored_procedure list'] = """
+helps['cosmosdb sql stored-procedure list'] = """
 type: command
 short-summary: List the SQL stored procedures under an Azure Cosmos DB SQL container.
 """
 
-helps['cosmosdb sql stored_procedure show'] = """
+helps['cosmosdb sql stored-procedure show'] = """
 type: command
 short-summary: Show the details of a SQL stored procedure under an Azure Cosmos DB SQL container.
 """
@@ -572,31 +572,31 @@ type: command
 short-summary: Show the details of a SQL trigger under an Azure Cosmos DB SQL container.
 """
 
-helps['cosmosdb sql user_defined_function'] = """
+helps['cosmosdb sql user-defined-function'] = """
 type: group
 short-summary: Manage Azure Cosmos DB SQL user defined functions.
 """
 
-helps['cosmosdb sql user_defined_function create'] = """
+helps['cosmosdb sql user-defined-function create'] = """
 type: command
 short-summary: Create an SQL user defined function under an Azure Cosmos DB SQL container.
 examples:
   - name: Create an Azure Cosmos DB SQL user defined function.
-    text: az cosmosdb sql user_defined_function create -g MyResourceGroup -a MyAccount -d MyDatabase -c MyContainer -n MyUserDefinedFunction -b UserDefinedFunctionBody
+    text: az cosmosdb sql user-defined-function create -g MyResourceGroup -a MyAccount -d MyDatabase -c MyContainer -n MyUserDefinedFunction -b UserDefinedFunctionBody
     crafted: true
 """
 
-helps['cosmosdb sql user_defined_function delete'] = """
+helps['cosmosdb sql user-defined-function delete'] = """
 type: command
 short-summary: Delete the SQL user defined function under an Azure Cosmos DB SQL container.
 """
 
-helps['cosmosdb sql user_defined_function list'] = """
+helps['cosmosdb sql user-defined-function list'] = """
 type: command
 short-summary: List the SQL user defined functions under an Azure Cosmos DB SQL container.
 """
 
-helps['cosmosdb sql user_defined_function show'] = """
+helps['cosmosdb sql user-defined-function show'] = """
 type: command
 short-summary: Show the details of a SQL user defined function under an Azure Cosmos DB SQL container.
 """
