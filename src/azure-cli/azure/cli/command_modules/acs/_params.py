@@ -359,7 +359,7 @@ def load_arguments(self, _):
 
     with self.argument_context('openshift update') as c:
         c.argument('refresh_cluster', arg_type=get_three_state_flag(),
-                help='Allow nodes to be rotated. Use this flag to trigger nodes rotation after DNS settings change.')
+                   help='Allow nodes to be rotated. Use this flag to trigger nodes rotation after DNS settings change.')
 
     with self.argument_context('openshift monitor enable') as c:
         c.argument('workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')
