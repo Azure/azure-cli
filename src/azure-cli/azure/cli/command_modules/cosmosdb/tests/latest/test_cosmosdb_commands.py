@@ -70,7 +70,7 @@ class CosmosDBTests(ScenarioTest):
         })
 
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
-        self.cmd('az cosmosdb delete -n {acc} -g {rg}')
+        self.cmd('az cosmosdb delete -n {acc} -g {rg} --yes')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', expect_failure=True)
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
@@ -325,7 +325,7 @@ class CosmosDBTests(ScenarioTest):
         database_list = self.cmd('az cosmosdb database list -g {rg} -n {acc}').get_output_in_json()
         assert len(database_list) == 1
 
-        self.cmd('az cosmosdb database delete -g {rg} -n {acc} -d {db_name}')
+        self.cmd('az cosmosdb database delete -g {rg} -n {acc} -d {db_name} --yes')
         assert not self.cmd('az cosmosdb database exists -g {rg} -n {acc} -d {db_name}').get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_collection')
@@ -372,7 +372,7 @@ class CosmosDBTests(ScenarioTest):
         disable_ttl = self.cmd('az cosmosdb collection update --default-ttl 0 -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()
         assert "defaultTtl" not in disable_ttl["collection"]
 
-        self.cmd('az cosmosdb collection delete -g {rg} -n {acc} -d {db_name} -c {col}')
+        self.cmd('az cosmosdb collection delete -g {rg} -n {acc} -d {db_name} -c {col} --yes')
         assert not self.cmd('az cosmosdb collection exists -g {rg} -n {acc} -d {db_name} -c {col}').get_output_in_json()
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_database')
@@ -395,7 +395,7 @@ class CosmosDBTests(ScenarioTest):
         database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 1
 
-        self.cmd('az cosmosdb sql database delete -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb sql database delete -g {rg} -a {acc} -n {db_name} --yes')
         database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 0
 
@@ -443,7 +443,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 1
 
-        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name}')
+        self.cmd('az cosmosdb sql container delete -g {rg} -a {acc} -d {db_name} -n {ctn_name} --yes')
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
 
@@ -469,22 +469,22 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} ').get_output_in_json()
-        sproc_create = self.cmd('az cosmosdb sql stored_procedure create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name} -b {body}').get_output_in_json()
+        sproc_create = self.cmd('az cosmosdb sql stored-procedure create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name} -b {body}').get_output_in_json()
 
         assert sproc_create["name"] == sproc_name
         assert sproc_create["resource"]["body"] == body
 
-        sproc_update = self.cmd('az cosmosdb sql stored_procedure update -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name} -b {nbody}').get_output_in_json()
+        sproc_update = self.cmd('az cosmosdb sql stored-procedure update -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name} -b {nbody}').get_output_in_json()
         assert sproc_update["resource"]["body"] == nbody
 
-        sproc_show = self.cmd('az cosmosdb sql stored_procedure show -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name}').get_output_in_json()
+        sproc_show = self.cmd('az cosmosdb sql stored-procedure show -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name}').get_output_in_json()
         assert sproc_show["name"] == sproc_name
 
-        sproc_list = self.cmd('az cosmosdb sql stored_procedure list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        sproc_list = self.cmd('az cosmosdb sql stored-procedure list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
         assert len(sproc_list) == 1
 
-        self.cmd('az cosmosdb sql stored_procedure delete -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name}')
-        sproc_list = self.cmd('az cosmosdb sql stored_procedure list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        self.cmd('az cosmosdb sql stored-procedure delete -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {sproc_name} --yes')
+        sproc_list = self.cmd('az cosmosdb sql stored-procedure list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
         assert len(sproc_list) == 0
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_user_defined_function')
@@ -509,22 +509,22 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
         self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} ').get_output_in_json()
-        udf_create = self.cmd('az cosmosdb sql user_defined_function create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name} -b {body}').get_output_in_json()
+        udf_create = self.cmd('az cosmosdb sql user-defined-function create --resource-group {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name} -b {body}').get_output_in_json()
 
         assert udf_create["name"] == udf_name
         assert udf_create["resource"]["body"] == body
 
-        udf_update = self.cmd('az cosmosdb sql user_defined_function update -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name} -b {nbody}').get_output_in_json()
+        udf_update = self.cmd('az cosmosdb sql user-defined-function update -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name} -b {nbody}').get_output_in_json()
         assert udf_update["resource"]["body"] == nbody
 
-        udf_show = self.cmd('az cosmosdb sql user_defined_function show -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name}').get_output_in_json()
+        udf_show = self.cmd('az cosmosdb sql user-defined-function show -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name}').get_output_in_json()
         assert udf_show["name"] == udf_name
 
-        udf_list = self.cmd('az cosmosdb sql user_defined_function list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        udf_list = self.cmd('az cosmosdb sql user-defined-function list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
         assert len(udf_list) == 1
 
-        self.cmd('az cosmosdb sql user_defined_function delete -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name}')
-        udf_list = self.cmd('az cosmosdb sql user_defined_function list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
+        self.cmd('az cosmosdb sql user-defined-function delete -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {udf_name} --yes')
+        udf_list = self.cmd('az cosmosdb sql user-defined-function list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
         assert len(udf_list) == 0
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_trigger')
@@ -569,7 +569,7 @@ class CosmosDBTests(ScenarioTest):
         trigger_list = self.cmd('az cosmosdb sql trigger list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
         assert len(trigger_list) == 1
 
-        self.cmd('az cosmosdb sql trigger delete -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {trigger_name}')
+        self.cmd('az cosmosdb sql trigger delete -g {rg} -a {acc} -d {db_name} -c {ctn_name} -n {trigger_name} --yes')
         trigger_list = self.cmd('az cosmosdb sql trigger list -g {rg} -a {acc} -d {db_name} -c {ctn_name}').get_output_in_json()
         assert len(trigger_list) == 0
 
@@ -593,7 +593,7 @@ class CosmosDBTests(ScenarioTest):
         database_list = self.cmd('az cosmosdb mongodb database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 1
 
-        self.cmd('az cosmosdb mongodb database delete -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb mongodb database delete -g {rg} -a {acc} -n {db_name} --yes')
         database_list = self.cmd('az cosmosdb mongodb database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 0
 
@@ -629,7 +629,7 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb mongodb collection list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(collection_list) == 1
 
-        self.cmd('az cosmosdb mongodb collection delete -g {rg} -a {acc} -d {db_name} -n {col_name}')
+        self.cmd('az cosmosdb mongodb collection delete -g {rg} -a {acc} -d {db_name} -n {col_name} --yes')
         collection_list = self.cmd(
             'az cosmosdb mongodb collection list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(collection_list) == 0
@@ -654,7 +654,7 @@ class CosmosDBTests(ScenarioTest):
         keyspace_list = self.cmd('az cosmosdb cassandra keyspace list -g {rg} -a {acc}').get_output_in_json()
         assert len(keyspace_list) == 1
 
-        self.cmd('az cosmosdb cassandra keyspace delete -g {rg} -a {acc} -n {ks_name}')
+        self.cmd('az cosmosdb cassandra keyspace delete -g {rg} -a {acc} -n {ks_name} --yes')
         keyspace_list = self.cmd('az cosmosdb cassandra keyspace list -g {rg} -a {acc}').get_output_in_json()
         assert len(keyspace_list) == 0
 
@@ -686,7 +686,7 @@ class CosmosDBTests(ScenarioTest):
         table_list = self.cmd('az cosmosdb cassandra table list -g {rg} -a {acc} -k {ks_name}').get_output_in_json()
         assert len(table_list) == 1
 
-        self.cmd('az cosmosdb cassandra table delete -g {rg} -a {acc} -k {ks_name} -n {table_name}')
+        self.cmd('az cosmosdb cassandra table delete -g {rg} -a {acc} -k {ks_name} -n {table_name} --yes')
         table_list = self.cmd('az cosmosdb cassandra table list -g {rg} -a {acc} -k {ks_name}').get_output_in_json()
         assert len(table_list) == 0
 
@@ -710,7 +710,7 @@ class CosmosDBTests(ScenarioTest):
         database_list = self.cmd('az cosmosdb gremlin database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 1
 
-        self.cmd('az cosmosdb gremlin database delete -g {rg} -a {acc} -n {db_name}')
+        self.cmd('az cosmosdb gremlin database delete -g {rg} -a {acc} -n {db_name} --yes')
         database_list = self.cmd('az cosmosdb gremlin database list -g {rg} -a {acc}').get_output_in_json()
         assert len(database_list) == 0
 
@@ -754,7 +754,7 @@ class CosmosDBTests(ScenarioTest):
         graph_list = self.cmd('az cosmosdb gremlin graph list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(graph_list) == 1
 
-        self.cmd('az cosmosdb gremlin graph delete -g {rg} -a {acc} -d {db_name} -n {gp_name}')
+        self.cmd('az cosmosdb gremlin graph delete -g {rg} -a {acc} -d {db_name} -n {gp_name} --yes')
         graph_list = self.cmd('az cosmosdb gremlin graph list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(graph_list) == 0
 
@@ -778,7 +778,7 @@ class CosmosDBTests(ScenarioTest):
         table_list = self.cmd('az cosmosdb table list -g {rg} -a {acc}').get_output_in_json()
         assert len(table_list) == 1
 
-        self.cmd('az cosmosdb table delete -g {rg} -a {acc} -n {table_name}')
+        self.cmd('az cosmosdb table delete -g {rg} -a {acc} -n {table_name} --yes')
         table_list = self.cmd('az cosmosdb table list -g {rg} -a {acc}').get_output_in_json()
         assert len(table_list) == 0
 
