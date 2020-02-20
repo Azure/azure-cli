@@ -5,11 +5,13 @@
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 import mock
+from msrestazure.tools import resource_id
 
 
 class MonitorGeneralScenarios(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     def test_monitor_clone_vm_metric_alerts_scenario(self, resource_group):
+        self.test_guid_count = 0
         self.kwargs.update({
             'alert': 'alert1',
             'vm1': 'vm1',
@@ -53,7 +55,7 @@ class MonitorGeneralScenarios(ScenarioTest):
     @StorageAccountPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_2')
     def test_monitor_clone_storage_metric_alerts_scenario(self, resource_group, storage_account, storage_account_2):
-        from msrestazure.tools import resource_id
+        self.test_guid_count = 0
         self.kwargs.update({
             'alert': 'alert1',
             'sa': storage_account,
@@ -99,7 +101,7 @@ class MonitorGeneralScenarios(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
     def test_monitor_clone_public_ip_metric_alerts_scenario(self, resource_group):
-        from msrestazure.tools import resource_id
+        self.test_guid_count = 0
         self.kwargs.update({
             'alert': 'alert1',
             'alert2': 'alert2',
