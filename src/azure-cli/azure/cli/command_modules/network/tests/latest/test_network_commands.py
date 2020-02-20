@@ -748,21 +748,23 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'ag': 'ag1',
             'res': 'application-gateway http-listener',
             'name': 'mylistener',
-            'gateway_ip': 'ip1'
+            'gateway_ip': 'ip1',
+            'port': 'cliport'
         })
 
         self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
         self.cmd('network application-gateway create -g {rg} -n {ag} '
                  '--sku WAF_v2 '
                  '--public-ip-address {gateway_ip} ')
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} -n {port} --port 18080')
 
-        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --frontend-port appGatewayFrontendPort --host-names "*.contoso.com" "www.microsoft.com"')
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --frontend-port {port} --host-names "*.contoso.com" "www.microsoft.com"')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('length(hostnames)', 2),
             self.check('hostnames[0]', "*.contoso.com"),
             self.check('hostnames[1]', "www.microsoft.com")
         ])
-        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --no-wait --host-names "*.contoso.com" "www.bing.com"')
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --host-names "*.contoso.com" "www.bing.com"')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
             self.check('length(hostnames)', 2),
             self.check('hostnames[0]', "*.contoso.com"),
