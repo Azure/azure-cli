@@ -5,6 +5,9 @@
 
 # pylint: disable=line-too-long
 import argparse
+import os.path
+import platform
+
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
@@ -258,6 +261,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.positional('chart_package', help="The helm chart package.", completer=FilesCompleter())
         c.argument('force', help='Overwrite the existing chart package.', action='store_true')
 
+    with self.argument_context('acr helm install-cli') as c:
+        c.argument('version', options_list=['--version', '-v'], help='The target helm CLI version. Helm v3 is currently not supported. ')
+        c.argument('install_location', options_list=['--install-location', '-l'], help='Path at which to install helm CLI.', default=_get_helm_default_install_location())
+
     with self.argument_context('acr network-rule') as c:
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.')
@@ -307,3 +314,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr token credential delete') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
         c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)
+
+
+def _get_helm_default_install_location():
+    exe_name = 'helm'
+    system = platform.system()
+    if system == 'Windows':
+        home_dir = os.environ.get('USERPROFILE')
+        if not home_dir:
+            return None
+        install_location = os.path.join(home_dir, r'.azure-{0}\{0}.exe'.format(exe_name))
+    elif system in ('Linux', 'Darwin'):
+        install_location = '/usr/local/bin/{}'.format(exe_name)
+    else:
+        install_location = None
+    return install_location
