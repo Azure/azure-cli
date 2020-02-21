@@ -11,6 +11,14 @@ def collect_blobs(blob_service, container, pattern=None):
     """
     List the blobs in the given blob container, filter the blob by comparing their path to the given pattern.
     """
+    return [name for (name, _) in collect_blob_objects(blob_service, container, pattern)]
+
+
+def collect_blob_objects(blob_service, container, pattern=None):
+    """
+    List the blob name and blob in the given blob container, filter the blob by comparing their path to
+     the given pattern.
+    """
     if not blob_service:
         raise ValueError('missing parameter blob_service')
 
@@ -18,19 +26,17 @@ def collect_blobs(blob_service, container, pattern=None):
         raise ValueError('missing parameter container')
 
     if not _pattern_has_wildcards(pattern):
-        return [pattern] if blob_service.exists(container, pattern) else []
+        if blob_service.exists(container, pattern):
+            yield pattern, blob_service.get_blob_properties(container, pattern)
+    else:
+        for blob in blob_service.list_blobs(container):
+            try:
+                blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
+            except NameError:
+                blob_name = blob.name
 
-    results = []
-    for blob in blob_service.list_blobs(container):
-        try:
-            blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
-        except NameError:
-            blob_name = blob.name
-
-        if not pattern or _match_path(blob_name, pattern):
-            results.append(blob_name)
-
-    return results
+            if not pattern or _match_path(blob_name, pattern):
+                yield blob_name, blob
 
 
 def collect_files(cmd, file_service, share, pattern=None):
