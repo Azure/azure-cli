@@ -201,12 +201,8 @@ def acr_login(cmd,
                 # Will not raise CLIError if there is no error other than '--password-stdin'
                 if not errors:
                     return None
-                stderr_messages = '\n'.join(errors) + '\n'
-
-            # Print to stderr
-            import sys
-            output = getattr(sys.stderr, 'buffer', sys.stderr)
-            output.write((stderr_messages).encode())
+                stderr_messages = '\n'.join(errors)
+            logger.warning(stderr_messages)
 
             # Raise error only if docker returns non-zero
             if return_code != 0:
