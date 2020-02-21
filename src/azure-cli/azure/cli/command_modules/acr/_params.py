@@ -316,6 +316,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
         c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)
 
+    with self.argument_context('acr private-endpoint-connection') as c:
+        c.argument('private_endpoint_connection_name', options_list=['--private-endpoint-connection-name', '-p'], help='name of private endpoint connection')
+
 
 def _get_helm_default_install_location():
     exe_name = 'helm'
