@@ -359,40 +359,40 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
         ])
 
         # user2 + role1/role2
-        role_assignment3 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
-                                    '--assignee {user2} --scope keys --name {role_assignment_name3}',
-                                    checks=[
-                                        self.check('name', '{role_assignment_name3}'),
-                                        self.check('properties.roleDefinitionId', '{role_def_id1}'),
-                                        self.check('properties.scope', '/keys')
-                                    ]).get_output_in_json()
+        self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
+                 '--assignee {user2} --scope keys --name {role_assignment_name3}',
+                 checks=[
+                     self.check('name', '{role_assignment_name3}'),
+                     self.check('properties.roleDefinitionId', '{role_def_id1}'),
+                     self.check('properties.scope', '/keys')
+                 ]).get_output_in_json()
 
-        role_assignment4 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
-                                    '--assignee {user2} --name {role_assignment_name4}',
-                                    checks=[
-                                        self.check('name', '{role_assignment_name4}'),
-                                        self.check('properties.roleDefinitionId', '{role_def_id2}'),
-                                        self.check('properties.scope', '/')
-                                    ]).get_output_in_json()
+        self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
+                 '--assignee {user2} --name {role_assignment_name4}',
+                 checks=[
+                     self.check('name', '{role_assignment_name4}'),
+                     self.check('properties.roleDefinitionId', '{role_def_id2}'),
+                     self.check('properties.scope', '/')
+                 ]).get_output_in_json()
 
         # user3 + role1/role2
-        role_assignment5 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
-                                    '--assignee {user3} --scope keys --name {role_assignment_name5}',
-                                    checks=[
-                                        self.check('name', '{role_assignment_name5}'),
-                                        self.check('properties.principalId', '{user3}'),
-                                        self.check('properties.roleDefinitionId', '{role_def_id1}'),
-                                        self.check('properties.scope', '/keys')
-                                    ]).get_output_in_json()
+        self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
+                 '--assignee {user3} --scope keys --name {role_assignment_name5}',
+                 checks=[
+                     self.check('name', '{role_assignment_name5}'),
+                     self.check('properties.principalId', '{user3}'),
+                     self.check('properties.roleDefinitionId', '{role_def_id1}'),
+                     self.check('properties.scope', '/keys')
+                 ]).get_output_in_json()
 
-        role_assignment6 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
-                                    '--assignee-object-id {user3} --name {role_assignment_name6}',
-                                    checks=[
-                                        self.check('name', '{role_assignment_name6}'),
-                                        self.check('properties.principalId', '{user3}'),
-                                        self.check('properties.roleDefinitionId', '{role_def_id2}'),
-                                        self.check('properties.scope', '/')
-                                    ]).get_output_in_json()
+        self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
+                 '--assignee-object-id {user3} --name {role_assignment_name6}',
+                 checks=[
+                     self.check('name', '{role_assignment_name6}'),
+                     self.check('properties.principalId', '{user3}'),
+                     self.check('properties.roleDefinitionId', '{role_def_id2}'),
+                     self.check('properties.scope', '/')
+                 ]).get_output_in_json()
 
         # list all (including this one: assignee=bim@microsoft.com,role=Administrator, scope=/)
         self.cmd('keyvault role assignment list --hsm-name {hsm}', checks=self.check('length(@)', 7))
