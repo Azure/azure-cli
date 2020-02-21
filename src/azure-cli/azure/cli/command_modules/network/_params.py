@@ -238,6 +238,11 @@ def load_arguments(self, _):
         c.argument('request_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('request_headers'), completer=get_sdk_completer('application_gateways', 'list_available_request_headers'))
         c.argument('sequence', type=int, help='Determines the execution order of the rule in the rule set.')
 
+    with self.argument_context('network application-gateway rewrite-rule', arg_group='URL Configuration') as c:
+        c.argument('modified_path', help='Url path for url rewrite')
+        c.argument('modified_query_string', help='Query string for url rewrite.')
+        c.argument('enable_reroute', arg_type=get_three_state_flag(), help='If set as true, it will re-evaluate the url path map provided in path based request routing rules using modified path.')
+
     with self.argument_context('network application-gateway rewrite-rule condition') as c:
         c.argument('rule_name', rewrite_rule_name_type)
         c.argument('variable', help='The variable whose value is being evaluated.', completer=get_sdk_completer('application_gateways', 'list_available_server_variables'))
