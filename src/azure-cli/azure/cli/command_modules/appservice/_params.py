@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import FUNCTIONS_VERSIONS_FUNCTIONAPP, RUNTIME_TO_IMAGE_FUNCTIONAPP
+from ._constants import FUNCTIONS_VERSIONS_FUNCTIONAPP, RUNTIME_TO_SUPPORTED_VERSIONS_FUNCTIONAPP
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create)
 
@@ -52,9 +52,9 @@ def load_arguments(self, _):
 
     # combine all runtime versions for all functions versions
     functionapp_runtime_to_version = {}
-    for functions_version in RUNTIME_TO_IMAGE_FUNCTIONAPP.values():
+    for functions_version in RUNTIME_TO_SUPPORTED_VERSIONS_FUNCTIONAPP.values():
         for runtime, val in functions_version.items():
-            functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val.keys())
+            functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val)
 
     functionapp_runtime_to_version_texts = []
     for runtime, runtime_versions in functionapp_runtime_to_version.items():

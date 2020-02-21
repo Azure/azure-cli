@@ -4,7 +4,9 @@ Release History
 ===============
 
 **AppService**
+
 az webapp create : Fixing issue when running the command with --runtime 
+* functionapp: Updated container image configuration for Linux apps
 
 2.1.0
 ++++++
