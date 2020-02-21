@@ -1111,3 +1111,8 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
     # endregion
+
+    # region Bastion
+    with self.command_group('network bastion', ) as g:
+        g.custom_command
+    # endregion
