@@ -162,3 +162,23 @@ def validate_asp_sku(cmd, namespace):
         if res.get('properties').get('hostingEnvironment') is not None:
             raise CLIError("Only pricing tier 'Isolated' is allowed in this app service plan. Use this link to "
                            "learn more: https://docs.microsoft.com/en-us/azure/app-service/overview-hosting-plans")
+
+
+def validate_ip_address(namespace):
+    if namespace.ip_address is not None:
+        # IPv6
+        if ':' in namespace.ip_address:
+            if namespace.ip_address.count(':') > 1:
+                if '/' not in namespace.ip_address:
+                    namespace.ip_address = namespace.ip_address + '/128'
+                    return
+                return
+        # IPv4
+        elif '.' in namespace.ip_address:
+            if namespace.ip_address.count('.') == 3:
+                if '/' not in namespace.ip_address:
+                    namespace.ip_address = namespace.ip_address + '/32'
+                    return
+                return
+
+        raise CLIError('Invalid IP address')
