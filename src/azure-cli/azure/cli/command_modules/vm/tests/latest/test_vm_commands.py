@@ -3457,6 +3457,12 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('proximityPlacementGroupType', 'Standard')
         ])
 
+        self.cmd('ppg show -g {rg} -n {ppg1} --colocation-status', checks=[
+            self.check('name', '{ppg1}'),
+            self.check('location', '{loc}'),
+            self.check('proximityPlacementGroupType', 'Standard')
+        ])
+
         self.cmd('ppg create -n {ppg2} -t ultra -g {rg}', checks=[
             self.check('name', '{ppg2}'),
             self.check('location', '{loc}'),
@@ -3467,8 +3473,6 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('name', '{ppg3}'),
             self.check('location', '{loc}'),
         ])
-
-        self.cmd('ppg show -g {rg} -n {ppg1} --colocation-status')
 
     @ResourceGroupPreparer(name_prefix='cli_test_ppg_vm_vmss_')
     def test_ppg_with_related_resources(self, resource_group):

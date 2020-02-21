@@ -21,7 +21,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_cmds_000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001","name":"cli_test_ppg_cmds_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-02-19T04:02:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001","name":"cli_test_ppg_cmds_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-02-21T06:00:39Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Feb 2020 04:02:07 GMT
+      - Fri, 21 Feb 2020 06:00:58 GMT
       expires:
       - '-1'
       pragma:
@@ -66,7 +66,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_cmds_000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001","name":"cli_test_ppg_cmds_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-02-19T04:02:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001","name":"cli_test_ppg_cmds_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-02-21T06:00:39Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -75,7 +75,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Feb 2020 04:02:09 GMT
+      - Fri, 21 Feb 2020 06:01:02 GMT
       expires:
       - '-1'
       pragma:
@@ -128,7 +128,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Feb 2020 04:02:14 GMT
+      - Fri, 21 Feb 2020 06:01:18 GMT
       expires:
       - '-1'
       pragma:
@@ -155,6 +155,65 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - ppg show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --colocation-status
+      User-Agent:
+      - python/3.8.1 (Windows-10-10.0.17763-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/10.0.0 Azure-SDK-For-Python AZURECLI/2.1.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?includeColocationStatus=True&api-version=2019-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\",\r\n
+        \ \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\":
+        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"proximityPlacementGroupType\":
+        \"Standard\",\r\n    \"virtualMachines\": [],\r\n    \"virtualMachineScaleSets\":
+        [],\r\n    \"availabilitySets\": [],\r\n    \"colocationStatus\": {\r\n      \"code\":
+        \"ColocationStatus/Aligned\",\r\n      \"level\": \"Info\",\r\n      \"displayStatus\":
+        \"Aligned\",\r\n      \"message\": \"All resources in the proximity placement
+        group are aligned.\"\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '722'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 21 Feb 2020 06:01:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/HighCostGet3Min;139,Microsoft.Compute/HighCostGet30Min;699
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - ppg create
       Connection:
       - keep-alive
@@ -169,7 +228,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_cmds_000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001","name":"cli_test_ppg_cmds_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-02-19T04:02:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001","name":"cli_test_ppg_cmds_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-02-21T06:00:39Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -178,7 +237,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Feb 2020 04:02:16 GMT
+      - Fri, 21 Feb 2020 06:01:27 GMT
       expires:
       - '-1'
       pragma:
@@ -231,7 +290,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Feb 2020 04:02:21 GMT
+      - Fri, 21 Feb 2020 06:01:36 GMT
       expires:
       - '-1'
       pragma:
@@ -272,7 +331,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_ppg_cmds_000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001","name":"cli_test_ppg_cmds_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-02-19T04:02:00Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001","name":"cli_test_ppg_cmds_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-02-21T06:00:39Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -281,7 +340,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Feb 2020 04:02:23 GMT
+      - Fri, 21 Feb 2020 06:01:48 GMT
       expires:
       - '-1'
       pragma:
@@ -333,7 +392,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 19 Feb 2020 04:02:29 GMT
+      - Fri, 21 Feb 2020 06:01:56 GMT
       expires:
       - '-1'
       pragma:
@@ -352,63 +411,4 @@ interactions:
     status:
       code: 201
       message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - ppg show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --colocation-status
-      User-Agent:
-      - python/3.8.1 (Windows-10-10.0.17763-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-compute/10.0.0 Azure-SDK-For-Python AZURECLI/2.1.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1?includeColocationStatus=True&api-version=2019-07-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"my_ppg_1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_ppg_cmds_000001/providers/Microsoft.Compute/proximityPlacementGroups/my_ppg_1\",\r\n
-        \ \"type\": \"Microsoft.Compute/proximityPlacementGroups\",\r\n  \"location\":
-        \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"proximityPlacementGroupType\":
-        \"Standard\",\r\n    \"virtualMachines\": [],\r\n    \"virtualMachineScaleSets\":
-        [],\r\n    \"availabilitySets\": [],\r\n    \"colocationStatus\": {\r\n      \"code\":
-        \"ColocationStatus/Aligned\",\r\n      \"level\": \"Info\",\r\n      \"displayStatus\":
-        \"Aligned\",\r\n      \"message\": \"All resources in the proximity placement
-        group are aligned.\"\r\n    }\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '722'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Wed, 19 Feb 2020 04:02:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/HighCostGet3Min;139,Microsoft.Compute/HighCostGet30Min;699
-    status:
-      code: 200
-      message: OK
 version: 1
