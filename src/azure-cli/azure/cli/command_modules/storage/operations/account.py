@@ -183,8 +183,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            domain_sid=None, azure_storage_sid=None, routing_choice=None,
                            publish_microsoft_endpoints=None, publish_internet_endpoints=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
-        cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
-                       'Encryption', 'NetworkRuleSet')
+        cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
+                       'NetworkRuleSet')
 
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -204,6 +204,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             raise ValueError('Specify `--encryption-key-source=Microsoft.Keyvault` to configure key vault properties.')
         encryption.key_vault_properties = encryption_key_vault_properties
 
+    RoutingPreference = cmd.get_models('RoutingPreference')
     params = StorageAccountUpdateParameters(
         sku=Sku(name=sku) if sku is not None else instance.sku,
         tags=tags if tags is not None else instance.tags,
