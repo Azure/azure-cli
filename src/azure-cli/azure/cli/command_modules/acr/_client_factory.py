@@ -31,6 +31,10 @@ def cf_acr_webhooks(cli_ctx, *_):
     return get_acr_service_client(cli_ctx).webhooks
 
 
+def cf_acr_private_endpoint_connections(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx).private_endpoint_connections
+
+
 def cf_acr_tasks(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).tasks
 

@@ -23,7 +23,6 @@ from cryptography.exceptions import UnsupportedAlgorithm
 
 
 from azure.cli.core import telemetry
-from azure.cli.core.profiles import ResourceType
 
 from ._validators import secret_text_encoding_values
 

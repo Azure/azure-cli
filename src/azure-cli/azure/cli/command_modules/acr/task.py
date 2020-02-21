@@ -230,7 +230,7 @@ def create_task_step(context_path,
                     values=(set_value if set_value else []) + (set_secret if set_secret else [])
                 )
             else:
-                DockerBuildStep = cmd.get_models('DockerBuildStep')
+                DockerBuildStep = cmd.get_models('DockerBuildStep', "")
                 step = DockerBuildStep(
                     image_names=image_names,
                     is_push_enabled=not no_push,
