@@ -1374,64 +1374,127 @@ def _resolve_role_id(client, role, hsm_base_url, scope):
         role_id = 'Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/{}'.format(role)
     else:
         all_roles = list_role_definitions(client, hsm_base_url=hsm_base_url, scope=scope)
-        for _role in all_roles.get('value', []):
+        for _role in all_roles:
             if _role.get('properties', {}).get('roleName') == role:
                 role_id = _role.get('id')
                 break
     return role_id
 
 
-def create_role_assignment(cmd, client, role, hsm_base_url=None, identifier=None,  # pylint: disable=unused-argument
-                           scope=None, assignee=None, assignee_principal_type=None, principal_id=None):
+def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=None,
+                           role_assignment_name=None, hsm_base_url=None, assignee=None,
+                           assignee_principal_type=None, identifier=None):  # pylint: disable=unused-argument
     """ Create a new role assignment for a user, group, or service principal. """
     patch_akv_client(client)
 
     from azure.cli.command_modules.role.custom import _resolve_object_id
 
-    if principal_id is None:
-        principal_id = _resolve_object_id(cmd.cli_ctx, assignee)
-        logger.info('resolved principal_id: {}'.format(principal_id))
+    if assignee_object_id is None:
+        assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee)
 
     role_definition_id = _resolve_role_id(client, role=role, hsm_base_url=hsm_base_url, scope=scope)
-    name = str(uuid.uuid4())
 
-    logger.info('hsm_base_url: {}'.format(hsm_base_url))
-    logger.info('scope: {}'.format(scope))
-    logger.info('assignee: {}'.format(assignee))
-    logger.info('assignee_principal_type: {}'.format(assignee_principal_type))
-    logger.info('principal_id: {}'.format(principal_id))
-    logger.info('role_definition_id: {}'.format(role_definition_id))
-    logger.info('name: {}'.format(name))
+    if role_assignment_name is None:
+        role_assignment_name = str(uuid.uuid4())
+
+    if scope is None:
+        scope = ''
 
     return client.create_role_assignment(
-        client, vault_base_url=hsm_base_url, scope=scope, name=name,
-        principal_id=principal_id, role_definition_id=role_definition_id
+        client, vault_base_url=hsm_base_url, scope=scope, name=role_assignment_name,
+        principal_id=assignee_object_id, role_definition_id=role_definition_id
     )
 
 
-def delete_role_assignment(client, name, hsm_base_url=None, scope=None,
-                           identifier=None):  # pylint: disable=unused-argument
+def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=None, scope=None, assignee=None,
+                           role=None, assignee_object_id=None, identifier=None, ids=None):
     """ Delete a role assignment. """
     patch_akv_client(client)
-    return client.delete_role_assignment(client, vault_base_url=hsm_base_url, scope=scope, name=name)
+
+    query_scope = scope
+    if query_scope is None:
+        query_scope = ''
+
+    deleted_info_list = []
+    if ids is not None:
+        for cnt_id in ids:
+            cnt_name = cnt_id.split('/')[-1]
+            deleted_info_list.append(
+                client.delete_role_assignment(
+                    client, vault_base_url=hsm_base_url, scope=query_scope, name=cnt_name
+                )
+            )
+    else:
+        if role_assignment_name is not None:
+            return [client.delete_role_assignment(client, vault_base_url=hsm_base_url, scope=query_scope,
+                                                  name=role_assignment_name)]
+
+        matched_role_assignments = list_role_assignments(
+            cmd, client, hsm_base_url=hsm_base_url, scope=scope,
+            role=role, assignee_object_id=assignee_object_id, assignee=assignee, identifier=identifier
+        )
+
+        for role_assignment in matched_role_assignments:
+            deleted_info_list.append(
+                client.delete_role_assignment(
+                    client, vault_base_url=hsm_base_url, scope=query_scope, name=role_assignment['name']
+                )
+            )
+
+    return deleted_info_list
 
 
-def get_role_assignment(client, name, hsm_base_url=None, scope=None,
+def get_role_assignment(client, role_assignment_name, hsm_base_url=None,
                         identifier=None):  # pylint: disable=unused-argument
     """ Get a role assignment. """
     patch_akv_client(client)
-    return client.get_role_assignment(client, vault_base_url=hsm_base_url, scope=scope, name=name)
+    return client.get_role_assignment(client, vault_base_url=hsm_base_url, scope='/', name=role_assignment_name)
 
 
-def list_role_assignments(client, hsm_base_url=None, scope=None,
-                          identifier=None, assignee=None, role=None):  # pylint: disable=unused-argument
+def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=None, role=None,
+                          assignee_object_id=None, identifier=None):  # pylint: disable=unused-argument
     """ List role assignments. """
     patch_akv_client(client)
-    return client.list_role_assignments_for_scope(client, vault_base_url=hsm_base_url, scope=scope)
+
+    from azure.cli.command_modules.role.custom import _resolve_object_id
+
+    if assignee_object_id is None and assignee is not None:
+        assignee_object_id = _resolve_object_id(cmd.cli_ctx, assignee)
+
+    query_scope = scope
+    if query_scope is None:
+        query_scope = ''
+
+    role_definition_id = None
+    if role is not None:
+        role_definition_id = _resolve_role_id(client, role=role, hsm_base_url=hsm_base_url, scope=query_scope)
+
+    all_role_assignments = \
+        client.list_role_assignments_for_scope(client, vault_base_url=hsm_base_url, scope=query_scope)
+    matched_role_assignments = []
+    for role_assignment in all_role_assignments.get('value', []):
+        if role_definition_id is not None:
+            if role_assignment.get('properties', {}).get('roleDefinitionId') != role_definition_id:
+                continue
+        if scope is not None:
+            cnt_scope = role_assignment.get('properties', {}).get('scope')
+            if cnt_scope not in [scope, '/' + scope]:
+                continue
+        if assignee_object_id is not None:
+            if role_assignment.get('properties', {}).get('principalId') != assignee_object_id:
+                continue
+        matched_role_assignments.append(role_assignment)
+
+    return matched_role_assignments
 
 
 def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None):  # pylint: disable=unused-argument
     """ List role definitions. """
     patch_akv_client(client)
-    return client.list_role_definitions(client, vault_base_url=hsm_base_url, scope=scope)
+
+    query_scope = scope
+    if query_scope is None:
+        query_scope = ''
+
+    return client.list_role_definitions(client, vault_base_url=hsm_base_url, scope=query_scope).get('value', [])
 # endregion

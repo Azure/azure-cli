@@ -43,6 +43,12 @@ def _create_keyvault(test, kwargs, additional_args=None):
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
 
 
+def _clear_hsm_role_assigments(test, hsm_name, assignees):
+    for assignee in assignees:
+        test.cmd('keyvault role assignment delete --hsm-name {hsm_name} --assignee {assignee}'
+                 .format(hsm_name=hsm_name, assignee=assignee))
+
+
 def _clear_hsm(test, hsm_name):
     all_keys = test.cmd('keyvault key list --hsm-name {hsm_name} --query "[].kid"'
                         .format(hsm_name=hsm_name)).get_output_in_json()
@@ -287,6 +293,166 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=self.check('properties.enableRbacAuthorization', True))
 
 
+class KeyVaultHSMRoleScenarioTest(ScenarioTest):
+    def test_keyvault_hsm_role(self):
+        self.kwargs.update({
+            'hsm': 'clitest',
+            'hsm_id': 'https://eastus.clitest.managedhsm-preview.azure.net',
+            'key1': self.create_random_name('key-role-', 24),
+            'key2': self.create_random_name('key-role-', 24),
+            'role_name1': 'Azure Key Vault Managed HSM Crypto Officer',
+            'role_name2': 'Azure Key Vault Managed HSM Crypto User',
+            'user1': 'fey@microsoft.com',
+            'user2': 'jiasli@microsoft.com',
+            'user3': 'ade81686-dde7-4bb0-9062-8f5250ff95eb'  # yungez@microsoft.com
+        })
+
+        for i in range(6):
+            self.kwargs['role_assignment_name{}'.format(i + 1)] = self.create_guid()
+
+        _clear_hsm_role_assigments(self, hsm_name=self.kwargs['hsm'],
+                                   assignees=[self.kwargs['user1'], self.kwargs['user2'], self.kwargs['user3']])
+
+        role_definitions = self.cmd('keyvault role definition list --hsm-name {hsm}').get_output_in_json()
+        role_definitions2 = self.cmd('keyvault role definition list --id {hsm_id}').get_output_in_json()
+        assert len(role_definitions) == len(role_definitions2)
+
+        role_def1 = [r for r in role_definitions if r['properties']['roleName'] == self.kwargs['role_name1']][0]
+        role_def2 = [r for r in role_definitions if r['properties']['roleName'] == self.kwargs['role_name2']][0]
+
+        self.kwargs.update({
+            'role_def_id1': role_def1['id'],
+            'role_def_id2': role_def2['id'],
+            'role_def_name1': role_def1['name'],
+            'role_def_name2': role_def2['name']
+        })
+
+        # user1 + role1/role2
+        role_assignment1 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
+                                    '--assignee {user1} --scope keys --name {role_assignment_name1}',
+                                    checks=[
+                                        self.check('name', '{role_assignment_name1}'),
+                                        self.check('properties.roleDefinitionId', '{role_def_id1}'),
+                                        self.check('properties.scope', '/keys')
+                                    ]).get_output_in_json()
+        self.kwargs['role_assignment_id1'] = role_assignment1['id']
+
+        self.cmd('keyvault role assignment show --hsm-name {hsm} --name {role_assignment_name1}', checks=[
+            self.check('name', '{role_assignment_name1}'),
+            self.check('properties.roleDefinitionId', '{role_def_id1}'),
+            self.check('properties.scope', '/keys')
+        ])
+
+        role_assignment2 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
+                                    '--assignee {user1} --name {role_assignment_name2}',
+                                    checks=[
+                                        self.check('name', '{role_assignment_name2}'),
+                                        self.check('properties.roleDefinitionId', '{role_def_id2}'),
+                                        self.check('properties.scope', '/')
+                                    ]).get_output_in_json()
+        self.kwargs['role_assignment_id2'] = role_assignment2['id']
+
+        self.cmd('keyvault role assignment show --hsm-name {hsm} --name {role_assignment_name2}', checks=[
+            self.check('name', '{role_assignment_name2}'),
+            self.check('properties.roleDefinitionId', '{role_def_id2}'),
+            self.check('properties.scope', '/')
+        ])
+
+        # user2 + role1/role2
+        role_assignment3 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
+                                    '--assignee {user2} --scope keys --name {role_assignment_name3}',
+                                    checks=[
+                                        self.check('name', '{role_assignment_name3}'),
+                                        self.check('properties.roleDefinitionId', '{role_def_id1}'),
+                                        self.check('properties.scope', '/keys')
+                                    ]).get_output_in_json()
+
+        role_assignment4 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
+                                    '--assignee {user2} --name {role_assignment_name4}',
+                                    checks=[
+                                        self.check('name', '{role_assignment_name4}'),
+                                        self.check('properties.roleDefinitionId', '{role_def_id2}'),
+                                        self.check('properties.scope', '/')
+                                    ]).get_output_in_json()
+
+        # user3 + role1/role2
+        role_assignment5 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
+                                    '--assignee {user3} --scope keys --name {role_assignment_name5}',
+                                    checks=[
+                                        self.check('name', '{role_assignment_name5}'),
+                                        self.check('properties.principalId', '{user3}'),
+                                        self.check('properties.roleDefinitionId', '{role_def_id1}'),
+                                        self.check('properties.scope', '/keys')
+                                    ]).get_output_in_json()
+
+        role_assignment6 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
+                                    '--assignee-object-id {user3} --name {role_assignment_name6}',
+                                    checks=[
+                                        self.check('name', '{role_assignment_name6}'),
+                                        self.check('properties.principalId', '{user3}'),
+                                        self.check('properties.roleDefinitionId', '{role_def_id2}'),
+                                        self.check('properties.scope', '/')
+                                    ]).get_output_in_json()
+
+        # list all (including this one: assignee=bim@microsoft.com,role=Administrator, scope=/)
+        self.cmd('keyvault role assignment list --hsm-name {hsm}', checks=self.check('length(@)', 7))
+
+        # list by scope
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --scope keys', checks=self.check('length(@)', 3))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --scope /keys', checks=self.check('length(@)', 3))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --scope ""', checks=self.check('length(@)', 4))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --scope "/"', checks=self.check('length(@)', 4))
+
+        # list by role
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --role "{role_name1}"',
+                 checks=self.check('length(@)', 3))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --role "{role_name2}"',
+                 checks=self.check('length(@)', 3))
+
+        # list by assignee
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user1}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user2}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user3}',
+                 checks=self.check('length(@)', 2))
+
+        # list by multiple conditions
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user1} --scope keys',
+                 checks=self.check('length(@)', 1))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user1} --role "{role_name1}"',
+                 checks=self.check('length(@)', 1))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user3} --role "{role_name1}" --scope keys',
+                 checks=self.check('length(@)', 1))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user3} --role "{role_name2}" --scope ""',
+                 checks=self.check('length(@)', 1))
+        self.cmd('keyvault role assignment list --hsm-name {hsm} --assignee {user3} --role "{role_name2}" --scope keys',
+                 checks=self.check('length(@)', 0))
+
+        # delete by ids
+        self.cmd('keyvault role assignment delete --hsm-name {hsm} --ids {role_assignment_id1} {role_assignment_id2}',
+                 checks=self.check('length(@)', 2))
+
+        # delete by name
+        self.cmd('keyvault role assignment delete --hsm-name {hsm} --name {role_assignment_name3}',
+                 checks=self.check('length(@)', 1))
+
+        # delete by assignee
+        self.cmd('keyvault role assignment delete --hsm-name {hsm} --assignee {user2}',
+                 checks=self.check('length(@)', 1))
+
+        # delete by role
+        self.cmd('keyvault role assignment delete --hsm-name {hsm} --role "{role_name2}"',
+                 checks=self.check('length(@)', 1))
+
+        # delete by scope
+        self.cmd('keyvault role assignment delete --hsm-name {hsm} --scope keys',
+                 checks=self.check('length(@)', 1))
+
+        # check final result
+        self.cmd('keyvault role assignment list --hsm-name {hsm}', checks=self.check('length(@)', 1))
+
+
 class KeyVaultKeyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_key')
     def test_keyvault_key(self, resource_group):
@@ -468,8 +634,19 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
         # create a key
         hsm_key = self.cmd('keyvault key create --hsm-name {hsm} -n {key} -p hsm',
                            checks=self.check('attributes.enabled', True)).get_output_in_json()
-        hsm_first_kid = hsm_key['key']['kid']
-        hsm_first_version = hsm_first_kid.rsplit('/', 1)[1]
+        self.kwargs['hsm_kid1'] = hsm_key['key']['kid']
+        self.kwargs['hsm_version1'] = self.kwargs['hsm_kid1'].rsplit('/', 1)[1]
+
+        # delete/recover
+        # TODO: activate this part when service side is fixed
+        """
+        deleted_key = self.cmd('keyvault key delete --id {hsm_kid1}',
+                               checks=self.check('key.kid', '{hsm_kid1}')).get_output_in_json()
+        self.kwargs['hsm_recovery_id'] = deleted_key['recoveryId']
+        self.cmd('keyvault key list-deleted --hsm-name {hsm}', checks=self.check('length(@)', 1))
+        self.cmd('keyvault key recover --id {hsm_recovery_id}',
+                  checks=self.check('key.kid', '{hsm_kid1}'))
+        """
 
         # list keys
         self.cmd('keyvault key list --hsm-name {hsm}',
@@ -502,11 +679,7 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
                  checks=self.check('key.kid', hsm_second_kid))
 
         # show key (specific version)
-        self.kwargs.update({
-            'hsm_version1': hsm_first_version,
-            'hsm_kid1': hsm_first_kid,
-            'hsm_kid2': hsm_second_kid
-        })
+        self.kwargs['hsm_kid2'] = hsm_second_kid
         self.cmd('keyvault key show --hsm-name {hsm} -n {key} -v {hsm_version1}',
                  checks=self.check('key.kid', '{hsm_kid1}'))
 

@@ -3,8 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.keyvault.models as models
+# pylint: skip-file
+
 import uuid
+
+import azure.keyvault.models as models
 
 
 def send_generic_request(self, method, url, query_parameters=None, body=None, custom_headers=None):
@@ -35,7 +38,7 @@ def send_generic_request(self, method, url, query_parameters=None, body=None, cu
     return response.json()
 
 
-def list_role_definitions(self, vault_base_url, scope="", custom_headers=None, raw=True, **operation_config):
+def list_role_definitions(self, vault_base_url, scope, custom_headers=None, raw=True, **operation_config):
     # Construct URL
     url = '/{scope}/providers/Microsoft.Authorization/roleDefinitions'
     path_format_arguments = {

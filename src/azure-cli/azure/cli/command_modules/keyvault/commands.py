@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from collections import OrderedDict
+
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import get_api_version, ResourceType
-from collections import OrderedDict
 
 from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_client_private_endpoint_connections_factory,

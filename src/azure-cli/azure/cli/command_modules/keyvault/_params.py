@@ -54,12 +54,12 @@ def load_arguments(self, _):
     JsonWebKeyOperation = CLIJsonWebKeyOperation  # TODO: Remove this patch when new SDK is released
 
     class CLIJsonWebKeyType(str, Enum):
-        aes_hsm = "AES-HSM"  #: Advanced Encryption Standard with a private key which is not exportable from the HSM.
         ec = "EC"  #: Elliptic Curve.
         ec_hsm = "EC-HSM"  #: Elliptic Curve with a private key which is not exportable from the HSM.
         rsa = "RSA"  #: RSA (https://tools.ietf.org/html/rfc3447)
         rsa_hsm = "RSA-HSM"  #: RSA with a private key which is not exportable from the HSM.
         oct = "oct"  #: Octet sequence (used to represent symmetric keys)
+        oct_hsm = "oct-HSM"  #: Oct with a private key which is not exportable from the HSM.
 
     JsonWebKeyType = CLIJsonWebKeyType  # TODO: Remove this patch when new SDK is released
 
@@ -233,6 +233,7 @@ def load_arguments(self, _):
         'download': hsm_base_url_desc2,
         'list-versions': hsm_base_url_desc2,
         'purge': hsm_base_url_desc2,
+        'recover': hsm_base_url_desc2,
         'set-attributes': hsm_base_url_desc2,
         'show': hsm_base_url_desc2,
         'show-deleted': hsm_base_url_desc2
@@ -245,7 +246,8 @@ def load_arguments(self, _):
                        validator=process_vault_and_hsm_name, help=hsm_base_url_descriptions[item])
 
     # SDK functions
-    for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'set-attributes', 'show', 'show-deleted']:
+    for item in ['delete', 'list', 'list-deleted', 'list-versions', 'purge', 'recover',
+                 'set-attributes', 'show', 'show-deleted']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
             if item in ['list', 'list-deleted']:
                 c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx),
@@ -259,7 +261,7 @@ def load_arguments(self, _):
                        help='Specifies the type of key protection.')
             c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.')
             c.argument('key_size', options_list=['--size'], type=int,
-                       help='The key size in bits. For example: 2048, 3072, or 4096 for RSA. 128, 192, or 256 for AES.')
+                       help='The key size in bits. For example: 2048, 3072, or 4096 for RSA. 128, 192, or 256 for oct.')
             c.argument('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
                        type=datetime_type)
             c.argument('not_before', default=None, type=datetime_type,
@@ -495,7 +497,7 @@ def load_arguments(self, _):
             c.argument('maxresults', options_list=['--maxresults'], type=int)
 
     with self.argument_context('keyvault role') as c:
-        c.argument('scope', default='/',
+        c.argument('scope',
                    help='scope at which the role assignment or definition applies to, '
                         'e.g., "/" or "/keys" or "/keys/{keyname}"')
 
@@ -506,7 +508,7 @@ def load_arguments(self, _):
                    validator=process_hsm_base_url)
 
     with self.argument_context('keyvault role assignment') as c:
-        c.argument('name', options_list=['-n'], help='Name of the role assignment.')
+        c.argument('role_assignment_name', options_list=['--name', '-n'], help='Name of the role assignment.')
         c.argument('assignee', help='represent a user, group, or service principal. '
                                     'supported format: object id, user sign-in name, or service principal name')
         c.argument('assignee_object_id',
