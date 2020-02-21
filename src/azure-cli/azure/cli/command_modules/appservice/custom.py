@@ -386,7 +386,7 @@ def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
     enable_oryx_build = None
 
     app_settings_should_not_have = []
-    app_settings_should_contains = {}
+    app_settings_should_contain = {}
 
     for keyval in settings:
         value = keyval['value'].lower()
@@ -402,7 +402,7 @@ def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
         update_app_settings(cmd, resource_group_name, name, [
             "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
         ], slot)
-        app_settings_should_contains['SCM_DO_BUILD_DURING_DEPLOYMENT'] = 'true'
+        app_settings_should_contain['SCM_DO_BUILD_DURING_DEPLOYMENT'] = 'true'
 
     if website_run_from_package:
         logger.warning("Removing WEBSITE_RUN_FROM_PACKAGE app setting")
@@ -419,14 +419,14 @@ def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
         app_settings_should_not_have.append('ENABLE_ORYX_BUILD')
 
     # Wait for scm site to get the latest app settings
-    if app_settings_should_not_have or app_settings_should_contains:
+    if app_settings_should_not_have or app_settings_should_contain:
         logger.warning("Waiting SCM site to be updated with the latest app settings")
         scm_is_up_to_date = False
         retries = 10
         while not scm_is_up_to_date and retries >= 0:
             scm_is_up_to_date = validate_app_settings_in_scm(
                 cmd, resource_group_name, name, slot,
-                should_contain=app_settings_should_contains,
+                should_contain=app_settings_should_contain,
                 should_not_have=app_settings_should_not_have)
             retries -= 1
             time.sleep(5)
@@ -439,7 +439,7 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
     scm_do_build_during_deployment = None
 
-    app_settings_should_contains = {}
+    app_settings_should_contain = {}
 
     for keyval in settings:
         value = keyval['value'].lower()
@@ -451,17 +451,17 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
         update_app_settings(cmd, resource_group_name, name, [
             "SCM_DO_BUILD_DURING_DEPLOYMENT=false"
         ], slot)
-        app_settings_should_contains['SCM_DO_BUILD_DURING_DEPLOYMENT'] = 'false'
+        app_settings_should_contain['SCM_DO_BUILD_DURING_DEPLOYMENT'] = 'false'
 
     # Wait for scm site to get the latest app settings
-    if app_settings_should_contains:
+    if app_settings_should_contain:
         logger.warning("Waiting SCM site to be updated with the latest app settings")
         scm_is_up_to_date = False
         retries = 10
         while not scm_is_up_to_date and retries >= 0:
             scm_is_up_to_date = validate_app_settings_in_scm(
                 cmd, resource_group_name, name, slot,
-                should_contain=app_settings_should_contains)
+                should_contain=app_settings_should_contain)
             retries -= 1
             time.sleep(5)
 
