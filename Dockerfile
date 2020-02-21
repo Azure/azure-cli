@@ -48,6 +48,7 @@ RUN curl -L https://github.com/jmespath/jp/releases/download/${JP_VERSION}/jp-li
 WORKDIR azure-cli
 COPY . /azure-cli
 
+RUN pip install ./privates/azure_mgmt_containerregistry-3.0.0rc8-py2.py3-none-any.whl
 # 1. Build packages and store in tmp dir
 # 2. Install the cli and the other command modules that weren't included
 # 3. Temporary fix - install azure-nspkg to remove import of pkg_resources in azure/__init__.py (to improve performance)
