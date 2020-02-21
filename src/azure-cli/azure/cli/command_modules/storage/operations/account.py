@@ -180,7 +180,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
-                           domain_sid=None, azure_storage_sid=None):
+                           domain_sid=None, azure_storage_sid=None, routing_choice=None,
+                           publish_microsoft_endpoints=None, publish_internet_endpoints=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -209,7 +210,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         custom_domain=domain,
         encryption=encryption,
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
-        enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
+        enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only,
+        routing_preference=RoutingPreference() if instance.routing_preference is None else instance.routing_preference
     )
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     from knack.util import CLIError
