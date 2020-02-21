@@ -1722,3 +1722,12 @@ def load_arguments(self, _):
     with self.argument_context('network traffic-manager endpoint list') as c:
         c.argument('profile_name', id_part=None)
     # endregion
+
+
+    # region Bastion
+    with self.argument_context('network bastion') as c:
+        c.argument('bastion_host_name', help='Name of the Bastion Host.', options_list=['--name', '-n'])
+        c.argument('public_ip_address', help='Name or ID of the Azure public IP. The SKU of the public IP must be Standard.', validator=get_public_ip_validator())
+        c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
+        c.ignore('subnet')
+    # endregion
