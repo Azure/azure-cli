@@ -134,8 +134,8 @@ def load_arguments(self, _):
         c.argument('container_name', container_name_type)
         c.argument('trigger_name', options_list=['--name', '-n'], help="Trigger name")
         c.argument('trigger_body', options_list=['--body', '-b'], completer=FilesCompleter(), help="Trigger body, you can enter it as a string or as a file, e.g., --body @triggerbody-file.json")
-        c.argument('trigger_type', options_list=['--type', '-t'], arg_type=get_enum_type(TriggerType), help="Trigger type, values can be: Pre or Post")
-        c.argument('trigger_operation', options_list=['--operation'], arg_type=get_enum_type(TriggerOperation), help="The operation of the trigger. Values can be: All, Create, Update, Delete, Replace")
+        c.argument('trigger_type', options_list=['--type', '-t'], arg_type=get_enum_type(TriggerType), help="Trigger type")
+        c.argument('trigger_operation', options_list=['--operation'], arg_type=get_enum_type(TriggerOperation), help="The operation of the trigger.")
 
 # SQL user defined function
     with self.argument_context('cosmosdb sql user-defined-function') as c:
