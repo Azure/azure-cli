@@ -20,7 +20,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
-                           encryption_key_type_for_table=None, encryption_key_type_for_queue=None):
+                           encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
+                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -98,6 +99,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         if encryption_key_type_for_queue is not None:
             queue_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_queue)
             params.encryption.services.queue = queue_encryption_service
+
+    if any([routing_choice, publish_microsoft_endpoints, publish_internet_endpoints]):
+        RoutingPreference = cmd.get_models('RoutingPreference')
+        params.routing_preference = RoutingPreference(
+            routing_choice=routing_choice,
+            publish_microsoft_endpoints=publish_microsoft_endpoints,
+            publish_internet_endpoints=publish_microsoft_endpoints
+        )
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
@@ -284,6 +293,13 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         elif bypass:
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = acl
+
+    if routing_choice is not None:
+        params.routing_preference.routing_choice = routing_choice
+    if publish_microsoft_endpoints is not None:
+        params.routing_preference.publish_microsoft_endpoints = publish_microsoft_endpoints
+    if publish_internet_endpoints is not None:
+        params.routing_preference.publish_internet_endpoints = publish_microsoft_endpoints
 
     return params
 
