@@ -985,15 +985,37 @@ def load_arguments(self, _):
 
         with self.argument_context('network nsg rule {}'.format(item), min_api='2017-06-01') as c:
             c.argument('source_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Source')
-            c.argument('source_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Source')
+            c.argument('source_address_prefixes',
+                       nargs='+',
+                       help="Space-separated list of CIDR prefixes or IP ranges. "
+                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
+                            "to match all IPs. Besides, it also supports all available Service Tags like "
+                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+                       arg_group='Source')
             c.argument('destination_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Destination')
-            c.argument('destination_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Destination')
+            c.argument('destination_address_prefixes',
+                       nargs='+',
+                       help="Space-separated list of CIDR prefixes or IP ranges. "
+                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
+                            "to match all IPs. Besides, it also supports all available Service Tags like "
+                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+                       arg_group='Destination')
 
         with self.argument_context('network nsg rule {}'.format(item), max_api='2017-03-01') as c:
             c.argument('source_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Source')
-            c.argument('source_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Source')
+            c.argument('source_address_prefix',
+                       help="Space-separated list of CIDR prefixes or IP ranges. "
+                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
+                            "to match all IPs. Besides, it also supports all available Service Tags like "
+                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+                       arg_group='Source')
             c.argument('destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
-            c.argument('destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
+            c.argument('destination_address_prefix',
+                       help="Space-separated list of CIDR prefixes or IP ranges. "
+                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
+                            "to match all IPs. Besides, it also supports all available Service Tags like "
+                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+                       arg_group='Destination')
 
         with self.argument_context('network nsg rule {}'.format(item), min_api='2017-09-01') as c:
             c.argument('source_asgs', nargs='+', help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID", arg_group='Source', validator=get_asg_validator(self, 'source_asgs'))
