@@ -9,7 +9,7 @@ from msrest import Deserializer
 from msrest.polling import PollingMethod, LROPoller
 from msrestazure.azure_exceptions import CloudError
 
-from ._constants import get_acr_models, get_finished_run_status, get_succeeded_run_status
+from ._constants import get_acr_task_models, get_finished_run_status, get_succeeded_run_status
 
 
 def get_run_with_polling(cmd,
@@ -18,7 +18,7 @@ def get_run_with_polling(cmd,
                          registry_name,
                          resource_group_name):
     deserializer = Deserializer(
-        {k: v for k, v in get_acr_models(cmd).__dict__.items() if isinstance(v, type)})
+        {k: v for k, v in get_acr_task_models(cmd).__dict__.items() if isinstance(v, type)})
 
     def deserialize_run(response):
         return deserializer('Run', response)
@@ -85,7 +85,9 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         return self.operation_result
 
     def _set_operation_status(self, response):
-        RunStatus = self._cmd.get_models('RunStatus')
+        from azure.cli.core.profiles import ResourceType
+        RunStatus = self._cmd.get_models('RunStatus', operation_group='tasks',
+                                         resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
         if response.status_code == 200:
             self.operation_result = self._deserialize(response)
             self.operation_status = self.operation_result.status or RunStatus.queued.value
