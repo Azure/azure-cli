@@ -1119,3 +1119,34 @@ examples:
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
+
+helps['acr private-endpoint-connection'] = """
+type: group
+short-summary:  Manage container registry private endpoint connections
+long-summary: to create a private endpoint connection use "az network private-endpoint create"
+"""
+
+helps['acr private-endpoint-connection approve'] = """
+type: group
+short-summary:  Approve a private endpoint connection request for a registry
+"""
+
+helps['acr private-endpoint-connection reject'] = """
+type: group
+short-summary:  Reject a private endpoint connection request for a registry
+"""
+
+helps['acr private-endpoint-connection list'] = """
+type: group
+short-summary:  List all private endpoint connections of a registry
+"""
+
+helps['acr private-endpoint-connection show'] = """
+type: group
+short-summary:  Show details of a private endpoint connection for a registry
+"""
+
+helps['acr private-endpoint-connection delete'] = """
+type: group
+short-summary:  Delete a private endpoint connection request for a registry
+"""
