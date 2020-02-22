@@ -8,8 +8,10 @@ import tempfile
 
 from knack.util import CLIError
 from knack.log import get_logger
+
 from knack.prompting import prompt_y_n, NoTTYException
 from azure.cli.core.commands.parameters import get_resources_in_subscription
+from azure.cli.core.profiles import ResourceType
 
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
@@ -207,7 +209,8 @@ def get_validate_platform(cmd, platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    OS, Architecture = cmd.get_models('OS', 'Architecture')
+    OS, Architecture = cmd.get_models('OS', 'Architecture', operation_group='tasks',
+                                      resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
     # Defaults
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
@@ -297,7 +300,8 @@ def get_custom_registry_credentials(cmd,
 
     source_registry_credentials = None
     if auth_mode:
-        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
+        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials', operation_group='tasks',
+                                                   resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode)
 
@@ -313,7 +317,8 @@ def get_custom_registry_credentials(cmd,
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',
             'SecretObject',
-            'SecretObjectType'
+            'SecretObjectType',
+            operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY
         )
 
         if not is_remove:
@@ -338,7 +343,8 @@ def get_custom_registry_credentials(cmd,
 
         custom_registries = {login_server: custom_reg_credential}
 
-    Credentials = cmd.get_models('Credentials')
+    Credentials = cmd.get_models('Credentials', operation_group='tasks',
+                                 resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
     return Credentials(
         source_registry=source_registry_credentials,
         custom_registries=custom_registries
@@ -347,7 +353,7 @@ def get_custom_registry_credentials(cmd,
 
 def build_timers_info(cmd, schedules):
     TimerTrigger, TriggerStatus = cmd.get_models(
-        'TimerTrigger', 'TriggerStatus')
+        'TimerTrigger', 'TriggerStatus', operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
     timer_triggers = []
 
     # Provide a default name for the timer if no name was provided.

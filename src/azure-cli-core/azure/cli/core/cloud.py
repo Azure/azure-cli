@@ -217,8 +217,8 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
 AZURE_PUBLIC_CLOUD = Cloud(
     'AzureCloud',
     endpoints=CloudEndpoints(
-        management='https://centraluseuap.management.core.windows.net/',
-        resource_manager='https://centraluseuap.management.azure.com/',
+        management='https://management.core.windows.net/',
+        resource_manager='https://management.azure.com/',
         sql_management='https://management.core.windows.net:8443/',
         batch_resource_id='https://batch.core.windows.net/',
         gallery='https://gallery.azure.com/',
