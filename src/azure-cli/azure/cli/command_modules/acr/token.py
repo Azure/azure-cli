@@ -38,7 +38,7 @@ def acr_token_create(cmd,
         arm_resource_id = get_resource_id_by_registry_name(cmd.cli_ctx, registry_name)
         scope_map_id = '{}/{}/{}'.format(arm_resource_id, SCOPE_MAPS, scope_map_name)
 
-    Token = cmd.get_models('Token')
+    Token = cmd.get_models('Token', operation_group='tokens')
 
     poller = client.create(
         resource_group_name,
@@ -127,7 +127,7 @@ def acr_token_update(cmd,
 
     from ._utils import get_resource_id_by_registry_name
 
-    TokenUpdateParameters = cmd.get_models('TokenUpdateParameters')
+    TokenUpdateParameters = cmd.get_models('TokenUpdateParameters', operation_group='tokens')
 
     scope_map_id = None
     if scope_map_name:
@@ -196,7 +196,7 @@ def acr_token_credential_generate(cmd,
         from ._utils import add_days_to_now
         expiry = add_days_to_now(days)
 
-    GenerateCredentialsParameters = cmd.get_models('GenerateCredentialsParameters')
+    GenerateCredentialsParameters = cmd.get_models('GenerateCredentialsParameters', operation_group='tokens')
 
     return client.generate_credentials(
         resource_group_name,
@@ -242,11 +242,11 @@ def acr_token_credential_delete(cmd,
     if password2:
         password_names.remove('password2')
 
-    TokenPassword = cmd.get_models('TokenPassword')
+    TokenPassword = cmd.get_models('TokenPassword', operation_group='tokens')
     new_password_payload = list(map(lambda name: TokenPassword(name=name), password_names))
 
-    TokenUpdateParameters = cmd.get_models('TokenUpdateParameters')
-    TokenCredentialsProperties = cmd.get_models('TokenCredentialsProperties')
+    TokenUpdateParameters = cmd.get_models('TokenUpdateParameters', operation_group='tokens')
+    TokenCredentialsProperties = cmd.get_models('TokenCredentialsProperties', operation_group='tokens')
 
     return client.update(
         resource_group_name,
