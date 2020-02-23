@@ -307,3 +307,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('list', 'list_')
         g.command('approve', 'approve')
         g.command('reject', 'reject')
+
+    with self.command_group('acr identity', acr_custom_util) as g:
+        g.command('show', 'show_identity')
+        g.command('assign', 'assign_identity')
+        g.command('remove', 'remove_identity')
+
+    with self.command_group('acr encryption', acr_custom_util) as g:
+        g.command('show', 'show_encryption')
+        g.command('rotate-key', "rotate_key")

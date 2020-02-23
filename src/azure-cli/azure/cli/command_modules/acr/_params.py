@@ -75,9 +75,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             c.argument('default_action', arg_type=get_enum_type(DefaultAction),
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
 
-        with self.argument_context(scope, arg_group="Customer managed key", is_preview=True) as c:
-            c.argument('managed_identity', help="Managed identity client id or resource id")
-            c.argument('keyvault_encryption_key', help="key vault key uri")
+    with self.argument_context('acr create', arg_group="Customer managed key", is_preview=True) as c:
+        c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
+        c.argument('key_encryption_key', help="key vault key uri")
 
     with self.argument_context('acr update') as c:
         c.argument('assign_identity', arg_type=get_three_state_flag(), help="Generate a system assigned identity for this registry to use with key management services like Azure KeyVault")
@@ -320,3 +320,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr private-endpoint-connection') as c:
         c.argument('private_endpoint_connection_name', options_list=['--private-endpoint-connection-name', '-p'], help='name of private endpoint connection')
+
+    with self.argument_context('acr identity') as c:
+        c.argument('identities', nargs='+', help="Space-separated identities. Use '[system]' to refer to the system assigned identity")
+
+    with self.argument_context('acr encryption') as c:
+        c.argument('key_encryption_key', help="key vault key uri")
+        c.argument('identity', help="client id of managed identity, resource name or id of user assigned identity. Use '[system]' to refer to the system assigned identity")
