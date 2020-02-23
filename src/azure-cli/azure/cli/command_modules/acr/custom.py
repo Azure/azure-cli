@@ -40,7 +40,10 @@ def acr_create(cmd,
                admin_enabled=False,
                default_action=None,
                tags=None,
-               workspace=None):
+               workspace=None,
+               managed_identity=None,
+               keyvault_encryption_key=None):
+
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
@@ -51,10 +54,15 @@ def acr_create(cmd,
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
+
+    if managed_identity or keyvault_encryption_key:
+        configure_cmk(cmd, registry, resource_group_name, managed_identity, keyvault_encryption_key)
+
     lro_poller = client.create(resource_group_name, registry_name, registry)
+
     if workspace:
-        from azure.cli.core.commands import LongRunningOperation
         from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands import LongRunningOperation
         from azure.cli.core.commands.client_factory import get_subscription_id
         acr = LongRunningOperation(cmd.cli_ctx)(lro_poller)
         if not is_valid_resource_id(workspace):
@@ -65,6 +73,7 @@ def acr_create(cmd,
                                     name=workspace)
         _create_diagnostic_settings(cmd.cli_ctx, acr, workspace)
         return acr
+
     return lro_poller
 
 
@@ -324,3 +333,67 @@ def _create_diagnostic_settings(cli_ctx, acr, workspace):
 
     client.diagnostic_settings.create_or_update(resource_uri=acr.id, parameters=parameters,
                                                 name=DEF_DIAG_SETTINGS_NAME_TEMPLATE.format(acr.name))
+
+
+def configure_cmk(cmd, registry, resource_group_name, managed_identity, keyvault_encryption_key):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
+
+    if bool(managed_identity) != bool(keyvault_encryption_key):
+        raise CLIError("Usage error: --managed-identity and --keyvault-encryption-key must be both supplied")
+
+    if not is_valid_resource_id(managed_identity):
+        managed_identity = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                       resource_group=resource_group_name,
+                                       namespace='Microsoft.ManagedIdentity',
+                                       type='userAssignedIdentities',
+                                       name=managed_identity)
+
+    res = parse_resource_id(managed_identity)
+    client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
+    identity_client_id = client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
+
+    KeyVaultProperties, EncryptionProperty = cmd.get_models('KeyVaultProperties', 'EncryptionProperty')
+    registry.encryption = EncryptionProperty(status='enabled', key_vault_properties=KeyVaultProperties(
+        key_identifier=keyvault_encryption_key, identity=identity_client_id))
+
+    ResourceIdentityType, IdentityProperties = cmd.get_models('ResourceIdentityType', 'IdentityProperties')
+    registry.identity = IdentityProperties(type=ResourceIdentityType.user_assigned,
+                                           user_assigned_identities={managed_identity: {}})
+
+
+def assign_identity(cmd, name, resource_group_name=None):
+    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+
+    def getter():
+        return acr_show(cmd, 
+
+    def setter(webapp):
+        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
+        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+
+    from azure.cli.core.commands.arm import assign_identity as _assign_identity
+    webapp = _assign_identity(cmd.cli_ctx, getter, setter, role, scope)
+    return webapp.identity
+
+
+def show_identity(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
+
+
+def remove_identity(cmd, resource_group_name, name, slot=None):
+    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+
+    def getter():
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+
+    def setter(webapp):
+        webapp.identity = ManagedServiceIdentity(type='None')
+        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
+        return LongRunningOperation(cmd.cli_ctx)(poller)
+
+    from azure.cli.core.commands.arm import assign_identity as _assign_identity
+    webapp = _assign_identity(cmd.cli_ctx, getter, setter)
+    return webapp.identity
