@@ -183,7 +183,7 @@ def acr_helm_repo_add(cmd,
 
 
 def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, yes=False):
-    """Install Helm command-line interface."""
+    """Install Helm command-line tool."""
 
     if client_version >= '3':
         raise CLIError('Helm v3 is not supported yet.')
@@ -193,6 +193,9 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
 
     # ensure installation directory exists
     install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
+    if not cli:
+        raise CLIError("{} is a directory. Please specify a complete file path.".format(install_location))
+
     if not os.path.exists(install_dir):
         os.makedirs(install_dir)
 
@@ -203,19 +206,17 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
     download_path = '' # path to downloaded file
 
     if not package:
-        raise CLIError("Current system is not supported.")
-
-    # TODO: sha verification
+        raise CLIError('The current system is not supported.')
 
     system = platform.system()
     import tempfile
     with tempfile.TemporaryDirectory() as tmp_dir:
-        # Download
-        download_path = os.path.join(tmp_dir, package)
-        _urlretrieve(source_url.format(package), download_path)
-
-        # Unzip
         try:
+            # Download
+            download_path = os.path.join(tmp_dir, package)
+            _urlretrieve(source_url.format(package), download_path)
+
+            # Unzip
             if system == 'Windows':
                 import zipfile
                 with zipfile.ZipFile(download_path, 'r') as zipObj:
@@ -225,10 +226,10 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
                 with tarfile.open(download_path, 'r') as tarObj:
                     tarObj.extractall(tmp_dir)
             else:
-                raise CLIError('This system is not supported yet.')
+                raise CLIError('The current system is not supported.')
 
             sub_dir = os.path.join(tmp_dir, folder)
-            # Show license
+            # Ask user to check license
             if not yes:
                 with open(os.path.join(sub_dir, 'LICENSE')) as f:
                     text = f.read()
@@ -241,15 +242,17 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
             for f in os.scandir(sub_dir):
                 # Rename helm to specified name
                 if os.path.splitext(f.name)[0] == 'helm':
+                    # TODO: cli is empty
                     shutil.move(f.path, install_location)
                 else:
-                    shutil.move(f.path, install_dir)
+                    shutil.move(f.path, os.path.join(install_dir, f.name))
 
             import stat
             os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         except IOError as e:
-            raise CLIError('Error while installing {}: {}'.format(package, e))
+            raise CLIError('Error while installing {} to {}: {}'.format(cli, install_dir, e))
 
+    logger.warning('Successfully installed %s to %s.', cli, install_dir)
     # Remind user to add to path
     if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
         env_paths = os.environ['PATH'].split(';')
