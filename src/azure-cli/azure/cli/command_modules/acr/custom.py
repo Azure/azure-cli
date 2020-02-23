@@ -19,6 +19,7 @@ from .network_rule import NETWORK_RULE_NOT_SUPPORTED
 
 logger = get_logger(__name__)
 DEF_DIAG_SETTINGS_NAME_TEMPLATE = '{}-diagnostic-settings'
+SYSTEM_ASSIGNED_IDENTITY_ALIAS = '[system]'
 
 
 def acr_check_name(client, registry_name):
@@ -41,8 +42,8 @@ def acr_create(cmd,
                default_action=None,
                tags=None,
                workspace=None,
-               managed_identity=None,
-               keyvault_encryption_key=None):
+               identity=None,
+               key_encryption_key=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -55,8 +56,8 @@ def acr_create(cmd,
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
 
-    if managed_identity or keyvault_encryption_key:
-        configure_cmk(cmd, registry, resource_group_name, managed_identity, keyvault_encryption_key)
+    if identity or key_encryption_key:
+        _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
 
     lro_poller = client.create(resource_group_name, registry_name, registry)
 
@@ -335,65 +336,136 @@ def _create_diagnostic_settings(cli_ctx, acr, workspace):
                                                 name=DEF_DIAG_SETTINGS_NAME_TEMPLATE.format(acr.name))
 
 
-def configure_cmk(cmd, registry, resource_group_name, managed_identity, keyvault_encryption_key):
-    from azure.mgmt.msi import ManagedServiceIdentityClient
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
+def _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key):
+    from azure.cli.core.commands.client_factory import get_subscription_id
 
-    if bool(managed_identity) != bool(keyvault_encryption_key):
-        raise CLIError("Usage error: --managed-identity and --keyvault-encryption-key must be both supplied")
+    if bool(identity) != bool(key_encryption_key):
+        raise CLIError("Usage error: --identity and --key-encryption-key must be both supplied")
 
-    if not is_valid_resource_id(managed_identity):
-        managed_identity = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
-                                       resource_group=resource_group_name,
-                                       namespace='Microsoft.ManagedIdentity',
-                                       type='userAssignedIdentities',
-                                       name=managed_identity)
+    identity = _ensure_identity_resource_id(subscription_id=get_subscription_id(cmd.cli_ctx),
+                                            resource_group=resource_group_name,
+                                            resource=identity)
 
-    res = parse_resource_id(managed_identity)
-    client = get_mgmt_service_client(cmd.cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
-    identity_client_id = client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
+    identity_client_id = _resolve_identity_client_id(cmd.cli_ctx, identity)
 
     KeyVaultProperties, EncryptionProperty = cmd.get_models('KeyVaultProperties', 'EncryptionProperty')
     registry.encryption = EncryptionProperty(status='enabled', key_vault_properties=KeyVaultProperties(
-        key_identifier=keyvault_encryption_key, identity=identity_client_id))
+        key_identifier=key_encryption_key, identity=identity_client_id))
 
     ResourceIdentityType, IdentityProperties = cmd.get_models('ResourceIdentityType', 'IdentityProperties')
     registry.identity = IdentityProperties(type=ResourceIdentityType.user_assigned,
-                                           user_assigned_identities={managed_identity: {}})
+                                           user_assigned_identities={identity: {}})
 
 
-def assign_identity(cmd, name, resource_group_name=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def assign_identity(cmd, client, registry_name, identities, resource_group_name=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    assign_system_identity, assign_user_identities = _analyze_identities(identities)
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 
-    def getter():
-        return acr_show(cmd, 
+    ResourceIdentityType = cmd.get_models('ResourceIdentityType')
 
-    def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
-        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
-        return LongRunningOperation(cmd.cli_ctx)(poller)
+    if assign_system_identity and registry.identity.type != ResourceIdentityType.system_assigned:
+        registry.identity.type = (ResourceIdentityType.system_assigned
+                                  if registry.identity.type == ResourceIdentityType.none
+                                  else ResourceIdentityType.system_assigned_user_assigned)
+    if assign_user_identities and registry.identity.type != ResourceIdentityType.user_assigned:
+        registry.identity.type = (ResourceIdentityType.user_assigned
+                                  if registry.identity.type == ResourceIdentityType.none
+                                  else ResourceIdentityType.system_assigned_user_assigned)
 
-    from azure.cli.core.commands.arm import assign_identity as _assign_identity
-    webapp = _assign_identity(cmd.cli_ctx, getter, setter, role, scope)
-    return webapp.identity
+    if assign_user_identities:
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        registry.identity.user_assigned_identities = registry.identity.user_assigned_identities or {}
+
+        for r in assign_user_identities:
+            r = _ensure_identity_resource_id(subscription_id, resource_group_name, r)
+            registry.identity.user_assigned_identities[r] = {}
+
+    return client.update(resource_group_name, registry_name, registry)
 
 
-def show_identity(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
+def show_identity(cmd, client, registry_name, resource_group_name=None):
+    return acr_show(cmd, client, registry_name, resource_group_name).identity
 
 
-def remove_identity(cmd, resource_group_name, name, slot=None):
-    ManagedServiceIdentity = cmd.get_models('ManagedServiceIdentity')
+def remove_identity(cmd, client, registry_name, identities, resource_group_name=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    remove_system_identity, remove_user_identities = _analyze_identities(identities)
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 
-    def getter():
-        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    ResourceIdentityType = cmd.get_models('ResourceIdentityType')
 
-    def setter(webapp):
-        webapp.identity = ManagedServiceIdentity(type='None')
-        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
-        return LongRunningOperation(cmd.cli_ctx)(poller)
+    if remove_system_identity:
+        registry.identity.type = (ResourceIdentityType.none
+                                  if registry.identity.type == ResourceIdentityType.system_assigned
+                                  else ResourceIdentityType.user_assigned)
 
-    from azure.cli.core.commands.arm import assign_identity as _assign_identity
-    webapp = _assign_identity(cmd.cli_ctx, getter, setter)
-    return webapp.identity
+    if remove_user_identities:
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        registry.identity.user_assigned_identities = registry.identity.user_assigned_identities or {}
+
+        for r in remove_user_identities:
+            r = _ensure_identity_resource_id(subscription_id, resource_group_name, r)
+            registry.identity.user_assigned_identities[r] = None
+
+        # all user assigned identities are gone
+        if not [x for x in registry.identity.user_assigned_identities if registry.identity.user_assigned_identities[x]]:
+            registry.identity.type = (ResourceIdentityType.none
+                                      if registry.identity.type == ResourceIdentityType.user_assigned
+                                      else ResourceIdentityType.system_assigned)
+
+    return client.update(resource_group_name, registry_name, registry)
+
+
+def show_encryption(cmd, client, registry_name, resource_group_name=None):
+    return acr_show(cmd, client, registry_name, resource_group_name).encryption
+
+
+def rotate_key(cmd, client, registry_name, identity=None, key_encryption_key=None, resource_group_name=None):
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    if key_encryption_key:
+        registry.encryption.key_vault_properties.key_identifier = key_encryption_key
+    if identity:
+        try:
+            import uuid
+            uuid.UUID(identity)
+            client_id = identity
+        except ValueError:
+            from azure.cli.core.commands.client_factory import get_subscription_id
+            if identity == SYSTEM_ASSIGNED_IDENTITY_ALIAS:
+                client_id = registry.identity.principal_id
+            else:
+                identity = _ensure_identity_resource_id(subscription_id=get_subscription_id(cmd.cli_ctx),
+                                                        resource_group=resource_group_name,
+                                                        resource=identity)
+                client_id = _resolve_identity_client_id(cmd.cli_ctx, identity)
+
+        registry.encryption.key_vault_properties.identity = client_id
+
+    return client.update(resource_group_name, registry_name, registry)
+
+
+def _analyze_identities(identities):
+    identities = identities or []
+    return SYSTEM_ASSIGNED_IDENTITY_ALIAS in identities, [x for x in identities if x != SYSTEM_ASSIGNED_IDENTITY_ALIAS]
+
+
+def _ensure_identity_resource_id(subscription_id, resource_group, resource):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    if is_valid_resource_id(resource):
+        return resource
+    return resource_id(subscription=subscription_id,
+                       resource_group=resource_group,
+                       namespace='Microsoft.ManagedIdentity',
+                       type='userAssignedIdentities',
+                       name=resource)
+
+
+def _resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
+    from azure.mgmt.msi import ManagedServiceIdentityClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from msrestazure.tools import parse_resource_id
+
+    res = parse_resource_id(managed_identity_resource_id)
+    client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
+    return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
