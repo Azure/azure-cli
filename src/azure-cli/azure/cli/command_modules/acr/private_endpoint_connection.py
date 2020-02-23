@@ -8,8 +8,7 @@ from ._utils import get_resource_group_name_by_registry_name
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, registry_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None,
-                                               connection_id=None):  # pylint: disable=unused-argument
+                                               private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
     PrivateLinkServiceConnectionState = cmd.get_models('Status', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
 
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, registry_name=registry_name,
@@ -27,21 +26,21 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
 
 
 def approve(cmd, client, registry_name, private_endpoint_connection_name,
-            resource_group_name=None, approval_description=None, connection_id=None):
+            resource_group_name=None, approval_description=None):
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, registry_name, private_endpoint_connection_name, is_approved=True,
-        description=approval_description, connection_id=connection_id)
+        description=approval_description)
 
 
 def reject(cmd, client, registry_name, private_endpoint_connection_name,
-           resource_group_name=None, rejection_description=None, connection_id=None):
+           resource_group_name=None, rejection_description=None):
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, registry_name, private_endpoint_connection_name, is_approved=False,
-        description=rejection_description, connection_id=connection_id)
+        description=rejection_description)
 
 
 def show(cmd, client, registry_name, private_endpoint_connection_name, resource_group_name=None):
