@@ -52,7 +52,7 @@ def acr_helm_list(cmd,
 def acr_helm_show(cmd,
                   registry_name,
                   chart,
-                  version=None,
+                  client_version=None,
                   repository='repo',
                   resource_group_name=None,  # pylint: disable=unused-argument
                   tenant_suffix=None,
@@ -70,7 +70,7 @@ def acr_helm_show(cmd,
     return request_data_from_registry(
         http_method='get',
         login_server=login_server,
-        path=_get_charts_path(repository, chart, version),
+        path=_get_charts_path(repository, chart, client_version),
         username=username,
         password=password)[0]
 
@@ -78,7 +78,7 @@ def acr_helm_show(cmd,
 def acr_helm_delete(cmd,
                     registry_name,
                     chart,
-                    version=None,
+                    client_version=None,
                     repository='repo',
                     resource_group_name=None,  # pylint: disable=unused-argument
                     tenant_suffix=None,
@@ -86,9 +86,9 @@ def acr_helm_delete(cmd,
                     password=None,
                     prov=False,
                     yes=False):
-    if version:
+    if client_version:
         message = "This operation will delete the chart package '{}'".format(
-            _get_chart_package_name(chart, version, prov))
+            _get_chart_package_name(chart, client_version, prov))
     else:
         message = "This operation will delete all versions of the chart '{}'".format(chart)
     user_confirmation("{}.\nAre you sure you want to continue?".format(message), yes)
@@ -105,7 +105,7 @@ def acr_helm_delete(cmd,
     return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
-        path=_get_blobs_path(repository, chart, version, prov) if version else _get_charts_path(repository, chart),
+        path=_get_blobs_path(repository, chart, client_version, prov) if client_version else _get_charts_path(repository, chart),
         username=username,
         password=password)[0]
 
@@ -182,18 +182,11 @@ def acr_helm_repo_add(cmd,
     p.wait()
 
 
-def acr_helm_install_cli(cmd, version='2.16.3', install_location=None):
+def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, yes=False):
     """Install Helm command-line interface."""
 
-    if version >= '3':
-        raise CLIError('Version not support.')
-
-    version = "v%s" % version
-    # source_url = 'https://get.helm.sh/{}'
-    source_url = 'http://localhost:8000/{}'
-    package_template = 'helm-{}-{}-{}.{}'
-    package = ''
-    download_path = '' # path to downloaded file
+    if client_version >= '3':
+        raise CLIError('Helm v3 is not supported yet.')
 
     if not install_location:
         raise CLIError('Invalid install location.')
@@ -203,46 +196,54 @@ def acr_helm_install_cli(cmd, version='2.16.3', install_location=None):
     if not os.path.exists(install_dir):
         os.makedirs(install_dir)
 
-    arch = _get_machine_architecture()
-    if not arch:
-        raise CLIError("This machine type is not supported by Helm CLI.")
+    client_version = "v%s" % client_version
+    # source_url = 'https://get.helm.sh/{}'
+    source_url = 'http://localhost:8000/{}'
+    package, folder = _get_helm_package_name(client_version)
+    download_path = '' # path to downloaded file
 
+    if not package:
+        raise CLIError("Current system is not supported.")
+
+    # TODO: sha verification
+
+    system = platform.system()
     import tempfile
     with tempfile.TemporaryDirectory() as tmp_dir:
-        system = platform.system().lower()
-        try:
-            if system == 'windows':
-                package = package_template.format(version, system, arch, 'zip')
-                download_path = os.path.join(tmp_dir, package)
-                # Download
-                _urlretrieve(source_url.format(package), download_path)
+        # Download
+        download_path = os.path.join(tmp_dir, package)
+        _urlretrieve(source_url.format(package), download_path)
 
-                # Decomporess
+        # Unzip
+        try:
+            if system == 'Windows':
                 import zipfile
                 with zipfile.ZipFile(download_path, 'r') as zipObj:
                     zipObj.extractall(tmp_dir)
-            elif system in ('linux', 'darwin'):
-                package = package_template.format(version, system, arch, 'tar.gz')
-                download_path = os.path.join(tmp_dir, package)
-                # Download
-                _urlretrieve(source_url.format(package), download_path)
-
-                # Decomporess
+            elif system in ('Linux', 'Darwin'):
                 import tarfile
                 with tarfile.open(download_path, 'r') as tarObj:
                     tarObj.extractall(tmp_dir)
             else:
-                raise CLIError('This system is not supported yet')
+                raise CLIError('This system is not supported yet.')
+
+            sub_dir = os.path.join(tmp_dir, folder)
+            # Show license
+            if not yes:
+                with open(os.path.join(sub_dir, 'LICENSE')) as f:
+                    text = f.read()
+                    logger.warning(text)
+                user_confirmation('Before proceeding with the installation, '
+                                  'please confirm that you have read and agreed the above license.')
 
             # Move files from temporary location to specified location
             import shutil
-            sub_dir = '{}-{}'.format(system, arch)
-            for f in os.scandir(os.path.join(tmp_dir, sub_dir)):
+            for f in os.scandir(sub_dir):
+                # Rename helm to specified name
                 if os.path.splitext(f.name)[0] == 'helm':
                     shutil.move(f.path, install_location)
                 else:
                     shutil.move(f.path, install_dir)
-            # TODO: ask user to agree or check license
 
             import stat
             os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
@@ -250,7 +251,7 @@ def acr_helm_install_cli(cmd, version='2.16.3', install_location=None):
             raise CLIError('Error while installing {}: {}'.format(package, e))
 
     # Remind user to add to path
-    if system == 'windows':  # be verbose, as the install_location likely not in Windows's search PATHs
+    if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
         env_paths = os.environ['PATH'].split(';')
         found = next((x for x in env_paths if x.lower().rstrip('\\') == install_dir.lower()), None)
         if not found:
@@ -265,45 +266,18 @@ def acr_helm_install_cli(cmd, version='2.16.3', install_location=None):
         logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
                        install_dir, cli)
 
-    # TODO: user to read license
 
+def _ssl_context():
+    import sys
+    import ssl
 
-def _get_machine_architecture():
-#       ARCH=$(uname -m)
-#   case $ARCH in
-#     armv5*) ARCH="armv5";;
-#     armv6*) ARCH="armv6";;
-#     armv7*) ARCH="arm";;
-#     aarch64) ARCH="arm64";;
-#     x86) ARCH="386";;
-#     x86_64) ARCH="amd64";;
-#     i686) ARCH="386";;
-#     i386) ARCH="386";;
-    arch = {
-        'armv5*': 'armv5',
-        'armv6*': 'armv6',
-        'armv7*': 'arm',
-        'aarch64': 'arm64',
-        'x86': '386',
-        'x86_64': 'amd64',
-        'i686': '386',
-        'i386': '386',
-        'AMD64': 'amd64',
-        'ppc64le': 'ppc64le',
-        's390x': 's390x'
-    }
-    machine = platform.machine()
-    return arch[machine] if machine in arch else None
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
 
-
-def _urlretrieve(url, path):
-    logger.debug('Query %s', url)
-    with urlopen(url) as response:
-        logger.debug('Start downloading from %s to %s', url, path)
-        # Open for writing in binary mode
-        with open(path, "wb") as f:
-            f.write(response.read())
-    logger.debug('Successfully downloaded from %s to %s', url, path)
+    return ssl.create_default_context()
 
 
 def get_helm_command(is_diagnostics_context=False):
@@ -335,9 +309,9 @@ def get_helm_command(is_diagnostics_context=False):
     return helm_command, None
 
 
-def _get_charts_path(repository, chart=None, version=None):
-    if chart and version:
-        return '/helm/v1/{}/_charts/{}/{}'.format(repository, chart, version)
+def _get_charts_path(repository, chart=None, client_version=None):
+    if chart and client_version:
+        return '/helm/v1/{}/_charts/{}/{}'.format(repository, chart, client_version)
 
     if chart:
         return '/helm/v1/{}/_charts/{}'.format(repository, chart)
@@ -345,19 +319,65 @@ def _get_charts_path(repository, chart=None, version=None):
     return '/helm/v1/{}/_charts'.format(repository)
 
 
-def _get_blobs_path(repository, chart, version=None, prov=False):
+def _get_blobs_path(repository, chart, client_version=None, prov=False):
     path = '/helm/v1/{}/_blobs'.format(repository)
 
-    if version:
-        return '{}/{}'.format(path, _get_chart_package_name(chart, version, prov))
+    if client_version:
+        return '{}/{}'.format(path, _get_chart_package_name(chart, client_version, prov))
 
     return '{}/{}'.format(path, chart)
 
 
-def _get_chart_package_name(chart, version, prov=False):
-    chart_package_name = '{}-{}.tgz'.format(chart, version)
+def _get_chart_package_name(chart, client_version, prov=False):
+    chart_package_name = '{}-{}.tgz'.format(chart, client_version)
 
     if prov:
         return '{}.prov'.format(chart_package_name)
 
     return chart_package_name
+
+
+def _get_helm_package_name(client_version):
+    package_template = 'helm-{}-{}-{}.{}'
+    folder_template = '{}-{}'
+    package = ''
+    folder = ''
+
+    archs = {
+        'armv5*': 'armv5',
+        'armv6*': 'armv6',
+        'armv7*': 'arm',
+        'aarch64': 'arm64',
+        'x86': '386',
+        'x86_64': 'amd64',
+        'i686': '386',
+        'i386': '386',
+        'AMD64': 'amd64',
+        'ppc64le': 'ppc64le',
+        's390x': 's390x'
+    }
+    machine = platform.machine()
+    if machine not in archs:
+        return None, None
+    arch = archs[machine]
+
+    system = platform.system().lower()
+    if system == 'windows':
+        package = package_template.format(client_version, system, arch, 'zip')
+    elif system in ('linux', 'darwin'):
+        package = package_template.format(client_version, system, arch, 'tar.gz')
+    else:
+        return None, None
+
+    folder = folder_template.format(system, arch)
+    return package, folder
+
+
+def _urlretrieve(url, path):
+    logger.warning('Requesting %s, it may take a long time...', url)
+    with urlopen(url, context=_ssl_context()) as response:
+        logger.debug('Start downloading from %s to %s', url, path)
+        # Open for writing in binary mode
+        with open(path, "wb") as f:
+            f.write(response.read())
+    logger.debug('Successfully downloaded from %s to %s', url, path)
