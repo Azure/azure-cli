@@ -131,15 +131,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     acr_scope_map_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.scope_map#{}',
         table_transformer=scope_map_output_format,
-        client_factory=cf_acr_scope_maps,
-        operation_group='scope_map'
+        client_factory=cf_acr_scope_maps
     )
 
     acr_token_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.token#{}',
         table_transformer=token_output_format,
-        client_factory=cf_acr_tokens,
-        operation_group='token'
+        client_factory=cf_acr_tokens
     )
 
     acr_token_credential_generate_util = CliCommandType(
