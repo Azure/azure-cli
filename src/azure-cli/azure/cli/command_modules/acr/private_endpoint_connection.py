@@ -8,7 +8,7 @@ from ._utils import get_resource_group_name_by_registry_name
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, registry_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
+                                               private_endpoint_connection_name, is_approved=True, description=None):
     PrivateLinkServiceConnectionState = cmd.get_models('Status', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
 
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, registry_name=registry_name,
