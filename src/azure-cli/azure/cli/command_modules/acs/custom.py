@@ -1846,12 +1846,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                         name=name
                     )
                     _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
-                return result
             else:
-                return sdk_no_wait(no_wait,
-                                   client.create_or_update,
-                                   resource_group_name=resource_group_name,
-                                   resource_name=name, parameters=mc)
+                result = sdk_no_wait(no_wait,
+                                     client.create_or_update,
+                                     resource_group_name=resource_group_name,
+                                     resource_name=name, parameters=mc)
+            return result
         except CloudError as ex:
             retry_exception = ex
             if 'not found in Active Directory tenant' in ex.message:
@@ -1902,11 +1902,11 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
                 name=name
             )
             _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
-
-        return result
     else:
-        return sdk_no_wait(no_wait, client.create_or_update,
-                           resource_group_name, name, instance)
+        result = sdk_no_wait(no_wait, client.create_or_update,
+                             resource_group_name, name, instance)
+
+    return result
 
 
 def aks_get_versions(cmd, client, location):
