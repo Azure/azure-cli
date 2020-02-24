@@ -1611,7 +1611,7 @@ def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
     if (
             hasattr(result, 'service_principal_profile') and
             hasattr(result.service_principal_profile, 'client_id') and
-            result.service_principal_profile.client_id != 'msi'
+            result.service_principal_profile.client_id.lower() != 'msi'
     ):
         logger.info('valid service principal exists, using it')
         service_principal_msi_id = result.service_principal_profile.client_id
@@ -1682,7 +1682,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
-
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
