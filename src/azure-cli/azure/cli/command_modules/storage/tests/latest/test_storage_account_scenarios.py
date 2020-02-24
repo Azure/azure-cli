@@ -992,3 +992,47 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
             self.check('name', '{sa}'),
             self.check('failoverInProgress', True)
         ])
+
+
+class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
+    @StorageAccountPreparer(name_prefix='filesoftdelete')
+    def test_storage_account_update_delete_retention_policy(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+        })
+
+        with self.assertRaises(SystemExit):
+            self.cmd('storage account file-service-properties update --enable-delete-retention true -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('storage account file-service-properties update --enable-delete-retention false --delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days -1 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 0 -n {sa} -g {rg}')
+
+        with self.assertRaises(SystemExit):
+            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 366 -n {sa} -g {rg}')
+
+        result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], 1)
+
+        result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 100 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], 100)
+
+        result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], 365)
+
+        result = self.cmd('{cmd} --enable-delete-retention false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
+        self.assertEqual(result['deleteRetentionPolicy']['days'], None)

@@ -9,6 +9,7 @@ import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -463,6 +464,30 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
     if enable_versioning is not None:
         instance.is_versioning_enabled = enable_versioning
     return instance
+
+
+def update_file_service_properties(cmd, client, resource_group_name, account_name, enable_delete_retention=None,
+                                   delete_retention_days=None):
+
+    if enable_delete_retention is not None:
+        if enable_delete_retention is False:
+            delete_retention_days = None
+        delete_retention_policy = cmd.get_models('DeleteRetentionPolicy')(
+            enabled=enable_delete_retention, days=delete_retention_days)
+
+    # If already enabled, only update days
+    if enable_delete_retention is None and delete_retention_days is not None:
+        delete_retention_policy = client.get_service_properties(
+            resource_group_name=resource_group_name,
+            account_name=account_name).share_delete_retention_policy
+        if delete_retention_policy.enabled:
+            delete_retention_policy.days = delete_retention_days
+        else:
+            raise CLIError("Delete Retention Policy hasn't been enabled, and you cannot set delete retention days. "
+                           "Please set --enabled-delete-retention as true to enable Delete Retention Policy.")
+
+    return client.set_service_properties(resource_group_name=resource_group_name, account_name=account_name,
+                                         share_delete_retention_policy=delete_retention_policy)
 
 
 def create_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
