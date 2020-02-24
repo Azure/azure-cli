@@ -480,7 +480,7 @@ def update_file_service_properties(cmd, client, resource_group_name, account_nam
         delete_retention_policy = client.get_service_properties(
             resource_group_name=resource_group_name,
             account_name=account_name).share_delete_retention_policy
-        if delete_retention_policy.enabled:
+        if delete_retention_policy is not None and delete_retention_policy.enabled:
             delete_retention_policy.days = delete_retention_days
         else:
             raise CLIError("Delete Retention Policy hasn't been enabled, and you cannot set delete retention days. "
