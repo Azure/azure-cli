@@ -154,9 +154,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('account_type', help='The storage account type', arg_type=get_enum_type(t_account_type))
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None)
-        c.argument('kind', help='Indicates the type of storage account.', min_api="2017-10-01",
+        c.argument('kind', help='Indicates the type of storage account.', min_api="2018-02-01",
                    arg_type=get_enum_type(t_kind), default='StorageV2')
-        c.argument('kind', help='Indicates the type of storage account.', max_api="2017-06-01",
+        c.argument('kind', help='Indicates the type of storage account.', max_api="2017-10-01",
                    arg_type=get_enum_type(t_kind), default='Storage')
         c.argument('https_only', arg_type=get_three_state_flag(), min_api='2019-04-01',
                    help='Allow https traffic only to storage service if set to true. The default value is true.')
