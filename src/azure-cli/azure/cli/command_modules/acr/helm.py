@@ -9,7 +9,6 @@ import platform
 from knack.util import CLIError
 from knack.log import get_logger
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
 from azure.cli.core.util import in_cloud_console
 from ._utils import user_confirmation
@@ -182,13 +181,13 @@ def acr_helm_repo_add(cmd,
     p.wait()
 
 
-def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, yes=False):
+def acr_helm_install_cli(client_version='2.16.3', install_location=None, yes=False):
     """Install Helm command-line tool."""
 
     if client_version >= '3':
         raise CLIError('Helm v3 is not supported yet.')
 
-    if not install_location:
+    if not install_location or install_location.isspace():
         raise CLIError('Invalid install location.')
 
     install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
@@ -200,34 +199,19 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
         os.makedirs(install_dir)
 
     client_version = "v%s" % client_version
-    # source_url = 'https://get.helm.sh/{}'
-    source_url = 'http://localhost:8000/{}'
+    source_url = 'https://get.helm.sh/{}'
     package, folder = _get_helm_package_name(client_version)
-    download_path = '' # downloaded package path
+    download_path = ''
 
     if not package:
         raise CLIError('The current system is not supported.')
 
-    system = platform.system()
     try:
         import tempfile
         with tempfile.TemporaryDirectory() as tmp_dir:
-            # Download
             download_path = os.path.join(tmp_dir, package)
             _urlretrieve(source_url.format(package), download_path)
-
-            # Unzip
-            logger.debug('Extracting %s to %s.', download_path, tmp_dir)
-            if system == 'Windows':
-                import zipfile
-                with zipfile.ZipFile(download_path, 'r') as zipObj:
-                    zipObj.extractall(tmp_dir)
-            elif system in ('Linux', 'Darwin'):
-                import tarfile
-                with tarfile.open(download_path, 'r') as tarObj:
-                    tarObj.extractall(tmp_dir)
-            else:
-                raise CLIError('The current system is not supported.')
+            _unzip(download_path, tmp_dir)
 
             sub_dir = os.path.join(tmp_dir, folder)
             # Ask user to check license
@@ -236,23 +220,26 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
                     text = f.read()
                     logger.warning(text)
                 user_confirmation('Before proceeding with the installation, '
-                                'please confirm that you have read and agreed the above license.')
+                                  'please confirm that you have read and agreed the above license.')
 
             # Move files from temporary location to specified location
             import shutil
+            import stat
             for f in os.scandir(sub_dir):
                 # Rename helm to specified name
                 target_path = install_location if os.path.splitext(f.name)[0] == 'helm' \
-                              else os.path.join(install_dir, f.name)
+                    else os.path.join(install_dir, f.name)
                 logger.debug('Moving %s to %s', f.path, target_path)
                 shutil.move(f.path, target_path)
-        import stat
-        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+                if os.path.splitext(f.name)[0] in ('helm', 'tiller'):
+                    os.chmod(target_path, os.stat(target_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as e:
         raise CLIError('Error while installing {} to {}: {}'.format(cli, install_dir, e))
 
     logger.warning('Successfully installed %s to %s.', cli, install_dir)
     # Remind user to add to path
+    system = platform.system()
     if system == 'Windows':  # be verbose, as the install_location likely not in Windows's search PATHs
         env_paths = os.environ['PATH'].split(';')
         found = next((x for x in env_paths if x.lower().rstrip('\\') == install_dir.lower()), None)
@@ -267,19 +254,6 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
     else:
         logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
                        install_dir, cli)
-
-
-def _ssl_context():
-    import sys
-    import ssl
-
-    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
-        try:
-            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
-        except AttributeError:
-            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
-    return ssl.create_default_context()
 
 
 def get_helm_command(is_diagnostics_context=False):
@@ -375,6 +349,19 @@ def _get_helm_package_name(client_version):
     return package, folder
 
 
+def _ssl_context():
+    import sys
+    import ssl
+
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()
+
+
 def _urlretrieve(url, path):
     logger.warning('Downloading client from %s, it may take a long time...', url)
     with urlopen(url, context=_ssl_context()) as response:
@@ -383,3 +370,18 @@ def _urlretrieve(url, path):
         with open(path, "wb") as f:
             f.write(response.read())
     logger.debug('Successfully downloaded from %s to %s', url, path)
+
+
+def _unzip(src, dest):
+    logger.debug('Extracting %s to %s.', src, dest)
+    system = platform.system()
+    if system == 'Windows':
+        import zipfile
+        with zipfile.ZipFile(src, 'r') as zipObj:
+            zipObj.extractall(dest)
+    elif system in ('Linux', 'Darwin'):
+        import tarfile
+        with tarfile.open(src, 'r') as tarObj:
+            tarObj.extractall(dest)
+    else:
+        raise CLIError('The current system is not supported.')

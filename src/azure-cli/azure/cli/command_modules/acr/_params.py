@@ -262,9 +262,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('force', help='Overwrite the existing chart package.', action='store_true')
 
     with self.argument_context('acr helm install-cli') as c:
-        c.argument('client_version', options_list=['--client-version'], help='The target helm CLI version. (Helm v3 is currently not supported) ')
-        c.argument('install_location', options_list=['--install-location'], help='Path at which to install helm CLI.', default=_get_helm_default_install_location())
-        c.argument('yes', help='Agree to the license of Helm and do not prompt for confirmation.')
+        c.argument('client_version', options_list=['--client-version'], help='The target Helm CLI version. (Helm v3 is currently not supported) ')
+        c.argument('install_location', options_list=['--install-location'], help='File path at which to install Helm CLI.', default=_get_helm_default_install_location())
+        c.argument('yes', help='Agree to the license of Helm, and do not prompt for confirmation.')
 
     with self.argument_context('acr network-rule') as c:
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
