@@ -51,7 +51,7 @@ def acr_helm_list(cmd,
 def acr_helm_show(cmd,
                   registry_name,
                   chart,
-                  client_version=None,
+                  version=None,
                   repository='repo',
                   resource_group_name=None,  # pylint: disable=unused-argument
                   tenant_suffix=None,
@@ -69,7 +69,7 @@ def acr_helm_show(cmd,
     return request_data_from_registry(
         http_method='get',
         login_server=login_server,
-        path=_get_charts_path(repository, chart, client_version),
+        path=_get_charts_path(repository, chart, version),
         username=username,
         password=password)[0]
 
@@ -77,7 +77,7 @@ def acr_helm_show(cmd,
 def acr_helm_delete(cmd,
                     registry_name,
                     chart,
-                    client_version=None,
+                    version=None,
                     repository='repo',
                     resource_group_name=None,  # pylint: disable=unused-argument
                     tenant_suffix=None,
@@ -85,9 +85,9 @@ def acr_helm_delete(cmd,
                     password=None,
                     prov=False,
                     yes=False):
-    if client_version:
+    if version:
         message = "This operation will delete the chart package '{}'".format(
-            _get_chart_package_name(chart, client_version, prov))
+            _get_chart_package_name(chart, version, prov))
     else:
         message = "This operation will delete all versions of the chart '{}'".format(chart)
     user_confirmation("{}.\nAre you sure you want to continue?".format(message), yes)
@@ -104,7 +104,7 @@ def acr_helm_delete(cmd,
     return request_data_from_registry(
         http_method='delete',
         login_server=login_server,
-        path=_get_blobs_path(repository, chart, client_version, prov) if client_version else _get_charts_path(repository, chart),
+        path=_get_blobs_path(repository, chart, version, prov) if version else _get_charts_path(repository, chart),
         username=username,
         password=password)[0]
 
@@ -285,9 +285,9 @@ def get_helm_command(is_diagnostics_context=False):
     return helm_command, None
 
 
-def _get_charts_path(repository, chart=None, client_version=None):
-    if chart and client_version:
-        return '/helm/v1/{}/_charts/{}/{}'.format(repository, chart, client_version)
+def _get_charts_path(repository, chart=None, version=None):
+    if chart and version:
+        return '/helm/v1/{}/_charts/{}/{}'.format(repository, chart, version)
 
     if chart:
         return '/helm/v1/{}/_charts/{}'.format(repository, chart)
@@ -295,17 +295,17 @@ def _get_charts_path(repository, chart=None, client_version=None):
     return '/helm/v1/{}/_charts'.format(repository)
 
 
-def _get_blobs_path(repository, chart, client_version=None, prov=False):
+def _get_blobs_path(repository, chart, version=None, prov=False):
     path = '/helm/v1/{}/_blobs'.format(repository)
 
-    if client_version:
-        return '{}/{}'.format(path, _get_chart_package_name(chart, client_version, prov))
+    if version:
+        return '{}/{}'.format(path, _get_chart_package_name(chart, version, prov))
 
     return '{}/{}'.format(path, chart)
 
 
-def _get_chart_package_name(chart, client_version, prov=False):
-    chart_package_name = '{}-{}.tgz'.format(chart, client_version)
+def _get_chart_package_name(chart, version, prov=False):
+    chart_package_name = '{}-{}.tgz'.format(chart, version)
 
     if prov:
         return '{}.prov'.format(chart_package_name)
