@@ -3,13 +3,93 @@
 Release History
 ===============
 
+2.1.0
+++++++
+
+**ACR**
+
+* Add a new argument `--expose-token` for `az acr login`
+* Fix the incorrect output of `az acr task identity show -n Name -r Registry -o table`
+* az acr login: Throw a CLIError if there are errors returned by docker command
+
+**ACS**
+
+* aks create/update: add `--vnet-subnet-id` validation
+
+**Aladdin**
+
+* Parse generated examples into commands' _help.py
+
 **AMS**
 
-* az ams is now GA.
+* az ams is GA now
+
+**AppConfig**
+
+* Revise help message to exclude unsupported key/label filter
+* Remove preview tag for most commands excluding managed identity and feature flags
+* Add customer managed key when updating stores
+
+**AppService**
+
+* az webapp list-runtimes: Fix the bug for list-runtimes
+* Add az webapp|functionapp config ssl create
+* Add support for v3 function apps and node 12
+
+**ARM**
+
+* az policy assignment create: Fix the error message when the `--policy` parameter is invalid
+* az group deployment create: Fix "stat: path too long for Windows" error when using large parameters.json file
+
+**Backup**
+
+* Fix for item level recovery flow in OLR
+* Add restore as files support for SQL and SAP Databases
+
+**Compute**
+
+* vm/vmss/availability-set update: add --ppg to allowing updating ProximityPlacementGroup
+* vmss create: add --data-disk-iops and --data-disk-mbps
+* az vm host: remove preview tag for `vm host` and `vm host group`
+* [BREAKING CHANGE] Fix #10728: `az vm create`: create subnet automatically if vnet is specified and subnet not exists
+* Increase robustness of vm image list
+
+**Eventhub**
+
+* Azure Stack support for 2019-03-01-hybrid profile
+
+**KeyVault**
+
+* az keyvault key create: add a new value `import` for parameter `--ops`
+* az keyvault key list-versions: support parameter `--id` for specifying keys
+* Support private endpoint connections
+
+**Network**
+
+* Bump to azure-mgmt-network 9.0.0
+* az network private-link-service update/create: support --enable-proxy-protocol
+* Add connection Monitor V2 feature
+
+**Packaging**
+
+* [BREAKING CHANGE] Drop support for Python 2.7
+
+**Profile**
+
+* Preview: Add new attributes `homeTenantId` and `managedByTenants` to subscription accounts. Please re-run `az login` for the changes to take effect
+* az login: Show a warning when a subscription is listed from more than one tenants and default to the first one. To select a specific tenant when accessing this subscription, please include `--tenant` in `az login`
+
+**Role**
+
+* az role assignment create: Fix the error that assigning a role to a service principal by display name yields a HTTP 400
 
 **SQL**
 
-* Update SQL Managed Instance cmdlet `az sql mi update` with two new parameters: tier and family.
+* Update SQL Managed Instance cmdlet `az sql mi update` with two new parameters: tier and family
+
+**Storage**
+
+* [BREAKING CHANGE] `az storage account create`: Change default storage account kind to StorageV2
 
 2.0.81
 ++++++
@@ -43,6 +123,10 @@ Release History
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
 * functionapp: Add ability to create Java function apps in Linux
+* functionapp: Added --functions-version property to 'az functionapp create'
+* functionapp: Added support for node 12 for v3 function apps
+* functionapp: Added support for python 3.8 for v3 function apps
+* functionapp: Changed python default version to 3.7 for v2 and v3 function apps
 
 **ARM**
 

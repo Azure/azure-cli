@@ -193,6 +193,7 @@ def check_version_compatibility(azext_metadata):
             min_max_msg_fmt += 'a min of {}.'.format(min_required)
         elif max_required:
             min_max_msg_fmt += 'a max of {}.'.format(max_required)
+        min_max_msg_fmt += '\nPlease install a compatible extension version or remove it.'
         raise CLIError(min_max_msg_fmt)
 
 

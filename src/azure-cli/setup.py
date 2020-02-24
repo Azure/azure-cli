@@ -8,6 +8,7 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
+import sys
 
 try:
     from azure_bdist_wheel import cmdclass
@@ -17,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.81"
+VERSION = "2.1.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -27,7 +28,6 @@ except OSError:
     pass
 else:
     import re
-    import sys
 
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
@@ -42,8 +42,6 @@ CLASSIFIERS = [
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
@@ -66,7 +64,7 @@ DEPENDENCIES = [
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement>=0.1.0',
     'azure-mgmt-applicationinsights~=0.1.1',
-    'azure-mgmt-appconfiguration~=0.3.0',
+    'azure-mgmt-appconfiguration~=0.4.0',
     'azure-mgmt-authorization~=0.52.0',
     'azure-mgmt-batch~=7.0',
     'azure-mgmt-batchai~=2.0',
@@ -109,7 +107,7 @@ DEPENDENCIES = [
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=1.8',
     'azure-mgmt-recoveryservices~=0.4.0',
-    'azure-mgmt-recoveryservicesbackup~=0.5.0',
+    'azure-mgmt-recoveryservicesbackup~=0.6.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
@@ -122,7 +120,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr~=0.3.0',
     'azure-mgmt-sql~=0.15.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
-    'azure-mgmt-storage~=7.1.0',
+    'azure-mgmt-storage~=7.2.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.44.0',
     'azure-multiapi-storage~=0.2.4',
@@ -139,7 +137,6 @@ DEPENDENCIES = [
     'pyOpenSSL>=17.1.0',
     'pytz==2019.1',
     'pyyaml~=5.1',
-    'psutil~=5.6',
     'requests~=2.22',
     'scp~=0.13.2',
     'six~=1.12',
@@ -156,6 +153,9 @@ with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
+
+if sys.version_info < (3, 4):
+    raise ImportError("azure-cli requires Python 3.4 or later.")
 
 setup(
     name='azure-cli',
