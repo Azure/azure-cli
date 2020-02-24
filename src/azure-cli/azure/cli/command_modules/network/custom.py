@@ -556,21 +556,31 @@ def update_ag_rewrite_rule_set(instance, parent, item_name):
 
 
 def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name,
-                           sequence=None, request_headers=None, response_headers=None, no_wait=False):
-    ApplicationGatewayRewriteRule, ApplicationGatewayRewriteRuleActionSet = cmd.get_models(
-        'ApplicationGatewayRewriteRule', 'ApplicationGatewayRewriteRuleActionSet')
+                           sequence=None, request_headers=None, response_headers=None, no_wait=False,
+                           modified_path=None, modified_query_string=None, enable_reroute=None):
+    (ApplicationGatewayRewriteRule,
+     ApplicationGatewayRewriteRuleActionSet,
+     ApplicationGatewayUrlConfiguration) = cmd.get_models('ApplicationGatewayRewriteRule',
+                                                          'ApplicationGatewayRewriteRuleActionSet',
+                                                          'ApplicationGatewayUrlConfiguration')
     if not request_headers and not response_headers:
         raise CLIError('usage error: --response-headers HEADER=VALUE | --request-headers HEADER=VALUE')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     rule_set = find_child_item(ag, rule_set_name,
                                path='rewrite_rule_sets', key_path='name')
+    url_configuration = None
+    if any([modified_path, modified_query_string, enable_reroute]):
+        url_configuration = ApplicationGatewayUrlConfiguration(modified_path=modified_path,
+                                                               modified_query_string=modified_query_string,
+                                                               reroute=enable_reroute)
     new_rule = ApplicationGatewayRewriteRule(
         name=rule_name,
         rule_sequence=sequence,
         action_set=ApplicationGatewayRewriteRuleActionSet(
             request_header_configurations=request_headers,
-            response_header_configurations=response_headers
+            response_header_configurations=response_headers,
+            url_configuration=url_configuration
         )
     )
     upsert_to_collection(rule_set, 'rewrite_rules', new_rule, 'name')
@@ -582,11 +592,19 @@ def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, r
 
 
 def update_ag_rewrite_rule(instance, parent, cmd, rule_set_name, rule_name, sequence=None,
-                           request_headers=None, response_headers=None):
+                           request_headers=None, response_headers=None,
+                           modified_path=None, modified_query_string=None, enable_reroute=None):
     with cmd.update_context(instance) as c:
         c.set_param('rule_sequence', sequence)
         c.set_param('action_set.request_header_configurations', request_headers)
         c.set_param('action_set.response_header_configurations', response_headers)
+        ApplicationGatewayUrlConfiguration = cmd.get_models('ApplicationGatewayUrlConfiguration')
+        url_configuration = None
+        if any([modified_path, modified_query_string, enable_reroute]):
+            url_configuration = ApplicationGatewayUrlConfiguration(modified_path=modified_path,
+                                                                   modified_query_string=modified_query_string,
+                                                                   reroute=enable_reroute)
+        c.set_param('action_set.url_configuration', url_configuration)
     return parent
 
 
@@ -1650,6 +1668,7 @@ def _build_record(cmd, data):
 def import_zone(cmd, resource_group_name, zone_name, file_name):
     from azure.cli.core.util import read_file_content
     import sys
+    logger.warning("In the future, zone name will be case insensitive.")
     RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
     file_text = read_file_content(file_name)
@@ -2002,7 +2021,7 @@ def dict_matches_filter(d, filter_dict):
 
 def lists_match(l1, l2):
     try:
-        return Counter(l1) == Counter(l2)
+        return Counter(l1) == Counter(l2)  # pylint: disable=too-many-function-args
     except TypeError:
         return False
 # endregion
