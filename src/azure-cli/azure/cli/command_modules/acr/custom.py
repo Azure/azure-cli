@@ -182,6 +182,7 @@ def acr_login(cmd,
                "--password", password,
                login_server], stderr=PIPE)
     _, stderr = p.communicate()
+    return_code = p.returncode
 
     if stderr:
         if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
@@ -194,13 +195,18 @@ def acr_login(cmd,
             p.wait()
         else:
             stderr_messages = stderr.decode()
+            # Dismiss the '--password-stdin' warning
             if b'--password-stdin' in stderr:
                 errors = [err for err in stderr_messages.split('\n') if err and '--password-stdin' not in err]
                 # Will not raise CLIError if there is no error other than '--password-stdin'
                 if not errors:
                     return None
                 stderr_messages = '\n'.join(errors)
-            raise CLIError('docker: ' + stderr_messages)
+            logger.warning(stderr_messages)
+
+            # Raise error only if docker returns non-zero
+            if return_code != 0:
+                raise CLIError('Login failed.')
 
     return None
 

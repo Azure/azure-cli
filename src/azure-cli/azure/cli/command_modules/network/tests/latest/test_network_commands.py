@@ -919,6 +919,7 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
             'ip': 'pip1',
             'set': 'ruleset1',
             'rule': 'rule1',
+            'rule2': 'rule2',
             'var': 'http_req_Authorization'
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
@@ -937,6 +938,26 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
         self.cmd('network application-gateway rewrite-rule list -g {rg} --gateway-name {gw} --rule-set-name {set}')
         self.cmd('network application-gateway rewrite-rule list-request-headers')
         self.cmd('network application-gateway rewrite-rule list-response-headers')
+
+        # manage rewrite rules with url configuration
+        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} '
+                 '--sequence 123 --request-headers foo=bar --response-headers cat=hat '
+                 '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
+                 checks=[
+                     self.check('actionSet.urlConfiguration.modifiedPath', '/def'),
+                     self.check('actionSet.urlConfiguration.modifiedQueryString', 'a=b&c=d%20f'),
+                     self.check('actionSet.urlConfiguration.reroute', False)
+                 ])
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} '
+                 '--sequence 321 --request-headers bar=foo --response-headers hat=cat '
+                 '--modified-path "/def2" --modified-query-string "a=b&c=d%20f12" --enable-reroute',
+                 checks=[
+                     self.check('actionSet.urlConfiguration.modifiedPath', '/def2'),
+                     self.check('actionSet.urlConfiguration.modifiedQueryString', 'a=b&c=d%20f12'),
+                     self.check('actionSet.urlConfiguration.reroute', True)
+                 ])
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} --set ruleSequence=321 --remove actionSet.responseHeaderConfigurations 0 --no-wait')
+        self.cmd('network application-gateway rewrite-rule show -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2}')
 
         # manage rewrite rule conditions
         self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')

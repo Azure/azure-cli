@@ -163,7 +163,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     def test_storage_create_default_kind(self, resource_group):
         name = self.create_random_name(prefix='cli', length=24)
         create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
-        self.cmd(create_cmd, checks=[JMESPathCheck('kind', 'StorageV2')])
+        self.cmd(create_cmd, checks=[JMESPathCheck('kind', 'Storage')])
 
     def test_show_usage(self):
         self.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
