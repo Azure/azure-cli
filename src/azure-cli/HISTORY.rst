@@ -3,6 +3,9 @@
 Release History
 ===============
 
+**AppService**
+az webapp create : Fixing issue when running the command with --runtime 
+
 2.1.0
 ++++++
 
