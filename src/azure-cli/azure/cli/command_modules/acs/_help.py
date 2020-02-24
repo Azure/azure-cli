@@ -279,7 +279,9 @@ parameters:
     long-summary: |-
         These addons are available:
             http_application_routing - configure ingress with automatic public DNS name creation.
-            monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one. Specify "--workspace-resource-id" to use an existing workspace.
+            monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
+                         Specify "--workspace-resource-id" to use an existing workspace.
+                         If monitoring addon is enabled --no-wait argument will have no effect
             virtual-node - enable AKS Virtual Node (PREVIEW). Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
   - name: --disable-rbac
     type: bool
@@ -447,6 +449,7 @@ long-summary: |-
     These addons are available:
         http_application_routing - configure ingress with automatic public DNS name creation.
         monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+                     If monitoring addon is enabled --no-wait argument will have no effect
         virtual-node - enable AKS Virtual Node (PREVIEW). Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
 parameters:
   - name: --addons -a
