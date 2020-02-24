@@ -212,6 +212,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_routing')
     def test_storage_account_with_routing_preference(self, resource_group):
+        # Create with initial routing choice
         name1 = self.create_random_name(prefix='clirouting', length=24)
         create_cmd1 = 'az storage account create -n {} -g {} --routing-choice InternetRouting'.format(
             name1, resource_group)
@@ -221,6 +222,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('routingPreference.routingChoice', 'InternetRouting'),
         ])
 
+        # Update publish microsoft endpoints
         update_cmd1 = 'az storage account update -n {} -g {} --publish-microsoft-endpoints true'.format(
             name1, resource_group)
         self.cmd(update_cmd1, checks=[
@@ -229,6 +231,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('routingPreference.routingChoice', 'InternetRouting'),
         ])
 
+        # Create with all routing preference set
         name2 = self.create_random_name(prefix='clirouting', length=24)
         create_cmd2 = 'az storage account create -n {} -g {} --routing-choice InternetRouting --publish-internet-endpoints true --publish-microsoft-endpoints true'.format(
             name2, resource_group)
@@ -238,10 +241,28 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('routingPreference.routingChoice', 'InternetRouting'),
         ])
 
+        # Update with routing choice
         update_cmd2 = 'az storage account create -n {} -g {} --routing-choice MicrosoftRouting'\
             .format(name2, resource_group)
 
         self.cmd(update_cmd2, checks=[
+            JMESPathCheck('routingPreference.routingChoice', 'MicrosoftRouting'),
+        ])
+
+        # Create without any routing preference
+        name3 = self.create_random_name(prefix='clirouting', length=24)
+        create_cmd3 = 'az storage account create -n {} -g {}'.format(
+            name3, resource_group)
+        self.cmd(create_cmd3, checks=[
+            JMESPathCheck('routingPreference', None),
+        ])
+
+        update_cmd3 = 'az storage account create -n {} -g {} --routing-choice MicrosoftRouting --publish-internet-endpoints true --publish-microsoft-endpoints true'\
+            .format(name3, resource_group)
+
+        self.cmd(update_cmd3, checks=[
+            JMESPathCheck('routingPreference.publishInternetEndpoints', True),
+            JMESPathCheck('routingPreference.publishMicrosoftEndpoints', True),
             JMESPathCheck('routingPreference.routingChoice', 'MicrosoftRouting'),
         ])
 

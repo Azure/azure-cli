@@ -204,15 +204,13 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             raise ValueError('Specify `--encryption-key-source=Microsoft.Keyvault` to configure key vault properties.')
         encryption.key_vault_properties = encryption_key_vault_properties
 
-    RoutingPreference = cmd.get_models('RoutingPreference')
     params = StorageAccountUpdateParameters(
         sku=Sku(name=sku) if sku is not None else instance.sku,
         tags=tags if tags is not None else instance.tags,
         custom_domain=domain,
         encryption=encryption,
         access_tier=AccessTier(access_tier) if access_tier is not None else instance.access_tier,
-        enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only,
-        routing_preference=RoutingPreference() if instance.routing_preference is None else instance.routing_preference
+        enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
     from knack.util import CLIError
@@ -297,12 +295,17 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = acl
 
-    if routing_choice is not None:
-        params.routing_preference.routing_choice = routing_choice
-    if publish_microsoft_endpoints is not None:
-        params.routing_preference.publish_microsoft_endpoints = publish_microsoft_endpoints
-    if publish_internet_endpoints is not None:
-        params.routing_preference.publish_internet_endpoints = publish_microsoft_endpoints
+    if hasattr(params, 'routing_preference') and any([routing_choice, publish_microsoft_endpoints,
+                                                      publish_internet_endpoints]):
+        if params.routing_preference is None:
+            RoutingPreference = cmd.get_models('RoutingPreference')
+            params.routing_preference = RoutingPreference()
+        if routing_choice is not None:
+            params.routing_preference.routing_choice = routing_choice
+        if publish_microsoft_endpoints is not None:
+            params.routing_preference.publish_microsoft_endpoints = publish_microsoft_endpoints
+        if publish_internet_endpoints is not None:
+            params.routing_preference.publish_internet_endpoints = publish_microsoft_endpoints
 
     return params
 
