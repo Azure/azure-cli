@@ -623,11 +623,19 @@ def _resolve_policy_id(cmd, policy, policy_set_definition, client):
 
 
 def _parse_management_group_reference(name):
-    if name.lower().startswith('/providers/microsoft.management/managementgroups'):
+    if _is_management_group_scope(name):
         parts = name.split('/')
         if len(parts) >= 9:
             return parts[4], parts[8]
     return None, name
+
+
+def _parse_management_group_id(scope):
+    if _is_management_group_scope(scope):
+        parts = scope.split('/')
+        if len(parts) >= 5:
+            return parts[4]
+    return None
 
 
 def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, management_group=None, for_policy_set=False):
@@ -1392,8 +1400,11 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     resource_group = id_parts.get('resource_group')
     resource_type = id_parts.get('child_type_1') or id_parts.get('type')
     resource_name = id_parts.get('child_name_1') or id_parts.get('name')
+    management_group = _parse_management_group_id(scope)
 
-    if all([resource_type, resource_group, subscription]):
+    if management_group:
+        result = policy_client.policy_assignments.list_for_management_group(management_group_id=management_group, filter='atScope()')
+    elif all([resource_type, resource_group, subscription]):
         namespace = id_parts.get('namespace')
         parent_resource_path = '' if not id_parts.get('child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
         result = policy_client.policy_assignments.list_for_resource(
@@ -1406,10 +1417,10 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     elif scope:
         raise CLIError('usage error `--scope`: must be a fully qualified ARM ID.')
     else:
-        raise CLIError('usage error: --scope ARM_ID | --resource-group NAME | --subscription ID')
+        raise CLIError('usage error: --scope ARM_ID | --resource-group NAME')
 
     if not disable_scope_strict_match:
-        result = [i for i in result if _scope.lower() == i.scope.lower()]
+        result = [i for i in result if _scope.lower().strip('/') == i.scope.lower().strip('/')]
 
     return result
 
@@ -1653,9 +1664,13 @@ def _get_subscription_id_from_subscription(cli_ctx, subscription):  # pylint: di
 
 
 def _get_parent_id_from_parent(parent):
-    if parent is None or parent.startswith("/providers/Microsoft.Management/managementGroups/"):
+    if parent is None or _is_management_group_scope(parent):
         return parent
     return "/providers/Microsoft.Management/managementGroups/" + parent
+
+
+def _is_management_group_scope(scope):
+    return scope is not None and scope.lower().startswith("/providers/microsoft.management/managementgroups")
 
 
 def cli_managementgroups_group_list(cmd, client):
