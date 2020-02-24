@@ -1133,7 +1133,7 @@ def as_user_validator(namespace):
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
 
 
-def validator_delete_retention_days(namespace):
+def validate_delete_retention_days(namespace):
     if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
         raise ValueError(
             "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
