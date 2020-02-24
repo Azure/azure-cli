@@ -1723,7 +1723,6 @@ def load_arguments(self, _):
         c.argument('profile_name', id_part=None)
     # endregion
 
-
     # region Bastion
     with self.argument_context('network bastion') as c:
         c.argument('bastion_host_name', help='Name of the Bastion Host.', options_list=['--name', '-n'])

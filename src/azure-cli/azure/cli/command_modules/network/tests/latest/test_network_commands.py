@@ -3350,7 +3350,7 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
 class NetworkBastionHostScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='test_network_bastion_host')
-    def test_network_create_batsion_host(self, resource_group):
+    def test_network_batsion_host_create(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
             'vm': 'clivm',
@@ -3365,11 +3365,20 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
         self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
                  '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password')
-        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1}')
+        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1}', checks=[
+            self.check('type', 'Microsoft.Network/bastionHosts'),
+            self.check('name', '{bastion}')
+        ])
         self.cmd('network bastion list')
-        self.cmd('network bastion list -g {rg}')
-        self.cmd('network bastion show -g {rg} -n {bastion}')
+        self.cmd('network bastion list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network bastion show -g {rg} -n {bastion}', checks=[
+            self.check('type', 'Microsoft.Network/bastionHosts'),
+            self.check('name', '{bastion}')
+        ])
         self.cmd('network bastion delete -g {rg} -n {bastion}')
+
 
 if __name__ == '__main__':
     unittest.main()
