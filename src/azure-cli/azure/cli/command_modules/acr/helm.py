@@ -191,11 +191,11 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
     if not install_location:
         raise CLIError('Invalid install location.')
 
-    # ensure installation directory exists
     install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
     if not cli:
         raise CLIError("{} is a directory. Please specify a complete file path.".format(install_location))
 
+    # Ensure installation directory exists
     if not os.path.exists(install_dir):
         os.makedirs(install_dir)
 
@@ -203,20 +203,21 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
     # source_url = 'https://get.helm.sh/{}'
     source_url = 'http://localhost:8000/{}'
     package, folder = _get_helm_package_name(client_version)
-    download_path = '' # path to downloaded file
+    download_path = '' # downloaded package path
 
     if not package:
         raise CLIError('The current system is not supported.')
 
     system = platform.system()
-    import tempfile
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        try:
+    try:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp_dir:
             # Download
             download_path = os.path.join(tmp_dir, package)
             _urlretrieve(source_url.format(package), download_path)
 
             # Unzip
+            logger.debug('Extracting %s to %s.', download_path, tmp_dir)
             if system == 'Windows':
                 import zipfile
                 with zipfile.ZipFile(download_path, 'r') as zipObj:
@@ -235,22 +236,20 @@ def acr_helm_install_cli(cmd, client_version='2.16.3', install_location=None, ye
                     text = f.read()
                     logger.warning(text)
                 user_confirmation('Before proceeding with the installation, '
-                                  'please confirm that you have read and agreed the above license.')
+                                'please confirm that you have read and agreed the above license.')
 
             # Move files from temporary location to specified location
             import shutil
             for f in os.scandir(sub_dir):
                 # Rename helm to specified name
-                if os.path.splitext(f.name)[0] == 'helm':
-                    # TODO: cli is empty
-                    shutil.move(f.path, install_location)
-                else:
-                    shutil.move(f.path, os.path.join(install_dir, f.name))
-
-            import stat
-            os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        except IOError as e:
-            raise CLIError('Error while installing {} to {}: {}'.format(cli, install_dir, e))
+                target_path = install_location if os.path.splitext(f.name)[0] == 'helm' \
+                              else os.path.join(install_dir, f.name)
+                logger.debug('Moving %s to %s', f.path, target_path)
+                shutil.move(f.path, target_path)
+        import stat
+        os.chmod(install_location, os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    except IOError as e:
+        raise CLIError('Error while installing {} to {}: {}'.format(cli, install_dir, e))
 
     logger.warning('Successfully installed %s to %s.', cli, install_dir)
     # Remind user to add to path
@@ -377,7 +376,7 @@ def _get_helm_package_name(client_version):
 
 
 def _urlretrieve(url, path):
-    logger.warning('Requesting %s, it may take a long time...', url)
+    logger.warning('Downloading client from %s, it may take a long time...', url)
     with urlopen(url, context=_ssl_context()) as response:
         logger.debug('Start downloading from %s to %s', url, path)
         # Open for writing in binary mode

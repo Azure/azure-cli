@@ -230,9 +230,18 @@ helps['acr helm install-cli'] = """
 type: command
 short-summary: Download and install Helm command-line tool.
 examples:
-  - name: Install helm CLI
+  - name: Install the default version of Helm CLI to the default location
     text: >
         az acr helm install-cli
+  - name: Install a specified version of Helm CLI to the default location
+    text: >
+        az acr helm install-cli --client-version 2.15.2
+  - name: Install the default version of Helm CLI to a specified location
+    text: >
+        az acr helm install-cli --install-location folder\subFolder\\filename
+  - name: Install a specified version of Helm CLI to a specified location
+    text: >
+        az acr helm install-cli --client-version 2.15.2 --install-location folder\subFolder\\filename
 """
 
 helps['acr import'] = """
