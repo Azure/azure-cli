@@ -238,10 +238,10 @@ examples:
         az acr helm install-cli --client-version x.x.x
   - name: Install the default version of Helm CLI to a specified location
     text: >
-        az acr helm install-cli --install-location folder/subFolder/filename
+        az acr helm install-cli --install-location /folder/filename
   - name: Install a specified version of Helm CLI to a specified location
     text: >
-        az acr helm install-cli --client-version x.x.x --install-location folder/subFolder/filename
+        az acr helm install-cli --client-version x.x.x --install-location /folder/filename
 """
 
 helps['acr import'] = """

@@ -5,12 +5,13 @@
 
 import os
 import platform
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from knack.util import CLIError
 from knack.log import get_logger
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from azure.cli.core.util import in_cloud_console
+
 from ._utils import user_confirmation
 
 from ._docker_utils import (
@@ -204,7 +205,7 @@ def acr_helm_install_cli(client_version='2.16.3', install_location=None, yes=Fal
     download_path = ''
 
     if not package:
-        raise CLIError('The current system is not supported.')
+        raise CLIError('No prebuilt binary for current system.')
 
     try:
         import tempfile
@@ -319,10 +320,11 @@ def _get_helm_package_name(client_version):
     package = ''
     folder = ''
 
+    # Reference: https://github.com/helm/helm/blob/master/scripts/get
     archs = {
-        'armv5*': 'armv5',
-        'armv6*': 'armv6',
-        'armv7*': 'arm',
+        'armv5': 'armv5',
+        'armv6': 'armv6',
+        'armv7': 'arm',
         'aarch64': 'arm64',
         'x86': '386',
         'x86_64': 'amd64',
