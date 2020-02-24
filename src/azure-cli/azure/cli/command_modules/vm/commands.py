@@ -464,7 +464,7 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
-        g.custom_command('show', 'show_proximity_placement_group')
+        g.show_command('show', 'get')
         g.custom_command('create', 'create_proximity_placement_group')
         g.custom_command('list', 'list_proximity_placement_groups')
         g.generic_update_command('update')

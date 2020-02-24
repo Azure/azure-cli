@@ -842,7 +842,7 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
 
     with self.argument_context('ppg show', min_api='2019-07-01') as c:
-        c.argument('colocation_status', arg_type=get_three_state_flag(), help='Enable fetching the colocation status of all the resources in the proximity placement group. Default is false.')
+        c.argument('include_colocation_status', options_list=['--colocation-status'], arg_type=get_three_state_flag(), help='Enable fetching the colocation status of all the resources in the proximity placement group. Default is false.')
 
     for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'),
                         ('vm availability-set create', 'availability set'),
