@@ -55,7 +55,6 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
             directory_service_options='AADDS' if enable_files_aadds else 'None')
     if enable_files_adds is not None:
-        from knack.util import CLIError
         ActiveDirectoryProperties = cmd.get_models('ActiveDirectoryProperties')
         if enable_files_adds:  # enable AD
             if not (domain_name and net_bios_domain_name and forest_name and domain_guid and domain_sid and
@@ -90,7 +89,6 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:
-            from knack.util import CLIError
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
                                                  virtual_network_rules=None)
@@ -238,7 +236,6 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         enable_https_traffic_only=https_only if https_only is not None else instance.enable_https_traffic_only
     )
     AzureFilesIdentityBasedAuthentication = cmd.get_models('AzureFilesIdentityBasedAuthentication')
-    from knack.util import CLIError
     if enable_files_aadds is not None:
         if enable_files_aadds:  # enable AADDS
             origin_storage_account = get_storage_account_properties(cmd.cli_ctx, instance.id)
@@ -350,7 +347,6 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
     if subnet:
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
-            from knack.util import CLIError
             raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
         VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
         if not rules.virtual_network_rules:

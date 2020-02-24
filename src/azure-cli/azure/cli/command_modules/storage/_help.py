@@ -204,7 +204,7 @@ long-summary: >
 examples:
   - name: Enable soft delete policy and set delete retention days to 100 for file service in storage account.
     text: az storage account file-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g MyResourceGroup
-  - name: Disable soft delete policy for file service. 
+  - name: Disable soft delete policy for file service.
     text: az storage account file-service-properties update --enable-delete-retention false -n mystorageaccount -g MyResourceGroup
 """
 
