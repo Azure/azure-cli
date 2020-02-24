@@ -788,6 +788,9 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('enforcementMode', '{em}')
         ])
 
+        # ensure the policy assignment shows up in the list result
+        self.cmd('policy assignment list --scope {scope}', checks=self.check("length([?name=='{pan}'])", 1))
+
         # delete the assignment and validate it's gone
         self.cmd('policy assignment delete -n {pan} --scope {scope}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
@@ -806,6 +809,7 @@ class PolicyScenarioTest(ScenarioTest):
             'metadata': 'test',
             'updated_metadata': 'test2',
         })
+
         if (management_group):
             self.kwargs.update({'mg': management_group})
         if (subscription):
@@ -959,6 +963,9 @@ class PolicyScenarioTest(ScenarioTest):
                 self.check('sku.name', 'A0'),
                 self.check('sku.tier', 'Free'),
             ])
+
+            # ensure the assignment appears in the list results
+            self.cmd('policy assignment list --resource-group {rg}', checks=self.check("length([?name=='{pan}'])", 1))
 
             # delete the assignment and validate it's gone
             self.cmd('policy assignment delete -n {pan} -g {rg}')
@@ -1129,6 +1136,10 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('account management-group create -n ' + management_group_name)
         try:
             self.resource_policy_operations(resource_group, management_group_name)
+
+            # Attempt to get a policy definition at an invalid management group scope
+            with self.assertRaises(IncorrectUsageError):
+                self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)
 
