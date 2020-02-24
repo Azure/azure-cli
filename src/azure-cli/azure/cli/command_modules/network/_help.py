@@ -5604,6 +5604,11 @@ type: command
 short-summary: List available service aliases in the region which can be used for Service Endpoint Policies.
 """
 
+helps['network bastion'] = """
+type: group
+short-summary: Manage Azure bastion host.
+"""
+
 helps['network bastion create'] = """
 type: command
 short-summary: Create a Azure bastion host machine.
