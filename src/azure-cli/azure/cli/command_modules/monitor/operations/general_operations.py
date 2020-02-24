@@ -19,10 +19,11 @@ def clone_existed_settings(cmd, source_resource=None, target_resource=None):
 
 
 def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource):
-    if not _is_resource_type_same(source_resource, target_resource):
-        raise CLIError('The target resource should be the same type with the source resource')
-    monitor_client = cf_monitor(cmd.cli_ctx)
-    # we can only clone the alert rules belonging to the current subscription.
+    if not _is_resource_type_same_and_sub_same(source_resource, target_resource):
+        raise CLIError('The target resource should be the same type with the source resource '
+                       'and they are in the same subscription')
+    monitor_client = cf_monitor(cmd.cli_ctx, subscription_id=parse_resource_id(source_resource)['subscription'])
+    # we can only clone the alert rules belonging to the source subscription.
     alert_rules = list(monitor_client.metric_alerts.list_by_subscription())
     updated_alert_rules = []
     ErrorResponseException = cmd.get_models('ErrorResponseException', operation_group='metric_alerts')
@@ -53,9 +54,9 @@ def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource):
     return updated_alert_rules if len(updated_alert_rules) > 1 else updated_alert_rules[0]
 
 
-def _is_resource_type_same(source_resource, target_resource):
+def _is_resource_type_same_and_sub_same(source_resource, target_resource):
     source_dict = parse_resource_id(source_resource)
-    source_type = "{}/{}".format(source_dict['namespace'], source_dict['type'])
     target_dict = parse_resource_id(target_resource)
-    target_type = "{}/{}".format(target_dict['namespace'], target_dict['type'])
-    return source_type == target_type
+    same_rp = source_dict['namespace'] == target_dict['namespace'] and source_dict['type'] == target_dict['type']
+    same_sub = source_dict['subscription'] == target_dict['subscription']
+    return same_rp and same_sub

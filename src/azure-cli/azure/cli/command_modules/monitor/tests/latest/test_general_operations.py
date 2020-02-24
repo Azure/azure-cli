@@ -8,7 +8,7 @@ import mock
 from msrestazure.tools import resource_id
 
 
-class MonitorGeneralScenarios(ScenarioTest):
+class MonitorCloneVMScenarios(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     def test_monitor_clone_vm_metric_alerts_scenario(self, resource_group):
         self.test_guid_count = 0
@@ -51,6 +51,8 @@ class MonitorGeneralScenarios(ScenarioTest):
                 self.check('length(scopes)', 3)
             ])
 
+
+class MonitorCloneStorageAccountScenarios(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
     @StorageAccountPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_2')
@@ -99,6 +101,8 @@ class MonitorGeneralScenarios(ScenarioTest):
                 self.check('length(criteria.allOf[1].dimensions)', 1),
             ])
 
+
+class MonitorClonePublicIpScenarios(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
     def test_monitor_clone_public_ip_metric_alerts_scenario(self, resource_group):
         self.test_guid_count = 0
