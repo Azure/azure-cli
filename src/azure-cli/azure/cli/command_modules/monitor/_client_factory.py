@@ -6,9 +6,9 @@
 
 # MANAGEMENT CLIENT FACTORIES
 def cf_monitor(cli_ctx, **kwargs):
-    from azure.mgmt.monitor import MonitorManagementClient
+    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, MonitorManagementClient, **kwargs)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_MONITOR, **kwargs)
 
 
 def cf_alert_rules(cli_ctx, _):
