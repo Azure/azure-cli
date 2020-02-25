@@ -25,6 +25,9 @@ from cryptography.exceptions import UnsupportedAlgorithm
 
 from azure.cli.core import telemetry
 from azure.cli.core.profiles import ResourceType
+from azure.graphrbac.models import GraphErrorException
+
+from msrestazure.azure_exceptions import CloudError
 
 from ._sdk_extensions import patch_akv_client
 from ._validators import _construct_vnet, secret_text_encoding_values
@@ -1375,10 +1378,68 @@ def _resolve_role_id(client, role, hsm_base_url, scope):
     else:
         all_roles = list_role_definitions(client, hsm_base_url=hsm_base_url, scope=scope)
         for _role in all_roles:
-            if _role.get('properties', {}).get('roleName') == role:
+            if _role.get('roleName') == role:
                 role_id = _role.get('id')
                 break
     return role_id
+
+
+def _get_role_dics(role_defs):
+    return {i['id']: i.get('roleName') for i in role_defs}
+
+
+def _get_principal_dics(cli_ctx, role_assignments):
+    principal_ids = set([i['properties']['principalId']
+                         for i in role_assignments if i.get('properties', {}).get('principalId')])
+
+    if principal_ids:
+        try:
+            from azure.cli.command_modules.role._client_factory import _graph_client_factory
+            from azure.cli.command_modules.role.custom import _get_displayable_name, _get_object_stubs
+
+            graph_client = _graph_client_factory(cli_ctx)
+            principals = _get_object_stubs(graph_client, principal_ids)
+            return {i.object_id: (_get_displayable_name(i), i.object_type) for i in principals}
+
+        except (CloudError, GraphErrorException) as ex:
+            # failure on resolving principal due to graph permission should not fail the whole thing
+            logger.info("Failed to resolve graph object information per error '%s'", ex)
+
+    return {}
+
+
+def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
+    # https://github.com/Azure/azure-cli/blob/3d2c62d6c0ee21830f2af83bd5840b0bb85a4ecd/src/azure-cli/azure/cli/command_modules/role/custom.py#L194-L229
+    # 1. Flatten the `properties`
+    # 2. fill in logic names to get things understandable.
+    # (it's possible that associated roles and principals were deleted, and we just do nothing.)
+    # 3. fill in role name
+    role_assignment['canDelegate'] = None
+    if 'properties' in role_assignment:
+        for k, v in role_assignment['properties'].items():
+            role_assignment[k] = v
+        del role_assignment['properties']
+
+    if not role_assignment.get('roleDefinitionName'):
+        role_definition_id = role_assignment.get('roleDefinitionId')
+        if role_definition_id:
+            role_assignment['roleDefinitionName'] = role_dics.get(role_definition_id)
+        else:
+            role_assignment['roleDefinitionName'] = None  # the role definition might have been deleted
+
+    # fill in principal names
+    if role_assignment.get('principalId'):
+        role_assignment['principalName'], role_assignment['principalType'] = \
+            principal_dics.get(role_assignment['principalId'])
+
+
+def _reconstruct_role_definition(role_definition):
+    if 'properties' in role_definition:
+        for k, v in role_definition['properties'].items():
+            if k == 'type':
+                k = 'roleType'
+            role_definition[k] = v
+        del role_definition['properties']
 
 
 def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=None,
@@ -1400,10 +1461,22 @@ def create_role_assignment(cmd, client, role, scope=None, assignee_object_id=Non
     if scope is None:
         scope = ''
 
-    return client.create_role_assignment(
+    role_assignment = client.create_role_assignment(
         client, vault_base_url=hsm_base_url, scope=scope, name=role_assignment_name,
         principal_id=assignee_object_id, role_definition_id=role_definition_id
     )
+
+    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url)
+    role_dics = _get_role_dics(role_defs)
+    principal_dics = _get_principal_dics(cmd.cli_ctx, [role_assignment])
+
+    _reconstruct_role_assignment(
+        role_dics=role_dics,
+        principal_dics=principal_dics,
+        role_assignment=role_assignment
+    )
+
+    return role_assignment
 
 
 def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=None, scope=None, assignee=None,
@@ -1415,11 +1488,11 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=
     if query_scope is None:
         query_scope = ''
 
-    deleted_info_list = []
+    deleted_role_assignments = []
     if ids is not None:
         for cnt_id in ids:
             cnt_name = cnt_id.split('/')[-1]
-            deleted_info_list.append(
+            deleted_role_assignments.append(
                 client.delete_role_assignment(
                     client, vault_base_url=hsm_base_url, scope=query_scope, name=cnt_name
                 )
@@ -1435,20 +1508,45 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=
         )
 
         for role_assignment in matched_role_assignments:
-            deleted_info_list.append(
+            deleted_role_assignments.append(
                 client.delete_role_assignment(
                     client, vault_base_url=hsm_base_url, scope=query_scope, name=role_assignment['name']
                 )
             )
 
-    return deleted_info_list
+    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url)
+    role_dics = _get_role_dics(role_defs)
+    principal_dics = _get_principal_dics(cmd.cli_ctx, deleted_role_assignments)
+
+    for i in deleted_role_assignments:
+        _reconstruct_role_assignment(
+            role_dics=role_dics,
+            principal_dics=principal_dics,
+            role_assignment=i
+        )
+
+    return deleted_role_assignments
 
 
-def get_role_assignment(client, role_assignment_name, hsm_base_url=None,
+def get_role_assignment(cmd, client, role_assignment_name, hsm_base_url=None,
                         identifier=None):  # pylint: disable=unused-argument
     """ Get a role assignment. """
     patch_akv_client(client)
-    return client.get_role_assignment(client, vault_base_url=hsm_base_url, scope='/', name=role_assignment_name)
+
+    role_assignment = \
+        client.get_role_assignment(client, vault_base_url=hsm_base_url, scope='/', name=role_assignment_name)
+
+    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url)
+    role_dics = _get_role_dics(role_defs)
+    principal_dics = _get_principal_dics(cmd.cli_ctx, [role_assignment])
+
+    _reconstruct_role_assignment(
+        role_dics=role_dics,
+        principal_dics=principal_dics,
+        role_assignment=role_assignment
+    )
+
+    return role_assignment
 
 
 def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=None, role=None,
@@ -1485,6 +1583,17 @@ def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=N
                 continue
         matched_role_assignments.append(role_assignment)
 
+    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url)
+    role_dics = _get_role_dics(role_defs)
+    principal_dics = _get_principal_dics(cmd.cli_ctx, matched_role_assignments)
+
+    for i in matched_role_assignments:
+        _reconstruct_role_assignment(
+            role_dics=role_dics,
+            principal_dics=principal_dics,
+            role_assignment=i
+        )
+
     return matched_role_assignments
 
 
@@ -1496,5 +1605,11 @@ def list_role_definitions(client, scope=None, hsm_base_url=None, identifier=None
     if query_scope is None:
         query_scope = ''
 
-    return client.list_role_definitions(client, vault_base_url=hsm_base_url, scope=query_scope).get('value', [])
+    raw_definitions = \
+        client.list_role_definitions(client, vault_base_url=hsm_base_url, scope=query_scope).get('value', [])
+
+    for i in raw_definitions:
+        _reconstruct_role_definition(i)
+
+    return raw_definitions
 # endregion
