@@ -28,6 +28,8 @@ from azure.mgmt.cdn.models import (Endpoint, SkuName, EndpointUpdateParameters, 
                                    PolicyMode, PolicyEnabledState, CdnWebApplicationFirewallPolicy, ManagedRuleSet,
                                    ManagedRuleGroupOverride, CustomRule, RateLimitRule)
 
+from azure.mgmt.cdn.operations import (EndpointsOperations)
+
 from azure.cli.core.util import (sdk_no_wait, find_child_item)
 from azure.cli.core.commands import upsert_to_collection
 
@@ -70,10 +72,7 @@ def update_endpoint(instance,
                     is_http_allowed=None,
                     is_https_allowed=None,
                     query_string_caching_behavior=None,
-                    waf_policy_link="",
                     tags=None):
-    from azure.mgmt.cdn.models import EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink
-
     params = EndpointUpdateParameters(
         origin_host_header=origin_host_header,
         origin_path=origin_path,
@@ -82,8 +81,6 @@ def update_endpoint(instance,
         is_http_allowed=is_http_allowed,
         is_https_allowed=is_https_allowed,
         query_string_caching_behavior=query_string_caching_behavior,
-        web_application_firewall_policy_link=None if waf_policy_link == "" else
-        EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=waf_policy_link),
         tags=tags
     )
 
@@ -98,10 +95,63 @@ def update_endpoint(instance,
         'is_http_allowed',
         'is_https_allowed',
         'query_string_caching_behavior',
-        'web_application_firewall_policy_link',
         'tags'
     ])
     return params
+
+
+def show_endpoint_waf_policy_link(client: EndpointsOperations,
+                                  resource_group_name: str,
+                                  profile_name: str,
+                                  endpoint_name: str):
+
+    from azure.mgmt.cdn.models import (EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink)
+
+    link = client.get(resource_group_name, profile_name, endpoint_name).web_application_firewall_policy_link
+    if link is not None:
+        return link
+    return EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=None)
+
+
+def set_endpoint_waf_policy_link(client: EndpointsOperations,
+                                 resource_group_name: str,
+                                 profile_name: str,
+                                 endpoint_name: str,
+                                 waf_policy_subscription_id: str = "",
+                                 waf_policy_resource_group_name: str = "",
+                                 waf_policy_name: str = "",
+                                 waf_policy_id: str = ""):
+
+    from azure.mgmt.cdn.models import (EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink)
+
+    endpoint = client.get(resource_group_name, profile_name, endpoint_name)
+
+    if waf_policy_id == "":
+        if waf_policy_subscription_id is None or waf_policy_resource_group_name is None or waf_policy_name is None:
+            raise CLIError('Either --waf-policy-id or all of --waf-policy-subscription-id, '
+                           '--waf-policy-resource-group-name, and --waf-policy-name must be specified.')
+        waf_policy_id = f'/subscriptions/{waf_policy_subscription_id}' \
+                        f'/resourceGroups/{waf_policy_resource_group_name}' \
+                        f'/providers/Microsoft.Cdn' \
+                        f'/CdnWebApplicationFirewallPolicies/{waf_policy_name}'
+    print(waf_policy_id)
+    endpoint.web_application_firewall_policy_link = \
+        EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=waf_policy_id)
+
+    result = client.create(resource_group_name, profile_name, endpoint_name, endpoint).result()
+    if result is not None:
+        return result.web_application_firewall_policy_link
+    return EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=None)
+
+
+def remove_endpoint_waf_policy_link(client: EndpointsOperations,
+                                    resource_group_name: str,
+                                    profile_name: str,
+                                    endpoint_name: str):
+
+    endpoint = client.get(resource_group_name, profile_name, endpoint_name)
+    endpoint.web_application_firewall_policy_link = None
+    client.create(resource_group_name, profile_name, endpoint_name, endpoint).wait()
 
 
 # pylint: disable=too-many-return-statements
@@ -411,9 +461,7 @@ def remove_action(client, resource_group_name, profile_name, endpoint_name, rule
 def create_endpoint(client, resource_group_name, profile_name, name, origins, location=None,
                     origin_host_header=None, origin_path=None, content_types_to_compress=None,
                     is_compression_enabled=None, is_http_allowed=None, is_https_allowed=None,
-                    query_string_caching_behavior=None, waf_policy_link="", tags=None, no_wait=None):
-
-    from azure.mgmt.cdn.models import EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink
+                    query_string_caching_behavior=None, tags=None, no_wait=None):
 
     is_compression_enabled = False if is_compression_enabled is None else is_compression_enabled
     is_http_allowed = True if is_http_allowed is None else is_http_allowed
@@ -427,8 +475,6 @@ def create_endpoint(client, resource_group_name, profile_name, name, origins, lo
                         is_http_allowed=is_http_allowed,
                         is_https_allowed=is_https_allowed,
                         query_string_caching_behavior=query_string_caching_behavior,
-                        web_application_firewall_policy_link=None if waf_policy_link == "" else
-                        EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=waf_policy_link),
                         tags=tags)
     if is_compression_enabled and not endpoint.content_types_to_compress:
         endpoint.content_types_to_compress = default_content_types()
@@ -554,10 +600,11 @@ def add_waf_policy_managed_rule_set(client,
     result = client.create_or_update(resource_group_name, policy_name, policy).result()
 
     # Return the new managed rule set from the updated policy.
-    for r in result.managed_rules.managed_rule_sets:
-        if r.rule_set_type == rule_set_type and r.rule_set_version == rule_set_version:
-            return r
-    raise CLIError("failed to get added managed rule set in WAF policy '{}'".format(policy_name))
+    updated = _find_policy_managed_rule_set(result, rule_set_type, rule_set_version)
+    if updated is None:
+        raise CLIError("failed to get added managed rule set in WAF policy '{}'".format(policy_name))
+
+    return updated
 
 
 def remove_waf_policy_managed_rule_set(client,

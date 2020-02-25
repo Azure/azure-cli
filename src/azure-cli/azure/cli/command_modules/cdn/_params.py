@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.cdn.models import QueryStringCachingBehavior, SkuName
+from azure.mgmt.cdn.models import QueryStringCachingBehavior, SkuName, ActionType
 
 from azure.cli.core.commands.parameters import get_three_state_flag, tags_type, get_enum_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
@@ -17,6 +17,7 @@ from ._actions import (OriginType, MatchConditionAction, ManagedRuleOverrideActi
 def load_arguments(self, _):
 
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
+    endpoint_name_type = CLIArgumentType(options_list=('--endpoint-name'), metavar='ENDPOINT_NAME')
     profile_name_help = 'Name of the CDN profile which is unique within the resource group.'
 
     with self.argument_context('cdn') as c:
@@ -53,19 +54,13 @@ def load_arguments(self, _):
                         'user requests for a compressed version. Content won\'t be compressed '
                         'on CDN when requested content is smaller than 1 byte or larger than 1 '
                         'MB.')
-        c.argument('waf_policy_link', help='The ResourceId of the CDN WAF Policy this endpoint is linked to.')
-        c.argument('profile_name', help='The name of the CDN profile.')
+        c.argument('profile_name', help=profile_name_help, id_part='name')
 
     with self.argument_context('cdn endpoint update') as c:
-        c.argument('waf_policy_link',
-                   help='The ResourceId of the CDN WAF Policy this endpoint is linked to. An '
-                   'existing link cannot be removed with this command - instead use "az cdn endpoint set"')
-
         caching_behavior = [item.value for item in list(QueryStringCachingBehavior)]
         c.argument('query_string_caching_behavior', options_list='--query-string-caching',
                    arg_type=get_enum_type(caching_behavior))
         c.argument('content_types_to_compress', nargs='+')
-        c.argument('profile_name', help=profile_name_help, id_part='name')
 
     with self.argument_context('cdn endpoint rule') as c:
         c.argument('rule_name', help='Name of the rule.')
@@ -129,6 +124,9 @@ def load_arguments(self, _):
     with self.argument_context('cdn endpoint list') as c:
         c.argument('profile_name', id_part=None)
 
+    with self.argument_context('cdn endpoint waf') as c:
+        c.argument('endpoint_name', endpoint_name_type, help='Name of the CDN endpoint.')
+
     # Custom Domain #
 
     with self.argument_context('cdn custom-domain') as c:
@@ -190,9 +188,11 @@ def load_arguments(self, _):
     with self.argument_context('cdn waf policy custom-rule set') as c:
         c.argument('match_conditions', options_list=['-m', '--match-condition'], action=MatchConditionAction, nargs='+')
         c.argument('priority', type=int, validator=validate_priority)
+        c.argument('action', arg_type=get_enum_type([item.value for item in list(ActionType)]))
 
     with self.argument_context('cdn waf policy rate-limit-rule set') as c:
         c.argument('match_conditions', options_list=['-m', '--match-condition'], action=MatchConditionAction, nargs='+')
         c.argument('priority', type=int, validator=validate_priority)
+        c.argument('action', arg_type=get_enum_type([item.value for item in list(ActionType)]))
         c.argument('request_threshold', type=int)
         c.argument('duration', type=int)

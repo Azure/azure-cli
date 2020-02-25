@@ -103,13 +103,15 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_endpoint', client_factory=cf_cdn,
                          doc_string_source='azure.mgmt.cdn.models#Endpoint',
                          supports_no_wait=True)
-        g.custom_command('set', 'create_endpoint', client_factory=cf_cdn,
-                         doc_string_source='azure.mgmt.cdn.models#Endpoint',
-                         supports_no_wait=True)
         g.generic_update_command('update', setter_name='update', setter_arg_name='endpoint_update_properties',
                                  custom_func_name='update_endpoint',
                                  doc_string_source='azure.mgmt.cdn.models#EndpointUpdateParameters',
                                  supports_no_wait=True)
+
+    with self.command_group('cdn endpoint waf policy', cdn_endpoints_sdk, is_preview=True) as g:
+        g.custom_show_command('show', 'show_endpoint_waf_policy_link', client_factory=cf_endpoints)
+        g.custom_command('set', 'set_endpoint_waf_policy_link', client_factory=cf_endpoints)
+        g.custom_command('remove', 'remove_endpoint_waf_policy_link', client_factory=cf_endpoints)
 
     with self.command_group('cdn endpoint rule', cdn_endpoints_sdk, is_preview=True) as g:
         g.show_command('show', 'get')

@@ -323,6 +323,7 @@ class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
         policy_id = self.policy_id(resource_group, policy)
 
         self.kwargs.update({
+            'subscription_id': self.get_subscription_id(),
             'resource_group': resource_group,
             'profile': 'ps1',
             'endpoint1': endpoint1,
@@ -333,40 +334,54 @@ class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         self.cmd('cdn profile create -g {resource_group} -n {profile} --sku=Standard_Microsoft --location=westus')
 
-        # Create WAF policy and linked endpoint
-        policy_checks = [JMESPathCheck('endpointLinks', []),
-                         JMESPathCheck('id', policy_id)]
+        # Create WAF policy and linked endpoint.
+        policy_checks = [JMESPathCheck('length(endpointLinks)', 0),
+                         JMESPathCheck('id', policy_id, case_sensitive=False)]
         self.cmd('cdn waf policy set -g {resource_group} --name {policy}', checks=policy_checks)
 
-        # Create linked endpoint
-        policy_checks = [JMESPathCheck('endpointLinks[0].id', self.endpoint_id(resource_group, profile, endpoint1)),
-                         JMESPathCheck('endpointLinks[1]', None)]
-        endpoint_checks = [JMESPathCheck('webApplicationFirewallPolicyLink.id', policy_id)]
+        # Create the endpoint.
+        endpoint_checks = [JMESPathCheck('webApplicationFirewallPolicyLink', None)]
+        link_checks = [JMESPathCheck('id', None)]
         self.cmd('cdn endpoint create -g {resource_group} '
                  '--origin www.test.com '
                  '--profile-name {profile} '
-                 '-n {endpoint1} '
-                 '--waf-policy-link {policy_id}',
+                 '-n {endpoint1} ',
                  checks=endpoint_checks)
+        self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint1}',
+                 checks=link_checks)
+
+        # Link the endpoint.
+        link_checks = [JMESPathCheck('id', policy_id, case_sensitive=False)]
+        endpoint_checks = [JMESPathCheck('webApplicationFirewallPolicyLink.id', policy_id, case_sensitive=False)]
+        policy_checks = [JMESPathCheck('length(endpointLinks)', 1),
+                         JMESPathCheck('endpointLinks[0].id', self.endpoint_id(resource_group, profile, endpoint1), case_sensitive=False)]
+        self.cmd('cdn endpoint waf policy set -g {resource_group} --profile-name {profile} --endpoint-name {endpoint1} '
+                 '--waf-policy-subscription-id {subscription_id} --waf-policy-resource-group-name {resource_group} '
+                 '--waf-policy-name {policy}',
+                 checks=link_checks)
+        self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint1}',
+                 checks=link_checks)
         self.cmd('cdn endpoint show -g {resource_group} '
                  '--profile-name {profile} '
                  '-n {endpoint1}',
                  checks=endpoint_checks)
         self.cmd('cdn waf policy show -g {resource_group} -n {policy}', checks=policy_checks)
 
-        # Create second endpoint and link with update.
-        policy_checks = [JMESPathCheck('endpointLinks[0].id', self.endpoint_id(resource_group, profile, endpoint1)),
-                         JMESPathCheck('endpointLinks[1].id', self.endpoint_id(resource_group, profile, endpoint2)),
-                         JMESPathCheck('endpointLinks[2]', None)]
+        # Create and link the second endpoint.
+        policy_checks = [JMESPathCheck('length(endpointLinks)', 2),
+                         JMESPathCheck('endpointLinks[0].id', self.endpoint_id(resource_group, profile, endpoint1), case_sensitive=False),
+                         JMESPathCheck('endpointLinks[1].id', self.endpoint_id(resource_group, profile, endpoint2), case_sensitive=False)]
         self.cmd('cdn endpoint create -g {resource_group} '
                  '--origin www.test.com '
                  '--profile-name {profile} '
                  '-n {endpoint2}')
-        self.cmd('cdn endpoint update -g {resource_group} '
+        self.cmd('cdn endpoint waf policy set -g {resource_group} '
                  '--profile-name {profile} '
-                 '-n {endpoint2} '
-                 '--waf-policy-link {policy_id}',
-                 checks=endpoint_checks)
+                 '--endpoint-name {endpoint2} '
+                 '--waf-policy-id {policy_id}',
+                 checks=link_checks)
+        self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint2}',
+                 checks=link_checks)
         self.cmd('cdn endpoint show -g {resource_group} '
                  '--profile-name {profile} '
                  '-n {endpoint2}',
@@ -374,22 +389,23 @@ class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.cmd('cdn waf policy show -g {resource_group} -n {policy}', checks=policy_checks)
 
         # Remove both endpoint links
-        policy_checks = [JMESPathCheck('endpointLinks', [])]
+        policy_checks = [JMESPathCheck('length(endpointLinks)', 0)]
         endpoint_checks = [JMESPathCheck('webApplicationFirewallPolicyLink', None)]
-        self.cmd('cdn endpoint set -g {resource_group} '
+        link_checks = [JMESPathCheck('id', None)]
+        self.cmd('cdn endpoint waf policy remove -g {resource_group} '
                  '--profile-name {profile} '
-                 '-n {endpoint1} '
-                 '--origin www.test.com',
-                 checks=endpoint_checks)
-        self.cmd('cdn endpoint set -g {resource_group} '
-                 '--profile-name {profile} '
-                 '-n {endpoint2} '
-                 '--origin www.test.com',
-                 checks=endpoint_checks)
+                 '--endpoint-name {endpoint1}')
+        self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint1}',
+                 checks=link_checks)
         self.cmd('cdn endpoint show -g {resource_group} '
                  '--profile-name {profile} '
                  '-n {endpoint1}',
                  checks=endpoint_checks)
+        self.cmd('cdn endpoint waf policy remove -g {resource_group} '
+                 '--profile-name {profile} '
+                 '--endpoint-name {endpoint2}')
+        self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint2}',
+                 checks=link_checks)
         self.cmd('cdn endpoint show -g {resource_group} '
                  '--profile-name {profile} '
                  '-n {endpoint2}',
@@ -397,17 +413,17 @@ class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.cmd('cdn waf policy show -g {resource_group} -n {policy}', checks=policy_checks)
 
     def endpoint_id(self, resource_group, profile, endpoint):
-        return ('/subscriptions/{}'
-                '/resourcegroups/{}'
-                '/providers/Microsoft.Cdn'
-                '/profiles/{}'
-                '/endpoints/{}').format(self.get_subscription_id(), resource_group, profile, endpoint)
+        return f'/subscriptions/{self.get_subscription_id()}' \
+               f'/resourcegroups/{resource_group}' \
+               f'/providers/Microsoft.Cdn' \
+               f'/profiles/{profile}' \
+               f'/endpoints/{endpoint}'
 
     def policy_id(self, resource_group, policy):
-        return ('/subscriptions/{}'
-                '/resourcegroups/{}'
-                '/providers/Microsoft.Cdn'
-                '/cdnwebapplicationfirewallpolicies/{}').format(self.get_subscription_id(), resource_group, policy)
+        return f'/subscriptions/{self.get_subscription_id()}' \
+               f'/resourcegroups/{resource_group}' \
+               f'/providers/Microsoft.Cdn' \
+               f'/cdnwebapplicationfirewallpolicies/{policy}'
 
 
 class CdnWafManagedRuleSetTest(CdnScenarioMixin, ScenarioTest):

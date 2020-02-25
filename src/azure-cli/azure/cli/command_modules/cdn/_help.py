@@ -95,24 +95,6 @@ examples:
             --origin www.example.com --no-http --enable-compression
 """
 
-helps['cdn endpoint set'] = """
-type: command
-short-summary: Create or update a named endpoint to connect to a CDN.
-examples:
-  - name: Set an endpoint to service content for hostname over HTTP or HTTPS.
-    text: >
-        az cdn endpoint set -g group -n endpoint --profile-name profile \\
-            --origin www.example.com
-  - name: Set an endpoint with a custom domain origin with HTTP and HTTPS ports.
-    text: >
-        az cdn endpoint set -g group -n endpoint --profile-name profile \\
-            --origin www.example.com 88 4444
-  - name: Set an endpoint with a custom domain with compression and only HTTPS.
-    text: >
-        az cdn endpoint set -g group -n endpoint --profile-name profile \\
-            --origin www.example.com --no-http --enable-compression
-"""
-
 helps['cdn endpoint delete'] = """
 type: command
 short-summary: Delete a CDN endpoint.
@@ -290,6 +272,64 @@ examples:
   - name: show delivery rules asscociate with the endpoint.
     text: >
         az cdn endpoint rule action show -g group --profile-name profile-name -n endpoint
+"""
+
+helps['cdn endpoint waf'] = """
+type: group
+short-summary: Manage WAF properties of a CDN endpoint.
+"""
+
+helps['cdn endpoint waf policy'] = """
+type: group
+short-summary: Apply a CDN WAF policy to a CDN endpoint.
+"""
+
+helps['cdn endpoint waf policy set'] = """
+type: command
+short-summary: Set the CDN WAF policy applied to a CDN endpoint
+parameters:
+  - name: --waf-policy-id
+    type: string
+    short-summary: >
+        The Resource ID of the CDN WAF policy to apply to this endpoint.
+  - name: --waf-policy-subscription-id
+    type: string
+    short-summary: >
+        The Resource ID of the CDN WAF policy to apply to this endpoint. ignored
+        if --waf-policy-id is set.
+  - name: --waf-policy-resource-group-name
+    type: string
+    short-summary: >
+        The resource group of the CDN WAF policy to apply to this endpoint.
+        Ignored if --waf-policy-id is set.
+  - name: --waf-policy-name
+    type: string
+    short-summary: >
+        The name of the CDN WAF policy to apply to this endpoint. Ignored if
+        --waf-policy-id is set.
+examples:
+  - name: Set the CDN WAF policy applied to a CDN endpoint by WAF Policy name.
+    text: >
+        az cdn endpoint waf policy set -g group --endpoint-name endpoint \\
+            --profile-name profile --waf-policy-subscription-id xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx \\
+"""
+
+helps['cdn endpoint waf policy remove'] = """
+type: command
+short-summary: Remove a CDN WAF policy from a CDN endpoint.
+examples:
+  - name: Remove a CDN WAF policy from a CDN endpoint.
+    text: >
+        az cdn endpoint waf policy remove -g group --endpoint-name endpoint --profile-name profile
+"""
+
+helps['cdn endpoint waf policy show'] = """
+type: command
+short-summary: Show which CDN WAF policy is applied to a CDN endpoint.
+examples:
+  - name: Show which CDN WAF policy is applied to a CDN endpoint.
+    text: >
+        az cdn endpoint waf policy show -g group --endpoint-name endpoint --profile-name profile
 """
 
 helps['cdn origin'] = """
@@ -573,7 +613,7 @@ parameters:
   - name: --action
     type: string
     short-summary: >
-        The action to take when the rule is matched. Valid values are 'Block', 'Redirect', 'Allow', and 'Log'.
+        The action to take when the rule is matched.
   - name: --match-condition -m
     type: string
     short-summary: Conditions used to determine if the rule is matched for a request.
@@ -642,7 +682,7 @@ parameters:
   - name: --action
     type: string
     short-summary: >
-        The action to take when the rule is matched. Valid values are 'Block', 'Redirect', 'Allow', and 'Log'.
+        The action to take when the rule is matched.
   - name: --match-condition -m
     type: string
     short-summary: Conditions used to determine if the rule is matched for a request.
