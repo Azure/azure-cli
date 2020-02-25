@@ -18,9 +18,11 @@ def list_spark_batch_jobs(cmd, client, workspace_name, spark_pool_name, from_ind
     return client.list(workspace_name, spark_pool_name, from_index, size, detailed)
 
 
-def create_spark_batch_job(cmd, client, workspace_name, spark_pool_name, job_name, file, class_name,
-                           args, driver_memory, driver_cores, executor_memory, executor_cores,
-                           num_executors, jars=None, files=None, archives=None, conf=None, artifact_id=None,
+def create_spark_batch_job(cmd, client, workspace_name, spark_pool_name, job_name, args, driver_memory, driver_cores,
+                           executor_memory, executor_cores,
+                           num_executors, file="local:///usr/hdp/current/spark2-client/jars/microsoft-spark.jar",
+                           class_name="org.apache.spark.deploy.dotnet.DotnetRunner", jars=None, files=None,
+                           archives=None, conf=None, artifact_id=None,
                            tags=None, detailed=True):
     livy_batch_request = ExtendedLivyBatchRequest(
         tags=tags, artifact_id=artifact_id,
