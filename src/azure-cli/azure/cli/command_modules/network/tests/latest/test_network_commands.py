@@ -122,9 +122,10 @@ class NetworkPrivateEndpoints(ScenarioTest):
 
         pe_connection_name = self.cmd('network private-link-service show -g {rg} -n {lks1}').get_output_in_json()['privateEndpointConnections'][0]['name']
         self.kwargs['pe_connect'] = pe_connection_name
-        self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected')
+        self.cmd('network private-link-service connection update -g {rg} -n {pe_connect} --service-name {lks1} --connection-status Rejected --action-required "need action"')
         self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
-            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Rejected')
+            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.status', 'Rejected'),
+            self.check('privateLinkServiceConnections[0].privateLinkServiceConnectionState.actionsRequired', "need action")
         ])
         self.cmd('network private-link-service connection delete -g {rg} -n {pe_connect} --service-name {lks1}')
         self.cmd('network private-link-service show -g {rg} -n {lks1}', checks=[
@@ -137,10 +138,6 @@ class NetworkPrivateLinkService(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_network_private_link_service')
     def test_network_private_link_service(self, resource_group):
-
-        # unable to create resource so we can only verify the commands don't fail (or fail expectedly)
-        self.cmd('network private-endpoint list')
-        self.cmd('network private-endpoint list -g {rg}')
 
         self.kwargs.update({
             'lb': 'lb1',
@@ -160,15 +157,17 @@ class NetworkPrivateLinkService(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} -n {subnet1} --vnet-name {vnet} --disable-private-link-service-network-policies')
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
         self.cmd('network vnet subnet update -g {rg} -n {subnet2} --vnet-name {vnet} --disable-private-endpoint-network-policies')
-        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}', checks=[
+        self.cmd('network private-link-service create -g {rg} -n {lks1} --vnet-name {vnet} --subnet {subnet1} --lb-name {lb} --lb-frontend-ip-configs LoadBalancerFrontEnd -l {location}  --enable-proxy-protocol', checks=[
             self.check('type', 'Microsoft.Network/privateLinkServices'),
             self.check('length(ipConfigurations)', 1),
-            self.check('length(loadBalancerFrontendIpConfigurations)', 1)
+            self.check('length(loadBalancerFrontendIpConfigurations)', 1),
+            self.check('enableProxyProtocol', True)
         ])
 
-        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}', checks=[
+        self.cmd('network private-link-service update -g {rg} -n {lks1} --visibility {sub1} {sub1} --auto-approval {sub1} {sub1}  --enable-proxy-protocol False', checks=[
             self.check('length(visibility.subscriptions)', 2),
-            self.check('length(autoApproval.subscriptions)', 2)
+            self.check('length(autoApproval.subscriptions)', 2),
+            self.check('enableProxyProtocol', False)
         ])
         self.cmd('network private-link-service list -g {rg}', checks=[
             self.check('length(@)', 1),
@@ -920,6 +919,7 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
             'ip': 'pip1',
             'set': 'ruleset1',
             'rule': 'rule1',
+            'rule2': 'rule2',
             'var': 'http_req_Authorization'
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
@@ -938,6 +938,26 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
         self.cmd('network application-gateway rewrite-rule list -g {rg} --gateway-name {gw} --rule-set-name {set}')
         self.cmd('network application-gateway rewrite-rule list-request-headers')
         self.cmd('network application-gateway rewrite-rule list-response-headers')
+
+        # manage rewrite rules with url configuration
+        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} '
+                 '--sequence 123 --request-headers foo=bar --response-headers cat=hat '
+                 '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
+                 checks=[
+                     self.check('actionSet.urlConfiguration.modifiedPath', '/def'),
+                     self.check('actionSet.urlConfiguration.modifiedQueryString', 'a=b&c=d%20f'),
+                     self.check('actionSet.urlConfiguration.reroute', False)
+                 ])
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} '
+                 '--sequence 321 --request-headers bar=foo --response-headers hat=cat '
+                 '--modified-path "/def2" --modified-query-string "a=b&c=d%20f12" --enable-reroute',
+                 checks=[
+                     self.check('actionSet.urlConfiguration.modifiedPath', '/def2'),
+                     self.check('actionSet.urlConfiguration.modifiedQueryString', 'a=b&c=d%20f12'),
+                     self.check('actionSet.urlConfiguration.reroute', True)
+                 ])
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} --set ruleSequence=321 --remove actionSet.responseHeaderConfigurations 0 --no-wait')
+        self.cmd('network application-gateway rewrite-rule show -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2}')
 
         # manage rewrite rule conditions
         self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')
@@ -2649,6 +2669,7 @@ class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
 class NetworkVirtualRouter(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
+    @unittest.skip('Skip as service has bug')
     def test_network_virtual_router_scenario(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -3156,7 +3177,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='eastasia')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='eastasia')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='eastasia', kind='StorageV2')
     def test_network_watcher_flow_log(self, resource_group, resource_group_location, storage_account):
 
         self.kwargs.update({
@@ -3190,7 +3211,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log2', location='canadaeast')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='canadaeast', kind='StorageV2')
     def test_network_watcher_flow_log2(self, resource_group, resource_group_location, storage_account):
 
         self.kwargs.update({
@@ -3247,33 +3268,6 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network vnet-gateway wait -g {rg} -n vgw1 --created')
         self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {rg} --storage-account {sa} --storage-path {storage_path}')
         self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {rg}')
-
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_connection_monitor', location='westcentralus')
-    @AllowLargeResponse()
-    def test_network_watcher_connection_monitor(self, resource_group, resource_group_location):
-        import time
-        self.kwargs.update({
-            'loc': resource_group_location,
-            'vm2': 'vm2',
-            'vm3': 'vm3',
-            'cm': 'cm1'
-        })
-
-        self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm2}')
-        self.cmd('vm extension set -g {rg} --vm-name {vm2} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
-        self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm3}')
-        self.cmd('vm extension set -g {rg} --vm-name {vm3} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
-        time.sleep(20)
-        self.cmd('network watcher connection-monitor create -n {cm} --source-resource {vm2} -g {rg} --dest-resource {vm3} --dest-port 80 --tags foo=doo')
-        self.cmd('network watcher connection-monitor list -l {loc}')
-        self.cmd('network watcher connection-monitor show -l {loc} -n {cm}')
-        try:
-            self.cmd('network watcher connection-monitor stop -l {loc} -n {cm}')
-            self.cmd('network watcher connection-monitor start -l {loc} -n {cm}')
-        except CLIError:
-            pass
-        self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
-        self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
 
 
 class ServiceEndpointScenarioTest(ScenarioTest):

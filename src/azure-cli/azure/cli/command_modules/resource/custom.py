@@ -26,7 +26,7 @@ from azure.mgmt.resource.resources.models import GenericResource
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
@@ -63,7 +63,11 @@ def _process_parameters(template_param_defs, parameter_lists):
             return None
 
     def _try_load_file_object(value):
-        if os.path.isfile(value):
+        try:
+            is_file = os.path.isfile(value)
+        except ValueError:
+            is_file = False
+        if is_file is True:
             parsed = get_file_json(value, throw_on_empty=False)
             return parsed.get('parameters', parsed)
         return None
@@ -285,7 +289,10 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions)
     if validate_only:
-        return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
+        response = sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
+        if response and response.error:
+            raise CLIError(response.error)
+        return response
     return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
 
 
@@ -507,6 +514,20 @@ def _deploy_arm_template_subscription_scope(cli_ctx,
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,
                                          resource_type=None, name=None, tag=None, location=None):
     """Build up OData filter string from parameters """
+    if tag is not None:
+        if resource_group_name:
+            raise IncorrectUsageError('you cannot use \'--tag\' with \'--resource-group\''
+                                      '(If the default value for resource group is set, please use \'az configure --defaults group=""\' command to clear it first)')
+        if resource_provider_namespace:
+            raise IncorrectUsageError('you cannot use \'--tag\' with \'--namespace\'')
+        if resource_type:
+            raise IncorrectUsageError('you cannot use \'--tag\' with \'--resource-type\'')
+        if name:
+            raise IncorrectUsageError('you cannot use \'--tag\' with \'--name\'')
+        if location:
+            raise IncorrectUsageError('you cannot use \'--tag\' with \'--location\''
+                                      '(If the default value for location is set, please use \'az configure --defaults location=""\' command to clear it first)')
+
     filters = []
 
     if resource_group_name:
@@ -534,9 +555,6 @@ def _list_resources_odata_filter_builder(resource_group_name=None, resource_prov
             raise CLIError('--namespace also requires --resource-type')
 
     if tag:
-        if name or location:
-            raise IncorrectUsageError('you cannot use the tag filter with other filters')
-
         tag_name = list(tag.keys())[0] if isinstance(tag, dict) else tag
         tag_value = tag[tag_name] if isinstance(tag, dict) else ''
         if tag_name:
@@ -605,11 +623,19 @@ def _resolve_policy_id(cmd, policy, policy_set_definition, client):
 
 
 def _parse_management_group_reference(name):
-    if name.lower().startswith('/providers/microsoft.management/managementgroups'):
+    if _is_management_group_scope(name):
         parts = name.split('/')
         if len(parts) >= 9:
             return parts[4], parts[8]
     return None, name
+
+
+def _parse_management_group_id(scope):
+    if _is_management_group_scope(scope):
+        parts = scope.split('/')
+        if len(parts) >= 5:
+            return parts[4]
+    return None
 
 
 def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, management_group=None, for_policy_set=False):
@@ -632,7 +658,15 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
     except (CloudError, HttpOperationError) as ex:
         status_code = ex.status_code if isinstance(ex, CloudError) else ex.response.status_code
         if status_code == 404:
-            return policy_operations.get_built_in(name)
+            try:
+                return policy_operations.get_built_in(name)
+            except CloudError as ex2:
+                # When the `--policy` parameter is neither a valid policy definition name nor conforms to the policy definition id format,
+                # an exception of "AuthorizationFailed" will be reported to mislead customers.
+                # So we need to modify the exception information thrown here.
+                if ex2.status_code == 403 and ex2.error and ex2.error.error == 'AuthorizationFailed':
+                    raise IncorrectUsageError('\'--policy\' should be a valid name or id of the policy definition')
+                raise ex2
         raise
 
 
@@ -713,7 +747,7 @@ def list_resource_groups(cmd, tag=None):  # pylint: disable=no-self-use
     return list(groups)
 
 
-def create_resource_group(cmd, rg_name, location, tags=None):
+def create_resource_group(cmd, rg_name, location, tags=None, managed_by=None):
     """ Create a new resource group.
     :param str resource_group_name:the desired resource group name
     :param str location:the resource group location
@@ -726,6 +760,10 @@ def create_resource_group(cmd, rg_name, location, tags=None):
         location=location,
         tags=tags
     )
+
+    if cmd.supported_api_version(min_api='2016-09-01'):
+        parameters.managed_by = managed_by
+
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
 
@@ -756,7 +794,6 @@ def export_group_as_template(
 
     result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
 
-    print(json.dumps(result.template, indent=2))
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
@@ -767,6 +804,8 @@ def export_group_as_template(
             logger.warning(str(error))
         for detail in getattr(error, 'details', None) or []:
             logger.error(detail.message)
+
+    return result.template
 
 
 def create_application(cmd, resource_group_name,
@@ -1361,8 +1400,11 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     resource_group = id_parts.get('resource_group')
     resource_type = id_parts.get('child_type_1') or id_parts.get('type')
     resource_name = id_parts.get('child_name_1') or id_parts.get('name')
+    management_group = _parse_management_group_id(scope)
 
-    if all([resource_type, resource_group, subscription]):
+    if management_group:
+        result = policy_client.policy_assignments.list_for_management_group(management_group_id=management_group, filter='atScope()')
+    elif all([resource_type, resource_group, subscription]):
         namespace = id_parts.get('namespace')
         parent_resource_path = '' if not id_parts.get('child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
         result = policy_client.policy_assignments.list_for_resource(
@@ -1375,10 +1417,10 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     elif scope:
         raise CLIError('usage error `--scope`: must be a fully qualified ARM ID.')
     else:
-        raise CLIError('usage error: --scope ARM_ID | --resource-group NAME | --subscription ID')
+        raise CLIError('usage error: --scope ARM_ID | --resource-group NAME')
 
     if not disable_scope_strict_match:
-        result = [i for i in result if _scope.lower() == i.scope.lower()]
+        result = [i for i in result if _scope.lower().strip('/') == i.scope.lower().strip('/')]
 
     return result
 
@@ -1622,9 +1664,13 @@ def _get_subscription_id_from_subscription(cli_ctx, subscription):  # pylint: di
 
 
 def _get_parent_id_from_parent(parent):
-    if parent is None or parent.startswith("/providers/Microsoft.Management/managementGroups/"):
+    if parent is None or _is_management_group_scope(parent):
         return parent
     return "/providers/Microsoft.Management/managementGroups/" + parent
+
+
+def _is_management_group_scope(scope):
+    return scope is not None and scope.lower().startswith("/providers/microsoft.management/managementgroups")
 
 
 def cli_managementgroups_group_list(cmd, client):
@@ -2011,7 +2057,7 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 # endregion
 
 
-def rest_call(cmd, method, uri, headers=None, uri_parameters=None,
+def rest_call(cmd, uri, method=None, headers=None, uri_parameters=None,
               body=None, skip_authorization_header=False, resource=None, output_file=None):
     from azure.cli.core.util import send_raw_request
     r = send_raw_request(cmd.cli_ctx, method, uri, headers, uri_parameters, body,
@@ -2142,7 +2188,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         # please add the service type that needs to be requested with PATCH type here
         # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
         # to properties will fail due to the lack of properties, so the PATCH type should be used
-        need_patch_service = ['Microsoft.RecoveryServices/vaults']
+        need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)
@@ -2268,6 +2314,13 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _resolve_api_version_by_id(rcf, resource_id):
         parts = parse_resource_id(resource_id)
+
+        if len(parts) == 2 and parts['subscription'] is not None and parts['resource_group'] is not None:
+            return AZURE_API_PROFILES['latest'][ResourceType.MGMT_RESOURCE_RESOURCES]
+
+        if 'namespace' not in parts:
+            raise CLIError('The type of value entered by --ids parameter is not supported.')
+
         namespace = parts.get('child_namespace_1', parts['namespace'])
         if parts.get('child_type_2'):
             parent = (parts['type'] + '/' + parts['name'] + '/' +

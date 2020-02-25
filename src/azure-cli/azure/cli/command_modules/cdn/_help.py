@@ -159,6 +159,116 @@ examples:
             --enable-compression
 """
 
+helps['cdn endpoint rule'] = """
+type: group
+short-summary: Manage delivery rules for an endpoint.
+"""
+
+helps['cdn endpoint rule add'] = """
+type: command
+short-summary: Add a delivery rule to a CDN endpoint.
+examples:
+  - name: Create a global rule to disable caching.
+    text: >
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 0\\
+            --rule-name global --action-name CacheExpiration --cache-behavior BypassCache
+  - name: Create a rule for http to https redirect
+    text: >
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1\\
+            --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS\\
+            --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
+"""
+
+helps['cdn endpoint rule remove'] = """
+type: command
+short-summary: Remove a delivery rule from an endpoint.
+examples:
+  - name: Remove the global rule.
+    text: >
+        az cdn endpoint rule remove -g group -n endpoint --profile-name profile --rule-name Global\\
+"""
+
+helps['cdn endpoint rule show'] = """
+type: command
+short-summary: Show delivery rules asscociate with the endpoint.
+examples:
+  - name: show delivery rules asscociate with the endpoint.
+    text: >
+        az cdn endpoint rule show -g group --profile-name profile-name
+"""
+
+helps['cdn endpoint rule condition'] = """
+type: group
+short-summary: Manage delivery rule conditions for an endpoint.
+"""
+
+helps['cdn endpoint rule condition add'] = """
+type: command
+short-summary: Add a condition to a delivery rule.
+examples:
+  - name: Add a remote address condition.
+    text: >
+        az cdn endpoint rule condition add -g group -n endpoint --profile-name profile --rule-name name\\
+            --match-variable RemoteAddress --operator GeoMatch --match-values "TH"
+"""
+
+helps['cdn endpoint rule condition remove'] = """
+type: command
+short-summary: Remove a condition from a delivery rule.
+examples:
+  - name: Remove the first condition.
+    text: >
+        az cdn endpoint rule condition remove -g group -n endpoint --profile-name profile --rule-name name\\
+            --index 0
+"""
+
+helps['cdn endpoint rule condition show'] = """
+type: command
+short-summary: show delivery rules asscociate with the endpoint.
+examples:
+  - name: show delivery rules asscociate with the endpoint.
+    text: >
+        az cdn endpoint rule condition show -g group --profile-name profile-name
+"""
+
+helps['cdn endpoint rule action'] = """
+type: group
+short-summary: Manage delivery rule actions for an endpoint.
+"""
+
+helps['cdn endpoint rule action add'] = """
+type: command
+short-summary: Add an action to a delivery rule.
+examples:
+  - name: Add a redirect action.
+    text: >
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name\\
+            --action-name "UrlRedirect" --redirect-protocol HTTPS --redirect-type Moved
+  - name: Add a cache expiration action
+    text: >
+        az cdn endpoint rule action add -g group -n endpoint --profile-name profile --rule-name name\\
+            --action-name "CacheExpiration" --cache-behavior BypassCache
+"""
+
+helps['cdn endpoint rule action remove'] = """
+type: command
+short-summary: Remove an action from a delivery rule.
+examples:
+  - name: Remove the first action.
+    text: >
+        az cdn endpoint rule action remove -g group -n endpoint --profile-name profile --rule-name name\\
+            --index 0
+"""
+
+helps['cdn endpoint rule action show'] = """
+type: command
+short-summary: show delivery rules asscociate with the endpoint.
+examples:
+  - name: show delivery rules asscociate with the endpoint.
+    text: >
+        az cdn endpoint rule action show -g group --profile-name profile-name
+"""
+
 helps['cdn origin'] = """
 type: group
 short-summary: List or show existing origins related to CDN endpoints.

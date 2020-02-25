@@ -366,15 +366,26 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
                          rp_name=None, target_item_name=None, log_point_in_time=None, target_server_type=None,
-                         target_server_name=None, workload_type=None):
+                         target_server_name=None, workload_type=None, backup_management_type="AzureWorkload",
+                         from_full_rp_name=None, filepath=None, target_container_name=None):
     target_item = None
     if target_item_name is not None:
         protectable_items_client = backup_protectable_items_cf(cmd.cli_ctx)
         target_item = show_protectable_instance(cmd, protectable_items_client, resource_group_name, vault_name,
                                                 target_server_name, target_server_type,
                                                 workload_type, container_name)
+    target_container = None
+    if target_container_name is not None:
+        container_client = backup_protection_containers_cf(cmd.cli_ctx)
+        target_container = common.show_container(cmd, container_client, target_container_name, resource_group_name,
+                                                 vault_name, backup_management_type)
+
+        if isinstance(target_container, list):
+            raise CLIError("Multiple containers with same Friendly Name found. Please give native names instead.")
+
     return custom_wl.show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name,
-                                          item_name, rp_name, target_item, target_item_name, log_point_in_time)
+                                          item_name, rp_name, target_item, target_item_name, log_point_in_time,
+                                          from_full_rp_name, filepath, target_container)
 
 
 def undelete_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,
