@@ -766,10 +766,11 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                             if filter_param:
                                 new_val["parameters"] = filter_param
                             feature_flag_value.conditions["client_filters"][idx] = new_val
-
-                    else:
-                        feature_flag_value.enabled = v
-                        feature_flag_value.conditions = default_conditions
+                elif isinstance(v, bool):
+                    feature_flag_value.enabled = v
+                    feature_flag_value.conditions = default_conditions
+                else:
+                    raise ValueError("The type of '{}' should be either boolean or dictionary.".format(v))
 
                 set_kv = KeyValue(key=key,
                                   value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),

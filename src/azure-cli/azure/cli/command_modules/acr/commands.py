@@ -17,6 +17,7 @@ from ._format import (
     replication_output_format,
     build_output_format,
     task_output_format,
+    task_identity_format,
     taskrun_output_format,
     run_output_format,
     helm_list_output_format,
@@ -223,7 +224,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('update', 'acr_task_update')
         g.command('identity assign', 'acr_task_identity_assign')
         g.command('identity remove', 'acr_task_identity_remove')
-        g.command('identity show', 'acr_task_identity_show')
+        g.command('identity show', 'acr_task_identity_show', table_transformer=task_identity_format)
         g.command('credential add', 'acr_task_credential_add')
         g.command('credential update', 'acr_task_credential_update')
         g.command('credential remove', 'acr_task_credential_remove')

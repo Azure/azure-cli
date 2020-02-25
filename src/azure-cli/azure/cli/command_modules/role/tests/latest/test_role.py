@@ -12,6 +12,7 @@ import datetime
 import mock
 import unittest
 
+from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
@@ -295,6 +296,15 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment delete --assignee {upn} --role reader')
+
+                # test role assignment on empty scope
+                with self.assertRaisesRegexp(CLIError, 'Invalid scope. Please use --help to view the valid format.'):
+                    self.cmd('role assignment create --assignee {upn} --scope "" --role reader')
+                    self.cmd('role assignment delete --assignee {upn} --scope "" --role reader')
+
+                # test role assignment on empty scope
+                with self.assertRaisesRegexp(CLIError, "No matches in graph database for 'fake'"):
+                    self.cmd('role assignment create --assignee fake --role contributor')
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 

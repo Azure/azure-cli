@@ -660,11 +660,37 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         nic_dependencies = []
         if vnet_type == 'new':
-            vnet_name = vnet_name or '{}VNET'.format(vm_name)
             subnet = subnet or '{}Subnet'.format(vm_name)
-            nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-            master_template.add_resource(build_vnet_resource(
-                cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
+            vnet_exists = False
+            if vnet_name:
+                from azure.cli.command_modules.vm._vm_utils import check_existence
+                vnet_exists = \
+                    check_existence(cmd.cli_ctx, vnet_name, resource_group_name, 'Microsoft.Network', 'virtualNetworks')
+                if vnet_exists:
+                    from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection
+                    from azure.cli.command_modules.vm._validators import get_network_client
+                    client = get_network_client(cmd.cli_ctx).virtual_networks
+                    vnet = cached_get(cmd, client.get, resource_group_name, vnet_name)
+
+                    Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_NETWORK)
+                    subnet_obj = Subnet(
+                        name=subnet,
+                        address_prefixes=[subnet_address_prefix],
+                        address_prefix=subnet_address_prefix
+                    )
+                    upsert_to_collection(vnet, 'subnets', subnet_obj, 'name')
+                    try:
+                        cached_put(cmd, client.create_or_update, vnet, resource_group_name, vnet_name).result()
+                    except Exception:
+                        raise CLIError('Subnet({}) does not exist, but failed to create a new subnet with address '
+                                       'prefix {}. It may be caused by name or address prefix conflict. Please specify '
+                                       'an appropriate subnet name with --subnet or a valid address prefix value with '
+                                       '--subnet-address-prefix.'.format(subnet, subnet_address_prefix))
+            if not vnet_exists:
+                vnet_name = vnet_name or '{}VNET'.format(vm_name)
+                nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+                master_template.add_resource(build_vnet_resource(
+                    cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
 
         if nsg_type == 'new':
             nsg_rule_type = 'rdp' if os_type.lower() == 'windows' else 'ssh'
@@ -1057,7 +1083,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
-              priority=None, max_price=None, **kwargs):
+              priority=None, max_price=None, proximity_placement_group=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1097,6 +1123,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm.billing_profile = BillingProfile(max_price=max_price)
         else:
             vm.billing_profile.max_price = max_price
+
+    if proximity_placement_group is not None:
+        vm.proximity_placement_group = {'id': proximity_placement_group}
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -1241,6 +1270,12 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
                                                   resource_group_name, deployment_name, properties))
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+
+
+def update_av_set(instance, resource_group_name, proximity_placement_group=None):
+    if proximity_placement_group is not None:
+        instance.proximity_placement_group = {'id': proximity_placement_group}
+    return instance
 
 
 def list_av_sets(cmd, resource_group_name=None):
@@ -1919,7 +1954,7 @@ def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd
     DataDisk, DiskCreateOptionTypes, VirtualHardDisk = cmd.get_models(
         'DataDisk', 'DiskCreateOptionTypes', 'VirtualHardDisk')
     if not new and not disk_name:
-        raise CLIError('Pleae provide the name of the existing disk to attach')
+        raise CLIError('Please provide the name of the existing disk to attach')
     create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
 
     vm = get_vm(cmd, resource_group_name, vm_name)
@@ -2139,7 +2174,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
-                os_disk_encryption_set=None, data_disk_encryption_sets=None):
+                os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2367,7 +2402,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
             terminate_notification_time=terminate_notification_time, max_price=max_price,
             scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
-            data_disk_encryption_sets=data_disk_encryption_sets)
+            data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
+            data_disk_mbps=data_disk_mbps)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2617,7 +2653,7 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
-                scale_in_policy=None, priority=None, max_price=None, **kwargs):
+                scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None, **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -2678,6 +2714,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
         else:
             vmss.virtual_machine_profile.billing_profile.max_price = max_price
+
+    if proximity_placement_group is not None:
+        vmss.proximity_placement_group = {'id': proximity_placement_group}
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)

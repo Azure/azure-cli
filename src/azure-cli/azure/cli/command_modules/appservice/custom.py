@@ -57,7 +57,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            should_create_new_rg, set_location, does_app_already_exist, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
-from ._constants import (RUNTIME_TO_DEFAULT_VERSION, NODE_VERSION_DEFAULT_FUNCTIONAPP,
+from ._constants import (RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP, NODE_VERSION_DEFAULT_FUNCTIONAPP,
                          RUNTIME_TO_IMAGE_FUNCTIONAPP, NODE_VERSION_DEFAULT)
 
 logger = get_logger(__name__)
@@ -132,7 +132,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         match = helper.resolve(runtime)
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
-        match['setter'](cmd, match, site_config)
+        match['setter'](cmd=cmd, stack=match, site_config=site_config)
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
         if not match['displayName'].startswith('node'):
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
@@ -699,7 +699,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
 
 def list_runtimes(cmd, linux=False):
     client = web_client_factory(cmd.cli_ctx)
-    runtime_helper = _StackRuntimeHelper(client, linux)
+    runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
 
     return [s['displayName'] for s in runtime_helper.stacks]
 
@@ -2054,6 +2054,35 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
                                                 certificate_envelope=kv_cert_def)
 
 
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None):
+    Certificate = cmd.get_models('Certificate')
+    hostname = hostname.lower()
+    client = web_client_factory(cmd.cli_ctx)
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not webapp:
+        slot_text = "Deployment slot {} in ".format(slot) if slot else ''
+        raise CLIError("{0}app {1} doesn't exist in resource group {2}".format(slot_text, name, resource_group_name))
+
+    parsed_plan_id = parse_resource_id(webapp.server_farm_id)
+    plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    if plan_info.sku.tier.upper() == 'FREE' or plan_info.sku.tier.upper() == 'SHARED':
+        raise CLIError('Managed Certificate is not supported on Free and Shared tier.')
+
+    if not _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot):
+        slot_text = " --slot {}".format(slot) if slot else ""
+        raise CLIError("Hostname (custom domain) '{0}' is not registered with {1}. "
+                       "Use 'az webapp config hostname add --resource-group {2} "
+                       "--webapp-name {1}{3} --hostname {0}' "
+                       "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
+
+    server_farm_id = webapp.server_farm_id
+    location = webapp.location
+    easy_cert_def = Certificate(location=location, canonical_name=hostname,
+                                server_farm_id=server_farm_id, password='')
+    return client.certificates.create_or_update(name=hostname, resource_group_name=resource_group_name,
+                                                certificate_envelope=easy_cert_def)
+
+
 def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
@@ -2160,7 +2189,7 @@ class _StackRuntimeHelper(object):
         return self._stacks
 
     @staticmethod
-    def update_site_config(stack, site_config):
+    def update_site_config(stack, site_config, cmd=None):
         for k, v in stack['configs'].items():
             setattr(site_config, k, v)
         return site_config
@@ -2301,12 +2330,17 @@ def validate_range_of_int_flag(flag_name, value, min_val, max_val):
 
 
 def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    os_type=None, runtime=None, runtime_version=None, consumption_plan_location=None,
-                    app_insights=None, app_insights_key=None, disable_app_insights=None, deployment_source_url=None,
+                    os_type=None, functions_version=None, runtime=None, runtime_version=None,
+                    consumption_plan_location=None, app_insights=None, app_insights_key=None,
+                    disable_app_insights=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     docker_registry_server_password=None, docker_registry_server_user=None,
                     deployment_container_image_name=None, tags=None):
     # pylint: disable=too-many-statements, too-many-branches
+    if functions_version is None:
+        logger.warning("No functions version specified so defaulting to 2. In the future, specifying a version will "
+                       "be required. To create a 2.x function you would pass in the flag `--functions_version 2`")
+        functions_version = '2'
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
@@ -2360,11 +2394,11 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     if runtime_version is not None:
         if runtime is None:
             raise CLIError('Must specify --runtime to use --runtime-version')
-        allowed_versions = RUNTIME_TO_IMAGE_FUNCTIONAPP[runtime].keys()
+        allowed_versions = RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version][runtime].keys()
         if runtime_version not in allowed_versions:
-            raise CLIError('--runtime-version {} is not supported for the selected --runtime {}. '
-                           'Supported versions are: {}'
-                           .format(runtime_version, runtime, ', '.join(allowed_versions)))
+            raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
+                           '--functions_version {}. Supported versions are: {}'
+                           .format(runtime_version, runtime, functions_version, ', '.join(allowed_versions)))
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -2372,10 +2406,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         functionapp_def.kind = 'functionapp,linux'
         functionapp_def.reserved = True
         is_consumption = consumption_plan_location is not None
-        if is_consumption:
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
-        else:
-            site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
+        if not is_consumption:
             site_config.app_settings.append(NameValuePair(name='MACHINEKEY_DecryptionKey',
                                                           value=str(hexlify(urandom(32)).decode()).upper()))
             if deployment_container_image_name:
@@ -2389,18 +2420,23 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-                if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP.keys():
+                if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version].keys():
                     raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
         if deployment_container_image_name is None:
-            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption, runtime, runtime_version)
+            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption,
+                                                                     functions_version,
+                                                                     runtime,
+                                                                     runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
-        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION', value='~2'))
     # adding appsetting to site to make it a function
+    site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
+                                                  value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION',
-                                                  value=_get_website_node_version_functionapp(runtime,
+                                                  value=_get_website_node_version_functionapp(functions_version,
+                                                                                              runtime,
                                                                                               runtime_version)))
 
     # If plan is not consumption or elastic premium, we need to set always on
@@ -2452,21 +2488,27 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     return functionapp
 
 
-def _get_linux_fx_functionapp(is_consumption, runtime, runtime_version):
+def _get_extension_version_functionapp(functions_version):
+    if functions_version is not None:
+        return '~{}'.format(functions_version)
+    return '~2'
+
+
+def _get_linux_fx_functionapp(is_consumption, functions_version, runtime, runtime_version):
     if runtime_version is None:
-        runtime_version = RUNTIME_TO_DEFAULT_VERSION[runtime]
+        runtime_version = RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP[functions_version][runtime]
     if is_consumption:
         return '{}|{}'.format(runtime.upper(), runtime_version)
     # App service or Elastic Premium
-    return _format_fx_version(RUNTIME_TO_IMAGE_FUNCTIONAPP[runtime][runtime_version])
+    return _format_fx_version(RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version][runtime][runtime_version])
 
 
-def _get_website_node_version_functionapp(runtime, runtime_version):
+def _get_website_node_version_functionapp(functions_version, runtime, runtime_version):
     if runtime is None or runtime != 'node':
-        return NODE_VERSION_DEFAULT_FUNCTIONAPP
+        return NODE_VERSION_DEFAULT_FUNCTIONAPP[functions_version]
     if runtime_version is not None:
         return '~{}'.format(runtime_version)
-    return NODE_VERSION_DEFAULT_FUNCTIONAPP
+    return NODE_VERSION_DEFAULT_FUNCTIONAPP[functions_version]
 
 
 def try_create_application_insights(cmd, functionapp):
@@ -3274,13 +3316,13 @@ def _start_ssh_session(hostname, port, username, password):
 
 
 def ssh_webapp(cmd, resource_group_name, name, port=None, slot=None, timeout=None):  # pylint: disable=too-many-statements
-    config = get_site_configs(cmd, resource_group_name, name, slot)
-    if config.remote_debugging_enabled:
-        raise CLIError('remote debugging is enabled, please disable')
-
     import platform
     if platform.system() == "Windows":
         raise CLIError('webapp ssh is only supported on linux and mac')
+
+    config = get_site_configs(cmd, resource_group_name, name, slot)
+    if config.remote_debugging_enabled:
+        raise CLIError('remote debugging is enabled, please disable')
     create_tunnel_and_session(cmd, resource_group_name, name, port=port, slot=slot, timeout=timeout)
 
 
@@ -3350,3 +3392,15 @@ def _format_key_vault_id(cli_ctx, key_vault, resource_group_name):
         namespace='Microsoft.KeyVault',
         type='vaults',
         name=key_vault)
+
+
+def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None):
+    hostname_bindings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                'list_host_name_bindings', slot)
+    verified_hostname_found = False
+    for hostname_binding in hostname_bindings:
+        binding_name = hostname_binding.name.split('/')[-1]
+        if binding_name.lower() == hostname and hostname_binding.host_name_type == 'Verified':
+            verified_hostname_found = True
+
+    return verified_hostname_found
