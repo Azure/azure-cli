@@ -132,7 +132,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         match = helper.resolve(runtime)
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
-        match['setter'](cmd, match, site_config)
+        match['setter'](cmd=cmd, stack=match, site_config=site_config)
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
         if not match['displayName'].startswith('node'):
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
@@ -2269,7 +2269,7 @@ class _StackRuntimeHelper(object):
         return self._stacks
 
     @staticmethod
-    def update_site_config(stack, site_config):
+    def update_site_config(stack, site_config, cmd=None):
         for k, v in stack['configs'].items():
             setattr(site_config, k, v)
         return site_config
