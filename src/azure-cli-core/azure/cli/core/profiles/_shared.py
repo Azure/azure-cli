@@ -138,7 +138,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_RESOURCES: '2019-07-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-06-01',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
-        ResourceType.MGMT_KEYVAULT: '2018-02-14',
+        ResourceType.MGMT_KEYVAULT: '2019-09-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-09-01-preview', {
             'classic_administrators': '2015-06-01',
             'role_definitions': '2018-01-01-preview',
