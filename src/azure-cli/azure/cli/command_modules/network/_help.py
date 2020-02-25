@@ -5329,6 +5329,11 @@ examples:
     text: az network watcher flow-log configure -g MyResourceGroup --enabled false --nsg MyNsg
 """
 
+helps['network watcher flow-log create'] = """
+type: command
+short-summary: Create a flow log on a network security group.
+"""
+
 helps['network watcher flow-log show'] = """
 type: command
 short-summary: Get the flow log configuration of a network security group.

@@ -1348,8 +1348,13 @@ def load_arguments(self, _):
         c.argument('filters', type=get_json_object)
 
     with self.argument_context('network watcher flow-log') as c:
+        c.ignore('location')
+        c.argument('flow_log_name', name_arg_type, help='The name of the flow logger', min_api='2019-11-01')
+        c.argument('tags', min_api='2019-11-01')
         c.argument('nsg', help='Name or ID of the network security group.')
-        c.argument('enabled', arg_type=get_three_state_flag())
+        c.argument('enabled', arg_type=get_three_state_flag(), help='Enable logging')
+        c.argument('retention', type=int, help='Number of days to retain logs')
+        c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs')
 
     with self.argument_context('network watcher flow-log', arg_group='Format', min_api='2018-10-01') as c:
         c.argument('log_format', options_list='--format', help='File type of the flow log.', arg_type=get_enum_type(FlowLogFormatType))

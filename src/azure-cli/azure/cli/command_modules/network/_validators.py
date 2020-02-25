@@ -1399,7 +1399,12 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
     process_nw_flow_log_show_namespace(cmd, namespace)
 
 
-def process_nw_flow_log_show_namespace(cmd, namespace):
+def process_nw_flow_log_create_namespace(cmd, namespace):
+    process_nw_flow_log_set_namespace(cmd, namespace)
+    return process_nw_flow_log_show_namespace(cmd, namespace, remove_location=False)
+
+
+def process_nw_flow_log_show_namespace(cmd, namespace, remove_location=True):
     from msrestazure.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.arm import get_arm_resource_by_id
 
@@ -1413,7 +1418,7 @@ def process_nw_flow_log_show_namespace(cmd, namespace):
 
     nsg = get_arm_resource_by_id(cmd.cli_ctx, namespace.nsg)
     namespace.location = nsg.location  # pylint: disable=no-member
-    get_network_watcher_from_location(remove=True)(cmd, namespace)
+    get_network_watcher_from_location(remove=remove_location)(cmd, namespace)
 
 
 def process_nw_topology_namespace(cmd, namespace):

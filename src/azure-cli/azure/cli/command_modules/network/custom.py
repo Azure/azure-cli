@@ -4385,6 +4385,61 @@ def show_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, resource_group_
     return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
 
 
+def create_nw_flow_log(cmd,
+                       client,
+                       watcher_rg,
+                       watcher_name,
+                       flow_log_name,
+                       nsg,
+                       storage_account=None,
+                       resource_group_name=None,
+                       location=None,
+                       enabled=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    FlowLog = cmd.get_models('FlowLog')
+    flow_log = FlowLog(location=location, target_resource_id=nsg, storage_id=storage_account, enabled=enabled, tags=tags)
+
+    if retention > 0:
+        RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
+        retention_policy = RetentionPolicyParameters(days=retention, enabled=(retention > 0))
+        flow_log.retention_policy = retention_policy
+
+    if log_format is not None or log_version is not None:
+        FlowLogFormatParameters = cmd.get_models('FlowLogFormatParameters')
+        format_config = FlowLogFormatParameters(type=log_format, version=log_version)
+        flow_log.format = format_config
+
+    if traffic_analytics_workspace is not None:
+        TrafficAnalyticsProperties, TrafficAnalyticsConfigurationProperties = \
+            cmd.get_models('TrafficAnalyticsProperties', 'TrafficAnalyticsConfigurationProperties')
+
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        traffic_analytics_config = TrafficAnalyticsConfigurationProperties(
+            enabled=traffic_analytics_enabled,
+            workspace_id=workspace.properties['customerId'],
+            workspace_region=workspace.location,
+            workspace_resource_id=workspace.id,
+            traffic_analytics_interval=traffic_analytics_interval
+        )
+        traffic_analytics = TrafficAnalyticsProperties(
+            network_watcher_flow_analytics_configuration=traffic_analytics_config
+        )
+
+        flow_log.flow_analytics_configuration = traffic_analytics
+
+    return client.create_or_update(watcher_rg, watcher_name, flow_log_name, flow_log)
+
+
 def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, storage_account,
                              storage_path, resource_type=None, resource_group_name=None,
                              no_wait=False):
