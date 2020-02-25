@@ -308,6 +308,7 @@ def load_arguments(self, _):
     with self.argument_context('aks use-dev-spaces') as c:
         c.argument('update', options_list=['--update'], action='store_true')
         c.argument('space_name', options_list=['--space', '-s'])
+        c.argument('endpoint_type', get_enum_type(['Public', 'Private', 'None'], default='Public'), options_list=['--endpoint', '-e'])
         c.argument('prompt', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation. Requires --space.')
 
     with self.argument_context('aks remove-dev-spaces') as c:
