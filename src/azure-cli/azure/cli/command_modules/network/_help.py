@@ -5336,6 +5336,12 @@ short-summary: Create a flow log on a network security group.
 
 helps['network watcher flow-log list'] = """
 type: command
+short-summary: List all flow log resources for the specified Network Watcher
+"""
+
+helps['network watcher flow-log delete'] = """
+type: command
+short-summary: Delete the specified flow log resource.
 """
 
 helps['network watcher flow-log show'] = """

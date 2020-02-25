@@ -921,6 +921,7 @@ def load_command_table(self, _):
     with self.command_group('network watcher flow-log', network_watcher_flow_log_sdk, min_api='2019-11-01') as g:
         g.custom_command('create', 'create_nw_flow_log', validator=process_nw_flow_log_create_namespace)
         g.command('list', 'list')
+        g.command('delete', 'delete')
 
     with self.command_group('network watcher troubleshooting', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)
