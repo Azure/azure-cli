@@ -1348,6 +1348,7 @@ def load_arguments(self, _):
         c.argument('filters', type=get_json_object)
 
     with self.argument_context('network watcher flow-log') as c:
+        c.argument('network_watcher_name', options_list='--watcher')
         c.ignore('location')
         c.argument('flow_log_name', name_arg_type, help='The name of the flow logger', min_api='2019-11-01')
         c.argument('tags', min_api='2019-11-01')

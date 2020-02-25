@@ -300,6 +300,11 @@ def load_command_table(self, _):
         client_factory=cf_connection_monitor
     )
 
+    network_watcher_flow_log_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#FlowLogsOperations.{}',
+        client_factory=cf_flow_logs,
+    )
+
     network_watcher_pc_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#PacketCapturesOperations.{}',
         client_factory=cf_packet_capture
@@ -909,12 +914,13 @@ def load_command_table(self, _):
         g.command('stop', 'stop')
         g.command('list', 'list')
 
-    with self.command_group('network watcher flow-log', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
+    with self.command_group('network watcher flow-log',  client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('configure', 'set_nsg_flow_logging', validator=process_nw_flow_log_set_namespace)
         g.custom_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
 
-    with self.command_group('network watcher flow-log', client_factory=cf_flow_logs, min_api='2019-11-01') as g:
+    with self.command_group('network watcher flow-log', network_watcher_flow_log_sdk, min_api='2019-11-01') as g:
         g.custom_command('create', 'create_nw_flow_log', validator=process_nw_flow_log_create_namespace)
+        g.command('list', 'list')
 
     with self.command_group('network watcher troubleshooting', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)
