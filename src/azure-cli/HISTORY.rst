@@ -477,13 +477,6 @@ Release History
 
 * [BREAKING CHANGE] `az storage account create`: Change default storage account kind to StorageV2
 
-**Azure Red Hat OpenShift**
-
-* Upgrade CLI to API version 2019-10-27-preview.
-* Bump to azure-mgmt-containerservice to 8.2.0.
-* Add private cluster support: add parameters to `az openshift create` and add new command `az openshift update`.
-* Remove `vnet-peer` parameter as not used anymore.
-
 2.0.81
 ++++++
 
