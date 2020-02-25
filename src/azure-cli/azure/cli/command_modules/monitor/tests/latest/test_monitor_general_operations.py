@@ -43,12 +43,12 @@ class MonitorCloneVMScenarios(ScenarioTest):
         ])
         with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {vm1_id} --target-resource {vm3_id}', checks=[
-                self.check('description', 'High CPU'),
-                self.check('severity', 2),
-                self.check('autoMitigate', None),
-                self.check('windowSize', '0:05:00'),
-                self.check('evaluationFrequency', '0:01:00'),
-                self.check('length(scopes)', 3)
+                self.check('@[0].description', 'High CPU'),
+                self.check('@[0].severity', 2),
+                self.check('@[0].autoMitigate', None),
+                self.check('@[0].windowSize', '0:05:00'),
+                self.check('@[0].evaluationFrequency', '0:01:00'),
+                self.check('length(@[0].scopes)', 3)
             ])
 
 
@@ -91,14 +91,14 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
 
         with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2}', checks=[
-                self.check('description', 'Test'),
-                self.check('severity', 2),
-                self.check('autoMitigate', None),
-                self.check('windowSize', '0:05:00'),
-                self.check('evaluationFrequency', '0:01:00'),
-                self.check('length(criteria.allOf)', 2),
-                self.check('length(criteria.allOf[0].dimensions)', 2),
-                self.check('length(criteria.allOf[1].dimensions)', 1),
+                self.check('@[0].description', 'Test'),
+                self.check('@[0].severity', 2),
+                self.check('@[0].autoMitigate', None),
+                self.check('@[0].windowSize', '0:05:00'),
+                self.check('@[0].evaluationFrequency', '0:01:00'),
+                self.check('length(@[0].criteria.allOf)', 2),
+                self.check('length(@[0].criteria.allOf[0].dimensions)', 2),
+                self.check('length(@[0].criteria.allOf[1].dimensions)', 1),
             ])
 
 

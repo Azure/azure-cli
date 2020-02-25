@@ -13,15 +13,14 @@ from msrestazure.tools import parse_resource_id
 logger = get_logger(__name__)
 
 
-def clone_existed_settings(cmd, source_resource=None, target_resource=None):
-    metrics_alert_rules = _clone_monitor_metrics_alerts(cmd, source_resource, target_resource)
-    return metrics_alert_rules
+def clone_existed_settings(cmd, source_resource, target_resource):
+    return _clone_monitor_metrics_alerts(cmd, source_resource, target_resource)
 
 
 def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource):
     if not _is_resource_type_same_and_sub_same(source_resource, target_resource):
-        raise CLIError('The target resource should be the same type with the source resource '
-                       'and they are in the same subscription')
+        raise CLIError('The target resource should be the same type with the source resource, '
+                       'meanwhile they should be in the same subscription')
     monitor_client = cf_monitor(cmd.cli_ctx, subscription_id=parse_resource_id(source_resource)['subscription'])
     # we can only clone the alert rules belonging to the source subscription.
     alert_rules = list(monitor_client.metric_alerts.list_by_subscription())
@@ -49,9 +48,7 @@ def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource):
             else:
                 logger.warning('The target resource already has alert rule %s. '
                                'Skip cloning this one.', alert_rule.name)
-    if not updated_alert_rules:
-        return None
-    return updated_alert_rules if len(updated_alert_rules) > 1 else updated_alert_rules[0]
+    return updated_alert_rules
 
 
 def _is_resource_type_same_and_sub_same(source_resource, target_resource):

@@ -1204,6 +1204,5 @@ examples:
 
 helps['monitor clone'] = """
 type: command
-short-summary: Clone alert rules from one resource to another.
-long-summary: Due to the service limitation, this command would only clone the alert rules in the current subscription.
+short-summary: Clone metrics alert rules from one resource to another resource.
 """
