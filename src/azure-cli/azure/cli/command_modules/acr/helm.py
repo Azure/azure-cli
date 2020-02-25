@@ -186,18 +186,12 @@ def acr_helm_install_cli(client_version='2.16.3', install_location=None, yes=Fal
     """Install Helm command-line tool."""
 
     if client_version >= '3':
-        raise CLIError('Helm v3 is not supported yet.')
+        logger.warning('Please note that "az acr helm" commands do not work with Helm 3, '
+                       'but you can still push Helm chart to ACR using a different command flow. '
+                       'For more information, please check out '
+                       'https://docs.microsoft.com/en-us/azure/container-registry/container-registry-helm-repos')
 
-    if not install_location or install_location.isspace():
-        raise CLIError('Invalid install location.')
-
-    install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
-    if not cli:
-        raise CLIError("{} is a directory. Please specify a complete file path.".format(install_location))
-
-    # Ensure installation directory exists
-    if not os.path.exists(install_dir):
-        os.makedirs(install_dir)
+    install_location, install_dir, cli = _process_helm_install_location_info(install_location)
 
     client_version = "v%s" % client_version
     source_url = 'https://get.helm.sh/{}'
@@ -236,6 +230,8 @@ def acr_helm_install_cli(client_version='2.16.3', install_location=None, yes=Fal
                 if os.path.splitext(f.name)[0] in ('helm', 'tiller'):
                     os.chmod(target_path, os.stat(target_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as e:
+        import traceback
+        logger.debug(traceback.format_exc())
         raise CLIError('Error while installing {} to {}: {}'.format(cli, install_dir, e))
 
     logger.warning('Successfully installed %s to %s.', cli, install_dir)
@@ -312,6 +308,26 @@ def _get_chart_package_name(chart, version, prov=False):
         return '{}.prov'.format(chart_package_name)
 
     return chart_package_name
+
+
+def _process_helm_install_location_info(install_location):
+    if not install_location or install_location.isspace():
+        raise CLIError('Invalid install location.')
+
+    install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
+    if not install_dir:
+        # Use current working directory
+        install_dir = os.getcwd()
+        install_location = os.path.join(install_dir, cli)
+    # Ensure installation directory exists
+    if not os.path.exists(install_dir):
+        os.makedirs(install_dir)
+    if not cli:
+        system = platform.system()
+        cli = 'helm.exe' if system == 'Windows' else 'helm'
+        install_location = os.path.join(install_dir, cli)
+
+    return install_location, install_dir, cli
 
 
 def _get_helm_package_name(client_version):
