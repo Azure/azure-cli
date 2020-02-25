@@ -166,7 +166,6 @@ def list_keyvault(client, resource_group_name=None):
 
 # pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
-    from msrestazure.azure_exceptions import CloudError
     try:
         current_user = graph_client.signed_in_user.get()
         if current_user and current_user.object_id:  # pylint:disable=no-member
@@ -336,7 +335,6 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     tags=None):
 
     from azure.cli.core._profile import Profile
-    from azure.graphrbac.models import GraphErrorException
     from azure.graphrbac import GraphRbacManagementClient
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -1389,8 +1387,8 @@ def _get_role_dics(role_defs):
 
 
 def _get_principal_dics(cli_ctx, role_assignments):
-    principal_ids = set([i['properties']['principalId']
-                         for i in role_assignments if i.get('properties', {}).get('principalId')])
+    principal_ids = {i['properties']['principalId']
+                     for i in role_assignments if i.get('properties', {}).get('principalId')}
 
     if principal_ids:
         try:
