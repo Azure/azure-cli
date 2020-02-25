@@ -4,9 +4,7 @@ Release History
 ===============
 
 **AppService**
-
 az webapp create : Fixing issue when running the command with --runtime 
-functionapp: Added error message to deployment command if resource group/function name invalid
 
 2.1.0
 ++++++
