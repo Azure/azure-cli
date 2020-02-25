@@ -22,7 +22,7 @@ HOMEBREW_FORMULAR_LATEST="https://raw.githubusercontent.com/Homebrew/homebrew-co
 
 
 def main():
-    print('Generate formular for Azure CLI homebrew release.')
+    print('Generate formula for Azure CLI homebrew release.')
 
     parser = argparse.ArgumentParser(prog='formula_generator.py')
     parser.set_defaults(func=generate_formula)
@@ -140,7 +140,7 @@ def update_formula() -> str:
                 pack = m.group(1)
                 node_index_dict[pack] = idx
         elif pack is not None:
-            if line.strip().startswith("url"):
+            if line.startswith("    url"):
                 #update the url of package
                 if pack in nodes.keys():
                     url_match = re.search(r'url "(.*)"', line)
@@ -149,12 +149,12 @@ def update_formula() -> str:
                         upgrade = True
                 else:
                     packs_to_remove.add(pack)
-            elif line.strip().startswith("sha256"):
+            elif line.startswith("    sha256"):
                 #update the sha256 of package
                 if pack in nodes.keys():
                     lines[idx] = re.sub('sha256 ".*"', 'sha256 "{}"'.format(nodes[pack]['checksum']), line, 1)
                     del nodes[pack]
-            elif line.strip().startswith("  end"):
+            elif line.startswith("  end"):
                 pack = None
                 upgrade = False
             elif upgrade:  # In case of upgrading, remove any patch following url and sha256 but before end
