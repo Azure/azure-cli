@@ -5603,3 +5603,28 @@ helps['network list-service-aliases'] = """
 type: command
 short-summary: List available service aliases in the region which can be used for Service Endpoint Policies.
 """
+
+helps['network bastion'] = """
+type: group
+short-summary: Manage Azure bastion host.
+"""
+
+helps['network bastion create'] = """
+type: command
+short-summary: Create a Azure bastion host machine.
+"""
+
+helps['network bastion delete'] = """
+type: command
+short-summary: Delete a Azure bastion host machine.
+"""
+
+helps['network bastion list'] = """
+type: command
+short-summary: List all Azure bastion host machines.
+"""
+
+helps['network bastion show'] = """
+type: command
+short-summary: Show a Azure bastion host machine.
+"""

@@ -5552,3 +5552,32 @@ def list_service_aliases(cmd, location, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name=resource_group_name, location=location)
     return client.list(location=location)
 # endregion
+
+
+# region bastion
+def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
+                        public_ip_address, location=None, subnet='AzureBastionSubnet'):
+    client = network_client_factory(cmd.cli_ctx).bastion_hosts
+    (BastionHost,
+     BastionHostIPConfiguration,
+     SubResource) = cmd.get_models('BastionHost',
+                                   'BastionHostIPConfiguration',
+                                   'SubResource')
+    ip_config_name = "bastion_ip_config"
+    ip_configuration = BastionHostIPConfiguration(name=ip_config_name,
+                                                  subnet=SubResource(id=subnet),
+                                                  public_ip_address=SubResource(id=public_ip_address))
+
+    bastion_host = BastionHost(ip_configurations=[ip_configuration],
+                               location=location)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   bastion_host_name=bastion_host_name,
+                                   parameters=bastion_host)
+
+
+def list_bastion_host(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).bastion_hosts
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+    return client.list()
+# endregion
