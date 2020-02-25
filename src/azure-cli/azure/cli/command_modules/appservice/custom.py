@@ -2421,7 +2421,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
                 if runtime not in RUNTIME_TO_SUPPORTED_VERSIONS_FUNCTIONAPP[functions_version]:
-                    raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
+                    raise CLIError("An appropriate linux image for runtime:'{}', "
+                                   "functions_version: '{}' was not found".format(runtime, functions_version))
         if deployment_container_image_name is None:
             site_config.linux_fx_version = _get_linux_fx_functionapp(functions_version, runtime, runtime_version)
     else:
