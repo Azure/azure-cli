@@ -49,8 +49,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
             self.check('provisioningState', 'Succeeded'),
-            StringContainCheck("key1"),
-            StringContainCheck("value1")
+            self.check('tags.key1', 'value1')
         ])
 
         # list
@@ -1054,8 +1053,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             StringContainCheck(resource_group),
             StringContainCheck(nodepool1_name),
             StringContainCheck(nodepool2_name),
-            StringContainCheck("key1"),
-            StringContainCheck("value1")
+            self.check('[1].tags.key1','value1')
         ])
         #nodepool list in tabular format
         self.cmd('aks nodepool list --resource-group={resource_group} --cluster-name={name} -o table', checks=[
@@ -1074,8 +1072,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         #nodepool update
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --tags {new_tags}', checks=[
-            StringContainCheck("key2"),
-            StringContainCheck("value2")
+            self.check('tags.key2','value2')
         ])
 
         # #nodepool delete
