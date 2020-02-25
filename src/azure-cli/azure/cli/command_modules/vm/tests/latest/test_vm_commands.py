@@ -3457,7 +3457,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('proximityPlacementGroupType', 'Standard')
         ])
 
-        self.cmd('ppg show -g {rg} -n {ppg1} --colocation-status', checks=[
+        self.cmd('ppg show -g {rg} -n {ppg1} --include-colocation-status', checks=[
             self.check('name', '{ppg1}'),
             self.check('location', '{loc}'),
             self.check('proximityPlacementGroupType', 'Standard')
