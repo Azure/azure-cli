@@ -852,16 +852,24 @@ parameters:
   - name: --space -s
     type: string
     short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+  - name: --endpoint -e
+    type: string
+    short-summary: The endpoint type to be used for a Azure Dev Spaces controller. See https://aka.ms/azds-networking for more information.
 examples:
   - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks
-  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \\ client components and selecting a new or existing dev space 'my-space'.
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \
+            client components and selecting a new or existing dev space 'my-space'.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks --update --space my-space
-  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \\ 'develop/my-space' without prompting for confirmation.
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \
+            'develop/my-space' without prompting for confirmation.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster with a private endpoint.
+    text: |-
+        az aks use-dev-spaces -g my-aks-group -n my-aks -e private
 """
 
 helps['aks wait'] = """
