@@ -26,6 +26,8 @@ from azure.mgmt.sql.models import (
     ReplicationRole,
     ResourceIdentity,
     SecurityAlertPolicyState,
+    SensitivityLabel,
+    SensitivityLabelSource,
     ServerKey,
     ServerKeyType,
     ServiceObjectiveName,
@@ -1432,6 +1434,14 @@ def db_audit_policy_update(
     if audit_actions_and_groups:
         instance.audit_actions_and_groups = audit_actions_and_groups
 
+    # If auditing is enabled, make sure that the actions and groups are set to default
+    # value in case they were removed previously (When disabling auditing)
+    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
+        instance.audit_actions_and_groups = [
+            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+            "FAILED_DATABASE_AUTHENTICATION_GROUP",
+            "BATCH_COMPLETED_GROUP"]
+
     if retention_days:
         instance.retention_days = retention_days
 
@@ -1482,6 +1492,99 @@ def db_threat_detection_policy_update(
         instance.email_account_admins = email_account_admins
 
     return instance
+
+
+def db_sensitivity_label_show(
+        client,
+        database_name,
+        server_name,
+        schema_name,
+        table_name,
+        column_name,
+        resource_group_name):
+
+    return client.get(
+        resource_group_name,
+        server_name,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        SensitivityLabelSource.current)
+
+
+def db_sensitivity_label_update(
+        cmd,
+        client,
+        database_name,
+        server_name,
+        schema_name,
+        table_name,
+        column_name,
+        resource_group_name,
+        label_name=None,
+        information_type=None):
+    '''
+    Updates a sensitivity label. Custom update function to apply parameters to instance.
+    '''
+
+    # Get the information protection policy
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.security import SecurityCenter
+    from msrestazure.azure_exceptions import CloudError
+
+    security_center_client = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
+
+    information_protection_policy = security_center_client.information_protection_policies.get(
+        scope='/providers/Microsoft.Management/managementGroups/{}'.format(_get_tenant_id()),
+        information_protection_policy_name="effective")
+
+    sensitivity_label = SensitivityLabel()
+
+    # Get the current label
+    try:
+        current_label = client.get(
+            resource_group_name,
+            server_name,
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            SensitivityLabelSource.current)
+        # Initialize with existing values
+        sensitivity_label.label_name = current_label.label_name
+        sensitivity_label.label_id = current_label.label_id
+        sensitivity_label.information_type = current_label.information_type
+        sensitivity_label.information_type_id = current_label.information_type_id
+
+    except CloudError as ex:
+        if not(ex.error and ex.error.error and 'SensitivityLabelsLabelNotFound' in ex.error.error):
+            raise ex
+
+    # Find the label id and information type id in the policy by the label name provided
+    label_id = None
+    if label_name:
+        label_id = next((id for id in information_protection_policy.labels
+                         if information_protection_policy.labels[id].display_name.lower() ==
+                         label_name.lower()),
+                        None)
+        if label_id is None:
+            raise CLIError('The provided label name was not found in the information protection policy.')
+        sensitivity_label.label_id = label_id
+        sensitivity_label.label_name = label_name
+    information_type_id = None
+    if information_type:
+        information_type_id = next((id for id in information_protection_policy.information_types
+                                    if information_protection_policy.information_types[id].display_name.lower() ==
+                                    information_type.lower()),
+                                   None)
+        if information_type_id is None:
+            raise CLIError('The provided information type was not found in the information protection policy.')
+        sensitivity_label.information_type_id = information_type_id
+        sensitivity_label.information_type = information_type
+
+    return client.create_or_update(
+        resource_group_name, server_name, database_name, schema_name, table_name, column_name, sensitivity_label)
 
 
 ###############################################
@@ -2099,19 +2202,17 @@ def encryption_protector_update(
 ###############################################
 
 
-def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
+def _find_managed_instance_sku_from_capabilities(
+        cli_ctx,
+        location,
+        sku):
     '''
     Given a requested sku which may have some properties filled in
-    (e.g. tier and capacity), finds the canonical matching sku
+    (e.g. tier and family), finds the canonical matching sku
     from the given location's capabilities.
     '''
 
     logger.debug('_find_managed_instance_sku_from_capabilities input: %s', sku)
-
-    if sku.name:
-        # User specified sku.name, so nothing else needs to be resolved.
-        logger.debug('_find_managed_instance_sku_from_capabilities return sku as is')
-        return sku
 
     if not _any_sku_values_specified(sku):
         # User did not request any properties of sku, so just wipe it out.
@@ -2183,6 +2284,7 @@ def managed_instance_list(
 
 
 def managed_instance_update(
+        cmd,
         instance,
         administrator_login_password=None,
         license_type=None,
@@ -2190,7 +2292,9 @@ def managed_instance_update(
         storage_size_in_gb=None,
         assign_identity=False,
         proxy_override=None,
-        public_data_endpoint_enabled=None):
+        public_data_endpoint_enabled=None,
+        tier=None,
+        family=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2210,6 +2314,16 @@ def managed_instance_update(
         storage_size_in_gb or instance.storage_size_in_gb)
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
+
+    instance.sku.name = None
+    instance.sku.tier = (
+        tier or instance.sku.tier)
+    instance.sku.family = (
+        family or instance.sku.family)
+    instance.sku = _find_managed_instance_sku_from_capabilities(
+        cmd.cli_ctx,
+        instance.location,
+        instance.sku)
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled

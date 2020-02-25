@@ -3,11 +3,114 @@
 Release History
 ===============
 
+**AppService**
+az webapp create : Fixing issue when running the command with --runtime 
+
+2.1.0
+++++++
+
+**ACR**
+
+* Add a new argument `--expose-token` for `az acr login`
+* Fix the incorrect output of `az acr task identity show -n Name -r Registry -o table`
+* az acr login: Throw a CLIError if there are errors returned by docker command
+
+**ACS**
+
+* aks create/update: add `--vnet-subnet-id` validation
+
+**Aladdin**
+
+* Parse generated examples into commands' _help.py
+
+**AMS**
+
+* az ams is GA now
+
+**AppConfig**
+
+* Revise help message to exclude unsupported key/label filter
+* Remove preview tag for most commands excluding managed identity and feature flags
+* Add customer managed key when updating stores
+
+**AppService**
+
+* az webapp list-runtimes: Fix the bug for list-runtimes
+* Add az webapp|functionapp config ssl create
+* Add support for v3 function apps and node 12
+
+**ARM**
+
+* az policy assignment create: Fix the error message when the `--policy` parameter is invalid
+* az group deployment create: Fix "stat: path too long for Windows" error when using large parameters.json file
+
+**Backup**
+
+* Fix for item level recovery flow in OLR
+* Add restore as files support for SQL and SAP Databases
+
+**Compute**
+
+* vm/vmss/availability-set update: add --ppg to allowing updating ProximityPlacementGroup
+* vmss create: add --data-disk-iops and --data-disk-mbps
+* az vm host: remove preview tag for `vm host` and `vm host group`
+* [BREAKING CHANGE] Fix #10728: `az vm create`: create subnet automatically if vnet is specified and subnet not exists
+* Increase robustness of vm image list
+
+**Eventhub**
+
+* Azure Stack support for 2019-03-01-hybrid profile
+
+**KeyVault**
+
+* az keyvault key create: add a new value `import` for parameter `--ops`
+* az keyvault key list-versions: support parameter `--id` for specifying keys
+* Support private endpoint connections
+
+**Network**
+
+* Bump to azure-mgmt-network 9.0.0
+* az network private-link-service update/create: support --enable-proxy-protocol
+* Add connection Monitor V2 feature
+
+**Packaging**
+
+* [BREAKING CHANGE] Drop support for Python 2.7
+
+**Profile**
+
+* Preview: Add new attributes `homeTenantId` and `managedByTenants` to subscription accounts. Please re-run `az login` for the changes to take effect
+* az login: Show a warning when a subscription is listed from more than one tenants and default to the first one. To select a specific tenant when accessing this subscription, please include `--tenant` in `az login`
+
+**Role**
+
+* az role assignment create: Fix the error that assigning a role to a service principal by display name yields a HTTP 400
+
+**SQL**
+
+* Update SQL Managed Instance cmdlet `az sql mi update` with two new parameters: tier and family
+
+**Storage**
+
+* [BREAKING CHANGE] `az storage account create`: Change default storage account kind to StorageV2
+
+2.0.81
+++++++
+
+**ACS**
+
+* Added support to set outbound allocated ports and idle timeouts on standard load balancer
+* Update to API Version 2019-11-01
+
 **ACR**
 
 * [BREAKING CHANGE] `az acr delete` will prompt
 * [BREAKING CHANGE] 'az acr task delete' will prompt
 * Add a new command group 'az acr taskrun show/list/delete' for taskrun management
+
+**AKS**
+
+* Each cluster gets a separate service principal to improve isolation
 
 **AppConfig**
 
@@ -20,11 +123,40 @@ Release History
 **AppService**
 
 * Azure Stack: surface commands under the profile of 2019-03-01-hybrid
+* functionapp: Add ability to create Java function apps in Linux
+* functionapp: Added --functions-version property to 'az functionapp create'
+* functionapp: Added support for node 12 for v3 function apps
+* functionapp: Added support for python 3.8 for v3 function apps
+* functionapp: Changed python default version to 3.7 for v2 and v3 function apps
 
 **ARM**
 
+* Fix issue #10246: `az resource tag` crashes when the parameter `--ids` passed in is resource group ID
 * Fix issue #11658: `az group export` command does not support `--query` and `--output` parameters
 * Fix issue #10279: The exit code of `az group deployment validate` is 0 when the verification fails
+* Fix issue #9916: Improve the error message of the conflict between tag and other filter conditions for `az resource list` command
+* Add new parameter `--managed-by` to support adding managedBy information for command `az group create`
+
+**Azure Red Hat OpenShift**
+
+* Add `monitor` subgroup to manage Log Analytics monitoring in Azure Red Hat OpensShift cluster
+
+**CDN**
+
+* Add support for rulesEngine feature
+* Add new commands group 'cdn endpoint rule' to manage rules
+* Update azure-mgmt-cdn version to 4.0.0 to use api version 2019-04-15
+
+**Deployment Manager**
+
+* Add list operation for all resources.
+* Enhance step resource for new step type.
+* Update azure-mgmt-deploymentmanager package to use version 0.2.0.
+
+**BotService**
+
+* Fix issue #11697: `az bot create` is not idempotent
+* Change name-correcting tests to run in Live-mode only
 
 **IoT**
 
@@ -34,6 +166,10 @@ Release History
 
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
+**Key Vault**
+
+* Add a new command `az keyvault key download` for downloading keys.
+
 **Misc**
 
 * Fix #6371: Support filename and environment variable completion in Bash
@@ -41,6 +177,30 @@ Release History
 **Network**
 
 * Fix #2092: az network dns record-set add/remove: add warning when record-set is not found. In the future, an extra argument will be supported to confirm this auto creation.
+
+**Policy**
+
+* Add new command `az policy metadata` to retrieve rich policy metadata resources
+* `az policy remediation create`: Specify whether compliance should be re-evaluated prior to remediation with the `--resource-discovery-mode` parameter
+
+**Profile**
+
+* `az account get-access-token`: Add `--tenant` parameter to acquire token for the tenant directly, needless to specify a subscription
+
+**RBAC**
+
+* [BREAKING CHANGE] Fix #11883: `az role assignment create`: empty scope will prompt error
+
+**Security**
+
+* Added new commands `az atp show` and `az atp update` to view and manage advanced threat protection settings for storage accounts.
+
+**SQL**
+
+* `sql dw create`: deprecated `--zone-redundant` and `--read-replica-count` parameters. These parameters do not apply to DataWarehouse.
+* [BREAKING CHANGE] `az sql db create`: Remove "WideWorldImportersStd" and "WideWorldImportersFull" as documented allowed values for "az sql db create --sample-name". These sample databases would always cause creation to fail.
+* Add New commands `sql db classification show/list/update/delete` and `sql db classification recommendation list/enable/disable` to manage sensitivity classifications for SQL databases.
+* `az sql db audit-policy`: Fix for empty audit actions and groups
 
 **Storage**
 
@@ -50,6 +210,31 @@ Release History
 * `az storage copy`: Add `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage remove`: Change `--inlcude` and `--exclude` parameters to `--include-path`, `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
 * `az storage sync`: Add `--include-pattern`, `--exclude-path` and`--exclude-pattern` parameters
+
+**ServiceFabric**
+
+* Adding new commands to manage appliaction and services.
+    - sf application-type
+        - list
+        - delete
+        - show
+        - create
+    - sf application-type version
+        - list
+        - delete
+        - show
+        - create
+    - sf application
+        - list
+        - delete
+        - show
+        - create
+        - update
+    - sf service
+        - list
+        - delete
+        - show
+        - create
 
 2.0.80
 ++++++
@@ -231,7 +416,7 @@ Release History
 
 **Policy**
 
-* Support for Policy API version 2019-09-01.
+* Support for Policy API version 2019-09-01
 * az policy set-definition: Support grouping within policy set definitions with `--definition-groups` parameter
 
 **Redis**

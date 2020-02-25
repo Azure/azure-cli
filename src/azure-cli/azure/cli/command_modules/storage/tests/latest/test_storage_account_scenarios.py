@@ -169,6 +169,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
         self.cmd(create_cmd, checks=[JMESPathCheck('sku.name', 'Standard_RAGRS')])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-10-01')
+    @ResourceGroupPreparer(location='southcentralus')
+    def test_storage_create_default_kind(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        create_cmd = 'az storage account create -n {} -g {}'.format(name, resource_group)
+        self.cmd(create_cmd, checks=[JMESPathCheck('kind', 'StorageV2')])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2018-02-01')
     @ResourceGroupPreparer(location='southcentralus', name_prefix='cli_storage_account_hns')
     def test_storage_create_with_hns(self, resource_group):
