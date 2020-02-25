@@ -110,6 +110,8 @@ def process_secret_set_namespace(cmd, namespace):
 
 
 def process_hsm_base_url(ns):
+    if not ns.identifier and not ns.hsm_base_url:
+        raise CLIError('Please specify --hsm-name or --id.')
     if ns.identifier:
         ns.hsm_base_url = ns.identifier
 
