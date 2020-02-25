@@ -678,17 +678,8 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaises(SystemExit):
             self.cmd('{cmd} --enable-delete-retention false --delete-retention-days 365 -n {sa} -g {rg}').get_output_in_json()
 
-        with self.assertRaises(SystemExit):
-            self.cmd('{cmd} --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
-
-        with self.assertRaises(SystemExit):
-            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days -1 -n {sa} -g {rg}')
-
-        with self.assertRaises(SystemExit):
-            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 0 -n {sa} -g {rg}')
-
-        with self.assertRaises(SystemExit):
-            self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 366 -n {sa} -g {rg}')
+        with self.assertRaisesRegexp(CLIError, "Delete Retention Policy hasn't been enabled,"):
+            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
 
         result = self.cmd('{cmd} --enable-delete-retention true --delete-retention-days 1 -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], True)

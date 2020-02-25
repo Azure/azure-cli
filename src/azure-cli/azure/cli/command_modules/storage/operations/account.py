@@ -452,13 +452,16 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
             delete_retention_days = None
         instance.delete_retention_policy = cmd.get_models('DeleteRetentionPolicy')(
             enabled=enable_delete_retention, days=delete_retention_days)
+
     if enable_restore_policy is not None:
         if enable_restore_policy is False:
             restore_days = None
         instance.restore_policy = cmd.get_models('RestorePolicyProperties')(
             enabled=enable_restore_policy, days=restore_days)
+
     if enable_versioning is not None:
         instance.is_versioning_enabled = enable_versioning
+
     return instance
 
 
