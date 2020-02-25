@@ -922,7 +922,10 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
 
     with self.command_group('network watcher flow-log', network_watcher_flow_log_sdk, min_api='2019-11-01') as g:
-        g.custom_command('create', 'create_nw_flow_log', validator=process_nw_flow_log_create_namespace)
+        g.custom_command('create',
+                         'create_nw_flow_log',
+                         client_factory=cf_flow_logs,
+                         validator=process_nw_flow_log_create_namespace)
         g.command('list', 'list')
         g.command('delete', 'delete')
 
