@@ -315,6 +315,7 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         IpRule = cmd.get_models('IPRule')
         if not rules.ip_rules:
             rules.ip_rules = []
+        rules.ip_rules = [r for r in rules.ip_rules if r.ip_address_or_range != ip_address]
         rules.ip_rules.append(IpRule(ip_address_or_range=ip_address, action=action))
 
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')

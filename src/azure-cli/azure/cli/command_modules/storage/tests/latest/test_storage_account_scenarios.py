@@ -42,6 +42,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                 **kwargs))
 
         self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        # test network-rule add idempotent
+        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
         self.cmd(
             'storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.2.0.0/24'.format(**kwargs))
         self.cmd(
