@@ -915,7 +915,10 @@ def load_command_table(self, _):
         g.command('list', 'list')
 
     with self.command_group('network watcher flow-log',  client_factory=cf_network_watcher, min_api='2016-09-01') as g:
-        g.custom_command('configure', 'set_nsg_flow_logging', validator=process_nw_flow_log_set_namespace)
+        g.custom_command('configure',
+                         'set_nsg_flow_logging',
+                         validator=process_nw_flow_log_set_namespace,
+                         deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
         g.custom_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
 
     with self.command_group('network watcher flow-log', network_watcher_flow_log_sdk, min_api='2019-11-01') as g:
