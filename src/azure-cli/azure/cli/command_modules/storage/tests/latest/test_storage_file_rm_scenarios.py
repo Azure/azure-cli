@@ -150,7 +150,27 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.kwargs.update({
             'share': self.create_random_name('share', 24),
         })
-        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share} --enabled-protocols NFS', checks={
+        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share} --enabled-protocols NFS --root-squash AllSquash', checks={
             JMESPathCheck('name', self.kwargs['share']),
-            JMESPathCheck('enabledProtocol', 'NFS')
+            JMESPathCheck('enabledProtocol', 'NFS'),
+            JMESPathCheck('rootSquash', 'AllSquash')
         })
+
+        self.cmd('storage share-rm update --storage-account {sa} -g {rg} -n {share} --root-squash NoRootSquash', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('rootSquash', 'NoRootSquash')
+        })
+
+        self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share}', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('enabledProtocol', 'NFS'),
+            JMESPathCheck('rootSquash', 'NoRootSquash')
+        })
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('[0].name', self.kwargs['share']),
+            JMESPathCheck('[0].enabledProtocol', 'NFS'),
+            JMESPathCheck('[0].rootSquash', 'NoRootSquash')
+        })
+
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share}')
