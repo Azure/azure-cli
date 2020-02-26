@@ -4381,7 +4381,18 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
-def show_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, resource_group_name=None):
+# why need 2 different names (watcher_name and network_watcher_name) for watcher?
+# It's temporary solution for compatible with old show command's parameter.
+# After old show command's parameter is deprecated, those parameters for should be removed.
+def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, resource_group_name=None, nsg=None,
+                          network_watcher_name=None, flow_log_name=None):
+    # new approach to show flow log
+    if all([resource_group_name, network_watcher_name, flow_log_name]):
+        from ._client_factory import cf_flow_logs
+        client = cf_flow_logs(cmd.cli_ctx, None)
+        return client.get(resource_group_name, network_watcher_name, flow_log_name)
+    
+    # deprecated approach to show flow log
     return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
 
 

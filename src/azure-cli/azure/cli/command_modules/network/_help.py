@@ -5348,8 +5348,10 @@ helps['network watcher flow-log show'] = """
 type: command
 short-summary: Get the flow log configuration of a network security group.
 examples:
-  - name: Show NSG flow logs.
+  - name: Show NSG flow logs. (Deprecated)
     text: az network watcher flow-log show -g MyResourceGroup --nsg MyNsg
+  - name: Show NSG flow logs with Azure Resource Management formatted.
+    text: az network watcher flow-log show --watcher MyNetworkWatcher --name true
 """
 
 helps['network watcher list'] = """

@@ -1408,17 +1408,22 @@ def process_nw_flow_log_show_namespace(cmd, namespace, remove_location=True):
     from msrestazure.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.arm import get_arm_resource_by_id
 
-    if not is_valid_resource_id(namespace.nsg):
-        namespace.nsg = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='networkSecurityGroups',
-            name=namespace.nsg)
+    if namespace.nsg is not None:
+        if not is_valid_resource_id(namespace.nsg):
+            namespace.nsg = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network',
+                type='networkSecurityGroups',
+                name=namespace.nsg)
 
-    nsg = get_arm_resource_by_id(cmd.cli_ctx, namespace.nsg)
-    namespace.location = nsg.location  # pylint: disable=no-member
-    get_network_watcher_from_location(remove=remove_location)(cmd, namespace)
+        nsg = get_arm_resource_by_id(cmd.cli_ctx, namespace.nsg)
+        namespace.location = nsg.location  # pylint: disable=no-member
+        get_network_watcher_from_location(remove=remove_location)(cmd, namespace)
+    elif namespace.flow_log_name is not None and namespace.network_watcher_name is not None:
+        pass
+    else:
+        raise CLIError('usage error: --nsg NSG | --watcher NETWORK_WATCHER_NAME --name FLOW_LOW_NAME')
 
 
 def process_nw_topology_namespace(cmd, namespace):

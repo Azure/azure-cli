@@ -1357,6 +1357,19 @@ def load_arguments(self, _):
         c.argument('retention', type=int, help='Number of days to retain logs')
         c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs')
 
+    # temporary solution for compatible with old show command's parameter
+    # after old show command's parameter is deprecated and removed,
+    # this argument group "network watcher flow-log show" should be removed
+    with self.argument_context('network watcher flow-log show') as c:
+        c.argument('nsg',
+                   deprecate_info=c.deprecate(redirect='--watcher and --name', hide=False),
+                   help='Name or ID of the network security group.')
+
+    with self.argument_context('network watcher flow-log show',
+                               arg_group='Result with Azure Management Resource (ARM) Formatted') as c:
+        c.argument('network_watcher_name', options_list='--watcher')
+        c.argument('flow_log_name', name_arg_type, help='The name of the flow logger', min_api='2019-11-01')
+
     with self.argument_context('network watcher flow-log', arg_group='Format', min_api='2018-10-01') as c:
         c.argument('log_format', options_list='--format', help='File type of the flow log.', arg_type=get_enum_type(FlowLogFormatType))
         c.argument('log_version', help='Version (revision) of the flow log.', type=int)

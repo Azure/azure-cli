@@ -921,11 +921,17 @@ def load_command_table(self, _):
                          deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
         g.custom_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
 
-    with self.command_group('network watcher flow-log', network_watcher_flow_log_sdk, min_api='2019-11-01') as g:
+    with self.command_group('network watcher flow-log', network_watcher_flow_log_sdk,  min_api='2019-11-01') as g:
         g.custom_command('create',
                          'create_nw_flow_log',
                          client_factory=cf_flow_logs,
                          validator=process_nw_flow_log_create_namespace)
+        # show command implementation is substituted by show_nsg_flow_logging()
+        # after old show command's parameter is deprecated and removed, should refactor this show command implementation
+        # g.custom_show_command('show',
+        #                       'show_nw_flow_log',
+        #                       client_factory=cf_flow_logs,
+        #                       validator=process_nw_flow_log_show_namespace)
         g.command('list', 'list')
         g.command('delete', 'delete')
 
