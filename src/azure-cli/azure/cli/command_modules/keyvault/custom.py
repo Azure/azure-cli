@@ -1412,7 +1412,6 @@ def _reconstruct_role_assignment(role_dics, principal_dics, role_assignment):
     # 2. fill in logic names to get things understandable.
     # (it's possible that associated roles and principals were deleted, and we just do nothing.)
     # 3. fill in role name
-    role_assignment['canDelegate'] = None
     if 'properties' in role_assignment:
         for k, v in role_assignment['properties'].items():
             role_assignment[k] = v
@@ -1524,27 +1523,6 @@ def delete_role_assignment(cmd, client, role_assignment_name=None, hsm_base_url=
         )
 
     return deleted_role_assignments
-
-
-def get_role_assignment(cmd, client, role_assignment_name, hsm_base_url=None,
-                        identifier=None):  # pylint: disable=unused-argument
-    """ Get a role assignment. """
-    patch_akv_client(client)
-
-    role_assignment = \
-        client.get_role_assignment(client, vault_base_url=hsm_base_url, scope='/', name=role_assignment_name)
-
-    role_defs = list_role_definitions(client, hsm_base_url=hsm_base_url)
-    role_dics = _get_role_dics(role_defs)
-    principal_dics = _get_principal_dics(cmd.cli_ctx, [role_assignment])
-
-    _reconstruct_role_assignment(
-        role_dics=role_dics,
-        principal_dics=principal_dics,
-        role_assignment=role_assignment
-    )
-
-    return role_assignment
 
 
 def list_role_assignments(cmd, client, hsm_base_url=None, scope=None, assignee=None, role=None,

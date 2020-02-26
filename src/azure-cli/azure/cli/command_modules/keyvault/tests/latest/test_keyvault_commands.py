@@ -48,6 +48,9 @@ def _clear_hsm_role_assigments(test, hsm_name, assignees):
         test.cmd('keyvault role assignment delete --hsm-name {hsm_name} --assignee {assignee}'
                  .format(hsm_name=hsm_name, assignee=assignee))
 
+    if test.is_live:
+        time.sleep(10)
+
 
 def _clear_hsm(test, hsm_name):
     all_keys = test.cmd('keyvault key list --hsm-name {hsm_name} --query "[].kid"'
@@ -340,14 +343,6 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                                     ]).get_output_in_json()
         self.kwargs['role_assignment_id1'] = role_assignment1['id']
 
-        self.cmd('keyvault role assignment show --hsm-name {hsm} --name {role_assignment_name1}', checks=[
-            self.check('name', '{role_assignment_name1}'),
-            self.check('roleDefinitionId', '{role_def_id1}'),
-            self.check('roleDefinitionName', '{role_name1}'),
-            self.check('principalName', '{user1}'),
-            self.check('scope', '/keys')
-        ])
-
         role_assignment2 = self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name2}" '
                                     '--assignee {user1} --name {role_assignment_name2}',
                                     checks=[
@@ -358,14 +353,6 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                                         self.check('scope', '/')
                                     ]).get_output_in_json()
         self.kwargs['role_assignment_id2'] = role_assignment2['id']
-
-        self.cmd('keyvault role assignment show --hsm-name {hsm} --name {role_assignment_name2}', checks=[
-            self.check('name', '{role_assignment_name2}'),
-            self.check('roleDefinitionId', '{role_def_id2}'),
-            self.check('roleDefinitionName', '{role_name2}'),
-            self.check('principalName', '{user1}'),
-            self.check('scope', '/')
-        ])
 
         # user2 + role1/role2
         self.cmd('keyvault role assignment create --hsm-name {hsm} --role "{role_name1}" '
@@ -410,6 +397,9 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
                      self.check('principalName', '{user3}'),
                      self.check('scope', '/')
                  ]).get_output_in_json()
+
+        if self.is_live:
+            time.sleep(10)
 
         # list all (including this one: assignee=bim@microsoft.com,role=Administrator, scope=/)
         self.cmd('keyvault role assignment list --hsm-name {hsm}', checks=self.check('length(@)', 7))

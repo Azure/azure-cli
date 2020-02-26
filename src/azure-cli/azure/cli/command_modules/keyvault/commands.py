@@ -205,7 +205,6 @@ def load_command_table(self, _):
         g.keyvault_custom('delete', 'delete_role_assignment')
         g.keyvault_custom('list', 'list_role_assignments', table_transformer=transform_assignment_list)
         g.keyvault_custom('create', 'create_role_assignment')
-        g.keyvault_custom('show', 'get_role_assignment')
 
     with self.command_group('keyvault role definition', kv_data_sdk) as g:
         g.keyvault_custom('list', 'list_role_definitions', table_transformer=transform_definition_list)
