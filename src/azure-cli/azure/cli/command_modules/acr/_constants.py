@@ -40,22 +40,22 @@ def get_premium_sku(cmd):
 
 
 def get_valid_os(cmd):
-    OS = cmd.get_models('OS', operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    OS = cmd.get_models('OS', operation_group='tasks')
     return [item.value.lower() for item in OS]
 
 
 def get_valid_architecture(cmd):
-    Architecture = cmd.get_models('Architecture', operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    Architecture = cmd.get_models('Architecture', operation_group='tasks')
     return [item.value.lower() for item in Architecture]
 
 
 def get_valid_variant(cmd):
-    Variant = cmd.get_models('Variant', operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    Variant = cmd.get_models('Variant', operation_group='tasks')
     return [item.value.lower() for item in Variant]
 
 
 def get_finished_run_status(cmd):
-    RunStatus = cmd.get_models('RunStatus', operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    RunStatus = cmd.get_models('RunStatus', operation_group='tasks')
     return [RunStatus.succeeded.value,
             RunStatus.failed.value,
             RunStatus.canceled.value,
@@ -64,7 +64,7 @@ def get_finished_run_status(cmd):
 
 
 def get_succeeded_run_status(cmd):
-    RunStatus = cmd.get_models('RunStatus', operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    RunStatus = cmd.get_models('RunStatus', operation_group='tasks')
     return [RunStatus.succeeded.value]
 
 
