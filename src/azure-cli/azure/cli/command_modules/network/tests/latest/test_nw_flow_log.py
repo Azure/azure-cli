@@ -60,3 +60,55 @@ class NWFlowLogScenarioTest(ScenarioTest):
                      self.check('retentionPolicy.days', 0),
                      self.check('retentionPolicy.enabled', False),
                  ])
+
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='westus', kind='StorageV2')
+    def test_nw_flow_log_delete(self, resource_group, resource_group_location, storage_account):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'storage_account': storage_account,
+            'nsg': 'nsg1',
+            'watcher_rg': 'NetworkWatcherRG',
+            'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
+            'flow_log': 'flow_log_test2',
+        })
+
+        # enable network watcher
+        # self.cmd('network watcher configure -g {rg} --locations {location} --enabled')
+
+        # prepare the target resource
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+
+        # prepare workspace
+        workspace = self.cmd('monitor log-analytics workspace create '
+                             '--resource-group {rg} '
+                             '--location {location} '
+                             '--workspace-name MyLogAnalytics10 ').get_output_in_json()
+        self.kwargs.update({
+            'workspace_id': workspace['id']
+        })
+
+        with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
+            self.cmd('network watcher flow-log create '
+                     '--resource-group {rg} '
+                     '--nsg {nsg} '
+                     '--storage-account {storage_account} '
+                     '--workspace {workspace_id} '
+                     '--name {flow_log} ')
+
+        self.cmd('network watcher flow-log show '
+                 '--resource-group {watcher_rg} '
+                 '--watcher {watcher_name} '
+                 '--name {flow_log} ')
+
+        self.cmd('network watcher flow-log delete '
+                 '--resource-group {watcher_rg} '
+                 '--watcher {watcher_name} '
+                 '--name {flow_log} ')
+
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('network watcher flow-log show '
+                     '--resource-group {watcher_rg} '
+                     '--watcher {watcher_name} '
+                     '--name {flow_log} ')
