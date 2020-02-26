@@ -198,6 +198,7 @@ def load_arguments(self, _):
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
         c.argument('attach_acr', acr_arg_type)
+        c.argument('enable_private_cluster', action='store_true')
         c.argument('nodepool_tags', nargs='*', validator=validate_nodepool_tags, help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
 
     with self.argument_context('aks update') as c:

@@ -8,13 +8,16 @@ from distutils.version import StrictVersion  # pylint: disable=no-name-in-module
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAPIServerAccessProfile
 
 
-def _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=None):
+def _populate_api_server_access_profile(api_server_authorized_ip_ranges, enable_private_cluster, instance=None):
     if instance is None or instance.api_server_access_profile is None:
         profile = ManagedClusterAPIServerAccessProfile()
     else:
         profile = instance.api_server_access_profile
 
-    if api_server_authorized_ip_ranges == "":
+    if enable_private_cluster:
+        profile.enable_private_cluster = True
+
+    if api_server_authorized_ip_ranges is None or api_server_authorized_ip_ranges == "":
         authorized_ip_ranges = []
     else:
         authorized_ip_ranges = [ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
