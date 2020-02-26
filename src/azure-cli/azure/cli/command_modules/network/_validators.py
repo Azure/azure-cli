@@ -1403,7 +1403,8 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
 
 def process_nw_flow_log_create_namespace(cmd, namespace):
     process_nw_flow_log_set_namespace(cmd, namespace)
-    return process_nw_flow_log_show_namespace(cmd, namespace, remove_location=False)
+    process_nw_flow_log_show_namespace(cmd, namespace, remove_location=False)
+    validate_tags(namespace)
 
 
 def process_nw_flow_log_show_namespace(cmd, namespace, remove_location=True):

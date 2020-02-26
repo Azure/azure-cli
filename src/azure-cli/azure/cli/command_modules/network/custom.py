@@ -4458,7 +4458,7 @@ def create_nw_flow_log(cmd,
 def update_nw_flow_log(cmd,
                        instance,
                        enabled=None,
-                       storage_account=None,
+                       storage_account_id=None,
                        retention=0,
                        log_format=None,
                        log_version=None,
@@ -4469,7 +4469,7 @@ def update_nw_flow_log(cmd,
     with cmd.update_context(instance) as c:
         c.set_param('enabled', enabled)
         c.set_param('tags', tags)
-        c.set_param('storage_id', storage_account)
+        c.set_param('storage_id', storage_account_id)
 
     with cmd.update_context(instance.retention_policy) as c:
         c.set_param('days', retention)
