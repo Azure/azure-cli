@@ -8,7 +8,6 @@ import re
 from msrest.exceptions import ValidationError
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands import LongRunningOperation
 from ._utils import (
     get_registry_by_name,
@@ -110,8 +109,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         cmd_value=cmd_value,
         timeout=timeout)
 
-    SourceControlType = cmd.get_models('SourceControlType', operation_group='tasks',
-                                       resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    SourceControlType = cmd.get_models('SourceControlType', operation_group='tasks')
     source_control_type = SourceControlType.visual_studio_team_service.value
     if context_path is not None and 'GITHUB.COM' in context_path.upper():
         source_control_type = SourceControlType.github.value
@@ -128,7 +126,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
         SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
             'SourceTrigger', 'SourceProperties', 'AuthInfo', 'TriggerStatus',
-            operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+            operation_group='tasks')
         source_triggers = [
             SourceTrigger(
                 source_repository=SourceProperties(
@@ -154,8 +152,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     base_image_trigger = None
     if base_image_trigger_enabled:
         BaseImageTrigger, TriggerStatus = cmd.get_models(
-            'BaseImageTrigger', 'TriggerStatus', operation_group='tasks',
-            resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+            'BaseImageTrigger', 'TriggerStatus', operation_group='tasks')
         base_image_trigger = BaseImageTrigger(
             base_image_trigger_type=base_image_trigger_type,
             status=TriggerStatus.enabled.value if base_image_trigger_enabled else TriggerStatus.disabled.value,
@@ -168,7 +165,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     Task, PlatformProperties, AgentProperties, TriggerProperties = cmd.get_models(
         'Task', 'PlatformProperties', 'AgentProperties', 'TriggerProperties',
-        operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        operation_group='tasks')
 
     identity = None
     if assign_identity is not None:
@@ -226,8 +223,7 @@ def create_task_step(context_path,
     if context_path:
         if file:
             if file.endswith(ALLOWED_TASK_FILE_TYPES):
-                FileTaskStep = cmd.get_models('FileTaskStep', operation_group='tasks',
-                                              resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                FileTaskStep = cmd.get_models('FileTaskStep', operation_group='tasks')
                 step = FileTaskStep(
                     task_file_path=file,
                     values_file_path=values,
@@ -236,8 +232,7 @@ def create_task_step(context_path,
                     values=(set_value if set_value else []) + (set_secret if set_secret else [])
                 )
             else:
-                DockerBuildStep = cmd.get_models('DockerBuildStep', operation_group='tasks',
-                                                 resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                DockerBuildStep = cmd.get_models('DockerBuildStep', operation_group='tasks')
                 step = DockerBuildStep(
                     image_names=image_names,
                     is_push_enabled=not no_push,
@@ -254,8 +249,7 @@ def create_task_step(context_path,
         yaml_template = get_yaml_template(
             cmd_value, timeout, file)
         import base64
-        EncodedTaskStep = cmd.get_models('EncodedTaskStep', operation_group='tasks',
-                                         resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        EncodedTaskStep = cmd.get_models('EncodedTaskStep', operation_group='tasks')
         step = EncodedTaskStep(
             encoded_task_content=base64.b64encode(
                 yaml_template.encode()).decode(),
@@ -343,7 +337,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
     FileTaskStepUpdateParameters, DockerBuildStepUpdateParameters = cmd.get_models(
         'FileTaskStepUpdateParameters', 'DockerBuildStepUpdateParameters',
-        operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        operation_group='tasks')
     if file and file.endswith(ALLOWED_TASK_FILE_TYPES):
         step = FileTaskStepUpdateParameters(
             task_file_path=file,
@@ -366,7 +360,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     elif step:
         DockerBuildStep, FileTaskStep = cmd.get_models(
             'DockerBuildStep', 'FileTaskStep',
-            operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+            operation_group='tasks')
         if isinstance(step, DockerBuildStep):
             step = DockerBuildStepUpdateParameters(
                 image_names=image_names,
@@ -390,8 +384,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
     source_control_type = None
     if context_path:
-        SourceControlType = cmd.get_models('SourceControlType', operation_group='tasks',
-                                           resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        SourceControlType = cmd.get_models('SourceControlType', operation_group='tasks')
         if 'GITHUB.COM' in context_path.upper():
             source_control_type = SourceControlType.github.value
         else:
@@ -400,8 +393,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     # update trigger
     source_trigger_update_params, base_image_trigger_update_params = None, None
     if task.trigger:
-        TriggerStatus = cmd.get_models('TriggerStatus', operation_group='tasks',
-                                       resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        TriggerStatus = cmd.get_models('TriggerStatus', operation_group='tasks')
 
         source_triggers = task.trigger.source_triggers
         base_image_trigger = task.trigger.base_image_trigger
@@ -410,7 +402,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
             SourceTriggerUpdateParameters, SourceUpdateParameters, AuthInfoUpdateParameters = cmd.get_models(
                 'SourceTriggerUpdateParameters', 'SourceUpdateParameters', 'AuthInfoUpdateParameters',
-                operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                operation_group='tasks')
 
             source_trigger_events = _get_trigger_event_list_patch(cmd,
                                                                   source_triggers,
@@ -436,7 +428,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         if base_image_trigger_enabled or base_image_trigger is not None:
             BaseImageTriggerUpdateParameters = cmd.get_models(
                 'BaseImageTriggerUpdateParameters',
-                operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                operation_group='tasks')
 
             base_image_status = None
             if base_image_trigger_enabled is not None:
@@ -456,7 +448,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
 
     TaskUpdateParameters, PlatformUpdateParameters, AgentProperties, TriggerUpdateParameters = cmd.get_models(
         'TaskUpdateParameters', 'PlatformUpdateParameters', 'AgentProperties', 'TriggerUpdateParameters',
-        operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        operation_group='tasks')
     taskUpdateParameters = TaskUpdateParameters(
         status=status,
         platform=PlatformUpdateParameters(
@@ -494,8 +486,7 @@ def acr_task_identity_assign(cmd,
     identity = _build_identities_info(cmd, identities)
 
     TaskUpdateParameters = cmd.get_models('TaskUpdateParameters',
-                                          operation_group='tasks',
-                                          resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                                          operation_group='tasks')
 
     taskUpdateParameters = TaskUpdateParameters(
         identity=identity
@@ -531,8 +522,7 @@ def acr_task_identity_remove(cmd,
     else:
         identity = _build_identities_info(cmd, identities, True)
 
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks',
-                                          resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
     taskUpdateParameters = TaskUpdateParameters(
         identity=identity
     )
@@ -571,8 +561,7 @@ def acr_task_credential_add(cmd,
     if login_server in existingCreds:
         raise CLIError("Login server '{}' already exists. You cannot add it again.".format(login_server))
 
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks',
-                                          resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
     taskUpdateParameters = TaskUpdateParameters(
         credentials=get_custom_registry_credentials(
             cmd=cmd,
@@ -608,8 +597,7 @@ def acr_task_credential_update(cmd,
     if login_server not in existingCreds:
         raise CLIError("Login server '{}' not found.".format(login_server))
 
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks',
-                                          resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
     taskUpdateParameters = TaskUpdateParameters(
         credentials=get_custom_registry_credentials(
             cmd=cmd,
@@ -636,8 +624,7 @@ def acr_task_credential_remove(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks',
-                                          resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
     taskUpdateParameters = TaskUpdateParameters(
         credentials=get_custom_registry_credentials(
             cmd=cmd,
@@ -678,7 +665,7 @@ def acr_task_timer_add(cmd,
 
     TaskUpdateParameters, TriggerUpdateParameters, TimerTriggerUpdateParameters, TriggerStatus = cmd.get_models(
         'TaskUpdateParameters', 'TriggerUpdateParameters', 'TimerTriggerUpdateParameters', 'TriggerStatus',
-        operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        operation_group='tasks')
     taskUpdateParameters = TaskUpdateParameters(
         trigger=TriggerUpdateParameters(
             timer_triggers=[
@@ -707,7 +694,7 @@ def acr_task_timer_update(cmd,
 
     TaskUpdateParameters, TriggerUpdateParameters, TimerTriggerUpdateParameters, TriggerStatus = cmd.get_models(
         'TaskUpdateParameters', 'TriggerUpdateParameters', 'TimerTriggerUpdateParameters', 'TriggerStatus',
-        operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        operation_group='tasks')
 
     trigger_status = None
     if enabled is not None:
@@ -808,8 +795,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
     from ._client_factory import cf_acr_registries_tasks
     client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
     TaskRunRequest, OverrideTaskStepProperties = cmd.get_models('TaskRunRequest', 'OverrideTaskStepProperties',
-                                                                operation_group='tasks',
-                                                                resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                                                                operation_group='tasks')
 
     import base64
     if update_trigger_token:
@@ -963,7 +949,7 @@ def _get_all_override_arguments(argument=None, secret_argument=None):
 def _build_identities_info(cmd, identities, is_remove=False):
     IdentityProperties, UserIdentityProperties, ResourceIdentityType = cmd.get_models(
         'IdentityProperties', 'UserIdentityProperties', 'ResourceIdentityType',
-        operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        operation_group='tasks')
     identities = identities or []
     identity_types = []
     if IDENTITY_GLOBAL_REMOVE in identities:
@@ -986,8 +972,7 @@ def _build_identities_info(cmd, identities, is_remove=False):
 def _get_trigger_event_list_put(cmd,
                                 commit_trigger_enabled=None,
                                 pull_request_trigger_enabled=None):
-    SourceTriggerEvent = cmd.get_models('SourceTriggerEvent', operation_group='tasks',
-                                        resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+    SourceTriggerEvent = cmd.get_models('SourceTriggerEvent', operation_group='tasks')
     source_trigger_events = []
     if commit_trigger_enabled:
         source_trigger_events.append(SourceTriggerEvent.commit.value)
@@ -1001,8 +986,7 @@ def _get_trigger_event_list_patch(cmd,
                                   commit_trigger_enabled=None,
                                   pull_request_trigger_enabled=None):
     TriggerStatus, SourceTriggerEvent = cmd.get_models('TriggerStatus', 'SourceTriggerEvent',
-                                                       operation_group='tasks',
-                                                       resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                                                       operation_group='tasks')
     source_trigger_events = set()
     # perform merge with server-side event list
     if source_triggers:

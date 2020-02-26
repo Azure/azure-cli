@@ -55,10 +55,9 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
-    from azure.cli.core.profiles import ResourceType
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
         'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties',
-        operation_group='tasks', resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+        operation_group='tasks')
 
     if source_location:
         request = FileTaskRunRequest(

@@ -73,10 +73,8 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         pack_image_tag=pack_image_tag,
         no_pull='--no-pull' if not pull else '')
 
-    from azure.cli.core.profiles import ResourceType
     EncodedTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'PlatformProperties',
-                                                               operation_group='tasks',
-                                                               resource_type=ResourceType.MGMT_CONTAINERREGISTRY)
+                                                               operation_group='tasks')
 
     request = EncodedTaskRunRequest(
         encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),

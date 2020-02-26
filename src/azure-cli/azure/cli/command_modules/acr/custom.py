@@ -427,7 +427,7 @@ def rotate_key(cmd, client, registry_name, identity=None, key_encryption_key=Non
         except ValueError:
             from azure.cli.core.commands.client_factory import get_subscription_id
             if identity == SYSTEM_ASSIGNED_IDENTITY_ALIAS:
-                client_id = registry.identity.principal_id
+                client_id = 'system'  # reserved word on ACR service
             else:
                 identity = _ensure_identity_resource_id(subscription_id=get_subscription_id(cmd.cli_ctx),
                                                         resource_group=resource_group_name,
