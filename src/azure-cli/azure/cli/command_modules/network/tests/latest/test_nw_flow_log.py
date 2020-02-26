@@ -3,7 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
+import random
+import string
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
@@ -21,6 +22,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test',
+            'workspace': 'workspace24',
         })
 
         # enable network watcher
@@ -33,18 +35,17 @@ class NWFlowLogScenarioTest(ScenarioTest):
         workspace = self.cmd('monitor log-analytics workspace create '
                              '--resource-group {rg} '
                              '--location {location} '
-                             '--workspace-name MyLogAnalytics5 ').get_output_in_json()
+                             '--workspace-name {workspace} ').get_output_in_json()
         self.kwargs.update({
             'workspace_id': workspace['id']
         })
 
-        with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
-            self.cmd('network watcher flow-log create '
-                     '--resource-group {rg} '
-                     '--nsg {nsg} '
-                     '--storage-account {storage_account} '
-                     '--workspace {workspace_id} '
-                     '--name {flow_log} ')
+        self.cmd('network watcher flow-log create '
+                 '--resource-group {rg} '
+                 '--nsg {nsg} '
+                 '--storage-account {storage_account} '
+                 '--workspace {workspace_id} '
+                 '--name {flow_log} ')
 
         self.cmd('network watcher flow-log list --resource-group {watcher_rg} --watcher {watcher_name}')
 
@@ -72,6 +73,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
+            'workspace': 'workspace21',
         })
 
         # enable network watcher
@@ -84,18 +86,17 @@ class NWFlowLogScenarioTest(ScenarioTest):
         workspace = self.cmd('monitor log-analytics workspace create '
                              '--resource-group {rg} '
                              '--location {location} '
-                             '--workspace-name MyLogAnalytics10 ').get_output_in_json()
+                             '--workspace-name {workspace} ').get_output_in_json()
         self.kwargs.update({
             'workspace_id': workspace['id']
         })
 
-        with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
-            self.cmd('network watcher flow-log create '
-                     '--resource-group {rg} '
-                     '--nsg {nsg} '
-                     '--storage-account {storage_account} '
-                     '--workspace {workspace_id} '
-                     '--name {flow_log} ')
+        self.cmd('network watcher flow-log create '
+                 '--resource-group {rg} '
+                 '--nsg {nsg} '
+                 '--storage-account {storage_account} '
+                 '--workspace {workspace_id} '
+                 '--name {flow_log} ')
 
         self.cmd('network watcher flow-log show '
                  '--resource-group {watcher_rg} '
@@ -131,6 +132,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
+            'workspace': 'workspace20',
         })
 
         # enable network watcher
@@ -146,18 +148,18 @@ class NWFlowLogScenarioTest(ScenarioTest):
         workspace = self.cmd('monitor log-analytics workspace create '
                              '--resource-group {rg} '
                              '--location {location} '
-                             '--workspace-name MyLogAnalytics15 ').get_output_in_json()
+                             '--workspace-name {workspace} ').get_output_in_json()
         self.kwargs.update({
             'workspace_id': workspace['id']
         })
 
-        with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
-            self.cmd('network watcher flow-log create '
-                     '--resource-group {rg} '
-                     '--nsg {nsg} '
-                     '--storage-account {storage_account} '
-                     '--workspace {workspace_id} '
-                     '--name {flow_log} ')
+        # with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
+        self.cmd('network watcher flow-log create '
+                 '--resource-group {rg} '
+                 '--nsg {nsg} '
+                 '--storage-account {storage_account} '
+                 '--workspace {workspace_id} '
+                 '--name {flow_log} ')
 
         # This output is Azure Management Resource formatted.
         self.cmd('network watcher flow-log show '
@@ -166,7 +168,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
                  '--name {flow_log} ',
                  checks=[
                      self.check('name', self.kwargs['flow_log']),
-                     self.check('enabled', False),
+                     self.check('enabled', True),
                      self.check('format.type', 'JSON'),
                      self.check('format.version', 1),
                      self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled',
@@ -180,8 +182,9 @@ class NWFlowLogScenarioTest(ScenarioTest):
 
         # This output is deprecating
         self.cmd('network watcher flow-log show --nsg {nsg_id}', checks=[
-            self.check('enabled', False),
-            self.check('format', None),
+            self.check('enabled', True),
+            self.check('format.type', 'JSON'),
+            self.check('format.version', 1),
             self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration', None),
             self.check('retentionPolicy.days', 0),
             self.check('retentionPolicy.enabled', False)

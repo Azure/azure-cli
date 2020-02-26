@@ -1389,6 +1389,7 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
             namespace='Microsoft.Storage',
             type='storageAccounts',
             name=namespace.storage_account)
+        print(namespace.storage_account)
     if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
         namespace.traffic_analytics_workspace = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
