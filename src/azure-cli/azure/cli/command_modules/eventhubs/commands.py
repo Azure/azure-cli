@@ -14,12 +14,19 @@ def load_command_table(self, _):
     from azure.cli.command_modules.eventhubs._client_factory import (namespaces_mgmt_client_factory,
                                                                      event_hub_mgmt_client_factory,
                                                                      consumer_groups_mgmt_client_factory,
-                                                                     disaster_recovery_mgmt_client_factory)
+                                                                     disaster_recovery_mgmt_client_factory,
+                                                                     cf_namespace2018)
 
     eh_namespace_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#NamespacesOperations.{}',
         client_factory=namespaces_mgmt_client_factory,
         resource_type=ResourceType.MGMT_EVENTHUB)
+
+    eh_namespace_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.eventhub.v2018_01_01_preview.operations.'
+                        '_namespaces_operations#NamespacesOperations.{}',
+        client_factory=cf_namespace2018
+    )
 
     eh_event_hub_util = CliCommandType(
         operations_tmpl='azure.mgmt.eventhub.operations#EventHubsOperations.{}',
@@ -42,13 +49,15 @@ def load_command_table(self, _):
 # Namespace Region
     custom_tmpl = 'azure.cli.command_modules.eventhubs.custom#{}'
     eventhubs_custom = CliCommandType(operations_tmpl=custom_tmpl)
-    with self.command_group('eventhubs namespace', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
+    with self.command_group('eventhubs namespace', eh_namespace_sdk, client_factory=cf_namespace2018) as g:
         g.custom_command('create', 'cli_namespace_create')
+        g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=eventhubs_custom)
+
+    with self.command_group('eventhubs namespace', eh_namespace_util, client_factory=namespaces_mgmt_client_factory) as g:
         g.show_command('show', 'get')
         g.custom_command('list', 'cli_namespace_list')
         g.command('delete', 'delete')
         g.command('exists', 'check_name_availability')
-        g.generic_update_command('update', custom_func_name='cli_namespace_update', custom_func_type=eventhubs_custom)
 
     with self.command_group('eventhubs namespace authorization-rule', eh_namespace_util, resource_type=ResourceType.MGMT_EVENTHUB, client_factory=namespaces_mgmt_client_factory) as g:
         g.command('create', 'create_or_update_authorization_rule')
