@@ -1381,7 +1381,8 @@ def process_nw_test_connectivity_namespace(cmd, namespace):
 
 def process_nw_flow_log_set_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
-    if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
+    if hasattr(namespace, 'storage_account') and \
+            namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         namespace.storage_account = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=namespace.resource_group_name,
@@ -1408,7 +1409,7 @@ def process_nw_flow_log_show_namespace(cmd, namespace, remove_location=True):
     from msrestazure.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.arm import get_arm_resource_by_id
 
-    if namespace.nsg is not None:
+    if hasattr(namespace, 'nsg') and namespace.nsg is not None:
         if not is_valid_resource_id(namespace.nsg):
             namespace.nsg = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),

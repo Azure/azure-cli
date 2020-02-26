@@ -5354,6 +5354,11 @@ examples:
     text: az network watcher flow-log show --watcher MyNetworkWatcher --name true
 """
 
+helps['network watcher flow-log update'] = """
+type: command
+short-summary: Update the flow log configuration of a network security group
+"""
+
 helps['network watcher list'] = """
 type: command
 short-summary: List Network Watchers.

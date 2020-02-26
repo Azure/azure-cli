@@ -4391,7 +4391,7 @@ def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, resource_group_
         from ._client_factory import cf_flow_logs
         client = cf_flow_logs(cmd.cli_ctx, None)
         return client.get(resource_group_name, network_watcher_name, flow_log_name)
-    
+
     # deprecated approach to show flow log
     return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
 
@@ -4414,7 +4414,11 @@ def create_nw_flow_log(cmd,
                        traffic_analytics_enabled=None,
                        tags=None):
     FlowLog = cmd.get_models('FlowLog')
-    flow_log = FlowLog(location=location, target_resource_id=nsg, storage_id=storage_account, enabled=enabled, tags=tags)
+    flow_log = FlowLog(location=location,
+                       target_resource_id=nsg,
+                       storage_id=storage_account,
+                       enabled=enabled,
+                       tags=tags)
 
     if retention > 0:
         RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
@@ -4449,6 +4453,45 @@ def create_nw_flow_log(cmd,
         flow_log.flow_analytics_configuration = traffic_analytics
 
     return client.create_or_update(watcher_rg, watcher_name, flow_log_name, flow_log)
+
+
+def update_nw_flow_log(cmd,
+                       instance,
+                       enabled=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('enabled', enabled)
+        c.set_param('tags', tags)
+
+    with cmd.update_context(instance.retention_policy) as c:
+        c.set_param('days', retention)
+        c.set_param('enabled', retention > 0)
+
+    with cmd.update_context(instance.format) as c:
+        c.set_param('type', log_format)
+        c.set_param('version', log_version)
+
+    if traffic_analytics_workspace is not None:
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        with cmd.update_context(
+                instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+            c.set_param('enabled', traffic_analytics_enabled)
+            c.set_param('workspace_id', workspace.properties['customerId'])
+            c.set_param('workspace_region', workspace.location)
+            c.set_param('workspace_resource_id', workspace.id)
+            c.set_param('traffic_analytics_interval', traffic_analytics_interval)
+
+    return instance
 
 
 def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, storage_account,
