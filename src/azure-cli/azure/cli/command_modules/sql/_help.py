@@ -617,7 +617,7 @@ examples:
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22"
   - name: Restore a dropped managed database using Point in time restore
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
-  - name: Restore a live managed database using Point in time restore from another instance
+  - name: Restore a live managed database from another instance using Point in time restore
     text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --dest-mi targetmi --dest-resource-group targetrg
 """
 
@@ -629,29 +629,29 @@ examples:
     text: az sql midb show -g mygroup --mi myinstance -n mymanageddb
 """
 
-helps['sql midb retention-policy'] = """
+helps['sql midb short-term-retention-policy'] = """
 type: group
-short-summary: Manage SQL managed instance database backup retention policy.
+short-summary: Manage SQL managed instance database backup short term retention policy.
 """
 
-helps['sql midb retention-policy update'] = """
+helps['sql midb short-term-retention-policy set'] = """
 type: command
 short-summary: Update short term retention for automated backups on a single database.
 examples:
-  - name: Update backup short term retention for live managed database.
-    text: az sql midb retention-policy update -g mygroup --mi myinstance -n mymanageddb --retention-days retentionindays
-  - name: Update backup short term retention for dropped managed database.
-    text: az sql midb retention-policy update -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22" --retention-days retentionindays
+  - name: Set backup short term retention for live managed database.
+    text: az sql midb short-term-retention-policy set -g mygroup --mi myinstance -n mymanageddb --retention-days retentionindays
+  - name: Set backup short term retention for dropped managed database.
+    text: az sql midb short-term-retention-policy set -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22" --retention-days retentionindays
 """
 
-helps['sql midb retention-policy show'] = """
+helps['sql midb short-term-retention-policy show'] = """
 type: command
 short-summary: Show short term retention for automated backups on a single database.
 examples:
   - name: Shows backup short term retention for live managed database.
-    text: az sql midb retention-policy show -g mygroup --mi myinstance -n mymanageddb
+    text: az sql midb short-term-retention-policy show -g mygroup --mi myinstance -n mymanageddb
   - name: Show backup short term retention for dropped managed database.
-    text: az sql midb retention-policy show -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22"
+    text: az sql midb short-term-retention-policy show -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22"
 """
 
 helps['sql server'] = """

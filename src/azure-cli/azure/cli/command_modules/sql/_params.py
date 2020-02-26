@@ -1456,7 +1456,7 @@ def load_arguments(self, _):
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. ' + time_format_help)
 
-    with self.argument_context('sql midb retention-policy update') as c:
+    with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
                 'deleted_time',
@@ -1474,7 +1474,7 @@ def load_arguments(self, _):
                    help='New backup short term retention policy in days.'
                    'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
 
-    with self.argument_context('sql midb retention-policy show') as c:
+    with self.argument_context('sql midb short-term-retention-policy show') as c:
         c.argument('deleted_time',
                    options_list=['--deleted-time'],
                    help='If specified, shows retention days for a deleted database, instead of an existing database.'

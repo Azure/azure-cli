@@ -3055,13 +3055,13 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
                      self.check('status', 'Online')])
 
         # test update short term retention on live database
-        self.cmd('sql midb retention-policy update -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_inc}',
+        self.cmd('sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_inc}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_inc}')])
 
         # test get short term retention on live database
-        self.cmd('sql midb retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
+        self.cmd('sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_inc}')])
@@ -3083,13 +3083,13 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
         })
 
         # test update short term retention on deleted database
-        self.cmd('sql midb retention-policy update -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deleted-time {deleted_time}',
+        self.cmd('sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deleted-time {deleted_time}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_dec}')])
 
         # test get short term retention on deleted database
-        self.cmd('sql midb retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deleted-time {deleted_time}',
+        self.cmd('sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deleted-time {deleted_time}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('retentionDays', '{retention_days_dec}')])
