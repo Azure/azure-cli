@@ -4,13 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint,
+                               JMESPathCheck)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-class StorageFileShareUsingResourceProviderScenarios(StorageScenarioMixin, ScenarioTest):
+class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_file_using_rm_main_scenario(self):
@@ -140,3 +141,16 @@ class StorageFileShareUsingResourceProviderScenarios(StorageScenarioMixin, Scena
 
         result = self.cmd('storage share-rm exists --ids {share_id_2}').get_output_in_json()
         self.assertEqual(result['exists'], False)
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_share_rm_with_NFS(self):
+
+        self.kwargs.update({
+            'share': self.create_random_name('share', 24),
+        })
+        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share} --enabled-protocols NFS', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('enabledProtocol', 'NFS')
+        })
