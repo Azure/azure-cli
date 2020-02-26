@@ -1,0 +1,62 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+from knack.util import CLIError
+
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+
+
+class NWFlowLogScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='westus', kind='StorageV2')
+    def test_nw_flow_log_create(self, resource_group, resource_group_location, storage_account):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'storage_account': storage_account,
+            'nsg': 'nsg1',
+            'watcher_rg': 'NetworkWatcherRG',
+            'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
+            'flow_log': 'flow_log_test',
+        })
+
+        # enable network watcher
+        # self.cmd('network watcher configure -g {rg} --locations {location} --enabled')
+
+        # prepare the target resource
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+
+        # prepare workspace
+        workspace = self.cmd('monitor log-analytics workspace create '
+                             '--resource-group {rg} '
+                             '--location {location} '
+                             '--workspace-name MyLogAnalytics5 ').get_output_in_json()
+        self.kwargs.update({
+            'workspace_id': workspace['id']
+        })
+
+        with self.assertRaisesRegexp(CLIError, '^Deployment failed'):
+            self.cmd('network watcher flow-log create '
+                     '--resource-group {rg} '
+                     '--nsg {nsg} '
+                     '--storage-account {storage_account} '
+                     '--workspace {workspace_id} '
+                     '--name {flow_log} ')
+
+        self.cmd('network watcher flow-log list --resource-group {watcher_rg} --watcher {watcher_name}')
+
+        # This output is Azure Management Resource formatted.
+        self.cmd('network watcher flow-log show '
+                 '--resource-group {watcher_rg} '
+                 '--watcher {watcher_name} '
+                 '--name {flow_log} ',
+                 checks=[
+                     self.check('name', self.kwargs['flow_log']),
+                     self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False),
+                     self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId', self.kwargs['workspace_id']),
+                     self.check('retentionPolicy.days', 0),
+                     self.check('retentionPolicy.enabled', False),
+                 ])
