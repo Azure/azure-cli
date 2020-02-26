@@ -392,52 +392,6 @@ type: group
 short-summary: Manage CDN WAF policies.
 """
 
-helps['cdn waf managed-rule-set'] = """
-type: group
-short-summary: View available CDN WAF managed rule sets.
-"""
-
-helps['cdn waf managed-rule-set list'] = """
-type: command
-short-summary: List available CDN WAF managed rule sets.
-examples:
-  - name: List all available CDN WAF managed rule sets.
-    text: az cdn waf managed-rule-set list
-"""
-
-helps['cdn waf managed-rule-set show'] = """
-type: command
-short-summary: List available CDN WAF managed rule sets.
-examples:
-  - name: Show the CDN WAF managed rule set DefaultRuleSet_1.0.
-    text: az cdn waf managed-rule-set show --rule-set-type DefaultRuleSet --rule-set-version 1.0
-"""
-
-helps['cdn waf managed-rule-set rule-group'] = """
-type: group
-short-summary: View available rule groups of a CDN WAF managed rule set.
-"""
-
-helps['cdn waf managed-rule-set rule-group list'] = """
-type: command
-short-summary: List available CDN WAF managed rule sets.
-examples:
-  - name: List available rule groups for DefaultRuleSet_1.0.
-    text: |
-      az cdn waf managed-rule-set rule-group list \\
-        --rule-set-type DefaultRuleSet --rule-set-version 1.0
-"""
-
-helps['cdn waf managed-rule-set rule-group show'] = """
-type: command
-short-summary: List available CDN WAF managed rule sets.
-examples:
-  - name: Show the SQLI rule group of DefaultRuleSet_1.0.
-    text: |
-      az cdn waf managed-rule-set rule-group show \\
-        --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
-"""
-
 helps['cdn waf policy set'] = """
 type: command
 short-summary: Create a new CDN WAF policy.
@@ -540,6 +494,23 @@ examples:
           --rule-set-type DefaultRuleSet --rule-set-version 1.0
 """
 
+helps['cdn waf policy managed-rule-set list-available'] = """
+type: command
+short-summary: List available CDN WAF managed rule sets.
+examples:
+  - name: List all available CDN WAF managed rule sets.
+    text: az cdn waf policy managed-rule-set list-available
+"""
+
+helps['cdn waf policy managed-rule-set show-available'] = """
+type: command
+short-summary: List available CDN WAF managed rule sets.
+examples:
+  - name: Show the CDN WAF managed rule set DefaultRuleSet_1.0.
+    text: az cdn waf policy managed-rule-set show-available \\
+            --rule-set-type DefaultRuleSet --rule-set-version 1.0
+"""
+
 helps['cdn waf policy managed-rule-set rule-group-override'] = """
 type: group
 short-summary: Manage rule group overrides of a managed rule on a CDN WAF policy.
@@ -547,10 +518,10 @@ short-summary: Manage rule group overrides of a managed rule on a CDN WAF policy
 
 helps['cdn waf policy managed-rule-set rule-group-override set'] = """
 type: command
-short-summary: Add a rule group override to a managed rule set on a CDN WAF policy.
+short-summary: Add or update a rule group override to a managed rule set on a CDN WAF policy.
 parameters:
   - name: --rule-override -r
-    short-summary: Override a rule in the rule group
+    short-summary: Override a rule in the rule group.
     long-summary: |
         rule overrides are specified as key value pairs in the form "KEY=VALUE [KEY=VALUE ...]".
         Available keys are 'id', 'action', and 'enabled'. 'id' is required. Valid values for
@@ -600,6 +571,25 @@ examples:
           --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
 """
 
+helps['cdn waf policy managed-rule-set rule-group-override list-available'] = """
+type: command
+short-summary: List available CDN WAF managed rule groups of a managed rule set.
+examples:
+  - name: List available rule groups for DefaultRuleSet_1.0.
+    text: |
+      az cdn waf policy managed-rule-set rule-group-override list-available \\
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0
+"""
+
+helps['cdn waf policy managed-rule-set rule-group-override show-available'] = """
+type: command
+short-summary: Show an available CDN WAF managed rule group.
+examples:
+  - name: Show the SQLI rule group of DefaultRuleSet_1.0.
+    text: |
+      az cdn waf policy managed-rule-set rule-group-override show-available \\
+        --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
+"""
 
 helps['cdn waf policy custom-rule'] = """
 type: group

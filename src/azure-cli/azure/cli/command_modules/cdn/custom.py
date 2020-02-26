@@ -508,6 +508,10 @@ def create_profile(client, resource_group_name, name,
 
 
 # region WAF Custom Commands
+def list_waf_managed_rule_set(client):
+    return client.list()
+
+
 def show_waf_managed_rule_set(client, rule_set_type, rule_set_version):
     rulesets = client.list()
     for r in rulesets:

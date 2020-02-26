@@ -140,17 +140,6 @@ def load_arguments(self, _):
         c.argument('origin_name', name_arg_type, id_part='name')
 
     # WAF #
-    with self.argument_context('cdn waf') as c:
-        c.argument('rule_set_type', help='The type of the managed rule set. For available rule set types, run "az '
-                                         'cdn waf managed-rule-set list"')
-        c.argument('rule_set_version', help='The version of the managed rule set. For available rule set versions '
-                                            'for a type, run "az cdn waf managed-rule-set list"')
-
-    with self.argument_context('cdn waf managed-rule-set rule-group') as c:
-        c.argument('name', name_arg_type, id_part='name', help='The name of the rule group. For available rule groups '
-                                                               'of a managed rule set, run "az cdn waf '
-                                                               'managed-rule-set rule-group list --rule-set-type type '
-                                                               '--rule-set-version version"')
 
     with self.argument_context('cdn waf policy set') as c:
         c.argument('disabled', arg_type=get_three_state_flag())
@@ -162,16 +151,20 @@ def load_arguments(self, _):
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the CDN WAF policy.')
 
     with self.argument_context('cdn waf policy managed-rule-set') as c:
-        c.argument('policy_name', help='Name of the CDN WAF policy.')
+        c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')
+        c.argument('rule_set_type', help='The type of the managed rule set.')
+        c.argument('rule_set_version', help='The version of the managed rule set.')
+    with self.argument_context('cdn waf policy managed-rule-set list') as c:
+        # List commands cannot use --ids flag
+        c.argument('policy_name', id_part='')
     with self.argument_context('cdn waf policy managed-rule-set add') as c:
         c.argument('enabled', arg_type=get_three_state_flag())
 
     with self.argument_context('cdn waf policy managed-rule-set rule-group-override') as c:
-        c.argument('name', name_arg_type, id_part='name', help='The name of the overriden rule group. For available '
-                                                               'rule groups of a managed rule set, run "az cdn waf '
-                                                               'managed-rule-set rule-group list --rule-set-type type '
-                                                               '--rule-set-version version"')
-        c.argument('policy_name', help='Name of the CDN WAF policy.')
+        c.argument('name', name_arg_type, id_part='', help='The name of the rule group.')
+    with self.argument_context('cdn waf policy managed-rule-set rule-group-override list') as c:
+        # List commands cannot use --ids flag
+        c.argument('policy_name', id_part='')
     with self.argument_context('cdn waf policy managed-rule-set rule-group-override set') as c:
         c.argument('rule_overrides',
                    options_list=['-r', '--rule-override'],
@@ -179,11 +172,17 @@ def load_arguments(self, _):
                    nargs='+')
 
     with self.argument_context('cdn waf policy custom-rule') as c:
-        c.argument('name', name_arg_type, id_part='name', help='The name of the custom rule.')
-        c.argument('policy_name', help='Name of the CDN WAF policy.')
+        c.argument('name', name_arg_type, id_part='', help='The name of the custom rule.')
+        c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')
+    with self.argument_context('cdn waf policy custom-rule list') as c:
+        # List commands cannot use --ids flag
+        c.argument('policy_name', id_part='')
     with self.argument_context('cdn waf policy rate-limit-rule') as c:
-        c.argument('name', name_arg_type, id_part='name', help='The name of the rate limit rule.')
-        c.argument('policy_name', help='Name of the CDN WAF policy.')
+        c.argument('name', name_arg_type, id_part='', help='The name of the rate limit rule.')
+        c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')
+    with self.argument_context('cdn waf policy rate-limit-rule list') as c:
+        # List commands cannot use --ids flag
+        c.argument('policy_name', id_part='')
 
     with self.argument_context('cdn waf policy custom-rule set') as c:
         c.argument('match_conditions', options_list=['-m', '--match-condition'], action=MatchConditionAction, nargs='+')
