@@ -226,6 +226,24 @@ examples:
         az acr helm show -n MyRegistry mychart --version 0.3.2
 """
 
+helps['acr helm install-cli'] = """
+type: command
+short-summary: Download and install Helm command-line tool.
+examples:
+  - name: Install the default version of Helm CLI to the default location
+    text: >
+        az acr helm install-cli
+  - name: Install a specified version of Helm CLI to the default location
+    text: >
+        az acr helm install-cli --client-version x.x.x
+  - name: Install the default version of Helm CLI to a specified location
+    text: >
+        az acr helm install-cli --install-location /folder/filename
+  - name: Install a specified version of Helm CLI to a specified location
+    text: >
+        az acr helm install-cli --client-version x.x.x --install-location /folder/filename
+"""
+
 helps['acr import'] = """
 type: command
 short-summary: Imports an image to an Azure Container Registry from another Container Registry. Import removes the need to docker pull, docker tag, docker push.
