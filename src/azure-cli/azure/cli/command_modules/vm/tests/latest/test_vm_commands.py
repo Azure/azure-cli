@@ -4151,9 +4151,9 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         )
         # Test enable automatic repairs with a health probe when update vmss
         self.cmd('vmss update -g {rg} -n {vmss} --set virtualMachineProfile.networkProfile.healthProbe.id={probe_id}',
-            checks=[
-                self.check('virtualMachineProfile.networkProfile.healthProbe.id', self.kwargs['probe_id'])
-            ])
+                 checks=[
+                     self.check('virtualMachineProfile.networkProfile.healthProbe.id', self.kwargs['probe_id'])
+                 ])
         self.kwargs['instance_ids'] = ' '.join(
             self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()
         )

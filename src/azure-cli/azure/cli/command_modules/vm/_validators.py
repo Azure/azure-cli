@@ -1636,6 +1636,7 @@ def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=un
     if namespace.terminate_notification_time is not None:
         namespace.terminate_notification_time = 'PT' + namespace.terminate_notification_time + 'M'
 
+
 def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.automatic_repairs_grace_period is not None:
         if namespace.load_balancer is None or namespace.health_probe is None:
@@ -1643,12 +1644,14 @@ def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=
                            "when create vmss with automatic repairs")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
+
 def _validate_vmss_update_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.enable_automatic_repairs is False and namespace.automatic_repairs_grace_period is not None:
         raise CLIError("usage error: please enable --enable-automatic-repairs")
     if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None:
         raise CLIError("usage error: please set --automatic-repairs-grace-period")
     _validate_vmss_automatic_repairs(cmd, namespace)
+
 
 def _validate_vmss_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
     """
