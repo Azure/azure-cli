@@ -1028,7 +1028,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace, supports_local_cache=True)
         g.generic_update_command('update', custom_func_name='update_vnet', supports_local_cache=True)
         g.command('list-endpoint-services', 'list', command_type=network_endpoint_service_sdk)
-        g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01')
+        g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01', is_preview=True)
 
     with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_vnet_peering')
