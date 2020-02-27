@@ -5341,7 +5341,7 @@ examples:
       --name MyFlowLog
       --nsg MyNetworkSecurityGroupName
       --storage-account account
-  - name: Create a flow log with Network Security Group ID (could be in another resource group)
+  - name: Create a flow log with Network Security Group ID (could be in other resource group)
     text: >
       az network watcher flow-log create
       --location westus
@@ -5388,6 +5388,20 @@ examples:
       --resource-group MyResourceGroup
       --name MyFlowLog
       --storage-account accountid
+  - name: Update Network Security Group on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --nsg MyNSG
+  - name: Update Workspace on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --workspace MyAnotherLogAnalyticWorkspace
 """
 
 helps['network watcher list'] = """
