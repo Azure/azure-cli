@@ -3427,11 +3427,13 @@ class VMGalleryImage(ScenarioTest):
         s1_id = self.cmd('snapshot create -g {rg} -n s1 --source d1').get_output_in_json()['id']
         s2_id = self.cmd('snapshot create -g {rg} -n s2 --source d2').get_output_in_json()['id']
         s3_id = self.cmd('snapshot create -g {rg} -n s3 --source d3').get_output_in_json()['id']
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version 1.0.0 --os-snapshot s1 --data-snapshots s2 s3',
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version 1.0.0 --os-snapshot s1 --data-snapshots s2 s3 --data-snapshot-luns 2 3',
                  checks=[
                      self.check('storageProfile.osDiskImage.source.id', s1_id),
                      self.check('storageProfile.dataDiskImages[0].source.id', s2_id),
                      self.check('storageProfile.dataDiskImages[1].source.id', s3_id),
+                     self.check('storageProfile.dataDiskImages[0].lun', 2),
+                     self.check('storageProfile.dataDiskImages[1].lun', 3)
                  ])
 # endregion
 
