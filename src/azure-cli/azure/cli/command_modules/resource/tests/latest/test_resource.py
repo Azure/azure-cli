@@ -1626,8 +1626,9 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             'image': self.create_random_name('cli_crosstenantimage', 40),
             'version': '1.1.2',
             'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
-            'aux_sub': '685ba005-af8d-4b04-8f16-a7bf38b2eb5a',
+            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
             'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
+            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
         })
         self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
                  checks=self.check('name', self.kwargs['rg']))
@@ -1657,11 +1658,15 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'crosstenant_vm_deploy.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('cli-crosstenantdeployment', 40),
+            'dn1': self.create_random_name('cli-crosstenantdeployment1', 40),
+            'dn2': self.create_random_name('cli-crosstenantdeployment2', 40),
+            'dn3': self.create_random_name('cli-crosstenantdeployment3', 40)
         })
 
         self.cmd('group deployment validate -g {vm_rg} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
+
         self.cmd('group deployment create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-subs "{aux_sub}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{vm_rg}')
@@ -1674,6 +1679,48 @@ class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
             self.check('name', '{dn}'),
             self.check('resourceGroup', '{vm_rg}')
         ])
+
+        self.cmd('group deployment create -g {vm_rg} -n {dn1} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn1}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment show -g {vm_rg} -n {dn1}', checks=[
+            self.check('name', '{dn1}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        self.cmd('group deployment create -g {vm_rg} -n {dn2} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-subs "{aux_sub}" -j', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn2}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment show -g {vm_rg} -n {dn2}', checks=[
+            self.check('name', '{dn2}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        self.cmd('group deployment create -g {vm_rg} -n {dn3} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" -j', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn3}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment show -g {vm_rg} -n {dn3}', checks=[
+            self.check('name', '{dn3}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        with self.assertRaises(CLIError):
+            self.cmd('group deployment create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" --aux-subs "{aux_sub}"')
 
 
 class InvokeActionTest(ScenarioTest):
