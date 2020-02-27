@@ -73,8 +73,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
 
     with self.argument_context('acr import') as c:
-        c.argument('source_image', options_list=['--source'], help="The source identifier will be either a source image name or a fully qualified source.")
-        c.argument('source_registry', options_list=['--registry', '-r'], help='The source container registry can be name, login server or resource ID of the source registry.')
+        c.argument('source_image', options_list=['--source'], help="The source identifier. If --registry is not specified, this parameter must be a fully qualified source (contains login server). If source registry is specified with --registry, this parameter must be a source image name (not contain login server).")
+        c.argument('source_registry', options_list=['--registry', '-r'], help='The source Azure container registry. This can be name, login server or resource ID of the source registry.')
         c.argument('source_registry_username', options_list=['--username', '-u'], help='The username of source container registry')
         c.argument('source_registry_password', options_list=['--password', '-p'], help='The password of source container registry')
         c.argument('target_tags', options_list=['--image', '-t'], help="The name and tag of the image using the format: '-t repo/image:tag'. Multiple tags are supported by passing -t multiple times.", action='append')
