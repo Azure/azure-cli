@@ -477,6 +477,20 @@ type: group
 short-summary: Manage blob metadata.
 """
 
+helps['storage blob restore'] = """
+type: command
+short-summary: Restore blobs in the specified blob ranges.
+examples:
+  - name: Restore blobs in two specified blob ranges. For examples, (container1/blob1, container2/blob2) and (container2/blob3..container2/blob4).
+    text: az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t 2020-02-27T03:59:59Z -r container1/blob1 container2/blob2 -r container2/blob3 container2/blob4
+  - name: Restore blobs in the specified blob ranges from account start to account end.
+    text: az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t 2020-02-27T03:59:59Z -r "" ""
+  - name: Restore blobs in the specified blob range.
+    text: |
+    end
+    az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t 2020-02-27T03:59:59Z -r "" ""
+"""
+
 helps['storage blob service-properties'] = """
 type: group
 short-summary: Manage storage blob service properties.

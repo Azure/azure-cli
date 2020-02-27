@@ -16,6 +16,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     filter_none, collect_blobs, collect_blob_objects, collect_files,
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
+from azure.cli.core.util import sdk_no_wait
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -28,6 +29,11 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
     return client.delete_container(
         container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
         if_unmodified_since=if_unmodified_since, timeout=timeout)
+
+
+def restore_blob_ranges(client, resource_group_name, account_name, time_to_restore, blob_ranges, no_wait=False):
+    return sdk_no_wait(no_wait, client.restore_blob_ranges, resource_group_name, account_name, time_to_restore,
+                       blob_ranges)
 
 
 def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):

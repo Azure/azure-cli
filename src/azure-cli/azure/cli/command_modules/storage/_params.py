@@ -383,8 +383,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import BlobRangeAddAction
-        c.argument('blob_ranges', options_list=['--blob-range', '-r'], action=BlobRangeAddAction, nargs='+')
-        c.argument('time_to_restore', options_list=['--time-to-restore', '-t'])
+        c.argument('blob_ranges', options_list=['--blob-range', '-r'], action=BlobRangeAddAction, nargs='+',
+                   help='Blob ranges to restore. You need to two values to specify start_range and end_range for each '
+                        'blob range, e.g. -r blob1 blob2. Note: Empty means account start as start range value, and '
+                        'means account end for end range.')
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('time_to_restore', type=get_datetime_type(True),  options_list=['--time-to-restore', '-t'],
+                   help='Restore blob to the specified time, which should be UTC datetime in (Y-m-d\'T\'H:M:S\'Z\').')
 
     with self.argument_context('storage blob update') as c:
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
