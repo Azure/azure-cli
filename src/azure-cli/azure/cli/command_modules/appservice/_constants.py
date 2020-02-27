@@ -18,14 +18,14 @@ PYTHON_VERSIONS = ['3.7', '3.6', '2.7']
 NETCORE_VERSIONS = ['1.0', '1.1', '2.1', '2.2']
 DOTNET_VERSIONS = ['3.5', '4.7']
 LINUX_SKU_DEFAULT = "P1V2"
-FUNCTIONS_VERSIONS_FUNCTIONAPP = ['2', '3']
+FUNCTIONS_VERSIONS = ['2', '3']
 # functions version : default node version
-NODE_VERSION_DEFAULT_FUNCTIONAPP = {
+FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION = {
     '2': '~10',
     '3': '~12'
 }
 # functions version -> runtime : default runtime version
-RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP = {
+FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION = {
     '2': {
         'node': '8',
         'dotnet': '2',
@@ -40,7 +40,7 @@ RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP = {
     }
 }
 # functions version -> runtime : runtime versions
-RUNTIME_TO_SUPPORTED_VERSIONS_FUNCTIONAPP = {
+FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS = {
     '2': {
         'node': ['8', '10'],
         'python': ['3.6', '3.7'],
