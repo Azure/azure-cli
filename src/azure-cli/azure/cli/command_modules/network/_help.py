@@ -5351,7 +5351,7 @@ examples:
   - name: Show NSG flow logs. (Deprecated)
     text: az network watcher flow-log show -g MyResourceGroup --nsg MyNsg
   - name: Show NSG flow logs with Azure Resource Management formatted.
-    text: az network watcher flow-log show --watcher MyNetworkWatcher --name true
+    text: az network watcher flow-log show --watcher MyNetworkWatcher --name MyFlowLog
 """
 
 helps['network watcher flow-log update'] = """
