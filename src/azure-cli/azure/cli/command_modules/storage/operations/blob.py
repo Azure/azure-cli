@@ -16,7 +16,6 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     filter_none, collect_blobs, collect_blob_objects, collect_files,
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
-from azure.cli.core.util import sdk_no_wait
 from knack.log import get_logger
 from knack.util import CLIError
 

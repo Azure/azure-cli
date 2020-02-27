@@ -389,7 +389,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'means account end for end range.')
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
-        c.argument('time_to_restore', type=get_datetime_type(True),  options_list=['--time-to-restore', '-t'],
+        c.argument('time_to_restore', type=get_datetime_type(True), options_list=['--time-to-restore', '-t'],
                    help='Restore blob to the specified time, which should be UTC datetime in (Y-m-d\'T\'H:M:S\'Z\').')
 
     with self.argument_context('storage blob update') as c:
