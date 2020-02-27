@@ -4381,30 +4381,29 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
-# why need 2 different names (watcher_name and network_watcher_name) for watcher?
-# It's temporary solution for compatible with old show command's parameter.
-# After old show command's parameter is deprecated, those parameters for should be removed.
-def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, resource_group_name=None, nsg=None,
-                          network_watcher_name=None, flow_log_name=None):
-    # new approach to show flow log
-    if all([resource_group_name, network_watcher_name, flow_log_name]):
-        from ._client_factory import cf_flow_logs
-        client = cf_flow_logs(cmd.cli_ctx, None)
-        return client.get(resource_group_name, network_watcher_name, flow_log_name)
-
+# combination of resource_group_name and nsg is for old output
+# combination of location and flow_log_name is for new output
+def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
+                          flow_log_name=None):
     # deprecated approach to show flow log
-    return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
+    if nsg is not None:
+        return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
+
+    # new approach to show flow log
+    from ._client_factory import cf_flow_logs
+    client = cf_flow_logs(cmd.cli_ctx, None)
+    return client.get(watcher_rg, watcher_name, flow_log_name)
 
 
 def create_nw_flow_log(cmd,
                        client,
+                       location,
                        watcher_rg,
                        watcher_name,
                        flow_log_name,
                        nsg,
                        storage_account=None,
                        resource_group_name=None,
-                       location=None,
                        enabled=None,
                        retention=0,
                        log_format=None,
@@ -4455,19 +4454,20 @@ def create_nw_flow_log(cmd,
     return client.create_or_update(watcher_rg, watcher_name, flow_log_name, flow_log)
 
 
-def update_nw_flow_log_getter(client, watcher_rg, network_watcher_name, flow_log_name):
-    return client.get(watcher_rg, network_watcher_name, flow_log_name)
+def update_nw_flow_log_getter(client, watcher_rg, watcher_name, flow_log_name):
+    return client.get(watcher_rg, watcher_name, flow_log_name)
 
 
-def update_nw_flow_log_setter(client, watcher_rg, network_watcher_name, flow_log_name, parameters):
-    return client.create_or_update(watcher_rg, network_watcher_name, flow_log_name, parameters)
+def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, parameters):
+    return client.create_or_update(watcher_rg, watcher_name, flow_log_name, parameters)
 
 
 def update_nw_flow_log(cmd,
                        instance,
-                       location=None,   # dummy parameter to let it appear in command
+                       location,
                        resource_group_name=None,    # dummy parameter to let it appear in command
                        enabled=None,
+                       nsg=None,
                        storage_account=None,
                        retention=0,
                        log_format=None,
@@ -4480,6 +4480,7 @@ def update_nw_flow_log(cmd,
         c.set_param('enabled', enabled)
         c.set_param('tags', tags)
         c.set_param('storage_id', storage_account)
+        c.set_param('target_resource_id', nsg)
 
     with cmd.update_context(instance.retention_policy) as c:
         c.set_param('days', retention)
@@ -4504,6 +4505,14 @@ def update_nw_flow_log(cmd,
             c.set_param('traffic_analytics_interval', traffic_analytics_interval)
 
     return instance
+
+
+def list_nw_flow_log(client, watcher_rg, watcher_name, location):
+    return client.list(watcher_rg, watcher_name)
+
+
+def delete_nw_flow_log(client, watcher_rg, watcher_name, location, flow_log_name):
+    return client.delete(watcher_rg, watcher_name, flow_log_name)
 
 
 def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, storage_account,

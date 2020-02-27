@@ -12,6 +12,7 @@ import os
 
 from knack.util import CLIError
 from knack.log import get_logger
+from msrestazure.tools import is_valid_resource_id, resource_id
 
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
@@ -1379,7 +1380,66 @@ def process_nw_test_connectivity_namespace(cmd, namespace):
         namespace.headers = headers
 
 
-def process_nw_flow_log_set_namespace(cmd, namespace, remove_location=True):
+def process_nw_flow_log_create_namespace(cmd, namespace):
+    """
+    Flow Log is the sub-resource of Network Watcher, they must be in the same region and subscription.
+    """
+
+    # for both create and update
+    if namespace.resource_group_name is None:
+        err_tpl, err_body = 'usage error: use {} instead.', None
+
+        if namespace.nsg and not is_valid_resource_id(namespace.nsg):
+            err_body = '--nsg ID / --nsg NSD_NAME --resource-group NSD_RESOURCE_GROUP'
+
+        if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
+            err_body = '--storage-account ID / --storage-account NAME --resource_group STORAGE_ACCOUNT_RESOURCE_GROUP'
+
+        if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
+            err_body = '--workspace ID / --workspace NAME --resource-group WORKSPACE_RESOURCE_GROUP'
+
+        if err_body is not None:
+            raise CLIError(err_tpl.format(err_body))
+
+    # for both create and update
+    if namespace.nsg and not is_valid_resource_id(namespace.nsg):
+        kwargs = {
+            'subscription': get_subscription_id(cmd.cli_ctx),
+            'resource_group': namespace.resource_group_name,
+            'namespace': 'Microsoft.Network',
+            'type': 'networkSecurityGroups',
+            'name': namespace.nsg
+        }
+        namespace.nsg = resource_id(**kwargs)
+
+    # for both create and update
+    if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
+        kwargs = {
+            'subscription': get_subscription_id(cmd.cli_ctx),
+            'resource_group': namespace.resource_group_name,
+            'namespace': 'Microsoft.Storage',
+            'type': 'storageAccounts',
+            'name': namespace.storage_account
+        }
+        namespace.storage_account = resource_id(**kwargs)
+
+    # for both create and update
+    if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
+        kwargs = {
+            'subscription': get_subscription_id(cmd.cli_ctx),
+            'resource_group': namespace.resource_group_name,
+            'namespace': 'Microsoft.OperationalInsights',
+            'type': 'workspaces',
+            'name': namespace.traffic_analytics_workspace
+        }
+        namespace.traffic_analytics_workspace = resource_id(**kwargs)
+
+    get_network_watcher_from_location(remove=False)(cmd, namespace)
+
+    validate_tags(namespace)
+
+
+def process_nw_flow_log_set_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         namespace.storage_account = resource_id(
@@ -1396,36 +1456,10 @@ def process_nw_flow_log_set_namespace(cmd, namespace, remove_location=True):
             type='workspaces',
             name=namespace.traffic_analytics_workspace)
 
-    process_nw_flow_log_show_namespace(cmd, namespace, remove_location)
+    process_nw_flow_log_show_namespace(cmd, namespace)
 
 
-def process_nw_flow_log_create_namespace(cmd, namespace):
-    """
-    Flow Log is the sub-resource of Network Watcher, they must be in the same region and subscription.
-    If we can get location from NSG, we will use it to identify the Flow Log and Network Watcher.
-    If user provide --location, we respect it.
-    If user don't provide --location, we try to retrieve region info from resource group.
-    Otherwise, we raise CLIError
-    """
-    process_nw_flow_log_set_namespace(cmd, namespace, remove_location=False)    # keep location
-
-    # set location for the sake of watcher if it's unset
-    if namespace.location is None and namespace.resource_group_name is not None:
-        get_default_location_from_resource_group(cmd, namespace)
-        get_network_watcher_from_location(remove=False)(cmd, namespace)
-
-    if namespace.location is None:
-        raise CLIError('usage error: require --location/--resource-group to help identify Network Watcher. '
-                       'Network Watcher and Flow Log must be in the same region and subscription. '
-                       'While the other resources are not required. '
-                       'If we can get location from NSG, we will use it to identify the Flow Log and Network Watcher. '
-                       'If location is provided, we will use it to identify the Flow Log and Network Watcher. '
-                       'If location is missing, we will try to retrieve location from resource group. ')
-
-    validate_tags(namespace)
-
-
-def process_nw_flow_log_show_namespace(cmd, namespace, remove_location=True):
+def process_nw_flow_log_show_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     from azure.cli.core.commands.arm import get_arm_resource_by_id
 
@@ -1440,11 +1474,11 @@ def process_nw_flow_log_show_namespace(cmd, namespace, remove_location=True):
 
         nsg = get_arm_resource_by_id(cmd.cli_ctx, namespace.nsg)
         namespace.location = nsg.location  # pylint: disable=no-member
-        get_network_watcher_from_location(remove=remove_location)(cmd, namespace)
-    elif namespace.flow_log_name is not None and namespace.network_watcher_name is not None:
-        pass
+        get_network_watcher_from_location(remove=True)(cmd, namespace)
+    elif namespace.flow_log_name is not None and namespace.location is not None:
+        get_network_watcher_from_location(remove=False)(cmd, namespace)
     else:
-        raise CLIError('usage error: --nsg NSG | --watcher NETWORK_WATCHER_NAME --name FLOW_LOW_NAME')
+        raise CLIError('usage error: --nsg NSG | --location NETWORK_WATCHER_LOCATION --name FLOW_LOW_NAME')
 
 
 def process_nw_topology_namespace(cmd, namespace):

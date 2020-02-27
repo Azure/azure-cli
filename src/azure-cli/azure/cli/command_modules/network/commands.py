@@ -43,6 +43,7 @@ from azure.cli.command_modules.network._format import (
     transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
+    get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
@@ -926,19 +927,17 @@ def load_command_table(self, _):
                          deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
         g.custom_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
 
-    with self.command_group('network watcher flow-log', network_watcher_flow_log_sdk, min_api='2019-11-01') as g:
+    with self.command_group('network watcher flow-log',
+                            network_watcher_flow_log_sdk,
+                            client_factory=cf_flow_logs,
+                            min_api='2019-11-01',
+                            validator=get_network_watcher_from_location(remove=False)) as g:
+        g.custom_command('list', 'list_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
+        g.custom_command('delete', 'delete_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
         g.custom_command('create',
                          'create_nw_flow_log',
                          client_factory=cf_flow_logs,
                          validator=process_nw_flow_log_create_namespace)
-        # show command implementation is substituted by show_nsg_flow_logging()
-        # after old show command's parameter is deprecated and removed, should refactor this show command implementation
-        # g.custom_show_command('show',
-        #                       'show_nw_flow_log',
-        #                       client_factory=cf_flow_logs,
-        #                       validator=process_nw_flow_log_show_namespace)
-        g.command('list', 'list')
-        g.command('delete', 'delete')
         g.generic_update_command('update',
                                  getter_name='update_nw_flow_log_getter',
                                  getter_type=network_watcher_flow_log_update_sdk,

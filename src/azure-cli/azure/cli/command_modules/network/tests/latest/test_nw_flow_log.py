@@ -11,8 +11,8 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccou
 
 class NWFlowLogScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')
-    @StorageAccountPreparer(name_prefix='testflowlog', location='westus', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='eastus')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='eastus', kind='StorageV2')
     def test_nw_flow_log_create(self, resource_group, resource_group_location, storage_account):
         self.kwargs.update({
             'rg': resource_group,
@@ -22,7 +22,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test',
-            'workspace': 'workspace24',
+            'workspace': 'workspace0424',
         })
 
         # enable network watcher
@@ -41,26 +41,24 @@ class NWFlowLogScenarioTest(ScenarioTest):
         })
 
         self.cmd('network watcher flow-log create '
+                 '--location {location} '
                  '--resource-group {rg} '
                  '--nsg {nsg} '
                  '--storage-account {storage_account} '
                  '--workspace {workspace_id} '
                  '--name {flow_log} ')
 
-        self.cmd('network watcher flow-log list --resource-group {watcher_rg} --watcher {watcher_name}')
+        self.cmd('network watcher flow-log list --location {location}')
 
         # This output is Azure Management Resource formatted.
-        self.cmd('network watcher flow-log show '
-                 '--resource-group {watcher_rg} '
-                 '--watcher {watcher_name} '
-                 '--name {flow_log} ',
-                 checks=[
-                     self.check('name', self.kwargs['flow_log']),
-                     self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False),
-                     self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId', self.kwargs['workspace_id']),
-                     self.check('retentionPolicy.days', 0),
-                     self.check('retentionPolicy.enabled', False),
-                 ])
+        self.cmd('network watcher flow-log show --location {location} --name {flow_log}', checks=[
+            self.check('name', self.kwargs['flow_log']),
+            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False),
+            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId',
+                       self.kwargs['workspace_id']),
+            self.check('retentionPolicy.days', 0),
+            self.check('retentionPolicy.enabled', False),
+        ])
 
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')
     @StorageAccountPreparer(name_prefix='testflowlog', location='westus', kind='StorageV2')
@@ -73,7 +71,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace21',
+            'workspace': 'workspace0422',
         })
 
         # enable network watcher
@@ -92,23 +90,18 @@ class NWFlowLogScenarioTest(ScenarioTest):
         })
 
         self.cmd('network watcher flow-log create '
+                 '--location {location} '
                  '--resource-group {rg} '
                  '--nsg {nsg} '
                  '--storage-account {storage_account} '
                  '--workspace {workspace_id} '
                  '--name {flow_log} ')
 
-        self.cmd('network watcher flow-log show '
-                 '--resource-group {watcher_rg} '
-                 '--watcher {watcher_name} '
-                 '--name {flow_log} ')
+        self.cmd('network watcher flow-log show --location {location} --name {flow_log}')
 
-        self.cmd('network watcher flow-log delete '
-                 '--resource-group {watcher_rg} '
-                 '--watcher {watcher_name} '
-                 '--name {flow_log} ')
+        self.cmd('network watcher flow-log delete --location {location} --name {flow_log}')
 
-        with self.assertRaisesRegexp(SystemExit, '3'):
+        with self.assertRaisesRegexp(SystemExit, '2'):
             self.cmd('network watcher flow-log show '
                      '--resource-group {watcher_rg} '
                      '--watcher {watcher_name} '
@@ -132,7 +125,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace20',
+            'workspace': 'workspace0421',
         })
 
         # enable network watcher
@@ -154,30 +147,25 @@ class NWFlowLogScenarioTest(ScenarioTest):
         })
 
         self.cmd('network watcher flow-log create '
+                 '--location {location} '
                  '--resource-group {rg} '
                  '--nsg {nsg} '
                  '--storage-account {storage_account} '
                  '--workspace {workspace_id} '
                  '--name {flow_log} ')
 
-        # This output is Azure Management Resource formatted.
-        self.cmd('network watcher flow-log show '
-                 '--resource-group {watcher_rg} '
-                 '--watcher {watcher_name} '
-                 '--name {flow_log} ',
-                 checks=[
-                     self.check('name', self.kwargs['flow_log']),
-                     self.check('enabled', True),
-                     self.check('format.type', 'JSON'),
-                     self.check('format.version', 1),
-                     self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled',
-                                False),
-                     self.check(
-                         'flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId',
-                         self.kwargs['workspace_id']),
-                     self.check('retentionPolicy.days', 0),
-                     self.check('retentionPolicy.enabled', False),
-                 ])
+        # This output is new Azure Management Resource formatted.
+        self.cmd('network watcher flow-log show --location {location} --name {flow_log}', checks=[
+            self.check('name', self.kwargs['flow_log']),
+            self.check('enabled', True),
+            self.check('format.type', 'JSON'),
+            self.check('format.version', 1),
+            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False),
+            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId',
+                       self.kwargs['workspace_id']),
+            self.check('retentionPolicy.days', 0),
+            self.check('retentionPolicy.enabled', False),
+        ])
 
         # This output is deprecating
         self.cmd('network watcher flow-log show --nsg {nsg_id}', checks=[
@@ -189,19 +177,19 @@ class NWFlowLogScenarioTest(ScenarioTest):
             self.check('retentionPolicy.enabled', False)
         ])
 
-    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')
-    @StorageAccountPreparer(name_prefix='testflowlog', location='westus', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='eastus')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='eastus', kind='StorageV2')
     def test_nw_flow_log_update(self, resource_group, resource_group_location, storage_account):
         self.kwargs.update({
             'rg': resource_group,
             'location': resource_group_location,
             'storage_account': storage_account,
-            'storage_account_2': 'storageaccount0393',
+            'storage_account_2': 'storageaccount0395',
             'nsg': 'nsg1',
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace0893',
+            'workspace': 'workspace0895',
         })
 
         # enable network watcher
@@ -213,7 +201,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'nsg_id': nsg_info['NewNSG']['id']
         })
 
-        # prepare another storage account
+        # prepare another storage account in another resource group
         storage_info = self.cmd('storage account create '
                                 '--resource-group {rg} '
                                 '--name {storage_account_2} ').get_output_in_json()
@@ -231,16 +219,14 @@ class NWFlowLogScenarioTest(ScenarioTest):
         })
 
         self.cmd('network watcher flow-log create '
+                 '--location {location} '
                  '--resource-group {rg} '
                  '--nsg {nsg} '
                  '--storage-account {storage_account} '
                  '--workspace {workspace_id} '
                  '--name {flow_log} ')
 
-        res1 = self.cmd('network watcher flow-log show '
-                        '--resource-group {watcher_rg} '
-                        '--watcher {watcher_name} '
-                        '--name {flow_log} ').get_output_in_json()
+        res1 = self.cmd('network watcher flow-log show --location {location} --name {flow_log}').get_output_in_json()
         self.assertEqual(res1['name'], self.kwargs['flow_log'])
         self.assertEqual(res1['enabled'], True)
         self.assertEqual(res1['retentionPolicy']['days'], 0)
@@ -249,8 +235,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
         self.assertIsNone(res1['tags'])
 
         res2 = self.cmd('network watcher flow-log update '
-                        '--resource-group {rg} '
-                        '--watcher {watcher_name} '
+                        '--location {location} '
                         '--name {flow_log} '
                         '--retention 2 '
                         '--storage-account {another_storage} '
