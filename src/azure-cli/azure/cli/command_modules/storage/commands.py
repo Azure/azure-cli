@@ -10,7 +10,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy,
                                                                cf_blob_data_gen_update, cf_sa_for_keys,
-                                                               cf_mgmt_blob_services, cf_mgmt_file_shares)
+                                                               cf_mgmt_blob_services, cf_mgmt_file_shares,
+                                                               cf_private_link, cf_private_endpoint)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -42,6 +43,23 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=cf_sa_for_keys,
         resource_type=ResourceType.MGMT_STORAGE
     )
+
+    private_link_resource_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=cf_private_link,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    private_endpoint_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=cf_private_endpoint,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    private_endpoint_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
+        client_factory=cf_private_endpoint,
+        resource_type=ResourceType.MGMT_STORAGE)
 
     storage_account_custom_type = CliCommandType(
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
@@ -128,6 +146,17 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('add', 'add_network_rule')
         g.custom_command('list', 'list_network_rules')
         g.custom_command('remove', 'remove_network_rule')
+
+    with self.command_group('storage account private-endpoint-connection', private_endpoint_sdk,
+                            custom_command_type=private_endpoint_custom_type, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
+        g.command('delete', 'delete')
+        g.command('show', 'get')
+        g.custom_command('approve', 'approve_private_endpoint_connection')
+        g.custom_command('reject', 'reject_private_endpoint_connection')
+
+    with self.command_group('storage account', private_link_resource_sdk, resource_type=ResourceType.MGMT_STORAGE, ) as g:
+        g.command('list-private-link-resource', 'list_by_storage_account', is_preview=True, min_api='2019-06-01')
 
     with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
                             custom_command_type=storage_account_custom_type,

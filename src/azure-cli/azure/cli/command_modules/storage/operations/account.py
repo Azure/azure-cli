@@ -366,6 +366,40 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
     return client.update(resource_group_name, account_name, params)
 
 
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, account_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
+    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus')
+
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, account_name=account_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    new_status = PrivateEndpointServiceConnectionStatus.approved \
+        if is_approved else PrivateEndpointServiceConnectionStatus.rejected
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+
+    return client.put(resource_group_name=resource_group_name,
+                      account_name=account_name,
+                      private_endpoint_connection_name=private_endpoint_connection_name,
+                      properties=private_endpoint_connection)
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, account_name,
+                                        private_endpoint_connection_name, approval_description=None):
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name=resource_group_name, account_name=account_name,
+        private_endpoint_connection_name=private_endpoint_connection_name, description=approval_description
+    )
+
+
+def reject_private_endpoint_connection(cmd, client, resource_group_name, account_name, private_endpoint_connection_name,
+                                       rejection_description=None):
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name=resource_group_name, account_name=account_name, is_approved=False,
+        private_endpoint_connection_name=private_endpoint_connection_name, description=rejection_description
+    )
+
+
 def create_management_policies(client, resource_group_name, account_name, policy=None):
     if policy:
         if os.path.exists(policy):
