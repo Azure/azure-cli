@@ -196,12 +196,12 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'rg': resource_group,
             'location': resource_group_location,
             'storage_account': storage_account,
-            'storage_account_2': 'storageaccount0389',
+            'storage_account_2': 'storageaccount0393',
             'nsg': 'nsg1',
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace0839',
+            'workspace': 'workspace0893',
         })
 
         # enable network watcher
@@ -218,7 +218,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
                                 '--resource-group {rg} '
                                 '--name {storage_account_2} ').get_output_in_json()
         self.kwargs.update({
-            'another_storage_id': storage_info['id']
+            'another_storage': storage_info['id']
         })
 
         # prepare workspace
@@ -249,11 +249,11 @@ class NWFlowLogScenarioTest(ScenarioTest):
         self.assertIsNone(res1['tags'])
 
         res2 = self.cmd('network watcher flow-log update '
-                        '--resource-group {watcher_rg} '
+                        '--resource-group {rg} '
                         '--watcher {watcher_name} '
                         '--name {flow_log} '
                         '--retention 2 '
-                        '--storage-account-id {another_storage_id} '
+                        '--storage-account {another_storage} '
                         '--tags foo=bar ').get_output_in_json()
         self.assertEqual(res2['name'], self.kwargs['flow_log'])
         self.assertEqual(res2['enabled'], True)

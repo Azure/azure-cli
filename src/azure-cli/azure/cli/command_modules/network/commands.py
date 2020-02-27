@@ -305,6 +305,11 @@ def load_command_table(self, _):
         client_factory=cf_flow_logs,
     )
 
+    network_watcher_flow_log_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_flow_logs,
+    )
+
     network_watcher_pc_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#PacketCapturesOperations.{}',
         client_factory=cf_packet_capture
@@ -935,6 +940,10 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.generic_update_command('update',
+                                 getter_name='update_nw_flow_log_getter',
+                                 getter_type=network_watcher_flow_log_update_sdk,
+                                 setter_name='update_nw_flow_log_setter',
+                                 setter_type=network_watcher_flow_log_update_sdk,
                                  custom_func_name='update_nw_flow_log',
                                  validator=process_nw_flow_log_create_namespace)
 

@@ -1349,13 +1349,12 @@ def load_arguments(self, _):
 
     with self.argument_context('network watcher flow-log') as c:
         c.argument('network_watcher_name', options_list='--watcher')
-        c.ignore('location')
+        c.argument('location', get_location_type(self.cli_ctx))
         c.argument('flow_log_name', name_arg_type, help='The name of the flow logger', min_api='2019-11-01')
         c.argument('nsg', help='Name or ID of the network security group.')
         c.argument('enabled', arg_type=get_three_state_flag(), help='Enable logging', default='true')
         c.argument('retention', type=int, help='Number of days to retain logs')
         c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs')
-        c.argument('storage_account_id', help='ID of the storage account in which to save the flow logs')
 
     # temporary solution for compatible with old show command's parameter
     # after old show command's parameter is deprecated and removed,

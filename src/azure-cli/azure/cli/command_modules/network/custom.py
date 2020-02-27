@@ -4455,10 +4455,20 @@ def create_nw_flow_log(cmd,
     return client.create_or_update(watcher_rg, watcher_name, flow_log_name, flow_log)
 
 
+def update_nw_flow_log_getter(client, watcher_rg, network_watcher_name, flow_log_name):
+    return client.get(watcher_rg, network_watcher_name, flow_log_name)
+
+
+def update_nw_flow_log_setter(client, watcher_rg, network_watcher_name, flow_log_name, parameters):
+    return client.create_or_update(watcher_rg, network_watcher_name, flow_log_name, parameters)
+
+
 def update_nw_flow_log(cmd,
                        instance,
+                       location=None,   # dummy parameter to let it appear in command
+                       resource_group_name=None,    # dummy parameter to let it appear in command
                        enabled=None,
-                       storage_account_id=None,
+                       storage_account=None,
                        retention=0,
                        log_format=None,
                        log_version=None,
@@ -4469,7 +4479,7 @@ def update_nw_flow_log(cmd,
     with cmd.update_context(instance) as c:
         c.set_param('enabled', enabled)
         c.set_param('tags', tags)
-        c.set_param('storage_id', storage_account_id)
+        c.set_param('storage_id', storage_account)
 
     with cmd.update_context(instance.retention_policy) as c:
         c.set_param('days', retention)

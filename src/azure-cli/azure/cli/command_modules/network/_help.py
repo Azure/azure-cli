@@ -5357,6 +5357,21 @@ examples:
 helps['network watcher flow-log update'] = """
 type: command
 short-summary: Update the flow log configuration of a network security group
+examples:
+  - name: Update storage account with name to let resource group identify the storage account and network watcher
+    text: >
+      az network watcher flow-log update
+      --resource-group MyResourceGroup
+      --watcher MyNetworkWatcher
+      --name MyFlowLog
+      --storage-account mystorageaccountname
+  - name: Update storage account with ID to let location identify the network watcher
+    text: >
+      az network watcher flow-log update
+      --resource-group MyResourceGroup
+      --watcher MyNetworkWatcher
+      --name MyFlowLog
+      --storage-account mystorageaccountid
 """
 
 helps['network watcher list'] = """

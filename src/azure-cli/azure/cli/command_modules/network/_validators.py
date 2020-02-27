@@ -1379,17 +1379,15 @@ def process_nw_test_connectivity_namespace(cmd, namespace):
         namespace.headers = headers
 
 
-def process_nw_flow_log_set_namespace(cmd, namespace):
+def process_nw_flow_log_set_namespace(cmd, namespace, remove_location=True):
     from msrestazure.tools import is_valid_resource_id, resource_id
-    if hasattr(namespace, 'storage_account') and \
-            namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
+    if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         namespace.storage_account = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=namespace.resource_group_name,
             namespace='Microsoft.Storage',
             type='storageAccounts',
             name=namespace.storage_account)
-        print(namespace.storage_account)
     if namespace.traffic_analytics_workspace and not is_valid_resource_id(namespace.traffic_analytics_workspace):
         namespace.traffic_analytics_workspace = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -1398,12 +1396,32 @@ def process_nw_flow_log_set_namespace(cmd, namespace):
             type='workspaces',
             name=namespace.traffic_analytics_workspace)
 
-    process_nw_flow_log_show_namespace(cmd, namespace)
+    process_nw_flow_log_show_namespace(cmd, namespace, remove_location)
 
 
 def process_nw_flow_log_create_namespace(cmd, namespace):
-    process_nw_flow_log_set_namespace(cmd, namespace)
-    process_nw_flow_log_show_namespace(cmd, namespace, remove_location=False)
+    """
+    Flow Log is the sub-resource of Network Watcher, they must be in the same region and subscription.
+    If we can get location from NSG, we will use it to identify the Flow Log and Network Watcher.
+    If user provide --location, we respect it.
+    If user don't provide --location, we try to retrieve region info from resource group.
+    Otherwise, we raise CLIError
+    """
+    process_nw_flow_log_set_namespace(cmd, namespace, remove_location=False)    # keep location
+
+    # set location for the sake of watcher if it's unset
+    if namespace.location is None and namespace.resource_group_name is not None:
+        get_default_location_from_resource_group(cmd, namespace)
+        get_network_watcher_from_location(remove=False)(cmd, namespace)
+
+    if namespace.location is None:
+        raise CLIError('usage error: require --location/--resource-group to help identify Network Watcher. '
+                       'Network Watcher and Flow Log must be in the same region and subscription. '
+                       'While the other resources are not required. '
+                       'If we can get location from NSG, we will use it to identify the Flow Log and Network Watcher. '
+                       'If location is provided, we will use it to identify the Flow Log and Network Watcher. '
+                       'If location is missing, we will try to retrieve location from resource group. ')
+
     validate_tags(namespace)
 
 
