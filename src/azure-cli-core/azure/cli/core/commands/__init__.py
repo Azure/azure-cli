@@ -724,12 +724,13 @@ class AzCliCommandInvoker(CommandInvoker):
                 del preview_kwargs['_get_message']
                 previews.append(ImplicitPreviewItem(**preview_kwargs))
 
-        colorama.init()
-        for d in deprecations:
-            print(d.message, file=sys.stderr)
-        for p in previews:
-            print(p.message, file=sys.stderr)
-        colorama.deinit()
+        if not self.cli_ctx.only_show_errors:
+            colorama.init()
+            for d in deprecations:
+                print(d.message, file=sys.stderr)
+            for p in previews:
+                print(p.message, file=sys.stderr)
+            colorama.deinit()
 
     def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
