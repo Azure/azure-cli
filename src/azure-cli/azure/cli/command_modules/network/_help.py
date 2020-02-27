@@ -5332,6 +5332,22 @@ examples:
 helps['network watcher flow-log create'] = """
 type: command
 short-summary: Create a flow log on a network security group.
+examples:
+  - name: Create a flow log with Network Security Group name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --nsg MyNetworkSecurityGroupName
+      --storage-account account
+  - name: Create a flow log with Network Security Group ID (could be in another resource group)
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --name MyFlowLog
+      --nsg MyNetworkSecurityGroupID
+      --storage-account account
 """
 
 helps['network watcher flow-log list'] = """
@@ -5351,7 +5367,7 @@ examples:
   - name: Show NSG flow logs. (Deprecated)
     text: az network watcher flow-log show -g MyResourceGroup --nsg MyNsg
   - name: Show NSG flow logs with Azure Resource Management formatted.
-    text: az network watcher flow-log show --watcher MyNetworkWatcher --name MyFlowLog
+    text: az network watcher flow-log show --location MyNetworkWatcher --name MyFlowLog
 """
 
 helps['network watcher flow-log update'] = """
@@ -5361,17 +5377,17 @@ examples:
   - name: Update storage account with name to let resource group identify the storage account and network watcher
     text: >
       az network watcher flow-log update
+      --location westus
       --resource-group MyResourceGroup
-      --watcher MyNetworkWatcher
       --name MyFlowLog
-      --storage-account mystorageaccountname
+      --storage-account accountname
   - name: Update storage account with ID to let location identify the network watcher
     text: >
       az network watcher flow-log update
+      --location westus
       --resource-group MyResourceGroup
-      --watcher MyNetworkWatcher
       --name MyFlowLog
-      --storage-account mystorageaccountid
+      --storage-account accountid
 """
 
 helps['network watcher list'] = """

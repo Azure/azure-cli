@@ -12,7 +12,6 @@ import os
 
 from knack.util import CLIError
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, resource_id
 
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
@@ -1384,6 +1383,7 @@ def process_nw_flow_log_create_namespace(cmd, namespace):
     """
     Flow Log is the sub-resource of Network Watcher, they must be in the same region and subscription.
     """
+    from msrestazure.tools import is_valid_resource_id, resource_id
 
     # for both create and update
     if namespace.resource_group_name is None:
