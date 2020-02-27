@@ -1348,7 +1348,7 @@ def load_arguments(self, _):
         c.argument('filters', type=get_json_object)
 
     with self.argument_context('network watcher flow-log') as c:
-        c.argument('network_watcher_name', options_list='--watcher')
+        c.argument('network_watcher_name', options_list='--watcher', min_api='2019-11-01')
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('flow_log_name', name_arg_type, help='The name of the flow logger', min_api='2019-11-01')
         c.argument('nsg', help='Name or ID of the network security group.')
@@ -1363,11 +1363,6 @@ def load_arguments(self, _):
         c.argument('nsg',
                    deprecate_info=c.deprecate(redirect='--watcher and --name combination', hide=False),
                    help='Name or ID of the network security group.')
-
-    with self.argument_context('network watcher flow-log show',
-                               arg_group='Result with Azure Management Resource (ARM) Formatted') as c:
-        c.argument('network_watcher_name', options_list='--watcher')
-        c.argument('flow_log_name', name_arg_type, help='The name of the flow logger', min_api='2019-11-01')
 
     with self.argument_context('network watcher flow-log', arg_group='Format', min_api='2018-10-01') as c:
         c.argument('log_format', options_list='--format', help='File type of the flow log.', arg_type=get_enum_type(FlowLogFormatType))
