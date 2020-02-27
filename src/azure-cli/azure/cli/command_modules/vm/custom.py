@@ -2174,7 +2174,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
-                os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None):
+                os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
+                automatic_repairs_grace_period=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2403,7 +2404,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             terminate_notification_time=terminate_notification_time, max_price=max_price,
             scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
             data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
-            data_disk_mbps=data_disk_mbps)
+            data_disk_mbps=data_disk_mbps, automatic_repairs_grace_period=automatic_repairs_grace_period)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2653,7 +2654,8 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
-                scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None, **kwargs):
+                scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None,
+                enable_automatic_repairs=None, automatic_repairs_grace_period=None, **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -2685,6 +2687,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
+
+    if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None:
+        AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
+        vmss.automatic_repairs_policy = \
+            AutomaticRepairsPolicy(enabled="true", grace_period=automatic_repairs_grace_period)
 
     if ultra_ssd_enabled is not None:
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):

@@ -1409,6 +1409,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_vmss_msi(cmd, namespace)
     _validate_proximity_placement_group(cmd, namespace)
     _validate_vmss_terminate_notification(cmd, namespace)
+    _validate_vmss_create_automatic_repairs(cmd, namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -1429,6 +1430,7 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
             raise CLIError("usage error: protection policies can only be applied to VM instances within a VMSS."
                            " Please use --instance-id to specify a VM instance")
     _validate_vmss_update_terminate_notification_related(cmd, namespace)
+    _validate_vmss_update_automatic_repairs(cmd, namespace)
 # endregion
 
 
@@ -1633,3 +1635,24 @@ def _validate_vmss_terminate_notification(cmd, namespace):  # pylint: disable=un
     """
     if namespace.terminate_notification_time is not None:
         namespace.terminate_notification_time = 'PT' + namespace.terminate_notification_time + 'M'
+
+def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.automatic_repairs_grace_period is not None:
+        if namespace.load_balancer is None or namespace.health_probe is None:
+            raise CLIError("usage error: --load-balancer and --health-probe are required "
+                           "when create vmss with automatic repairs")
+    _validate_vmss_automatic_repairs(cmd, namespace)
+
+def _validate_vmss_update_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
+    if namespace.enable_automatic_repairs is False and namespace.automatic_repairs_grace_period is not None:
+        raise CLIError("usage error: please enable --enable-automatic-repairs")
+    if namespace.enable_automatic_repairs is True and namespace.automatic_repairs_grace_period is None:
+        raise CLIError("usage error: please set --automatic-repairs-grace-period")
+    _validate_vmss_automatic_repairs(cmd, namespace)
+
+def _validate_vmss_automatic_repairs(cmd, namespace):  # pylint: disable=unused-argument
+    """
+        Transform minutes to ISO 8601 formmat
+    """
+    if namespace.automatic_repairs_grace_period is not None:
+        namespace.automatic_repairs_grace_period = 'PT' + namespace.automatic_repairs_grace_period + 'M'
