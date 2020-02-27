@@ -487,8 +487,8 @@ examples:
     text: az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t 2020-02-27T03:59:59Z -r "" ""
   - name: Restore blobs in the specified blob range.
     text: |
-    end
-    az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t 2020-02-27T03:59:59Z -r "" ""
+        time=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2
 """
 
 helps['storage blob service-properties'] = """

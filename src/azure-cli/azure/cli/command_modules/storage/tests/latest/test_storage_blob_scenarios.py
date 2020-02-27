@@ -491,34 +491,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaisesRegexp(AzureException, "Authentication failure"):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
-    @ResourceGroupPreparer(name_prefix="storage_blob_restore")
-    @StorageAccountPreparer(name_prefix="storage_blob_restore", kind="StorageV2", location="eastus2euap")
-    def test_storage_blob_restore(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-        self.cmd('storage account blob-service-properties update --enable-change-feed -n {sa}').assert_with_checks(
-            JMESPathCheck('changeFeed.enabled', True))
-
-        self.cmd('storage account blob-service-properties update --enable-delete-retention --delete-retention-days 2 -n {sa}')\
-            .assert_with_checks(JMESPathCheck('deleteRetentionPolicy.enabled', True),
-                                JMESPathCheck('deleteRetentionPolicy.days', 2))
-        # Enable Restore Policy
-        self.cmd('storage account blob-service-properties update --enable-restore-policy --restore-days 1 -n {sa}')\
-            .assert_with_checks(JMESPathCheck('restorePolicy.enabled', True),
-                                JMESPathCheck('restorePolicy.days', 1))
-
-        c1 = self.create_container(account_info)
-        c2 = self.create_container(account_info)
-        b1 = self.create_random_name('blob1', 24)
-        b2 = self.create_random_name('blob2', 24)
-        b3 = self.create_random_name('blob3', 24)
-        b4 = self.create_random_name('blob4', 24)
-
-        # Restore blobs to 1 day ago, with specific ranges
-        time_to_restore = (datetime.utcnow() + timedelta(days=-1)).strftime('%Y-%m-%dT%H:%MZ')
-
-        self.storage_cmd('storage blob restore -t {} -r {} {} -r {} {}'.format(time_to_restore, b1, b2),
-                         account_info)
-
 
 if __name__ == '__main__':
     unittest.main()

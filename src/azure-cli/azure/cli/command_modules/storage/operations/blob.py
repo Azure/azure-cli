@@ -31,11 +31,6 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
         if_unmodified_since=if_unmodified_since, timeout=timeout)
 
 
-def restore_blob_ranges(client, resource_group_name, account_name, time_to_restore, blob_ranges, no_wait=False):
-    return sdk_no_wait(no_wait, client.restore_blob_ranges, resource_group_name, account_name, time_to_restore,
-                       blob_ranges)
-
-
 def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):
     if blob_type == 'block':
         return client.set_standard_blob_tier(container_name=container_name, blob_name=blob_name,
