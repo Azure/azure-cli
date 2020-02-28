@@ -208,7 +208,7 @@ def get_validate_platform(cmd, platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    OS, Architecture = cmd.get_models('OS', 'Architecture', operation_group='tasks')
+    OS, Architecture = cmd.get_models('OS', 'Architecture')
     # Defaults
     platform_os = OS.linux.value
     platform_arch = Architecture.amd64.value
@@ -298,7 +298,7 @@ def get_custom_registry_credentials(cmd,
 
     source_registry_credentials = None
     if auth_mode:
-        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials', operation_group='tasks')
+        SourceRegistryCredentials = cmd.get_models('SourceRegistryCredentials')
         source_registry_credentials = SourceRegistryCredentials(
             login_mode=auth_mode)
 
@@ -314,9 +314,7 @@ def get_custom_registry_credentials(cmd,
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',
             'SecretObject',
-            'SecretObjectType',
-            operation_group='tasks'
-        )
+            'SecretObjectType')
 
         if not is_remove:
             if is_identity_credential:
@@ -340,7 +338,7 @@ def get_custom_registry_credentials(cmd,
 
         custom_registries = {login_server: custom_reg_credential}
 
-    Credentials = cmd.get_models('Credentials', operation_group='tasks')
+    Credentials = cmd.get_models('Credentials')
     return Credentials(
         source_registry=source_registry_credentials,
         custom_registries=custom_registries
@@ -349,7 +347,7 @@ def get_custom_registry_credentials(cmd,
 
 def build_timers_info(cmd, schedules):
     TimerTrigger, TriggerStatus = cmd.get_models(
-        'TimerTrigger', 'TriggerStatus', operation_group='tasks')
+        'TimerTrigger', 'TriggerStatus')
     timer_triggers = []
 
     # Provide a default name for the timer if no name was provided.

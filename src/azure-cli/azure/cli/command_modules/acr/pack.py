@@ -53,7 +53,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         raise CLIError('Building with Buildpacks requires a valid source location.')
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
-    OS = cmd.get_models('OS', operation_group='tasks')
+    OS = cmd.get_models('OS')
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
@@ -73,8 +73,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         pack_image_tag=pack_image_tag,
         no_pull='--no-pull' if not pull else '')
 
-    EncodedTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'PlatformProperties',
-                                                               operation_group='tasks')
+    EncodedTaskRunRequest, PlatformProperties = cmd.get_models('EncodedTaskRunRequest', 'PlatformProperties')
 
     request = EncodedTaskRunRequest(
         encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),

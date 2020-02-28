@@ -40,22 +40,22 @@ def get_premium_sku(cmd):
 
 
 def get_valid_os(cmd):
-    OS = cmd.get_models('OS', operation_group='tasks')
+    OS = cmd.get_models('OS')
     return [item.value.lower() for item in OS]
 
 
 def get_valid_architecture(cmd):
-    Architecture = cmd.get_models('Architecture', operation_group='tasks')
+    Architecture = cmd.get_models('Architecture')
     return [item.value.lower() for item in Architecture]
 
 
 def get_valid_variant(cmd):
-    Variant = cmd.get_models('Variant', operation_group='tasks')
+    Variant = cmd.get_models('Variant')
     return [item.value.lower() for item in Variant]
 
 
 def get_finished_run_status(cmd):
-    RunStatus = cmd.get_models('RunStatus', operation_group='tasks')
+    RunStatus = cmd.get_models('RunStatus')
     return [RunStatus.succeeded.value,
             RunStatus.failed.value,
             RunStatus.canceled.value,
@@ -64,10 +64,10 @@ def get_finished_run_status(cmd):
 
 
 def get_succeeded_run_status(cmd):
-    RunStatus = cmd.get_models('RunStatus', operation_group='tasks')
+    RunStatus = cmd.get_models('RunStatus')
     return [RunStatus.succeeded.value]
 
 
 def get_acr_task_models(cmd):
     from azure.cli.core.profiles import get_sdk
-    return get_sdk(cmd.cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, 'models', operation_group='tasks')
+    return get_sdk(cmd.cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, 'models')

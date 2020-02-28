@@ -144,13 +144,7 @@ AZURE_API_PROFILES = {
             'role_definitions': '2018-01-01-preview',
             'provider_operations_metadata': '2018-01-01-preview'
         }),
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2019-12-01-preview', {
-            'tasks': '2019-06-01-preview',
-            'task_runs': '2019-06-01-preview',
-            'runs': '2019-06-01-preview',
-            'scope_maps': '2019-05-01-preview',
-            'tokens': '2019-05-01-preview'
-        }),
+        ResourceType.MGMT_CONTAINERREGISTRY: '2019-12-01-preview',
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',

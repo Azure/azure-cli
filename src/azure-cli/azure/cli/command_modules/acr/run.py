@@ -56,8 +56,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
     EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
-        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties',
-        operation_group='tasks')
+        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties')
 
     if source_location:
         request = FileTaskRunRequest(
