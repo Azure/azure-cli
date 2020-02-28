@@ -4980,6 +4980,17 @@ def update_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
     return ncf.virtual_network_peerings.create_or_update(
         resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
 
+
+def list_available_ips(cmd, resource_group_name, virtual_network_name):
+    client = network_client_factory(cmd.cli_ctx).virtual_networks
+    vnet = client.get(resource_group_name=resource_group_name,
+                      virtual_network_name=virtual_network_name)
+    start_ip = vnet.address_space.address_prefixes[0].split('/')[0]
+    available_ips = client.check_ip_address_availability(resource_group_name=resource_group_name,
+                                                         virtual_network_name=virtual_network_name,
+                                                         ip_address=start_ip)
+    return available_ips.available_ip_addresses
+
 # endregion
 
 

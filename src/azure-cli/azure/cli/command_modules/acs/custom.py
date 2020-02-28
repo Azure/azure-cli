@@ -1646,6 +1646,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_osdisk_size=0,
                node_count=3,
                nodepool_name="nodepool1",
+               nodepool_tags=None,
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1698,6 +1699,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
+        tags=nodepool_tags,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -2708,6 +2710,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       max_count=None,
                       enable_cluster_autoscaler=False,
                       node_taints=None,
+                      tags=None,
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2732,6 +2735,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     agent_pool = AgentPool(
         name=nodepool_name,
+        tags=tags,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
@@ -2781,13 +2785,15 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          disable_cluster_autoscaler=False,
                          update_cluster_autoscaler=False,
                          min_count=None, max_count=None,
+                         tags=None,
                          no_wait=False):
 
     update_flags = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     if update_flags != 1:
-        raise CLIError('Please specify "--enable-cluster-autoscaler" or '
-                       '"--disable-cluster-autoscaler" or '
-                       '"--update-cluster-autoscaler"')
+        if update_flags != 0 or tags is None:
+            raise CLIError('Please specify "--enable-cluster-autoscaler" or '
+                           '"--disable-cluster-autoscaler" or '
+                           '"--update-cluster-autoscaler"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     node_count = instance.count
@@ -2820,6 +2826,8 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         instance.enable_auto_scaling = False
         instance.min_count = None
         instance.max_count = None
+
+    instance.tags = tags
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 

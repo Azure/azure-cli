@@ -20,7 +20,7 @@ from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_connector_name, validate_max_pods, validate_nodes_count,
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
-    validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr,
+    validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id)
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
@@ -198,6 +198,7 @@ def load_arguments(self, _):
         c.argument('skip_subnet_role_assignment', action='store_true')
         c.argument('api_server_authorized_ip_ranges', type=str, validator=validate_ip_ranges)
         c.argument('attach_acr', acr_arg_type)
+        c.argument('nodepool_tags', nargs='*', validator=validate_nodepool_tags, help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
 
     with self.argument_context('aks update') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -285,6 +286,7 @@ def load_arguments(self, _):
             c.argument('os_type', type=str)
             c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
             c.argument('node_taints', type=str, validator=validate_taints)
+            c.argument('tags', tags_type)
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
@@ -294,6 +296,7 @@ def load_arguments(self, _):
         c.argument('enable_cluster_autoscaler', options_list=["--enable-cluster-autoscaler", "-e"], action='store_true')
         c.argument('disable_cluster_autoscaler', options_list=["--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
+        c.argument('tags', tags_type)
 
     with self.argument_context('aks upgrade-connector') as c:
         c.argument('aci_resource_group')

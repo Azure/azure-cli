@@ -4433,6 +4433,14 @@ examples:
     text: az network vnet show -g MyResourceGroup -n MyVNet
 """
 
+helps['network vnet list-available-ips'] = """
+type: command
+short-summary: List some available ips in the vnet.
+examples:
+  - name: List some available ips in the vnet.
+    text: az network vnet list-available-ips -g MyResourceGroup -n MyVNet
+"""
+
 helps['network vnet subnet'] = """
 type: group
 short-summary: Manage subnets in an Azure Virtual Network.
