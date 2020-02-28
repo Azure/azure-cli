@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import FUNCTIONS_VERSIONS_FUNCTIONAPP, RUNTIME_TO_IMAGE_FUNCTIONAPP
+from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address)
 
@@ -52,9 +52,9 @@ def load_arguments(self, _):
 
     # combine all runtime versions for all functions versions
     functionapp_runtime_to_version = {}
-    for functions_version in RUNTIME_TO_IMAGE_FUNCTIONAPP.values():
+    for functions_version in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS.values():
         for runtime, val in functions_version.items():
-            functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val.keys())
+            functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val)
 
     functionapp_runtime_to_version_texts = []
     for runtime, runtime_versions in functionapp_runtime_to_version.items():
@@ -470,7 +470,7 @@ def load_arguments(self, _):
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
-        c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS_FUNCTIONAPP))
+        c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
         c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
         c.argument('runtime_version', help='The version of the functions runtime stack. '
                                            'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))

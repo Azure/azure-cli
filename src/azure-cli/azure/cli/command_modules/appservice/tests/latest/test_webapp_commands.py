@@ -1368,7 +1368,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/java:2.0-java8-appservice')])
+            JMESPathCheck('linuxFxVersion', 'JAVA|8')])
 
 
 class FunctionUpdatePlan(ScenarioTest):
@@ -1661,7 +1661,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node8-appservice')])
+            JMESPathCheck('linuxFxVersion', 'NODE|8')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
@@ -1688,7 +1688,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:2.0-node10-appservice')])
+            JMESPathCheck('linuxFxVersion', 'NODE|10')])
 
     @ResourceGroupPreparer(location='westus')
     @StorageAccountPreparer()
@@ -1734,8 +1734,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck(
-                'linuxFxVersion', 'DOCKER|mcr.microsoft.com/azure-functions/node:3.0-node12-appservice')
+            JMESPathCheck('linuxFxVersion', 'NODE|12')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
