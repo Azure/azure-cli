@@ -57,8 +57,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            should_create_new_rg, set_location, does_app_already_exist, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
-from ._constants import (RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP, NODE_VERSION_DEFAULT_FUNCTIONAPP,
-                         RUNTIME_TO_IMAGE_FUNCTIONAPP, NODE_VERSION_DEFAULT)
+from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
+                         FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT)
 
 logger = get_logger(__name__)
 
@@ -2397,7 +2397,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     if runtime_version is not None:
         if runtime is None:
             raise CLIError('Must specify --runtime to use --runtime-version')
-        allowed_versions = RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version][runtime].keys()
+        allowed_versions = FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version][runtime]
         if runtime_version not in allowed_versions:
             raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
                            '--functions_version {}. Supported versions are: {}'
@@ -2423,13 +2423,11 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-                if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version].keys():
-                    raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
+                if runtime not in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version]:
+                    raise CLIError("An appropriate linux image for runtime:'{}', "
+                                   "functions_version: '{}' was not found".format(runtime, functions_version))
         if deployment_container_image_name is None:
-            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption,
-                                                                     functions_version,
-                                                                     runtime,
-                                                                     runtime_version)
+            site_config.linux_fx_version = _get_linux_fx_functionapp(functions_version, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
     # adding appsetting to site to make it a function
@@ -2469,8 +2467,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if consumption_plan_location and is_linux:
-        logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully"
-                       "created but is not active until content is published using"
+        logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully "
+                       "created but is not active until content is published using "
                        "Azure Portal or the Functions Core Tools.", name)
     else:
         _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
@@ -2497,21 +2495,20 @@ def _get_extension_version_functionapp(functions_version):
     return '~2'
 
 
-def _get_linux_fx_functionapp(is_consumption, functions_version, runtime, runtime_version):
+def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):
+    if runtime == 'dotnet':
+        return runtime.upper()
     if runtime_version is None:
-        runtime_version = RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP[functions_version][runtime]
-    if is_consumption:
-        return '{}|{}'.format(runtime.upper(), runtime_version)
-    # App service or Elastic Premium
-    return _format_fx_version(RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version][runtime][runtime_version])
+        runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]
+    return '{}|{}'.format(runtime.upper(), runtime_version)
 
 
 def _get_website_node_version_functionapp(functions_version, runtime, runtime_version):
     if runtime is None or runtime != 'node':
-        return NODE_VERSION_DEFAULT_FUNCTIONAPP[functions_version]
+        return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
     if runtime_version is not None:
         return '~{}'.format(runtime_version)
-    return NODE_VERSION_DEFAULT_FUNCTIONAPP[functions_version]
+    return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
 
 
 def try_create_application_insights(cmd, functionapp):
