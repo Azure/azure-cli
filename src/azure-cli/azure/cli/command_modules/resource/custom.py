@@ -475,14 +475,14 @@ def deploy_arm_template_at_resource_group(cmd,
                                           template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, mode=None, rollback_on_error=None,
                                           no_wait=False, handle_extended_json_format=False,
-                                          aux_subscriptions=None):
+                                          aux_subscriptions=None, aux_tenants=None):
     return _deploy_arm_template_at_resource_group(cli_ctx=cmd.cli_ctx,
                                                   resource_group_name=resource_group_name,
                                                   template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                   deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
                                                   validate_only=False,
                                                   no_wait=no_wait, handle_extended_json_format=handle_extended_json_format,
-                                                  aux_subscriptions=aux_subscriptions)
+                                                  aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
 
 def validate_arm_template_at_resource_group(cmd,
@@ -504,7 +504,7 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
                                            deployment_name=None, mode=None, rollback_on_error=None,
                                            validate_only=False,
                                            no_wait=False, handle_extended_json_format=False,
-                                           aux_subscriptions=None):
+                                           aux_subscriptions=None, aux_tenants=None):
     deployment_properties = None
     if handle_extended_json_format:
         deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cli_ctx, template_file=template_file,
@@ -517,7 +517,8 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
                                                                parameters=parameters, mode=mode,
                                                                rollback_on_error=rollback_on_error)
 
-    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format, aux_subscriptions=aux_subscriptions)
+    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format,
+                                                    aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
 
@@ -704,8 +705,10 @@ def _prepare_deployment_properties(cli_ctx, template_file=None, template_uri=Non
     return properties
 
 
-def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False, aux_subscriptions=None):
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions)
+def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False,
+                                      aux_subscriptions=None, aux_tenants=None):
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions,
+                                  aux_tenants=aux_tenants)
     deployment_client = smc.deployments  # This solves the multi-api for you
 
     if handle_extended_json_format:
