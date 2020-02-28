@@ -1909,6 +1909,7 @@ def server_create(
         server_name,
         assign_identity=False,
         no_wait=False,
+        public_network_access=None,
         **kwargs):
     '''
     Creates a server.
@@ -1916,6 +1917,9 @@ def server_create(
 
     if assign_identity:
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    if public_network_access is not None:
+        kwargs['public_network_access'] = public_network_access
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -1942,7 +1946,8 @@ def server_list(
 def server_update(
         instance,
         administrator_login_password=None,
-        assign_identity=False):
+        assign_identity=False,
+        public_network_access=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
     '''
@@ -1954,6 +1959,9 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+
+    if public_network_access is not None:
+        instance.public_network_access = public_network_access
 
     return instance
 

@@ -1039,6 +1039,12 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this server'
                    'for use with key management services like Azure KeyVault.')
 
+        c.argument('public_network_access',
+                   options_list=['--public-network-access', '-a'],
+                   arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True),
+                   help='Sets whether public network access to server is allowed or not. When disabled,'
+                   'only connections made through Private Links can reach this server.')
+
     with self.argument_context('sql server create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1061,6 +1067,12 @@ def load_arguments(self, _):
                    options_list=['--assign-identity', '-i'],
                    help='Generate and assign an Azure Active Directory Identity for this server'
                    'for use with key management services like Azure KeyVault.')
+
+        c.argument('public_network_access',
+                   options_list=['--public-network-access', '-a'],
+                   arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True),
+                   help='Sets whether public network access to server is allowed or not. When disabled,'
+                   'only connections made through Private Links can reach this server.')
 
     with self.argument_context('sql server update') as c:
         c.argument('administrator_login_password',
