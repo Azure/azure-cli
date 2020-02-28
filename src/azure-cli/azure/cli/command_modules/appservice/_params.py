@@ -15,7 +15,7 @@ from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAut
 from ._completers import get_hostname_completion_list
 from ._constants import FUNCTIONS_VERSIONS_FUNCTIONAPP, RUNTIME_TO_IMAGE_FUNCTIONAPP
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create)
+                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address)
 
 
 AUTH_TYPES = {
@@ -556,7 +556,7 @@ def load_arguments(self, _):
             c.argument('description', help='Description of the access restriction rule')
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
-            c.argument('ip_address', help="IP address or CIDR range")
+            c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
             c.argument('vnet_name', help="vNet name")
             c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('ignore_missing_vnet_service_endpoint',
@@ -570,7 +570,7 @@ def load_arguments(self, _):
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
-            c.argument('ip_address', help="IP address or CIDR range")
+            c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
             c.argument('vnet_name', help="vNet name")
             c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('scm_site', help='True if access restriction should be removed from scm site',
