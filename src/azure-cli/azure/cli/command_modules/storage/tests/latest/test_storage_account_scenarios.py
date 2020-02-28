@@ -773,3 +773,92 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('{cmd} --enable-delete-retention false -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['deleteRetentionPolicy']['days'], None)
+
+    class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
+        @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
+        @StorageAccountPreparer(name_prefix='saplr')
+        def test_storage_account_private_link(self, storage_account):
+            self.kwargs.update({
+                'sa': storage_account
+            })
+            self.cmd('storage account list-private-link-resource --account-name {sa} -g {rg}', checks=[
+                self.check('length(@)', 30)])
+
+    class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
+        @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
+        @StorageAccountPreparer(name_prefix='saplr')
+        def test_storage_account_private_endpoint(self, storage_account, resource_group):
+            self.kwargs.update({
+                'sa': storage_account,
+                'loc': 'centraluseuap',
+                'vnet': self.create_random_name('cli-vnet-', 24),
+                'subnet': self.create_random_name('cli-subnet-', 24),
+                'pe': self.create_random_name('cli-pe-', 24),
+                'pe_connection': self.create_random_name('cli-pec-', 24),
+            })
+
+            # Prepare network
+            self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                     checks=self.check('length(newVNet.subnets)', 1))
+            self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                     '--disable-private-endpoint-network-policies true',
+                     checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+            # Create a private endpoint connection
+            sa = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+            self.kwargs['sa_id'] = sa['id']
+
+            pr = self.cmd('storage account list-private-link-resource --account-name {sa} -g {rg}').get_output_in_json()
+            self.kwargs['group_id'] = pr[0]['groupId']
+
+            pe = self.cmd(
+                'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+                '--connection-name {pe_connection} --private-connection-resource-id {sa_id} '
+                '--group-ids blob').get_output_in_json()
+            self.assertEqual('name', self.kwargs['pe'])
+            self.assertEqual('privateLinkServiceConnections.name', self.kwargs['pe_connection'])
+            self.assertEqual('privateLinkServiceConnections.privateLinkServiceConnectionState.status', 'Approved')
+            self.assertEqual('privateLinkServiceConnections.provisioningState', 'Succeed')
+            self.assertEqual('privateLinkServiceConnections.groupIds', 'Succeed')
+            self.assertIn('privateLinkServiceConnections.id', pe)
+            self.kwargs['pe_id'] = pe['id']
+
+            # Show the connection at vault side
+            sa = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+            self.assertIn('privateLinkServiceConnections', sa)
+            self.assertEqual(len(sa['privateLinkServiceConnections']), 1)
+            self.assertEqual(sa['privateLinkServiceConnections'][0]['privateEndpoint']['id'], self.kwargs['pe_id'])
+            self.assertEqual(sa['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+                             'Approved')
+
+            self.kwargs['sa_pec_id'] = sa['privateEndpointConnections'][0]['id']
+            self.kwargs['sa_pec_name'] = sa['privateEndpointConnections'][0]['name']
+
+            self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec}',
+                     checks=self.check('id', '{kv_pe_id}'))
+
+            self.kwargs['kv_pe_name'] = self.kwargs['kv_pe_id'].split('/')[-1]
+            self.cmd('keyvault private-endpoint show --vault-name {kv} --connection-name {kv_pe_name}',
+                     checks=self.check('name', '{kv_pe_name}'))
+            self.cmd('keyvault private-endpoint show --vault-name {kv} -n {kv_pe_name}',
+                     checks=self.check('name', '{kv_pe_name}'))
+
+            # Try running `set-policy` on the linked vault
+            self.kwargs['policy_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+            self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
+                     checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
+
+            # Test approval/rejection
+            self.kwargs.update({
+                'approval_desc': 'You are approved!',
+                'rejection_desc': 'You are rejected!'
+            })
+            self.cmd('keyvault private-endpoint reject --connection-id {kv_pe_id} '
+                     '--rejection-description "{rejection_desc}"', checks=[
+                self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
+                self.check('provisioningState', 'Updating')
+            ])
+
+            self.cmd('keyvault private-endpoint show --connection-id {kv_pe_id}',
+                     checks=self.check('provisioningState', 'Succeeded'))

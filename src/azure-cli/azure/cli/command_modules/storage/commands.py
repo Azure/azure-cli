@@ -150,10 +150,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account private-endpoint-connection', private_endpoint_sdk,
                             custom_command_type=private_endpoint_custom_type, is_preview=True,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
-        g.command('delete', 'delete')
-        g.command('show', 'get')
-        g.custom_command('approve', 'approve_private_endpoint_connection')
-        g.custom_command('reject', 'reject_private_endpoint_connection')
+        from ._validators import validate_private_endpoint_connection_id
+        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+        g.command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
 
     with self.command_group('storage account', private_link_resource_sdk, resource_type=ResourceType.MGMT_STORAGE, ) as g:
         g.command('list-private-link-resource', 'list_by_storage_account', is_preview=True, min_api='2019-06-01')

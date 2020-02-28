@@ -385,18 +385,18 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, account_name,
-                                        private_endpoint_connection_name, approval_description=None):
+                                        private_endpoint_connection_name, description=None):
     return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, account_name=account_name,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=approval_description
+        cmd, client, resource_group_name=resource_group_name, account_name=account_name, is_approved=True,
+        private_endpoint_connection_name=private_endpoint_connection_name, description=description
     )
 
 
 def reject_private_endpoint_connection(cmd, client, resource_group_name, account_name, private_endpoint_connection_name,
-                                       rejection_description=None):
+                                       description=None):
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name=resource_group_name, account_name=account_name, is_approved=False,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=rejection_description
+        private_endpoint_connection_name=private_endpoint_connection_name, description=description
     )
 
 

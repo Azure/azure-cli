@@ -5,6 +5,9 @@
 
 # pylint: disable=protected-access
 
+from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -16,7 +19,6 @@ from azure.cli.command_modules.storage.util import glob_files_locally, guess_con
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
-from knack.log import get_logger
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -792,7 +794,6 @@ def process_blob_upload_batch_parameters(cmd, namespace):
             namespace.blob_type = 'page'
         elif any(vhd_files):
             # source files contain vhd files but not all of them
-            from knack.util import CLIError
             raise CLIError("""Fail to guess the required blob type. Type of the files to be
             uploaded are not consistent. Default blob type for .vhd files is "page", while
             others are "block". You can solve this problem by either explicitly set the blob
@@ -1159,3 +1160,18 @@ def validator_delete_retention_days(namespace):
         if namespace.delete_retention_days > 365:
             raise ValueError(
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
+
+
+def validate_private_endpoint_connection_id(cmd, namespace):
+    ns = namespace
+    if ns.connection_id:
+        id_parts = ns.connection_id.split('/')
+        ns.private_endpoint_connection_name = id_parts[-1]
+        ns.account_name = id_parts[-3]
+        ns.resource_group_name = id_parts[-7]
+        del ns.connection_id
+    if ns.account_name and not ns.resource_group_name:
+        ns.resource_group_name = _query_account_rg(cmd.cli_ctx, ns.account_name)[0]
+
+    if not all([ns.account_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --account-name NAME]')

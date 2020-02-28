@@ -206,6 +206,86 @@ examples:
     crafted: true
 """
 
+helps['storage account private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for storage account.
+examples:
+  - name: Approve a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection approve --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Approve a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection approve --id $id
+  - name: Approve a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection approve -g myRg --account-name mystorageaccount --name myconnection 
+  - name: Approve a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection approve -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection request for storage account.
+examples:
+  - name: Delete a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection delete --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Delete a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection delete --id $id
+  - name: Delete a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection delete -g myRg --account-name mystorageaccount --name myconnection 
+  - name: Delete a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection delete -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for storage account.
+examples:
+  - name: Reject a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection reject --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Reject a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection reject --id $id
+  - name: Reject a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection reject -g myRg --account-name mystorageaccount --name myconnection 
+  - name: Reject a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection reject -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection request for storage account.
+examples:
+  - name: Show details of a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection show --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Show details of a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection show --id $id
+  - name: Show details of a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection show -g myRg --account-name mystorageaccount --name myconnection 
+  - name: Show details of a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection show -g myRg --account-name mystorageaccount --name $name
+"""
+
 helps['storage account revoke-delegation-keys'] = """
 type: command
 short-summary: Revoke all user delegation keys for a storage account.
