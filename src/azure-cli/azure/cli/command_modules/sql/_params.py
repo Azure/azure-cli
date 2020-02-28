@@ -1041,8 +1041,8 @@ def load_arguments(self, _):
 
         c.argument('public_network_access',
                    options_list=['--public-network-access', '-a'],
-                   arg_type=get_three_state_flag(positive_label='Enabled', 
-                                                 negative_label='Disabled', 
+                   arg_type=get_three_state_flag(positive_label='Enabled',
+                                                 negative_label='Disabled',
                                                  return_label=True),
                    help='Sets whether public network access to server is allowed or not. When disabled,'
                    'only connections made through Private Links can reach this server.')
@@ -1072,8 +1072,8 @@ def load_arguments(self, _):
 
         c.argument('public_network_access',
                    options_list=['--public-network-access', '-a'],
-                   arg_type=get_three_state_flag(positive_label='Enabled', 
-                                                 negative_label='Disabled', 
+                   arg_type=get_three_state_flag(positive_label='Enabled',
+                                                 negative_label='Disabled',
                                                  return_label=True),
                    help='Sets whether public network access to server is allowed or not. When disabled,'
                    'only connections made through Private Links can reach this server.')
