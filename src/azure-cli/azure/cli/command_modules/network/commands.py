@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
-    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases)
+    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -47,7 +47,10 @@ from azure.cli.command_modules.network._validators import (
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
-    process_nw_cm_create_namespace, process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
+    process_nw_cm_create_namespace,
+    process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
+    process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
+    process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
@@ -330,6 +333,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#AvailableServiceAliasesOperations.{}',
         client_factory=cf_service_aliases,
         min_api='2019-08-01'
+    )
+
+    network_bastion_hosts_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#BastionHostsOperations.{}',
+        client_factory=cf_bastion_hosts,
+        min_api='2019-11-01'
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
@@ -666,22 +675,21 @@ def load_command_table(self, _):
 
     # region PrivateEndpoint
     with self.command_group('network private-endpoint', network_private_endpoint_sdk) as g:
-        g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01', is_preview=True)
-        g.command('delete', 'delete', min_api='2019-04-01', is_preview=True)
+        g.custom_command('create', 'create_private_endpoint', min_api='2019-04-01')
+        g.command('delete', 'delete', min_api='2019-04-01')
         g.custom_command('list', 'list_private_endpoints')
         g.show_command('show')
-        g.generic_update_command('update', custom_func_name='update_private_endpoint', is_preview=True, min_api='2019-04-01')
+        g.generic_update_command('update', custom_func_name='update_private_endpoint', min_api='2019-04-01')
         g.command(
             'list-types', 'list',
             operations_tmpl='azure.mgmt.network.operations#AvailablePrivateEndpointTypesOperations.{}',
             client_factory=cf_private_endpoint_types,
-            is_preview=True,
             min_api='2019-04-01'
         )
     # endregion
 
     # region PrivateLinkServices
-    with self.command_group('network private-link-service', network_private_link_service_sdk, is_preview=True) as g:
+    with self.command_group('network private-link-service', network_private_link_service_sdk) as g:
         g.custom_command('create', 'create_private_link_service')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_private_link_services')
@@ -850,6 +858,49 @@ def load_command_table(self, _):
         g.command('query', 'query')
         g.command('list', 'list')
 
+    with self.command_group('network watcher connection-monitor endpoint',
+                            network_watcher_cm_sdk,
+                            min_api='2019-11-01',
+                            client_factory=cf_connection_monitor,
+                            is_preview=True,
+                            validator=process_nw_cm_v2_endpoint_namespace) as g:
+        g.custom_command('add', 'add_nw_connection_monitor_v2_endpoint')
+        g.custom_command('remove', 'remove_nw_connection_monitor_v2_endpoint')
+        g.custom_show_command('show', 'show_nw_connection_monitor_v2_endpoint')
+        g.custom_command('list', 'list_nw_connection_monitor_v2_endpoint')
+
+    with self.command_group('network watcher connection-monitor test-configuration',
+                            network_watcher_cm_sdk,
+                            min_api='2019-11-01',
+                            client_factory=cf_connection_monitor,
+                            is_preview=True,
+                            validator=process_nw_cm_v2_test_configuration_namespace) as c:
+        c.custom_command('add', 'add_nw_connection_monitor_v2_test_configuration')
+        c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_configuration')
+        c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_configuration')
+        c.custom_command('list', 'list_nw_connection_monitor_v2_test_configuration')
+
+    with self.command_group('network watcher connection-monitor test-group',
+                            network_watcher_cm_sdk,
+                            min_api='2019-11-01',
+                            client_factory=cf_connection_monitor,
+                            is_preview=True,
+                            validator=process_nw_cm_v2_test_group) as c:
+        c.custom_command('add', 'add_nw_connection_monitor_v2_test_group')
+        c.custom_command('remove', 'remove_nw_connection_monitor_v2_test_group')
+        c.custom_show_command('show', 'show_nw_connection_monitor_v2_test_group')
+        c.custom_command('list', 'list_nw_connection_monitor_v2_test_group')
+
+    with self.command_group('network watcher connection-monitor output',
+                            network_watcher_cm_sdk,
+                            min_api='2019-11-01',
+                            client_factory=cf_connection_monitor,
+                            is_preview=True,
+                            validator=process_nw_cm_v2_output_namespace) as c:
+        c.custom_command('add', 'add_nw_connection_monitor_v2_output')
+        c.custom_command('remove', 'remove_nw_connection_monitor_v2_output')
+        c.custom_command('list', 'list_nw_connection_monitor_v2_output')
+
     with self.command_group('network watcher packet-capture', network_watcher_pc_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_nw_packet_capture', client_factory=cf_packet_capture, validator=process_nw_packet_capture_create_namespace)
         g.show_command('show', 'get')
@@ -977,6 +1028,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_vnet', transform=transform_vnet_create_output, validator=process_vnet_create_namespace, supports_local_cache=True)
         g.generic_update_command('update', custom_func_name='update_vnet', supports_local_cache=True)
         g.command('list-endpoint-services', 'list', command_type=network_endpoint_service_sdk)
+        g.custom_command('list-available-ips', 'list_available_ips', min_api='2016-09-01', is_preview=True)
 
     with self.command_group('network vnet peering', network_vnet_peering_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_vnet_peering')
@@ -1064,4 +1116,12 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
+    # endregion
+
+    # region Bastion
+    with self.command_group('network bastion', network_bastion_hosts_sdk, is_preview=True) as g:
+        g.custom_command('create', 'create_bastion_host')
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_bastion_host')
+        g.command('delete', 'delete')
     # endregion

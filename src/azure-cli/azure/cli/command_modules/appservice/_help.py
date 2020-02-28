@@ -328,6 +328,14 @@ examples:
     text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
 """
 
+helps['functionapp config ssl create'] = """
+type: command
+short-summary: Create a Managed Certificate for a hostname in a function app.
+examples:
+  - name: Create a Managed Certificate for $fqdn.
+    text: az functionapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname $fqdn
+"""
+
 helps['functionapp cors'] = """
 type: group
 short-summary: Manage Cross-Origin Resource Sharing (CORS)
@@ -1180,6 +1188,14 @@ examples:
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
 """
 
+helps['webapp config ssl create'] = """
+type: command
+short-summary: Create a Managed Certificate for a hostname in a webapp app.
+examples:
+  - name: Create a Managed Certificate for $fqdn.
+    text: az webapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname $fqdn
+"""
+
 helps['webapp config storage-account'] = """
 type: group
 short-summary: Manage a web app's Azure storage account configurations. (Linux Web Apps and Windows Containers Web Apps Only)
@@ -1514,6 +1530,15 @@ examples:
   - name: Set FTP and git deployment credentials for all apps.
     text: >
         az webapp deployment user set --user-name MyUserName
+"""
+
+helps['webapp deployment user show'] = """
+type: command
+short-summary: Get deployment publishing user.
+examples:
+  - name: Get publishing user information.
+    text: >
+        az webapp deployment user show
 """
 
 helps['webapp hybrid-connection'] = """

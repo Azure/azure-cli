@@ -7,12 +7,13 @@ from __future__ import print_function
 
 import os
 from datetime import datetime
+from datetime import timezone
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
                                                     create_short_lived_share_sas,
                                                     create_short_lived_container_sas,
-                                                    filter_none, collect_blobs, collect_files,
+                                                    filter_none, collect_blobs, collect_blob_objects, collect_files,
                                                     mkdir_p, guess_content_type, normalize_blob_file_path,
                                                     check_precondition_success)
 from knack.log import get_logger
@@ -398,23 +399,26 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
         return client.delete_blob(**delete_blob_args)
 
     logger = get_logger(__name__)
-    source_blobs = list(collect_blobs(client, source_container_name, pattern))
+    source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
-        if if_modified_since:
-            logger.warning('--if-modified-since argument is ignored when using --dry-run.')
-        if if_unmodified_since:
-            logger.warning('--if-unmodified-since argument is ignored when using --dry-run.')
+        delete_blobs = []
+        if_modified_since_utc = if_modified_since.replace(tzinfo=timezone.utc) if if_modified_since else None
+        if_unmodified_since_utc = if_unmodified_since.replace(tzinfo=timezone.utc) if if_unmodified_since else None
+        for blob in source_blobs:
+            if not if_modified_since or blob[1].properties.last_modified >= if_modified_since_utc:
+                if not if_unmodified_since or blob[1].properties.last_modified <= if_unmodified_since_utc:
+                    delete_blobs.append(blob[0])
         logger.warning('delete action: from %s', source)
         logger.warning('    pattern %s', pattern)
         logger.warning('  container %s', source_container_name)
-        logger.warning('      total %d', len(source_blobs))
+        logger.warning('      total %d', len(delete_blobs))
         logger.warning(' operations')
-        for blob in source_blobs:
+        for blob in delete_blobs:
             logger.warning('  - %s', blob)
         return []
 
-    results = [result for include, result in (_delete_blob(blob) for blob in source_blobs) if include]
+    results = [result for include, result in (_delete_blob(blob[0]) for blob in source_blobs) if include]
     num_failures = len(source_blobs) - len(results)
     if num_failures:
         logger.warning('%s of %s blobs not deleted due to "Failed Precondition"', num_failures, len(source_blobs))

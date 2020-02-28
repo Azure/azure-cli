@@ -50,6 +50,14 @@ def task_output_format(result):
     return _output_format(result, _task_format_group)
 
 
+def task_identity_format(result):
+    return _output_format(result, _task_identity_format_group)
+
+
+def taskrun_output_format(result):
+    return _output_format(result, _taskrun_format_group)
+
+
 def build_output_format(result):
     return _output_format(result, _build_format_group)
 
@@ -184,6 +192,31 @@ def _task_format_group(item):
     ])
 
 
+def _task_identity_format_group(item):
+    identities = _get_array_value(item, 'userAssignedIdentities')
+    identities_by_line = str('\n'.join(identities)) if identities else ' '
+
+    return OrderedDict([
+        ('PRINCIPAL ID', _get_value(item, 'principalId')),
+        ('TENANT ID', _get_value(item, 'tenantId')),
+        ('TYPE', _get_value(item, 'type')),
+        ('USER ASSIGNED IDENTITIES', identities_by_line)
+    ])
+
+
+def _taskrun_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('RUN ID', _get_value(item, 'runResult', 'runId')),
+        ('TASK', _get_value(item, 'runResult', 'task')),
+        ('PLATFORM', _get_value(item, 'runResult', 'platform', 'os')),
+        ('STATUS', _get_value(item, 'runResult', 'status')),
+        ('STARTED', _format_datetime(_get_value(item, 'runResult', 'startTime'))),
+        ('DURATION', _get_duration(_get_value(item, 'runResult', 'startTime'),
+                                   _get_value(item, 'runResult', 'finishTime')))
+    ])
+
+
 def _build_format_group(item):
     return OrderedDict([
         ('BUILD ID', _get_value(item, 'buildId')),
@@ -193,7 +226,8 @@ def _build_format_group(item):
         ("TRIGGER", _get_build_trigger(_get_value(item, 'imageUpdateTrigger'),
                                        _get_value(item, 'sourceTrigger', 'eventType'))),
         ('STARTED', _format_datetime(_get_value(item, 'startTime'))),
-        ('DURATION', _get_duration(_get_value(item, 'startTime'), _get_value(item, 'finishTime')))
+        ('DURATION', _get_duration(_get_value(item, 'startTime'),
+                                   _get_value(item, 'finishTime')))
     ])
 
 

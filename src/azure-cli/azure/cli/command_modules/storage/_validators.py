@@ -65,6 +65,16 @@ def _create_token_credential(cli_ctx):
 
 
 # region PARAMETER VALIDATORS
+def parse_storage_account(cmd, namespace):
+    """Parse storage account which can be either account name or account id"""
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+
+    if namespace.account_name and is_valid_resource_id(namespace.account_name):
+        namespace.resource_group_name = parse_resource_id(namespace.account_name)['resource_group']
+        namespace.account_name = parse_resource_id(namespace.account_name)['name']
+    elif namespace.account_name and not namespace.resource_group_name:
+        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
+
 
 def process_resource_group(cmd, namespace):
     """Processes the resource group parameter from the account name"""
@@ -104,15 +114,16 @@ def validate_client_parameters(cmd, namespace):
         if auth_mode == 'login':
             n.token_credential = _create_token_credential(cmd.cli_ctx)
 
-            # give warning if there are account key args being ignored
-            account_key_args = [n.account_key and "--account-key", n.sas_token and "--sas-token",
-                                n.connection_string and "--connection-string"]
-            account_key_args = [arg for arg in account_key_args if arg]
+    if hasattr(n, 'token_credential') and n.token_credential:
+        # give warning if there are account key args being ignored
+        account_key_args = [n.account_key and "--account-key", n.sas_token and "--sas-token",
+                            n.connection_string and "--connection-string"]
+        account_key_args = [arg for arg in account_key_args if arg]
 
-            if account_key_args:
-                logger.warning('In "login" auth mode, the following arguments are ignored: %s',
-                               ' ,'.join(account_key_args))
-            return
+        if account_key_args:
+            logger.warning('In "login" auth mode, the following arguments are ignored: %s',
+                           ' ,'.join(account_key_args))
+        return
 
     if not n.connection_string:
         n.connection_string = get_config_value('storage', 'connection_string', None)
@@ -139,6 +150,9 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
+        logger.warning('No connection string, account key or sas token found, we will query account keys for your '
+                       'storage account. Please try to use --auth-mode login or provide one of the following parameters'
+                       ': connection string, account key or sas token for your storage account.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
@@ -361,13 +375,13 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
             key = ns.get('account_key')
             cs = ns.get('connection_string')
             sas = ns.get('sas_token')
+            token_credential = ns.get('token_credential')
             if _class_name(settings_class) == _class_name(t_blob_content_settings):
                 client = get_storage_data_service_client(cmd.cli_ctx,
-                                                         t_base_blob_service,
-                                                         account,
-                                                         key,
-                                                         cs,
-                                                         sas)
+                                                         service=t_base_blob_service,
+                                                         name=account,
+                                                         key=key, connection_string=cs, sas_token=sas,
+                                                         token_credential=token_credential)
                 container = ns.get('container_name')
                 blob = ns.get('blob_name')
                 lease_id = ns.get('lease_id')

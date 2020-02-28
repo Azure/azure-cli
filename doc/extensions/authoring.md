@@ -119,11 +119,11 @@ See [Extension Metadata](metadata.md) for more information.
 
 - When you run `az --version` it will list your normal extensions directory as well as any directories being used to find developer extensions. Developer extensions will appear in the output with a path next to the version number.
 
-### Test your extension on both Python 2 & 3
+### Test your extension on Python 3
 
-- The CLI supports both Python 2 & 3 so verify that your extension does the same.
-- You can create both a Python 2 and 3 virtual environment and run your extension in both.
-- e.g. `virtualenv env27` and `virtualenv -p /usr/local/bin/python3 env`.
+- The CLI supports Python 3.5, 3.6, 3.7, 3.8 so verify that your extension does the same.
+- You can create virtual environments for different versions and run your extension in them.
+- e.g. `python3.6 -m venv env36` and `python3.8 -m venv env38`.
 
 
 :zap: IMPORTANT :zap:

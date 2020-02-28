@@ -17,6 +17,8 @@ from ._format import (
     replication_output_format,
     build_output_format,
     task_output_format,
+    task_identity_format,
+    taskrun_output_format,
     run_output_format,
     helm_list_output_format,
     helm_show_output_format,
@@ -29,6 +31,7 @@ from ._client_factory import (
     cf_acr_replications,
     cf_acr_webhooks,
     cf_acr_tasks,
+    cf_acr_taskruns,
     cf_acr_runs,
     cf_acr_scope_maps,
     cf_acr_tokens,
@@ -103,6 +106,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         operations_tmpl='azure.cli.command_modules.acr.task#{}',
         table_transformer=task_output_format,
         client_factory=cf_acr_tasks
+    )
+
+    acr_taskrun_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.taskrun#{}',
+        table_transformer=taskrun_output_format,
+        client_factory=cf_acr_taskruns
     )
 
     acr_helm_util = CliCommandType(
@@ -215,7 +224,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('update', 'acr_task_update')
         g.command('identity assign', 'acr_task_identity_assign')
         g.command('identity remove', 'acr_task_identity_remove')
-        g.command('identity show', 'acr_task_identity_show')
+        g.command('identity show', 'acr_task_identity_show', table_transformer=task_identity_format)
         g.command('credential add', 'acr_task_credential_add')
         g.command('credential update', 'acr_task_credential_update')
         g.command('credential remove', 'acr_task_credential_remove')
@@ -237,6 +246,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('logs', 'acr_task_logs', client_factory=cf_acr_runs,
                   table_transformer=None)
 
+    with self.command_group('acr taskrun', acr_taskrun_util, is_preview=True) as g:
+        g.command('list', 'acr_taskrun_list')
+        g.command('delete', 'acr_taskrun_delete')
+        g.command('show', 'acr_taskrun_show')
+        g.command('logs', 'acr_taskrun_logs', client_factory=cf_acr_runs,
+                  table_transformer=None)
+
     with self.command_group('acr config content-trust', acr_policy_util) as g:
         g.command('show', 'acr_config_content_trust_show')
         g.command('update', 'acr_config_content_trust_update')
@@ -251,6 +267,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_helm_delete')
         g.command('push', 'acr_helm_push')
         g.command('repo add', 'acr_helm_repo_add')
+        g.command('install-cli', 'acr_helm_install_cli', is_preview=True)
 
     with self.command_group('acr network-rule', acr_network_rule_util) as g:
         g.command('list', 'acr_network_rule_list')

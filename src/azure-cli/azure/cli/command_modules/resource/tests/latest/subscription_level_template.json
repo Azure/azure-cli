@@ -44,10 +44,19 @@
       }
     },
     {
+      "type": "Microsoft.Resources/resourceGroups",
+      "name": "[parameters('nestedRGName')]",
+      "apiVersion": "2018-05-01",
+      "location": "WestUS",
+      "properties": {
+      }
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "name": "rg-nested",
       "apiVersion": "2017-05-10",
       "resourceGroup": "[parameters('nestedRGName')]",
+      "dependsOn": [ "[parameters('nestedRGName')]" ],
       "properties": {
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
