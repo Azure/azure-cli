@@ -309,6 +309,41 @@ examples:
     text: az mariadb server-logs list -g testgroup -s testsvr --max-file-size 30
 """
 
+helps['mariadb server private-endpoint'] = """
+type: group
+short-summary: Manage MariaDB server private endpoint connections.
+"""
+
+helps['mariadb server private-endpoint approve'] = """
+type: command
+short-summary: Approve the specified private endpoint connection associated with a MariaDB server.
+"""
+
+helps['mariadb server private-endpoint reject'] = """
+type: command
+short-summary: Reject the specified private endpoint connection associated with a MariaDB server.
+"""
+
+helps['mariadb server private-endpoint delete'] = """
+type: command
+short-summary: Delete the specified private endpoint connection associated with a MariaDB server.
+"""
+
+helps['mariadb server private-endpoint show'] = """
+type: command
+short-summary: Show details of a private endpoint connection associated with a MariaDB server.
+"""
+
+helps['mariadb server private-link-resource'] = """
+type: group
+short-summary: Manage MariaDB server private link resources.
+"""
+
+helps['mariadb private-link-resource show'] = """
+type: command
+short-summary: Show the private link resources supported for a MariaDB server.
+"""
+
 helps['mysql'] = """
 type: group
 short-summary: Manage Azure Database for MySQL servers.
@@ -619,6 +654,41 @@ examples:
     text: az mysql server-logs list -g testgroup -s testsvr --max-file-size 30
 """
 
+helps['mysql server private-endpoint'] = """
+type: group
+short-summary: Manage MySQL server private endpoint connections.
+"""
+
+helps['mysql server private-endpoint approve'] = """
+type: command
+short-summary: Approve the specified private endpoint connection associated with a MySQL server.
+"""
+
+helps['mysql server private-endpoint reject'] = """
+type: command
+short-summary: Reject the specified private endpoint connection associated with a MySQL server.
+"""
+
+helps['mysql server private-endpoint delete'] = """
+type: command
+short-summary: Delete the specified private endpoint connection associated with a MySQL server.
+"""
+
+helps['mysql server private-endpoint show'] = """
+type: command
+short-summary: Show details of a private endpoint connection associated with a MySQL server.
+"""
+
+helps['mysql server private-link-resource'] = """
+type: group
+short-summary: Manage MySQL server private link resources.
+"""
+
+helps['mysql private-link-resource show'] = """
+type: command
+short-summary: Show the private link resources supported for a MySQL server.
+"""
+
 helps['postgres'] = """
 type: group
 short-summary: Manage Azure Database for PostgreSQL servers.
@@ -920,4 +990,39 @@ examples:
     text: az postgres server-logs list -g testgroup -s testsvr --file-last-written 10
   - name: List log files for 'testsvr' less than 30Kb in size.
     text: az postgres server-logs list -g testgroup -s testsvr --max-file-size 30
+"""
+
+helps['postgres server private-endpoint'] = """
+type: group
+short-summary: Manage PostgreSQL server private endpoint connections.
+"""
+
+helps['postgres server private-endpoint approve'] = """
+type: command
+short-summary: Approve the specified private endpoint connection associated with a PostgreSQL server.
+"""
+
+helps['postgres server private-endpoint reject'] = """
+type: command
+short-summary: Reject the specified private endpoint connection associated with a PostgreSQL server.
+"""
+
+helps['postgres server private-endpoint delete'] = """
+type: command
+short-summary: Delete the specified private endpoint connection associated with a PostgreSQL server.
+"""
+
+helps['postgres server private-endpoint show'] = """
+type: command
+short-summary: Show details of a private endpoint connection associated with a PostgreSQL server.
+"""
+
+helps['postgres server private-link-resource'] = """
+type: group
+short-summary: Manage PostgreSQL server private link resources.
+"""
+
+helps['postgres server private-link-resource show'] = """
+type: command
+short-summary: Show the private link resources supported for a PostgreSQL server.
 """

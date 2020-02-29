@@ -8,6 +8,7 @@
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mariadb.operations.servers_operations import ServersOperations as MariaDBServersOperations
@@ -425,3 +426,44 @@ def _server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()
+
+# region private_endpoint
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None,
+                                               connection_id=None):  # pylint: disable=unused-argument
+    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
+                                                            resource_type=ResourceType.MGMT_RDBMS)
+
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, server_name=server_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    new_status = PrivateEndpointServiceConnectionStatus.approved \
+        if is_approved else PrivateEndpointServiceConnectionStatus.rejected
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+
+    return client.put(resource_group_name=resource_group_name,
+                      server_name=server_name,
+                      private_endpoint_connection_name=private_endpoint_connection_name,
+                      properties=private_endpoint_connection)
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                        approval_description=None, connection_id=None):
+    """Approve a private endpoint connection request for a server."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
+        description=approval_description, connection_id=connection_id
+    )
+
+
+def reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                       rejection_description=None, connection_id=None):
+    """Reject a private endpoint connection request for a server."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
+        description=rejection_description, connection_id=connection_id
+    )
+# endregion

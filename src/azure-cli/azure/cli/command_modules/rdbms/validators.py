@@ -3,11 +3,33 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import argparse
+
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
+
+
+def _get_resource_group_from_server_name(cli_ctx, server_name):
+    """
+    Fetch resource group from server name
+    :param str server_name: name of the server
+    :return: resource group name or None
+    :rtype: str
+    """
+    from azure.cli.core.profiles import ResourceType
+    from msrestazure.tools import parse_resource_id
+
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RDBMS).servers
+    for server in client.list():
+        id_comps = parse_resource_id(server.id)
+        if id_comps['name'] == server_name:
+            return id_comps['resource_group']
+    return None
 
 
 def get_combined_validator(validators):
@@ -71,3 +93,24 @@ def validate_subnet(cmd, namespace):
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
     delattr(namespace, 'vnet_name')
+
+
+def validate_private_endpoint_connection_id(cmd, ns):
+    connection_id = ns.connection_id
+    connection_name = ns.private_endpoint_connection_name
+    server_name = ns.server_name
+
+    if not connection_id:
+        if not all([connection_name, server_name]):
+            raise argparse.ArgumentError(
+                None, 'specify both: --connection-name/-n and --server-name')
+        ns.resource_group_name = _get_resource_group_from_server_name(cmd.cli_ctx, server_name)
+    else:
+        if any([connection_name, server_name]):
+            raise argparse.ArgumentError(
+                None, 'you don\'t need to specify --connection-name/-n or --server-name if --connection-id is specified')
+
+        id_parts = connection_id.split('/')
+        ns.private_endpoint_connection_name = id_parts[-1]
+        ns.server_name = id_parts[-3]
+        ns.resource_group_name = id_parts[-7]
