@@ -1355,7 +1355,8 @@ def load_arguments(self, _):
         c.argument('nsg', help='Name or ID of the network security group.')
         c.argument('enabled', arg_type=get_three_state_flag(), help='Enable logging', default='true')
         c.argument('retention', type=int, help='Number of days to retain logs')
-        c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs')
+        c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs. '
+                                           'Must be in the same region of flow log.')
 
     # temporary solution for compatible with old show command's parameter
     # after old show command's parameter is deprecated and removed,
@@ -1371,7 +1372,9 @@ def load_arguments(self, _):
 
     with self.argument_context('network watcher flow-log', arg_group='Traffic Analytics', min_api='2018-10-01') as c:
         c.argument('traffic_analytics_interval', type=int, options_list='--interval', help='Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.', min_api='2018-12-01')
-        c.argument('traffic_analytics_workspace', options_list='--workspace', help='Name or ID of a Log Analytics workspace.')
+        c.argument('traffic_analytics_workspace',
+                   options_list='--workspace',
+                   help='Name or ID of a Log Analytics workspace. Must be in the same region of flow log')
         c.argument('traffic_analytics_enabled', options_list='--traffic-analytics', arg_type=get_three_state_flag(), help='Enable traffic analytics. Defaults to true if `--workspace` is provided.')
 
     for item in ['list', 'stop', 'delete', 'show', 'show-status']:
