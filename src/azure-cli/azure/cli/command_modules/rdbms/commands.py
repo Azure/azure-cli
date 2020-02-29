@@ -357,7 +357,7 @@ def load_command_table(self, _):
     with self.command_group('mariadb server private-link-resource',
                             mariadb_private_link_resources_sdk,
                             client_factory=cf_mariadb_private_link_resources_operations) as g:
-        g.show_command('show', 'list_by_vault')
+        g.show_command('show', 'list_by_server')
 
 
     with self.command_group('mysql server private-endpoint-connection',
@@ -373,7 +373,7 @@ def load_command_table(self, _):
     with self.command_group('mysql server private-link-resource',
                             mysql_private_link_resources_sdk,
                             client_factory=cf_mysql_private_link_resources_operations) as g:
-        g.show_command('show', 'list_by_vault')
+        g.show_command('show', 'list_by_server')
 
     with self.command_group('postgres server private-endpoint-connection',
                             postgres_private_endpoint_connections_sdk,
@@ -388,4 +388,4 @@ def load_command_table(self, _):
     with self.command_group('postgres server private-link-resource',
                             postgres_private_link_resources_sdk,
                             client_factory=cf_postgres_private_link_resources_operations) as g:
-        g.show_command('show', 'list_by_vault')
+        g.show_command('show', 'list_by_server')
