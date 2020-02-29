@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
-    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts)
+    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -43,6 +43,7 @@ from azure.cli.command_modules.network._format import (
     transform_vnet_table_output, transform_effective_route_table, transform_effective_nsg,
     transform_vnet_gateway_routes_table, transform_vnet_gateway_bgp_peer_table)
 from azure.cli.command_modules.network._validators import (
+    get_network_watcher_from_location,
     process_ag_create_namespace, process_ag_listener_create_namespace, process_ag_http_settings_create_namespace,
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
@@ -50,7 +51,7 @@ from azure.cli.command_modules.network._validators import (
     process_nw_cm_create_namespace,
     process_nw_cm_v2_endpoint_namespace, process_nw_cm_v2_test_configuration_namespace,
     process_nw_cm_v2_test_group, process_nw_cm_v2_output_namespace,
-    process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
+    process_nw_flow_log_set_namespace, process_nw_flow_log_create_namespace, process_nw_flow_log_show_namespace,
     process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
     process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
@@ -298,6 +299,16 @@ def load_command_table(self, _):
     network_watcher_cm_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ConnectionMonitorsOperations.{}',
         client_factory=cf_connection_monitor
+    )
+
+    network_watcher_flow_log_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#FlowLogsOperations.{}',
+        client_factory=cf_flow_logs,
+    )
+
+    network_watcher_flow_log_update_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.network.custom#{}',
+        client_factory=cf_flow_logs,
     )
 
     network_watcher_pc_sdk = CliCommandType(
@@ -910,8 +921,30 @@ def load_command_table(self, _):
         g.command('list', 'list')
 
     with self.command_group('network watcher flow-log', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
-        g.custom_command('configure', 'set_nsg_flow_logging', validator=process_nw_flow_log_set_namespace)
+        g.custom_command('configure',
+                         'set_nsg_flow_logging',
+                         validator=process_nw_flow_log_set_namespace,
+                         deprecate_info=self.deprecate(redirect='network watcher flow-log create', hide=False))
         g.custom_show_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
+
+    with self.command_group('network watcher flow-log',
+                            network_watcher_flow_log_sdk,
+                            client_factory=cf_flow_logs,
+                            min_api='2019-11-01',
+                            validator=get_network_watcher_from_location(remove=False)) as g:
+        g.custom_command('list', 'list_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
+        g.custom_command('delete', 'delete_nw_flow_log', validator=get_network_watcher_from_location(remove=False))
+        g.custom_command('create',
+                         'create_nw_flow_log',
+                         client_factory=cf_flow_logs,
+                         validator=process_nw_flow_log_create_namespace)
+        g.generic_update_command('update',
+                                 getter_name='update_nw_flow_log_getter',
+                                 getter_type=network_watcher_flow_log_update_sdk,
+                                 setter_name='update_nw_flow_log_setter',
+                                 setter_type=network_watcher_flow_log_update_sdk,
+                                 custom_func_name='update_nw_flow_log',
+                                 validator=process_nw_flow_log_create_namespace)
 
     with self.command_group('network watcher troubleshooting', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('start', 'start_nw_troubleshooting', supports_no_wait=True, validator=process_nw_troubleshooting_start_namespace)
