@@ -14,7 +14,7 @@ import json
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
-     should_disable_connection_verify)
+     should_disable_connection_verify, parse_proxy_resource_id)
 
 
 class TestUtils(unittest.TestCase):
@@ -120,6 +120,28 @@ class TestUtils(unittest.TestCase):
 
         # Test force_lower
         _run_test(16, True)
+
+    def test_proxy_resource_parse(self):
+        mock_proxy_resource_id = "/subscriptions/0000/resourceGroups/clirg/" \
+                                 "providers/Microsoft.Network/privateEndpoints/cli/" \
+                                 "privateLinkServiceConnections/child_name_1/child_type_2/child_name_2"
+        result = parse_proxy_resource_id(mock_proxy_resource_id)
+        valid_dict_values = {
+            'subscription': '0000',
+            'resource_group': 'clirg',
+            'namespace': 'Microsoft.Network',
+            'type': 'privateEndpoints',
+            'name': 'cli',
+            'child_type_1': 'privateLinkServiceConnections',
+            'child_name_1': 'child_name_1',
+            'child_type_2': 'child_type_2',
+            'child_name_2': 'child_name_2',
+            'last_child_num': 2
+        }
+        self.assertEqual(len(result.keys()), len(valid_dict_values.keys()))
+        for key, value in valid_dict_values.items():
+            self.assertEqual(result[key], value)
+
 
     @mock.patch('webbrowser.open', autospec=True)
     @mock.patch('subprocess.Popen', autospec=True)

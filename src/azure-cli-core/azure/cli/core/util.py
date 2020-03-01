@@ -12,6 +12,7 @@ import binascii
 import platform
 import ssl
 import six
+import re
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
@@ -28,6 +29,12 @@ SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens wh
                      # pylint: disable=line-too-long
                      'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#working-behind-a-proxy. '
                      'Error detail: {}')
+
+_PROXYID_RE = re.compile(
+    '(?i)/subscriptions/(?P<subscription>[^/]*)(/resourceGroups/(?P<resource_group>[^/]*))?'
+    '(/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.*))?')
+
+_CHILDREN_RE = re.compile('(?i)/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
 
 
 def handle_exception(ex):  # pylint: disable=too-many-return-statements
@@ -654,3 +661,40 @@ def _ssl_context():
 def urlretrieve(url):
     req = urlopen(url, context=_ssl_context())
     return req.read()
+
+
+def parse_proxy_resource_id(rid):
+    """Parses a resource_id into its various parts.
+
+    Returns a dictionary with a single key-value pair, 'name': rid, if invalid resource id.
+
+    :param rid: The resource id being parsed
+    :type rid: str
+    :returns: A dictionary with with following key/value pairs (if found):
+
+        - subscription:            Subscription id
+        - resource_group:          Name of resource group
+        - namespace:               Namespace for the resource provider (i.e. Microsoft.Compute)
+        - type:                    Type of the root resource (i.e. virtualMachines)
+        - name:                    Name of the root resource
+        - child_type_{level}:      Type of the child resource of that level
+        - child_name_{level}:      Name of the child resource of that level
+        - last_child_num:          Level of the last child
+
+    :rtype: dict[str,str]
+    """
+    if not rid:
+        return {}
+    match = _PROXYID_RE.match(rid)
+    if match:
+        result = match.groupdict()
+        children = _CHILDREN_RE.finditer(result['children'] or '')
+        count = None
+        for count, child in enumerate(children):
+            result.update({
+                key + '_%d' % (count + 1): group for key, group in child.groupdict().items()})
+        result['last_child_num'] = count + 1 if isinstance(count, int) else None
+        result.pop('children', None)
+    else:
+        result = dict(name=rid)
+    return {key: value for key, value in result.items() if value is not None}
