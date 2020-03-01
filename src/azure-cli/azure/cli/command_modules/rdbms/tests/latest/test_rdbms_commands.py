@@ -761,7 +761,7 @@ class MySqlPrivateLinkResourceScenarioTest(ScenarioTest):
 
 class MariadbPrivateLinkResourceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group')
-    def test_mysql_private_link_resource(self, resource_group):
+    def test_mariadb_private_link_resource(self, resource_group):
         # create a server
         server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
         self.cmd('mariadb server create -g {} --name {} -l brazilsouth '
