@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from datetime import datetime
+from time import sleep
 from dateutil.tz import tzutc   # pylint: disable=import-error
 
 from azure.cli.core.util import CLIError
@@ -199,7 +200,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # test restore to a new server, make sure wait at least 5 min after server created.
-        from time import sleep
         sleep(300)
 
         self.cmd('{} server restore -g {} --name {} '
@@ -530,7 +530,6 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                               JMESPathCheck('replicationRole', 'None'),
                               JMESPathCheck('masterServerId', '')]).get_output_in_json()
 
-        from time import sleep
         sleep(300)
         # test replica create
         self.cmd('{} server replica create -g {} -n {} -l brazilsouth --sku-name GP_Gen5_4 '
@@ -636,7 +635,6 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                               JMESPathCheck('replicationRole', 'None'),
                               JMESPathCheck('masterServerId', '')]).get_output_in_json()
 
-        from time import sleep
         sleep(300)
         if isBasicTier is False:
             # enable replication support for  GP/MO servers
@@ -718,68 +716,69 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
 
+
 class PostgreSqlPrivateLinkResourceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group')
     def test_postgres_private_link_resource(self, resource_group):
         # create a server
-        server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        result = self.cmd('postgres server create -g {} --name {} -l brazilsouth '
-                          '--admin-user cloudsa --admin-password SecretPassword123 '
-                          '--sku-name GP_Gen5_2'
-                          .format(resource_group, server),
-                          checks=[
-                              JMESPathCheck('name', server),
-                              JMESPathCheck('resourceGroup', resource_group),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        self.cmd('postgres server create -g {} --name {} -l brazilsouth '
+                 '--admin-user cloudsa --admin-password SecretPassword123 '
+                 '--sku-name GP_Gen5_2'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sslEnforcement', 'Enabled'),
+                     JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
 
-        from time import sleep
         sleep(300)
 
         self.cmd('postgres server private-link-resource show --server-name {}'.format(server_name),
                  checks=self.check('value[0].groupId', 'postgresqlServer'))
 
+
 class MySqlPrivateLinkResourceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group')
     def test_mysql_private_link_resource(self, resource_group):
         # create a server
-        server = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        result = self.cmd('mysql server create -g {} --name {} -l brazilsouth '
-                          '--admin-user cloudsa --admin-password SecretPassword123 '
-                          '--sku-name GP_Gen5_2'
-                          .format(resource_group, server),
-                          checks=[
-                              JMESPathCheck('name', server),
-                              JMESPathCheck('resourceGroup', resource_group),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        self.cmd('mysql server create -g {} --name {} -l brazilsouth '
+                 '--admin-user cloudsa --admin-password SecretPassword123 '
+                 '--sku-name GP_Gen5_2'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sslEnforcement', 'Enabled'),
+                     JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
 
-        from time import sleep
         sleep(300)
 
         self.cmd('mysql server private-link-resource show --server-name {}'.format(server_name),
                  checks=self.check('value[0].groupId', 'mysqlServer'))
+
 
 class MariadbPrivateLinkResourceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group')
     def test_mysql_private_link_resource(self, resource_group):
         # create a server
         server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        result = self.cmd('mariadb server create -g {} --name {} -l brazilsouth '
-                          '--admin-user cloudsa --admin-password SecretPassword123 '
-                          '--sku-name GP_Gen5_2'
-                          .format(resource_group, server_name),
-                          checks=[
-                              JMESPathCheck('name', server_name),
-                              JMESPathCheck('resourceGroup', resource_group),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
+        self.cmd('mariadb server create -g {} --name {} -l brazilsouth '
+                 '--admin-user cloudsa --admin-password SecretPassword123 '
+                 '--sku-name GP_Gen5_2'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sslEnforcement', 'Enabled'),
+                     JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
 
-        from time import sleep
         sleep(300)
 
         self.cmd('mariadb server private-link-resource show --server-name {}'.format(server_name),
                  checks=self.check('value[0].groupId', 'mariadbServer'))
+
 
 class PostgreSqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group')
@@ -804,7 +803,6 @@ class PostgreSqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
                               JMESPathCheck('sslEnforcement', 'Enabled'),
                               JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
 
-        from time import sleep
         sleep(300)
 
         self.kwargs['postgres_id'] = result['id']
@@ -849,7 +847,7 @@ class PostgreSqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
         while self.cmd('postgres server private-endpoint-connection show --id {postgres_pec_id}').\
                 get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
             if self.is_live:
-                time.sleep(5)
+                sleep(5)
             retries += 1
 
         self.cmd('postgres server private-endpoint-connection show --id {postgres_pec_id}',
@@ -866,7 +864,7 @@ class PostgreSqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
         while self.cmd('postgres server private-endpoint-connection show --id {postgres_pec_id}'). \
                 get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
             if self.is_live:
-                time.sleep(5)
+                sleep(5)
             retries += 1
 
         self.cmd('postgres server private-endpoint-connection show --id {postgres_pec_id}',
@@ -896,7 +894,6 @@ class MySqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
                               JMESPathCheck('sslEnforcement', 'Enabled'),
                               JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
 
-        from time import sleep
         sleep(300)
 
         self.kwargs['mysql_id'] = result['id']
@@ -914,7 +911,7 @@ class MySqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
 
         # Show the connection at server side
         mysql = self.cmd('mysql server show -n {mysql}',
-                            checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
+                         checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
         self.kwargs['mysql_pec_id'] = mysql['properties']['privateEndpointConnections'][0]['id']
         self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}',
                  checks=self.check('id', '{mysql_pec_id}'))
@@ -941,7 +938,7 @@ class MySqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
         while self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}').\
                 get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
             if self.is_live:
-                time.sleep(5)
+                sleep(5)
             retries += 1
 
         self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}',
@@ -958,11 +955,12 @@ class MySqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
         while self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}'). \
                 get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
             if self.is_live:
-                time.sleep(5)
+                sleep(5)
             retries += 1
 
         self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}',
                  checks=self.check('provisioningState', 'Succeeded'))
+
 
 class MariadbPrivateEndpointConnectionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group')
@@ -987,7 +985,6 @@ class MariadbPrivateEndpointConnectionScenarioTest(ScenarioTest):
                               JMESPathCheck('sslEnforcement', 'Enabled'),
                               JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
 
-        from time import sleep
         sleep(300)
 
         self.kwargs['mariadb_id'] = result['id']
@@ -1005,7 +1002,7 @@ class MariadbPrivateEndpointConnectionScenarioTest(ScenarioTest):
 
         # Show the connection at server side
         mariadb = self.cmd('mariadb server show -n {mariadb}',
-                            checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
+                           checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
         self.kwargs['mariadb_pec_id'] = mariadb['properties']['privateEndpointConnections'][0]['id']
         self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}',
                  checks=self.check('id', '{mariadb_pec_id}'))
@@ -1032,7 +1029,7 @@ class MariadbPrivateEndpointConnectionScenarioTest(ScenarioTest):
         while self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}').\
                 get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
             if self.is_live:
-                time.sleep(5)
+                sleep(5)
             retries += 1
 
         self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}',
@@ -1049,7 +1046,7 @@ class MariadbPrivateEndpointConnectionScenarioTest(ScenarioTest):
         while self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}'). \
                 get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
             if self.is_live:
-                time.sleep(5)
+                sleep(5)
             retries += 1
 
         self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}',

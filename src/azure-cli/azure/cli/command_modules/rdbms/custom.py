@@ -427,6 +427,7 @@ def _server_list_custom_func(client, resource_group_name=None):
         return client.list_by_resource_group(resource_group_name)
     return client.list()
 
+
 # region private_endpoint
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
                                                private_endpoint_connection_name, is_approved=True, description=None,

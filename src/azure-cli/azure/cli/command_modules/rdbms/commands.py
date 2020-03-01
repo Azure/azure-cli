@@ -359,7 +359,6 @@ def load_command_table(self, _):
                             client_factory=cf_mariadb_private_link_resources_operations) as g:
         g.show_command('show', 'list_by_server')
 
-
     with self.command_group('mysql server private-endpoint-connection',
                             mysql_private_endpoint_connections_sdk,
                             client_factory=cf_mysql_private_endpoint_connections_operations) as g:
