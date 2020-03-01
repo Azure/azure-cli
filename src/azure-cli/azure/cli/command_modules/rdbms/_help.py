@@ -309,27 +309,27 @@ examples:
     text: az mariadb server-logs list -g testgroup -s testsvr --max-file-size 30
 """
 
-helps['mariadb server private-endpoint'] = """
+helps['mariadb server private-endpoint-connection'] = """
 type: group
 short-summary: Manage MariaDB server private endpoint connections.
 """
 
-helps['mariadb server private-endpoint approve'] = """
+helps['mariadb server private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve the specified private endpoint connection associated with a MariaDB server.
 """
 
-helps['mariadb server private-endpoint reject'] = """
+helps['mariadb server private-endpoint-connection reject'] = """
 type: command
 short-summary: Reject the specified private endpoint connection associated with a MariaDB server.
 """
 
-helps['mariadb server private-endpoint delete'] = """
+helps['mariadb server private-endpoint-connection delete'] = """
 type: command
 short-summary: Delete the specified private endpoint connection associated with a MariaDB server.
 """
 
-helps['mariadb server private-endpoint show'] = """
+helps['mariadb server private-endpoint-connection show'] = """
 type: command
 short-summary: Show details of a private endpoint connection associated with a MariaDB server.
 """
@@ -654,27 +654,27 @@ examples:
     text: az mysql server-logs list -g testgroup -s testsvr --max-file-size 30
 """
 
-helps['mysql server private-endpoint'] = """
+helps['mysql server private-endpoint-connection'] = """
 type: group
 short-summary: Manage MySQL server private endpoint connections.
 """
 
-helps['mysql server private-endpoint approve'] = """
+helps['mysql server private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve the specified private endpoint connection associated with a MySQL server.
 """
 
-helps['mysql server private-endpoint reject'] = """
+helps['mysql server private-endpoint-connection reject'] = """
 type: command
 short-summary: Reject the specified private endpoint connection associated with a MySQL server.
 """
 
-helps['mysql server private-endpoint delete'] = """
+helps['mysql server private-endpoint-connection delete'] = """
 type: command
 short-summary: Delete the specified private endpoint connection associated with a MySQL server.
 """
 
-helps['mysql server private-endpoint show'] = """
+helps['mysql server private-endpoint-connection show'] = """
 type: command
 short-summary: Show details of a private endpoint connection associated with a MySQL server.
 """
@@ -992,27 +992,27 @@ examples:
     text: az postgres server-logs list -g testgroup -s testsvr --max-file-size 30
 """
 
-helps['postgres server private-endpoint'] = """
+helps['postgres server private-endpoint-connection'] = """
 type: group
 short-summary: Manage PostgreSQL server private endpoint connections.
 """
 
-helps['postgres server private-endpoint approve'] = """
+helps['postgres server private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve the specified private endpoint connection associated with a PostgreSQL server.
 """
 
-helps['postgres server private-endpoint reject'] = """
+helps['postgres server private-endpoint-connection reject'] = """
 type: command
 short-summary: Reject the specified private endpoint connection associated with a PostgreSQL server.
 """
 
-helps['postgres server private-endpoint delete'] = """
+helps['postgres server private-endpoint-connection delete'] = """
 type: command
 short-summary: Delete the specified private endpoint connection associated with a PostgreSQL server.
 """
 
-helps['postgres server private-endpoint show'] = """
+helps['postgres server private-endpoint-connection show'] = """
 type: command
 short-summary: Show details of a private endpoint connection associated with a PostgreSQL server.
 """

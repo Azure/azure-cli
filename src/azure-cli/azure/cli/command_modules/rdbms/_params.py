@@ -126,22 +126,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
 
-    for scope in ['mariadb server private-endpoint', 'mysql server private-endpoint', 'postgres server private-endpoint']:
+    for scope in ['mariadb server private-endpoint-connection', 'mysql server private-endpoint-connection', 'postgres server private-endpoint-connection']:
         with self.argument_context(scope) as c:
             c.argument('approval_description', help='Comments for the approval.')
-            c.argument('private_endpoint_connection_name', options_list=['--connection-name', '-n'], required=False,
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
                        help='The name of the private endpoint connection associated with the Server. '
-                            'Required if --connection-id is not specified')
+                            'Required if --id is not specified')
             c.argument('server_name', options_list=['--server-name', '-s'], required=False,
-                       help='Name of the Server. Required if --connection-id is not specified')
+                       help='Name of the Server. Required if --id is not specified')
             c.argument('rejection_description', help='Comments for the rejection.')
 
     for item in ['approve', 'reject', 'delete', 'show']:
-        for scope in ['mariadb server private-endpoint {}', 'mysql server private-endpoint {}', 'postgres server private-endpoint {}']:
+        for scope in ['mariadb server private-endpoint-connection {}', 'mysql server private-endpoint-connection {}', 'postgres server private-endpoint-connection {}']:
             with self.argument_context(scope.format(item)) as c:
                 c.extra('connection_id', required=False,
                         help='The ID of the private endpoint connection associated with the Server. '
-                             'If specified --server-name and --connection-name/-n, this should be omitted.')
+                             'If specified --server-name and --name/-n, this should be omitted.')
 
     for scope in ['mariadb server private-link-resource', 'mysql server private-link-resource', 'postgres server private-link-resource']:
         with self.argument_context(scope) as c:
