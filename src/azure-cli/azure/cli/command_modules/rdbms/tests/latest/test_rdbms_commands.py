@@ -259,6 +259,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
+        self._test_private_link_resource(resource_group, server, database_engine)
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mysql')
@@ -268,6 +269,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
+        self._test_private_link_resource(resource_group, server, database_engine)
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
@@ -277,6 +279,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
+        self._test_private_link_resource(resource_group, server, database_engine)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
         firewall_rule_1 = 'rule1'
@@ -505,6 +508,19 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         self.assertIsNotNone(result[0]['name'])
 
+    def _test_private_link_resource(self, resource_group, server, database_engine):
+        groupId = ""
+
+        if database_engine == 'postgres':
+            groupId = "postgresqlServer"
+        elif database_engine == 'mysql':
+            groupId = "mysqlServer"
+        else:
+            groupId = "mariadbServer"
+
+        self.cmd('{} server private-link-resource show --server-name {}'.format(database_engine, server),
+                 checks=self.check('value[0].groupId', groupId))
+
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
@@ -715,69 +731,6 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
-
-
-class PostgreSqlPrivateLinkResourceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group')
-    def test_postgres_private_link_resource(self, resource_group):
-        # create a server
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        self.cmd('postgres server create -g {} --name {} -l brazilsouth '
-                 '--admin-user cloudsa --admin-password SecretPassword123 '
-                 '--sku-name GP_Gen5_2'
-                 .format(resource_group, server_name),
-                 checks=[
-                     JMESPathCheck('name', server_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sslEnforcement', 'Enabled'),
-                     JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
-
-        sleep(300)
-
-        self.cmd('postgres server private-link-resource show --server-name {}'.format(server_name),
-                 checks=self.check('value[0].groupId', 'postgresqlServer'))
-
-
-class MySqlPrivateLinkResourceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group')
-    def test_mysql_private_link_resource(self, resource_group):
-        # create a server
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        self.cmd('mysql server create -g {} --name {} -l brazilsouth '
-                 '--admin-user cloudsa --admin-password SecretPassword123 '
-                 '--sku-name GP_Gen5_2'
-                 .format(resource_group, server_name),
-                 checks=[
-                     JMESPathCheck('name', server_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sslEnforcement', 'Enabled'),
-                     JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
-
-        sleep(300)
-
-        self.cmd('mysql server private-link-resource show --server-name {}'.format(server_name),
-                 checks=self.check('value[0].groupId', 'mysqlServer'))
-
-
-class MariadbPrivateLinkResourceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group')
-    def test_mariadb_private_link_resource(self, resource_group):
-        # create a server
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
-        self.cmd('mariadb server create -g {} --name {} -l brazilsouth '
-                 '--admin-user cloudsa --admin-password SecretPassword123 '
-                 '--sku-name GP_Gen5_2'
-                 .format(resource_group, server_name),
-                 checks=[
-                     JMESPathCheck('name', server_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sslEnforcement', 'Enabled'),
-                     JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
-
-        sleep(300)
-
-        self.cmd('mariadb server private-link-resource show --server-name {}'.format(server_name),
-                 checks=self.check('value[0].groupId', 'mariadbServer'))
 
 
 class PostgreSqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
