@@ -339,7 +339,7 @@ type: group
 short-summary: Manage MariaDB server private link resources.
 """
 
-helps['mariadb private-link-resource show'] = """
+helps['mariadb server private-link-resource show'] = """
 type: command
 short-summary: Show the private link resources supported for a MariaDB server.
 """
@@ -684,7 +684,7 @@ type: group
 short-summary: Manage MySQL server private link resources.
 """
 
-helps['mysql private-link-resource show'] = """
+helps['mysql server private-link-resource show'] = """
 type: command
 short-summary: Show the private link resources supported for a MySQL server.
 """
