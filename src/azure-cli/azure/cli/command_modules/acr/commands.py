@@ -302,8 +302,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     with self.command_group('acr private-endpoint-connection', acr_private_endpoint_connection_util,
                             is_preview=True) as g:
         g.command('delete', 'delete')
-        g.command('show', 'show')
-        g.command('list', 'list_')
+        g.show_command('show', 'show')
+        g.command('list', 'list')
         g.command('approve', 'approve')
         g.command('reject', 'reject')
 

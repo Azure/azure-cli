@@ -27,7 +27,7 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
 def approve(cmd, client, registry_name, private_endpoint_connection_name,
             resource_group_name=None, approval_description=None):
 
-    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
+    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, registry_name, private_endpoint_connection_name, is_approved=True,
@@ -44,23 +44,23 @@ def reject(cmd, client, registry_name, private_endpoint_connection_name,
 
 def show(cmd, client, registry_name, private_endpoint_connection_name, resource_group_name=None):
 
-    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
+    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
-    return client.show(resource_group_name=resource_group_name,
+    return client.get(resource_group_name=resource_group_name,
                        registry_name=registry_name,
                        private_endpoint_connection_name=private_endpoint_connection_name)
 
 
 def delete(cmd, client, registry_name, private_endpoint_connection_name, resource_group_name=None):
 
-    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
+    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return client.delete(resource_group_name=resource_group_name, registry_name=registry_name,
                          private_endpoint_connection_name=private_endpoint_connection_name)
 
 
-def list_(cmd, client, registry_name, resource_group_name=None):
+def list(cmd, client, registry_name, resource_group_name=None):
 
-    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
+    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     return client.list(resource_group_name=resource_group_name, registry_name=registry_name)
