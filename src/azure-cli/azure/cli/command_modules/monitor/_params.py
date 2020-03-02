@@ -351,7 +351,7 @@ def load_arguments(self, _):
         c.argument('always_clone', action='store_true',
                    help="If this argument is applied, "
                         "all monitor settings would be cloned instead of expanding its scope.")
-        from azure.cli.command_modules.monitor.operations.general_operations import TYPE_FUNCTION_MAPPTING
-        c.argument('monitor_types', options_list=['--types', '-t'], arg_type=get_enum_type(TYPE_FUNCTION_MAPPTING.keys()),
-                   nargs='+', help='List of types of monitor settings which would be cloned.')
+        # from azure.cli.command_modules.monitor.operations.general_operations import TYPE_FUNCTION_MAPPTING
+        # c.argument('monitor_types', options_list=['--types', '-t'], arg_type=get_enum_type(TYPE_FUNCTION_MAPPTING.keys()),
+        #            nargs='+', help='List of types of monitor settings which would be cloned.')
     # endregion
