@@ -142,7 +142,6 @@ class TestUtils(unittest.TestCase):
         for key, value in valid_dict_values.items():
             self.assertEqual(result[key], value)
 
-
     @mock.patch('webbrowser.open', autospec=True)
     @mock.patch('subprocess.Popen', autospec=True)
     def test_open_page_in_browser(self, sunprocess_open_mock, webbrowser_open_mock):
