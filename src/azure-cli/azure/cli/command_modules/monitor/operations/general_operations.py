@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 CLONED_NAME = "cloned-{}-{}"
 
 
-def clone_existed_settings(cmd, source_resource, target_resource, always_clone=False, monitor_types=['metricsAlert']):
+def clone_existed_settings(cmd, source_resource, target_resource, always_clone=False, monitor_types=None):
     result = {}
     monitor_types = set(monitor_types)
     if "metricsAlert" in monitor_types:

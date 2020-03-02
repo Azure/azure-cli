@@ -352,5 +352,5 @@ def load_arguments(self, _):
                    help="If this argument is applied, "
                         "all monitor settings would be cloned instead of expanding its scope.")
         c.argument('monitor_types', options_list=['--types', '-t'], arg_type=get_enum_type(['metricsAlert']),
-                   nargs='+', help='List of types of monitor settings which would be cloned.')
+                   nargs='+', help='List of types of monitor settings which would be cloned.', default=['metricsAlert'])
     # endregion
