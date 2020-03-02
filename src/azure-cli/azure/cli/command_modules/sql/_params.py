@@ -1246,6 +1246,9 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ServerConnectionType),
                    help='The connection type used for connecting to the instance.')
 
+        c.argument('minimal_tls_version',
+				   help='The minimal TLS version enforced by the managed instance for inbound connections.')
+
         c.argument('public_data_endpoint_enabled',
                    arg_type=get_three_state_flag(),
                    help='Whether or not the public data endpoint is enabled for the instance.')
@@ -1264,6 +1267,7 @@ def load_arguments(self, _):
                 'administrator_login',
                 'administrator_login_password',
                 'license_type',
+                'minimal_tls_version',
                 'virtual_network_subnet_id',
                 'vcores',
                 'storage_size_in_gb',

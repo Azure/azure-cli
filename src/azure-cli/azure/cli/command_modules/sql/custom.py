@@ -2294,7 +2294,8 @@ def managed_instance_update(
         proxy_override=None,
         public_data_endpoint_enabled=None,
         tier=None,
-        family=None):
+        family=None,
+        minimal_tls_version=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2314,6 +2315,8 @@ def managed_instance_update(
         storage_size_in_gb or instance.storage_size_in_gb)
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
+    instance.minimal_tls_version = (
+        minimal_tls_version or instance.minimal_tls_version)
 
     instance.sku.name = None
     instance.sku.tier = (
