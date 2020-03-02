@@ -1550,7 +1550,7 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         protocol = 'http'
 
     proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
-    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy'.format(proxy_url,
+    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
                                                                                                        protocol)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
