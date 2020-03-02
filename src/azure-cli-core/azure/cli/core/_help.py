@@ -128,6 +128,8 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
                                         group_help_cls=CliGroupHelpFile,
                                         help_cls=CliHelpFile)
         from knack.help import HelpObject
+        # Used to specify what the original help request was for
+        self.original_nouns = ''
 
         # TODO: This workaround is used to avoid a bizarre bug in Python 2.7. It
         # essentially reassigns Knack's HelpObject._normalize_text implementation
@@ -150,6 +152,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
     # override
     def show_help(self, cli_name, nouns, parser, is_group):
         self.update_loaders_with_help_file_contents(nouns)
+        self.original_nouns = ' '.join(nouns)
         super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
         print(SURVEY_PROMPT)
 
@@ -194,6 +197,10 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
     @staticmethod
     def example_provider(help_file):
         return help_file.examples
+
+    @staticmethod
+    def replace_examples(examples, command):
+        return examples
 
 
 class CliHelpFile(KnackHelpFile):
@@ -247,6 +254,10 @@ class CliHelpFile(KnackHelpFile):
         ordered_loaders = sorted(self.help_ctx.versioned_loaders.values(), key=lambda ldr: ldr.version)
         for loader in ordered_loaders:
             loader.versioned_load(self, options)
+
+        # Used as a hook for changing the default examples
+        if self.help_ctx.original_nouns == self.command:
+            self.examples = AzCliHelp.replace_examples(self.examples, self.command)
 
 
 class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
