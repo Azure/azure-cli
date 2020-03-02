@@ -259,7 +259,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
-        self._test_private_link_resource(resource_group, server, database_engine)
+        group_id = 'mariadbServer'
+        self._test_private_link_resource(resource_group, server, database_engine, group_id)
+        self._test_private_endpoint_connection(resource_group, server, database_engine, group_id)
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mysql')
@@ -269,7 +271,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
-        self._test_private_link_resource(resource_group, server, database_engine)
+        group_id = 'mysqlServer'
+        self._test_private_link_resource(resource_group, server, database_engine, group_id)
+        self._test_private_endpoint_connection(resource_group, server, database_engine, group_id)
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
@@ -279,7 +283,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
-        self._test_private_link_resource(resource_group, server, database_engine)
+        group_id = 'postgresqlServer'
+        self._test_private_link_resource(resource_group, server, database_engine, group_id)
+        self._test_private_endpoint_connection(resource_group, server, database_engine, group_id)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
         firewall_rule_1 = 'rule1'
@@ -508,18 +514,94 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         self.assertIsNotNone(result[0]['name'])
 
-    def _test_private_link_resource(self, resource_group, server, database_engine):
-        groupId = ""
+    def _test_private_link_resource(self, resource_group, server, database_engine, group_id):
+        self.cmd('{} server private-link-resource show -g {} -s {}'
+                 .format(database_engine, resource_group, server),
+                 checks=self.check('value[0].groupId', group_id))
 
-        if database_engine == 'postgres':
-            groupId = "postgresqlServer"
-        elif database_engine == 'mysql':
-            groupId = "mysqlServer"
-        else:
-            groupId = "mariadbServer"
+    def _test_private_endpoint_connection(self, resource_group, server, database_engine, group_id):
+        loc = 'eastus'
+        vnet = self.create_random_name('cli-vnet-', 24)
+        subnet = self.create_random_name('cli-subnet-', 24)
+        pe = self.create_random_name('cli-pe-', 24)
+        pe_connection = self.create_random_name('cli-pec-', 24)
 
-        self.cmd('{} server private-link-resource show --server-name {}'.format(database_engine, server),
-                 checks=self.check('value[0].groupId', groupId))
+        result = self.cmd('{} server show -g {} -s {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        postgres_id = result['id']
+        self.cmd('network vnet create -n {} -g {} -l {} --subnet-name {}'
+                 .format(vnet, resource_group, loc, subnet),
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {} --vnet-name {} -g {} '
+                 '--disable-private-endpoint-network-policies true'
+                 .format(subnet, vnet, resource_group),
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                 '--connection-name {} --private-connection-resource-id {} '
+                 '--group-ids {}'
+                 .format(resource_group, pe, vnet, subnet, loc, pe_connection, postgres_id, group_id)).get_output_in_json()
+
+        # Show the connection at server side
+        postgres = self.cmd('{} server show -n {}'
+                            .format(database_engine, server),
+                            checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
+        postgres_pec_id = postgres['properties']['privateEndpointConnections'][0]['id']
+        self.cmd('{} server private-endpoint-connection show --id {}'
+                 .format(database_engine, postgres_pec_id),
+                 checks=self.check('id', postgres_pec_id))
+        postgres_pec_name = postgres_pec_id.split('/')[-1]
+        self.cmd('{} server private-endpoint-connection show --server-name {} --name {}'
+                 .format(database_engine, server, postgres_pec_name),
+                 checks=self.check('name', postgres_pec_name))
+
+        # Test approval/rejection
+        approval_desc = 'You are approved!'
+        rejection_desc = 'You are rejected!'
+
+        self.cmd('{} server private-endpoint-connection reject --id {} '
+                 '--rejection-description "{}"'
+                 .format(database_engine, postgres_pec_id, rejection_desc),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', rejection_desc),
+                     self.check('provisioningState', 'Updating')
+                 ])
+
+        max_retries = 20
+        retries = 0
+        while self.cmd('{} server private-endpoint-connection show --id {}'
+                       .format(database_engine, postgres_pec_id)).\
+                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
+            if self.is_live:
+                sleep(5)
+            retries += 1
+
+        self.cmd('{} server private-endpoint-connection show --id {}'
+                 .format(database_engine, postgres_pec_id),
+                 checks=self.check('provisioningState', 'Succeeded'))
+
+        self.cmd('{} server private-endpoint-connection approve --server-name {} --name {} '
+                 '--approval-description "{approval_desc}"'
+                 .format(database_engine, server, postgres_pec_name, approval_desc),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', approval_desc),
+                     self.check('provisioningState', 'Updating')
+                 ])
+
+        retries = 0
+        while self.cmd('{} server private-endpoint-connection show --id {}'
+                       .format(database_engine, postgres_pec_id)). \
+                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
+            if self.is_live:
+                sleep(5)
+            retries += 1
+
+        self.cmd('{} server private-endpoint-connection show --id {}'
+                 .format(database_engine, postgres_pec_id),
+                 checks=self.check('provisioningState', 'Succeeded'))
 
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
@@ -731,276 +813,3 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[1]), checks=NoneCheck())
-
-
-class PostgreSqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group')
-    def test_postgres_private_endpoint_connection(self, resource_group):
-        self.kwargs.update({
-            'server_name': self.create_random_name('cli-test-postgres-pec-', 24),
-            'loc': 'brazilsouth',
-            'vnet': self.create_random_name('cli-vnet-', 24),
-            'subnet': self.create_random_name('cli-subnet-', 24),
-            'pe': self.create_random_name('cli-pe-', 24),
-            'pe_connection': self.create_random_name('cli-pec-', 24)
-        })
-
-        # Prepare server and network
-        result = self.cmd('postgres server create -g {} --name {} -l brazilsouth '
-                          '--admin-user cloudsa --admin-password SecretPassword123 '
-                          '--sku-name GP_Gen5_2'
-                          .format(resource_group, self.kwargs['server_name']),
-                          checks=[
-                              JMESPathCheck('name', self.kwargs['server_name']),
-                              JMESPathCheck('resourceGroup', resource_group),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
-
-        sleep(300)
-
-        self.kwargs['postgres_id'] = result['id']
-        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
-                 checks=self.check('length(newVNet.subnets)', 1))
-        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
-                 '--disable-private-endpoint-network-policies true',
-                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
-
-        # Create a private endpoint connection
-        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
-                      '--connection-name {pe_connection} --private-connection-resource-id {postgres_id} '
-                      '--group-ids server').get_output_in_json()
-        self.kwargs['pe_id'] = pe['id']
-
-        # Show the connection at server side
-        postgres = self.cmd('postgres server show -n {postgres}',
-                            checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
-        self.kwargs['postgres_pec_id'] = postgres['properties']['privateEndpointConnections'][0]['id']
-        self.cmd('postgres server private-endpoint-connection show --id {postgres_pec_id}',
-                 checks=self.check('id', '{postgres_pec_id}'))
-        self.kwargs['postgres_pec_name'] = self.kwargs['postgres_pec_id'].split('/')[-1]
-        self.cmd('postgres server private-endpoint-connection show --server-name {server_name} --name {postgres_pec_name}',
-                 checks=self.check('name', '{postgres_pec_name}'))
-        self.cmd('postgres server private-endpoint-connection show --server-name {server_name} -n {postgres_pec_name}',
-                 checks=self.check('name', '{postgres_pec_name}'))
-
-        # Test approval/rejection
-        self.kwargs.update({
-            'approval_desc': 'You are approved!',
-            'rejection_desc': 'You are rejected!'
-        })
-        self.cmd('postgres server private-endpoint-connection reject --id {postgres_pec_id} '
-                 '--rejection-description "{rejection_desc}"', checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
-                     self.check('provisioningState', 'Updating')
-                 ])
-
-        max_retries = 20
-        retries = 0
-        while self.cmd('postgres server private-endpoint-connection show --id {postgres_pec_id}').\
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                sleep(5)
-            retries += 1
-
-        self.cmd('postgres server private-endpoint-connection show --id {postgres_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
-
-        self.cmd('postgres server private-endpoint-connection approve --server-name {server_name} --name {postgres_pec_name} '
-                 '--approval-description "{approval_desc}"', checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
-                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
-                     self.check('provisioningState', 'Updating')
-                 ])
-
-        retries = 0
-        while self.cmd('postgres server private-endpoint-connection show --id {postgres_pec_id}'). \
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                sleep(5)
-            retries += 1
-
-        self.cmd('postgres server private-endpoint-connection show --id {postgres_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
-
-
-class MySqlPrivateEndpointConnectionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group')
-    def test_mysql_private_endpoint_connection(self, resource_group):
-        self.kwargs.update({
-            'server_name': self.create_random_name('cli-test-mysql-pec-', 24),
-            'loc': 'brazilsouth',
-            'vnet': self.create_random_name('cli-vnet-', 24),
-            'subnet': self.create_random_name('cli-subnet-', 24),
-            'pe': self.create_random_name('cli-pe-', 24),
-            'pe_connection': self.create_random_name('cli-pec-', 24)
-        })
-
-        # Prepare server and network
-        result = self.cmd('mysql server create -g {} --name {} -l brazilsouth '
-                          '--admin-user cloudsa --admin-password SecretPassword123 '
-                          '--sku-name GP_Gen5_2'
-                          .format(resource_group, self.kwargs['server_name']),
-                          checks=[
-                              JMESPathCheck('name', self.kwargs['server_name']),
-                              JMESPathCheck('resourceGroup', resource_group),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
-
-        sleep(300)
-
-        self.kwargs['mysql_id'] = result['id']
-        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
-                 checks=self.check('length(newVNet.subnets)', 1))
-        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
-                 '--disable-private-endpoint-network-policies true',
-                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
-
-        # Create a private endpoint connection
-        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
-                      '--connection-name {pe_connection} --private-connection-resource-id {mysql_id} '
-                      '--group-ids server').get_output_in_json()
-        self.kwargs['pe_id'] = pe['id']
-
-        # Show the connection at server side
-        mysql = self.cmd('mysql server show -n {mysql}',
-                         checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
-        self.kwargs['mysql_pec_id'] = mysql['properties']['privateEndpointConnections'][0]['id']
-        self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}',
-                 checks=self.check('id', '{mysql_pec_id}'))
-        self.kwargs['mysql_pec_name'] = self.kwargs['mysql_pec_id'].split('/')[-1]
-        self.cmd('mysql server private-endpoint-connection show --server-name {server_name} --name {mysql_pec_name}',
-                 checks=self.check('name', '{mysql_pec_name}'))
-        self.cmd('mysql server private-endpoint-connection show --server-name {server_name} -n {mysql_pec_name}',
-                 checks=self.check('name', '{mysql_pec_name}'))
-
-        # Test approval/rejection
-        self.kwargs.update({
-            'approval_desc': 'You are approved!',
-            'rejection_desc': 'You are rejected!'
-        })
-        self.cmd('mysql server private-endpoint-connection reject --id {mysql_pec_id} '
-                 '--rejection-description "{rejection_desc}"', checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
-                     self.check('provisioningState', 'Updating')
-                 ])
-
-        max_retries = 20
-        retries = 0
-        while self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}').\
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                sleep(5)
-            retries += 1
-
-        self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
-
-        self.cmd('mysql server private-endpoint-connection approve --server-name {server_name} --name {mysql_pec_name} '
-                 '--approval-description "{approval_desc}"', checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
-                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
-                     self.check('provisioningState', 'Updating')
-                 ])
-
-        retries = 0
-        while self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}'). \
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                sleep(5)
-            retries += 1
-
-        self.cmd('mysql server private-endpoint-connection show --id {mysql_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
-
-
-class MariadbPrivateEndpointConnectionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group')
-    def test_mariadb_private_endpoint_connection(self, resource_group):
-        self.kwargs.update({
-            'server_name': self.create_random_name('cli-test-mariadb-pec-', 24),
-            'loc': 'brazilsouth',
-            'vnet': self.create_random_name('cli-vnet-', 24),
-            'subnet': self.create_random_name('cli-subnet-', 24),
-            'pe': self.create_random_name('cli-pe-', 24),
-            'pe_connection': self.create_random_name('cli-pec-', 24)
-        })
-
-        # Prepare server and network
-        result = self.cmd('mariadb server create -g {} --name {} -l brazilsouth '
-                          '--admin-user cloudsa --admin-password SecretPassword123 '
-                          '--sku-name GP_Gen5_2'
-                          .format(resource_group, self.kwargs['server_name']),
-                          checks=[
-                              JMESPathCheck('name', self.kwargs['server_name']),
-                              JMESPathCheck('resourceGroup', resource_group),
-                              JMESPathCheck('sslEnforcement', 'Enabled'),
-                              JMESPathCheck('sku.name', 'GP_Gen5_2')]).get_output_in_json()
-
-        sleep(300)
-
-        self.kwargs['mariadb_id'] = result['id']
-        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
-                 checks=self.check('length(newVNet.subnets)', 1))
-        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
-                 '--disable-private-endpoint-network-policies true',
-                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
-
-        # Create a private endpoint connection
-        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
-                      '--connection-name {pe_connection} --private-connection-resource-id {mariadb_id} '
-                      '--group-ids server').get_output_in_json()
-        self.kwargs['pe_id'] = pe['id']
-
-        # Show the connection at server side
-        mariadb = self.cmd('mariadb server show -n {mariadb}',
-                           checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
-        self.kwargs['mariadb_pec_id'] = mariadb['properties']['privateEndpointConnections'][0]['id']
-        self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}',
-                 checks=self.check('id', '{mariadb_pec_id}'))
-        self.kwargs['mariadb_pec_name'] = self.kwargs['mariadb_pec_id'].split('/')[-1]
-        self.cmd('mariadb server private-endpoint-connection show --server-name {server_name} --name {mariadb_pec_name}',
-                 checks=self.check('name', '{mariadb_pec_name}'))
-        self.cmd('mariadb server private-endpoint-connection show --server-name {server_name} -n {mariadb_pec_name}',
-                 checks=self.check('name', '{mariadb_pec_name}'))
-
-        # Test approval/rejection
-        self.kwargs.update({
-            'approval_desc': 'You are approved!',
-            'rejection_desc': 'You are rejected!'
-        })
-        self.cmd('mariadb server private-endpoint-connection reject --id {mariadb_pec_id} '
-                 '--rejection-description "{rejection_desc}"', checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
-                     self.check('provisioningState', 'Updating')
-                 ])
-
-        max_retries = 20
-        retries = 0
-        while self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}').\
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                sleep(5)
-            retries += 1
-
-        self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
-
-        self.cmd('mariadb server private-endpoint-connection approve --server-name {server_name} --name {mariadb_pec_name} '
-                 '--approval-description "{approval_desc}"', checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
-                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
-                     self.check('provisioningState', 'Updating')
-                 ])
-
-        retries = 0
-        while self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}'). \
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                sleep(5)
-            retries += 1
-
-        self.cmd('mariadb server private-endpoint-connection show --id {mariadb_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))

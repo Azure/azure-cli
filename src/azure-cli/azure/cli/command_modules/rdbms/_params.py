@@ -139,7 +139,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     for item in ['approve', 'reject', 'delete', 'show']:
         for scope in ['mariadb server private-endpoint-connection {}', 'mysql server private-endpoint-connection {}', 'postgres server private-endpoint-connection {}']:
             with self.argument_context(scope.format(item)) as c:
-                c.extra('connection_id', required=False,
+                c.extra('connection_id', options_list=['--id'], required=False,
                         help='The ID of the private endpoint connection associated with the Server. '
                              'If specified --server-name and --name/-n, this should be omitted.')
 
