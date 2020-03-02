@@ -1680,6 +1680,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                zones=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
+               enable_private_cluster=False,
                attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1802,8 +1803,13 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
 
     api_server_access_profile = None
-    if api_server_authorized_ip_ranges:
-        api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+    if enable_private_cluster and load_balancer_sku.lower() != "standard":
+        raise CLIError("Please use standard load balancer for private cluster")
+    if api_server_authorized_ip_ranges or enable_private_cluster:
+        api_server_access_profile = _populate_api_server_access_profile(
+            api_server_authorized_ip_ranges,
+            enable_private_cluster
+        )
 
     # Check that both --disable-rbac and --enable-rbac weren't provided
     if all([disable_rbac, enable_rbac]):
