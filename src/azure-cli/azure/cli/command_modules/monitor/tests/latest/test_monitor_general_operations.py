@@ -102,6 +102,56 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
             ])
 
 
+class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
+    @StorageAccountPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_2')
+    def test_monitor_clone_storage_metric_alerts_always_scenario(self, resource_group, storage_account, storage_account_2):
+        self.test_guid_count = 0
+        self.kwargs.update({
+            'alert': 'alert1',
+            'sa': storage_account,
+            'ag1': 'ag1',
+            'sub': self.get_subscription_id(),
+            'sa_id': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account,
+                namespace='Microsoft.Storage',
+                type='storageAccounts'),
+            'sa_id_2': resource_id(
+                resource_group=resource_group,
+                subscription=self.get_subscription_id(),
+                name=storage_account_2,
+                namespace='Microsoft.Storage',
+                type='storageAccounts'),
+        })
+
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {sa_id} --action {ag1} --description "Test" --condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
+            self.check('description', 'Test'),
+            self.check('severity', 2),
+            self.check('autoMitigate', None),
+            self.check('windowSize', '0:05:00'),
+            self.check('evaluationFrequency', '0:01:00'),
+            self.check('length(criteria.allOf)', 2),
+            self.check('length(criteria.allOf[0].dimensions)', 2),
+            self.check('length(criteria.allOf[1].dimensions)', 1)
+        ])
+
+        with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
+            self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2} --always-clone', checks=[
+                self.check('metricsAlert[0].description', 'Test'),
+                self.check('metricsAlert[0].severity', 2),
+                self.check('metricsAlert[0].autoMitigate', None),
+                self.check('metricsAlert[0].windowSize', '0:05:00'),
+                self.check('metricsAlert[0].evaluationFrequency', '0:01:00'),
+                self.check('length(metricsAlert[0].criteria.allOf)', 2),
+                self.check('length(metricsAlert[0].criteria.allOf[0].dimensions)', 2),
+                self.check('length(metricsAlert[0].criteria.allOf[1].dimensions)', 1),
+            ])
+
+
 class MonitorClonePublicIpScenarios(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
     def test_monitor_clone_public_ip_metric_alerts_scenario(self, resource_group):
