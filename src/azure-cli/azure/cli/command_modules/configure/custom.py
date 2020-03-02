@@ -26,7 +26,7 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_PROMPT_TELEMETRY,
                                                          MSG_PROMPT_FILE_LOGGING,
                                                          MSG_PROMPT_CACHE_TTL,
-                                                         MSG_CLOUD_FORBID_TELEMETRY,
+                                                         WARNING_CLOUD_FORBID_TELEMETRY,
                                                          DEFAULT_CACHE_TTL)
 from azure.cli.command_modules.configure._utils import get_default_from_config
 
@@ -167,7 +167,7 @@ def handle_configure(cmd, defaults=None, list_defaults=None, scope=None):
         _handle_global_configuration(cmd.cli_ctx.config, cloud_forbid_telemetry)
         print(MSG_CLOSING)
         if cloud_forbid_telemetry:
-            logger.warning(MSG_CLOUD_FORBID_TELEMETRY.format(current_cloud))
+            logger.warning(WARNING_CLOUD_FORBID_TELEMETRY, current_cloud)
         # TODO: log_telemetry('configure', **answers)
     except NoTTYException:
         raise CLIError('This command is interactive and no tty available.')
