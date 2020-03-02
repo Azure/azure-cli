@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only
 import mock
 from msrestazure.tools import resource_id
 
@@ -43,12 +43,12 @@ class MonitorCloneVMScenarios(ScenarioTest):
         ])
         with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {vm1_id} --target-resource {vm3_id}', checks=[
-                self.check('@[0].description', 'High CPU'),
-                self.check('@[0].severity', 2),
-                self.check('@[0].autoMitigate', None),
-                self.check('@[0].windowSize', '0:05:00'),
-                self.check('@[0].evaluationFrequency', '0:01:00'),
-                self.check('length(@[0].scopes)', 3)
+                self.check('metricsAlert[0].description', 'High CPU'),
+                self.check('metricsAlert[0].severity', 2),
+                self.check('metricsAlert[0].autoMitigate', None),
+                self.check('metricsAlert[0].windowSize', '0:05:00'),
+                self.check('metricsAlert[0].evaluationFrequency', '0:01:00'),
+                self.check('length(metricsAlert[0].scopes)', 3)
             ])
 
 
@@ -91,14 +91,14 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
 
         with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2}', checks=[
-                self.check('@[0].description', 'Test'),
-                self.check('@[0].severity', 2),
-                self.check('@[0].autoMitigate', None),
-                self.check('@[0].windowSize', '0:05:00'),
-                self.check('@[0].evaluationFrequency', '0:01:00'),
-                self.check('length(@[0].criteria.allOf)', 2),
-                self.check('length(@[0].criteria.allOf[0].dimensions)', 2),
-                self.check('length(@[0].criteria.allOf[1].dimensions)', 1),
+                self.check('metricsAlert[0].description', 'Test'),
+                self.check('metricsAlert[0].severity', 2),
+                self.check('metricsAlert[0].autoMitigate', None),
+                self.check('metricsAlert[0].windowSize', '0:05:00'),
+                self.check('metricsAlert[0].evaluationFrequency', '0:01:00'),
+                self.check('length(metricsAlert[0].criteria.allOf)', 2),
+                self.check('length(metricsAlert[0].criteria.allOf[0].dimensions)', 2),
+                self.check('length(metricsAlert[0].criteria.allOf[1].dimensions)', 1),
             ])
 
 
@@ -142,5 +142,99 @@ class MonitorClonePublicIpScenarios(ScenarioTest):
 
         with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {ip1_id} --target-resource {ip2_id}', checks=[
-                self.check('length(@)', 2),
+                self.check('length(metricsAlert)', 2),
+            ])
+
+
+class MonitorClonePublicIpAlwaysScenarios(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
+    def test_monitor_clone_public_ip_metric_alerts_always_scenario(self, resource_group):
+        self.test_guid_count = 0
+        self.kwargs.update({
+            'alert': 'alert1',
+            'alert2': 'alert2',
+            'ag1': 'ag1',
+            'sub': self.get_subscription_id(),
+            'rg': resource_group,
+            'ip1': 'ip1',
+            'ip2': 'ip2'
+        })
+
+        ip1_json = self.cmd('network public-ip create -g {rg} -n {ip1}').get_output_in_json()
+        ip2_json = self.cmd('network public-ip create -g {rg} -n {ip2}').get_output_in_json()
+        self.kwargs.update({
+            'ip1_id': ip1_json['publicIp']['id'],
+            'ip2_id': ip2_json['publicIp']['id']
+        })
+
+        self.cmd('monitor action-group create -g {rg} -n {ag1}')
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {ip1_id} --action {ag1} --description "Test" --condition "total TCPBytesForwardedDDoS > 5"', checks=[
+            self.check('description', 'Test'),
+            self.check('severity', 2),
+            self.check('windowSize', '0:05:00'),
+            self.check('evaluationFrequency', '0:01:00'),
+            self.check('length(scopes)', 1)
+        ])
+
+        self.cmd('monitor metrics alert create -g {rg} -n {alert2} --scopes {ip1_id} --action {ag1} --description "Test2" --condition "max TCPBytesForwardedDDoS > 5"', checks=[
+            self.check('description', 'Test2'),
+            self.check('severity', 2),
+            self.check('windowSize', '0:05:00'),
+            self.check('evaluationFrequency', '0:01:00'),
+            self.check('length(scopes)', 1)
+        ])
+
+        with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
+            self.cmd('monitor clone --source-resource {ip1_id} --target-resource {ip2_id}', checks=[
+                self.check('length(metricsAlert)', 2),
+            ])
+
+
+class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
+    def test_monitor_clone_storage_metric_alerts_across_subs_scenario(self, resource_group):
+        self.test_guid_count = 0
+        self.kwargs.update({
+            'alert': 'alert1',
+            'sa': self.create_random_name('sa', 24),
+            'sa2': self.create_random_name('sa', 24),
+            'ag1': 'ag1',
+            'rg': resource_group,
+            'ext_sub': 'f64d4ee8-be94-457d-ba26-3fa6b6506cef',
+            'ext_rg': self.create_random_name('test_rg', 24),
+        })
+
+        self.cmd('group create -l eastus -n {ext_rg} --subscription {ext_sub}')
+        sa1_json = self.cmd('storage account create -n {sa} -g {ext_rg} -l eastus --sku Standard_LRS --kind Storage --subscription {ext_sub}').get_output_in_json()
+        sa2_json = self.cmd('storage account create -n {sa2} -g {rg} -l eastus --sku Standard_LRS --kind Storage').get_output_in_json()
+        self.kwargs.update({
+            'sa_id': sa1_json['id'],
+            'sa_id_2': sa2_json['id'],
+        })
+        self.cmd('monitor action-group create -g {ext_rg} -n {ag1} --subscription {ext_sub}')
+        self.cmd('monitor metrics alert create -g {ext_rg} --subscription {ext_sub} -n {alert} '
+                 '--scopes {sa_id} --action {ag1} --description "Test" '
+                 '--condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" '
+                 '--condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
+            self.check('description', 'Test'),
+            self.check('severity', 2),
+            self.check('autoMitigate', None),
+            self.check('windowSize', '0:05:00'),
+            self.check('evaluationFrequency', '0:01:00'),
+            self.check('length(criteria.allOf)', 2),
+            self.check('length(criteria.allOf[0].dimensions)', 2),
+            self.check('length(criteria.allOf[1].dimensions)', 1)
+        ])
+
+        with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
+            self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2}', checks=[
+                self.check('metricsAlert[0].description', 'Test'),
+                self.check('metricsAlert[0].severity', 2),
+                self.check('metricsAlert[0].autoMitigate', None),
+                self.check('metricsAlert[0].windowSize', '0:05:00'),
+                self.check('metricsAlert[0].evaluationFrequency', '0:01:00'),
+                self.check('length(metricsAlert[0].criteria.allOf)', 2),
+                self.check('length(metricsAlert[0].criteria.allOf[0].dimensions)', 2),
+                self.check('length(metricsAlert[0].criteria.allOf[1].dimensions)', 1),
             ])
