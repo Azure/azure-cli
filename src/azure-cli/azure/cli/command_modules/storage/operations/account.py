@@ -368,24 +368,34 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, account_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
-    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus')
+
+    PrivateEndpointServiceConnectionStatus, ErrorResponseException = \
+        cmd.get_models('PrivateEndpointServiceConnectionStatus', 'ErrorResponseException')
 
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, account_name=account_name,
                                              private_endpoint_connection_name=private_endpoint_connection_name)
 
+    old_status = private_endpoint_connection.private_link_service_connection_state.status
     new_status = PrivateEndpointServiceConnectionStatus.approved \
         if is_approved else PrivateEndpointServiceConnectionStatus.rejected
     private_endpoint_connection.private_link_service_connection_state.status = new_status
     private_endpoint_connection.private_link_service_connection_state.description = description
-
-    return client.put(resource_group_name=resource_group_name,
-                      account_name=account_name,
-                      private_endpoint_connection_name=private_endpoint_connection_name,
-                      properties=private_endpoint_connection)
+    try:
+        return client.put(resource_group_name=resource_group_name,
+                          account_name=account_name,
+                          private_endpoint_connection_name=private_endpoint_connection_name,
+                          properties=private_endpoint_connection)
+    except ErrorResponseException as ex:
+        if ex.response.status_code == 400:
+            from knack.util import CLIError
+            if new_status == "Approved" and old_status == "Rejected":
+                raise CLIError("You cannot approve the connection request after rejection. Please create a new "
+                               "connection for approval.")
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, account_name,
                                         private_endpoint_connection_name, description=None):
+
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name=resource_group_name, account_name=account_name, is_approved=True,
         private_endpoint_connection_name=private_endpoint_connection_name, description=description

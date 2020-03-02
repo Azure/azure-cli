@@ -80,7 +80,7 @@ def transform_entity_result(entity):
 def transform_logging_list_output(result):
     from collections import OrderedDict
     new_result = []
-    for key in sorted(result.keys()):
+    for key in result:
         new_entry = OrderedDict()
         new_entry['Service'] = key
         new_entry['Read'] = str(result[key]['read'])
@@ -114,6 +114,11 @@ def create_boolean_result_output_transformer(property_name):
         return {property_name: result}
 
     return _transformer
+
+
+def transform_private_link_list_output(result):
+    if hasattr(result, "value"):
+        return result.value
 
 
 def transform_storage_list_output(result):

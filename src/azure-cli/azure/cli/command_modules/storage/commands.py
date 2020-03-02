@@ -159,7 +159,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          validator=validate_private_endpoint_connection_id)
 
     with self.command_group('storage account', private_link_resource_sdk, resource_type=ResourceType.MGMT_STORAGE, ) as g:
-        g.command('list-private-link-resource', 'list_by_storage_account', is_preview=True, min_api='2019-06-01')
+        from ._transformers import transform_private_link_list_output
+        g.command('list-private-link-resource', 'list_by_storage_account', is_preview=True, min_api='2019-06-01',
+                  transform=transform_private_link_list_output)
 
     with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
                             custom_command_type=storage_account_custom_type,
