@@ -144,7 +144,7 @@ def _handle_global_configuration(config, cloud_forbid_telemetry):
 
 # pylint: disable=inconsistent-return-statements
 def handle_configure(cmd, defaults=None, list_defaults=None, scope=None):
-    from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD, CLOUDS_FORBIDDING_TELEMETRY
+    from azure.cli.core.cloud import cloud_forbid_telemetry, get_active_cloud_name
     if defaults:
         defaults_section = cmd.cli_ctx.config.defaults_section_name
         with ConfiguredDefaultSetter(cmd.cli_ctx.config, scope.lower() == 'local'):
@@ -162,12 +162,11 @@ def handle_configure(cmd, defaults=None, list_defaults=None, scope=None):
     # if nothing supplied, we go interactively
     try:
         print(MSG_INTRO)
-        current_cloud = cmd.cli_ctx.config.get('cloud', 'name', fallback=AZURE_PUBLIC_CLOUD.name)
-        cloud_forbid_telemetry = current_cloud in CLOUDS_FORBIDDING_TELEMETRY
+        cloud_forbid_telemetry = cloud_forbid_telemetry(cmd.cli_ctx)
         _handle_global_configuration(cmd.cli_ctx.config, cloud_forbid_telemetry)
         print(MSG_CLOSING)
         if cloud_forbid_telemetry:
-            logger.warning(WARNING_CLOUD_FORBID_TELEMETRY, current_cloud)
+            logger.warning(WARNING_CLOUD_FORBID_TELEMETRY, get_active_cloud_name(cmd.cli_ctx))
         # TODO: log_telemetry('configure', **answers)
     except NoTTYException:
         raise CLIError('This command is interactive and no tty available.')

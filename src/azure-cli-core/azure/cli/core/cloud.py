@@ -529,3 +529,6 @@ def remove_cloud(cli_ctx, cloud_name):
     config.remove_section(cloud_name)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:
         config.write(configfile)
+
+def cloud_forbid_telemetry(cli_ctx):
+    return get_active_cloud_name(cli_ctx) in CLOUDS_FORBIDDING_TELEMETRY
