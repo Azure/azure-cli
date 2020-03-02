@@ -224,7 +224,7 @@ examples:
         az storage account private-endpoint-connection approve --id $id
   - name: Approve a private endpoint connection request for storage account using account name and connection name.
     text: |
-        az storage account private-endpoint-connection approve -g myRg --account-name mystorageaccount --name myconnection 
+        az storage account private-endpoint-connection approve -g myRg --account-name mystorageaccount --name myconnection
   - name: Approve a private endpoint connection request for storage account using account name and connection name.
     text: |
         name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
@@ -244,7 +244,7 @@ examples:
         az storage account private-endpoint-connection delete --id $id
   - name: Delete a private endpoint connection request for storage account using account name and connection name.
     text: |
-        az storage account private-endpoint-connection delete -g myRg --account-name mystorageaccount --name myconnection 
+        az storage account private-endpoint-connection delete -g myRg --account-name mystorageaccount --name myconnection
   - name: Delete a private endpoint connection request for storage account using account name and connection name.
     text: |
         name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
@@ -264,7 +264,7 @@ examples:
         az storage account private-endpoint-connection reject --id $id
   - name: Reject a private endpoint connection request for storage account using account name and connection name.
     text: |
-        az storage account private-endpoint-connection reject -g myRg --account-name mystorageaccount --name myconnection 
+        az storage account private-endpoint-connection reject -g myRg --account-name mystorageaccount --name myconnection
   - name: Reject a private endpoint connection request for storage account using account name and connection name.
     text: |
         name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
@@ -284,7 +284,7 @@ examples:
         az storage account private-endpoint-connection show --id $id
   - name: Show details of a private endpoint connection request for storage account using account name and connection name.
     text: |
-        az storage account private-endpoint-connection show -g myRg --account-name mystorageaccount --name myconnection 
+        az storage account private-endpoint-connection show -g myRg --account-name mystorageaccount --name myconnection
   - name: Show details of a private endpoint connection request for storage account using account name and connection name.
     text: |
         name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")

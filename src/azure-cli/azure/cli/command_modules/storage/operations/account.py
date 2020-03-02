@@ -389,8 +389,8 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
         if ex.response.status_code == 400:
             from msrestazure.azure_exceptions import CloudError
             if new_status == "Approved" and old_status == "Rejected":
-                raise CloudError(ex.response, "You cannot approve the connection request after rejection. Please create a new "
-                               "connection for approval.")
+                raise CloudError(ex.response, "You cannot approve the connection request after rejection. "
+                                 "Please create a new connection for approval.")
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, account_name,
