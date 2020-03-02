@@ -755,7 +755,7 @@ def load_arguments(self, _):
         c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.', id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
-        c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az keyvault(storage/etc) private-endpoint show" to obtain the list of group ids.')
+        c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az keyvault(storage/etc) private-link-resource list" to obtain the list of group ids.')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
         c.argument('manual_request', help='Use manual request to establish the connection', arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
