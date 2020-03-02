@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import argparse
-
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 from azure.cli.core.commands.validators import (
