@@ -79,20 +79,19 @@ short-summary: Manage CDN endpoints.
 helps['cdn endpoint create'] = """
 type: command
 short-summary: Create a named endpoint to connect to a CDN.
-
 examples:
   - name: Create an endpoint to service content for hostname over HTTP or HTTPS.
     text: >
-        az cdn endpoint create -g group -n endpoint --profile-name profile \\
-            --origin www.example.com
+        az cdn endpoint create -g group -n endpoint --profile-name profile
+        --origin www.example.com
   - name: Create an endpoint with a custom domain origin with HTTP and HTTPS ports.
     text: >
-        az cdn endpoint create -g group -n endpoint --profile-name profile \\
-            --origin www.example.com 88 4444
+        az cdn endpoint create -g group -n endpoint --profile-name profile
+        --origin www.example.com 88 4444
   - name: Create an endpoint with a custom domain with compression and only HTTPS.
     text: >
-        az cdn endpoint create -g group -n endpoint --profile-name profile \\
-            --origin www.example.com --no-http --enable-compression
+        az cdn endpoint create -g group -n endpoint --profile-name profile
+        --origin www.example.com --no-http --enable-compression
 """
 
 helps['cdn endpoint delete'] = """
@@ -100,8 +99,7 @@ type: command
 short-summary: Delete a CDN endpoint.
 examples:
   - name: Delete a CDN endpoint.
-    text: >
-        az cdn endpoint delete -g group -n endpoint --profile-name profile-name
+    text: az cdn endpoint delete -g group -n endpoint --profile-name profile-name
 """
 
 helps['cdn endpoint list'] = """
@@ -119,8 +117,8 @@ short-summary: Pre-load content for a CDN endpoint.
 examples:
   - name: Pre-load Javascript and CSS content for an endpoint.
     text: >
-        az cdn endpoint load -g group -n endpoint --profile-name profile-name --content-paths \\
-            '/scripts/app.js' '/styles/main.css'
+        az cdn endpoint load -g group -n endpoint --profile-name profile-name --content-paths
+        '/scripts/app.js' '/styles/main.css'
 """
 
 helps['cdn endpoint purge'] = """
@@ -129,8 +127,8 @@ short-summary: Purge pre-loaded content for a CDN endpoint.
 examples:
   - name: Purge pre-loaded Javascript and CSS content.
     text: >
-        az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths \\
-            '/scripts/app.js' '/styles/*'
+        az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths
+        '/scripts/app.js' '/styles/*'
 """
 
 helps['cdn endpoint start'] = """
@@ -160,8 +158,8 @@ examples:
         az cdn endpoint update -g group -n endpoint --profile-name profile --no-http
   - name: Enable content compression for an endpoint.
     text: >
-        az cdn endpoint update -g group -n endpoint --profile-name profile \\
-            --enable-compression
+        az cdn endpoint update -g group -n endpoint --profile-name profile
+        --enable-compression
 """
 
 helps['cdn endpoint rule'] = """
@@ -175,13 +173,13 @@ short-summary: Add a delivery rule to a CDN endpoint.
 examples:
   - name: Create a global rule to disable caching.
     text: >
-        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 0 \\
-            --rule-name global --action-name CacheExpiration --cache-behavior BypassCache
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 0
+        --rule-name global --action-name CacheExpiration --cache-behavior BypassCache
   - name: Create a rule for http to https redirect
     text: >
-        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1 \\
-            --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS \\
-            --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
+        az cdn endpoint rule add -g group -n endpoint --profile-name profile --order 1
+        --rule-name "redirect" --match-variable RequestScheme --operator Equal --match-values HTTPS
+        --action-name "UrlRedirect" --redirect-protocol Https --redirect-type Moved
 """
 
 helps['cdn endpoint rule remove'] = """
@@ -607,11 +605,19 @@ parameters:
   - name: --match-condition -m
     type: string
     short-summary: Conditions used to determine if the rule is matched for a request.
-    long-summary: >
+    long-summary: |
         Match conditions are specified as key value pairs in the form "KEY=VALUE [KEY=VALUE ...]".
         Available keys are 'match-variable', 'operator', 'match-value', 'selector', 'negate', and
-        'transform'. 'match-variable', 'operator', and 'match-value' are required. 'match-value' and
-        'transform' may be specified multiple times per match condition.
+        'transform'. 'match-variable', 'operator', and 'match-value' are required. 'match-value'
+        and 'transform' may be specified multiple times per match condition.
+
+        Valid values for 'match-variable' are 'RemoteAddr', 'SocketAddr', 'RequestMethod',
+        'RequestHeader', 'RequestUri', 'QueryString', 'RequestBody', 'Cookies', and 'PostArgs'.
+        Valid values for 'operator' are 'Any', 'IPMatch', 'GeoMatch', 'Equal', 'Contains',
+        'LessThan', 'GreaterThan', 'LessThanOrEqual', 'GreaterThanOrEqual', 'BeginsWith',
+        'EndsWith', and 'RegEx'. Valid values for 'transform' are 'Lowercase', 'Uppercase',
+        'Trim', 'UrlDecode', 'UrlEncode', and 'RemoveNulls'. Valid values for 'negate' are 'True'
+        and 'False', and 'negate' defaults to 'False'.
   - name: --priority
     type: int
     short-summary: The priority of the custom rule as a non-negative integer.
