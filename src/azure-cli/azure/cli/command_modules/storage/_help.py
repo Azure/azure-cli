@@ -206,6 +206,11 @@ examples:
     crafted: true
 """
 
+helps['storage account private-endpoint-connection'] = """
+type: group
+short-summary: Manage storage account private endpoint connection.
+"""
+
 helps['storage account private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve a private endpoint connection request for storage account.
