@@ -222,16 +222,17 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
         self.cmd('monitor metrics alert create -g {ext_rg} --subscription {ext_sub} -n {alert} '
                  '--scopes {sa_id} --action {ag1} --description "Test" '
                  '--condition "total transactions > 5 where ResponseType includes Success and ApiName includes GetBlob" '
-                 '--condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"', checks=[
-            self.check('description', 'Test'),
-            self.check('severity', 2),
-            self.check('autoMitigate', None),
-            self.check('windowSize', '0:05:00'),
-            self.check('evaluationFrequency', '0:01:00'),
-            self.check('length(criteria.allOf)', 2),
-            self.check('length(criteria.allOf[0].dimensions)', 2),
-            self.check('length(criteria.allOf[1].dimensions)', 1)
-        ])
+                 '--condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"',
+                 checks=[
+                     self.check('description', 'Test'),
+                     self.check('severity', 2),
+                     self.check('autoMitigate', None),
+                     self.check('windowSize', '0:05:00'),
+                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('length(criteria.allOf)', 2),
+                     self.check('length(criteria.allOf[0].dimensions)', 2),
+                     self.check('length(criteria.allOf[1].dimensions)', 1)
+                 ])
 
         with mock.patch('azure.cli.command_modules.monitor.util._gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2}', checks=[

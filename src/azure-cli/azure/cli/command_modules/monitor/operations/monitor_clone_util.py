@@ -23,6 +23,7 @@ def _gen_metrics_alert_rules_clone_list(monitor_client, source_resource, target_
                 logger.warning('The target resource already has alert rule %s. '
                                'Skip cloning this one.', alert_rule.name)
 
+
 def _add_into_existing_scopes(monitor_client, alert_rule, target_resource):
     alert_rule.scopes.append(target_resource)
     resource_group_name, name = _parse_id(alert_rule.id).values()
