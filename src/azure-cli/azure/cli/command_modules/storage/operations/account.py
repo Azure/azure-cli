@@ -387,9 +387,9 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
                           properties=private_endpoint_connection)
     except ErrorResponseException as ex:
         if ex.response.status_code == 400:
-            from knack.util import CLIError
+            from msrestazure.azure_exceptions import CloudError
             if new_status == "Approved" and old_status == "Rejected":
-                raise CLIError("You cannot approve the connection request after rejection. Please create a new "
+                raise CloudError(ex.response, "You cannot approve the connection request after rejection. Please create a new "
                                "connection for approval.")
 
 
