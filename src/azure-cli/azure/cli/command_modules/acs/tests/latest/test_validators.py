@@ -95,3 +95,107 @@ class TestVNetSubnetId(unittest.TestCase):
 class VnetSubnetIdNamespace:
     def __init__(self, vnet_subnet_id):
         self.vnet_subnet_id = vnet_subnet_id
+
+
+class TestLabels(unittest.TestCase):
+    def test_invalid_labels_prefix(self):
+        invalid_labels = "k8s##.io/label1=value"
+        namespace = LabelsNamespace(invalid_labels)
+        err = ("Invalid label: k8s##.io/label1=value. Prefix part a DNS-1123 label must consist of lower case "
+               "alphanumeric characters or '-', and must start and end with an alphanumeric character")
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_nodepool_labels(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_labels_prefix_toolong(self):
+        self.maxDiff = None
+        invalid_labels = ("k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890"
+                          "k8s12345678901234567890123456789012345678901234567890/label1=value")
+
+        namespace = LabelsNamespace(invalid_labels)
+        err = ("Invalid label: %s. Label prefix can't be empty or more than 253 chars." % invalid_labels)
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_nodepool_labels(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_labels_wrong_format(self):
+        self.maxDiff = None
+        invalid_labels = ("label1value")
+
+        namespace = LabelsNamespace(invalid_labels)
+        err = ("Invalid label: %s. Label definition must be of format name=value." % invalid_labels)
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_nodepool_labels(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_labels_name_toolong(self):
+        self.maxDiff = None
+        invalid_labels = ("k8s123456789012345678901234567890123456789012345678901234567890123=value")
+
+        namespace = LabelsNamespace(invalid_labels)
+        err = ("Invalid label: %s. Label name can't be empty or more than 63 chars." % invalid_labels)
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_nodepool_labels(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_labels_name_invalid(self):
+        self.maxDiff = None
+        invalid_labels = ("k8s1##@@=value")
+
+        namespace = LabelsNamespace(invalid_labels)
+        err = ("Invalid label: %s. A qualified name must consist of alphanumeric characters, '-', '_' "
+               "or '.', and must start and end with an alphanumeric character (e.g. 'MyName',  or "
+               "'my.name',  or '123-abc') with an optional DNS subdomain prefix and '/' (e.g. "
+               "'example.com/MyName')" % invalid_labels)
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_nodepool_labels(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_labels_value_toolong(self):
+        self.maxDiff = None
+        invalid_labels = ("label=k8s123456789012345678901234567890123456789012345678901234567890123")
+
+        namespace = LabelsNamespace(invalid_labels)
+        err = ("Invalid label: %s. Label must be more than 63 chars." % invalid_labels)
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_nodepool_labels(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_labels_value_invalid(self):
+        self.maxDiff = None
+        invalid_labels = ("label=k8s1##@@")
+
+        namespace = LabelsNamespace(invalid_labels)
+        err = ("Invalid label: %s. A valid label must be an empty string or consist of alphanumeric "
+               "characters, '-', '_' or '.', and must start and end with an alphanumeric character" % invalid_labels)
+
+        with self.assertRaises(CLIError) as cm:
+            validators.validate_nodepool_labels(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_labels(self):
+        namespace = LabelsNamespace("k8s.io/label=value")
+        validators.validate_nodepool_labels(namespace)
+
+        namespace = LabelsNamespace(["k8s.io/label=value", "label2=value2"])
+        validators.validate_nodepool_labels(namespace)
+
+
+class LabelsNamespace:
+    def __init__(self, labels):
+        self.labels = labels
