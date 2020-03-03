@@ -666,7 +666,7 @@ def urlretrieve(url):
 def parse_proxy_resource_id(rid):
     """Parses a resource_id into its various parts.
 
-    Returns an empty dictionary, if invalid resource id.
+    Return an empty dictionary, if invalid resource id.
 
     :param rid: The resource id being parsed
     :type rid: str

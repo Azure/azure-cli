@@ -3,7 +3,7 @@
 #### Private Endpoint Connection
 
 - The parent resource should expose a single command group called `private-endpoint-connection` with four commands: `approve`, `reject`, `delete`, `show`.
-- If `approve` and `reject` commands are long running operations, please also provide `... private-endpoint-connection wait` command and support `--no-wait` in `approve` and `reject` commands.
+- If `approve`, `reject` and `delete` commands are long running operations, please also provide `... private-endpoint-connection wait` command and support `--no-wait` in `approve` and `reject` commands.
 - The `... private-endpoint-connection approve` command should look similar to the following, depending on which features are supported by the service.
 ```
 Arguments
@@ -66,10 +66,22 @@ pe_resource_id = "/subscriptions/0000/resourceGroups/clirg/" \
                  "privateLinkServiceConnections/peconnection"
 result = parse_proxy_resource_id(pe_resource_id)
 namespace.resource_group = result['resource_group']
-namespace.endpoint = result['clipe']
+namespace.endpoint = result['name']
 namespace.name = result['child_name_1']
 ```
-
+The best practice to support extra `--id` is to add extra argument in `_param.py`. Then you can use the `parse_proxy_resource_id` to parse the `--id` and delete this extra argument from the namspace.
+```
+with self.argument_context('storage account private-endpoint-connection {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
+     c.extra('connection_id', options_list=['--id'], help='help='The ID of the private endpoint connection associated with the Storage Account.')
+```
+```
+from azure.cli.core.util import parse_proxy_resource_id
+result = parse_proxy_resource_id(namespace.connection_id)
+namespace.resource_group = result['resource_group']
+namespace.endpoint = result['name']
+namespace.name = result['child_name_1']
+del namespace.connection_id
+```
 #### Transform
 In order to transform the output of the `list` command, we provide a transform function `gen_dict_to_list_transform`.
 ```
