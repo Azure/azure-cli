@@ -195,7 +195,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
     # This method is meant to be a hook that can be overridden by an extension or module.
     @staticmethod
-    def check_for_new_examples(command): # pylint: disable=unused-argument
+    def check_for_new_examples(command):  # pylint: disable=unused-argument
         return []
 
 
