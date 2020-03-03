@@ -666,7 +666,7 @@ def urlretrieve(url):
 def parse_proxy_resource_id(rid):
     """Parses a resource_id into its various parts.
 
-    Returns a dictionary with a single key-value pair, 'name': rid, if invalid resource id.
+    Returns an empty dictionary, if invalid resource id.
 
     :param rid: The resource id being parsed
     :type rid: str
@@ -696,5 +696,5 @@ def parse_proxy_resource_id(rid):
         result['last_child_num'] = count + 1 if isinstance(count, int) else None
         result.pop('children', None)
     else:
-        result = dict(name=rid)
+        result = {}
     return {key: value for key, value in result.items() if value is not None}

@@ -3,11 +3,11 @@
 #### Private Endpoint Connection
 
 - The parent resource should expose a single command group called `private-endpoint-connection` with four commands: `approve`, `reject`, `delete`, `show`.
-- If `approve` and `reject` are long running operations, please also provide `... private-endpoint-connection wait` command and support `--no-wait` in `approve` and `reject` commands.
+- If `approve` and `reject` commands are long running operations, please also provide `... private-endpoint-connection wait` command and support `--no-wait` in `approve` and `reject` commands.
 - The `... private-endpoint-connection approve` command should look similar to the following, depending on which features are supported by the service.
 ```
 Arguments
-    --approval-description          : Comments for the approval.
+    --description                   : Comments for the approval.
     --id                            : The ID of the private endpoint connection associated with the Key
                                       Vault(Storage Account). If specified --vault-name and --name/-n, this should be omitted.
     --name -n                       : The name of the private endpoint connection associated with the Key
@@ -18,7 +18,7 @@ Arguments
 - The `... private-endpoint-connection reject` command should look similar to the following, depending on which features are supported by the service.
 ```
 Arguments
-    --rejection-description         : Comments for the rejection.
+    --description                   : Comments for the rejection.
     --id                            : The ID of the private endpoint connection associated with the Key
                                       Vault(Storage Account). If specified --vault-name and --name/-n, this should be omitted.
     --name -n                       : The name of the private endpoint connection associated with the Key
@@ -52,6 +52,10 @@ Arguments
 ## Command Authoring
 
 Storage and keyvault modules both are good examples. Feel free to use them as reference.
+
+*Storage*: [PR Link](https://github.com/Azure/azure-cli/pull/12383)
+
+*Keyvault*: [Command Module](https://github.com/Azure/azure-cli/tree/dev/src/azure-cli/azure/cli/command_modules/keyvault)
 
 #### Parameters
 We provide a build-in function `parse_proxy_resource_id` to parse private endpoint connection id. It can be used to support the `--id` argument.
