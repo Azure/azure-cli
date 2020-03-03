@@ -695,6 +695,5 @@ def parse_proxy_resource_id(rid):
                 key + '_%d' % (count + 1): group for key, group in child.groupdict().items()})
         result['last_child_num'] = count + 1 if isinstance(count, int) else None
         result.pop('children', None)
-    else:
-        result = {}
-    return {key: value for key, value in result.items() if value is not None}
+        return {key: value for key, value in result.items() if value is not None}
+    return None

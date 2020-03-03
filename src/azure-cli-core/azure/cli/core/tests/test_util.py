@@ -124,7 +124,7 @@ class TestUtils(unittest.TestCase):
     def test_proxy_resource_parse(self):
         mock_proxy_resource_id = "/subscriptions/0000/resourceGroups/clirg/" \
                                  "providers/Microsoft.Network/privateEndpoints/cli/" \
-                                 "privateLinkServiceConnections/child_name_1/child_type_2/child_name_2"
+                                 "privateLinkServiceConnections/cliPec/privateLinkServiceConnectionsSubTypes/cliPecSubName"
         result = parse_proxy_resource_id(mock_proxy_resource_id)
         valid_dict_values = {
             'subscription': '0000',
@@ -133,14 +133,18 @@ class TestUtils(unittest.TestCase):
             'type': 'privateEndpoints',
             'name': 'cli',
             'child_type_1': 'privateLinkServiceConnections',
-            'child_name_1': 'child_name_1',
-            'child_type_2': 'child_type_2',
-            'child_name_2': 'child_name_2',
+            'child_name_1': 'cliPec',
+            'child_type_2': 'privateLinkServiceConnectionsSubTypes',
+            'child_name_2': 'cliPecSubName',
             'last_child_num': 2
         }
         self.assertEqual(len(result.keys()), len(valid_dict_values.keys()))
         for key, value in valid_dict_values.items():
             self.assertEqual(result[key], value)
+
+        invalid_proxy_resource_id = "invalidProxyResourceID"
+        result = parse_proxy_resource_id(invalid_proxy_resource_id)
+        self.assertIsNone(result)
 
     @mock.patch('webbrowser.open', autospec=True)
     @mock.patch('subprocess.Popen', autospec=True)
