@@ -450,21 +450,21 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
-                                        approval_description=None, connection_id=None):
+                                        description=None, connection_id=None):
     """Approve a private endpoint connection request for a server."""
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
-        description=approval_description, connection_id=connection_id
+        description=description, connection_id=connection_id
     )
 
 
 def reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
-                                       rejection_description=None, connection_id=None):
+                                       description=None, connection_id=None):
     """Reject a private endpoint connection request for a server."""
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
-        description=rejection_description, connection_id=connection_id
+        description=description, connection_id=connection_id
     )
 # endregion
