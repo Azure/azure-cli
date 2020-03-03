@@ -92,6 +92,7 @@ def validate_subnet(cmd, namespace):
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
     delattr(namespace, 'vnet_name')
 
+
 def validate_private_endpoint_connection_id(cmd, namespace):
     if namespace.connection_id:
         id_parts = namespace.connection_id.split('/')
