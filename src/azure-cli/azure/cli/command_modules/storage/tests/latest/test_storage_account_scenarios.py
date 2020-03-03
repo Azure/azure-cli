@@ -781,7 +781,7 @@ class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
         self.kwargs.update({
             'sa': storage_account
         })
-        self.cmd('storage account list-private-link-resource --account-name {sa} -g {rg}', checks=[
+        self.cmd('storage account private-link-resource list --account-name {sa} -g {rg}', checks=[
             self.check('length(@)', 6)])
 
 
@@ -807,7 +807,7 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
         # Create a private endpoint connection
-        pr = self.cmd('storage account list-private-link-resource --account-name {sa} -g {rg}').get_output_in_json()
+        pr = self.cmd('storage account private-link-resource list --account-name {sa} -g {rg}').get_output_in_json()
         self.kwargs['group_id'] = pr[0]['groupId']
 
         storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
@@ -822,6 +822,7 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], self.kwargs['group_id'])
         self.kwargs['pe_id'] = private_endpoint['privateLinkServiceConnections'][0]['id']
+
 
         # Show the connection at storage account
         storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
