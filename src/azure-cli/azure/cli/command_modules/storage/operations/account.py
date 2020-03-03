@@ -111,6 +111,17 @@ def list_storage_accounts(cmd, resource_group_name=None):
     return list(accounts)
 
 
+def show_storage_account(cmd, client, resource_group_name, account_name, expand=None, include_blob_restore_status=None,
+                         include_geo_replication_status=None):
+
+    StorageAccountExpand = cmd.get_models('StorageAccountExpand')
+    if include_blob_restore_status:
+        expand = StorageAccountExpand.blob_restore_status
+    if include_geo_replication_status:
+        expand = StorageAccountExpand.geo_replication_status
+    # what about including two parameters
+    return client.get_properties(resource_group_name=resource_group_name, account_name=account_name, expand=expand)
+
 def show_storage_account_connection_string(cmd, resource_group_name, account_name, protocol='https', blob_endpoint=None,
                                            file_endpoint=None, queue_endpoint=None, table_endpoint=None, sas_token=None,
                                            key_name='primary'):
