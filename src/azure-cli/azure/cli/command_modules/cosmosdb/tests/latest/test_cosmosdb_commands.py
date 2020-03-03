@@ -926,7 +926,7 @@ class CosmosDBTests(ScenarioTest):
 
         db_througput_update = self.cmd('az cosmosdb table throughput update -g {rg} -a {acc} -n {tb_name} --throughput {tp2}').get_output_in_json()
         assert db_througput_update["resource"]["throughput"] == tp2
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_key_vault_key_uri')
     def test_cosmosdb_key_vault_key_uri(self, resource_group):
 
