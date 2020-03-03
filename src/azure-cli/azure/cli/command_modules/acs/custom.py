@@ -1818,7 +1818,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     identity = None
     # Enable managed identity by default if customer
-    # doesn't explicity specify a service principal in 
+    # doesn't explicity specify a service principal in
     # the request.
     if not service_principal:
         identity = ManagedClusterIdentity(
