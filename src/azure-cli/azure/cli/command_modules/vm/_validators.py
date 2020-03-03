@@ -1641,7 +1641,7 @@ def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=
     if namespace.automatic_repairs_grace_period is not None:
         if namespace.load_balancer is None or namespace.health_probe is None:
             raise CLIError("usage error: --load-balancer and --health-probe are required "
-                           "when create vmss with automatic repairs")
+                           "when creating vmss with automatic repairs")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 
