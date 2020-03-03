@@ -36,7 +36,7 @@ def approve(cmd, client, registry_name, private_endpoint_connection_name,
 
 def reject(cmd, client, registry_name, private_endpoint_connection_name,
            resource_group_name=None, rejection_description=None):
-    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name)
+    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, registry_name, private_endpoint_connection_name, is_approved=False,
         description=rejection_description)

@@ -85,7 +85,6 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         return self.operation_result
 
     def _set_operation_status(self, response):
-        from azure.cli.core.profiles import ResourceType
         RunStatus = self._cmd.get_models('RunStatus')
         if response.status_code == 200:
             self.operation_result = self._deserialize(response)

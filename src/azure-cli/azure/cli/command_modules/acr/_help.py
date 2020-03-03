@@ -1138,33 +1138,84 @@ examples:
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
 
+# region private-endpoint-connection
+# be careful to keep long-summary consistent in this region
 helps['acr private-endpoint-connection'] = """
 type: group
-short-summary:  Manage container registry private endpoint connections
-long-summary: to create a private endpoint connection use "az network private-endpoint create"
+short-summary: Manage container registry private endpoint connections
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
 """
 
 helps['acr private-endpoint-connection approve'] = """
-type: group
-short-summary:  Approve a private endpoint connection request for a registry
+type: command
+short-summary: Approve a private endpoint connection request for a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
 """
 
 helps['acr private-endpoint-connection reject'] = """
-type: group
-short-summary:  Reject a private endpoint connection request for a registry
+type: command
+short-summary: Reject a private endpoint connection request for a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
 """
 
 helps['acr private-endpoint-connection list'] = """
-type: group
-short-summary:  List all private endpoint connections of a registry
+type: command
+short-summary: List all private endpoint connections to a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
 """
 
 helps['acr private-endpoint-connection show'] = """
-type: group
-short-summary:  Show details of a private endpoint connection for a registry
+type: command
+short-summary:  Show details of a container registry's private endpoint connection
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
 """
 
 helps['acr private-endpoint-connection delete'] = """
-type: group
-short-summary:  Delete a private endpoint connection request for a registry
+type: command
+short-summary:  Delete a private endpoint connection request for a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
 """
+# endregion
+
+# region encryption
+helps['acr encryption'] = """
+type: group
+short-summary: Manage container registry encryption
+long-summary: For more information, see http://aka.ms/acr/cmk
+"""
+
+helps['acr encryption rotate-key'] = """
+type: command
+short-summary: Rotate (update) the container registry's encryption key
+long-summary: For more information, see http://aka.ms/acr/cmk
+"""
+
+helps['acr encryption show'] = """
+type: command
+short-summary: Show the container registry's encryption details
+long-summary: For more information, see http://aka.ms/acr/cmk
+"""
+# endregion
+
+# region identity
+helps['acr identity'] = """
+type: group
+short-summary: Manage service (managed) identities for a container registry
+"""
+
+helps['acr identity assign'] = """
+type: command
+short-summary: Assign a managed identity to a container registry
+long-summary: Managed identities can be user-assigned or system-assigned
+"""
+
+helps['acr identity remove'] = """
+type: command
+short-summary: Remove a managed identity from a container registry
+"""
+
+helps['acr identity show'] = """
+type: command
+short-summary: Show the container registry's identity details
+"""
+# endregion
