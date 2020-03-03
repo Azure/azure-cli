@@ -92,21 +92,16 @@ def validate_subnet(cmd, namespace):
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
     delattr(namespace, 'vnet_name')
 
+def validate_private_endpoint_connection_id(cmd, namespace):
+    if namespace.connection_id:
+        id_parts = namespace.connection_id.split('/')
+        namespace.private_endpoint_connection_name = id_parts[-1]
+        namespace.server_name = id_parts[-3]
+        namespace.resource_group_name = id_parts[-7]
+    if namespace.server_name and not namespace.resource_group_name:
+        namespace.resource_group_name = _get_resource_group_from_server_name(cmd.cli_ctx, namespace.server_name)
 
-def validate_private_endpoint_connection_id(cmd, ns):
-    connection_id = ns.connection_id
-    connection_name = ns.private_endpoint_connection_name
-    server_name = ns.server_name
+    if not all([namespace.server_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --server-name NAME]')
 
-    if not connection_id:
-        if not all([connection_name, server_name]):
-            raise CLIError('usage error: --name/-n and --server-name')
-        ns.resource_group_name = _get_resource_group_from_server_name(cmd.cli_ctx, server_name)
-    else:
-        if any([connection_name, server_name]):
-            raise CLIError('usage error: --id | --server-name --name/-n')
-
-        id_parts = connection_id.split('/')
-        ns.private_endpoint_connection_name = id_parts[-1]
-        ns.server_name = id_parts[-3]
-        ns.resource_group_name = id_parts[-7]
+    del namespace.connection_id
