@@ -512,7 +512,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertIsNotNone(result[0]['name'])
 
     def _test_private_link_resource(self, resource_group, server, database_engine, group_id):
-        result = self.cmd('{} server private-link-resource show -g {} -s {}'
+        result = self.cmd('{} server private-link-resource list -g {} -s {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(result[0]['properties']['groupId'], group_id)
 
@@ -536,7 +536,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} server show -g {} -n {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         server_id = result['id']
-        result = self.cmd('{} server private-link-resource show -g {} -s {}'
+        result = self.cmd('{} server private-link-resource list -g {} -s {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         group_id = result[0]['properties']['groupId']
 

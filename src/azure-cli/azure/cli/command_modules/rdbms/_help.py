@@ -339,9 +339,9 @@ type: group
 short-summary: Manage MariaDB server private link resources.
 """
 
-helps['mariadb server private-link-resource show'] = """
+helps['mariadb server private-link-resource list'] = """
 type: command
-short-summary: Show the private link resources supported for a MariaDB server.
+short-summary: List the private link resources supported for a MariaDB server.
 """
 
 helps['mysql'] = """
@@ -684,9 +684,9 @@ type: group
 short-summary: Manage MySQL server private link resources.
 """
 
-helps['mysql server private-link-resource show'] = """
+helps['mysql server private-link-resource list'] = """
 type: command
-short-summary: Show the private link resources supported for a MySQL server.
+short-summary: List the private link resources supported for a MySQL server.
 """
 
 helps['postgres'] = """
@@ -1022,7 +1022,7 @@ type: group
 short-summary: Manage PostgreSQL server private link resources.
 """
 
-helps['postgres server private-link-resource show'] = """
+helps['postgres server private-link-resource list'] = """
 type: command
-short-summary: Show the private link resources supported for a PostgreSQL server.
+short-summary: List the private link resources supported for a PostgreSQL server.
 """
