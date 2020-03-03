@@ -953,6 +953,9 @@ examples:
     - name: Copy a file asynchronously from source uri to destination storage account with sas token.
       text: |
         az storage file copy start --source-uri "https://srcaccount.file.core.windows.net/myshare/mydir/myfile?<sastoken>" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
+    - name: Copy a file asynchronously from file snapshot to destination storage account with sas token.
+      text: |
+        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --file-snapshot "2020-03-02T13:51:54.0000000Z" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
 """
 
 helps['storage file copy start-batch'] = """
