@@ -199,9 +199,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        # test restore to a new server, make sure wait at least 5 min after server created.
-        # sleep(600)
-
         self.cmd('{} server restore -g {} --name {} '
                  '--source-server {} '
                  '--restore-point-in-time {}'
@@ -576,7 +573,6 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                               JMESPathCheck('replicationRole', 'None'),
                               JMESPathCheck('masterServerId', '')]).get_output_in_json()
 
-        # sleep(600)
         # test replica create
         self.cmd('{} server replica create -g {} -n {} -l eastus --sku-name GP_Gen5_4 '
                  '--source-server {}'
@@ -636,7 +632,6 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, server), checks=NoneCheck())
 
-        # sleep(600)
         # test show server with replication info, replica was auto stopped after master server deleted
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, replicas[1]),
@@ -682,7 +677,6 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                               JMESPathCheck('replicationRole', 'None'),
                               JMESPathCheck('masterServerId', '')]).get_output_in_json()
 
-        # sleep(600)
         if isBasicTier is False:
             # enable replication support for  GP/MO servers
             self.cmd('{} server configuration set -g {} -s {} -n azure.replication_support --value REPLICA'
@@ -723,7 +717,6 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
         # test replica delete
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
-        # sleep(600)
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} server show -g {} --name {}'
@@ -748,7 +741,6 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, server), checks=NoneCheck())
 
-        # sleep(600)
         # test show server with replication info, replica was auto stopped after master server deleted
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, replicas[1]),
