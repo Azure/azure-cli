@@ -489,6 +489,10 @@ examples:
     text: |
         time=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
         az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2
+  - name: Restore blobs in the specified blob range without wait and query blob restore status with 'az storage account show'.
+    text: |
+        time=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2 --no-wait
 """
 
 helps['storage blob service-properties'] = """

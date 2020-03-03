@@ -130,3 +130,6 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
             JMESPathCheck('status', 'Complete'),
             JMESPathCheck('parameters.blobRanges[0].startRange', start_range),
             JMESPathCheck('parameters.blobRanges[0].endRange', end_range)])
+
+        self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {} --no-wait'.format(
+            time_to_restore, start_range, end_range, storage_account, resource_group))
