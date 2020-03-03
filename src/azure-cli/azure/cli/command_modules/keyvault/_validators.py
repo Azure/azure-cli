@@ -166,6 +166,23 @@ def validate_policy_permissions(ns):
             '--certificate-permissions --storage-permissions')
 
 
+def validate_pure_vault_id(cmd, ns):
+    identifier = ns.identifier
+    vault_name = ns.vault_name
+
+    if not identifier:
+        if not vault_name:
+            raise CLIError('incorrect usage: [--id ID | --vault-name NAME]')
+        ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
+    else:
+        if vault_name:
+            raise CLIError('you don\'t need to specify --vault-name if --id is specified')
+
+        id_parts = identifier.split('/')
+        ns.vault_name = id_parts[8]
+        ns.resource_group_name = id_parts[4]
+
+
 def validate_private_endpoint_connection_id(cmd, ns):
     connection_id = ns.connection_id
     connection_name = ns.private_endpoint_connection_name
@@ -173,18 +190,22 @@ def validate_private_endpoint_connection_id(cmd, ns):
 
     if not connection_id:
         if not all([connection_name, vault_name]):
-            raise argparse.ArgumentError(
-                None, 'specify both: --name/-n and --vault-name')
+            raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME]')
         ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
     else:
         if any([connection_name, vault_name]):
-            raise argparse.ArgumentError(
-                None, 'you don\'t need to specify --name/-n or --vault-name if --id is specified')
+            raise CLIError('you don\'t need to specify --name/-n or --vault-name if --id is specified')
 
         id_parts = connection_id.split('/')
         ns.private_endpoint_connection_name = id_parts[-1]
         ns.vault_name = id_parts[-3]
         ns.resource_group_name = id_parts[-7]
+
+
+def transform_private_link_list_output(result):
+    if hasattr(result, 'value'):
+        return result.value
+    return result
 
 
 def validate_principal(ns):
