@@ -73,7 +73,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
 
     with self.argument_context('acr import') as c:
-        c.argument('source_image', options_list=['--source'], help="The source identifier. If --registry is not specified, this parameter must be a fully qualified source (contains login server). If source registry is specified with --registry, this parameter must be a source image name (not contain login server).")
+        c.argument('source_image', options_list=['--source'], help="Source image name or fully qualified source containing the registry login server. If `--registry` is used, `--source` will always be interpreted as a source image, even if it contains the login server.")
         c.argument('source_registry', options_list=['--registry', '-r'], help='The source Azure container registry. This can be name, login server or resource ID of the source registry.')
         c.argument('source_registry_username', options_list=['--username', '-u'], help='The username of source container registry')
         c.argument('source_registry_password', options_list=['--password', '-p'], help='The password of source container registry')

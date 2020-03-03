@@ -113,8 +113,9 @@ def _handle_result(cmd, result_poller, source_registry, source_image, registry):
 
                 if registry.login_server.lower() in source_image.lower():
                     logger.warning("Import from source failed.\n\tsource image: '%s'\n"
-                                   "Attention: When source registry is specified with --registry, "
-                                   "--source is considered to be a source image name. ", "{}/{}"
+                                   "Attention: When source registry is specified with `--registry`, "
+                                   "`--source` is considered to be a source image name. "
+                                   "Do not prefix `--source` with the registry login server name.", "{}/{}"
                                    .format(registry.login_server, source_image))
         except (ClientException, CLIError) as unexpected_ex:  # raise exception
             logger.debug("Unexpected exception: %s", unexpected_ex)
