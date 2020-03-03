@@ -823,7 +823,6 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], self.kwargs['group_id'])
         self.kwargs['pe_id'] = private_endpoint['privateLinkServiceConnections'][0]['id']
 
-
         # Show the connection at storage account
         storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
         self.assertIn('privateEndpointConnections', storage)

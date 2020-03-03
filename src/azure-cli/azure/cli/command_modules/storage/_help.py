@@ -291,6 +291,20 @@ examples:
         az storage account private-endpoint-connection show -g myRg --account-name mystorageaccount --name $name
 """
 
+helps['storage account private-link-resource'] = """
+type: group
+short-summary: Manage storage account private link resources.
+"""
+
+helps['storage account private-link-resource list'] = """
+type: command
+short-summary: Get the private link resources that need to be created for a storage account.
+examples:
+  - name: Get the private link resources that need to be created for a storage account.
+    text: |
+        az storage account private-link-resource list --account-name mystorageaccount -g MyResourceGroup
+"""
+
 helps['storage account revoke-delegation-keys'] = """
 type: command
 short-summary: Revoke all user delegation keys for a storage account.

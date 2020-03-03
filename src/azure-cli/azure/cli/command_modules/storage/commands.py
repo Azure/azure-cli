@@ -158,7 +158,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('reject', 'reject_private_endpoint_connection',
                          validator=validate_private_endpoint_connection_id)
 
-    with self.command_group('storage account private-link-resource', private_link_resource_sdk, resource_type=ResourceType.MGMT_STORAGE) as g:
+    with self.command_group('storage account private-link-resource', private_link_resource_sdk, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
         from ._transformers import transform_private_link_list_output
         g.command('list', 'list_by_storage_account', is_preview=True, min_api='2019-06-01',
                   transform=transform_private_link_list_output)
