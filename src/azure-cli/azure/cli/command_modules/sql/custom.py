@@ -424,6 +424,16 @@ class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
 
+class SqlServerMinimalTlsVersionType(Enum):
+    tls_1_0 = "1.0"
+    tls_1_1 = "1.1"
+    tls_1_2 = "1.2"
+
+class SqlManagedInstanceMinimalTlsVersionType(Enum):
+    tls_1_0 = "1.0"
+    tls_1_1 = "1.1"
+    tls_1_2 = "1.2"
+    no_tls = "None"
 
 class ComputeModelType(str, Enum):
 

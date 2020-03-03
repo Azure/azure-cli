@@ -56,7 +56,9 @@ from .custom import (
     ComputeModelType,
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
-    FailoverPolicyType
+    FailoverPolicyType,
+    SqlServerMinimalTlsVersionType,
+    SqlManagedInstanceMinimalTlsVersionType
 )
 
 from ._validators import (
@@ -1039,6 +1041,10 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this server'
                    'for use with key management services like Azure KeyVault.')
 
+        c.argument('minimal_tls_version',
+                   arg_type=get_enum_type(SqlServerMinimalTlsVersionType),
+                   help='The minimal TLS version enforced by the sql server for inbound connections.')
+
     with self.argument_context('sql server create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1247,7 +1253,8 @@ def load_arguments(self, _):
                    help='The connection type used for connecting to the instance.')
 
         c.argument('minimal_tls_version',
-				   help='The minimal TLS version enforced by the managed instance for inbound connections.')
+                   arg_type=get_enum_type(SqlManagedInstanceMinimalTlsVersionType),
+                   help='The minimal TLS version enforced by the managed instance for inbound connections.')
 
         c.argument('public_data_endpoint_enabled',
                    arg_type=get_three_state_flag(),
