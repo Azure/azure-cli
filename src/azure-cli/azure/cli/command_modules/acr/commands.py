@@ -303,7 +303,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                             is_preview=True) as g:
         g.command('delete', 'delete')
         g.show_command('show', 'show')
-        g.command('list', 'list')
+        g.command('list', 'list_connections')
         g.command('approve', 'approve')
         g.command('reject', 'reject')
 

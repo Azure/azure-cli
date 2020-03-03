@@ -46,9 +46,8 @@ def show(cmd, client, registry_name, private_endpoint_connection_name, resource_
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
-    return client.get(resource_group_name=resource_group_name,
-                       registry_name=registry_name,
-                       private_endpoint_connection_name=private_endpoint_connection_name)
+    return client.get(resource_group_name=resource_group_name, registry_name=registry_name,
+                      private_endpoint_connection_name=private_endpoint_connection_name)
 
 
 def delete(cmd, client, registry_name, private_endpoint_connection_name, resource_group_name=None):
@@ -59,7 +58,8 @@ def delete(cmd, client, registry_name, private_endpoint_connection_name, resourc
                          private_endpoint_connection_name=private_endpoint_connection_name)
 
 
-def list(cmd, client, registry_name, resource_group_name=None):
+# cannot redefine list as it is a builtin function
+def list_connections(cmd, client, registry_name, resource_group_name=None):
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 

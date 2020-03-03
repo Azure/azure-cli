@@ -326,6 +326,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr private-endpoint-connection') as c:
         c.argument('private_endpoint_connection_name', options_list=['--private-endpoint-connection-name', '-p'], help='name of private endpoint connection')
+        c.argument('approval_description', options_list=['--description'], help='Approval description. For example, the reason for approval.')
+        c.argument('rejection_description', options_list=['--description'], help='Rejection description. For example, the reason for rejection.')
 
     with self.argument_context('acr identity') as c:
         c.argument('identities', nargs='+', help="Space-separated identities. Use '[system]' to refer to the system assigned identity")
