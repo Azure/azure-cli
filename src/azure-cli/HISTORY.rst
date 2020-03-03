@@ -6,6 +6,11 @@ Release History
 **AppService**
 az webapp create : Fixing issue when running the command with --runtime 
 
+**Cosmos DB**
+
+* Update azure-mgmt-cosmosdb package to use 0.12.0
+* az cosmosdb create: add --key-vault-key-uri for setting customer managed keys path
+
 2.1.0
 ++++++
 

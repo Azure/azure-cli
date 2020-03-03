@@ -46,6 +46,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb create') as c:
         c.argument('account_name', completer=None)
+        c.argument('key_vault_key_uri', help="The URI of the key vault")
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
