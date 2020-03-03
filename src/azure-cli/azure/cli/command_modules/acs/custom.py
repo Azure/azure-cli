@@ -64,6 +64,7 @@ from azure.mgmt.containerservice.v2019_11_01.models import ManagedCluster
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAddonProfile
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterIdentity
 from azure.mgmt.containerservice.v2019_11_01.models import AgentPool
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
@@ -1815,6 +1816,15 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if all([disable_rbac, enable_rbac]):
         raise CLIError('specify either "--disable-rbac" or "--enable-rbac", not both.')
 
+    identity = None
+    # Enable managed identity by default if customer
+    # doesn't explicity specify a service principal in 
+    # the request.
+    if not service_principal:
+        identity = ManagedClusterIdentity(
+            type="SystemAssigned"
+        )
+
     mc = ManagedCluster(
         location=location,
         tags=tags,
@@ -1827,7 +1837,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         network_profile=network_profile,
         addon_profiles=addon_profiles,
         aad_profile=aad_profile,
-        api_server_access_profile=api_server_access_profile
+        api_server_access_profile=api_server_access_profile,
+        identity=identity
     )
 
     # Due to SPN replication latency, we do a few retries here
