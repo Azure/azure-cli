@@ -13,6 +13,22 @@ from ._client_factory import _graph_client_factory
 VARIANT_GROUP_ID_ARGS = ['object_id', 'group_id', 'group_object_id']
 
 
+def _validate_group(namespace, attr, value, group_filter, has_next_filter):
+    client = _graph_client_factory(namespace.cmd.cli_ctx)
+    result = list(client.groups.list(filter=group_filter))
+    count = len(result)
+    ret = False
+    if count == 1:
+        setattr(namespace, attr, result[0].object_id)
+        ret = True
+    elif count == 0:
+        if not has_next_filter:
+            raise CLIError("No group matches the name of '{}'".format(value))
+    else:
+        raise CLIError("More than one groups match the name of '{}'".format(value))
+    return ret
+
+
 def validate_group(namespace):
     # For AD auto-commands, here we resolve logic names to object ids needed by SDK methods
     attr, value = next(((x, getattr(namespace, x)) for x in VARIANT_GROUP_ID_ARGS
@@ -20,18 +36,8 @@ def validate_group(namespace):
     try:
         uuid.UUID(value)
     except ValueError:
-        client = _graph_client_factory(namespace.cmd.cli_ctx)
-        sub_filters = []
-        sub_filters.append("startswith(displayName,'{}')".format(value))
-        sub_filters.append("displayName eq '{}'".format(value))
-        result = list(client.groups.list(filter=' or '.join(sub_filters)))
-        count = len(result)
-        if count == 1:
-            setattr(namespace, attr, result[0].object_id)
-        elif count == 0:
-            raise CLIError("No group matches the name of '{}'".format(value))
-        else:
-            raise CLIError("More than one groups match the name of '{}'".format(value))
+        if not _validate_group(namespace, attr, value, "displayName eq '{}'".format(value), True):
+            _validate_group(namespace, attr, value, "startswith(displayName,'{}')".format(value), False)
 
 
 def validate_member_id(namespace):

@@ -262,17 +262,14 @@ class GraphGroupScenarioTest(ScenarioTest):
         account_info = self.cmd('account show').get_output_in_json()
         if account_info['user']['type'] == 'servicePrincipal':
             return  # this test delete users which are beyond a SP's capacity, so quit...
-        upn = account_info['user']['name']
-        domain = upn.split('@', 1)[1]
         self.kwargs = {
             'user1': 'deleteme1',
             'user2': 'deleteme2',
-            'domain': domain,
+            'domain': 'azuresdkteam.onmicrosoft.com',
             'new_mail_nick_name': 'deleteme11',
             'group': 'deleteme_g',
             'pass': 'Test1234!!'
         }
-        self.recording_processors.append(AADGraphUserReplacer('@' + domain, '@example.com'))
         try:
             # create user1
             user1_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
@@ -363,6 +360,31 @@ class GraphGroupScenarioTest(ScenarioTest):
                      checks=self.check("length([?displayName=='{group}'])", 1))
         finally:
             self.cmd('ad group delete -g {group}')
+
+    def test_graph_group_show(self):
+        account_info = self.cmd('account show').get_output_in_json()
+        if account_info['user']['type'] == 'servicePrincipal':
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        self.kwargs = {
+            'group1': 'show_group_1',
+            'group11': 'show_group_11',
+            'prefix': 'show_prefix',
+            'prefix_group': 'show_prefix_group'
+        }
+
+        self.cmd('ad group create --display-name {group1} --mail-nickname {group1}')
+        self.cmd('ad group create --display-name {group11} --mail-nickname {group11}')
+        self.cmd('ad group create --display-name {prefix_group} --mail-nickname {prefix_group}')
+        self.cmd('ad group show --group {group1}',
+                 checks=self.check('displayName', '{group1}'))
+        self.cmd('ad group show --group {group11}',
+                 checks=self.check('displayName', '{group11}'))
+        self.cmd('ad group show --group {prefix}',
+                 checks=self.check('displayName', '{prefix_group}'))
+        self.cmd('ad group delete -g {group1}')
+        self.cmd('ad group delete -g {group11}')
+        self.cmd('ad group delete -g {prefix}')
 
 
 def get_signed_in_user(test_case):
