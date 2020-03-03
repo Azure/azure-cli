@@ -929,11 +929,15 @@ class CosmosDBTests(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_key_vault_key_uri')
     def test_cosmosdb_key_vault_key_uri(self, resource_group):
+        kv_name = self.create_random_name(prefix='cli', length=15)
+        key_name = self.create_random_name(prefix='cli', length=15)
+        key_uri = "https://{}.vault.azure.net/keys/{}".format(kv_name, key_name)
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
-            'kv_name': self.create_random_name(prefix='cli', length=15),
-            'key_name': self.create_random_name(prefix='cli', length=15),
+            'kv_name': kv_name,
+            'key_name': key_name,
+            'key_uri': key_uri,
             'location': "eastus2"
         })
 
@@ -941,4 +945,6 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --spn a232010e-820c-4083-83bb-3ace5fc29d0b --key-permissions get unwrapKey wrapKey')
         self.cmd('az keyvault key create -n {key_name} --kty RSA --size 3072 --vault-name {kv_name}')
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={location} failoverPriority=0 --key-vault-key-uri https://{kv_name}.vault.azure.net/keys/{key_name}')
+        cmk_output = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={location} failoverPriority=0 --key-vault-key-uri {key_uri}').get_output_in_json()
+
+        assert cmk_output["keyVaultKeyUri"] == key_uri
