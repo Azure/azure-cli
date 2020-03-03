@@ -235,12 +235,12 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_log_analytics_workspace')
-        g.show_command('get-schema', 'get_schema')
-        g.show_command('list-usages', 'list_usages')
-        g.show_command('list-management-groups', 'list_management_groups')
-        g.show_command('get-shared-keys', 'get_shared_keys')
+        g.command('get-schema', 'get_schema')
+        g.command('list-usages', 'list_usages')
+        g.command('list-management-groups', 'list_management_groups')
+        g.command('get-shared-keys', 'get_shared_keys')
 
     with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom) as g:
-        g.show_command('list', 'list_intelligence_packs')
+        g.command('list', 'list_intelligence_packs')
         g.command('enable', 'enable_intelligence_pack')
         g.command('disable', 'disable_intelligence_pack')
