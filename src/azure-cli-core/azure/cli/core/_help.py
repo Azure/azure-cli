@@ -195,8 +195,8 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
     # This method is meant to be a hook that can be overridden by an extension or module.
     @staticmethod
-    def check_for_new_examples(command):  # pylint: disable=unused-argument
-        return []
+    def check_for_new_examples(command, examples):  # pylint: disable=unused-argument
+        return examples
 
 
 class CliHelpFile(KnackHelpFile):
@@ -253,9 +253,7 @@ class CliHelpFile(KnackHelpFile):
 
         # Used as a hook for changing the default examples
         if self.help_ctx.original_nouns == self.command:
-            new_examples = AzCliHelp.check_for_new_examples(self.command)
-            if new_examples:
-                self.examples = new_examples
+            self.examples = AzCliHelp.check_for_new_examples(self.command, self.examples)
 
 
 class CliGroupHelpFile(KnackGroupHelpFile, CliHelpFile):
