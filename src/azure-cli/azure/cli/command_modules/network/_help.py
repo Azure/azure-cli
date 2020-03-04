@@ -1243,7 +1243,6 @@ examples:
   - name: Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
     text: |
         az network application-gateway waf-policy managed-rule rule-set remove --policy-name MyPolicy --resource-group MyResourceGroup --type Permanent --version IPv4
-    crafted: true
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set list'] = """
