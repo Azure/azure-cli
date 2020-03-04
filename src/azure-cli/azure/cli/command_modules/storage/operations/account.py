@@ -13,6 +13,12 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
+def str2bool(v):
+    if v is not None:
+        return v.lower() == "true"
+    return v
+
+
 # pylint: disable=too-many-locals, too-many-statements
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
@@ -104,8 +110,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         RoutingPreference = cmd.get_models('RoutingPreference')
         params.routing_preference = RoutingPreference(
             routing_choice=routing_choice,
-            publish_microsoft_endpoints=publish_microsoft_endpoints,
-            publish_internet_endpoints=publish_microsoft_endpoints
+            publish_microsoft_endpoints=str2bool(publish_microsoft_endpoints),
+            publish_internet_endpoints=str2bool(publish_internet_endpoints)
         )
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
@@ -303,9 +309,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         if routing_choice is not None:
             params.routing_preference.routing_choice = routing_choice
         if publish_microsoft_endpoints is not None:
-            params.routing_preference.publish_microsoft_endpoints = publish_microsoft_endpoints
+            params.routing_preference.publish_microsoft_endpoints = str2bool(publish_microsoft_endpoints)
         if publish_internet_endpoints is not None:
-            params.routing_preference.publish_internet_endpoints = publish_microsoft_endpoints
+            params.routing_preference.publish_internet_endpoints = str2bool(publish_internet_endpoints)
 
     return params
 
