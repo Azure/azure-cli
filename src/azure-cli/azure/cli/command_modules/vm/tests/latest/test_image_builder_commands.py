@@ -45,14 +45,23 @@ class ImageTemplateTest(ScenarioTest):
                 raise ex
             pass
 
-    @def test_image_builder_template_file(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_file_')
+    def test_image_builder_template_file(self, resource_group):
         self._assign_ib_permissions(resource_group)
 
         self.kwargs.update({
             'tmp': 'tmp1'
         })
 
-        self.cmd('image builder create -g {rg} -n {tmp} --image-template ')
+        self.cmd('image builder create -g {rg} -n {tmp} --image-template "https://raw.githubusercontent.com/qwordy/azvmimagebuilder/master/quickquickstarts/0_Creating_a_Custom_Linux_Managed_Image/example.json"',
+                 checks=[
+                     self.check('source.offer', 'UbuntuServer'),
+                     self.check('source.publisher', 'Canonical'),
+                     self.check('source.sku', '18.04-LTS'),
+                     self.check('source.version', '18.04.201903060'),
+                     self.check('source.type', 'PlatformImage'),
+                     self.check('length(customize)', 5)
+                 ])
 
     # @cus.json has some problem in online CI checks, can't find file
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_no_defer')
@@ -73,7 +82,7 @@ class ImageTemplateTest(ScenarioTest):
             self.check('source.sku', '18.04-LTS'),
             self.check('source.version', '18.04.201808140'),
             self.check('source.type', 'PlatformImage'),
-            self.check('length(customize)', 5),
+            self.check('length(customize)', 5)
         ])
 
         self.cmd('image builder run -g {rg} -n {tmp}')

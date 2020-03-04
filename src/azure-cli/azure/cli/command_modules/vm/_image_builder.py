@@ -5,12 +5,13 @@
 
 # TODO refactor out _image_builder commands.
 # i.e something like image_builder/_client_factory image_builder/commands.py image_builder/_params.py
-
+import os
 import re
 import json
 from json import JSONDecodeError
 from enum import Enum
 
+import requests
 
 try:
     from urllib.parse import urlparse
@@ -154,6 +155,9 @@ def _validate_location(location, location_names, location_display_names):
 
 
 def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    if namespace.image_template is not None:
+        return
+
     from azure.cli.core.commands.parameters import get_subscription_locations
 
     source = None
@@ -372,7 +376,7 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
 
 # region Custom Commands
 
-def create_image_template(  # pylint: disable=too-many-locals
+def create_image_template(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         cmd, client, resource_group_name, image_template_name, location=None,
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
         source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
@@ -383,8 +387,23 @@ def create_image_template(  # pylint: disable=too-many-locals
                                                 ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  # pylint: disable=line-too-long
 
     if image_template is not None:
-
-        return
+        if os.path.exists(image_template):
+            with open(image_template) as f:
+                content = f.read()
+        else:
+            r = requests.get(image_template)
+            if r.status_code != 200:
+                raise CLIError('usage error: --image-template is not a valid local path or URL')
+            obj = json.loads(r.content)
+            content = {}
+            if 'properties' in obj:
+                content = obj['properties']
+            if 'location' in obj:
+                content['location'] = obj['location']
+            if 'tags' in obj:
+                content['tags'] = obj['tags']
+        return client.virtual_machine_image_templates.create_or_update(
+            parameters=content, resource_group_name=resource_group_name, image_template_name=image_template_name)
 
     template_source, template_scripts, template_destinations = None, [], []
 
