@@ -136,7 +136,7 @@ DEPENDENCIES = [
     'pygments~=2.4',
     'pyOpenSSL>=17.1.0',
     'pytz==2019.1',
-    'pyyaml~=5.3',
+    'pyyaml~=5.2',
     'requests~=2.22',
     'scp~=0.13.2',
     'six~=1.12',
