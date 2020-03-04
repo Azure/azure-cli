@@ -136,11 +136,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account encryption-scope', encryption_scope_sdk,
                             custom_command_type=encryption_scope_custom_type, is_preview=True,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
-        from ._validators import validate_encryption_key
-        g.custom_command('create', 'create_encryption_scope', validator=validate_encryption_key)
+
+        g.custom_command('create', 'create_encryption_scope')
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.custom_command('update', 'update_encryption_scope', validator=validate_encryption_key)
+        g.custom_command('update', 'update_encryption_scope')
 
     management_policy_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#ManagementPoliciesOperations.{}',

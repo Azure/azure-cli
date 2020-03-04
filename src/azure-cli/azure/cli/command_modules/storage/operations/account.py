@@ -481,8 +481,8 @@ def create_encryption_scope(cmd, client, resource_group_name, account_name, encr
 
 
 def update_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
-                            encryption_key_source=None, encryption_key_uri=None):
-    EncryptionScope = cmd.get_models('EncryptionScope')
+                            encryption_key_source=None, encryption_key_uri=None, disabled=False):
+    EncryptionScope, EncryptionScopeState = cmd.get_models('EncryptionScope', 'EncryptionScopeState')
 
     if encryption_key_source:
         encryption_scope = EncryptionScope(source=encryption_key_source)
@@ -490,6 +490,11 @@ def update_encryption_scope(cmd, client, resource_group_name, account_name, encr
     if encryption_key_uri:
         EncryptionScopeKeyVaultProperties = cmd.get_models('EncryptionScopeKeyVaultProperties')
         encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=encryption_key_uri)
+
+    if disabled:
+        encryption_scope.state = EncryptionScopeState.disabled
+    else:
+        encryption_scope.state = EncryptionScopeState.enabled
 
     return client.patch(resource_group_name=resource_group_name, account_name=account_name,
                         encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
