@@ -284,7 +284,7 @@ class CdnWafPolicyScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.cmd('cdn waf policy show -g {resource_group} -n {policy}', checks=checks)
 
         # Remove managed rule group override
-        self.cmd('cdn waf policy managed-rule-set rule-group-override delete -g {resource_group} --policy-name {policy} '
+        self.cmd('cdn waf policy managed-rule-set rule-group-override delete -y -g {resource_group} --policy-name {policy} '
                  '--rule-set-type {rule_set_type} --rule-set-version {rule_set_version} -n {rule_group}')
         with self.assertRaises(CLIError):
             self.cmd('cdn waf policy managed-rule-set rule-group-override show -g {resource_group} '
@@ -292,24 +292,24 @@ class CdnWafPolicyScenarioTest(CdnScenarioMixin, ScenarioTest):
                      '--rule-set-version {rule_set_version} -n {rule_group}')
 
         # Remove managed rule set
-        self.cmd('cdn waf policy managed-rule-set remove -g {resource_group} --policy-name {policy} '
+        self.cmd('cdn waf policy managed-rule-set remove -y -g {resource_group} --policy-name {policy} '
                  '--rule-set-type {rule_set_type} --rule-set-version {rule_set_version}')
         with self.assertRaises(CLIError):
             self.cmd('cdn waf policy managed-rule-set show -g {resource_group} --policy-name {policy} '
                      '--rule-set-type {rule_set_type} --rule-set-version {rule_set_version}')
 
         # Remove custom rule
-        self.cmd('cdn waf policy custom-rule delete -g {resource_group} --policy-name {policy} -n {custom_rule_1}')
+        self.cmd('cdn waf policy custom-rule delete -y -g {resource_group} --policy-name {policy} -n {custom_rule_1}')
         with self.assertRaises(CLIError):
             self.cmd('cdn waf policy custom-rule show -g {resource_group} --policy-name {policy} -n {custom_rule_1}')
 
         # Remove rate limit rule
-        self.cmd('cdn waf policy rate-limit-rule delete -g {resource_group} --policy-name {policy} -n {rate_limit_rule_1}')
+        self.cmd('cdn waf policy rate-limit-rule delete -y -g {resource_group} --policy-name {policy} -n {rate_limit_rule_1}')
         with self.assertRaises(CLIError):
             self.cmd('cdn waf policy rate-limit-rule show -g {resource_group} --policy-name {policy} -n {rate_limit_rule_1}')
 
         # Delete policy
-        self.cmd('cdn waf policy delete -g {resource_group} -n {policy}')
+        self.cmd('cdn waf policy delete -y -g {resource_group} -n {policy}')
 
 
 class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
@@ -392,7 +392,7 @@ class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
         policy_checks = [JMESPathCheck('length(endpointLinks)', 0)]
         endpoint_checks = [JMESPathCheck('webApplicationFirewallPolicyLink', None)]
         link_checks = [JMESPathCheck('id', None)]
-        self.cmd('cdn endpoint waf policy remove -g {resource_group} '
+        self.cmd('cdn endpoint waf policy remove -y -g {resource_group} '
                  '--profile-name {profile} '
                  '--endpoint-name {endpoint1}')
         self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint1}',
@@ -401,7 +401,7 @@ class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
                  '--profile-name {profile} '
                  '-n {endpoint1}',
                  checks=endpoint_checks)
-        self.cmd('cdn endpoint waf policy remove -g {resource_group} '
+        self.cmd('cdn endpoint waf policy remove -y -g {resource_group} '
                  '--profile-name {profile} '
                  '--endpoint-name {endpoint2}')
         self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint2}',

@@ -20,4 +20,6 @@ def validate_origin(namespace):
 
 
 def validate_priority(namespace):
-    return 0 <= namespace.priority <= 1000
+    if namespace.priority < 0 or namespace.priority > 1000:
+        raise CLIError('argument --priority must be in the range [0, 1000]')
+    return True

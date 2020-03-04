@@ -104,7 +104,7 @@ def load_command_table(self, _):
     with self.command_group('cdn endpoint waf policy', cdn_endpoints_sdk, is_preview=True) as g:
         g.custom_show_command('show', 'show_endpoint_waf_policy_link', client_factory=cf_endpoints)
         g.custom_command('set', 'set_endpoint_waf_policy_link', client_factory=cf_endpoints)
-        g.custom_command('remove', 'remove_endpoint_waf_policy_link', client_factory=cf_endpoints)
+        g.custom_command('remove', 'remove_endpoint_waf_policy_link', client_factory=cf_endpoints, confirmation=True)
 
     with self.command_group('cdn endpoint rule', cdn_endpoints_sdk, is_preview=True) as g:
         g.show_command('show', 'get')
@@ -156,11 +156,14 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.custom_command('set', 'set_waf_policy', client_factory=cf_waf_policy)
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('cdn waf policy managed-rule-set', cdn_waf_policy_sdk, is_preview=True) as g:
         g.custom_command('add', 'add_waf_policy_managed_rule_set', client_factory=cf_waf_policy)
-        g.custom_command('remove', 'remove_waf_policy_managed_rule_set', client_factory=cf_waf_policy)
+        g.custom_command('remove',
+                         'remove_waf_policy_managed_rule_set',
+                         client_factory=cf_waf_policy,
+                         confirmation=True)
         g.custom_command('list', 'list_waf_policy_managed_rule_sets', client_factory=cf_waf_policy)
         g.custom_show_command('show', 'show_waf_policy_managed_rule_set', client_factory=cf_waf_policy)
         g.custom_command('list-available', 'list_waf_managed_rule_set', client_factory=cf_waf_rule_set)
@@ -170,7 +173,10 @@ def load_command_table(self, _):
                             cdn_waf_policy_sdk,
                             is_preview=True) as g:
         g.custom_command('set', 'set_waf_managed_rule_group_override', client_factory=cf_waf_policy)
-        g.custom_command('delete', 'delete_waf_managed_rule_group_override', client_factory=cf_waf_policy)
+        g.custom_command('delete',
+                         'delete_waf_managed_rule_group_override',
+                         client_factory=cf_waf_policy,
+                         confirmation=True)
         g.custom_command('list', 'list_waf_policy_managed_rule_group_overrides', client_factory=cf_waf_policy)
         g.custom_show_command('show', 'show_waf_managed_rule_group_override', client_factory=cf_waf_policy)
         g.custom_command('list-available', 'list_waf_managed_rule_groups', client_factory=cf_waf_rule_set)
@@ -178,12 +184,12 @@ def load_command_table(self, _):
 
     with self.command_group('cdn waf policy custom-rule', cdn_waf_policy_sdk, is_preview=True) as g:
         g.custom_command('set', 'set_waf_custom_rule', client_factory=cf_waf_policy)
-        g.custom_command('delete', 'delete_waf_custom_rule', client_factory=cf_waf_policy)
+        g.custom_command('delete', 'delete_waf_custom_rule', client_factory=cf_waf_policy, confirmation=True)
         g.custom_command('list', 'list_waf_custom_rules', client_factory=cf_waf_policy)
         g.custom_show_command('show', 'show_waf_custom_rule', client_factory=cf_waf_policy)
 
     with self.command_group('cdn waf policy rate-limit-rule', cdn_waf_policy_sdk, is_preview=True) as g:
         g.custom_command('set', 'set_waf_rate_limit_rule', client_factory=cf_waf_policy)
-        g.custom_command('delete', 'delete_waf_rate_limit_rule', client_factory=cf_waf_policy)
+        g.custom_command('delete', 'delete_waf_rate_limit_rule', client_factory=cf_waf_policy, confirmation=True)
         g.custom_command('list', 'list_waf_rate_limit_rules', client_factory=cf_waf_policy)
         g.custom_show_command('show', 'show_waf_rate_limit_rule', client_factory=cf_waf_policy)
