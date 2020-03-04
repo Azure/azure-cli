@@ -68,7 +68,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  media_resource_id=None,
                  ossrdbms_resource_id=None,
                  log_analytics_resource_id=None,
-                 app_insights_resource_id=None):
+                 app_insights_resource_id=None,
+                 app_insights_telemetry_channel_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -85,6 +86,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.ossrdbms_resource_id = ossrdbms_resource_id
         self.log_analytics_resource_id = log_analytics_resource_id
         self.app_insights_resource_id = app_insights_resource_id
+        self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -256,7 +258,8 @@ AZURE_CHINA_CLOUD = Cloud(
         media_resource_id='https://rest.media.chinacloudapi.cn',
         ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn',
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
-        log_analytics_resource_id='https://api.loganalytics.azure.cn'),
+        log_analytics_resource_id='https://api.loganalytics.azure.cn',
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -279,7 +282,8 @@ AZURE_US_GOV_CLOUD = Cloud(
         media_resource_id='https://rest.media.usgovcloudapi.net',
         ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net',
         app_insights_resource_id='https://api.applicationinsights.us',
-        log_analytics_resource_id='https://api.loganalytics.us'),
+        log_analytics_resource_id='https://api.loganalytics.us',
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
