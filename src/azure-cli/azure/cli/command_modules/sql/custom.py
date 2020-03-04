@@ -432,10 +432,10 @@ class SqlServerMinimalTlsVersionType(Enum):
 
 
 class SqlManagedInstanceMinimalTlsVersionType(Enum):
+    no_tls = "None"
     tls_1_0 = "1.0"
     tls_1_1 = "1.1"
     tls_1_2 = "1.2"
-    no_tls = "None"
 
 
 class ComputeModelType(str, Enum):
@@ -1955,7 +1955,8 @@ def server_list(
 def server_update(
         instance,
         administrator_login_password=None,
-        assign_identity=False):
+        assign_identity=False,
+        minimal_tls_version=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
     '''
@@ -1967,6 +1968,8 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+    instance.minimal_tls_version = (
+        minimal_tls_version or instance.minimal_tls_version)
 
     return instance
 
