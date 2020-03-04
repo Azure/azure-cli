@@ -362,7 +362,10 @@ def assign_identity(cmd, client, registry_name, identities, resource_group_name=
     assign_system_identity, assign_user_identities = _analyze_identities(identities)
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 
-    ResourceIdentityType = cmd.get_models('ResourceIdentityType')
+    IdentityProperties, ResourceIdentityType = cmd.get_models('IdentityProperties', 'ResourceIdentityType')
+
+    # ensure registry.identity is set and is of type IdentityProperties
+    registry.identity = registry.identity or IdentityProperties(type=ResourceIdentityType.none)
 
     if assign_system_identity and registry.identity.type != ResourceIdentityType.system_assigned:
         registry.identity.type = (ResourceIdentityType.system_assigned
@@ -395,7 +398,13 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
 
     ResourceIdentityType = cmd.get_models('ResourceIdentityType')
 
+    # if registry.identity is not set or is none, return the registry.
+    if not registry.identity or registry.identity.type == ResourceIdentityType.none:
+        raise CLIError("The registry {} has no system or user assigned identities.".format(registry_name))
+
     if remove_system_identity:
+        if registry.identity.type == ResourceIdentityType.user_assigned:
+            raise CLIError("The registry does not have a system identity assigned.")
         registry.identity.type = (ResourceIdentityType.none
                                   if registry.identity.type == ResourceIdentityType.system_assigned
                                   else ResourceIdentityType.user_assigned)
@@ -404,17 +413,32 @@ def remove_identity(cmd, client, registry_name, identities, resource_group_name=
         subscription_id = get_subscription_id(cmd.cli_ctx)
         registry.identity.user_assigned_identities = registry.identity.user_assigned_identities or {}
 
-        for r in remove_user_identities:
-            r = _ensure_identity_resource_id(subscription_id, resource_group_name, r)
-            registry.identity.user_assigned_identities[r] = None
+        for id_to_remove in remove_user_identities:
+            original_identity = id_to_remove
+            was_removed = False
+
+            id_to_remove = _ensure_identity_resource_id(subscription_id, resource_group_name, id_to_remove)
+
+            # remove identity if it exists even if case is different
+            for existing_identity in registry.identity.user_assigned_identities.copy():
+                if existing_identity.lower() == id_to_remove.lower():
+                    registry.identity.user_assigned_identities.pop(existing_identity)
+                    was_removed = True
+                    break
+
+            if not was_removed:
+                raise CLIError("The registry does not have specified user identity '{}' assigned, "
+                               "so it cannot be removed.".format(original_identity))
 
         # all user assigned identities are gone
-        if not [x for x in registry.identity.user_assigned_identities if registry.identity.user_assigned_identities[x]]:
+        if not registry.identity.user_assigned_identities:
+            registry.identity.user_assigned_identities = None  # required for put
             registry.identity.type = (ResourceIdentityType.none
                                       if registry.identity.type == ResourceIdentityType.user_assigned
                                       else ResourceIdentityType.system_assigned)
 
-    return client.update(resource_group_name, registry_name, registry)
+    # this method should be named create_or_update as it calls the PUT method
+    return client.create(resource_group_name, registry_name, registry)
 
 
 def show_encryption(cmd, client, registry_name, resource_group_name=None):

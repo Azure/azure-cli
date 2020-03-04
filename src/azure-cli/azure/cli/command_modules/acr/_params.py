@@ -325,7 +325,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)
 
     with self.argument_context('acr private-endpoint-connection') as c:
-        c.argument('private_endpoint_connection_name', options_list=['--private-endpoint-connection-name', '-p'], help='name of private endpoint connection')
+        # to match private_endpoint_connection_command_guideline.md guidelines
+        c.argument('registry_name', options_list=['--registry-name', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], help='The name of the private endpoint connection')
+
         c.argument('approval_description', options_list=['--description'], help='Approval description. For example, the reason for approval.')
         c.argument('rejection_description', options_list=['--description'], help='Rejection description. For example, the reason for rejection.')
 
