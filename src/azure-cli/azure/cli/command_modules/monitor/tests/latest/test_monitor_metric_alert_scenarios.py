@@ -78,6 +78,29 @@ class MonitorTests(ScenarioTest):
             self.check('criteria.allOf[0].dimensions[0].values[0]', '*')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_special_char')
+    def test_metric_alert_special_char_scenario(self, resource_group):
+        self.kwargs.update({
+            'alert': 'alert1',
+            'rg': resource_group
+        })
+        self.cmd('network application-gateway create -g {rg} -n ag1')
+        gateway_json = self.cmd('network application-gateway show -g {rg} -n ag1').get_output_in_json()
+        self.kwargs.update({
+            'ag_id': gateway_json['id'],
+        })
+        self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {ag_id} --description "Test"'
+                 ' --condition "avg UnhealthyHostCount>= 1 where BackendSettingsPool includes address-pool-dcc-blue~backendHttpSettings"', checks=[
+            self.check('description', 'Test'),
+            self.check('severity', 2),
+            self.check('autoMitigate', None),
+            self.check('windowSize', '0:05:00'),
+            self.check('evaluationFrequency', '0:01:00'),
+            self.check('length(criteria.allOf)', 1),
+            self.check('length(criteria.allOf[0].dimensions)', 1),
+            self.check('criteria.allOf[0].dimensions[0].values[0]', 'address-pool-dcc-blue~backendHttpSettings')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_monitor')
     def test_metric_alert_basic_scenarios(self, resource_group):
         vm = 'vm1'
