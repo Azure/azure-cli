@@ -548,6 +548,39 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
+        # TODO : uncomment once server show returns privateEndpointConnections
+        '''
+        # Show the connection at server
+        result = self.cmd('{} server show -g {} -n {}'
+                           .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertIn('privateEndpointConnections', result)
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+                         'Approved')
+
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        server_pec_name = result['privateEndpointConnections'][0]['name']
+
+        self.cmd('{} server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server, resource_group, server_pec_name),
+                 checks=self.check('id', server_pec_id))
+
+        self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {}'
+                 .format(database_engine, server, resource_group, server_pec_name),
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
+
+        self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {}'
+                 .format(database_engine, server, resource_group, server_pec_name),
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
+
+        with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+            self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {}'
+                     .format(database_engine, server, resource_group, server_pec_name))
+
+        self.cmd('{} server private-endpoint-connection delete --id {sa_pec_id} -y'
+                 .format(database_engine, server_pec_id))
+        '''
+
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
