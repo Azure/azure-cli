@@ -3462,7 +3462,8 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
         self.cmd('ppg show -g {rg} -n {ppg1} --include-colocation-status', checks=[
             self.check('name', '{ppg1}'),
             self.check('location', '{loc}'),
-            self.check('proximityPlacementGroupType', 'Standard')
+            self.check('proximityPlacementGroupType', 'Standard'),
+            self.exists('colocationStatus')
         ])
 
         self.cmd('ppg create -n {ppg2} -t ultra -g {rg}', checks=[
