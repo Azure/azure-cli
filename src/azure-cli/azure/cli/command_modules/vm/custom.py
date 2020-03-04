@@ -2983,7 +2983,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
-                         os_snapshot=None, data_snapshots=None, managed_image=None):
+                         os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
@@ -3020,10 +3020,17 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             source = GalleryArtifactVersionSource(id=managed_image)
         if os_snapshot is not None:
             os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
+        if data_snapshot_luns and not data_snapshots:
+            raise CLIError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
         if data_snapshots:
+            if data_snapshot_luns and len(data_snapshots) != len(data_snapshot_luns):
+                raise CLIError('usage error: Length of --data-snapshots and --data-snapshot-luns should be equal.')
+            if not data_snapshot_luns:
+                data_snapshot_luns = [i for i in range(len(data_snapshots))]
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
-                data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s), lun=i))
+                data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s),
+                                                             lun=data_snapshot_luns[i]))
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),

@@ -325,6 +325,9 @@ parameters:
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --enable-private-cluster
+    type: string
+    short-summary: Enable private cluster.
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
@@ -614,6 +617,9 @@ parameters:
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
+  - name: --labels
+    type: string
+    short-summary: The node labels for the node pool. You can't change the node labels through CLI after the node pool is created. See https://aka.ms/node-labels for syntax of labels.
 """
 
 helps['aks nodepool delete'] = """
@@ -852,16 +858,24 @@ parameters:
   - name: --space -s
     type: string
     short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+  - name: --endpoint -e
+    type: string
+    short-summary: The endpoint type to be used for a Azure Dev Spaces controller. See https://aka.ms/azds-networking for more information.
 examples:
   - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks
-  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \\ client components and selecting a new or existing dev space 'my-space'.
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \
+            client components and selecting a new or existing dev space 'my-space'.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks --update --space my-space
-  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \\ 'develop/my-space' without prompting for confirmation.
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \
+            'develop/my-space' without prompting for confirmation.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster with a private endpoint.
+    text: |-
+        az aks use-dev-spaces -g my-aks-group -n my-aks -e private
 """
 
 helps['aks wait'] = """

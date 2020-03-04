@@ -2473,6 +2473,31 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_test')
+    def test_network_vnet_list_available_ips(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'rt': 'Microsoft.Network/virtualNetworks',
+            'rg': resource_group
+        })
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default', checks=[
+            self.check('newVNet.provisioningState', 'Succeeded'),
+            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
+        ])
+        self.kwargs['prefixes'] = '20.0.0.0/16 10.0.0.0/16'
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --address-prefixes {prefixes} --dns-servers 1.2.3.4', checks=[
+            self.check('length(addressSpace.addressPrefixes)', 2),
+            self.check('dhcpOptions.dnsServers[0]', '1.2.3.4')
+        ])
+
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24')
+
+        self.cmd('network vnet list-available-ips -g {rg} --name {vnet}', checks=[
+            self.check('length(@)', 5)
+        ])
+
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
@@ -3345,6 +3370,39 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
         })
         self.cmd('network list-service-aliases -l centralus')
         self.cmd('network list-service-aliases -l centralus -g {rg}')
+
+
+class NetworkBastionHostScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_bastion_host')
+    def test_network_batsion_host_create(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'vm': 'clivm',
+            'vnet': 'vnet',
+            'subnet1': 'AzureBastionSubnet',
+            'subnet2': 'vmSubnet',
+            'ip1': 'ip1',
+            'bastion': 'clibastion'
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
+                 '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password')
+        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1}', checks=[
+            self.check('type', 'Microsoft.Network/bastionHosts'),
+            self.check('name', '{bastion}')
+        ])
+        self.cmd('network bastion list')
+        self.cmd('network bastion list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network bastion show -g {rg} -n {bastion}', checks=[
+            self.check('type', 'Microsoft.Network/bastionHosts'),
+            self.check('name', '{bastion}')
+        ])
+        self.cmd('network bastion delete -g {rg} -n {bastion}')
 
 
 if __name__ == '__main__':

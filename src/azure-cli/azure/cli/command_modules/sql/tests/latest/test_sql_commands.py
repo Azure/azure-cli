@@ -764,6 +764,17 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
     return db
 
 
+def _wait_until_first_backup_midb(self):
+
+    earliest_restore_date_string = None
+
+    while earliest_restore_date_string is None:
+        db = self.cmd('sql midb show -g {rg} --mi {managed_instance_name} -n {database_name}',
+                      checks=[self.greater_than('length(@)', 0)])
+
+        earliest_restore_date_string = db.json_value['earliestRestorePoint']
+
+
 class SqlServerDbRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
@@ -2971,6 +2982,212 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
                  checks=[
                      self.check('serverKeyType', 'ServiceManaged'),
                      self.check('serverKeyName', 'ServiceManaged')])
+
+
+class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    def test_sql_managed_db_short_retention(self, resource_group, resource_group_location):
+
+        resource_prefix = 'MIDBShortTermRetention'
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name_internet': 'vcCliTestRouteInternet',
+            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'database_name': self.create_random_name(resource_prefix, 50),
+            'vault_name': self.create_random_name(resource_prefix, 50),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy",
+            'retention_days_inc': 14,
+            'retention_days_dec': 7
+        })
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {rg} -n {route_table_name}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # create sql managed_instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                 checks=[
+                     self.check('name', '{managed_instance_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('administratorLogin', '{admin_login}'),
+                     self.check('vCores', '{v_cores}'),
+                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                     self.check('licenseType', '{license_type}'),
+                     self.check('sku.tier', '{edition}'),
+                     self.check('sku.family', '{family}'),
+                     self.check('sku.capacity', '{v_cores}'),
+                     self.check('collation', '{collation}'),
+                     self.check('proxyOverride', '{proxy_override}'),
+                     self.check('publicDataEndpointEnabled', 'True')]).get_output_in_json()
+
+        # create database
+        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
+                     self.check('status', 'Online')])
+
+        # test update short term retention on live database
+        self.cmd('sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_inc}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('retentionDays', '{retention_days_inc}')])
+
+        # test get short term retention on live database
+        self.cmd('sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('retentionDays', '{retention_days_inc}')])
+
+        # Wait for first backup before dropping
+        _wait_until_first_backup_midb(self)
+
+        # Delete by group/server/name
+        self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
+                 checks=[NoneCheck()])
+
+        # Get deleted database
+        deleted_databases = self.cmd('sql midb list-deleted -g {rg} --managed-instance {managed_instance_name}',
+                                     checks=[
+                                         self.greater_than('length(@)', 0)])
+
+        self.kwargs.update({
+            'deleted_time': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
+        })
+
+        # test update short term retention on deleted database
+        self.cmd('sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deleted-time {deleted_time}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('retentionDays', '{retention_days_dec}')])
+
+        # test get short term retention on deleted database
+        self.cmd('sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deleted-time {deleted_time}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('retentionDays', '{retention_days_dec}')])
+
+
+class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    def test_sql_managed_deleted_db_restore(self, resource_group, resource_group_location):
+
+        resource_prefix = 'MIRestoreDeletedDB'
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name_internet': 'vcCliTestRouteInternet',
+            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'database_name': self.create_random_name(resource_prefix, 50),
+            'restored_database_name': self.create_random_name(resource_prefix, 50),
+            'vault_name': self.create_random_name(resource_prefix, 50),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy",
+            'retention_days_inc': 14,
+            'retention_days_dec': 7
+        })
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {rg} -n {route_table_name}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # create sql managed_instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                 checks=[
+                     self.check('name', '{managed_instance_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('administratorLogin', '{admin_login}'),
+                     self.check('vCores', '{v_cores}'),
+                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                     self.check('licenseType', '{license_type}'),
+                     self.check('sku.tier', '{edition}'),
+                     self.check('sku.family', '{family}'),
+                     self.check('sku.capacity', '{v_cores}'),
+                     self.check('collation', '{collation}'),
+                     self.check('proxyOverride', '{proxy_override}'),
+                     self.check('publicDataEndpointEnabled', 'True')]).get_output_in_json()
+
+        # create database
+        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
+                     self.check('status', 'Online')])
+
+        # Wait for first backup before dropping
+        _wait_until_first_backup_midb(self)
+
+        # Delete by group/server/name
+        self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
+                 checks=[NoneCheck()])
+
+        # Get deleted database
+        deleted_databases = self.cmd('sql midb list-deleted -g {rg} --managed-instance {managed_instance_name}',
+                                     checks=[
+                                         self.greater_than('length(@)', 0)])
+
+        self.kwargs.update({
+            'deleted_time': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
+        })
+
+        # test restore deleted database
+        self.cmd('sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{restored_database_name}'),
+                     self.check('status', 'Online')])
 
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):

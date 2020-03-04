@@ -1646,6 +1646,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_osdisk_size=0,
                node_count=3,
                nodepool_name="nodepool1",
+               nodepool_tags=None,
+               nodepool_labels=None,
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1679,6 +1681,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                zones=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
+               enable_private_cluster=False,
                attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1698,6 +1701,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
+        tags=nodepool_tags,
+        node_labels=nodepool_labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -1800,8 +1805,13 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
 
     api_server_access_profile = None
-    if api_server_authorized_ip_ranges:
-        api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+    if enable_private_cluster and load_balancer_sku.lower() != "standard":
+        raise CLIError("Please use standard load balancer for private cluster")
+    if api_server_authorized_ip_ranges or enable_private_cluster:
+        api_server_access_profile = _populate_api_server_access_profile(
+            api_server_authorized_ip_ranges,
+            enable_private_cluster
+        )
 
     # Check that both --disable-rbac and --enable-rbac weren't provided
     if all([disable_rbac, enable_rbac]):
@@ -2174,7 +2184,8 @@ DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
 DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces.custom'
 
 
-def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None, prompt=False):
+def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None,
+                       endpoint_type='Public', prompt=False):
     """
     Use Azure Dev Spaces with a managed Kubernetes cluster.
 
@@ -2185,8 +2196,12 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     :type resource_group_name: String
     :param update: Update to the latest Azure Dev Spaces client components.
     :type update: bool
-    :param space_name: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+    :param space_name: Name of the new or existing dev space to select. Defaults to an \
+    interactive selection experience.
     :type space_name: String
+    :param endpoint_type: The endpoint type to be used for a Azure Dev Spaces controller. \
+    See https://aka.ms/azds-networking for more information.
+    :type endpoint_type: String
     :param prompt: Do not prompt for confirmation. Requires --space.
     :type prompt: bool
     """
@@ -2194,7 +2209,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     if _get_or_add_extension(cmd, DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE, update):
         azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
-            azext_custom.ads_use_dev_spaces(name, resource_group_name, update, space_name, prompt)
+            azext_custom.ads_use_dev_spaces(name, resource_group_name, update, space_name, endpoint_type, prompt)
         except TypeError:
             raise CLIError("Use '--update' option to get the latest Azure Dev Spaces client components.")
         except AttributeError as ae:
@@ -2703,6 +2718,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       max_count=None,
                       enable_cluster_autoscaler=False,
                       node_taints=None,
+                      tags=None,
+                      labels=None,
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2727,6 +2744,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     agent_pool = AgentPool(
         name=nodepool_name,
+        tags=tags,
+        node_labels=labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
@@ -2776,13 +2795,15 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          disable_cluster_autoscaler=False,
                          update_cluster_autoscaler=False,
                          min_count=None, max_count=None,
+                         tags=None,
                          no_wait=False):
 
     update_flags = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     if update_flags != 1:
-        raise CLIError('Please specify "--enable-cluster-autoscaler" or '
-                       '"--disable-cluster-autoscaler" or '
-                       '"--update-cluster-autoscaler"')
+        if update_flags != 0 or tags is None:
+            raise CLIError('Please specify "--enable-cluster-autoscaler" or '
+                           '"--disable-cluster-autoscaler" or '
+                           '"--update-cluster-autoscaler"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     node_count = instance.count
@@ -2815,6 +2836,8 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         instance.enable_auto_scaling = False
         instance.min_count = None
         instance.max_count = None
+
+    instance.tags = tags
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
