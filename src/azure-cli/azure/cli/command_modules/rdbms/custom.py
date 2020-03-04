@@ -430,8 +430,7 @@ def _server_list_custom_func(client, resource_group_name=None):
 
 # region private_endpoint
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None,
-                                               connection_id=None):  # pylint: disable=unused-argument
+                                               private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
     PrivateEndpointServiceConnectionStatus, ErrorResponseException = \
         cmd.get_models('PrivateEndpointServiceConnectionStatus', 'ErrorResponseException',
                        resource_type=ResourceType.MGMT_RDBMS)
@@ -458,21 +457,19 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
-                                        description=None, connection_id=None):
+                                        description=None):
     """Approve a private endpoint connection request for a server."""
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
-        description=description, connection_id=connection_id
-    )
+        description=description)
 
 
 def reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
-                                       description=None, connection_id=None):
+                                       description=None):
     """Reject a private endpoint connection request for a server."""
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
-        description=description, connection_id=connection_id
-    )
+        description=description)
 # endregion
