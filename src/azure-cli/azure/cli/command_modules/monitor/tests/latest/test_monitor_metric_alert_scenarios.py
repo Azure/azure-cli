@@ -90,16 +90,17 @@ class MonitorTests(ScenarioTest):
             'ag_id': gateway_json['id'],
         })
         self.cmd('monitor metrics alert create -g {rg} -n {alert} --scopes {ag_id} --description "Test"'
-                 ' --condition "avg UnhealthyHostCount>= 1 where BackendSettingsPool includes address-pool-dcc-blue~backendHttpSettings"', checks=[
-            self.check('description', 'Test'),
-            self.check('severity', 2),
-            self.check('autoMitigate', None),
-            self.check('windowSize', '0:05:00'),
-            self.check('evaluationFrequency', '0:01:00'),
-            self.check('length(criteria.allOf)', 1),
-            self.check('length(criteria.allOf[0].dimensions)', 1),
-            self.check('criteria.allOf[0].dimensions[0].values[0]', 'address-pool-dcc-blue~backendHttpSettings')
-        ])
+                 ' --condition "avg UnhealthyHostCount>= 1 where BackendSettingsPool includes address-pool-dcc-blue~backendHttpSettings"',
+                 checks=[
+                     self.check('description', 'Test'),
+                     self.check('severity', 2),
+                     self.check('autoMitigate', None),
+                     self.check('windowSize', '0:05:00'),
+                     self.check('evaluationFrequency', '0:01:00'),
+                     self.check('length(criteria.allOf)', 1),
+                     self.check('length(criteria.allOf[0].dimensions)', 1),
+                     self.check('criteria.allOf[0].dimensions[0].values[0]', 'address-pool-dcc-blue~backendHttpSettings')
+                 ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor')
     def test_metric_alert_basic_scenarios(self, resource_group):
