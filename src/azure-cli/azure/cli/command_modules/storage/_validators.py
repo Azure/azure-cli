@@ -7,9 +7,6 @@
 
 import argparse
 
-from knack.util import CLIError
-from knack.log import get_logger
-
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -21,6 +18,9 @@ from azure.cli.command_modules.storage.util import glob_files_locally, guess_con
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
+
+from knack.log import get_logger
+from knack.util import CLIError
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -158,6 +158,12 @@ def validate_client_parameters(cmd, namespace):
                        'storage account. Please try to use --auth-mode login or provide one of the following parameters'
                        ': connection string, account key or sas token for your storage account.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+
+
+def validate_encryption_key(cmd, namespace):
+    encryption_key_source = cmd.get_models('EncryptionScopeSource', resource_type=ResourceType.MGMT_STORAGE)
+    if namespace.encryption_key_source == encryption_key_source.microsoft_key_vault and not namespace.encryption_key_uri:
+        raise CLIError("usage error: Please specify --encryption-key-uri when using Microsoft.Keyvault as key source.")
 
 
 def process_blob_source_uri(cmd, namespace):
