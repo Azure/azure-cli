@@ -554,12 +554,10 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         api_version = '2018-06-01' if database_engine == 'mariadb' else '2017-12-01'
         result = self.cmd('az rest --method get --uri https://management.azure.com{}?api-version={}'
                           .format(server_id, api_version, server)).get_output_in_json()
-        self.assertIn('privateEndpointConnections', result)
-        self.assertEqual(len(result['privateEndpointConnections']), 1)
-        self.assertEqual(result['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
+        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Approved')
-
-        server_pec_id = result['privateEndpointConnections'][0]['id']
+        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
@@ -567,19 +565,15 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, server, resource_group, server_pec_name),
                  checks=self.check('id', server_pec_id))
 
-        self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {}'
-                 .format(database_engine, server, resource_group, server_pec_name),
-                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
-
-        self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {}'
-                 .format(database_engine, server, resource_group, server_pec_name),
-                 checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
-
-        with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+        with self.assertRaisesRegexp(CloudError, 'Private Endpoint Connection Status is not Pending'):
             self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {}'
                      .format(database_engine, server, resource_group, server_pec_name))
 
-        self.cmd('{} server private-endpoint-connection delete --id {} -y'
+        with self.assertRaisesRegexp(CloudError, 'Private Endpoint Connection Status is not Pending'):
+            self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {}'
+                     .format(database_engine, server, resource_group, server_pec_name))
+
+        self.cmd('{} server private-endpoint-connection delete --id {}'
                  .format(database_engine, server_pec_id))
 
 
