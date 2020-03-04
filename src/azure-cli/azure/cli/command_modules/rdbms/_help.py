@@ -334,11 +334,6 @@ type: command
 short-summary: Show details of a private endpoint connection associated with a MariaDB server.
 """
 
-helps['mariadb server private-endpoint-connection wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until an operation is complete.
-"""
-
 helps['mariadb server private-link-resource'] = """
 type: group
 short-summary: Manage MariaDB server private link resources.
@@ -684,11 +679,6 @@ type: command
 short-summary: Show details of a private endpoint connection associated with a MySQL server.
 """
 
-helps['mysql server private-endpoint-connection wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until an operation is complete.
-"""
-
 helps['mysql server private-link-resource'] = """
 type: group
 short-summary: Manage MySQL server private link resources.
@@ -1025,11 +1015,6 @@ short-summary: Delete the specified private endpoint connection associated with 
 helps['postgres server private-endpoint-connection show'] = """
 type: command
 short-summary: Show details of a private endpoint connection associated with a PostgreSQL server.
-"""
-
-helps['postgres server private-endpoint-connection wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until an operation is complete.
 """
 
 helps['postgres server private-link-resource'] = """
