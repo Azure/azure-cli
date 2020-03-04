@@ -83,7 +83,7 @@ namespace.name = result['child_name_1']
 del namespace.connection_id
 ```
 #### Transform
-In order to transform the output of the `list` command, we provide a transform function `gen_dict_to_list_transform`.
+In order to transform the output of the `list` command, we provide a transform function `gen_dict_to_list_transform`. The key's value depend on each service's response.
 ```
 from azure.cli.core.commands.transform import gen_dict_to_list_transform
 g.command('list', transform=gen_dict_to_list_transform(key='values')) #  defalut key is `value`
