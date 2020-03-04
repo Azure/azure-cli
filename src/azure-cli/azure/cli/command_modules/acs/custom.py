@@ -1647,6 +1647,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_count=3,
                nodepool_name="nodepool1",
                nodepool_tags=None,
+               nodepool_labels=None,
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1680,6 +1681,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                zones=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
+               enable_private_cluster=False,
                attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1700,6 +1702,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
         tags=nodepool_tags,
+        node_labels=nodepool_labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -1802,8 +1805,13 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
 
     api_server_access_profile = None
-    if api_server_authorized_ip_ranges:
-        api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+    if enable_private_cluster and load_balancer_sku.lower() != "standard":
+        raise CLIError("Please use standard load balancer for private cluster")
+    if api_server_authorized_ip_ranges or enable_private_cluster:
+        api_server_access_profile = _populate_api_server_access_profile(
+            api_server_authorized_ip_ranges,
+            enable_private_cluster
+        )
 
     # Check that both --disable-rbac and --enable-rbac weren't provided
     if all([disable_rbac, enable_rbac]):
@@ -2711,6 +2719,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       enable_cluster_autoscaler=False,
                       node_taints=None,
                       tags=None,
+                      labels=None,
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2736,6 +2745,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     agent_pool = AgentPool(
         name=nodepool_name,
         tags=tags,
+        node_labels=labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
