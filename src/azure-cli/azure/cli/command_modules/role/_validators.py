@@ -25,7 +25,7 @@ def _validate_group(namespace, attr, value, group_filter, has_next_filter):
         if not has_next_filter:
             raise CLIError("No group matches the name of '{}'".format(value))
     else:
-        raise CLIError("More than one groups match the name of '{}'".format(value))
+        raise CLIError("More than one group match the name of '{}'".format(value))
     return ret
 
 
