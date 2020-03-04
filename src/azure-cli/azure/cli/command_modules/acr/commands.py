@@ -35,7 +35,8 @@ from ._client_factory import (
     cf_acr_runs,
     cf_acr_scope_maps,
     cf_acr_tokens,
-    cf_acr_token_credentials
+    cf_acr_token_credentials,
+    cf_acr_private_endpoint_connections
 )
 
 
@@ -130,21 +131,24 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
     acr_scope_map_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.scope_map#{}',
         table_transformer=scope_map_output_format,
-        client_factory=cf_acr_scope_maps,
-        operation_group='scope_map'
+        client_factory=cf_acr_scope_maps
     )
 
     acr_token_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.token#{}',
         table_transformer=token_output_format,
-        client_factory=cf_acr_tokens,
-        operation_group='token'
+        client_factory=cf_acr_tokens
     )
 
     acr_token_credential_generate_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.token#{}',
         table_transformer=token_credential_output_format,
         client_factory=cf_acr_token_credentials
+    )
+
+    acr_private_endpoint_connection_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.private_endpoint_connection#{}',
+        client_factory=cf_acr_private_endpoint_connections
     )
 
     with self.command_group('acr', acr_custom_util) as g:
@@ -294,3 +298,20 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     with self.command_group('acr token credential', acr_token_credential_generate_util) as g:
         g.command('generate', 'acr_token_credential_generate')
+
+    with self.command_group('acr private-endpoint-connection', acr_private_endpoint_connection_util,
+                            is_preview=True) as g:
+        g.command('delete', 'delete')
+        g.show_command('show', 'show')
+        g.command('list', 'list_connections')
+        g.command('approve', 'approve')
+        g.command('reject', 'reject')
+
+    with self.command_group('acr identity', acr_custom_util, is_preview=True) as g:
+        g.command('show', 'show_identity')
+        g.command('assign', 'assign_identity')
+        g.command('remove', 'remove_identity')
+
+    with self.command_group('acr encryption', acr_custom_util, is_preview=True) as g:
+        g.command('show', 'show_encryption')
+        g.command('rotate-key', "rotate_key")
