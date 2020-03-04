@@ -115,6 +115,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                      help='Look into sub-directories recursively.')
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
+    t_routing_choice = self.get_models('RoutingChoice', resource_type=ResourceType.MGMT_STORAGE)
+    routing_choice_type = CLIArgumentType(
+        arg_group='Routing Preference', arg_type=get_enum_type(t_routing_choice),
+        help='Routing Choice defines the kind of network routing opted by the user.',
+        is_preview=True, min_api='2019-06-01')
+    publish_microsoft_endpoints_type = CLIArgumentType(
+        arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
+        help='A boolean flag which indicates whether microsoft routing storage endpoints are to be published.')
+    publish_internet_endpoints_type = CLIArgumentType(
+        arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
+        help='A boolean flag which indicates whether internet routing storage endpoints are to be published.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -189,6 +200,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'with account-scoped encryption key. "Service": Queue will always be encrypted with '
                         'service-scoped keys. Currently the default encryption key type is "Service".',
                    min_api='2019-06-01', options_list=['--encryption-key-type-for-queue', '-q'])
+        c.argument('routing_choice', routing_choice_type)
+        c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
+        c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
@@ -208,6 +222,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('domain_guid', domain_guid_type)
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
+        c.argument('routing_choice', routing_choice_type)
+        c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
+        c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         c.extra('encryption_key_name', help='The name of the KeyVault key', )
