@@ -37,7 +37,8 @@ from azure.mgmt.sql.models import (
     ManagedInstancePairInfo,
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
-    InstanceFailoverGroupReadWriteEndpoint
+    InstanceFailoverGroupReadWriteEndpoint,
+    ServerPublicNetworkAccess
 )
 
 from knack.log import get_logger
@@ -1909,7 +1910,7 @@ def server_create(
         server_name,
         assign_identity=False,
         no_wait=False,
-        public_network_access=None,
+        enable_public_network=None,
         **kwargs):
     '''
     Creates a server.
@@ -1918,8 +1919,11 @@ def server_create(
     if assign_identity:
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
 
-    if public_network_access is not None:
-        kwargs['public_network_access'] = public_network_access
+    if enable_public_network is not None:
+        if enable_public_network:
+            kwargs['public_network_access'] = ServerPublicNetworkAccess.enabled
+        else:
+            kwargs['public_network_access'] = ServerPublicNetworkAccess.disabled
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -1947,7 +1951,7 @@ def server_update(
         instance,
         administrator_login_password=None,
         assign_identity=False,
-        public_network_access=None):
+        enable_public_network=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
     '''
@@ -1960,8 +1964,11 @@ def server_update(
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
 
-    if public_network_access is not None:
-        instance.public_network_access = public_network_access
+    if enable_public_network is not None:
+        if enable_public_network:
+            instance.public_network_access = ServerPublicNetworkAccess.enabled
+        else:
+            instance.public_network_access = ServerPublicNetworkAccess.disabled
 
     return instance
 

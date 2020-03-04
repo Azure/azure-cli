@@ -167,7 +167,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        # test create sql server with no public-network-access passed in, verify publicNetworkAccess == Enabled
+        # test create sql server with no enable-public-network passed in, verify publicNetworkAccess == Enabled
         self.cmd('sql server create -g {} --name {} '
                  '--admin-user {} --admin-password {}'
                  .format(resource_group_1, server_name_1, admin_login, admin_passwords[0]),
@@ -178,10 +178,10 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
-        # test create sql server with public-network-access == 'Enabled' passed in, verify publicNetworkAccess == Enabled
+        # test create sql server with enable-public-network == true passed in, verify publicNetworkAccess == Enabled
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {} --public-network-access {}'
-                 .format(resource_group_1, server_name_2, admin_login, admin_passwords[0], 'Enabled'),
+                 '--admin-user {} --admin-password {} --enable-public-network {}'
+                 .format(resource_group_1, server_name_2, admin_login, admin_passwords[0], 'true'),
                  checks=[
                      JMESPathCheck('name', server_name_2),
                      JMESPathCheck('location', resource_group_location),
@@ -189,10 +189,10 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
-        # test create sql server with public-network-access == 'Disabled' passed in, verify publicNetworkAccess == Disabled
+        # test create sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
         self.cmd('sql server create -g {} --name {} '
-                 '--admin-user {} --admin-password {} -a {}'
-                 .format(resource_group_1, server_name_3, admin_login, admin_passwords[0], 'Disabled'),
+                 '--admin-user {} --admin-password {} -e {}'
+                 .format(resource_group_1, server_name_3, admin_login, admin_passwords[0], 'false'),
                  checks=[
                      JMESPathCheck('name', server_name_3),
                      JMESPathCheck('location', resource_group_location),
@@ -200,7 +200,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
-        # test get sql server to verify public-network-access == 'Disabled' for the above server as expected
+        # test get sql server to verify publicNetworkAccess == 'Disabled' for the above server as expected
         self.cmd('sql server show -g {} --name {}'
                  .format(resource_group_1, server_name_3),
                  checks=[
@@ -215,7 +215,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        # test create sql server with no public-network-access passed in, verify publicNetworkAccess == Enabled
+        # test create sql server with no enable-public-network passed in, verify publicNetworkAccess == Enabled
         self.cmd('sql server create -g {} --name {} --admin-user {} --admin-password {}'
                  .format(resource_group, server_name, admin_login, admin_passwords[0]),
                  checks=[
@@ -225,24 +225,24 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
 
-        # test update sql server with public-network-access == 'Disabled' passed in, verify publicNetworkAccess == Disabled
-        self.cmd('sql server update -g {} -n {} --public-network-access {}'
-                 .format(resource_group, server_name, 'Disabled'),
+        # test update sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
+        self.cmd('sql server update -g {} -n {} --enable-public-network {}'
+                 .format(resource_group, server_name, 'false'),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
-        # test update sql server with no public-network-access passed in, verify publicNetworkAccess == Disabled
+        # test update sql server with no enable-public-network passed in, verify publicNetworkAccess == Disabled
         self.cmd('sql server update -g {} -n {} -i'
-                 .format(resource_group, server_name, 'Disabled'),
+                 .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('identity.type', 'SystemAssigned'),
                      JMESPathCheck('publicNetworkAccess', 'Disabled')])
 
-        # test update sql server with public-network-access == 'Enabled' passed in, verify publicNetworkAccess == Enabled
-        self.cmd('sql server update -g {} -n {} -a {}'
-                 .format(resource_group, server_name, 'Enabled'),
+        # test update sql server with enable-public-network == true passed in, verify publicNetworkAccess == Enabled
+        self.cmd('sql server update -g {} -n {} -e {}'
+                 .format(resource_group, server_name, 'true'),
                  checks=[
                      JMESPathCheck('name', server_name),
                      JMESPathCheck('publicNetworkAccess', 'Enabled')])
