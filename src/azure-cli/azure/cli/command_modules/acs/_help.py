@@ -622,6 +622,9 @@ parameters:
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
+  - name: --labels
+    type: string
+    short-summary: The node labels for the node pool. You can't change the node labels through CLI after the node pool is created. See https://aka.ms/node-labels for syntax of labels.
 """
 
 helps['aks nodepool delete'] = """
