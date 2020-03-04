@@ -1159,19 +1159,3 @@ def validator_delete_retention_days(namespace):
         if namespace.delete_retention_days > 365:
             raise ValueError(
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
-
-
-def validate_private_endpoint_connection_id(cmd, namespace):
-
-    if namespace.connection_id:
-        id_parts = namespace.connection_id.split('/')
-        namespace.private_endpoint_connection_name = id_parts[-1]
-        namespace.account_name = id_parts[-3]
-        namespace.resource_group_name = id_parts[-7]
-    if namespace.account_name and not namespace.resource_group_name:
-        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
-
-    if not all([namespace.account_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage: [--id ID | --name NAME --account-name NAME]')
-
-    del namespace.connection_id

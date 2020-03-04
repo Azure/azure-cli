@@ -116,12 +116,6 @@ def create_boolean_result_output_transformer(property_name):
     return _transformer
 
 
-def transform_private_link_list_output(result):
-    if hasattr(result, "value"):
-        return result.value
-    return result
-
-
 def transform_storage_list_output(result):
     if getattr(result, 'next_marker', None):
         logger.warning('Next Marker:')
