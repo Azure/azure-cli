@@ -45,8 +45,12 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, TokenStatus = self.get_models(
-        'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', 'TokenStatus')
+    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, \
+        BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, TokenStatus = self.get_models(
+            'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
+            'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType',
+            'TokenStatus')
+
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
@@ -74,6 +78,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         with self.argument_context(scope, arg_group='Network Rule') as c:
             c.argument('default_action', arg_type=get_enum_type(DefaultAction),
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
+
+    with self.argument_context('acr create', arg_group="Customer managed key", is_preview=True) as c:
+        c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
+        c.argument('key_encryption_key', help="key vault key uri")
 
     with self.argument_context('acr import') as c:
         c.argument('source_image', options_list=['--source'], help="The source identifier will be either a source image name or a fully qualified source.")
@@ -315,6 +323,21 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr token credential delete') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
         c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)
+
+    with self.argument_context('acr private-endpoint-connection') as c:
+        # to match private_endpoint_connection_command_guideline.md guidelines
+        c.argument('registry_name', options_list=['--registry-name', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], help='The name of the private endpoint connection')
+
+        c.argument('approval_description', options_list=['--description'], help='Approval description. For example, the reason for approval.')
+        c.argument('rejection_description', options_list=['--description'], help='Rejection description. For example, the reason for rejection.')
+
+    with self.argument_context('acr identity') as c:
+        c.argument('identities', nargs='+', help="Space-separated identities. Use '[system]' to refer to the system assigned identity")
+
+    with self.argument_context('acr encryption') as c:
+        c.argument('key_encryption_key', help="key vault key uri")
+        c.argument('identity', help="client id of managed identity, resource name or id of user assigned identity. Use '[system]' to refer to the system assigned identity")
 
 
 def _get_helm_default_install_location():
