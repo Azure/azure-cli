@@ -341,14 +341,13 @@ class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
 
         # Create the endpoint.
         endpoint_checks = [JMESPathCheck('webApplicationFirewallPolicyLink', None)]
-        link_checks = [JMESPathCheck('id', None)]
         self.cmd('cdn endpoint create -g {resource_group} '
                  '--origin www.test.com '
                  '--profile-name {profile} '
                  '-n {endpoint1} ',
                  checks=endpoint_checks)
-        self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint1}',
-                 checks=link_checks)
+        with self.assertRaises(CLIError):
+            self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint1}')
 
         # Link the endpoint.
         link_checks = [JMESPathCheck('id', policy_id, case_sensitive=False)]
@@ -391,12 +390,11 @@ class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
         # Remove both endpoint links
         policy_checks = [JMESPathCheck('length(endpointLinks)', 0)]
         endpoint_checks = [JMESPathCheck('webApplicationFirewallPolicyLink', None)]
-        link_checks = [JMESPathCheck('id', None)]
         self.cmd('cdn endpoint waf policy remove -y -g {resource_group} '
                  '--profile-name {profile} '
                  '--endpoint-name {endpoint1}')
-        self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint1}',
-                 checks=link_checks)
+        with self.assertRaises(CLIError):
+            self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint1}')
         self.cmd('cdn endpoint show -g {resource_group} '
                  '--profile-name {profile} '
                  '-n {endpoint1}',
@@ -404,8 +402,8 @@ class CdnWafEndpointLinkScenarioTest(CdnScenarioMixin, ScenarioTest):
         self.cmd('cdn endpoint waf policy remove -y -g {resource_group} '
                  '--profile-name {profile} '
                  '--endpoint-name {endpoint2}')
-        self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint2}',
-                 checks=link_checks)
+        with self.assertRaises(CLIError):
+            self.cmd('cdn endpoint waf policy show -g {resource_group} --profile-name {profile} --endpoint-name {endpoint2}')
         self.cmd('cdn endpoint show -g {resource_group} '
                  '--profile-name {profile} '
                  '-n {endpoint2}',

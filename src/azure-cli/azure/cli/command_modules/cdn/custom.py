@@ -110,7 +110,7 @@ def show_endpoint_waf_policy_link(client: EndpointsOperations,
     link = client.get(resource_group_name, profile_name, endpoint_name).web_application_firewall_policy_link
     if link is not None:
         return link
-    return EndpointPropertiesUpdateParametersWebApplicationFirewallPolicyLink(id=None)
+    raise CLIError(f"endpoint {endpoint_name} does not have a CDN WAF policy link.", endpoint_name)
 
 
 def set_endpoint_waf_policy_link(client: EndpointsOperations,
