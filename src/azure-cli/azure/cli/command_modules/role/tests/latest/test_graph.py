@@ -262,10 +262,14 @@ class GraphGroupScenarioTest(ScenarioTest):
         account_info = self.cmd('account show').get_output_in_json()
         if account_info['user']['type'] == 'servicePrincipal':
             return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        signed_in_info = self.cmd('ad signed-in-user show').get_output_in_json()
+        user_principal_name = signed_in_info['userPrincipalName']
+        domain = user_principal_name.split('@', 1)[1]
         self.kwargs = {
             'user1': 'deleteme1',
             'user2': 'deleteme2',
-            'domain': 'azuresdkteam.onmicrosoft.com',
+            'domain': domain,
             'new_mail_nick_name': 'deleteme11',
             'group': 'deleteme_g',
             'pass': 'Test1234!!'
