@@ -2876,7 +2876,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         extensions = extension_profile.extensions
         if extensions:
             extension_profile.extensions = [x for x in extensions if
-                                            x.type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
+                                            x.type1.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
     ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
                                           publisher=publisher,

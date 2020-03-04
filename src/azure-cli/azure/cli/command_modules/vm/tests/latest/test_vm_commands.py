@@ -1412,7 +1412,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
                  '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
-            self.check('type', '{ext_type}')
+            self.check('type1', '{ext_type}')
         ])
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
 
