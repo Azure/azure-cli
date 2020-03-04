@@ -289,8 +289,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='The provider for the encryption scope.', validator=validate_encryption_key)
             c.argument('encryption_key_uri', options_list=['-u', '--encryption-key-uri'],
                        help='The object identifier for a key vault key object. When applied, the encryption scope will '
-                       'use the key referenced by the identifier to enable customer-managed key support on this encryption'
-                       'scope.')
+                       'use the key referenced by the identifier to enable customer-managed key support on this '
+                       'encryption scope.')
 
     with self.argument_context('storage account encryption-scope update') as c:
         c.argument('disabled', arg_type=get_three_state_flag(), help='Disable the encryption scope. When disabled, '

@@ -162,7 +162,8 @@ def validate_client_parameters(cmd, namespace):
 
 def validate_encryption_key(cmd, namespace):
     encryption_key_source = cmd.get_models('EncryptionScopeSource', resource_type=ResourceType.MGMT_STORAGE)
-    if namespace.encryption_key_source == encryption_key_source.microsoft_key_vault and not namespace.encryption_key_uri:
+    if namespace.encryption_key_source == encryption_key_source.microsoft_key_vault and \
+            not namespace.encryption_key_uri:
         raise CLIError("usage error: Please specify --encryption-key-uri when using Microsoft.Keyvault as key source.")
 
 
