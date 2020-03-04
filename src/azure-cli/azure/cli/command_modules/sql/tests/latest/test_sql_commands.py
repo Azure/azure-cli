@@ -73,8 +73,8 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group_1')
-    @ResourceGroupPreparer(parameter_name='resource_group_2')
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
     def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
@@ -979,9 +979,9 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='westeurope')
     @StorageAccountPreparer(location='westus')
     @StorageAccountPreparer(parameter_name='storage_account_2',
                             resource_group_parameter_name='resource_group_2')
@@ -2104,7 +2104,7 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
     @SqlServerPreparer()
     @StorageAccountPreparer()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'westus'
+        location_long_name = 'westeurope'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -3274,7 +3274,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                            parameter_name_for_location="resource_group_location_2")
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westus')
+                       location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_2", location='eastus')
     def test_sql_failover_group_mgmt(self,
@@ -3720,9 +3720,9 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         return self.cmd('storage account keys list -g {} -n {} --query [0].value'
                         .format(resource_group, storage_account)).get_output_in_json()
 
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
-    @StorageAccountPreparer(location='westus')
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
+    @StorageAccountPreparer(location='westeurope')
     def test_sql_db_sensitivity_classifications(self, resource_group, resource_group_location, server, storage_account):
         from azure.mgmt.sql.models import SampleName
 
