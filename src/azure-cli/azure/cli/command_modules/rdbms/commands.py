@@ -348,11 +348,15 @@ def load_command_table(self, _):
                             mariadb_private_endpoint_connections_sdk,
                             client_factory=cf_mariadb_private_endpoint_connections_operations) as g:
         g.custom_command('approve', 'approve_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
+                         validator=validate_private_endpoint_connection_id,
+                         supports_no_wait=True)
         g.custom_command('reject', 'reject_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+                         validator=validate_private_endpoint_connection_id,
+                         supports_no_wait=True)
+        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id,
+                  supports_no_wait=True)
         g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.wait_command('wait')
 
     with self.command_group('mariadb server private-link-resource',
                             mariadb_private_link_resources_sdk,
@@ -363,11 +367,15 @@ def load_command_table(self, _):
                             mysql_private_endpoint_connections_sdk,
                             client_factory=cf_mysql_private_endpoint_connections_operations) as g:
         g.custom_command('approve', 'approve_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
+                         validator=validate_private_endpoint_connection_id,
+                         supports_no_wait=True)
         g.custom_command('reject', 'reject_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+                         validator=validate_private_endpoint_connection_id,
+                         supports_no_wait=True)
+        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id,
+                  supports_no_wait=True)
         g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.wait_command('wait')
 
     with self.command_group('mysql server private-link-resource',
                             mysql_private_link_resources_sdk,
@@ -378,11 +386,15 @@ def load_command_table(self, _):
                             postgres_private_endpoint_connections_sdk,
                             client_factory=cf_postgres_private_endpoint_connections_operations) as g:
         g.custom_command('approve', 'approve_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
+                         validator=validate_private_endpoint_connection_id,
+                         supports_no_wait=True)
         g.custom_command('reject', 'reject_private_endpoint_connection',
-                         validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+                         validator=validate_private_endpoint_connection_id,
+                         supports_no_wait=True)
+        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id,
+                  supports_no_wait=True)
         g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.wait_command('wait')
 
     with self.command_group('postgres server private-link-resource',
                             postgres_private_link_resources_sdk,

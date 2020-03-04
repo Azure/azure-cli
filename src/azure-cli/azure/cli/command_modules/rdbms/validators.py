@@ -8,6 +8,8 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 
+from azure.cli.core.util import parse_proxy_resource_id
+
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 
@@ -95,10 +97,10 @@ def validate_subnet(cmd, namespace):
 
 def validate_private_endpoint_connection_id(cmd, namespace):
     if namespace.connection_id:
-        id_parts = namespace.connection_id.split('/')
-        namespace.private_endpoint_connection_name = id_parts[-1]
-        namespace.server_name = id_parts[-3]
-        namespace.resource_group_name = id_parts[-7]
+        result = parse_proxy_resource_id(namespace.connection_id)
+        namespace.private_endpoint_connection_name = result['child_name_1']
+        namespace.server_name = result['name']
+        namespace.resource_group_name = result['resource_group']
     if namespace.server_name and not namespace.resource_group_name:
         namespace.resource_group_name = _get_resource_group_from_server_name(cmd.cli_ctx, namespace.server_name)
 
