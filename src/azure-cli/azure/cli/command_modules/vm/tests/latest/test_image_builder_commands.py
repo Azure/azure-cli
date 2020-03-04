@@ -45,6 +45,15 @@ class ImageTemplateTest(ScenarioTest):
                 raise ex
             pass
 
+    @def test_image_builder_template_file(self, resource_group):
+        self._assign_ib_permissions(resource_group)
+
+        self.kwargs.update({
+            'tmp': 'tmp1'
+        })
+
+        self.cmd('image builder create -g {rg} -n {tmp} --image-template ')
+
     # @cus.json has some problem in online CI checks, can't find file
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_no_defer')
     @live_only()

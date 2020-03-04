@@ -188,6 +188,7 @@ def load_arguments(self, _):
         ib_cutput_type = CLIArgumentType(arg_group="Output")
 
         c.argument('build_timeout', type=int, help="The Maximum duration to wait while building the image template, in minutes. Default is 60.")
+        c.argument('image_template', help='Local path or URL to a template file')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)

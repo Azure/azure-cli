@@ -376,11 +376,15 @@ def create_image_template(  # pylint: disable=too-many-locals
         cmd, client, resource_group_name, image_template_name, location=None,
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
         source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
-        shared_image_destinations=None, no_wait=False, customize=None, distribute=None):  # pylint: disable=unused-argument, too-many-locals
+        shared_image_destinations=None, no_wait=False, customize=None, distribute=None, image_template=None):  # pylint: disable=unused-argument, too-many-locals
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateIsoSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  # pylint: disable=line-too-long
+
+    if image_template is not None:
+
+        return
 
     template_source, template_scripts, template_destinations = None, [], []
 
