@@ -681,7 +681,7 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
     @SqlServerPreparer(location='southeastasia')
     def test_sql_db_operation_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
-        update_service_objective = 'S1'
+        update_service_objective = 'GP_Gen5_8'
 
         # Create db
         self.cmd('sql db create -g {} -s {} -n {}'
@@ -761,17 +761,17 @@ class AzureActiveDirectoryAdministratorScenarioTest(LiveScenarioTest):
 
 
 class SqlServerDbCopyScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(parameter_name='resource_group_1')
-    @ResourceGroupPreparer(parameter_name='resource_group_2')
-    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1')
-    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2')
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
+    @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1', location='westeurope')
+    @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2', location='westeurope')
     @AllowLargeResponse()
     def test_sql_db_copy(self, resource_group_1, resource_group_2,
                          resource_group_location,
                          server1, server2):
         database_name = "cliautomationdb01"
         database_copy_name = "cliautomationdb02"
-        service_objective = 'S1'
+        service_objective = 'GP_Gen5_8'
 
         # create database
         self.cmd('sql db create -g {} --server {} --name {}'
@@ -805,7 +805,7 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         # copy database to elastic pool in other server (max parameters, other than
         # service_objective)
         pool_name = 'pool1'
-        pool_edition = 'Standard'
+        pool_edition = 'GeneralPurpose'
         self.cmd('sql elastic-pool create -g {} --server {} --name {} '
                  ' --edition {}'
                  .format(resource_group_2, server2, pool_name, pool_edition))
@@ -853,8 +853,8 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
 
 
 class SqlServerDbRestoreScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
     @AllowLargeResponse()
     def test_sql_db_restore(self, resource_group, resource_group_location, server):
         database_name = 'cliautomationdb01'
@@ -908,8 +908,8 @@ class SqlServerDbRestoreScenarioTest(ScenarioTest):
 
 
 class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
     @AllowLargeResponse()
     def test_sql_db_restore_deleted(self, resource_group, resource_group_location, server):
         database_name = 'cliautomationdb01'
@@ -1110,13 +1110,13 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
 
 class SqlServerDwMgmtScenarioTest(ScenarioTest):
     # pylint: disable=too-many-instance-attributes
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
     @AllowLargeResponse()
     def test_sql_dw_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
 
-        update_service_objective = 'DW200'
+        update_service_objective = 'DW200c'
         update_storage = '20TB'
         update_storage_bytes = str(20 * 1024 * 1024 * 1024 * 1024)
 
@@ -1339,15 +1339,20 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
 class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
-                           parameter_name_for_location="resource_group_location_1")
+                           parameter_name_for_location="resource_group_location_1",
+                           location='westeurope')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
-                           parameter_name_for_location="resource_group_location_2")
+                           parameter_name_for_location="resource_group_location_2",
+                           location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_1",
-                       resource_group_parameter_name="resource_group_1")
+                       resource_group_parameter_name="resource_group_1",
+                       location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_1")
+                       resource_group_parameter_name="resource_group_1",
+                       location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_3",
-                       resource_group_parameter_name="resource_group_2")
+                       resource_group_parameter_name="resource_group_2",
+                       location='westeurope')
     @AllowLargeResponse()
     def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,
@@ -1355,7 +1360,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                                  server_name_1, server_name_2, server_name_3):
 
         database_name = "cliautomationdb01"
-        service_objective = 'S1'
+        service_objective = 'GP_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
         class ServerInfo(object):  # pylint: disable=too-few-public-methods
@@ -1414,7 +1419,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
 
         # Create replica in pool in third server with max params (except service objective)
         pool_name = 'pool1'
-        pool_edition = 'Standard'
+        pool_edition = 'GeneralPurpose'
         self.cmd('sql elastic-pool create -g {} --server {} --name {} '
                  ' --edition {}'
                  .format(s3.group, s3.name, pool_name, pool_edition))
@@ -3083,7 +3088,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         v_cores = 8
         storage_size_in_gb = '64'
         edition = 'GeneralPurpose'
-        family = 'Gen4'
+        family = 'Gen5'
         resource_group_1 = "cl_one"
         collation = "Latin1_General_100_CS_AS_SC"
         user = admin_login
