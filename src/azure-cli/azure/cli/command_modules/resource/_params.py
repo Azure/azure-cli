@@ -191,8 +191,11 @@ def load_arguments(self, _):
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
-        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
-                   help='Auxiliary subscriptions which will be used during deployment across tenants.')
+        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
+                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
 
     with self.argument_context('group deployment validate') as c:
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
@@ -238,8 +241,11 @@ def load_arguments(self, _):
     with self.argument_context('deployment group create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
-        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
-                   help='Auxiliary subscriptions which will be used during deployment across tenants.')
+        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
+                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
 
     with self.argument_context('deployment group validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
