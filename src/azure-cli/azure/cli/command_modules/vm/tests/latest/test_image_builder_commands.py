@@ -51,18 +51,28 @@ class ImageTemplateTest(ScenarioTest):
     def test_image_builder_template_file(self, resource_group):
         self._assign_ib_permissions(resource_group)
 
-        self.kwargs.update({
-            'tmp': 'tmp1'
-        })
-
-        self.cmd('image builder create -g {rg} -n {tmp} --image-template "https://raw.githubusercontent.com/qwordy/azvmimagebuilder/master/quickquickstarts/0_Creating_a_Custom_Linux_Managed_Image/example.json"',
+        # URL
+        self.cmd('image builder create -g {rg} -n tmp1 --image-template "https://raw.githubusercontent.com/qwordy/azvmimagebuilder/master/quickquickstarts/0_Creating_a_Custom_Linux_Managed_Image/example.json"',
                  checks=[
                      self.check('source.offer', 'UbuntuServer'),
                      self.check('source.publisher', 'Canonical'),
                      self.check('source.sku', '18.04-LTS'),
                      self.check('source.version', '18.04.201903060'),
                      self.check('source.type', 'PlatformImage'),
-                     self.check('length(customize)', 5)
+                     self.check('length(customize)', 5),
+                     self.check('distribute[0].type', 'ManagedImage')
+                 ])
+
+        # Local file
+        self.cmd('image builder create -g {rg} -n tmp2 --image-template image_template.json',
+                 checks=[
+                     self.check('source.offer', 'UbuntuServer'),
+                     self.check('source.publisher', 'Canonical'),
+                     self.check('source.sku', '18.04-LTS'),
+                     self.check('source.version', '18.04.201903060'),
+                     self.check('source.type', 'PlatformImage'),
+                     self.check('length(customize)', 5),
+                     self.check('distribute[0].type', 'ManagedImage')
                  ])
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic')
