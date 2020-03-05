@@ -65,30 +65,6 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('length(customize)', 5)
                  ])
 
-    # @cus.json has some problem in online CI checks, can't find file
-    @ResourceGroupPreparer(name_prefix='cli_test_image_builder_no_defer')
-    @live_only()
-    def test_image_builder_no_defer(self, resource_group, resource_group_location):
-        self._assign_ib_permissions(resource_group)
-
-        self.kwargs.update({
-            'tmp': 'tmp1',
-            'img_src': LINUX_IMAGE_SOURCE,
-            'img_1': 'img_1',
-            'loc': resource_group_location,
-        })
-
-        self.cmd('image builder create -g {rg} -n {tmp} --image-source {img_src} --customize @cus.json --managed-image-destinations {img_1}={loc}', checks=[
-            self.check('source.offer', 'UbuntuServer'),
-            self.check('source.publisher', 'Canonical'),
-            self.check('source.sku', '18.04-LTS'),
-            self.check('source.version', '18.04.201808140'),
-            self.check('source.type', 'PlatformImage'),
-            self.check('length(customize)', 5)
-        ])
-
-        self.cmd('image builder run -g {rg} -n {tmp}')
-
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic')
     def test_image_builder_basic(self, resource_group):
         self._assign_ib_permissions(resource_group)

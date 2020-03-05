@@ -196,13 +196,11 @@ def load_arguments(self, _):
         c.argument('', arg_type=ib_source_type)
 
         # Image Customizer Arguments
-        c.argument('customize', arg_type=ib_customizer_type, help='Specify the properties used to describe the customization steps of the image. JSON format. Do not use it together with --scripts. Examples: https://github.com/danielsollondon/azvmimagebuilder/tree/master/quickquickstarts')
         c.argument('scripts', arg_type=ib_customizer_type)
         c.argument('', arg_type=ib_customizer_type)
         c.argument('', arg_type=ib_customizer_type)
 
         # Image Output Arguments
-        c.argument('distribute', arg_type=ib_cutput_type, help='The distribution targets where the image output needs to go to. JSON format. Do not use it together with other arguments in Ouput Arguments.')
         c.argument('managed_image_destinations', arg_type=ib_cutput_type)
         c.argument('shared_image_destinations', arg_type=ib_cutput_type)
         c.argument('output_name', arg_type=ib_cutput_type)
