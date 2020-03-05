@@ -184,6 +184,10 @@ examples:
             --scripts $scripts --managed-image-destinations image_1=westus \\
             --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth
 
+  - name: Create an image builder template using an image template file.
+    text: |
+        az image builder create -g my-group -n mytemplate --image-template filename
+
   - name: >
         [Advanced] Create an image template with multiple customizers and distributors using the CLI's object cache via --defer. Supports features such as: customizer and output names, powershell exit codes, inline scripts, windows restart, file customizers, artifact tags and vhd output distributors.
     text: |
