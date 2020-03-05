@@ -131,8 +131,7 @@ def _split_registry_and_image(source_image):
         raise CLIError(SOURCE_NOT_FOUND)
 
     registry_uri = source_image[:slash]
-    dot = registry_uri.find('.')
-    if dot <= 0:
+    if '.' not in registry_uri:
         raise CLIError(LOGIN_SERVER_NOT_VALID)
 
     source_image = source_image[slash + 1:]

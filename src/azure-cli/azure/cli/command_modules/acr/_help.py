@@ -230,7 +230,7 @@ helps['acr import'] = """
 type: command
 short-summary: Imports an image to an Azure Container Registry from another Container Registry. Import removes the need to docker pull, docker tag, docker push.
 examples:
-  - name: Import an image from 'sourceregistry' to 'MyRegistry'. The image inherits its source repository and tag names. 
+  - name: Import an image from 'sourceregistry' to 'MyRegistry'. The image inherits its source repository and tag names.
     text: >
         az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
   - name: Import an image from a public repository on Docker Hub. The image uses the specified repository and tag names.
