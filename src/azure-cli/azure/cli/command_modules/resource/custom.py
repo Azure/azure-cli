@@ -15,6 +15,7 @@ import re
 import ssl
 import sys
 import uuid
+import base64
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
@@ -1668,7 +1669,10 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
             identity = _build_identities_info(cmd, assign_identity)
         assignment.identity = identity
 
-    createdAssignment = policy_client.policy_assignments.create(scope, name or uuid.uuid4(), assignment)
+    if name is None:
+        name = (base64.urlsafe_b64encode(uuid.uuid4().bytes).decode())[:-2]
+
+    createdAssignment = policy_client.policy_assignments.create(scope, name, assignment)
 
     # Create the identity's role assignment if requested
     if assign_identity is not None and identity_scope:

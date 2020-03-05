@@ -1415,6 +1415,41 @@ class PolicyScenarioTest(ScenarioTest):
                 self.check('id', '{id}')
             ])
 
+    # Because the policy assignment name is generated randomly and automatically, the value of each run is different,
+    # so it cannot be rerecord.
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_create_policy_assignment_random')
+    @AllowLargeResponse(4096)
+    @live_only()
+    def test_resource_create_policy_assignment_random(self, resource_group, management_group=None, subscription=None):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'pn': self.create_random_name('azure-cli-test-policy', 30),
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'pdn': self.create_random_name('test_policy', 20),
+            'desc': 'desc_for_test_policy_123',
+            'padn': self.create_random_name('test_assignment', 20),
+            'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\')
+        })
+
+        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
+
+        self.kwargs['pan_random'] = self.cmd('policy assignment create --policy {pn} --display-name {padn} -g {rg} --params {params}', checks=[
+            self.check('displayName', '{padn}'),
+            self.check('sku.name', 'A0'),
+            self.check('sku.tier', 'Free'),
+        ]).get_output_in_json()['name']
+
+        # clean policy assignment and policy
+        self.cmd('policy assignment delete -n {pan_random} -g {rg}')
+        self.cmd('policy assignment list --disable-scope-strict-match',
+                 checks=self.check("length([?name=='{pan_random}'])", 0))
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        self.cmd(cmd)
+        time.sleep(10)
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
+
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
