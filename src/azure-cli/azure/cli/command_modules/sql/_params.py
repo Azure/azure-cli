@@ -1055,7 +1055,8 @@ def load_arguments(self, _):
             c, 'parameters', Server, [
                 'administrator_login',
                 'administrator_login_password',
-                'location'
+                'location',
+                'minimal_tls_version'
             ])
 
         c.argument('administrator_login',
