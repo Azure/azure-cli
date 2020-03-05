@@ -45,7 +45,9 @@ class ImageTemplateTest(ScenarioTest):
                 raise ex
             pass
 
+    # Test framework has problem, hence, live only.
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_file_')
+    @live_only()
     def test_image_builder_template_file(self, resource_group):
         self._assign_ib_permissions(resource_group)
 
