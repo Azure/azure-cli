@@ -2780,9 +2780,9 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test delete sql managed instance
         self.cmd('sql mi delete --id {} --yes'
                  .format(managed_instance_1['id']), checks=NoneCheck())
-        
+
         if is_playback:
-            time.sleep(60) 
+            time.sleep(60)
 
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
@@ -2813,7 +2813,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
 
         # test list sql managed_instance in the subscription should be at least 2
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
-
 
         self.cmd('sql mi delete -g {} -n {} --yes'
                  .format(resource_group_1, managed_instance_name_2), checks=NoneCheck())
@@ -3758,6 +3757,7 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('length(@)', 0)])
 
+
 class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2euap')
     def test_sql_server_minimal_tls_version(self, resource_group):
@@ -3769,14 +3769,14 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
         tls1_1 = "1.1"
 
         # test create sql server with minimal required parameters
-        server_1 = self.cmd('sql server create -g {} --name {} '
-                            '--admin-user {} --admin-password {} --minimal-tls-version {}'
-                            .format(resource_group, server_name_1, admin_login, admin_passwords[0], tls1_2),
-                            checks=[
-                                JMESPathCheck('name', server_name_1),
-                                JMESPathCheck('location', resource_group_location),
-                                JMESPathCheck('resourceGroup', resource_group),
-                                JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {} --minimal-tls-version {}'
+                 .format(resource_group, server_name_1, admin_login, admin_passwords[0], tls1_2),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
 
         # test update sql server
         self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
