@@ -481,7 +481,7 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
         extensions = vmss.virtual_machine_profile.extension_profile.extensions
 
     ade_extension = [x for x in extensions if
-                     x.type.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
+                     x.type1.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
     if not ade_extension:
         from knack.util import CLIError
         raise CLIError("VM scale set '{}' was not encrypted".format(vmss_name))

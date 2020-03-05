@@ -1412,7 +1412,7 @@ class VMSSExtensionInstallTest(ScenarioTest):
                  '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
-            self.check('type', '{ext_type}')
+            self.check('type1', '{ext_type}')
         ])
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
 
@@ -3457,6 +3457,13 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
             self.check('name', '{ppg1}'),
             self.check('location', '{loc}'),
             self.check('proximityPlacementGroupType', 'Standard')
+        ])
+
+        self.cmd('ppg show -g {rg} -n {ppg1} --include-colocation-status', checks=[
+            self.check('name', '{ppg1}'),
+            self.check('location', '{loc}'),
+            self.check('proximityPlacementGroupType', 'Standard'),
+            self.exists('colocationStatus')
         ])
 
         self.cmd('ppg create -n {ppg2} -t ultra -g {rg}', checks=[

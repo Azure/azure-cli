@@ -842,6 +842,9 @@ def load_arguments(self, _):
         c.argument('ppg_type', options_list=['--type', '-t'], help="The type of the proximity placement group. Allowed values: Standard.")
         c.argument('tags', tags_type)
 
+    with self.argument_context('ppg show', min_api='2019-07-01') as c:
+        c.argument('include_colocation_status', action='store_true', help='Enable fetching the colocation status of all the resources in the proximity placement group.')
+
     for scope, item in [('vm create', 'VM'), ('vmss create', 'VMSS'),
                         ('vm availability-set create', 'availability set'),
                         ('vm update', 'VM'), ('vmss update', 'VMSS'),
