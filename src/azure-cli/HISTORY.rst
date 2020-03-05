@@ -4,7 +4,9 @@ Release History
 ===============
 
 **AppService**
-az webapp create : Fixing issue when running the command with --runtime 
+
+* functionapp: Fix an issue when using `az functionapp deployment source config-zip` to deploy on Linux app service / premium plan causing 5xx error
+* az webapp create : Fixing issue when running the command with --runtime 
 
 2.1.0
 ++++++

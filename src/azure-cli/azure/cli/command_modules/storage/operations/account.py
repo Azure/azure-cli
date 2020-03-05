@@ -13,6 +13,12 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
+def str2bool(v):
+    if v is not None:
+        return v.lower() == "true"
+    return v
+
+
 # pylint: disable=too-many-locals, too-many-statements
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, access_tier=None, https_only=None,
@@ -20,7 +26,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            enable_large_file_share=None, enable_files_adds=None, domain_name=None,
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
-                           encryption_key_type_for_table=None, encryption_key_type_for_queue=None):
+                           encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
+                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -99,6 +106,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             queue_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_queue)
             params.encryption.services.queue = queue_encryption_service
 
+    if any([routing_choice, publish_microsoft_endpoints, publish_internet_endpoints]):
+        RoutingPreference = cmd.get_models('RoutingPreference')
+        params.routing_preference = RoutingPreference(
+            routing_choice=routing_choice,
+            publish_microsoft_endpoints=str2bool(publish_microsoft_endpoints),
+            publish_internet_endpoints=str2bool(publish_internet_endpoints)
+        )
+
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
@@ -171,10 +186,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
-                           domain_sid=None, azure_storage_sid=None):
+                           domain_sid=None, azure_storage_sid=None, routing_choice=None,
+                           publish_microsoft_endpoints=None, publish_internet_endpoints=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
-        cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
-                       'Encryption', 'NetworkRuleSet')
+        cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
+                       'NetworkRuleSet')
 
     domain = instance.custom_domain
     if custom_domain is not None:
@@ -285,6 +301,18 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = acl
 
+    if hasattr(params, 'routing_preference') and any([routing_choice, publish_microsoft_endpoints,
+                                                      publish_internet_endpoints]):
+        if params.routing_preference is None:
+            RoutingPreference = cmd.get_models('RoutingPreference')
+            params.routing_preference = RoutingPreference()
+        if routing_choice is not None:
+            params.routing_preference.routing_choice = routing_choice
+        if publish_microsoft_endpoints is not None:
+            params.routing_preference.publish_microsoft_endpoints = str2bool(publish_microsoft_endpoints)
+        if publish_internet_endpoints is not None:
+            params.routing_preference.publish_internet_endpoints = str2bool(publish_internet_endpoints)
+
     return params
 
 
@@ -336,6 +364,51 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, account_name, params)
+
+
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, account_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):
+
+    PrivateEndpointServiceConnectionStatus, ErrorResponseException = \
+        cmd.get_models('PrivateEndpointServiceConnectionStatus', 'ErrorResponseException')
+
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, account_name=account_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    old_status = private_endpoint_connection.private_link_service_connection_state.status
+    new_status = PrivateEndpointServiceConnectionStatus.approved \
+        if is_approved else PrivateEndpointServiceConnectionStatus.rejected
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+    try:
+        return client.put(resource_group_name=resource_group_name,
+                          account_name=account_name,
+                          private_endpoint_connection_name=private_endpoint_connection_name,
+                          properties=private_endpoint_connection)
+    except ErrorResponseException as ex:
+        if ex.response.status_code == 400:
+            from msrestazure.azure_exceptions import CloudError
+            if new_status == "Approved" and old_status == "Rejected":
+                raise CloudError(ex.response, "You cannot approve the connection request after rejection. "
+                                 "Please create a new connection for approval.")
+        raise ex
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, account_name,
+                                        private_endpoint_connection_name, description=None):
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name=resource_group_name, account_name=account_name, is_approved=True,
+        private_endpoint_connection_name=private_endpoint_connection_name, description=description
+    )
+
+
+def reject_private_endpoint_connection(cmd, client, resource_group_name, account_name, private_endpoint_connection_name,
+                                       description=None):
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name=resource_group_name, account_name=account_name, is_approved=False,
+        private_endpoint_connection_name=private_endpoint_connection_name, description=description
+    )
 
 
 def create_management_policies(client, resource_group_name, account_name, policy=None):

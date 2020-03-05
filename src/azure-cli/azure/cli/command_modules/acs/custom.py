@@ -64,6 +64,7 @@ from azure.mgmt.containerservice.v2019_11_01.models import ManagedCluster
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAddonProfile
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterIdentity
 from azure.mgmt.containerservice.v2019_11_01.models import AgentPool
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
@@ -1550,18 +1551,18 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         protocol = 'http'
 
     proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
-    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy'.format(proxy_url,
-                                                                                                       protocol)
+    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
+                                                                                                        protocol)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
         # TODO: better error handling here.
         response = requests.post('http://localhost:8888/openport/{0}'.format(listen_port))
         result = json.loads(response.text)
-        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy'.format(result['url'],
-                                                                                                          protocol)
+        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
+            result['url'], protocol)
         term_id = os.environ.get('ACC_TERM_ID')
         if term_id:
-            response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
+            response = requests.post('http://localhost:8888/openLink/{0}'.format(term_id),
                                      json={"url": dashboardURL})
         logger.warning('To view the console, please open %s in a new tab', dashboardURL)
     else:
@@ -1647,6 +1648,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_count=3,
                nodepool_name="nodepool1",
                nodepool_tags=None,
+               nodepool_labels=None,
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1681,6 +1683,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
+               enable_managed_identity=False,
                attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1701,6 +1704,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
         tags=nodepool_tags,
+        node_labels=nodepool_labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -1815,6 +1819,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if all([disable_rbac, enable_rbac]):
         raise CLIError('specify either "--disable-rbac" or "--enable-rbac", not both.')
 
+    identity = None
+    if enable_managed_identity:
+        identity = ManagedClusterIdentity(
+            type="SystemAssigned"
+        )
     mc = ManagedCluster(
         location=location,
         tags=tags,
@@ -1827,7 +1836,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         network_profile=network_profile,
         addon_profiles=addon_profiles,
         aad_profile=aad_profile,
-        api_server_access_profile=api_server_access_profile
+        api_server_access_profile=api_server_access_profile,
+        identity=identity
     )
 
     # Due to SPN replication latency, we do a few retries here
@@ -2717,6 +2727,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       enable_cluster_autoscaler=False,
                       node_taints=None,
                       tags=None,
+                      labels=None,
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2742,6 +2753,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     agent_pool = AgentPool(
         name=nodepool_name,
         tags=tags,
+        node_labels=labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
