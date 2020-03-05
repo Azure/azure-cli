@@ -124,19 +124,17 @@ def load_arguments(self, _):
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
-    with self.argument_context('keyvault private-endpoint-connection', min_api='2018-02-14') as c:
-        c.argument('description', help='Comments for the approval/rejection.')
-        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
-                   help='The name of the private endpoint connection associated with the Key Vault. '
-                        'Required if --id is not specified')
-        c.argument('vault_name', vault_name_type, required=False,
-                   help='Name of the Key Vault. Required if --id is not specified')
-
     for item in ['approve', 'reject', 'delete', 'show', 'wait']:
         with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
             c.extra('connection_id', options_list=['--id'], required=False,
                     help='The ID of the private endpoint connection associated with the Key Vault. '
                          'If specified --vault-name and --name/-n, this should be omitted.')
+            c.argument('description', help='Comments for the {} operation.'.format(item))
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the Key Vault. '
+                            'Required if --id is not specified')
+            c.argument('vault_name', vault_name_type, required=False,
+                       help='Name of the Key Vault. Required if --id is not specified')
 
     with self.argument_context('keyvault private-link-resource', min_api='2018-02-14') as c:
         c.argument('vault_name', vault_name_type, help='Name of the Key Vault.')

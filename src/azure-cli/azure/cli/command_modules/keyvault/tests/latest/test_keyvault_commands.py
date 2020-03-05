@@ -64,7 +64,10 @@ class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
 
         _create_keyvault(self, self.kwargs)
         self.cmd('keyvault private-link-resource list --vault-name {kv}',
-                 checks=self.check('[0].groupId', 'vault'))
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].groupId', 'vault')
+                 ])
 
 
 class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
@@ -117,7 +120,10 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
             'rejection_desc': 'You are rejected!'
         })
         self.cmd('keyvault private-endpoint-connection reject --id {kv_pec_id} '
-                 '--description "{rejection_desc}"', checks=[
+                 '--description "{rejection_desc}" --no-wait', checks=self.is_empty())
+
+        self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
+                 checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Rejected'),
                      self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
                      self.check('provisioningState', 'Updating')
@@ -125,18 +131,18 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
 
         self.cmd('keyvault private-endpoint-connection wait --id {kv_pec_id} --created')
         self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
 
         self.cmd('keyvault private-endpoint-connection approve --vault-name {kv} --name {kv_pec_name} '
                  '--description "{approval_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Approved'),
                      self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
-                     self.check('provisioningState', 'Updating')
+                     self.check('provisioningState', 'Succeeded')
                  ])
-
-        self.cmd('keyvault private-endpoint-connection wait -n {kv_pec_name} --vault-name {kv} --created')
-        self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):

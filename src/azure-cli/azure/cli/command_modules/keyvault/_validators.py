@@ -166,23 +166,6 @@ def validate_policy_permissions(ns):
             '--certificate-permissions --storage-permissions')
 
 
-def validate_pure_vault_id(cmd, ns):
-    identifier = ns.identifier
-    vault_name = ns.vault_name
-
-    if not identifier:
-        if not vault_name:
-            raise CLIError('incorrect usage: [--id ID | --vault-name NAME]')
-        ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
-    else:
-        if vault_name:
-            raise CLIError('you don\'t need to specify --vault-name if --id is specified')
-
-        id_parts = identifier.split('/')
-        ns.vault_name = id_parts[8]
-        ns.resource_group_name = id_parts[4]
-
-
 def validate_private_endpoint_connection_id(cmd, ns):
     if ns.connection_id:
         from azure.cli.core.util import parse_proxy_resource_id

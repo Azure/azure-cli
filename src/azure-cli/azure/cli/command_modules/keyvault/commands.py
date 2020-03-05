@@ -83,9 +83,9 @@ def load_command_table(self, _):
                             min_api='2018-02-14',
                             client_factory=keyvault_client_private_endpoint_connections_factory,
                             is_preview=True) as g:
-        g.custom_command('approve', 'approve_private_endpoint_connection',
+        g.custom_command('approve', 'approve_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
-        g.custom_command('reject', 'reject_private_endpoint_connection',
+        g.custom_command('reject', 'reject_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
         g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
         g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
