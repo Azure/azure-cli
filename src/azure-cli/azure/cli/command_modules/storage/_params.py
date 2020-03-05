@@ -604,6 +604,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container exists') as c:
         c.ignore('blob_name', 'snapshot')
 
+    with self.argument_context('storage container immutability-policy') as c:
+        c.argument('allow_protected_append_writes', options_list=['--allow-protected-append-writes', '-w'],
+                   arg_type=get_three_state_flag())
+
     with self.argument_context('storage container list') as c:
         c.argument('num_results', arg_type=num_results_type)
 
