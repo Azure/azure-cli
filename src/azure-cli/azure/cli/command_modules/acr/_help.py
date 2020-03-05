@@ -1181,9 +1181,9 @@ type: group
 short-summary: Manage registry private link resources.
 """
 
-helps['acr private-link-resource show'] = """
+helps['acr private-link-resource list'] = """
 type: command
-short-summary: Show the private link resources supported for a registry
+short-summary: list the private link resources supported for a registry
 """
 # endregion
 

@@ -495,6 +495,6 @@ def _resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
     return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
 
 
-def show_private_link_resource(cmd, client, registry_name, resource_group_name=None):
+def list_private_link_resources(cmd, client, registry_name, resource_group_name=None):
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return client.list_private_link_resources(resource_group_name, registry_name)
