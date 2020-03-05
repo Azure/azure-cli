@@ -1958,7 +1958,7 @@ class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
 class SqlServerCapabilityScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_capabilities(self):
-        location = 'westus'
+        location = 'westeurope'
         # New capabilities are added quite frequently and the state of each capability depends
         # on your subscription. So it's not a good idea to make strict checks against exactly
         # which capabilities are returned. The idea is to just check the overall structure.
@@ -3298,7 +3298,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
         s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
 
-        failover_group_name = "fgclitest1650"
+        failover_group_name = "fgclitest1657"
 
         database_name = "db1"
 
@@ -3486,7 +3486,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westeurope')
     def test_sql_virtual_cluster_mgmt(self, resource_group, resource_group_location):
         self.kwargs.update({
             'loc': resource_group_location,
