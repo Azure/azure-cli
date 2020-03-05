@@ -15,6 +15,7 @@ import re
 import ssl
 import sys
 import uuid
+import base64
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
@@ -255,7 +256,7 @@ def _urlretrieve(url):
 def _deploy_arm_template_core(cli_ctx, resource_group_name,
                               template_file=None, template_uri=None, deployment_name=None,
                               parameters=None, mode=None, rollback_on_error=None, validate_only=False,
-                              no_wait=False, aux_subscriptions=None):
+                              no_wait=False, aux_subscriptions=None, aux_tenants=None):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
                                                                     'OnErrorDeployment', mod='models')
@@ -287,7 +288,8 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,
     properties = DeploymentProperties(template=template, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions)
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions,
+                                  aux_tenants=aux_tenants)
 
     validation_result = smc.deployments.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=properties)
 
@@ -312,7 +314,7 @@ def _remove_comments_from_json(template):
 def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_file=None,
                                          template_uri=None, deployment_name=None, parameters=None,
                                          mode=None, rollback_on_error=None, validate_only=False, no_wait=False,
-                                         aux_subscriptions=None):
+                                         aux_subscriptions=None, aux_tenants=None):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
                                                                     'OnErrorDeployment', mod='models')
@@ -343,7 +345,8 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions)
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions,
+                                  aux_tenants=aux_tenants)
 
     deployment_client = smc.deployments  # This solves the multi-api for you
 
@@ -473,14 +476,14 @@ def deploy_arm_template_at_resource_group(cmd,
                                           template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, mode=None, rollback_on_error=None,
                                           no_wait=False, handle_extended_json_format=False,
-                                          aux_subscriptions=None):
+                                          aux_subscriptions=None, aux_tenants=None):
     return _deploy_arm_template_at_resource_group(cli_ctx=cmd.cli_ctx,
                                                   resource_group_name=resource_group_name,
                                                   template_file=template_file, template_uri=template_uri, parameters=parameters,
                                                   deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
                                                   validate_only=False,
                                                   no_wait=no_wait, handle_extended_json_format=handle_extended_json_format,
-                                                  aux_subscriptions=aux_subscriptions)
+                                                  aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
 
 def validate_arm_template_at_resource_group(cmd,
@@ -502,7 +505,7 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
                                            deployment_name=None, mode=None, rollback_on_error=None,
                                            validate_only=False,
                                            no_wait=False, handle_extended_json_format=False,
-                                           aux_subscriptions=None):
+                                           aux_subscriptions=None, aux_tenants=None):
     deployment_properties = None
     if handle_extended_json_format:
         deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx=cli_ctx, template_file=template_file,
@@ -515,7 +518,8 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
                                                                parameters=parameters, mode=mode,
                                                                rollback_on_error=rollback_on_error)
 
-    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format, aux_subscriptions=aux_subscriptions)
+    mgmt_client = _get_deployment_management_client(cli_ctx, handle_extended_json_format=handle_extended_json_format,
+                                                    aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
 
@@ -702,8 +706,10 @@ def _prepare_deployment_properties(cli_ctx, template_file=None, template_uri=Non
     return properties
 
 
-def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False, aux_subscriptions=None):
-    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions)
+def _get_deployment_management_client(cli_ctx, handle_extended_json_format=False,
+                                      aux_subscriptions=None, aux_tenants=None):
+    smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions,
+                                  aux_tenants=aux_tenants)
     deployment_client = smc.deployments  # This solves the multi-api for you
 
     if handle_extended_json_format:
@@ -1230,18 +1236,18 @@ def delete_deployment_at_tenant_scope(cmd, deployment_name):
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
                         parameters=None, mode=None, rollback_on_error=None, no_wait=False,
-                        handle_extended_json_format=False, aux_subscriptions=None):
+                        handle_extended_json_format=False, aux_subscriptions=None, aux_tenants=None):
     if handle_extended_json_format:
         return _deploy_arm_template_core_unmodified(cmd.cli_ctx, resource_group_name=resource_group_name,
                                                     template_file=template_file, template_uri=template_uri,
                                                     deployment_name=deployment_name, parameters=parameters, mode=mode,
                                                     rollback_on_error=rollback_on_error, no_wait=no_wait,
-                                                    aux_subscriptions=aux_subscriptions)
+                                                    aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     return _deploy_arm_template_core(cmd.cli_ctx, resource_group_name=resource_group_name, template_file=template_file,
                                      template_uri=template_uri, deployment_name=deployment_name,
                                      parameters=parameters, mode=mode, rollback_on_error=rollback_on_error,
-                                     no_wait=no_wait, aux_subscriptions=aux_subscriptions)
+                                     no_wait=no_wait, aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
 
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
@@ -1668,7 +1674,10 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
             identity = _build_identities_info(cmd, assign_identity)
         assignment.identity = identity
 
-    createdAssignment = policy_client.policy_assignments.create(scope, name or uuid.uuid4(), assignment)
+    if name is None:
+        name = (base64.urlsafe_b64encode(uuid.uuid4().bytes).decode())[:-2]
+
+    createdAssignment = policy_client.policy_assignments.create(scope, name, assignment)
 
     # Create the identity's role assignment if requested
     if assign_identity is not None and identity_scope:
