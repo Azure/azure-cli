@@ -825,8 +825,10 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 def _get_earliest_restore_date(db):
     return datetime.strptime(db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
 
+
 def _get_earliest_restore_date_for_deleted_db(deleted_db):
     return datetime.strptime(deleted_db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S+00:00")
+
 
 def _get_deleted_date(deleted_db):
     return datetime.strptime(deleted_db['deletionDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
