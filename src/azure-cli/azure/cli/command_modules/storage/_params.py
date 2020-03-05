@@ -221,6 +221,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        required=False)
             c.argument('description', help='Comments for {} operation.'.format(item))
 
+    with self.argument_context('storage account private-link-resource',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type)
+
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
         c.argument('custom_domain',

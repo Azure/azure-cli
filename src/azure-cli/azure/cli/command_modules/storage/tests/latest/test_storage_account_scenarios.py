@@ -784,6 +784,11 @@ class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
         self.cmd('storage account private-link-resource list --account-name {sa} -g {rg}', checks=[
             self.check('length(@)', 6)])
 
+        storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+        self.kwargs['sa_id'] = storage['id']
+        self.cmd('storage account private-link-resource list --ids {sa_id} -g {rg}', checks=[
+            self.check('length(@)', 6)])
+
 
 class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
