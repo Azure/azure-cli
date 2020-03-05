@@ -126,14 +126,6 @@ def list_storage_accounts(cmd, resource_group_name=None):
     return list(accounts)
 
 
-def show_storage_accounts(cmd, client, resource_group_name, account_name, expand=None, include_restore_status=None):
-    if include_restore_status:
-        StorageAccountExpand = cmd.get_models('StorageAccountExpand')
-        expand = StorageAccountExpand()
-
-    return client.get_properties()
-
-
 def show_storage_account_connection_string(cmd, resource_group_name, account_name, protocol='https', blob_endpoint=None,
                                            file_endpoint=None, queue_endpoint=None, table_endpoint=None, sas_token=None,
                                            key_name='primary'):

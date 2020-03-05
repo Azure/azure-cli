@@ -101,37 +101,42 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
             .assert_with_checks(JMESPathCheck('restorePolicy.enabled', True),
                                 JMESPathCheck('restorePolicy.days', 1))
 
-        self.kwargs.update({
-            'c1': self.create_random_name(prefix='container', length=24),
-            'b1': self.create_random_name('blob1', 24),
-            'b2': self.create_random_name('blob2', 24)
-        })
+        c1 = self.create_random_name(prefix='containera', length=24)
+        c2 = self.create_random_name(prefix='containerb', length=24)
+        b1 =self.create_random_name(prefix='blob1', length=24)
+        b2 = self.create_random_name(prefix='blob2', length=24)
+        b3 = self.create_random_name(prefix='blob3', length=24)
+        b4 = self.create_random_name(prefix='blob4', length=24)
 
-        local_file1 = self.create_temp_file(256)
-        local_file2 = self.create_temp_file(256)
+        local_file = self.create_temp_file(256)
 
         account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
                                .format(storage_account, resource_group)).output
-        self.kwargs['key'] = account_key
 
-        self.cmd('storage container create -n {c1} --account-name {sa} --account-key {key}') \
-            .assert_with_checks(JMESPathCheck('created', True))
+        # Prepare containers and blobs
+        for container in [c1, c2]:
+            self.cmd('storage container create -n {} --account-name {} --account-key {}'.format(
+                container, storage_account, account_key)) \
+                .assert_with_checks(JMESPathCheck('created', True))
+            for blob in [b1, b2, b3, b4]:
+                self.cmd('storage blob upload -c {} -f "{}" -n {} --account-name {} --account-key {}'.format(
+                    container, local_file, blob, storage_account, account_key))
+            self.cmd('storage blob list -c {} --account-name {} --account-key {}'.format(
+                container, storage_account, account_key)) \
+                .assert_with_checks(JMESPathCheck('length(@)', 4))
 
-        self.cmd('storage blob upload -c {} -f "{}" -n {} --account-name {} --account-key {}'.format(
-            self.kwargs['c1'], local_file1, self.kwargs['b1'], storage_account, account_key))
-        self.cmd('storage blob upload -c {} -f "{}" -n {} --account-name {} --account-key {}'.format(
-            self.kwargs['c1'], local_file2, self.kwargs['b2'], storage_account, account_key))
+            self.cmd('storage container delete -n {} --account-name {} --account-key {}'.format(
+                container, storage_account, account_key)) \
+                .assert_with_checks(JMESPathCheck('deleted', True))
 
-        self.cmd('storage blob list -c {c1} --account-name {sa} --account-key {key}') \
-            .assert_with_checks(JMESPathCheck('length(@)', 2))
-
-        self.cmd('storage container delete -n {c1} --account-name {sa} --account-key {key}') \
-            .assert_with_checks(JMESPathCheck('deleted', True))
         time.sleep(10)
-        # Restore blobs to 1 day ago, with specific ranges
+
+        # Restore blobs, with specific ranges
         time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
-        start_range = '/'.join([self.kwargs['c1'], self.kwargs['b1']])
-        end_range = '/'.join([self.kwargs['c1'], self.kwargs['b2']])
+
+        # c1/b1 -> c1/b2
+        start_range = '/'.join([c1, b1])
+        end_range = '/'.join([c1, b2])
         self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {}'.format(
             time_to_restore, start_range, end_range, storage_account, resource_group), checks=[
             JMESPathCheck('status', 'Complete'),
@@ -140,3 +145,19 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
 
         self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {} --no-wait'.format(
             time_to_restore, start_range, end_range, storage_account, resource_group))
+
+        time.sleep(90)
+
+        time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
+        # c1/b2 -> c2/b3
+        start_range = '/'.join([c1, b2])
+        end_range = '/'.join([c2, b3])
+        self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {}'.format(
+            time_to_restore, start_range, end_range, storage_account, resource_group), checks=[
+            JMESPathCheck('status', 'Complete'),
+            JMESPathCheck('parameters.blobRanges[0].startRange', start_range),
+            JMESPathCheck('parameters.blobRanges[0].endRange', end_range)])
+
+        time.sleep(90)
+        self.cmd('storage blob restore -t {} --account-name {} -g {} --no-wait'.format(
+            time_to_restore, storage_account, resource_group))
