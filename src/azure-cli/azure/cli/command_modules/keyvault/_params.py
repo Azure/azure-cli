@@ -132,7 +132,7 @@ def load_arguments(self, _):
         c.argument('vault_name', vault_name_type, required=False,
                    help='Name of the Key Vault. Required if --id is not specified')
 
-    for item in ['approve', 'reject', 'delete', 'show']:
+    for item in ['approve', 'reject', 'delete', 'show', 'wait']:
         with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
             c.extra('connection_id', options_list=['--id'], required=False,
                     help='The ID of the private endpoint connection associated with the Key Vault. '
@@ -140,10 +140,6 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault private-link-resource', min_api='2018-02-14') as c:
         c.argument('vault_name', vault_name_type, required=False, help='Name of the Key Vault.')
-
-    with self.argument_context('keyvault private-link-resource list', min_api='2018-02-14') as c:
-        c.extra('identifier', options_list=['--id'], required=False,
-                help='Id of the Key Vault.  If specified \'--vault-name\' should be omitted.')
     # endregion
 
     # region Shared

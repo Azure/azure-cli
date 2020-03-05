@@ -62,11 +62,8 @@ class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
             'loc': 'centraluseuap'
         })
 
-        keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
-        self.kwargs['kv_id'] = keyvault['id']
+        _create_keyvault(self, self.kwargs)
         self.cmd('keyvault private-link-resource list --vault-name {kv}',
-                 checks=self.check('[0].groupId', 'vault'))
-        self.cmd('keyvault private-link-resource list --id {kv_id}',
                  checks=self.check('[0].groupId', 'vault'))
 
 
@@ -126,14 +123,7 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Updating')
                  ])
 
-        max_retries = 20
-        retries = 0
-        while self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}').\
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            #if self.is_live:
-            time.sleep(5)
-            retries += 1
-
+        self.cmd('keyvault private-endpoint-connection wait --id {kv_pec_id} --created')
         self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
                  checks=self.check('provisioningState', 'Succeeded'))
 
@@ -144,13 +134,7 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
                      self.check('provisioningState', 'Updating')
                  ])
 
-        retries = 0
-        while self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}'). \
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            #if self.is_live:
-            time.sleep(5)
-            retries += 1
-
+        self.cmd('keyvault private-endpoint-connection wait -n {kv_pec_name} --vault-name {kv} --created')
         self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
                  checks=self.check('provisioningState', 'Succeeded'))
 

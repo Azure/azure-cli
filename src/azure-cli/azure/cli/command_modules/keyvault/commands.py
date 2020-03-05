@@ -13,7 +13,7 @@ from ._client_factory import (
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace, transform_private_link_list_output,
-    validate_private_endpoint_connection_id, validate_pure_vault_id)
+    validate_private_endpoint_connection_id)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -89,15 +89,14 @@ def load_command_table(self, _):
                          validator=validate_private_endpoint_connection_id)
         g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
         g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
-        g.wait_command('wait')
+        g.wait_command('wait', validator=validate_private_endpoint_connection_id)
 
     with self.command_group('keyvault private-link-resource',
                             kv_private_link_resources_sdk,
                             min_api='2018-02-14',
                             client_factory=keyvault_client_private_link_resources_factory,
                             is_preview=True) as g:
-        g.command('list', 'list_by_vault', validator=validate_pure_vault_id,
-                  transform=transform_private_link_list_output)
+        g.command('list', 'list_by_vault', transform=transform_private_link_list_output)
 
     # Data Plane Commands
     with self.command_group('keyvault key', kv_data_sdk) as g:
