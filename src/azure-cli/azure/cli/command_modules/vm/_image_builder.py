@@ -393,16 +393,20 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
                 content = f.read()
         else:
             # It should be an URL
-            r = requests.get(image_template)
+            msg = '\nusage error: --image-template is not a correct local path or URL'
+            try:
+                r = requests.get(image_template)
+            except Exception:
+                raise CLIError(traceback.format_exc() + msg)
             if r.status_code != 200:
-                raise CLIError('usage error: --image-template is not a valid local path or URL')
+                raise CLIError(traceback.format_exc() + msg)
             content = r.content
 
         try:
             obj = json.loads(content)
         except json.JSONDecodeError:
-            raise CLIError('usage error: Content of --image-template is not a valid JSON string\n' +
-                           traceback.format_exc())
+            raise CLIError(traceback.format_exc() +
+                           '\nusage error: Content of --image-template is not a valid JSON string')
         content = {}
         if 'properties' in obj:
             content = obj['properties']
