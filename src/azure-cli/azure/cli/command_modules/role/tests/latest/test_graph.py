@@ -259,13 +259,11 @@ class CreateForRbacScenarioTest(ScenarioTest):
 class GraphGroupScenarioTest(ScenarioTest):
 
     def test_graph_group_scenario(self):
-        account_info = self.cmd('account show').get_output_in_json()
-        if account_info['user']['type'] == 'servicePrincipal':
+        username = get_signed_in_user(self)
+        if not username:
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
-        signed_in_info = self.cmd('ad signed-in-user show').get_output_in_json()
-        user_principal_name = signed_in_info['userPrincipalName']
-        domain = user_principal_name.split('@', 1)[1]
+        domain = username.split('@', 1)[1]
         self.kwargs = {
             'user1': 'deleteme1',
             'user2': 'deleteme2',
@@ -275,7 +273,6 @@ class GraphGroupScenarioTest(ScenarioTest):
             'pass': 'Test1234!!'
         }
         self.recording_processors.append(AADGraphUserReplacer('@' + domain, '@example.com'))
-        self.replay_processors.append(AADGraphUserReplacer('@' + domain, '@example.com'))
         try:
             # create user1
             user1_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
