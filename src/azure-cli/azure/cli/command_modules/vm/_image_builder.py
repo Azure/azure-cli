@@ -388,24 +388,28 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
 
     if image_template is not None:
         if os.path.exists(image_template):
+            # Local file
             with open(image_template) as f:
                 content = f.read()
         else:
+            # It should be an URL
             r = requests.get(image_template)
             if r.status_code != 200:
                 raise CLIError('usage error: --image-template is not a valid local path or URL')
-            try:
-                obj = json.loads(r.content)
-            except json.JSONDecodeError:
-                raise CLIError('usage error: Content of --image-template is not a valid JSON string\n' +
-                               traceback.format_exc())
-            content = {}
-            if 'properties' in obj:
-                content = obj['properties']
-            if 'location' in obj:
-                content['location'] = obj['location']
-            if 'tags' in obj:
-                content['tags'] = obj['tags']
+            content = r.content
+
+        try:
+            obj = json.loads(content)
+        except json.JSONDecodeError:
+            raise CLIError('usage error: Content of --image-template is not a valid JSON string\n' +
+                           traceback.format_exc())
+        content = {}
+        if 'properties' in obj:
+            content = obj['properties']
+        if 'location' in obj:
+            content['location'] = obj['location']
+        if 'tags' in obj:
+            content['tags'] = obj['tags']
         return client.virtual_machine_image_templates.create_or_update(
             parameters=content, resource_group_name=resource_group_name, image_template_name=image_template_name)
 
