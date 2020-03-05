@@ -307,6 +307,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('approve', 'approve')
         g.command('reject', 'reject')
 
+    with self.command_group('acr private-link-resource', acr_custom_util, is_preview=True) as g:
+        g.command('list', 'list_private_link_resources')
+
     with self.command_group('acr identity', acr_custom_util, is_preview=True) as g:
         g.command('show', 'show_identity')
         g.command('assign', 'assign_identity')

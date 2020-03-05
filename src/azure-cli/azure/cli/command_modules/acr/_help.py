@@ -1175,6 +1175,16 @@ type: command
 short-summary:  Delete a private endpoint connection request for a container registry
 long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
 """
+
+helps['acr private-link-resource'] = """
+type: group
+short-summary: Manage registry private link resources.
+"""
+
+helps['acr private-link-resource list'] = """
+type: command
+short-summary: list the private link resources supported for a registry
+"""
 # endregion
 
 # region encryption
