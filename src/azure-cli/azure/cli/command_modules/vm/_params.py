@@ -514,8 +514,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(['VM', 'ScaleSetVM']), is_preview=True)
         c.argument('scale_in_policy', scale_in_policy_type)
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01', is_preview=True,
-            help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.'
-        )
+                   help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -559,7 +558,6 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('terminate_notification_time', min_api='2019-03-01',
                        help='Length of time (in minutes, between 5 and 15) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
-
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
