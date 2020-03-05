@@ -2814,7 +2814,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test list sql managed_instance in the subscription should be at least 2
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
 
-
         self.cmd('sql mi delete -g {} -n {} --yes'
                  .format(resource_group_1, managed_instance_name_2), checks=NoneCheck())
 
@@ -3771,13 +3770,13 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
 
         # test create sql server with minimal required parameters
         self.cmd('sql server create -g {} --name {} '
-                            '--admin-user {} --admin-password {} --minimal-tls-version {}'
-                            .format(resource_group, server_name_1, admin_login, admin_passwords[0], tls1_2),
-                            checks=[
-                                JMESPathCheck('name', server_name_1),
-                                JMESPathCheck('location', resource_group_location),
-                                JMESPathCheck('resourceGroup', resource_group),
-                                JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
+                 '--admin-user {} --admin-password {} --minimal-tls-version {}'
+                 .format(resource_group, server_name_1, admin_login, admin_passwords[0], tls1_2),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
 
         # test update sql server
         self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
