@@ -2679,32 +2679,33 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        families = ['Gen4', 'Gen5']
+        families = ['Gen5']
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
             subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CLean'
         else:
-            subnet = '/subscriptions/ee5ea899-0791-418f-9270-77cd8273794b/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CooL'
+            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
 
         license_type = 'LicenseIncluded'
         loc = 'westcentralus'
         v_cores = 8
-        storage_size_in_gb = '64'
+        storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
-        resource_group_1 = "cl_one"
+        resource_group_1 = "DejanDuVnetRG"
         collation = "Serbian_Cyrillic_100_CS_AS"
         proxy_override = "Proxy"
         proxy_override_update = "Redirect"
         public_data_endpoint_enabled_update = "False"
         timezone_id = "Central European Standard Time"
+        tls1_2 = "1.2"
 
         user = admin_login
 
         # test create sql managed_instance
         managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
-                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}"'
-                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id),
+                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --minimal_tls_version {}'
+                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, tls1_2),
                                       checks=[
                                           JMESPathCheck('name', managed_instance_name_1),
                                           JMESPathCheck('resourceGroup', resource_group_1),
@@ -2719,7 +2720,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('collation', collation),
                                           JMESPathCheck('proxyOverride', proxy_override),
                                           JMESPathCheck('publicDataEndpointEnabled', 'True'),
-                                          JMESPathCheck('timezoneId', timezone_id)]).get_output_in_json()
+                                          JMESPathCheck('timezoneId', timezone_id),
+                                          JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
 
         # test show sql managed instance 1
         self.cmd('sql mi show -g {} -n {}'
@@ -2784,6 +2786,13 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('proxyOverride', proxy_override_update),
                      JMESPathCheck('publicDataEndpointEnabled', public_data_endpoint_enabled_update)])
 
+        # test delete sql managed instance
+        self.cmd('sql mi delete --id {} --yes'
+                 .format(managed_instance_1['id']), checks=NoneCheck())
+        
+        if is_playback:
+            time.sleep(60) 
+
         # test create another sql managed instance, with identity this time
         self.cmd('sql mi create -g {} -n {} -l {} -i '
                  '--admin-user {} --admin-password {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled'
@@ -2814,9 +2823,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         # test list sql managed_instance in the subscription should be at least 2
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
 
-        # test delete sql managed instance
-        self.cmd('sql mi delete --id {} --yes'
-                 .format(managed_instance_1['id']), checks=NoneCheck())
+
         self.cmd('sql mi delete -g {} -n {} --yes'
                  .format(resource_group_1, managed_instance_name_2), checks=NoneCheck())
 
@@ -3759,3 +3766,31 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('length(@)', 0)])
+
+class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='useuapeast2')
+    def test_sql_server_minimal_tls_version(self, resource_group):
+        server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_passwords = ['SecretPassword123', 'SecretPassword456']
+        resource_group_location = "useuapeast2"
+        tls1_2 = "1.2"
+        tls1_1 = "1.1"
+
+        # test create sql server with minimal required parameters
+        server_1 = self.cmd('sql server create -g {} --name {} '
+                            '--admin-user {} --admin-password {} --minimal_tls_version {}'
+                            .format(resource_group, server_name_1, admin_login, admin_passwords[0], tls1_2),
+                            checks=[
+                                JMESPathCheck('name', server_name_1),
+                                JMESPathCheck('location', resource_group_location),
+                                JMESPathCheck('resourceGroup', resource_group),
+                                JMESPathCheck('minimalTlsVersion', tls1_1)]).get_output_in_json()
+
+        # test update sql server
+        self.cmd('sql server update -g {} --name {} --minimal_tls_version {} -i'
+                 .format(resource_group, server_name_1, tls1_1),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('minimalTlsVersion', tls1_1)])

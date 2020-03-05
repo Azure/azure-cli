@@ -1043,7 +1043,8 @@ def load_arguments(self, _):
 
         c.argument('minimal_tls_version',
                    arg_type=get_enum_type(SqlServerMinimalTlsVersionType),
-                   help='The minimal TLS version enforced by the sql server for inbound connections.')
+                   help='The minimal TLS version enforced by the sql server for inbound connections.',
+                   is_preview=True)
 
     with self.argument_context('sql server create') as c:
         c.argument('location',
@@ -1254,7 +1255,8 @@ def load_arguments(self, _):
 
         c.argument('minimal_tls_version',
                    arg_type=get_enum_type(SqlManagedInstanceMinimalTlsVersionType),
-                   help='The minimal TLS version enforced by the managed instance for inbound connections.')
+                   help='The minimal TLS version enforced by the managed instance for inbound connections.',
+                   is_preview=True)
 
         c.argument('public_data_endpoint_enabled',
                    arg_type=get_three_state_flag(),
