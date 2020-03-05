@@ -493,3 +493,8 @@ def _resolve_identity_client_id(cli_ctx, managed_identity_resource_id):
     res = parse_resource_id(managed_identity_resource_id)
     client = get_mgmt_service_client(cli_ctx, ManagedServiceIdentityClient, subscription_id=res['subscription'])
     return client.user_assigned_identities.get(res['resource_group'], res['name']).client_id
+
+
+def list_private_link_resources(cmd, client, registry_name, resource_group_name=None):
+    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
+    return client.list_private_link_resources(resource_group_name, registry_name)
