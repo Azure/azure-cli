@@ -139,7 +139,7 @@ def load_arguments(self, _):
                          'If specified --vault-name and --name/-n, this should be omitted.')
 
     with self.argument_context('keyvault private-link-resource', min_api='2018-02-14') as c:
-        c.argument('vault_name', vault_name_type, required=False, help='Name of the Key Vault.')
+        c.argument('vault_name', vault_name_type, help='Name of the Key Vault.')
     # endregion
 
     # region Shared
