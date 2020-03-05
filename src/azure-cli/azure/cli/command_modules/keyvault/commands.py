@@ -12,7 +12,7 @@ from ._client_factory import (
     keyvault_client_private_link_resources_factory, keyvault_data_plane_factory)
 
 from ._validators import (
-    process_secret_set_namespace, process_certificate_cancel_namespace, transform_private_link_list_output,
+    process_secret_set_namespace, process_certificate_cancel_namespace,
     validate_private_endpoint_connection_id)
 
 
@@ -96,7 +96,8 @@ def load_command_table(self, _):
                             min_api='2018-02-14',
                             client_factory=keyvault_client_private_link_resources_factory,
                             is_preview=True) as g:
-        g.command('list', 'list_by_vault', transform=transform_private_link_list_output)
+        from azure.cli.core.commands.transform import gen_dict_to_list_transform
+        g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
     with self.command_group('keyvault key', kv_data_sdk) as g:
