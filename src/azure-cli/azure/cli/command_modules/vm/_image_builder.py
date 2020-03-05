@@ -8,6 +8,7 @@
 import os
 import re
 import json
+import traceback
 from json import JSONDecodeError
 from enum import Enum
 
@@ -394,7 +395,11 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             r = requests.get(image_template)
             if r.status_code != 200:
                 raise CLIError('usage error: --image-template is not a valid local path or URL')
-            obj = json.loads(r.content)
+            try:
+                obj = json.loads(r.content)
+            except JSONDecodeError as e:
+                raise CLIError('usage error: Content of --image-template is not a valid JSON string\n' +
+                               traceback.format_exc())
             content = {}
             if 'properties' in obj:
                 content = obj['properties']
