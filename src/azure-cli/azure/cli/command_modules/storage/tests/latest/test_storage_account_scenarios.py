@@ -426,7 +426,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     def test_management_policy(self, resource_group):
         import os
-        from msrestazure.azure_exceptions import CloudError
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         policy_file = os.path.join(curr_dir, 'mgmt_policy.json').replace('\\', '\\\\')
 
@@ -773,3 +772,77 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('{cmd} --enable-delete-retention false -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['deleteRetentionPolicy']['days'], None)
+
+
+class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
+    @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2', sku='Standard_LRS')
+    def test_storage_account_private_link(self, storage_account):
+        self.kwargs.update({
+            'sa': storage_account
+        })
+        self.cmd('storage account private-link-resource list --account-name {sa} -g {rg}', checks=[
+            self.check('length(@)', 6)])
+
+
+class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
+    @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
+    def test_storage_account_private_endpoint(self, storage_account):
+        from msrestazure.azure_exceptions import CloudError
+        self.kwargs.update({
+            'sa': storage_account,
+            'loc': 'eastus',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+        })
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pr = self.cmd('storage account private-link-resource list --account-name {sa} -g {rg}').get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+
+        storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+        self.kwargs['sa_id'] = storage['id']
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {sa_id} '
+            '--group-ids blob').get_output_in_json()
+        self.assertEqual(private_endpoint['name'], self.kwargs['pe'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], self.kwargs['pe_connection'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], self.kwargs['group_id'])
+        self.kwargs['pe_id'] = private_endpoint['privateLinkServiceConnections'][0]['id']
+
+        # Show the connection at storage account
+        storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+        self.assertIn('privateEndpointConnections', storage)
+        self.assertEqual(len(storage['privateEndpointConnections']), 1)
+        self.assertEqual(storage['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+                         'Approved')
+
+        self.kwargs['sa_pec_id'] = storage['privateEndpointConnections'][0]['id']
+        self.kwargs['sa_pec_name'] = storage['privateEndpointConnections'][0]['name']
+
+        self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
+                 checks=self.check('id', '{sa_pec_id}'))
+
+        self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}',
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
+
+        self.cmd('storage account private-endpoint-connection reject --account-name {sa} -g {rg} --name {sa_pec_name}',
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
+
+        with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+            self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
+
+        self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')
