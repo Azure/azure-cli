@@ -367,7 +367,7 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, account_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
+                                               private_endpoint_connection_name, is_approved=True, description=None):
 
     PrivateEndpointServiceConnectionStatus, ErrorResponseException = \
         cmd.get_models('PrivateEndpointServiceConnectionStatus', 'ErrorResponseException')
@@ -391,6 +391,7 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
             if new_status == "Approved" and old_status == "Rejected":
                 raise CloudError(ex.response, "You cannot approve the connection request after rejection. "
                                  "Please create a new connection for approval.")
+        raise ex
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, account_name,
