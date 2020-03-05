@@ -672,7 +672,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
                         terminate_notification_time=None, max_price=None, scale_in_policy=None,
                         os_disk_encryption_set=None, data_disk_encryption_sets=None,
-                        data_disk_iops=None, data_disk_mbps=None):
+                        data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -876,6 +876,13 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             }
         }
         vmss_properties['virtualMachineProfile']['scheduledEventsProfile'] = scheduled_events_profile
+
+    if automatic_repairs_grace_period is not None:
+        automatic_repairs_policy = {
+            'enabled': 'true',
+            'gracePeriod': automatic_repairs_grace_period
+        }
+        vmss_properties['automaticRepairsPolicy'] = automatic_repairs_policy
 
     if scale_in_policy:
         vmss_properties['scaleInPolicy'] = {'rules': scale_in_policy}

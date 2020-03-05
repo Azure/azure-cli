@@ -5337,12 +5337,79 @@ examples:
     text: az network watcher flow-log configure -g MyResourceGroup --enabled false --nsg MyNsg
 """
 
+helps['network watcher flow-log create'] = """
+type: command
+short-summary: Create a flow log on a network security group.
+examples:
+  - name: Create a flow log with Network Security Group name
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --nsg MyNetworkSecurityGroupName
+      --storage-account account
+  - name: Create a flow log with Network Security Group ID (could be in other resource group)
+    text: >
+      az network watcher flow-log create
+      --location westus
+      --name MyFlowLog
+      --nsg MyNetworkSecurityGroupID
+      --storage-account account
+"""
+
+helps['network watcher flow-log list'] = """
+type: command
+short-summary: List all flow log resources for the specified Network Watcher
+"""
+
+helps['network watcher flow-log delete'] = """
+type: command
+short-summary: Delete the specified flow log resource.
+"""
+
 helps['network watcher flow-log show'] = """
 type: command
 short-summary: Get the flow log configuration of a network security group.
 examples:
-  - name: Show NSG flow logs.
+  - name: Show NSG flow logs. (Deprecated)
     text: az network watcher flow-log show -g MyResourceGroup --nsg MyNsg
+  - name: Show NSG flow logs with Azure Resource Management formatted.
+    text: az network watcher flow-log show --location MyNetworkWatcher --name MyFlowLog
+"""
+
+helps['network watcher flow-log update'] = """
+type: command
+short-summary: Update the flow log configuration of a network security group
+examples:
+  - name: Update storage account with name to let resource group identify the storage account and network watcher
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --storage-account accountname
+  - name: Update storage account with ID to let location identify the network watcher
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyResourceGroup
+      --name MyFlowLog
+      --storage-account accountid
+  - name: Update Network Security Group on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --nsg MyNSG
+  - name: Update Workspace on another resource group
+    text: >
+      az network watcher flow-log update
+      --location westus
+      --resource-group MyAnotherResourceGroup
+      --name MyFlowLog
+      --workspace MyAnotherLogAnalyticWorkspace
 """
 
 helps['network watcher list'] = """
