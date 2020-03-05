@@ -150,16 +150,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account private-endpoint-connection', private_endpoint_sdk,
                             custom_command_type=private_endpoint_custom_type, is_preview=True,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
-        from azure.cli.core.util import parse_proxy_resource_id
-        g.command('delete', 'delete', confirmation=True, validator=parse_proxy_resource_id)
-        g.command('show', 'get', validator=parse_proxy_resource_id)
+        from ._validators import validate_private_endpoint_connection_id
+        g.command('delete', 'delete', confirmation=True, validator=validate_private_endpoint_connection_id)
+        g.command('show', 'get', validator=validate_private_endpoint_connection_id)
         g.custom_command('approve', 'approve_private_endpoint_connection',
-                         validator=parse_proxy_resource_id)
+                         validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'reject_private_endpoint_connection',
-                         validator=parse_proxy_resource_id)
+                         validator=validate_private_endpoint_connection_id)
 
-    with self.command_group('storage account private-link-resource', private_link_resource_sdk, is_preview=True,
-                            resource_type=ResourceType.MGMT_STORAGE) as g:
+    with self.command_group('storage account private-link-resource', private_link_resource_sdk, resource_type=ResourceType.MGMT_STORAGE) as g:
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
         g.command('list', 'list_by_storage_account', is_preview=True, min_api='2019-06-01',
                   transform=gen_dict_to_list_transform(key="value"))

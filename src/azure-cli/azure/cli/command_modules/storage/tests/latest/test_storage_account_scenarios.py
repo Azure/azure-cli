@@ -792,7 +792,7 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
         from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
-            'loc': 'centraluseuap',
+            'loc': 'eastus',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),

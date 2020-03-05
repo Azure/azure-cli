@@ -18,7 +18,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account)
 
 
-def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
+def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
     from argcomplete.completers import FilesCompleter
     from six import u as unicode_string
 
@@ -220,10 +220,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('resource_group_name', help='The resource group name of specified storage account.',
                        required=False)
             c.argument('description', help='Comments for {} operation.'.format(item))
-
-    with self.argument_context('storage account private-link-resource',
-                               resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.argument('account_name', acct_name_type)
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
