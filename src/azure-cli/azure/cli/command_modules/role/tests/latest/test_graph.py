@@ -274,6 +274,8 @@ class GraphGroupScenarioTest(ScenarioTest):
             'group': 'deleteme_g',
             'pass': 'Test1234!!'
         }
+        self.recording_processors.append(AADGraphUserReplacer('@' + domain, '@example.com'))
+        self.replay_processors.append(AADGraphUserReplacer('@' + domain, '@example.com'))
         try:
             # create user1
             user1_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
