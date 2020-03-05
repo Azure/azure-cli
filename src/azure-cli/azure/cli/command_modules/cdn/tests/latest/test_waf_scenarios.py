@@ -430,32 +430,18 @@ class CdnWafManagedRuleSetTest(CdnScenarioMixin, ScenarioTest):
 
         rule_set_type = 'DefaultRuleSet'
         rule_set_version = '1.0'
-        rule_group_name = 'SQLI'
 
         self.kwargs.update({
             'resource_group': resource_group,
             'rule_set_type': rule_set_type,
             'rule_set_version': rule_set_version,
-            'rule_group_name': rule_group_name,
         })
 
         checks = [JMESPathCheck('@[0].name', 'DefaultRuleSet_1.0')]
         self.cmd('cdn waf policy managed-rule-set list-available', checks=checks)
 
-        checks = [JMESPathCheck('ruleSetType', rule_set_type),
-                  JMESPathCheck('ruleSetVersion', rule_set_version)]
-        self.cmd('cdn waf policy managed-rule-set show-available '
-                 '--rule-set-type {rule_set_type} --rule-set-version {rule_set_version}',
-                 checks=checks)
-
         checks = [JMESPathCheck('@[0].ruleGroupName', 'PROTOCOL-ATTACK'),
                   JMESPathCheck('length(@[0].rules)', 7)]
         self.cmd('cdn waf policy managed-rule-set rule-group-override list-available '
                  '--rule-set-type {rule_set_type} --rule-set-version {rule_set_version}',
-                 checks=checks)
-
-        checks = [JMESPathCheck('ruleGroupName', 'SQLI'),
-                  JMESPathCheck('rules[0].ruleId', '942100')]
-        self.cmd('cdn waf policy managed-rule-set rule-group-override show-available '
-                 '--rule-set-type {rule_set_type} --rule-set-version {rule_set_version} -n {rule_group_name}',
                  checks=checks)

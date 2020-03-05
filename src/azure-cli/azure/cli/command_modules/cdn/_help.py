@@ -500,15 +500,6 @@ examples:
     text: az cdn waf policy managed-rule-set list-available
 """
 
-helps['cdn waf policy managed-rule-set show-available'] = """
-type: command
-short-summary: List available CDN WAF managed rule sets.
-examples:
-  - name: Show the CDN WAF managed rule set DefaultRuleSet_1.0.
-    text: az cdn waf policy managed-rule-set show-available \\
-            --rule-set-type DefaultRuleSet --rule-set-version 1.0
-"""
-
 helps['cdn waf policy managed-rule-set rule-group-override'] = """
 type: group
 short-summary: Manage rule group overrides of a managed rule on a CDN WAF policy.
@@ -577,16 +568,6 @@ examples:
     text: |
       az cdn waf policy managed-rule-set rule-group-override list-available \\
         --rule-set-type DefaultRuleSet --rule-set-version 1.0
-"""
-
-helps['cdn waf policy managed-rule-set rule-group-override show-available'] = """
-type: command
-short-summary: Show an available CDN WAF managed rule group.
-examples:
-  - name: Show the SQLI rule group of DefaultRuleSet_1.0.
-    text: |
-      az cdn waf policy managed-rule-set rule-group-override show-available \\
-        --rule-set-type DefaultRuleSet --rule-set-version 1.0 -n SQLI
 """
 
 helps['cdn waf policy custom-rule'] = """

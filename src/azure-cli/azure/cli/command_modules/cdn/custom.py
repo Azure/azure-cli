@@ -512,7 +512,7 @@ def list_waf_managed_rule_set(client):
     return client.list()
 
 
-def show_waf_managed_rule_set(client, rule_set_type, rule_set_version):
+def _show_waf_managed_rule_set(client, rule_set_type, rule_set_version):
     rulesets = client.list()
     for r in rulesets:
         if r.rule_set_type == rule_set_type and r.rule_set_version == rule_set_version:
@@ -520,19 +520,8 @@ def show_waf_managed_rule_set(client, rule_set_type, rule_set_version):
     raise CLIError("managed rule set type '{}' version '{}' not found".format(rule_set_type, rule_set_version))
 
 
-def show_waf_managed_rule_group(client, rule_set_type, rule_set_version, name):
-    ruleset = show_waf_managed_rule_set(client, rule_set_type, rule_set_version)
-
-    for g in ruleset.rule_groups:
-        if g.rule_group_name == name:
-            return g
-
-    raise CLIError("managed rule group type '{}' version '{}' not found in managed rule set {}".format(
-        name, rule_set_type, rule_set_version))
-
-
 def list_waf_managed_rule_groups(client, rule_set_type, rule_set_version):
-    return show_waf_managed_rule_set(client, rule_set_type, rule_set_version).rule_groups
+    return _show_waf_managed_rule_set(client, rule_set_type, rule_set_version).rule_groups
 
 
 def set_waf_policy(client,
