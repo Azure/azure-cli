@@ -825,6 +825,8 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
 def _get_earliest_restore_date(db):
     return datetime.strptime(db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
 
+def _get_earliest_restore_date_for_deleted_db(deleted_db):
+    return datetime.strptime(deleted_db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S+00:00")
 
 def _get_deleted_date(deleted_db):
     return datetime.strptime(deleted_db['deletionDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
@@ -961,7 +963,7 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
 
         # Restore deleted to earlier point in time
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --deleted-time {} --dest-name {}'
-                 .format(resource_group, server, database_name, _get_earliest_restore_date(deleted_db).isoformat(),
+                 .format(resource_group, server, database_name, _get_earliest_restore_date_for_deleted_db(deleted_db).isoformat(),
                          _get_deleted_date(deleted_db).isoformat(), restore_database_name2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -2772,7 +2774,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        families = ['Gen4', 'Gen5']
+        families = ['Gen5']
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
@@ -3079,17 +3081,17 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
-            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CLean'
+            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
         else:
-            subnet = '/subscriptions/ee5ea899-0791-418f-9270-77cd8273794b/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CooL'
+            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
 
         license_type = 'LicenseIncluded'
-        loc = 'westcentralus'
-        v_cores = 8
-        storage_size_in_gb = '64'
+        loc = 'eastus2euap'
+        v_cores = 4
+        storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
         family = 'Gen5'
-        resource_group_1 = "cl_one"
+        resource_group_1 = "DejanDuVnetRG"
         collation = "Latin1_General_100_CS_AS_SC"
         user = admin_login
 

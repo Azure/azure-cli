@@ -1920,10 +1920,7 @@ def server_create(
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
 
     if enable_public_network is not None:
-        if enable_public_network:
-            kwargs['public_network_access'] = ServerPublicNetworkAccess.enabled
-        else:
-            kwargs['public_network_access'] = ServerPublicNetworkAccess.disabled
+        kwargs['public_network_access'] = ServerPublicNetworkAccess.enabled if enable_public_network else ServerPublicNetworkAccess.disabled
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -1965,10 +1962,7 @@ def server_update(
         administrator_login_password or instance.administrator_login_password)
 
     if enable_public_network is not None:
-        if enable_public_network:
-            instance.public_network_access = ServerPublicNetworkAccess.enabled
-        else:
-            instance.public_network_access = ServerPublicNetworkAccess.disabled
+        instance.public_network_access = ServerPublicNetworkAccess.enabled if enable_public_network else ServerPublicNetworkAccess.disabled
 
     return instance
 

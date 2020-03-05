@@ -1042,8 +1042,9 @@ def load_arguments(self, _):
         c.argument('enable_public_network',
                    options_list=['--enable-public-network', '-e'],
                    arg_type=get_three_state_flag(),
-                   help='Set whether public network access to server is allowed or not. When disabled,'
-                   'only connections made through Private Links can reach this server.')
+                   help='Set whether public network access to server is allowed or not. When false,'
+                   'only connections made through Private Links can reach this server.',
+                   is_preview=True)
 
     with self.argument_context('sql server create') as c:
         c.argument('location',
