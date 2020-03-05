@@ -2984,17 +2984,17 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
-            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CLean'
+            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
         else:
-            subnet = '/subscriptions/ee5ea899-0791-418f-9270-77cd8273794b/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CooL'
+            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
 
         license_type = 'LicenseIncluded'
-        loc = 'westcentralus'
-        v_cores = 8
-        storage_size_in_gb = '64'
+        loc = 'eastus2euap'
+        v_cores = 4
+        storage_size_in_gb = '128'
         edition = 'GeneralPurpose'
-        family = 'Gen4'
-        resource_group_1 = "cl_one"
+        family = 'Gen5'
+        resource_group_1 = "DejanDuVnetRG"
         collation = "Latin1_General_100_CS_AS_SC"
         user = admin_login
 
