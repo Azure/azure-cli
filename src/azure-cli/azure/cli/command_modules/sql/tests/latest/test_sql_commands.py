@@ -215,7 +215,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        # test create sql server with no enable-public-network passed in, verify publicNetworkAccess == Enabled
+        # test create sql server with no enable-public-network passed in , verify publicNetworkAccess == Enabled
         self.cmd('sql server create -g {} --name {} --admin-user {} --admin-password {}'
                  .format(resource_group, server_name, admin_login, admin_passwords[0]),
                  checks=[
