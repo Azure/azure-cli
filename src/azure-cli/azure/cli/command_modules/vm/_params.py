@@ -513,6 +513,9 @@ def load_arguments(self, _):
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In VM mode, you manually create and add a virtual machine of any configuration to the scale set. In ScaleSetVM mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
                    arg_type=get_enum_type(['VM', 'ScaleSetVM']), is_preview=True)
         c.argument('scale_in_policy', scale_in_policy_type)
+        c.argument('automatic_repairs_grace_period', min_api='2018-10-01', is_preview=True,
+            help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.'
+        )
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -545,12 +548,18 @@ def load_arguments(self, _):
         c.argument('enable_automatic_repairs', min_api='2018-10-01', arg_type=get_three_state_flag(),
                    help='Enable automatic repairs', is_preview=True)
 
+    with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs', is_preview=True) as c:
+        c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
+        c.argument(
+            'automatic_repairs_grace_period',
+            help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.'
+        )
+
     for scope in ['vmss create', 'vmss update']:
         with self.argument_context(scope) as c:
             c.argument('terminate_notification_time', min_api='2019-03-01',
                        help='Length of time (in minutes, between 5 and 15) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
-            c.argument('automatic_repairs_grace_period', min_api='2018-10-01', is_preview=True,
-                       help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
+
 
     for scope, help_prefix in [('vmss update', 'Update the'), ('vmss wait', 'Wait on the')]:
         with self.argument_context(scope) as c:
