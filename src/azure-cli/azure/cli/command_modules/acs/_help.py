@@ -331,6 +331,9 @@ parameters:
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+  - name: --enable-managed-identity
+    type: bool
+    short-summary: Using a system assigned managed identity to manage cluster resource group.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -354,6 +357,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku basic --vm-set-type AvailabilitySet
   - name: Create a kubernetes cluster with authorized apiserver IP ranges.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 193.168.1.0/24,194.168.1.0/24,195.168.1.0
+  - name: Create a kubernetes cluster which enables managed identity.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
 """
 
 helps['aks update'] = """
