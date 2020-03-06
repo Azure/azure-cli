@@ -204,6 +204,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
 
+    with self.argument_context('storage account private-endpoint-connection',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with the Storage Account.')
+    for item in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('storage account private-endpoint-connection {}'.format(item),
+                                   resource_type=ResourceType.MGMT_STORAGE) as c:
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the Storage Account.')
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the Storage Account. You can get '
+                    'it using `az storage account show`.')
+            c.argument('account_name', help='The storage account name.', required=False)
+            c.argument('resource_group_name', help='The resource group name of specified storage account.',
+                       required=False)
+            c.argument('description', help='Comments for {} operation.'.format(item))
+
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
         c.argument('custom_domain',
