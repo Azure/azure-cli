@@ -56,7 +56,9 @@ from .custom import (
     ComputeModelType,
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
-    FailoverPolicyType
+    FailoverPolicyType,
+    SqlServerMinimalTlsVersionType,
+    SqlManagedInstanceMinimalTlsVersionType
 )
 
 from ._validators import (
@@ -1039,6 +1041,10 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this server'
                    'for use with key management services like Azure KeyVault.')
 
+        c.argument('minimal_tls_version',
+                   arg_type=get_enum_type(SqlServerMinimalTlsVersionType),
+                   help='The minimal TLS version enforced by the sql server for inbound connections.')
+
         c.argument('enable_public_network',
                    options_list=['--enable-public-network', '-e'],
                    arg_type=get_three_state_flag(),
@@ -1055,7 +1061,8 @@ def load_arguments(self, _):
             c, 'parameters', Server, [
                 'administrator_login',
                 'administrator_login_password',
-                'location'
+                'location',
+                'minimal_tls_version'
             ])
 
         c.argument('administrator_login',
@@ -1253,6 +1260,11 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ServerConnectionType),
                    help='The connection type used for connecting to the instance.')
 
+        c.argument('minimal_tls_version',
+                   arg_type=get_enum_type(SqlManagedInstanceMinimalTlsVersionType),
+                   help='The minimal TLS version enforced by the managed instance for inbound connections.',
+                   is_preview=True)
+
         c.argument('public_data_endpoint_enabled',
                    arg_type=get_three_state_flag(),
                    help='Whether or not the public data endpoint is enabled for the instance.')
@@ -1271,6 +1283,7 @@ def load_arguments(self, _):
                 'administrator_login',
                 'administrator_login_password',
                 'license_type',
+                'minimal_tls_version',
                 'virtual_network_subnet_id',
                 'vcores',
                 'storage_size_in_gb',
