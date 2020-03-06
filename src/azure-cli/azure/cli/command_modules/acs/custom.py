@@ -533,8 +533,8 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     # always create application with 5 years expiration
     start_date = datetime.datetime.utcnow()
     end_date = start_date + relativedelta(years=5)
-    result = create_application(rbac_client.applications, name, url, [url], password=client_secret,
-                                start_date=start_date, end_date=end_date)
+    result, aad_session_key = create_application(rbac_client.applications, name, url, [url], password=client_secret,
+                                                 start_date=start_date, end_date=end_date)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
         hook.add(message='Creating service principal', value=0.1 * x, total_val=1.0)
@@ -546,10 +546,10 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
             logger.info(ex)
             time.sleep(2 + 2 * x)
     else:
-        return False
+        return False, aad_session_key
     hook.add(message='Finished service principal creation', value=1.0, total_val=1.0)
     logger.info('Finished service principal creation')
-    return service_principal
+    return service_principal, aad_session_key
 
 
 def _add_role_assignment(cli_ctx, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
@@ -1313,7 +1313,8 @@ def create_application(client, display_name, homepage, identifier_uris,
                                                    password_credentials=password_creds,
                                                    required_resource_access=required_resource_accesses)
     try:
-        return client.create(app_create_param)
+        result = client.create(app_create_param, raw=True)
+        return result.output, result.response.headers["ocp-aad-session-key"]
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -1840,6 +1841,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         identity=identity
     )
 
+    # Add AAD session key to header
+    custom_headers = {'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")}
+
     # Due to SPN replication latency, we do a few retries here
     max_retry = 30
     retry_exception = Exception(None)
@@ -1867,7 +1871,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 result = sdk_no_wait(no_wait,
                                      client.create_or_update,
                                      resource_group_name=resource_group_name,
-                                     resource_name=name, parameters=mc)
+                                     resource_name=name,
+                                     parameters=mc,
+                                     custom_headers=custom_headers)
             return result
         except CloudError as ex:
             retry_exception = ex
@@ -2896,6 +2902,7 @@ def _ensure_aks_service_principal(cli_ctx,
                                   dns_name_prefix=None,
                                   location=None,
                                   name=None):
+    aad_session_key = None
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
@@ -2905,7 +2912,7 @@ def _ensure_aks_service_principal(cli_ctx,
         salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
         url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        service_principal, aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
             raise CLIError('Could not create a service principal with the right permissions. '
                            'Are you an Owner on this project?')
@@ -2918,6 +2925,7 @@ def _ensure_aks_service_principal(cli_ctx,
     return {
         'client_secret': client_secret,
         'service_principal': service_principal,
+        'aad_session_key': aad_session_key,
     }
 
 
@@ -2962,12 +2970,12 @@ def _ensure_osa_aad(cli_ctx,
                                required_resource_accesses=[required_osa_aad_access])
             logger.info('Updated AAD: %s', aad_client_app_id)
         else:
-            result = create_application(client=rbac_client.applications,
-                                        display_name=name,
-                                        identifier_uris=[app_id_name],
-                                        homepage=app_id_name,
-                                        password=aad_client_app_secret,
-                                        required_resource_accesses=[required_osa_aad_access])
+            result, _aad_session_key = create_application(client=rbac_client.applications,
+                                                          display_name=name,
+                                                          identifier_uris=[app_id_name],
+                                                          homepage=app_id_name,
+                                                          password=aad_client_app_secret,
+                                                          required_resource_accesses=[required_osa_aad_access])
             aad_client_app_id = result.app_id
             logger.info('Created an AAD: %s', aad_client_app_id)
         # Get the TenantID
@@ -2998,7 +3006,7 @@ def _ensure_service_principal(cli_ctx,
         salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
         url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        service_principal, _aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
             raise CLIError('Could not create a service principal with the right permissions. '
                            'Are you an Owner on this project?')
