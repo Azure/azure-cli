@@ -161,12 +161,12 @@ type: command
 short-summary: List custom VM images.
 """
 
-helps['image template'] = """
+helps['image builder'] = """
 type: group
 short-summary: Manage and build image builder templates.
 """
 
-helps['image template create'] = """
+helps['image builder create'] = """
 type: command
 short-summary: Create an image builder template.
 parameters:
@@ -180,9 +180,13 @@ examples:
         scripts="https://my-script-url.net/customize_script.sh"
         imagesource="Canonical:UbuntuServer:18.04-LTS:18.04.201903060"
 
-        az image template create --image-source $imagesource -n mytemplate -g my-group \\
+        az image builder create --image-source $imagesource -n mytemplate -g my-group \\
             --scripts $scripts --managed-image-destinations image_1=westus \\
             --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth
+
+  - name: Create an image builder template using an image template file.
+    text: |
+        az image builder create -g my-group -n mytemplate --image-template filename
 
   - name: >
         [Advanced] Create an image template with multiple customizers and distributors using the CLI's object cache via --defer. Supports features such as: customizer and output names, powershell exit codes, inline scripts, windows restart, file customizers, artifact tags and vhd output distributors.
@@ -192,60 +196,60 @@ examples:
 
         # create and update template object in local cli cache. Defers put request to ARM
         # Cache object ttl set via az configure.
-        az image template create --image-source $imagesource -n mytemplate \\
+        az image builder create --image-source $imagesource -n mytemplate \\
             -g my-group --scripts $script --defer
 
         # add customizers
-        az image template customizer add -n mytemplate -g my-group  \\
+        az image builder customizer add -n mytemplate -g my-group  \\
             --customizer-name my-pwsh-script --exit-codes 0 1 --inline-script \\
             "mkdir c:\\buildActions" "echo Azure-Image-Builder-Was-Here \\
              > c:\\buildActions\\Output.txt" --type powershell --defer
 
-        az image template customizer add -n mytemplate -g my-group \\
+        az image builder customizer add -n mytemplate -g my-group \\
             --customizer-name my-file-customizer --type file \\
             --file-source "https://my-file-source.net/file.txt"  \\
             --dest-path "c:\\buildArtifacts\\file.txt" --defer
 
         # add distributors
-        az image template output add -n mytemplate -g my-group --is-vhd \\
+        az image builder output add -n mytemplate -g my-group --is-vhd \\
             --output-name my-win-image-vhd --artifact-tags "is_vhd=True" --defer
 
-        az image template output add -n mytemplate -g my-group \\
+        az image builder output add -n mytemplate -g my-group \\
             --output-name my-win-image-managed --managed-image winImage \\
             --managed-image-location eastus \\
             --artifact-tags "is_vhd=False" --defer
 
         # Stop deferring put request to ARM. Create the template from the object cache.
         # Cache object will be deleted.
-        az image template update -n mytemplate -g my-group
+        az image builder update -n mytemplate -g my-group
 """
 
-helps['image template customizer'] = """
+helps['image builder customizer'] = """
 type: group
 short-summary: Manage image builder template customizers.
 """
 
-helps['image template customizer add'] = """
+helps['image builder customizer add'] = """
 type: command
 short-summary: Add an image builder customizer to an image builder template.
 long-summary: Must be used with --defer
 examples:
   - name: Add an inline shell customizer to an image template in the cli object cache
     text: |
-        az image template customizer add -n mytemplate -g my-group \\
+        az image builder customizer add -n mytemplate -g my-group \\
             --inline-script "sudo mkdir /buildArtifacts" \\
                             "sudo cp /tmp/index.html /buildArtifacts/index.html" \\
             --customizer-name shell-script-inline --type shell --defer
 
   - name: Add a file customizer to an image template in the cli object cache
     text: |
-        az image template customizer add -n mytemplate -g my-group \\
+        az image builder customizer add -n mytemplate -g my-group \\
             --customizer-name my-file --type file \\
             --file-source "https://my-remote-file.html" --dest-path "/tmp/index.html" --defer
 
   - name: Add a windows restart customizer to an image template in the cli object cache
     text: |
-        az image template customizer add -n mytemplate -g my-group \\
+        az image builder customizer add -n mytemplate -g my-group \\
         --customizer-name shell-script-url \\
         --restart-check-command "echo Azure-Image-Builder-Restarted-the-VM  > \\
                                 c:\\buildArtifacts\\restart.txt" \\
@@ -253,29 +257,29 @@ examples:
 
 """
 
-helps['image template customizer clear'] = """
+helps['image builder customizer clear'] = """
 type: command
 short-summary: Remove all image builder customizers from an image builder template.
 long-summary: Must be used with --defer
 """
 
-helps['image template customizer remove'] = """
+helps['image builder customizer remove'] = """
 type: command
 short-summary: Remove an image builder customizer from an image builder template.
 long-summary: Must be used with --defer
 """
 
-helps['image template delete'] = """
+helps['image builder delete'] = """
 type: command
 short-summary: Delete image builder template.
 """
 
-helps['image template list'] = """
+helps['image builder list'] = """
 type: command
 short-summary: List image builder templates.
 """
 
-helps['image template output'] = """
+helps['image builder output'] = """
 type: group
 short-summary: Manage image builder template output distributors.
 long-summary: >
@@ -283,80 +287,80 @@ long-summary: >
     a shared image in a shared image gallery (SIG), or as a VHD blob.
 """
 
-helps['image template output add'] = """
+helps['image builder output add'] = """
 type: command
 short-summary: Add an image builder output distributor to an image builder template.
 long-summary: Must be used with --defer. The output distributor can be a managed image, a gallery image, or as a VHD blob.
 examples:
   - name: Add a managed image distributor to an image template in the cli object cache. Specify a run output name.
     text: |
-        az image template output add -n mytemplate -g my-group \\
+        az image builder output add -n mytemplate -g my-group \\
             --managed-image my_desired_image_name --output-name managed_image_run_01 --defer
 
   - name: Add a shared image gallery distributor to an image template in the cli object cache. Specify its replication regions.
     text: |
-        az image template output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
+        az image builder output add -n mytemplate -g my-group --gallery-name my_shared_gallery \\
             --gallery-replication-regions westus brazilsouth \\
             --gallery-image-definition linux_image_def --defer
 
   - name: Add a VHD distributor to an image template in the cli object cache.
     text: |
-        az image template output add -n mytemplate -g my-group \\
+        az image builder output add -n mytemplate -g my-group \\
             --output-name my_vhd_image --is-vhd  --defer
 
 """
 
-helps['image template output clear'] = """
+helps['image builder output clear'] = """
 type: command
 short-summary: Remove all image builder output distributors from an image builder template.
 long-summary: Must be used with --defer
 """
 
-helps['image template output remove'] = """
+helps['image builder output remove'] = """
 type: command
 short-summary: Remove an image builder output distributor from an image builder template.
 long-summary: Must be used with --defer
 """
 
-helps['image template run'] = """
+helps['image builder run'] = """
 type: command
 short-summary: Build an image builder template.
 examples:
   - name: Start a template build run and then wait for it to finish.
     text: |
-        az image template run -n mytemplate -g my-group --no-wait
+        az image builder run -n mytemplate -g my-group --no-wait
 
-        az image template wait -n mytemplate -g aibmdi \\
+        az image builder wait -n mytemplate -g aibmdi \\
             --custom "lastRunStatus.runState!='running'"
 
-        az image template show -n mytemplate -g my-group
+        az image builder show -n mytemplate -g my-group
 """
 
-helps['image template show'] = """
+helps['image builder show'] = """
 type: command
 short-summary: Show an image builder template.
 examples:
   - name: Show an image builder template (autogenerated)
     text: |
-        az image template show --name mytemplate  --resource-group my-group
+        az image builder show --name mytemplate  --resource-group my-group
     crafted: true
 """
 
-helps['image template show-runs'] = """
+helps['image builder show-runs'] = """
 type: command
 short-summary: Show an image builder template's run outputs.
 examples:
   - name: Run a template build run and then view its run outputs.
     text: |
-        az image template run -n mytemplate -g my-group --no-wait
+        az image builder run -n mytemplate -g my-group --no-wait
 
-        az image template wait -n mytemplate -g aibmdi \\
+        az image builder wait -n mytemplate -g aibmdi \\
             --custom "lastRunStatus.runState!='running'"
 
-        az image template show-runs -n mytemplate -g my-group
+        az image builder show-runs -n mytemplate -g my-group
 """
 
-helps['image template update'] = """
+helps['image builder update'] = """
 type: command
 short-summary: Update an image builder template.
 long-summary: >
@@ -367,33 +371,33 @@ long-summary: >
 examples:
   - name: |
         Create a template resource from a template object in the cli cache.
-        See "az image template create / output add / customizer add --help" and "az cache -h" for more information
+        See "az image builder create / output add / customizer add --help" and "az cache -h" for more information
     text: |
         # create and write template object to local cli cache
-        az image template create --image-source {image_source} -n mytemplate -g my-group \\
+        az image builder create --image-source {image_source} -n mytemplate -g my-group \\
             --scripts {script} --managed-image-destinations image_1=westus --defer
 
         # add customizers and outputs to local cache template object via az image template output / customizer add
         # one can also update cache object properties through generic update options, such as: --set
-        az image template output add -n mytemplate -g my-group --output-name my-win-image-managed \\
+        az image builder output add -n mytemplate -g my-group --output-name my-win-image-managed \\
             --artifact-tags "is_vhd=False"  --managed-image winImage --managed-image-location eastus --defer
 
         # send template create request to azure to create template resource
-        az image template update -n mytemplate -g my-group
+        az image builder update -n mytemplate -g my-group
 """
 
-helps['image template wait'] = """
+helps['image builder wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the template is met.
 examples:
   - name: Start a template build run and then wait for it to finish.
     text: |
-        az image template run -n mytemplate -g my-group --no-wait
+        az image builder run -n mytemplate -g my-group --no-wait
 
-        az image template wait -n mytemplate -g aibmdi \\
+        az image builder wait -n mytemplate -g aibmdi \\
             --custom "lastRunStatus.runState!='running'"
 
-        az image template show -n mytemplate -g my-group
+        az image builder show -n mytemplate -g my-group
 """
 
 helps['image update'] = """
