@@ -37,7 +37,8 @@ from azure.mgmt.sql.models import (
     ManagedInstancePairInfo,
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
-    InstanceFailoverGroupReadWriteEndpoint
+    InstanceFailoverGroupReadWriteEndpoint,
+    ServerPublicNetworkAccess
 )
 
 from knack.log import get_logger
@@ -1987,6 +1988,7 @@ def server_create(
         server_name,
         assign_identity=False,
         no_wait=False,
+        enable_public_network=None,
         **kwargs):
     '''
     Creates a server.
@@ -1994,6 +1996,11 @@ def server_create(
 
     if assign_identity:
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    if enable_public_network is not None:
+        kwargs['public_network_access'] = (
+            ServerPublicNetworkAccess.enabled if enable_public_network
+            else ServerPublicNetworkAccess.disabled)
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -2021,7 +2028,8 @@ def server_update(
         instance,
         administrator_login_password=None,
         assign_identity=False,
-        minimal_tls_version=None):
+        minimal_tls_version=None,
+        enable_public_network=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
     '''
@@ -2035,6 +2043,11 @@ def server_update(
         administrator_login_password or instance.administrator_login_password)
     instance.minimal_tls_version = (
         minimal_tls_version or instance.minimal_tls_version)
+
+    if enable_public_network is not None:
+        instance.public_network_access = (
+            ServerPublicNetworkAccess.enabled if enable_public_network
+            else ServerPublicNetworkAccess.disabled)
 
     return instance
 

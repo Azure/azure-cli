@@ -130,6 +130,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
         client_factory=cf_mgmt_policy)
 
+    storage_blob_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.blob#{}',
+        client_factory=cf_sa,
+        resource_type=ResourceType.MGMT_STORAGE)
+
     with self.command_group('storage account management-policy', management_policy_sdk,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2018-11-01',
                             custom_command_type=management_policy_custom_type) as g:
@@ -245,6 +250,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('copy cancel', 'abort_copy_blob')
         g.storage_custom_command_oauth(
             'copy start-batch', 'storage_blob_copy_batch')
+
+    with self.command_group('storage blob', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
+                            custom_command_type=storage_blob_custom_type) as g:
+        g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', is_preview=True, supports_no_wait=True)
 
     with self.command_group('storage blob incremental-copy',
                             operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',

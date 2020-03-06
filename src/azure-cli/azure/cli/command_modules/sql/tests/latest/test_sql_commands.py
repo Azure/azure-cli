@@ -159,6 +159,94 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # test list sql server should be 0
         self.cmd('sql server list -g {}'.format(resource_group_1), checks=[NoneCheck()])
 
+    @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
+    def test_sql_server_public_network_access_create_mgmt(self, resource_group_1, resource_group_location):
+        server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_3 = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_passwords = ['SecretPassword123', 'SecretPassword456']
+
+        # test create sql server with no enable-public-network passed in, verify publicNetworkAccess == Enabled
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {}'
+                 .format(resource_group_1, server_name_1, admin_login, admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('publicNetworkAccess', 'Enabled')])
+
+        # test create sql server with enable-public-network == true passed in, verify publicNetworkAccess == Enabled
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {} --enable-public-network {}'
+                 .format(resource_group_1, server_name_2, admin_login, admin_passwords[0], 'true'),
+                 checks=[
+                     JMESPathCheck('name', server_name_2),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('publicNetworkAccess', 'Enabled')])
+
+        # test create sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
+        self.cmd('sql server create -g {} --name {} '
+                 '--admin-user {} --admin-password {} -e {}'
+                 .format(resource_group_1, server_name_3, admin_login, admin_passwords[0], 'false'),
+                 checks=[
+                     JMESPathCheck('name', server_name_3),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('publicNetworkAccess', 'Disabled')])
+
+        # test get sql server to verify publicNetworkAccess == 'Disabled' for the above server as expected
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group_1, server_name_3),
+                 checks=[
+                     JMESPathCheck('name', server_name_3),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('publicNetworkAccess', 'Disabled')])
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
+    def test_sql_server_public_network_access_update_mgmt(self, resource_group, resource_group_location):
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_passwords = ['SecretPassword123', 'SecretPassword456']
+
+        # test create sql server with no enable-public-network passed in, verify publicNetworkAccess == Enabled
+        self.cmd('sql server create -g {} --name {} --admin-user {} --admin-password {}'
+                 .format(resource_group, server_name, admin_login, admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', resource_group_location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('publicNetworkAccess', 'Enabled')])
+
+        # test update sql server with enable-public-network == false passed in, verify publicNetworkAccess == Disabled
+        self.cmd('sql server update -g {} -n {} --enable-public-network {}'
+                 .format(resource_group, server_name, 'false'),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('publicNetworkAccess', 'Disabled')])
+
+        # test update sql server with no enable-public-network passed in, verify publicNetworkAccess == Disabled
+        self.cmd('sql server update -g {} -n {} -i'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('identity.type', 'SystemAssigned'),
+                     JMESPathCheck('publicNetworkAccess', 'Disabled')])
+
+        # test update sql server with enable-public-network == true passed in, verify publicNetworkAccess == Enabled
+        self.cmd('sql server update -g {} -n {} -e {}'
+                 .format(resource_group, server_name, 'true'),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('publicNetworkAccess', 'Enabled')])
+
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
@@ -1266,15 +1354,20 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
 class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
-                           parameter_name_for_location="resource_group_location_1")
+                           parameter_name_for_location="resource_group_location_1",
+                           location='westeurope')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
-                           parameter_name_for_location="resource_group_location_2")
+                           parameter_name_for_location="resource_group_location_2",
+                           location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_1",
-                       resource_group_parameter_name="resource_group_1")
+                       resource_group_parameter_name="resource_group_1",
+                       location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_1")
+                       resource_group_parameter_name="resource_group_1",
+                       location='westeurope')
     @SqlServerPreparer(parameter_name="server_name_3",
-                       resource_group_parameter_name="resource_group_2")
+                       resource_group_parameter_name="resource_group_2",
+                       location='westeurope')
     @AllowLargeResponse()
     def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,

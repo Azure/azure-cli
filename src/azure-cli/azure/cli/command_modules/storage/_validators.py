@@ -5,6 +5,8 @@
 
 # pylint: disable=protected-access
 
+import argparse
+
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -481,7 +483,6 @@ def validate_entity(namespace):
     missing_keys = '{}PartitionKey'.format(missing_keys) \
         if 'PartitionKey' not in keys else missing_keys
     if missing_keys:
-        import argparse
         raise argparse.ArgumentError(
             None, 'incorrect usage: entity requires: {}'.format(missing_keys))
 
@@ -520,7 +521,6 @@ def validate_marker(namespace):
             del marker[key]
             marker[new_key] = val
     if expected_keys:
-        import argparse
         raise argparse.ArgumentError(
             None, 'incorrect usage: marker requires: {}'.format(' '.join(expected_keys)))
 
@@ -908,7 +908,6 @@ def process_file_download_namespace(namespace):
 
 
 def process_metric_update_namespace(namespace):
-    import argparse
     namespace.hour = namespace.hour == 'true'
     namespace.minute = namespace.minute == 'true'
     namespace.api = namespace.api == 'true' if namespace.api else None
@@ -1118,7 +1117,6 @@ def validate_azcopy_remove_arguments(cmd, namespace):
 def as_user_validator(namespace):
     if namespace.as_user:
         if namespace.expiry is None:
-            import argparse
             raise argparse.ArgumentError(
                 None, 'incorrect usage: specify --expiry when as-user is enabled')
 
@@ -1126,13 +1124,11 @@ def as_user_validator(namespace):
 
         from datetime import datetime, timedelta
         if expiry > datetime.utcnow() + timedelta(days=7):
-            import argparse
             raise argparse.ArgumentError(
                 None, 'incorrect usage: --expiry should be within 7 days from now')
 
         if ((not hasattr(namespace, 'token_credential') or namespace.token_credential is None) and
                 (not hasattr(namespace, 'auth_mode') or namespace.auth_mode != 'login')):
-            import argparse
             raise argparse.ArgumentError(
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
 
@@ -1159,6 +1155,24 @@ def validator_delete_retention_days(namespace):
         if namespace.delete_retention_days > 365:
             raise ValueError(
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
+
+
+# pylint: disable=too-few-public-methods
+class BlobRangeAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.blob_ranges:
+            namespace.blob_ranges = []
+        if isinstance(values, list):
+            values = ' '.join(values)
+        BlobRange = namespace._cmd.get_models('BlobRestoreRange', resource_type=ResourceType.MGMT_STORAGE)
+        try:
+            start_range, end_range = values.split(' ')
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --blob-range VARIABLE OPERATOR VALUE')
+        namespace.blob_ranges.append(BlobRange(
+            start_range=start_range,
+            end_range=end_range
+        ))
 
 
 def validate_private_endpoint_connection_id(cmd, namespace):

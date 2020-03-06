@@ -319,6 +319,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    min_api='2018-07-01')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
                    validator=validator_delete_retention_days, min_api='2018-07-01')
+        c.argument('enable_restore_policy', arg_type=get_three_state_flag(), arg_group='Restore Policy',
+                   min_api='2019-06-01', help="Enable blob restore policy when it set to true.")
+        c.argument('restore_days', type=int, arg_group='Restore Policy',
+                   min_api='2019-06-01', help="The number of days for the blob can be restored. It should be greater "
+                   "than zero and less than Delete Retention Days.")
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
@@ -392,6 +397,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
+
+    with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
+        from ._validators import BlobRangeAddAction
+        c.argument('blob_ranges', options_list=['--blob-range', '-r'], action=BlobRangeAddAction, nargs='+',
+                   help='Blob ranges to restore. You need to two values to specify start_range and end_range for each '
+                        'blob range, e.g. -r blob1 blob2. Note: Empty means account start as start range value, and '
+                        'means account end for end range.')
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('time_to_restore', type=get_datetime_type(True), options_list=['--time-to-restore', '-t'],
+                   help='Restore blob to the specified time, which should be UTC datetime in (Y-m-d\'T\'H:M:S\'Z\').')
 
     with self.argument_context('storage blob update') as c:
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')

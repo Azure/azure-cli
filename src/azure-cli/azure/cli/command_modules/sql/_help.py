@@ -703,6 +703,8 @@ short-summary: Create a server.
 examples:
   - name: Create a server.
     text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword
+  - name: Create a server with disabled public network access to server.
+    text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword -e false
 """
 
 helps['sql server dns-alias'] = """

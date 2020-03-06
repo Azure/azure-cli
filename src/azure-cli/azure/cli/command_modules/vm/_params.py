@@ -167,7 +167,7 @@ def load_arguments(self, _):
     # endregion
 
     # region Image Templates
-    with self.argument_context('image template') as c:
+    with self.argument_context('image builder') as c:
         ib_output_name_help = "Name of the image builder run output."
 
         c.argument('location', get_location_type(self.cli_ctx))
@@ -182,12 +182,13 @@ def load_arguments(self, _):
         c.argument('output_name', help=ib_output_name_help)
         c.ignore('destinations_lists', 'scripts_list', 'source_dict')
 
-    with self.argument_context('image template create') as c:
+    with self.argument_context('image builder create') as c:
         ib_source_type = CLIArgumentType(arg_group="Image Source")
         ib_customizer_type = CLIArgumentType(arg_group="Customizer")
         ib_cutput_type = CLIArgumentType(arg_group="Output")
 
         c.argument('build_timeout', type=int, help="The Maximum duration to wait while building the image template, in minutes. Default is 60.")
+        c.argument('image_template', help='Local path or URL to an image template file. When using --image-template, all other parameters are ignored except -g and -n. Reference: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-json')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
@@ -204,7 +205,7 @@ def load_arguments(self, _):
         c.argument('shared_image_destinations', arg_type=ib_cutput_type)
         c.argument('output_name', arg_type=ib_cutput_type)
 
-    with self.argument_context('image template output') as c:
+    with self.argument_context('image builder output') as c:
         ib_sig_regions_help = "Space-separated list of regions to replicate the image version into."
         ib_img_location_help = "Location where the customized image will be created."
 
@@ -214,7 +215,7 @@ def load_arguments(self, _):
         c.argument('managed_image', arg_group="Managed Image", help="Name or ID of the customized managed image to be created.")
         c.argument('managed_image_location', arg_group="Managed Image", help=ib_img_location_help)
 
-    with self.argument_context('image template output add') as c:
+    with self.argument_context('image builder output add') as c:
         ib_artifact_tags_help = "Tags that will be applied to the output artifact once it has been created by the distributor. " + tags_type.settings['help']
         ib_artifact_tags_type = CLIArgumentType(overrides=tags_type, help=ib_artifact_tags_help, options_list=["--artifact-tags"])
         ib_default_loc_help = " Defaults to resource group's location."
@@ -226,7 +227,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=ib_artifact_tags_type)
         c.ignore('location')
 
-    with self.argument_context('image template customizer') as c:
+    with self.argument_context('image builder customizer') as c:
         ib_win_restart_type = CLIArgumentType(arg_group="Windows Restart")
         ib_script_type = CLIArgumentType(arg_group="Shell and Powershell")
         ib_powershell_type = CLIArgumentType(arg_group="Powershell")

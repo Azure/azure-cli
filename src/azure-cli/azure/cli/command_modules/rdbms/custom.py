@@ -440,7 +440,7 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
     return client.create_or_update(resource_group_name=resource_group_name,
                                    server_name=server_name,
                                    private_endpoint_connection_name=private_endpoint_connection_name,
-                                   properties=private_endpoint_connection)
+                                   private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
