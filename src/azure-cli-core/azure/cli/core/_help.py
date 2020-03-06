@@ -159,7 +159,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         if not nouns:
             help_file.command = ''
         else:
-            help_file.examples = AzCliHelp.check_for_new_examples(help_file.command, help_file.examples)
+            help_file.examples = AzCliHelp.update_examples(help_file)
         self._print_detailed_help(cli_name, help_file)
 
         print(SURVEY_PROMPT)
@@ -203,8 +203,8 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
     # This method is meant to be a hook that can be overridden by an extension or module.
     @staticmethod
-    def check_for_new_examples(command, examples):  # pylint: disable=unused-argument
-        return examples
+    def update_examples(help_file):
+        return help_file.examples
 
 
 class CliHelpFile(KnackHelpFile):
