@@ -31,7 +31,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus2euap',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -369,7 +369,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
         vnet_firewall_rule_1 = 'vnet_rule1'
         vnet_firewall_rule_2 = 'vnet_rule2'
-        location = 'eastus'
+        location = 'eastus2euap'
         vnet_name = 'clitestvnet'
         ignore_missing_endpoint = 'true'
         address_prefix = '10.0.0.0/16'
@@ -516,11 +516,15 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['properties']['groupId'], group_id)
 
     def _test_private_endpoint_connection(self, resource_group, server, database_engine):
-        loc = 'eastus'
+        loc = 'eastus2euap'
         vnet = self.create_random_name('cli-vnet-', 24)
         subnet = self.create_random_name('cli-subnet-', 24)
-        pe = self.create_random_name('cli-pe-', 24)
-        pe_connection = self.create_random_name('cli-pec-', 24)
+        pe_name_auto = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_approve = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_reject = self.create_random_name('cli-pe-', 24)
+        pe_connection_name_auto = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_approve = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_reject = self.create_random_name('cli-pec-', 24)
 
         # Prepare network
         self.cmd('network vnet create -n {} -g {} -l {} --subnet-name {}'
@@ -539,20 +543,25 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                           .format(database_engine, resource_group, server)).get_output_in_json()
         group_id = result[0]['properties']['groupId']
 
+        approval_description = 'You are approved!'
+        rejection_description = 'You are rejected!'
+        api_version = '2018-06-01' if database_engine == 'mariadb' else '2017-12-01'
+        expectedError = 'Private Endpoint Connection Status is not Pending'
+
+        # Testing Auto-Approval workflow
         # Create a private endpoint connection
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
                                     '--group-ids {}'
-                                    .format(resource_group, pe, vnet, subnet, loc, pe_connection, server_id, group_id)).get_output_in_json()
-        self.assertEqual(private_endpoint['name'], pe)
-        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], pe_connection)
+                                    .format(resource_group, pe_name_auto, vnet, subnet, loc, pe_connection_name_auto, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_auto)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], pe_connection_name_auto)
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
         # Get Private Endpoint Connection Name and Id
-        api_version = '2018-06-01' if database_engine == 'mariadb' else '2017-12-01'
-        result = self.cmd('az rest --method get --uri https://management.azure.com{}?api-version={}'
+        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
                           .format(server_id, api_version, server)).get_output_in_json()
         self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
         self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
@@ -563,15 +572,109 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} server private-endpoint-connection show --server-name {} -g {} --name {}'
                  .format(database_engine, server, resource_group, server_pec_name),
-                 checks=self.check('id', server_pec_id))
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('provisioningState', 'Ready')
+                 ])
 
-        with self.assertRaisesRegexp(CloudError, 'Private Endpoint Connection Status is not Pending'):
-            self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {}'
-                     .format(database_engine, server, resource_group, server_pec_name))
+        with self.assertRaisesRegexp(CloudError, expectedError):
+            self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server, resource_group, server_pec_name, approval_description))
 
-        with self.assertRaisesRegexp(CloudError, 'Private Endpoint Connection Status is not Pending'):
-            self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {}'
-                     .format(database_engine, server, resource_group, server_pec_name))
+        with self.assertRaisesRegexp(CloudError, expectedError):
+            self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server, resource_group, server_pec_name, rejection_description))
+
+        self.cmd('{} server private-endpoint-connection delete --id {}'
+                 .format(database_engine, server_pec_id))
+
+        # Testing Manual-Approval workflow [Approval]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-ids {} --manual-request'
+                                    .format(resource_group, pe_name_manual_approve, vnet, subnet, loc, pe_connection_name_manual_approve, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_approve)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_approve)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
+                          .format(server_id, api_version, server)).get_output_in_json()
+        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
+        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+                         'Pending')
+        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('provisioningState', 'Ready')
+                 ])
+
+        self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                 .format(database_engine, server, resource_group, server_pec_name, approval_description),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', approval_description),
+                     self.check('provisioningState', 'Ready')
+                 ])
+
+        with self.assertRaisesRegexp(CloudError, expectedError):
+            self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server, resource_group, server_pec_name, rejection_description))
+
+        self.cmd('{} server private-endpoint-connection delete --id {}'
+                 .format(database_engine, server_pec_id))
+
+        # Testing Manual-Approval workflow [Rejection]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-ids {} --manual-request true'
+                                    .format(resource_group, pe_name_manual_reject, vnet, subnet, loc, pe_connection_name_manual_reject, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_reject)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_reject)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
+                          .format(server_id, api_version, server)).get_output_in_json()
+        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
+        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+                         'Pending')
+        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('provisioningState', 'Ready')
+                 ])
+
+        self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                 .format(database_engine, server, resource_group, server_pec_name, rejection_description),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', rejection_description),
+                     self.check('provisioningState', 'Ready')
+                 ])
+
+        with self.assertRaisesRegexp(CloudError, expectedError):
+            self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server, resource_group, server_pec_name, approval_description))
 
         self.cmd('{} server private-endpoint-connection delete --id {}'
                  .format(database_engine, server_pec_id))
