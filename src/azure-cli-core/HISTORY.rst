@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.1.1
+++++++
+* az cloud show: add application insights endpoint for China/US cloud
+
 2.1.0
 ++++++
 * Support `--output yamlc` for colorized YAML
