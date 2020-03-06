@@ -215,7 +215,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
-        # test create sql server with no enable-public-network passed in , verify publicNetworkAccess == Enabled
+        # test create sql server with no enable-public-network passed in, verify publicNetworkAccess == Enabled
         self.cmd('sql server create -g {} --name {} --admin-user {} --admin-password {}'
                  .format(resource_group, server_name, admin_login, admin_passwords[0]),
                  checks=[
@@ -2787,7 +2787,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         managed_instance_name_2 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        families = ['Gen5']
+        families = ['Gen4','Gen5']
 
         is_playback = os.path.exists(self.recording_file)
         if is_playback:
