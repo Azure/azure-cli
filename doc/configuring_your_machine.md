@@ -1,7 +1,7 @@
 ﻿Setting up your development environment
 ========================================
 The Azure Python CLI projects sources are located on GitHub (https://github.com/Azure/azure-cli/). In order to contribute to the project, you are expected to:
--    Have a GitHub account. For Microsoft contributors, follow the guidelines on https://opensourcehub.microsoft.com/ to create, configure and link your account
+-    Have a GitHub account. For Microsoft contributors, follow the guidelines on https://opensource.microsoft.com/ to create, configure and link your account
 -    Fork the  https://github.com/Azure/azure-cli/ repository into your private GitHub account
 -    Create pull requests against the https://github.com/azure/azure-cli repository to get your code changes merged into the project repository.
 
@@ -20,7 +20,7 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 1. Both VS 2015 and 2017 support Python development, but VS 2015 is more relible, particular on the intellisense and "Test Explorer". VS 2019's Python support is being actively improved, and we will recommend it here once the evalution result is promising.  
 2. Steps to setup VS 2015:
 
-   - You can install VS 2015 from https://visualstudio.microsoft.com/vs/older-downloads/
+   - You can install VS 2015 from https://visualstudio.microsoft.com/vs/older-downloads/#visual-studio-2015-family
    - Click menu "View->Other Windows->Python Environment" and create a new one by pointing to a local installed Python like 3.7.0.
    - Click menu "File->New Project", and in the dialog select "Python->From Existing Python Code". This will create a project from your local clone.
    - Go through the wizard
@@ -38,7 +38,7 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 Experimental steps – still haven’t been able to get virtual environments to work well with VSCode
 
 1. Install VS Code
-2. Install (one of) the python extension(s) (https://marketplace.visualstudio.com/items?itemName=donjayamanne.python)
+2. Install (one of) the python extension(s) (https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 3. Put [breakpoints](https://code.visualstudio.com/docs/editor/debugging#_breakpoints) in your code, then click on the Debug icon in the Activity Bar on the side of Visual Studio Code, and select `Azure CLI Debug` from the drop down menu. After that, press the play button to start debugging.
 4. To add custom arguments to the command that you want to debug, press the gear icon beside the drop down menu and modify the `args` field in `launch.json`
 
