@@ -113,9 +113,6 @@ Release History
 * Sql midb Add: list-deleted, show-deleted, update-retention, show-retention
 * (sql server create:) Add optional public-network-access 'Enable'/'Disable' flag to sql server create
 * (sql server update:) make some customer-facing change
-
-**SQL DB, SQL MI**
-
 * Add minimal_tls_version property for MI and SQL DB
 
 **Storage**
