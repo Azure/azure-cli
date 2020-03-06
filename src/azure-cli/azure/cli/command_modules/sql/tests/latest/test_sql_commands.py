@@ -3190,7 +3190,6 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
                      self.check('status', 'Online')])
 
 
-
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
     @record_only()
@@ -3335,23 +3334,23 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
 
         # create sql managed_instance
         self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-                '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
-                checks=[
-                    self.check('name', '{managed_instance_name}'),
-                    self.check('resourceGroup', '{rg}'),
-                    self.check('administratorLogin', '{admin_login}'),
-                    self.check('vCores', '{v_cores}'),
-                    self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                    self.check('licenseType', '{license_type}'),
-                    self.check('sku.tier', '{edition}'),
-                    self.check('sku.family', '{family}'),
-                    self.check('sku.capacity', '{v_cores}'),
-                    self.check('identity', None),
-                    self.check('collation', '{collation}'),
-                    self.check('proxyOverride', '{proxy_override}'),
-                    self.check('publicDataEndpointEnabled', 'True')])
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
+                 checks=[
+                     self.check('name', '{managed_instance_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('administratorLogin', '{admin_login}'),
+                     self.check('vCores', '{v_cores}'),
+                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                     self.check('licenseType', '{license_type}'),
+                     self.check('sku.tier', '{edition}'),
+                     self.check('sku.family', '{family}'),
+                     self.check('sku.capacity', '{v_cores}'),
+                     self.check('identity', None),
+                     self.check('collation', '{collation}'),
+                     self.check('proxyOverride', '{proxy_override}'),
+                     self.check('publicDataEndpointEnabled', 'True')])
 
         print('Managed instance is created...\n')
 
@@ -3365,23 +3364,23 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
         print('Arguments are updated with login and sid data')
 
         self.cmd('sql mi ad-admin create --mi {managed_instance_name} -g {rg} -i {oid} -u {user}',
-                checks=[
-                    self.check('login', '{user}'),
-                    self.check('sid', '{oid}')])
+                 checks=[
+                     self.check('login', '{user}'),
+                     self.check('sid', '{oid}')])
 
         print('Aad admin is set...\n')
 
         self.cmd('sql mi ad-admin list --mi {managed_instance_name} -g {rg}',
-                checks=[
-                    self.check('[0].login', '{user}'),
-                    self.check('[0].sid', '{oid}')])
+                 checks=[
+                     self.check('[0].login', '{user}'),
+                     self.check('[0].sid', '{oid}')])
 
         print('Get aad admin...\n')
 
         self.cmd('sql mi ad-admin update --mi {managed_instance_name} -g {rg} -u {user2} -i {oid2}',
-                checks=[
-                    self.check('login', '{user2}'),
-                    self.check('sid', '{oid2}')])
+                 checks=[
+                     self.check('login', '{user2}'),
+                     self.check('sid', '{oid2}')])
 
         print('Aad admin is updated...\n')
 
@@ -3390,8 +3389,8 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
         print('Aad admin is deleted...\n')
 
         self.cmd('sql mi ad-admin list --mi {managed_instance_name} -g {rg}',
-                checks=[
-                    self.check('login', None)])
+                 checks=[
+                     self.check('login', None)])
 
         print('Test is finished...\n')
 
@@ -3860,17 +3859,17 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
         # create db
         self.cmd('sql db create -g {} -s {} -n {} --sample-name {}'
-                .format(resource_group, server, database_name, SampleName.adventure_works_lt),
-                checks=[
-                    JMESPathCheck('resourceGroup', resource_group),
-                    JMESPathCheck('name', database_name),
-                    JMESPathCheck('status', 'Online')])
+                 .format(resource_group, server, database_name, SampleName.adventure_works_lt),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('status', 'Online')])
 
         # list current sensitivity classifications
         self.cmd('sql db classification list -g {} -s {} -n {}'
-                .format(resource_group, server, database_name),
-                checks=[
-                    JMESPathCheck('length(@)', 0)])  # No classifications are set at the beginning
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)])  # No classifications are set at the beginning
 
         # get storage account endpoint and key
         storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
@@ -3886,28 +3885,28 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         retention_days = 30
 
         self.cmd('sql db threat-policy update -g {} -s {} -n {}'
-                ' --state {} --storage-key {} --storage-endpoint {}'
-                ' --retention-days {} --email-addresses {} --disabled-alerts {}'
-                ' --email-account-admins {}'
-                .format(resource_group, server, database_name, state_enabled, key,
-                        storage_endpoint, retention_days, email_addresses_input,
-                        disabled_alerts_input, email_account_admins),
-                checks=[
-                    JMESPathCheck('resourceGroup', resource_group),
-                    JMESPathCheck('state', state_enabled),
-                    JMESPathCheck('storageAccountAccessKey', key),
-                    JMESPathCheck('storageEndpoint', storage_endpoint),
-                    JMESPathCheck('retentionDays', retention_days),
-                    JMESPathCheck('emailAddresses', email_addresses_expected),
-                    JMESPathCheck('disabledAlerts', disabled_alerts_expected),
-                    JMESPathCheck('emailAccountAdmins', email_account_admins)])
+                 ' --state {} --storage-key {} --storage-endpoint {}'
+                 ' --retention-days {} --email-addresses {} --disabled-alerts {}'
+                 ' --email-account-admins {}'
+                 .format(resource_group, server, database_name, state_enabled, key,
+                         storage_endpoint, retention_days, email_addresses_input,
+                         disabled_alerts_input, email_account_admins),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('state', state_enabled),
+                     JMESPathCheck('storageAccountAccessKey', key),
+                     JMESPathCheck('storageEndpoint', storage_endpoint),
+                     JMESPathCheck('retentionDays', retention_days),
+                     JMESPathCheck('emailAddresses', email_addresses_expected),
+                     JMESPathCheck('disabledAlerts', disabled_alerts_expected),
+                     JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
         # list recommended sensitivity classifications
         expected_recommended_sensitivityclassifications_count = 15
         self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
-                .format(resource_group, server, database_name),
-                checks=[
-                    JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
 
         schema_name = 'SalesLT'
         table_name = 'Customer'
@@ -3915,23 +3914,23 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
         # disable the recommendation for SalesLT/Customer/FirstName
         self.cmd('sql db classification recommendation disable -g {} -s {} -n {} --schema {} --table {} --column {}'
-                .format(resource_group, server, database_name, schema_name, table_name, column_name))
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
         # list recommended sensitivity classifications
         self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
-                .format(resource_group, server, database_name),
-                checks=[
-                    JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
 
         # re-enable the disabled recommendation
         self.cmd('sql db classification recommendation enable -g {} -s {} -n {} --schema {} --table {} --column {}'
-                .format(resource_group, server, database_name, schema_name, table_name, column_name))
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
         # lits recommended sensitivity classifications
         self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
-                .format(resource_group, server, database_name),
-                checks=[
-                    JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
 
         # update the sensitivity classification
         information_type = 'Name'
@@ -3940,43 +3939,43 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
         label_id = 'bf91e08c-f4f0-478a-b016-25164b2a65ff'
 
         self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
-                .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
-                checks=[
-                    JMESPathCheck('informationType', information_type),
-                    JMESPathCheck('labelName', label_name),
-                    JMESPathCheck('informationTypeId', information_type_id),
-                    JMESPathCheck('labelId', label_id)])
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
+                 checks=[
+                     JMESPathCheck('informationType', information_type),
+                     JMESPathCheck('labelName', label_name),
+                     JMESPathCheck('informationTypeId', information_type_id),
+                     JMESPathCheck('labelId', label_id)])
 
         # get the classified column
         self.cmd('sql db classification show -g {} -s {} -n {} --schema {} --table {} --column {}'
-                .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type),
-                checks=[
-                    JMESPathCheck('informationType', information_type),
-                    JMESPathCheck('labelName', label_name),
-                    JMESPathCheck('informationTypeId', information_type_id),
-                    JMESPathCheck('labelId', label_id)])
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type),
+                 checks=[
+                     JMESPathCheck('informationType', information_type),
+                     JMESPathCheck('labelName', label_name),
+                     JMESPathCheck('informationTypeId', information_type_id),
+                     JMESPathCheck('labelId', label_id)])
 
         # list recommended classifications
         self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
-                .format(resource_group, server, database_name),
-                checks=[
-                    JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
 
         # list current classifications
         self.cmd('sql db classification list -g {} -s {} -n {}'
-                .format(resource_group, server, database_name),
-                checks=[
-                    JMESPathCheck('length(@)', 1)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1)])
 
         # delete the label
         self.cmd('sql db classification delete -g {} -s {} -n {} --schema {} --table {} --column {}'
-                .format(resource_group, server, database_name, schema_name, table_name, column_name))
+                 .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
         # list current labels
         self.cmd('sql db classification list -g {} -s {} -n {}'
-                .format(resource_group, server, database_name),
-                checks=[
-                    JMESPathCheck('length(@)', 0)])
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)])
 
 
 class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
