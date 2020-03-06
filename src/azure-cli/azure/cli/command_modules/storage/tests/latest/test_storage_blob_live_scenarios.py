@@ -103,7 +103,7 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
 
         c1 = self.create_random_name(prefix='containera', length=24)
         c2 = self.create_random_name(prefix='containerb', length=24)
-        b1 =self.create_random_name(prefix='blob1', length=24)
+        b1 = self.create_random_name(prefix='blob1', length=24)
         b2 = self.create_random_name(prefix='blob2', length=24)
         b3 = self.create_random_name(prefix='blob3', length=24)
         b4 = self.create_random_name(prefix='blob4', length=24)

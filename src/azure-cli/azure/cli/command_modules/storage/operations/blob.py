@@ -31,7 +31,8 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
         if_unmodified_since=if_unmodified_since, timeout=timeout)
 
 
-def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_restore, blob_ranges=None, no_wait=False):
+def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_restore, blob_ranges=None,
+                        no_wait=False):
 
     if blob_ranges is None:
         BlobRestoreRange = cmd.get_models("BlobRestoreRange")
