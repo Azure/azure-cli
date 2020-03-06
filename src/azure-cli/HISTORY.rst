@@ -59,11 +59,11 @@ Release History
 
 **Compute**
 
-* sig image-version: add --data-snapshot-luns
-* ppg show: add --colocation-status to Enable fetching the colocation status of all the resources in the proximity placement group
+* az sig image-version: add --data-snapshot-luns
+* az ppg show: add --colocation-status to enable fetching the colocation status of all the resources in the proximity placement group
 * az vmss create/update: support automatic repairs
-* [BREAKING CHANGE] image template: rename template to builder
-* image builder create: add --image-template
+* [BREAKING CHANGE] az image template: rename template to builder
+* az image builder create: add --image-template
 
 **Cosmos DB**
 
