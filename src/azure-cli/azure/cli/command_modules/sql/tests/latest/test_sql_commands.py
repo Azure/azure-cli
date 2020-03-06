@@ -768,12 +768,12 @@ def _create_db_wait_for_first_backup(test, resource_group, server, database_name
     return db
 
 
-def _wait_until_first_backup_midb(self, rg_name, mi_name, db_name):
+def _wait_until_first_backup_midb(self):
 
     earliest_restore_date_string = None
 
     while earliest_restore_date_string is None:
-        db = self.cmd('sql midb show -g {} --mi {} -n {}'.format(rg_name, mi_name, db_name),
+        db = self.cmd('sql midb show -g {rg} --mi {managed_instance_name} -n {database_name}',
                       checks=[self.greater_than('length(@)', 0)])
 
         earliest_restore_date_string = db.json_value['earliestRestorePoint']
