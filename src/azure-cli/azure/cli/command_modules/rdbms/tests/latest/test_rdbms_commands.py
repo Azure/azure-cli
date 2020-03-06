@@ -526,7 +526,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         pe_connection_name_manual_approve = self.create_random_name('cli-pec-', 24)
         pe_connection_name_manual_reject = self.create_random_name('cli-pec-', 24)
 
-        # Prepare network
+        # Prepare network and disable network policies
         self.cmd('network vnet create -n {} -g {} -l {} --subnet-name {}'
                  .format(vnet, resource_group, loc, subnet),
                  checks=self.check('length(newVNet.subnets)', 1))
