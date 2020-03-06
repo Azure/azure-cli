@@ -3097,9 +3097,9 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 
-    @record_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_deleted_db_restore(self, resource_group, resource_group_location):
+
         resource_prefix = 'MIRestoreDeletedDB'
 
         self.kwargs.update({
@@ -3140,43 +3140,43 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 
         # create sql managed_instance
         self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-                '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
-                checks=[
-                    self.check('name', '{managed_instance_name}'),
-                    self.check('resourceGroup', '{rg}'),
-                    self.check('administratorLogin', '{admin_login}'),
-                    self.check('vCores', '{v_cores}'),
-                    self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                    self.check('licenseType', '{license_type}'),
-                    self.check('sku.tier', '{edition}'),
-                    self.check('sku.family', '{family}'),
-                    self.check('sku.capacity', '{v_cores}'),
-                    self.check('collation', '{collation}'),
-                    self.check('proxyOverride', '{proxy_override}'),
-                    self.check('publicDataEndpointEnabled', 'True')]).get_output_in_json()
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                 checks=[
+                     self.check('name', '{managed_instance_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('administratorLogin', '{admin_login}'),
+                     self.check('vCores', '{v_cores}'),
+                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                     self.check('licenseType', '{license_type}'),
+                     self.check('sku.tier', '{edition}'),
+                     self.check('sku.family', '{family}'),
+                     self.check('sku.capacity', '{v_cores}'),
+                     self.check('collation', '{collation}'),
+                     self.check('proxyOverride', '{proxy_override}'),
+                     self.check('publicDataEndpointEnabled', 'True')]).get_output_in_json()
 
         # create database
         self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
-                checks=[
-                    self.check('resourceGroup', '{rg}'),
-                    self.check('name', '{database_name}'),
-                    self.check('location', '{loc}'),
-                    self.check('collation', '{collation}'),
-                    self.check('status', 'Online')])
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
+                     self.check('status', 'Online')])
 
         # Wait for first backup before dropping
         _wait_until_first_backup_midb(self)
 
         # Delete by group/server/name
         self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
-                checks=[NoneCheck()])
+                 checks=[NoneCheck()])
 
         # Get deleted database
         deleted_databases = self.cmd('sql midb list-deleted -g {rg} --managed-instance {managed_instance_name}',
-                                    checks=[
-                                        self.greater_than('length(@)', 0)])
+                                     checks=[
+                                         self.greater_than('length(@)', 0)])
 
         self.kwargs.update({
             'deleted_time': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
@@ -3184,10 +3184,11 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 
         # test restore deleted database
         self.cmd('sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
-                checks=[
-                    self.check('resourceGroup', '{rg}'),
-                    self.check('name', '{restored_database_name}'),
-                    self.check('status', 'Online')])
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{restored_database_name}'),
+                     self.check('status', 'Online')])
+
 
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
