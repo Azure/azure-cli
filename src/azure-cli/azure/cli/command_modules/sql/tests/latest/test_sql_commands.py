@@ -738,6 +738,10 @@ def _get_earliest_restore_date(db):
     return datetime.strptime(db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
 
 
+def _get_earliest_restore_date_for_deleted_db(deleted_db):
+    return datetime.strptime(deleted_db['earliestRestoreDate'], "%Y-%m-%dT%H:%M:%S+00:00")
+
+
 def _get_deleted_date(deleted_db):
     return datetime.strptime(deleted_db['deletionDate'], "%Y-%m-%dT%H:%M:%S.%f+00:00")
 
@@ -884,7 +888,7 @@ class SqlServerDbRestoreDeletedScenarioTest(ScenarioTest):
 
         # Restore deleted to earlier point in time
         self.cmd('sql db restore -g {} -s {} -n {} -t {} --deleted-time {} --dest-name {}'
-                 .format(resource_group, server, database_name, _get_earliest_restore_date(deleted_db).isoformat(),
+                 .format(resource_group, server, database_name, _get_earliest_restore_date_for_deleted_db(deleted_db).isoformat(),
                          _get_deleted_date(deleted_db).isoformat(), restore_database_name2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
@@ -2983,95 +2987,94 @@ class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
-    def test_sql_managed_db_short_retention(self):
+    def test_sql_managed_db_short_retention(self, resource_group, resource_group_location):
+
         resource_prefix = 'MIDBShortTermRetention'
-        managed_instance_name_1 = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
-        admin_login = 'admin123'
-        admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        families = ['Gen5']
-
-        is_playback = os.path.exists(self.recording_file)
-        if is_playback:
-            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cl_one/providers/Microsoft.Network/virtualNetworks/cl_initial/subnets/CLean'
-        else:
-            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
-
-        license_type = 'LicenseIncluded'
-        loc = 'eastus2euap'
-        v_cores = 4
-        storage_size_in_gb = '128'
-        edition = 'GeneralPurpose'
-        resource_group_1 = "DejanDuVnetRG"
-        collation = "Serbian_Cyrillic_100_CS_AS"
-        proxy_override = "Proxy"
-        proxy_override_update = "Redirect"
-        public_data_endpoint_enabled_update = "False"
-        timezone_id = "Central European Standard Time"
-        tls1_2 = "1.2"
-        tls1_1 = "1.1"
-        database_name = self.create_random_name(resource_prefix, 50)
-        retention_days_inc = 14
-        retention_days_dec = 7
-        user = admin_login
-
-        # test create sql managed_instance
-        managed_instance_1 = self.cmd('sql mi create -g {} -n {} -l {} '
-                                      '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {} --collation {} --proxy-override {} --public-data-endpoint-enabled --timezone-id "{}" --minimal-tls-version {}'
-                                      .format(resource_group_1, managed_instance_name_1, loc, user, admin_passwords[0], subnet, license_type, v_cores, storage_size_in_gb, edition, families[0], collation, proxy_override, timezone_id, tls1_2),
-                                      checks=[
-                                          JMESPathCheck('name', managed_instance_name_1),
-                                          JMESPathCheck('resourceGroup', resource_group_1),
-                                          JMESPathCheck('administratorLogin', user),
-                                          JMESPathCheck('vCores', v_cores),
-                                          JMESPathCheck('storageSizeInGb', storage_size_in_gb),
-                                          JMESPathCheck('licenseType', license_type),
-                                          JMESPathCheck('sku.tier', edition),
-                                          JMESPathCheck('sku.family', families[0]),
-                                          JMESPathCheck('sku.capacity', v_cores),
-                                          JMESPathCheck('identity', None),
-                                          JMESPathCheck('collation', collation),
-                                          JMESPathCheck('proxyOverride', proxy_override),
-                                          JMESPathCheck('publicDataEndpointEnabled', 'True'),
-                                          JMESPathCheck('timezoneId', timezone_id),
-                                          JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
 
         self.kwargs.update({
-            'loc': loc,
-            'managed_instance_name': managed_instance_name_1,
+            'loc': resource_group_location,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name_internet': 'vcCliTestRouteInternet',
+            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
             'database_name': self.create_random_name(resource_prefix, 50),
-            'rg': resource_group_1,
+            'vault_name': self.create_random_name(resource_prefix, 50),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
             'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy",
             'retention_days_inc': 14,
             'retention_days_dec': 7
         })
 
-        # create database
-        self.cmd('sql midb create -g {} --mi {} -n {} --collation {}'.format(resource_group_1, managed_instance_name_1, database_name, collation),
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {rg} -n {route_table_name}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        # create sql managed_instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
                  checks=[
-                     self.check('name', database_name),
-                     self.check('location', loc),
-                     self.check('collation', collation),
+                     self.check('name', '{managed_instance_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('administratorLogin', '{admin_login}'),
+                     self.check('vCores', '{v_cores}'),
+                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                     self.check('licenseType', '{license_type}'),
+                     self.check('sku.tier', '{edition}'),
+                     self.check('sku.family', '{family}'),
+                     self.check('sku.capacity', '{v_cores}'),
+                     self.check('collation', '{collation}'),
+                     self.check('proxyOverride', '{proxy_override}'),
+                     self.check('publicDataEndpointEnabled', 'True')]).get_output_in_json()
+
+        # create database
+        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
                      self.check('status', 'Online')])
 
         # test update short term retention on live database
-        self.cmd('sql midb short-term-retention-policy set -g {} --mi {} -n {} --retention-days {}'.format(resource_group_1, managed_instance_name_1, database_name, retention_days_inc),
+        self.cmd('sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_inc}',
                  checks=[
-                     self.check('retentionDays', retention_days_inc)])
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('retentionDays', '{retention_days_inc}')])
 
         # test get short term retention on live database
-        self.cmd('sql midb short-term-retention-policy show -g {} --mi {} -n {}'.format(resource_group_1, managed_instance_name_1, database_name),
+        self.cmd('sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
                  checks=[
-                     self.check('retentionDays', retention_days_inc)])
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('retentionDays', '{retention_days_inc}')])
 
         # Wait for first backup before dropping
-        _wait_until_first_backup_midb(self, resource_group_1, managed_instance_name_1, database_name)
+        _wait_until_first_backup_midb(self)
 
         # Delete by group/server/name
-        self.cmd('sql midb delete -g {} --managed-instance {} -n {} --yes'.format(resource_group_1, managed_instance_name_1, database_name),
+        self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
                  checks=[NoneCheck()])
 
         # Get deleted database
-        deleted_databases = self.cmd('sql midb list-deleted -g {} --managed-instance {}'.format(resource_group_1, managed_instance_name_1),
+        deleted_databases = self.cmd('sql midb list-deleted -g {rg} --managed-instance {managed_instance_name}',
                                      checks=[
                                          self.greater_than('length(@)', 0)])
 
@@ -3079,102 +3082,112 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
             'deleted_time': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
         })
 
+        # test update short term retention on deleted database
+        self.cmd('sql midb short-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --retention-days {retention_days_dec} --deleted-time {deleted_time}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('retentionDays', '{retention_days_dec}')])
+
+        # test get short term retention on deleted database
+        self.cmd('sql midb short-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name} --deleted-time {deleted_time}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('retentionDays', '{retention_days_dec}')])
+
 
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_deleted_db_restore(self, resource_group, resource_group_location):
-        is_playback = os.path.exists(self.recording_file)
-        if not is_playback:
-            resource_prefix = 'MIRestoreDeletedDB'
+        resource_prefix = 'MIRestoreDeletedDB'
 
-            self.kwargs.update({
-                'loc': resource_group_location,
-                'vnet_name': 'vcCliTestVnet',
-                'subnet_name': 'vcCliTestSubnet',
-                'route_table_name': 'vcCliTestRouteTable',
-                'route_name_internet': 'vcCliTestRouteInternet',
-                'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
-                'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
-                'database_name': self.create_random_name(resource_prefix, 50),
-                'restored_database_name': self.create_random_name(resource_prefix, 50),
-                'vault_name': self.create_random_name(resource_prefix, 50),
-                'admin_login': 'admin123',
-                'admin_password': 'SecretPassword123',
-                'license_type': 'LicenseIncluded',
-                'v_cores': 8,
-                'storage_size_in_gb': '32',
-                'edition': 'GeneralPurpose',
-                'family': 'Gen5',
-                'collation': "Serbian_Cyrillic_100_CS_AS",
-                'proxy_override': "Proxy",
-                'retention_days_inc': 14,
-                'retention_days_dec': 7
-            })
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name_internet': 'vcCliTestRouteInternet',
+            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'database_name': self.create_random_name(resource_prefix, 50),
+            'restored_database_name': self.create_random_name(resource_prefix, 50),
+            'vault_name': self.create_random_name(resource_prefix, 50),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy",
+            'retention_days_inc': 14,
+            'retention_days_dec': 7
+        })
 
-            # Create and prepare VNet and subnet for new virtual cluster
-            self.cmd('network route-table create -g {rg} -n {route_table_name}')
-            self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-            self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-            self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
-            self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-            subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {rg} -n {route_table_name}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
-            self.kwargs.update({
-                'subnet_id': subnet['id']
-            })
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
 
-            # create sql managed_instance
-            self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-                    '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                    '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                    '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
-                    checks=[
-                        self.check('name', '{managed_instance_name}'),
-                        self.check('resourceGroup', '{rg}'),
-                        self.check('administratorLogin', '{admin_login}'),
-                        self.check('vCores', '{v_cores}'),
-                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                        self.check('licenseType', '{license_type}'),
-                        self.check('sku.tier', '{edition}'),
-                        self.check('sku.family', '{family}'),
-                        self.check('sku.capacity', '{v_cores}'),
-                        self.check('collation', '{collation}'),
-                        self.check('proxyOverride', '{proxy_override}'),
-                        self.check('publicDataEndpointEnabled', 'True')]).get_output_in_json()
+        # create sql managed_instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                checks=[
+                    self.check('name', '{managed_instance_name}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('administratorLogin', '{admin_login}'),
+                    self.check('vCores', '{v_cores}'),
+                    self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                    self.check('licenseType', '{license_type}'),
+                    self.check('sku.tier', '{edition}'),
+                    self.check('sku.family', '{family}'),
+                    self.check('sku.capacity', '{v_cores}'),
+                    self.check('collation', '{collation}'),
+                    self.check('proxyOverride', '{proxy_override}'),
+                    self.check('publicDataEndpointEnabled', 'True')]).get_output_in_json()
 
-            # create database
-            self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
-                    checks=[
-                        self.check('resourceGroup', '{rg}'),
-                        self.check('name', '{database_name}'),
-                        self.check('location', '{loc}'),
-                        self.check('collation', '{collation}'),
-                        self.check('status', 'Online')])
+        # create database
+        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
+                checks=[
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('name', '{database_name}'),
+                    self.check('location', '{loc}'),
+                    self.check('collation', '{collation}'),
+                    self.check('status', 'Online')])
 
-            # Wait for first backup before dropping
-            _wait_until_first_backup_midb(self)
+        # Wait for first backup before dropping
+        _wait_until_first_backup_midb(self)
 
-            # Delete by group/server/name
-            self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
-                    checks=[NoneCheck()])
+        # Delete by group/server/name
+        self.cmd('sql midb delete -g {rg} --managed-instance {managed_instance_name} -n {database_name} --yes',
+                checks=[NoneCheck()])
 
-            # Get deleted database
-            deleted_databases = self.cmd('sql midb list-deleted -g {rg} --managed-instance {managed_instance_name}',
-                                        checks=[
-                                            self.greater_than('length(@)', 0)])
+        # Get deleted database
+        deleted_databases = self.cmd('sql midb list-deleted -g {rg} --managed-instance {managed_instance_name}',
+                                    checks=[
+                                        self.greater_than('length(@)', 0)])
 
-            self.kwargs.update({
-                'deleted_time': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
-            })
+        self.kwargs.update({
+            'deleted_time': _get_deleted_date(deleted_databases.json_value[0]).isoformat()
+        })
 
-            # test restore deleted database
-            self.cmd('sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
-                    checks=[
-                        self.check('resourceGroup', '{rg}'),
-                        self.check('name', '{restored_database_name}'),
-                        self.check('status', 'Online')])
+        # test restore deleted database
+        self.cmd('sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
+                checks=[
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('name', '{restored_database_name}'),
+                    self.check('status', 'Online')])
 
 
 class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
@@ -3281,107 +3294,105 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
-    @record_only()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_mi_aad_admin(self, resource_group, resource_group_location):
 
         print('Test is started...\n')
-        is_playback = os.path.exists(self.recording_file)
-        if not is_playback:
-            self.kwargs.update({
-                'loc': resource_group_location,
-                'vnet_name': 'vcCliTestVnet',
-                'subnet_name': 'vcCliTestSubnet',
-                'route_table_name': 'vcCliTestRouteTable',
-                'route_name_internet': 'vcCliTestRouteInternet',
-                'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
-                'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
-                'admin_login': 'admin123',
-                'admin_password': 'SecretPassword123',
-                'license_type': 'LicenseIncluded',
-                'v_cores': 8,
-                'storage_size_in_gb': '32',
-                'edition': 'GeneralPurpose',
-                'family': 'Gen5',
-                'collation': "Serbian_Cyrillic_100_CS_AS",
-                'proxy_override': "Proxy"
-            })
 
-            # Create and prepare VNet and subnet for new virtual cluster
-            self.cmd('network route-table create -g {rg} -n {route_table_name}')
-            self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-            self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-            self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
-            self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-            subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name_internet': 'vcCliTestRouteInternet',
+            'route_name_vnetlocal': 'vcCliTestRouteVnetLoc',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy"
+        })
 
-            print('Vnet is created...\n')
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {rg} -n {route_table_name}')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
-            self.kwargs.update({
-                'subnet_id': subnet['id']
-            })
+        print('Vnet is created...\n')
 
-            # create sql managed_instance
-            self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-                    '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
-                    '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
-                    '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
-                    checks=[
-                        self.check('name', '{managed_instance_name}'),
-                        self.check('resourceGroup', '{rg}'),
-                        self.check('administratorLogin', '{admin_login}'),
-                        self.check('vCores', '{v_cores}'),
-                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
-                        self.check('licenseType', '{license_type}'),
-                        self.check('sku.tier', '{edition}'),
-                        self.check('sku.family', '{family}'),
-                        self.check('sku.capacity', '{v_cores}'),
-                        self.check('identity', None),
-                        self.check('collation', '{collation}'),
-                        self.check('proxyOverride', '{proxy_override}'),
-                        self.check('publicDataEndpointEnabled', 'True')])
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
 
-            print('Managed instance is created...\n')
+        # create sql managed_instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled',
+                checks=[
+                    self.check('name', '{managed_instance_name}'),
+                    self.check('resourceGroup', '{rg}'),
+                    self.check('administratorLogin', '{admin_login}'),
+                    self.check('vCores', '{v_cores}'),
+                    self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                    self.check('licenseType', '{license_type}'),
+                    self.check('sku.tier', '{edition}'),
+                    self.check('sku.family', '{family}'),
+                    self.check('sku.capacity', '{v_cores}'),
+                    self.check('identity', None),
+                    self.check('collation', '{collation}'),
+                    self.check('proxyOverride', '{proxy_override}'),
+                    self.check('publicDataEndpointEnabled', 'True')])
 
-            self.kwargs.update({
-                'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
-                'oid2': 'e4d43337-d52c-4a0c-b581-09055e0359a0',
-                'user': 'DSEngAll',
-                'user2': 'TestUser'
-            })
+        print('Managed instance is created...\n')
 
-            print('Arguments are updated with login and sid data')
+        self.kwargs.update({
+            'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
+            'oid2': 'e4d43337-d52c-4a0c-b581-09055e0359a0',
+            'user': 'DSEngAll',
+            'user2': 'TestUser'
+        })
 
-            self.cmd('sql mi ad-admin create --mi {managed_instance_name} -g {rg} -i {oid} -u {user}',
-                    checks=[
-                        self.check('login', '{user}'),
-                        self.check('sid', '{oid}')])
+        print('Arguments are updated with login and sid data')
 
-            print('Aad admin is set...\n')
+        self.cmd('sql mi ad-admin create --mi {managed_instance_name} -g {rg} -i {oid} -u {user}',
+                checks=[
+                    self.check('login', '{user}'),
+                    self.check('sid', '{oid}')])
 
-            self.cmd('sql mi ad-admin list --mi {managed_instance_name} -g {rg}',
-                    checks=[
-                        self.check('[0].login', '{user}'),
-                        self.check('[0].sid', '{oid}')])
+        print('Aad admin is set...\n')
 
-            print('Get aad admin...\n')
+        self.cmd('sql mi ad-admin list --mi {managed_instance_name} -g {rg}',
+                checks=[
+                    self.check('[0].login', '{user}'),
+                    self.check('[0].sid', '{oid}')])
 
-            self.cmd('sql mi ad-admin update --mi {managed_instance_name} -g {rg} -u {user2} -i {oid2}',
-                    checks=[
-                        self.check('login', '{user2}'),
-                        self.check('sid', '{oid2}')])
+        print('Get aad admin...\n')
 
-            print('Aad admin is updated...\n')
+        self.cmd('sql mi ad-admin update --mi {managed_instance_name} -g {rg} -u {user2} -i {oid2}',
+                checks=[
+                    self.check('login', '{user2}'),
+                    self.check('sid', '{oid2}')])
 
-            self.cmd('sql mi ad-admin delete --mi {managed_instance_name} -g {rg}')
+        print('Aad admin is updated...\n')
 
-            print('Aad admin is deleted...\n')
+        self.cmd('sql mi ad-admin delete --mi {managed_instance_name} -g {rg}')
 
-            self.cmd('sql mi ad-admin list --mi {managed_instance_name} -g {rg}',
-                    checks=[
-                        self.check('login', None)])
+        print('Aad admin is deleted...\n')
 
-            print('Test is finished...\n')
+        self.cmd('sql mi ad-admin list --mi {managed_instance_name} -g {rg}',
+                checks=[
+                    self.check('login', None)])
+
+        print('Test is finished...\n')
 
 
 class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
@@ -3843,129 +3854,128 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
     @StorageAccountPreparer(location='westeurope')
     def test_sql_db_sensitivity_classifications(self, resource_group, resource_group_location, server, storage_account):
         from azure.mgmt.sql.models import SampleName
-        is_playback = os.path.exists(self.recording_file)
-        if not is_playback:
-            database_name = "sensitivityclassificationsdb01"
 
-            # create db
-            self.cmd('sql db create -g {} -s {} -n {} --sample-name {}'
-                    .format(resource_group, server, database_name, SampleName.adventure_works_lt),
-                    checks=[
-                        JMESPathCheck('resourceGroup', resource_group),
-                        JMESPathCheck('name', database_name),
-                        JMESPathCheck('status', 'Online')])
+        database_name = "sensitivityclassificationsdb01"
 
-            # list current sensitivity classifications
-            self.cmd('sql db classification list -g {} -s {} -n {}'
-                    .format(resource_group, server, database_name),
-                    checks=[
-                        JMESPathCheck('length(@)', 0)])  # No classifications are set at the beginning
+        # create db
+        self.cmd('sql db create -g {} -s {} -n {} --sample-name {}'
+                .format(resource_group, server, database_name, SampleName.adventure_works_lt),
+                checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('name', database_name),
+                    JMESPathCheck('status', 'Online')])
 
-            # get storage account endpoint and key
-            storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
-            key = self._get_storage_key(storage_account, resource_group)
+        # list current sensitivity classifications
+        self.cmd('sql db classification list -g {} -s {} -n {}'
+                .format(resource_group, server, database_name),
+                checks=[
+                    JMESPathCheck('length(@)', 0)])  # No classifications are set at the beginning
 
-            # enable ADS - (required to use data classification)
-            disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
-            disabled_alerts_expected = 'Sql_Injection_Vulnerability;Access_Anomaly'
-            email_addresses_input = 'test1@example.com test2@example.com'
-            email_addresses_expected = 'test1@example.com;test2@example.com'
-            email_account_admins = 'Enabled'
-            state_enabled = 'Enabled'
-            retention_days = 30
+        # get storage account endpoint and key
+        storage_endpoint = self._get_storage_endpoint(storage_account, resource_group)
+        key = self._get_storage_key(storage_account, resource_group)
 
-            self.cmd('sql db threat-policy update -g {} -s {} -n {}'
-                    ' --state {} --storage-key {} --storage-endpoint {}'
-                    ' --retention-days {} --email-addresses {} --disabled-alerts {}'
-                    ' --email-account-admins {}'
-                    .format(resource_group, server, database_name, state_enabled, key,
-                            storage_endpoint, retention_days, email_addresses_input,
-                            disabled_alerts_input, email_account_admins),
-                    checks=[
-                        JMESPathCheck('resourceGroup', resource_group),
-                        JMESPathCheck('state', state_enabled),
-                        JMESPathCheck('storageAccountAccessKey', key),
-                        JMESPathCheck('storageEndpoint', storage_endpoint),
-                        JMESPathCheck('retentionDays', retention_days),
-                        JMESPathCheck('emailAddresses', email_addresses_expected),
-                        JMESPathCheck('disabledAlerts', disabled_alerts_expected),
-                        JMESPathCheck('emailAccountAdmins', email_account_admins)])
+        # enable ADS - (required to use data classification)
+        disabled_alerts_input = 'Sql_Injection_Vulnerability Access_Anomaly'
+        disabled_alerts_expected = 'Sql_Injection_Vulnerability;Access_Anomaly'
+        email_addresses_input = 'test1@example.com test2@example.com'
+        email_addresses_expected = 'test1@example.com;test2@example.com'
+        email_account_admins = 'Enabled'
+        state_enabled = 'Enabled'
+        retention_days = 30
 
-            # list recommended sensitivity classifications
-            expected_recommended_sensitivityclassifications_count = 15
-            self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
-                    .format(resource_group, server, database_name),
-                    checks=[
-                        JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
+        self.cmd('sql db threat-policy update -g {} -s {} -n {}'
+                ' --state {} --storage-key {} --storage-endpoint {}'
+                ' --retention-days {} --email-addresses {} --disabled-alerts {}'
+                ' --email-account-admins {}'
+                .format(resource_group, server, database_name, state_enabled, key,
+                        storage_endpoint, retention_days, email_addresses_input,
+                        disabled_alerts_input, email_account_admins),
+                checks=[
+                    JMESPathCheck('resourceGroup', resource_group),
+                    JMESPathCheck('state', state_enabled),
+                    JMESPathCheck('storageAccountAccessKey', key),
+                    JMESPathCheck('storageEndpoint', storage_endpoint),
+                    JMESPathCheck('retentionDays', retention_days),
+                    JMESPathCheck('emailAddresses', email_addresses_expected),
+                    JMESPathCheck('disabledAlerts', disabled_alerts_expected),
+                    JMESPathCheck('emailAccountAdmins', email_account_admins)])
 
-            schema_name = 'SalesLT'
-            table_name = 'Customer'
-            column_name = 'FirstName'
+        # list recommended sensitivity classifications
+        expected_recommended_sensitivityclassifications_count = 15
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
+                .format(resource_group, server, database_name),
+                checks=[
+                    JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
 
-            # disable the recommendation for SalesLT/Customer/FirstName
-            self.cmd('sql db classification recommendation disable -g {} -s {} -n {} --schema {} --table {} --column {}'
-                    .format(resource_group, server, database_name, schema_name, table_name, column_name))
+        schema_name = 'SalesLT'
+        table_name = 'Customer'
+        column_name = 'FirstName'
 
-            # list recommended sensitivity classifications
-            self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
-                    .format(resource_group, server, database_name),
-                    checks=[
-                        JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
+        # disable the recommendation for SalesLT/Customer/FirstName
+        self.cmd('sql db classification recommendation disable -g {} -s {} -n {} --schema {} --table {} --column {}'
+                .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
-            # re-enable the disabled recommendation
-            self.cmd('sql db classification recommendation enable -g {} -s {} -n {} --schema {} --table {} --column {}'
-                    .format(resource_group, server, database_name, schema_name, table_name, column_name))
+        # list recommended sensitivity classifications
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
+                .format(resource_group, server, database_name),
+                checks=[
+                    JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
 
-            # lits recommended sensitivity classifications
-            self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
-                    .format(resource_group, server, database_name),
-                    checks=[
-                        JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
+        # re-enable the disabled recommendation
+        self.cmd('sql db classification recommendation enable -g {} -s {} -n {} --schema {} --table {} --column {}'
+                .format(resource_group, server, database_name, schema_name, table_name, column_name))
 
-            # update the sensitivity classification
-            information_type = 'Name'
-            label_name = 'Confidential - GDPR'
-            information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
-            label_id = 'bf91e08c-f4f0-478a-b016-25164b2a65ff'
+        # lits recommended sensitivity classifications
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
+                .format(resource_group, server, database_name),
+                checks=[
+                    JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count)])
 
-            self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
-                    .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
-                    checks=[
-                        JMESPathCheck('informationType', information_type),
-                        JMESPathCheck('labelName', label_name),
-                        JMESPathCheck('informationTypeId', information_type_id),
-                        JMESPathCheck('labelId', label_id)])
+        # update the sensitivity classification
+        information_type = 'Name'
+        label_name = 'Confidential - GDPR'
+        information_type_id = '57845286-7598-22f5-9659-15b24aeb125e'
+        label_id = 'bf91e08c-f4f0-478a-b016-25164b2a65ff'
 
-            # get the classified column
-            self.cmd('sql db classification show -g {} -s {} -n {} --schema {} --table {} --column {}'
-                    .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type),
-                    checks=[
-                        JMESPathCheck('informationType', information_type),
-                        JMESPathCheck('labelName', label_name),
-                        JMESPathCheck('informationTypeId', information_type_id),
-                        JMESPathCheck('labelId', label_id)])
+        self.cmd('sql db classification update -g {} -s {} -n {} --schema {} --table {} --column {} --information-type {} --label "{}"'
+                .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type, label_name),
+                checks=[
+                    JMESPathCheck('informationType', information_type),
+                    JMESPathCheck('labelName', label_name),
+                    JMESPathCheck('informationTypeId', information_type_id),
+                    JMESPathCheck('labelId', label_id)])
 
-            # list recommended classifications
-            self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
-                    .format(resource_group, server, database_name),
-                    checks=[
-                        JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
+        # get the classified column
+        self.cmd('sql db classification show -g {} -s {} -n {} --schema {} --table {} --column {}'
+                .format(resource_group, server, database_name, schema_name, table_name, column_name, information_type),
+                checks=[
+                    JMESPathCheck('informationType', information_type),
+                    JMESPathCheck('labelName', label_name),
+                    JMESPathCheck('informationTypeId', information_type_id),
+                    JMESPathCheck('labelId', label_id)])
 
-            # list current classifications
-            self.cmd('sql db classification list -g {} -s {} -n {}'
-                    .format(resource_group, server, database_name),
-                    checks=[
-                        JMESPathCheck('length(@)', 1)])
+        # list recommended classifications
+        self.cmd('sql db classification recommendation list -g {} -s {} -n {}'
+                .format(resource_group, server, database_name),
+                checks=[
+                    JMESPathCheck('length(@)', expected_recommended_sensitivityclassifications_count - 1)])
 
-            # delete the label
-            self.cmd('sql db classification delete -g {} -s {} -n {} --schema {} --table {} --column {}'
-                    .format(resource_group, server, database_name, schema_name, table_name, column_name))
+        # list current classifications
+        self.cmd('sql db classification list -g {} -s {} -n {}'
+                .format(resource_group, server, database_name),
+                checks=[
+                    JMESPathCheck('length(@)', 1)])
 
-            # list current labels
-            self.cmd('sql db classification list -g {} -s {} -n {}'
-                    .format(resource_group, server, database_name),
-                    checks=[
-                        JMESPathCheck('length(@)', 0)])
+        # delete the label
+        self.cmd('sql db classification delete -g {} -s {} -n {} --schema {} --table {} --column {}'
+                .format(resource_group, server, database_name, schema_name, table_name, column_name))
+
+        # list current labels
+        self.cmd('sql db classification list -g {} -s {} -n {}'
+                .format(resource_group, server, database_name),
+                checks=[
+                    JMESPathCheck('length(@)', 0)])
 
 
 class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
