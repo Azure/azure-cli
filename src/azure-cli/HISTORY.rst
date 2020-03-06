@@ -13,16 +13,11 @@ Release History
 * Add private link and CMK support
 * add 'private-link-resource list' command
 
-**ACS**
-
-* [BREAKING CHANGE] az aks: support msi changes for GF and BF for omsagent (Container monitoring)(#1)
-* az aks use-dev-spaces: Adding endpoint type option to the use-dev-spaces command to customize the endpoint created on an Azure Dev Spaces controller
-
 **AKS**
 
 * fix the aks browse in cloud shell
 * az aks: Fix monitoring addon and agentpool NoneType errors
-* Add --nodepool-tags to node pool when creating azure kubernetes cluster (remember to remove the same history notes from 2.0.81)
+* Add --nodepool-tags to node pool when creating azure kubernetes cluster
 * Add --tags when adding or updating a nodepool to cluster
 * aks create: add `--enable-private-cluster`
 * add --nodepool-labels when creating azure kubernetes cluster
@@ -31,6 +26,8 @@ Release History
 * Support create aks clusters enabling managed identity
 * az aks: Validate network plugin to be either "azure" or "kubenet"
 * az aks: Add aad session key support
+* [BREAKING CHANGE] az aks: support msi changes for GF and BF for omsagent (Container monitoring)(#1)
+* az aks use-dev-spaces: Adding endpoint type option to the use-dev-spaces command to customize the endpoint created on an Azure Dev Spaces controller
 
 **AppConfig**
 
@@ -238,8 +235,6 @@ Release History
 **AKS**
 
 * Each cluster gets a separate service principal to improve isolation
-* Add --nodepool-tags to node pool when creating azure kubernetes cluster
-* Add --tags when adding or updating a nodepool to cluster
 
 **AppConfig**
 
