@@ -443,6 +443,19 @@ class FailoverPolicyType(Enum):
     manual = 'Manual'
 
 
+class SqlServerMinimalTlsVersionType(Enum):
+    tls_1_0 = "1.0"
+    tls_1_1 = "1.1"
+    tls_1_2 = "1.2"
+
+
+class SqlManagedInstanceMinimalTlsVersionType(Enum):
+    no_tls = "None"
+    tls_1_0 = "1.0"
+    tls_1_1 = "1.1"
+    tls_1_2 = "1.2"
+
+
 class ComputeModelType(str, Enum):
 
     provisioned = "Provisioned"
@@ -2015,6 +2028,7 @@ def server_update(
         instance,
         administrator_login_password=None,
         assign_identity=False,
+        minimal_tls_version=None,
         enable_public_network=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
@@ -2027,6 +2041,8 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+    instance.minimal_tls_version = (
+        minimal_tls_version or instance.minimal_tls_version)
 
     if enable_public_network is not None:
         instance.public_network_access = (
@@ -2372,7 +2388,8 @@ def managed_instance_update(
         proxy_override=None,
         public_data_endpoint_enabled=None,
         tier=None,
-        family=None):
+        family=None,
+        minimal_tls_version=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2392,6 +2409,8 @@ def managed_instance_update(
         storage_size_in_gb or instance.storage_size_in_gb)
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
+    instance.minimal_tls_version = (
+        minimal_tls_version or instance.minimal_tls_version)
 
     instance.sku.name = None
     instance.sku.tier = (
