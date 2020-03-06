@@ -1039,6 +1039,13 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this server'
                    'for use with key management services like Azure KeyVault.')
 
+        c.argument('enable_public_network',
+                   options_list=['--enable-public-network', '-e'],
+                   arg_type=get_three_state_flag(),
+                   help='Set whether public network access to server is allowed or not. When false,'
+                   'only connections made through Private Links can reach this server.',
+                   is_preview=True)
+
     with self.argument_context('sql server create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
