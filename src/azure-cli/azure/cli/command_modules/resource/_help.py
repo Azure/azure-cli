@@ -1011,6 +1011,14 @@ examples:
   - name: Create a read-only subscription level lock.
     text: >
         az lock create --name lockName --resource-group group --lock-type ReadOnly
+  - name: Create a read-only resource level lock on a vnet resource.
+    text: >
+        az lock create --name lockName --resource-group group --lock-type ReadOnly --resource-type \\
+            Microsoft.Network/virtualNetworks --resource myVnet
+  - name: Create a read-only resource level lock on a subnet resource with a specific parent.
+    text: >
+        az lock create --name lockName --resource-group group --lock-type ReadOnly --resource-type \\
+            Microsoft.Network/subnets --parent virtualNetworks/myVnet --resource mySubnet
 """
 
 helps['lock delete'] = """
