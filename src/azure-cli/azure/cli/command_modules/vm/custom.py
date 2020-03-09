@@ -3150,7 +3150,9 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
     workspace = None
     extension_resources = vm.resources or []
     for resource in extension_resources:
-        if resource.name == "OMSExtension":
+        if resource.name == "OMSExtension" or resource.name == "OmsAgentForLinux":
+            workspace = resource.settings.get('workspaceId', None)
+        elif resource.name == "MicrosoftMonitoringAgent":
             workspace = resource.settings.get('workspaceId', None)
     if workspace is None:
         raise CLIError('Cannot find the corresponding log analytics workspace. '
