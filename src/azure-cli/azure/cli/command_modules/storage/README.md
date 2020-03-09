@@ -53,3 +53,11 @@ az storage account encryption-scope update \
     -g MyResourceGoup
 ```
 
+#### Disable specified encryption scope in a storage account.
+```
+az storage account encryption-scope update \
+    -n myencryption \
+    --account-name mystorageaccount \
+    -g MyResourceGoup \
+    --disabled
+```

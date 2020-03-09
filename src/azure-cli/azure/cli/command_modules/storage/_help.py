@@ -127,7 +127,7 @@ examples:
         az storage account encryption-scope update --name myencryption -s Microsoft.Storage --account-name mystorageaccount -g MyResourceGroup
   - name: Disable an encryption scope within storage account.
     text: |
-        az storage account encryption-scope create --name myencryption --disabled true --account-name mystorageaccount -g MyResourceGroup
+        az storage account encryption-scope update --name myencryption --disabled true --account-name mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account generate-sas'] = """
