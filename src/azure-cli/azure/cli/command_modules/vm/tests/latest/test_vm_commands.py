@@ -4218,8 +4218,8 @@ class VMCreateNSGRule(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} -n {vm} --image centos --nsg-rule NONE')
-        self.cmd('network nic show -g {rg} -n {vm}VMNIC', checks=[
-            self.check('networkSecurityGroup.defaultSecurityRules', None)
+        self.cmd('network nsg show -g {rg} -n {vm}NSG', checks=[
+            self.not_exists('securityRules')
         ])
 
 
