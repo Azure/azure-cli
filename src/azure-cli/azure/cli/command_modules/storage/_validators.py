@@ -117,6 +117,10 @@ def validate_client_parameters(cmd, namespace):
             n.account_name = get_config_value('storage', 'account', None)
         if auth_mode == 'login':
             n.token_credential = _create_token_credential(cmd.cli_ctx)
+        if auth_mode == 'key':
+            logger.warning('Legacy "key" auth mode will be deprecated soon. Please try to use --auth-mode login '
+                           'or provide one of the following parameters: connection string, account key or sas token'
+                           ' for your storage account.')
 
     if hasattr(n, 'token_credential') and n.token_credential:
         # give warning if there are account key args being ignored
@@ -154,9 +158,10 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('No connection string, account key or sas token found, we will query account keys for your '
-                       'storage account. Please try to use --auth-mode login or provide one of the following parameters'
-                       ': connection string, account key or sas token for your storage account.')
+        if auth_mode != 'key':
+            logger.warning('No connection string, account key or sas token found, we will query account keys for your '
+                           'storage account. Please try to use --auth-mode login or provide one of the following '
+                           'parameters: connection string, account key or sas token for your storage account.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
