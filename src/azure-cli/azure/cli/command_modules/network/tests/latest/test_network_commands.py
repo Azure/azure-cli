@@ -1070,11 +1070,24 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
         # add two managed rule set to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0')
+                 ])
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp1} --rules 921100 921110')
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp2} --rules 913100')
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type Microsoft_BotManagerRuleSet --version 0.1',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1')
+                 ])
 
         # add one exclusion rule to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
@@ -1091,6 +1104,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
+            self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),
