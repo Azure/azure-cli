@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**IoT**
+
+* Set default SKU to S1 while hub create.
+
 2.2.0
 ++++++
 
