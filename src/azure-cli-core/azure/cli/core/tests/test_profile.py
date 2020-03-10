@@ -1850,9 +1850,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
     def test_find_using_common_tenant_mfa_warning(self, _get_authorization_code_mock, mock_auth_context):
-        # Assume 2 tenants with subscriptions in them
-        # tenant1: subscription1
-        # tenant2_mfa: subscription2
+        # Assume 2 tenants. Home tenant tenant1 doesn't require MFA, but tenant2 does
         import adal
         cli = DummyCli()
         mock_arm_client = mock.MagicMock()
