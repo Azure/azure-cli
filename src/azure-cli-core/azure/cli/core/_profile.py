@@ -879,7 +879,7 @@ class SubscriptionFinder(object):
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
                 # with other tenants.
-                msg = getattr(ex, 'error_response', {}).get('error_description', '')
+                msg = (getattr(ex, 'error_response', None) or {}).get('error_description') or ''
                 if 'AADSTS50076' in msg:
                     logger.warning("Tenant %s requires Multi-Factor Authentication (MFA). "
                                    "To access this tenant, use 'az login --tenant' to explicitly "
