@@ -243,8 +243,8 @@ Authentication failure. This may be caused by either invalid account key, connec
         with self.command_loader.argument_context(command_name, min_api='2017-11-09') as c:
             c.extra('auth_mode', arg_type=get_enum_type(['login', 'key']),
                     help='The mode in which to run the command. "login" mode will directly use your login credentials '
-                         'for the authentication. The legacy "key" mode will attempt to query for '
-                         'an account key if no authentication parameters for the account are provided. '
+                         'for the authentication. The legacy "key" mode will be deprecated soon, which will attempt to '
+                         'query for an account key if no authentication parameters for the account are provided. '
                          'Environment variable: AZURE_STORAGE_AUTH_MODE')
 
 
