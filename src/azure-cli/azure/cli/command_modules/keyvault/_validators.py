@@ -6,7 +6,7 @@
 import argparse
 import base64
 import binascii
-from collections import Iterable
+from collections.abc import Iterable
 from datetime import datetime
 import re
 

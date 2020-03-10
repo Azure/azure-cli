@@ -849,7 +849,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         # list certificate versions
         self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1 --maxresults 10',
                  checks=[
-                     self.check('length(@)', 2),self.check('[0].name', 'cert1')
+                     self.check('length(@)', 2),
+                     self.check('[0].name', 'cert1')
                  ])
         ver_list = self.cmd('keyvault certificate list-versions --vault-name {kv} -n cert1',
                             checks=self.check('length(@)', 2)).get_output_in_json()
