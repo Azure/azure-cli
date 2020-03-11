@@ -316,6 +316,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
         c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)
 
+    with self.argument_context('acr agentpool') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('agentpool_name', options_list=['--name', '-n'], help='The name of the agentpool.')
+        c.argument('tag', help='The tag of the agentpool.')
+        c.argument('count', type=int, help='The count of the agentpool.')
+        c.argument('tier', help='The tier of the agentpool.')
+        c.argument('os_type', options_list=['--os'], help='The os of the agentpool.', deprecate_info=c.deprecate(hide=True))
+        c.argument('vnet_id', options_list=['--vnet-id'], help='The Virtual Network Subnet Resource Id of the agent machine.')
+
+    with self.argument_context('acr agentpool show') as c:
+        c.argument('queue_count', help="Get only the queue count", action='store_true')
+
 
 def _get_helm_default_install_location():
     exe_name = 'helm'

@@ -14,6 +14,7 @@ az webapp create : Fixing issue when running the command with --runtime
 * Add a new argument `--expose-token` for `az acr login`
 * Fix the incorrect output of `az acr task identity show -n Name -r Registry -o table`
 * az acr login: Throw a CLIError if there are errors returned by docker command
+* Add a new command group 'az acr task agentpool create/update/show/list/delete' for taskrun management
 
 **ACS**
 

@@ -78,6 +78,10 @@ def token_credential_output_format(result):
     return _output_format(result, _token_password_format_group)
 
 
+def agentpool_output_format(result):
+    return _output_format(result, _agentpool_format_group)
+
+
 def helm_list_output_format(result):
     if isinstance(result, dict):
         obj_list = []
@@ -216,6 +220,14 @@ def _taskrun_format_group(item):
                                    _get_value(item, 'runResult', 'finishTime')))
     ])
 
+def _agentpool_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('STATE', _get_value(item, 'provisioningState')),
+        ('OS', _get_value(item, 'os')),
+        ('TIER', _get_value(item, 'tier')),
+        ('VNET', _get_value(item, 'virtualNetworkSubnetResourceId'))
+    ])
 
 def _build_format_group(item):
     return OrderedDict([
