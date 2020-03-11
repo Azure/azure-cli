@@ -232,7 +232,7 @@ def load_command_table(self, _):
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace')
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_log_analytics_workspace')
         g.command('get-schema', 'get_schema')

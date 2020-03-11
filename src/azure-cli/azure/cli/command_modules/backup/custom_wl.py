@@ -7,6 +7,8 @@ import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
 # pylint: disable=import-error
 # pylint: disable=broad-except
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
 
 from uuid import uuid4
 from azure.cli.command_modules.backup._validators import datetime_type
@@ -461,22 +463,30 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     database_name = recovery_config_object['database_name']
     container_id = recovery_config_object['container_id']
     alternate_directory_paths = recovery_config_object['alternate_directory_paths']
+    recovery_mode = recovery_config_object['recovery_mode']
+    filepath = recovery_config_object['filepath']
 
     # Construct trigger restore request object
     trigger_restore_properties = _get_restore_request_instance(item_type, log_point_in_time)
     trigger_restore_properties.recovery_type = restore_mode
 
     if restore_mode == 'AlternateLocation':
-        setattr(trigger_restore_properties, 'source_resource_id', source_resource_id)
-        setattr(trigger_restore_properties, 'target_info', TargetRestoreInfo(overwrite_option='Overwrite',
-                                                                             database_name=database_name,
-                                                                             container_id=container_id))
-        if 'sql' in item_type.lower():
-            directory_map = []
-            for i in alternate_directory_paths:
-                directory_map.append(SQLDataDirectoryMapping(mapping_type=i[0], source_path=i[1],
-                                                             source_logical_name=i[2], target_path=i[3]))
-            setattr(trigger_restore_properties, 'alternate_directory_paths', directory_map)
+        if recovery_mode != "FileRecovery":
+            setattr(trigger_restore_properties, 'source_resource_id', source_resource_id)
+            setattr(trigger_restore_properties, 'target_info', TargetRestoreInfo(overwrite_option='Overwrite',
+                                                                                 database_name=database_name,
+                                                                                 container_id=container_id))
+            if 'sql' in item_type.lower():
+                directory_map = []
+                for i in alternate_directory_paths:
+                    directory_map.append(SQLDataDirectoryMapping(mapping_type=i[0], source_path=i[1],
+                                                                 source_logical_name=i[2], target_path=i[3]))
+                setattr(trigger_restore_properties, 'alternate_directory_paths', directory_map)
+        else:
+            target_info = TargetRestoreInfo(overwrite_option='Overwrite', container_id=container_id,
+                                            target_directory_for_file_restore=filepath)
+            setattr(trigger_restore_properties, 'target_info', target_info)
+            trigger_restore_properties.recovery_mode = recovery_mode
 
     if log_point_in_time is not None:
         setattr(trigger_restore_properties, 'point_in_time', datetime_type(log_point_in_time))
@@ -493,7 +503,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
-                         rp_name, target_item, target_item_name, log_point_in_time):
+                         rp_name, target_item, target_item_name, log_point_in_time, from_full_rp_name,
+                         filepath, target_container):
     if log_point_in_time is not None:
         datetime_type(log_point_in_time)
 
@@ -510,6 +521,9 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                 """
                 Target Item must be either of type HANAInstance or SQLInstance.
                 """)
+
+    if restore_mode == 'RestoreAsFiles' and target_container is None:
+        raise CLIError("Target Container must be provided.")
 
     if rp_name is None and log_point_in_time is None:
         raise CLIError(
@@ -531,7 +545,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
 
     # Mapping of restore mode
     restore_mode_map = {'OriginalWorkloadRestore': 'OriginalLocation',
-                        'AlternateWorkloadRestore': 'AlternateLocation'}
+                        'AlternateWorkloadRestore': 'AlternateLocation',
+                        'RestoreAsFiles': 'AlternateLocation'}
+
+    if rp_name is None and restore_mode == "RestoreAsFiles" and from_full_rp_name is not None:
+        rp_name = from_full_rp_name
     rp_name = rp_name if rp_name is not None else 'DefaultRangeRecoveryPoint'
 
     if rp_name == 'DefaultRangeRecoveryPoint':
@@ -573,6 +591,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if not ('sql' in item_type.lower() and restore_mode == 'AlternateWorkloadRestore'):
         alternate_directory_paths = None
 
+    recovery_mode = None
+    if restore_mode == 'RestoreAsFiles':
+        recovery_mode = 'FileRecovery'
+        container_id = target_container.id
+
     return {
         'restore_mode': restore_mode_map[restore_mode],
         'container_uri': item.properties.container_name,
@@ -583,6 +606,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'source_resource_id': item.properties.source_resource_id,
         'database_name': db_name,
         'container_id': container_id,
+        'recovery_mode': recovery_mode,
+        'filepath': filepath,
         'alternate_directory_paths': alternate_directory_paths}
 
 

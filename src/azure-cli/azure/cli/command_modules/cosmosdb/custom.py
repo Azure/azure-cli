@@ -21,6 +21,12 @@ from azure.mgmt.cosmosdb.models import (
     SqlContainerResource,
     SqlContainerCreateUpdateParameters,
     ContainerPartitionKey,
+    SqlStoredProcedureResource,
+    SqlStoredProcedureCreateUpdateParameters,
+    SqlTriggerResource,
+    SqlTriggerCreateUpdateParameters,
+    SqlUserDefinedFunctionResource,
+    SqlUserDefinedFunctionCreateUpdateParameters,
     TableResource,
     TableCreateUpdateParameters,
     MongoDBDatabaseResource,
@@ -80,7 +86,8 @@ def cli_cosmosdb_create(cmd, client,
                         enable_virtual_network=None,
                         virtual_network_rules=None,
                         enable_multiple_write_locations=None,
-                        disable_key_based_metadata_write_access=None):
+                        disable_key_based_metadata_write_access=None,
+                        key_uri=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -111,7 +118,8 @@ def cli_cosmosdb_create(cmd, client,
         capabilities=capabilities,
         virtual_network_rules=virtual_network_rules,
         enable_multiple_write_locations=enable_multiple_write_locations,
-        disable_key_based_metadata_write_access=disable_key_based_metadata_write_access)
+        disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
+        key_vault_key_uri=key_uri)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -318,6 +326,145 @@ def cli_cosmosdb_sql_container_update(client,
                                               database_name,
                                               container_name,
                                               sql_container_create_update_resource)
+
+
+def cli_cosmosdb_sql_stored_procedure_create_update(client,
+                                                    resource_group_name,
+                                                    account_name,
+                                                    database_name,
+                                                    container_name,
+                                                    stored_procedure_name,
+                                                    stored_procedure_body):
+
+    """Creates or Updates an Azure Cosmos DB SQL stored procedure """
+    sql_stored_procedure_resource = SqlStoredProcedureResource(id=stored_procedure_name)
+    sql_stored_procedure_resource.body = stored_procedure_body
+
+    sql_stored_procedure_create_update_resource = SqlStoredProcedureCreateUpdateParameters(
+        resource=sql_stored_procedure_resource,
+        options={})
+
+    return client.create_update_sql_stored_procedure(resource_group_name,
+                                                     account_name,
+                                                     database_name,
+                                                     container_name,
+                                                     stored_procedure_name,
+                                                     sql_stored_procedure_create_update_resource)
+
+
+def cli_cosmosdb_sql_user_defined_function_create_update(client,
+                                                         resource_group_name,
+                                                         account_name,
+                                                         database_name,
+                                                         container_name,
+                                                         user_defined_function_name,
+                                                         user_defined_function_body):
+
+    """Creates or Updates an Azure Cosmos DB SQL user defined function """
+    sql_user_defined_function_resource = SqlUserDefinedFunctionResource(id=user_defined_function_name)
+    sql_user_defined_function_resource.body = user_defined_function_body
+
+    sql_user_defined_function_create_update_resource = SqlUserDefinedFunctionCreateUpdateParameters(
+        resource=sql_user_defined_function_resource,
+        options={})
+
+    return client.create_update_sql_user_defined_function(resource_group_name,
+                                                          account_name,
+                                                          database_name,
+                                                          container_name,
+                                                          user_defined_function_name,
+                                                          sql_user_defined_function_create_update_resource)
+
+
+def _populate_sql_trigger_definition(sql_trigger_resource,
+                                     trigger_body,
+                                     trigger_operation,
+                                     trigger_type):
+    if all(arg is None for arg in
+           [trigger_body, trigger_operation, trigger_type]):
+        return False
+
+    if trigger_body is not None:
+        sql_trigger_resource.body = trigger_body
+
+    if trigger_operation is not None:
+        sql_trigger_resource.trigger_operation = trigger_operation
+
+    if trigger_type is not None:
+        sql_trigger_resource.trigger_type = trigger_type
+
+    return True
+
+
+def cli_cosmosdb_sql_trigger_create(client,
+                                    resource_group_name,
+                                    account_name,
+                                    database_name,
+                                    container_name,
+                                    trigger_name,
+                                    trigger_body,
+                                    trigger_type=None,
+                                    trigger_operation=None):
+
+    """Creates an Azure Cosmos DB SQL trigger """
+    if trigger_operation is None:
+        trigger_operation = "All"
+
+    if trigger_type is None:
+        trigger_type = "Pre"
+
+    sql_trigger_resource = SqlTriggerResource(id=trigger_name)
+    sql_trigger_resource.body = trigger_body
+    sql_trigger_resource.trigger_type = trigger_type
+    sql_trigger_resource.trigger_operation = trigger_operation
+
+    sql_trigger_create_update_resource = SqlTriggerCreateUpdateParameters(
+        resource=sql_trigger_resource,
+        options={})
+
+    return client.create_update_sql_trigger(resource_group_name,
+                                            account_name,
+                                            database_name,
+                                            container_name,
+                                            trigger_name,
+                                            sql_trigger_create_update_resource)
+
+
+def cli_cosmosdb_sql_trigger_update(client,
+                                    resource_group_name,
+                                    account_name,
+                                    database_name,
+                                    container_name,
+                                    trigger_name,
+                                    trigger_body=None,
+                                    trigger_type=None,
+                                    trigger_operation=None):
+
+    """Updates an Azure Cosmos DB SQL trigger """
+    logger.debug('reading SQL trigger')
+    sql_trigger = client.get_sql_trigger(resource_group_name, account_name, database_name, container_name, trigger_name)
+
+    sql_trigger_resource = SqlTriggerResource(id=trigger_name)
+    sql_trigger_resource.body = sql_trigger.resource.body
+    sql_trigger_resource.trigger_operation = sql_trigger.resource.trigger_operation
+    sql_trigger_resource.trigger_type = sql_trigger.resource.trigger_type
+
+    if _populate_sql_trigger_definition(sql_trigger_resource,
+                                        trigger_body,
+                                        trigger_operation,
+                                        trigger_type):
+        logger.debug('replacing SQL trigger')
+
+    sql_trigger_create_update_resource = SqlTriggerCreateUpdateParameters(
+        resource=sql_trigger_resource,
+        options={})
+
+    return client.create_update_sql_trigger(resource_group_name,
+                                            account_name,
+                                            database_name,
+                                            container_name,
+                                            trigger_name,
+                                            sql_trigger_create_update_resource)
 
 
 def cli_cosmosdb_gremlin_database_create(client,

@@ -39,13 +39,13 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'identity': system_assigned_identity
         })
 
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --assign-identity {identity}',
-                 checks=[self.check('name', '{config_store_name}'),
-                         self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', resource_group),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('sku.name', sku),
-                         self.check('identity.type', 'SystemAssigned')])
+        store = self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --assign-identity {identity}',
+                         checks=[self.check('name', '{config_store_name}'),
+                                 self.check('location', '{rg_loc}'),
+                                 self.check('resourceGroup', resource_group),
+                                 self.check('provisioningState', 'Succeeded'),
+                                 self.check('sku.name', sku),
+                                 self.check('identity.type', 'SystemAssigned')]).get_output_in_json()
         self.cmd('appconfig list -g {rg}',
                  checks=[self.check('[0].name', '{config_store_name}'),
                          self.check('[0].location', '{rg_loc}'),
@@ -66,16 +66,41 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         updated_tag = tag_key + '=' + tag_value
         structered_tag = {tag_key: tag_value}
         self.kwargs.update({
-            'updated_tag': updated_tag
+            'updated_tag': updated_tag,
+            'update_sku': sku   # we currently only can test on standard sku
         })
 
-        self.cmd('appconfig update -n {config_store_name} -g {rg} --tags {updated_tag}',
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --tags {updated_tag} --sku {update_sku}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('tags', structered_tag),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku)])
+
+        keyvault_name = self.create_random_name(prefix='cmk-test-keyvault', length=24)
+        encryption_key = 'key'
+        system_assigned_identity_id = store['identity']['principalId']
+        self.kwargs.update({
+            'encryption_key': encryption_key,
+            'keyvault_name': keyvault_name,
+            'identity_id': system_assigned_identity_id
+        })
+
+        keyvault = _setup_key_vault(self, self.kwargs)
+        keyvault_uri = keyvault['properties']['vaultUri']
+        self.kwargs.update({
+            'keyvault_uri': keyvault_uri,
+        })
+
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --encryption-key-name {encryption_key} --encryption-key-vault {keyvault_uri}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('tags', structered_tag),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('encryption.keyVaultProperties.keyIdentifier', keyvault_uri.strip('/') + "/keys/{}/".format(encryption_key))])
 
         self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
@@ -1035,40 +1060,6 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                                          self.check('[0].label', null_label)]).get_output_in_json()
         assert len(list_features) == 1
 
-        # List all features ending with Beta, any label
-        suffix_feature_pattern = '*Beta'
-        self.kwargs.update({
-            'feature': suffix_feature_pattern
-        })
-
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}').get_output_in_json()
-        assert len(list_features) == 3
-
-        # List all features ending with Beta, null label
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
-                                 checks=[self.check('[0].key', suffix_feature),
-                                         self.check('[0].label', null_label)]).get_output_in_json()
-        assert len(list_features) == 1
-
-        # List all features containing Beta, any label
-        contains_feature_pattern = '*Beta*'
-        self.kwargs.update({
-            'feature': contains_feature_pattern
-        })
-
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}').get_output_in_json()
-        assert len(list_features) == 5
-
-        # List all features containing Beta, null label
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
-                                 checks=[self.check('[0].key', prefix_feature),
-                                         self.check('[0].label', null_label),
-                                         self.check('[1].key', suffix_feature),
-                                         self.check('[1].label', null_label),
-                                         self.check('[2].key', contains_feature),
-                                         self.check('[2].label', null_label)]).get_output_in_json()
-        assert len(list_features) == 3
-
         # Invalid Pattern - contains comma
         comma_pattern = 'Beta,Alpha'
         self.kwargs.update({
@@ -1110,25 +1101,6 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                                    self.check('[0].label', updated_label),
                                    self.check('[0].state', default_state)]).get_output_in_json()
         assert len(deleted) == 1
-
-        # Delete by pattern - this should delete 2 features Beta (label v1) and SuffixBeta
-        self.kwargs.update({
-            'feature': suffix_feature_pattern,
-            'label': any_label_pattern
-        })
-
-        deleted = self.cmd('appconfig feature delete --connection-string {connection_string}  --feature {feature} --label {label} -y',
-                           checks=[self.check('[0].locked', default_locked),
-                                   self.check('[0].key', entry_feature),
-                                   self.check('[0].description', updated_entry_description),
-                                   self.check('[0].label', entry_label),
-                                   self.check('[0].state', default_state),
-                                   self.check('[1].locked', default_locked),
-                                   self.check('[1].key', suffix_feature),
-                                   self.check('[1].description', default_description),
-                                   self.check('[1].label', null_label),
-                                   self.check('[1].state', default_state)]).get_output_in_json()
-        assert len(deleted) == 2
 
         # Lock feature - ThisBetaVersion
         self.kwargs.update({
@@ -1175,7 +1147,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
-        assert len(list_features) == 2
+        assert len(list_features) == 4
 
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
@@ -1364,18 +1336,6 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
-        self.kwargs.update({
-            'key': FeatureFlagConstants.FEATURE_FLAG_PREFIX
-        })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
-
-        self.kwargs.update({
-            'key': FeatureFlagConstants.FEATURE_FLAG_PREFIX.upper() + 'test'
-        })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
-
         # validate key for KeyVault ref
         self.kwargs.update({
             'key': "%KeyVault",
@@ -1383,27 +1343,6 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         })
         with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y')
-
-        # validate content type
-        self.kwargs.update({
-            'key': "Color",
-            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
-        })
-        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
-
-        self.kwargs.update({
-            'key': "Color",
-            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE.upper()
-        })
-        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
-
-        self.kwargs.update({
-            'content_type': KeyVaultConstants.KEYVAULT_CONTENT_TYPE
-        })
-        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for KeyVault references."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         # validate feature name
         self.kwargs.update({
@@ -1445,6 +1384,14 @@ def _create_config_store(test, kwargs):
 
 def _create_user_assigned_identity(test, kwargs):
     return test.cmd('identity create -n {identity_name} -g {rg}').get_output_in_json()
+
+
+def _setup_key_vault(test, kwargs):
+    key_vault = test.cmd('keyvault create -n {keyvault_name} -g {rg} -l {rg_loc} --enable-purge-protection --enable-soft-delete').get_output_in_json()
+    test.cmd('keyvault key create --vault-name {keyvault_name} -n {encryption_key}')
+    test.cmd('keyvault set-policy -n {keyvault_name} --key-permissions get wrapKey unwrapKey --object-id {identity_id}')
+
+    return key_vault
 
 
 def _format_datetime(date_string):

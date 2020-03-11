@@ -1133,7 +1133,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy","name":"DefaultPolicy","type":"Microsoft.RecoveryServices/vaults/backupPolicies","properties":{"backupManagementType":"AzureIaasVM","instantRPDetails":{},"schedulePolicy":{"schedulePolicyType":"SimpleSchedulePolicy","scheduleRunFrequency":"Daily","scheduleRunTimes":["2019-12-16T23:00:00Z"],"scheduleWeeklyFrequency":0},"retentionPolicy":{"retentionPolicyType":"LongTermRetentionPolicy","dailySchedule":{"retentionTimes":["2019-12-16T23:00:00Z"],"retentionDuration":{"count":30,"durationType":"Days"}}},"instantRpRetentionRangeInDays":2,"timeZone":"UTC","protectedItemsCount":0}}'
@@ -1654,7 +1654,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/vm%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/vm%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2019-06-15
   response:
     body:
       string: ''
@@ -4457,7 +4457,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/b536d643-b44f-42f0-a725-9636100c3b3e?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/b536d643-b44f-42f0-a725-9636100c3b3e?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/b536d643-b44f-42f0-a725-9636100c3b3e","name":"b536d643-b44f-42f0-a725-9636100c3b3e","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT1M32.5783535S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM
@@ -4511,7 +4511,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"IRPending","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"175923084642517","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupPolicies/DefaultPolicy","policyName":"DefaultPolicy"}}]}'
@@ -4565,7 +4565,7 @@ interactions:
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2019-06-15
   response:
     body:
       string: ''
@@ -4979,7 +4979,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/7d14fcb0-66a9-4cb0-82ba-fda0e7501e6e?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/7d14fcb0-66a9-4cb0-82ba-fda0e7501e6e?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/7d14fcb0-66a9-4cb0-82ba-fda0e7501e6e","name":"7d14fcb0-66a9-4cb0-82ba-fda0e7501e6e","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT11.8611523S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM
@@ -5032,7 +5032,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"175923084642517","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":"","deferredDeleteTimeInUTC":"2019-12-16T13:16:26.6857896Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"13.23:59:43.3699681"}}]}'
@@ -5083,7 +5083,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"175923084642517","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":"","deferredDeleteTimeInUTC":"2019-12-16T13:16:26.6857896Z","isScheduledForDeferredDelete":true,"deferredDeleteTimeRemaining":"13.23:59:42.3642198"}}]}'
@@ -5140,7 +5140,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2019-06-15
   response:
     body:
       string: ''
@@ -5546,7 +5546,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/bf02d010-103b-44dc-8270-c317eebaf364?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/bf02d010-103b-44dc-8270-c317eebaf364?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/bf02d010-103b-44dc-8270-c317eebaf364","name":"bf02d010-103b-44dc-8270-c317eebaf364","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT11.4760044S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM
@@ -5599,7 +5599,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig","name":"vaultconfig","type":"Microsoft.RecoveryServices/vaults/backupconfig","properties":{"enhancedSecurityState":"Enabled","softDeleteFeatureState":"Enabled","isSoftDeleteFeatureStateEditable":true}}'
@@ -5655,7 +5655,7 @@ interactions:
       accept-language:
       - en-US
     method: PATCH
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupconfig/vaultconfig","name":"vaultconfig","type":"Microsoft.RecoveryServices/vaults/backupconfig","properties":{"enhancedSecurityState":"Enabled","softDeleteFeatureState":"Disabled","isSoftDeleteFeatureStateEditable":true}}'
@@ -5708,7 +5708,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"175923084642517","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":""}}]}'
@@ -5810,7 +5810,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"175923084642517","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":""}}]}'
@@ -5862,7 +5862,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-05-13&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectedItems?api-version=2019-06-15&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20itemType%20eq%20%27VM%27
   response:
     body:
       string: '{"value":[{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003/protectedItems/VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","name":"VM;iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","type":"Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems","properties":{"friendlyName":"clitest-vm000003","virtualMachineId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","protectionStatus":"Healthy","protectionState":"ProtectionStopped","healthStatus":"Passed","lastBackupStatus":"","lastBackupTime":"2001-01-01T00:00:00Z","protectedItemDataId":"175923084642517","protectedItemType":"Microsoft.Compute/virtualMachines","backupManagementType":"AzureIaasVM","workloadType":"VM","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","sourceResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Compute/virtualMachines/clitest-vm000003","policyId":"","policyName":""}}]}'
@@ -5916,7 +5916,7 @@ interactions:
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupFabrics/Azure/protectionContainers/IaasVMContainer%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003/protectedItems/VM%3Biaasvmcontainerv2%3Bclitest.rg000001%3Bclitest-vm000003?api-version=2019-06-15
   response:
     body:
       string: ''
@@ -9034,7 +9034,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/7f83bc42-9e7a-4698-8feb-588329ba6591?api-version=2019-05-13
+    uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/7f83bc42-9e7a-4698-8feb-588329ba6591?api-version=2019-06-15
   response:
     body:
       string: '{"id":"/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupJobs/7f83bc42-9e7a-4698-8feb-588329ba6591","name":"7f83bc42-9e7a-4698-8feb-588329ba6591","type":"Microsoft.RecoveryServices/vaults/backupJobs","properties":{"jobType":"AzureIaaSVMJob","containerName":"iaasvmcontainerv2;clitest.rg000001;clitest-vm000003","duration":"PT1M52.33168S","virtualMachineVersion":"Compute","extendedInfo":{"tasksList":[],"propertyBag":{"VM

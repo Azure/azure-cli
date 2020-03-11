@@ -204,7 +204,7 @@ _session = TelemetrySession()
 def _user_agrees_to_telemetry(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
-        if not _get_config().getboolean('core', 'collect_telemetry', fallback=True):
+        if not is_telemetry_enabled():
             return None
         return func(*args, **kwargs)
 
@@ -356,6 +356,14 @@ def _add_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATI
         'name': '{}/{}'.format(PRODUCT_NAME, event_name),
         'properties': properties
     })
+
+
+@decorators.suppress_all_exceptions()
+def is_telemetry_enabled():
+    from azure.cli.core.cloud import cloud_forbid_telemetry
+    if cloud_forbid_telemetry(_session.application):
+        return False
+    return _get_config().getboolean('core', 'collect_telemetry', fallback=True)
 
 
 # definitions

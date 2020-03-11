@@ -681,10 +681,10 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
                     return None
                 provisioning_state = get_provisioning_state(instance)
                 # until we have any needs to wait for 'Failed', let us bail out on this
-                if provisioning_state == 'Failed':
+                if provisioning_state.casefold() == 'failed':
                     progress_indicator.stop()
                     raise CLIError('The operation failed')
-                if ((wait_for_created or wait_for_updated) and provisioning_state == 'Succeeded') or \
+                if ((wait_for_created or wait_for_updated) and provisioning_state.casefold() == 'succeeded') or \
                         custom_condition and bool(verify_property(instance, custom_condition)):
                     progress_indicator.end()
                     return None

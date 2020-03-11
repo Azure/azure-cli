@@ -21,7 +21,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_import_depth, validate_query_fields,
                           validate_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
-                          validate_key, validate_content_type, validate_feature,
+                          validate_key, validate_feature,
                           validate_identity)
 
 
@@ -78,6 +78,12 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig update') as c:
         c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('appconfig update', arg_group='Customer Managed Key', is_preview=True) as c:
+        c.argument('encryption_key_name', help='The name of the KeyVault key.')
+        c.argument('encryption_key_vault', help='The URI of the KeyVault.')
+        c.argument('encryption_key_version', help='The version of the KeyVault key. Use the latest version by default.')
+        c.argument('identity_client_id', help='Client ID of the managed identity with wrap and unwrap access to encryption key. Use system assigned identity by default.')
 
     with self.argument_context('appconfig identity assign') as c:
         c.argument('identities', arg_type=identities_arg_type)
@@ -141,7 +147,7 @@ def load_arguments(self, _):
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
-        c.argument('content_type', validator=validate_content_type, help='Content type of the keyvalue to be set.')
+        c.argument('content_type', help='Content type of the keyvalue to be set.')
         c.argument('value', help='Value of the keyvalue to be set.')
 
     with self.argument_context('appconfig kv set-keyvault') as c:

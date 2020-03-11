@@ -4,7 +4,7 @@
 
 * Visual Studio Code [Link](http://code.visualstudio.com/)
 * Visual Studio Code Python Extension [Link](https://marketplace.visualstudio.com/items?itemName=donjayamanne.python)
-* Python 2.7 or 3.5
+* Python 3.5+
 * Set up development environment [Link](https://github.com/Azure/azure-cli/blob/master/doc/configuring_your_machine.md)
 
 ## Quick start
