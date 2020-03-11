@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.81"
+VERSION = "2.2.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -64,20 +64,20 @@ DEPENDENCIES = [
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement>=0.1.0',
     'azure-mgmt-applicationinsights~=0.1.1',
-    'azure-mgmt-appconfiguration~=0.3.0',
+    'azure-mgmt-appconfiguration~=0.4.0',
     'azure-mgmt-authorization~=0.52.0',
     'azure-mgmt-batch~=7.0',
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing~=0.2',
     'azure-mgmt-botservice~=0.2.0',
-    'azure-mgmt-cdn~=4.0.0',
+    'azure-mgmt-cdn==4.1.0rc1',
     'azure-mgmt-cognitiveservices~=5.0.0',
-    'azure-mgmt-compute~=10.0',
+    'azure-mgmt-compute~=11.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry~=3.0.0rc8',
+    'azure-mgmt-containerregistry~=3.0.0rc9',
     'azure-mgmt-containerservice~=8.1.0',
-    'azure-mgmt-cosmosdb~=0.11.0',
+    'azure-mgmt-cosmosdb~=0.12.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
@@ -105,9 +105,9 @@ DEPENDENCIES = [
     'azure-mgmt-network~=9.0.0',
     'azure-mgmt-policyinsights~=0.4.0',
     'azure-mgmt-privatedns~=0.1.0',
-    'azure-mgmt-rdbms~=1.8',
+    'azure-mgmt-rdbms~=2.0.0',
     'azure-mgmt-recoveryservices~=0.4.0',
-    'azure-mgmt-recoveryservicesbackup~=0.5.0',
+    'azure-mgmt-recoveryservicesbackup~=0.6.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
@@ -118,9 +118,9 @@ DEPENDENCIES = [
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.4.0',
     'azure-mgmt-signalr~=0.3.0',
-    'azure-mgmt-sql~=0.15.0',
+    'azure-mgmt-sql~=0.17.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
-    'azure-mgmt-storage~=7.2.0',
+    'azure-mgmt-storage~=8.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.44.0',
     'azure-multiapi-storage~=0.2.4',
@@ -136,8 +136,7 @@ DEPENDENCIES = [
     'pygments~=2.4',
     'pyOpenSSL>=17.1.0',
     'pytz==2019.1',
-    'pyyaml~=5.1',
-    'psutil~=5.6',
+    'pyyaml~=5.2',
     'requests~=2.22',
     'scp~=0.13.2',
     'six~=1.12',

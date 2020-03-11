@@ -40,15 +40,28 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location):
         location = get_one_of_subscription_locations(cli_ctx)
 
     def _load_images_from_publisher(publisher):
-        offers = client.virtual_machine_images.list_offers(location, publisher)
+        from msrestazure.azure_exceptions import CloudError
+        try:
+            offers = client.virtual_machine_images.list_offers(location, publisher)
+        except CloudError as e:
+            logger.warning(str(e))
+            return
         if offer:
             offers = [o for o in offers if _matched(offer, o.name)]
         for o in offers:
-            skus = client.virtual_machine_images.list_skus(location, publisher, o.name)
+            try:
+                skus = client.virtual_machine_images.list_skus(location, publisher, o.name)
+            except CloudError as e:
+                logger.warning(str(e))
+                continue
             if sku:
                 skus = [s for s in skus if _matched(sku, s.name)]
             for s in skus:
-                images = client.virtual_machine_images.list(location, publisher, o.name, s.name)
+                try:
+                    images = client.virtual_machine_images.list(location, publisher, o.name, s.name)
+                except CloudError as e:
+                    logger.warning(str(e))
+                    continue
                 for i in images:
                     all_images.append({
                         'publisher': publisher,

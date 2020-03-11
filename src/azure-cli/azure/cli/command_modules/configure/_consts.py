@@ -30,6 +30,9 @@ MSG_CLOSING = '\nYou\'re all set! Here are some commands to try:\n' \
               ' $ az vm create --help\n' \
               ' $ az feedback\n'
 
+WARNING_CLOUD_FORBID_TELEMETRY = '\nYour current cloud: %s does not allow data collection.' \
+                                 ' Telemetry is disabled regardless of the configuration.'
+
 MSG_GLOBAL_SETTINGS_LOCATION = 'Your settings can be found at {}'
 
 MSG_HEADING_CURRENT_CONFIG_INFO = 'Your current configuration is as follows:'

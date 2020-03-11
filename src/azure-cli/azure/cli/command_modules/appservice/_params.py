@@ -13,9 +13,9 @@ from azure.cli.core.commands.parameters import (resource_group_name_type, get_lo
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import RUNTIME_TO_IMAGE_FUNCTIONAPP
+from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
-                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create)
+                          validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address)
 
 
 AUTH_TYPES = {
@@ -50,9 +50,17 @@ def load_arguments(self, _):
     isolated_sku_arg_type = CLIArgumentType(help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
                                             arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
+    # combine all runtime versions for all functions versions
+    functionapp_runtime_to_version = {}
+    for functions_version in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS.values():
+        for runtime, val in functions_version.items():
+            functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val)
+
     functionapp_runtime_to_version_texts = []
-    for runtime, val in RUNTIME_TO_IMAGE_FUNCTIONAPP.items():
-        functionapp_runtime_to_version_texts.append(runtime + ' -> [' + ', '.join(val.keys()) + ']')
+    for runtime, runtime_versions in functionapp_runtime_to_version.items():
+        runtime_versions_list = list(runtime_versions)
+        runtime_versions_list.sort(key=float)
+        functionapp_runtime_to_version_texts.append(runtime + ' -> [' + ', '.join(runtime_versions_list) + ']')
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -177,6 +185,8 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config ssl import') as c:
             c.argument('key_vault', help='The name or resource ID of the Key Vault')
             c.argument('key_vault_certificate_name', help='The name of the certificate in Key Vault')
+        with self.argument_context(scope + ' config ssl create') as c:
+            c.argument('hostname', help='The custom domain name')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
         with self.argument_context(scope + ' deployment user') as c:
@@ -460,6 +470,7 @@ def load_arguments(self, _):
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
+        c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
         c.argument('runtime', help='The functions runtime stack.', arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
         c.argument('runtime_version', help='The version of the functions runtime stack. '
                                            'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
@@ -545,7 +556,7 @@ def load_arguments(self, _):
             c.argument('description', help='Description of the access restriction rule')
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
-            c.argument('ip_address', help="IP address or CIDR range")
+            c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
             c.argument('vnet_name', help="vNet name")
             c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('ignore_missing_vnet_service_endpoint',
@@ -559,7 +570,7 @@ def load_arguments(self, _):
             c.argument('name', arg_type=webapp_name_arg_type)
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
-            c.argument('ip_address', help="IP address or CIDR range")
+            c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
             c.argument('vnet_name', help="vNet name")
             c.argument('subnet', help="Subnet name (requires vNet name) or subnet resource id")
             c.argument('scm_site', help='True if access restriction should be removed from scm site',

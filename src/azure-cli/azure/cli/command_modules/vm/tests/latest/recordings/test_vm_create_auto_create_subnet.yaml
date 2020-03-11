@@ -1,0 +1,1912 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/10.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Compute/virtualMachines?api-version=2019-07-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks?api-version=2019-11-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '123'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --name --location
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet?api-version=2019-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"myvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet\",\r\n
+        \ \"etag\": \"W/\\\"2c58d4d4-5099-4867-9f76-5c12be110e3c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"30c58031-d2a5-474e-b304-9a688ebc4efd\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/9186f319-58e6-4219-b87e-8b78107296fa?api-version=2019-11-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '768'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3076ec2a-54c4-46f0-93b3-59bb4cf0112c
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/9186f319-58e6-4219-b87e-8b78107296fa?api-version=2019-11-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ee1a4be8-7791-4ea8-bb0a-bb87853b6a60
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet?api-version=2019-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"myvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet\",\r\n
+        \ \"etag\": \"W/\\\"1f1194cd-8e8a-44e4-af68-8ec61b752685\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"30c58031-d2a5-474e-b304-9a688ebc4efd\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '769'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:31 GMT
+      etag:
+      - W/"1f1194cd-8e8a-44e4-af68-8ec61b752685"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 23c8872a-4156-41e4-b930-ed92b699985c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
+  response:
+    body:
+      string: "{\n  \"$schema\": \"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\",\n
+        \ \"contentVersion\": \"1.0.0.0\",\n  \"parameters\": {},\n  \"variables\":
+        {},\n  \"resources\": [],\n  \"outputs\": {\n    \"aliases\": {\n      \"type\":
+        \"object\",\n      \"value\": {\n        \"Linux\": {\n          \"CentOS\":
+        {\n            \"publisher\": \"OpenLogic\",\n            \"offer\": \"CentOS\",\n
+        \           \"sku\": \"7.5\",\n            \"version\": \"latest\"\n          },\n
+        \         \"CoreOS\": {\n            \"publisher\": \"CoreOS\",\n            \"offer\":
+        \"CoreOS\",\n            \"sku\": \"Stable\",\n            \"version\": \"latest\"\n
+        \         },\n          \"Debian\": {\n            \"publisher\": \"Debian\",\n
+        \           \"offer\": \"debian-10\",\n            \"sku\": \"10\",\n            \"version\":
+        \"latest\"\n          },\n          \"openSUSE-Leap\": {\n            \"publisher\":
+        \"SUSE\",\n            \"offer\": \"openSUSE-Leap\",\n            \"sku\":
+        \"42.3\",\n            \"version\": \"latest\"\n          },\n          \"RHEL\":
+        {\n            \"publisher\": \"RedHat\",\n            \"offer\": \"RHEL\",\n
+        \           \"sku\": \"7-LVM\",\n            \"version\": \"latest\"\n          },\n
+        \         \"SLES\": {\n            \"publisher\": \"SUSE\",\n            \"offer\":
+        \"SLES\",\n            \"sku\": \"15\",\n            \"version\": \"latest\"\n
+        \         },\n          \"UbuntuLTS\": {\n            \"publisher\": \"Canonical\",\n
+        \           \"offer\": \"UbuntuServer\",\n            \"sku\": \"18.04-LTS\",\n
+        \           \"version\": \"latest\"\n          }\n        },\n        \"Windows\":
+        {\n          \"Win2019Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2019-Datacenter\",\n
+        \           \"version\": \"latest\"\n          },\n          \"Win2016Datacenter\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2016-Datacenter\",\n            \"version\":
+        \"latest\"\n          },\n          \"Win2012R2Datacenter\": {\n            \"publisher\":
+        \"MicrosoftWindowsServer\",\n            \"offer\": \"WindowsServer\",\n            \"sku\":
+        \"2012-R2-Datacenter\",\n            \"version\": \"latest\"\n          },\n
+        \         \"Win2012Datacenter\": {\n            \"publisher\": \"MicrosoftWindowsServer\",\n
+        \           \"offer\": \"WindowsServer\",\n            \"sku\": \"2012-Datacenter\",\n
+        \           \"version\": \"latest\"\n          },\n          \"Win2008R2SP1\":
+        {\n            \"publisher\": \"MicrosoftWindowsServer\",\n            \"offer\":
+        \"WindowsServer\",\n            \"sku\": \"2008-R2-SP1\",\n            \"version\":
+        \"latest\"\n          }\n        }\n      }\n    }\n  }\n}\n"
+    headers:
+      accept-ranges:
+      - bytes
+      access-control-allow-origin:
+      - '*'
+      cache-control:
+      - max-age=300
+      connection:
+      - keep-alive
+      content-length:
+      - '2501'
+      content-security-policy:
+      - default-src 'none'; style-src 'unsafe-inline'; sandbox
+      content-type:
+      - text/plain; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:33 GMT
+      etag:
+      - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
+      expires:
+      - Wed, 12 Feb 2020 12:16:33 GMT
+      source-age:
+      - '226'
+      strict-transport-security:
+      - max-age=31536000
+      vary:
+      - Authorization,Accept-Encoding
+      via:
+      - 1.1 varnish (Varnish/6.0)
+      - 1.1 varnish
+      x-cache:
+      - HIT
+      x-cache-hits:
+      - '2'
+      x-content-type-options:
+      - nosniff
+      x-fastly-request-id:
+      - 816eb4166ccfa3e5c58abe75809819537bf0d5d8
+      x-frame-options:
+      - deny
+      x-geo-block-list:
+      - ''
+      x-github-request-id:
+      - 59A8:6C5A:6F2B5:77C00:5E43A0C4
+      x-served-by:
+      - cache-sin18043-SIN
+      x-timer:
+      - S1581509494.911957,VS0,VE0
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network","namespace":"Microsoft.Network","authorizations":[{"applicationId":"2cf9eb86-36b5-49dc-86ae-9a63135dfa8c","roleDefinitionId":"13ba9ab4-19f0-4804-adc4-14ece36cc7a1"},{"applicationId":"7c33bfcb-8d33-48d6-8e60-dc6404003489","roleDefinitionId":"ad6261e4-fa9a-4642-aa5f-104f1b67e9e3"},{"applicationId":"1e3e4475-288f-4018-a376-df66fd7fac5f","roleDefinitionId":"1d538b69-3d87-4e56-8ff8-25786fd48261"},{"applicationId":"a0be0c72-870e-46f0-9c49-c98333a996f7","roleDefinitionId":"7ce22727-ffce-45a9-930c-ddb2e56fa131"},{"applicationId":"486c78bf-a0f7-45f1-92fd-37215929e116","roleDefinitionId":"98a9e526-0a60-4c1f-a33a-ae46e1f8dc0d"},{"applicationId":"19947cfd-0303-466c-ac3c-fcc19a7a1570","roleDefinitionId":"d813ab6c-bfb7-413e-9462-005b21f0ce09"},{"applicationId":"341b7f3d-69b3-47f9-9ce7-5b7f4945fdbd","roleDefinitionId":"8141843c-c51c-4c1e-a5bf-0d351594b86c"},{"applicationId":"328fd23b-de6e-462c-9433-e207470a5727","roleDefinitionId":"79e29e06-4056-41e5-a6b2-959f1f47747e"}],"resourceTypes":[{"resourceType":"virtualNetworks","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"publicIPAddresses","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"zoneMappings":[{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":[]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":[]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkInterfaces","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"privateEndpoints","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01"],"defaultApiVersion":"2019-02-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"privateEndpointRedirectMaps","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01"],"defaultApiVersion":"2019-07-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"loadBalancers","locations":["West US","East
+        US","North Europe","West Europe","East Asia","Southeast Asia","North Central
+        US","South Central US","Central US","East US 2","Japan East","Japan West","Brazil
+        South","Australia East","Australia Southeast","Central India","South India","West
+        India","Canada Central","Canada East","West Central US","West US 2","UK West","UK
+        South","Korea Central","Korea South","France Central","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkSecurityGroups","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"applicationSecurityGroups","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2017-09-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"serviceEndpointPolicies","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01"],"defaultApiVersion":"2018-01-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkIntentPolicies","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","France
+        South","Australia Central","South Africa North","UAE North","Switzerland North","Germany
+        West Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"defaultApiVersion":"2018-04-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"routeTables","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"publicIPPrefixes","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01"],"defaultApiVersion":"2018-07-01","zoneMappings":[{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":[]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":[]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"ddosCustomPolicies","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01"],"defaultApiVersion":"2018-10-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkWatchers","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30"],"defaultApiVersion":"2017-09-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkWatchers/connectionMonitors","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2017-09-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkWatchers/flowLogs","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2019-07-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkWatchers/lenses","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2017-09-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkWatchers/pingMeshes","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2017-09-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"virtualNetworkGateways","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"localNetworkGateways","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"connections","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-03-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"applicationGateways","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2018-12-01","zoneMappings":[{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":[]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":[]}],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"applicationGatewayWebApplicationFirewallPolicies","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01"],"defaultApiVersion":"2018-12-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"locations","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"None"},{"resourceType":"locations/operations","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"None"},{"resourceType":"locations/operationResults","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"None"},{"resourceType":"locations/CheckDnsNameAvailability","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"None"},{"resourceType":"locations/usages","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2015-06-15"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2017-10-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2017-10-01"}],"capabilities":"None"},{"resourceType":"locations/virtualNetworkAvailableEndpointServices","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01"],"capabilities":"None"},{"resourceType":"locations/availableDelegations","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"capabilities":"None"},{"resourceType":"locations/serviceTags","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01"],"capabilities":"None"},{"resourceType":"locations/availablePrivateEndpointTypes","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01"],"capabilities":"None"},{"resourceType":"locations/availableServiceAliases","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01"],"capabilities":"None"},{"resourceType":"locations/checkPrivateLinkServiceVisibility","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01"],"capabilities":"None"},{"resourceType":"locations/autoApprovedPrivateLinkServices","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01"],"capabilities":"None"},{"resourceType":"locations/supportedVirtualMachineSizes","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"capabilities":"None"},{"resourceType":"locations/checkAcceleratedNetworkingSupport","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"capabilities":"None"},{"resourceType":"locations/validateResourceOwnership","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"capabilities":"None"},{"resourceType":"locations/setResourceOwnership","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"capabilities":"None"},{"resourceType":"locations/effectiveResourceOwnership","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"capabilities":"None"},{"resourceType":"operations","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"None"},{"resourceType":"dnszones","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2016-04-01"},{"profileVersion":"2018-03-01-hybrid","apiVersion":"2016-04-01"},{"profileVersion":"2019-03-01-hybrid","apiVersion":"2016-04-01"}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"dnsOperationResults","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnsOperationStatuses","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"getDnsResourceReference","locations":["global"],"apiVersions":["2018-05-01"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"internalNotify","locations":["global"],"apiVersions":["2018-05-01"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/A","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/AAAA","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/CNAME","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/PTR","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/MX","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/TXT","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/SRV","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/SOA","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/NS","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/CAA","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/recordsets","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"dnszones/all","locations":["global"],"apiVersions":["2018-05-01","2018-03-01-preview","2017-10-01","2017-09-15-preview","2017-09-01","2016-04-01","2015-05-04-preview"],"defaultApiVersion":"2018-05-01","capabilities":"None"},{"resourceType":"privateDnsZones","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"privateDnsZones/virtualNetworkLinks","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"privateDnsOperationResults","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsOperationStatuses","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsZones/A","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsZones/AAAA","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsZones/CNAME","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsZones/PTR","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsZones/MX","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsZones/TXT","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsZones/SRV","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsZones/SOA","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"privateDnsZones/all","locations":["global"],"apiVersions":["2018-09-01"],"defaultApiVersion":"2018-09-01","capabilities":"None"},{"resourceType":"trafficmanagerprofiles","locations":["global"],"apiVersions":["2018-08-01","2018-04-01","2018-03-01","2018-02-01","2017-05-01","2017-03-01","2015-11-01","2015-04-28-preview"],"defaultApiVersion":"2018-08-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"trafficmanagerprofiles/heatMaps","locations":["global"],"apiVersions":["2018-08-01","2018-04-01","2018-03-01","2018-02-01","2017-09-01-preview"],"defaultApiVersion":"2018-08-01","capabilities":"None"},{"resourceType":"checkTrafficManagerNameAvailability","locations":["global"],"apiVersions":["2018-08-01","2018-04-01","2018-03-01","2018-02-01","2017-05-01","2017-03-01","2015-11-01","2015-04-28-preview"],"defaultApiVersion":"2018-08-01","capabilities":"None"},{"resourceType":"trafficManagerUserMetricsKeys","locations":["global"],"apiVersions":["2018-08-01","2018-04-01","2017-09-01-preview"],"defaultApiVersion":"2018-08-01","capabilities":"None"},{"resourceType":"trafficManagerGeographicHierarchies","locations":["global"],"apiVersions":["2018-08-01","2018-04-01","2018-03-01","2018-02-01","2017-05-01","2017-03-01"],"defaultApiVersion":"2018-08-01","capabilities":"None"},{"resourceType":"expressRouteCircuits","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"defaultApiVersion":"2017-09-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"expressRouteServiceProviders","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01","2016-11-01","2016-10-01","2016-09-01","2016-08-01","2016-07-01","2016-06-01","2016-03-30","2015-06-15","2015-05-01-preview","2014-12-01-preview"],"capabilities":"None"},{"resourceType":"applicationGatewayAvailableWafRuleSets","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01"],"capabilities":"None"},{"resourceType":"applicationGatewayAvailableSslOptions","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01"],"capabilities":"None"},{"resourceType":"applicationGatewayAvailableServerVariables","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01"],"capabilities":"None"},{"resourceType":"applicationGatewayAvailableRequestHeaders","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01"],"capabilities":"None"},{"resourceType":"applicationGatewayAvailableResponseHeaders","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01"],"capabilities":"None"},{"resourceType":"routeFilters","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01"],"defaultApiVersion":"2016-12-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"bgpServiceCommunities","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01","2017-08-01","2017-06-01","2017-04-01","2017-03-01","2016-12-01"],"capabilities":"None"},{"resourceType":"virtualWans","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2017-09-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"vpnSites","locations":["West US","East
+        US","North Europe","West Europe","East Asia","Southeast Asia","North Central
+        US","South Central US","Central US","East US 2","Japan East","Japan West","Brazil
+        South","Australia East","Australia Southeast","Central India","South India","West
+        India","Canada Central","Canada East","West Central US","West US 2","UK West","UK
+        South","Korea Central","Korea South","France Central","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2017-09-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"vpnServerConfigurations","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","South
+        Africa North","Switzerland North","Germany West Central","Norway East","Central
+        US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01"],"defaultApiVersion":"2019-08-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"virtualHubs","locations":["West US","East
+        US","North Europe","West Europe","East Asia","Southeast Asia","North Central
+        US","South Central US","Central US","East US 2","Japan East","Japan West","Brazil
+        South","Australia East","Australia Southeast","Central India","South India","West
+        India","Canada Central","Canada East","West Central US","West US 2","UK West","UK
+        South","Korea Central","Korea South","France Central","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2017-11-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"vpnGateways","locations":["West US","East
+        US","North Europe","West Europe","East Asia","Southeast Asia","North Central
+        US","South Central US","Central US","East US 2","Japan East","Japan West","Brazil
+        South","Australia East","Australia Southeast","Central India","South India","West
+        India","Canada Central","Canada East","West Central US","West US 2","UK West","UK
+        South","Korea Central","Korea South","France Central","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01","2018-01-01","2017-11-01","2017-10-01","2017-09-01"],"defaultApiVersion":"2017-11-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"p2sVpnGateways","locations":["West US","East
+        US","North Europe","West Europe","East Asia","Southeast Asia","North Central
+        US","South Central US","Central US","East US 2","Japan East","Japan West","Brazil
+        South","Australia East","Australia Southeast","Central India","South India","West
+        India","Canada Central","Canada East","West Central US","West US 2","UK West","UK
+        South","Korea Central","Korea South","France Central","Australia Central","UAE
+        North","South Africa North","Switzerland North","Germany West Central","Norway
+        East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2019-08-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"expressRouteGateways","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2018-08-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"firewallPolicies","locations":["UAE North","Australia
+        Central 2","UAE Central","Germany North","Central India","Korea South","Switzerland
+        North","Switzerland West","Japan West","France South","South Africa West","West
+        India","Canada East","South India","Germany West Central","Norway East","Norway
+        West","South Africa North","East Asia","Southeast Asia","Korea Central","Brazil
+        South","Japan East","UK West","West US","East US","North Europe","West Europe","West
+        Central US","South Central US","Australia East","Australia Central","Australia
+        Southeast","UK South","East US 2","West US 2","North Central US","Canada Central","France
+        Central","Central US","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01"],"defaultApiVersion":"2019-06-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"ipGroups","locations":["UAE
+        North","Australia Central 2","UAE Central","Germany North","Central India","Korea
+        South","Switzerland North","Switzerland West","Japan West","France South","South
+        Africa West","West India","Canada East","South India","Germany West Central","Norway
+        East","Norway West","South Africa North","East Asia","Southeast Asia","Korea
+        Central","Brazil South","Japan East","UK West","West US","East US","North
+        Europe","West Europe","South Central US","Australia East","Australia Central","Australia
+        Southeast","UK South","East US 2","West US 2","North Central US","Canada Central","France
+        Central","West Central US","Central US","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01"],"defaultApiVersion":"2019-08-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"locations/nfvOperations","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01"],"capabilities":"None"},{"resourceType":"locations/nfvOperationResults","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01"],"capabilities":"None"},{"resourceType":"azureFirewalls","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Brazil South","Australia
+        East","Australia Southeast","Central India","South India","West India","Canada
+        Central","Canada East","West Central US","West US 2","UK West","UK South","France
+        Central","Australia Central","Japan West","Japan East","Korea Central","Korea
+        South","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01"],"defaultApiVersion":"2018-04-01","zoneMappings":[{"location":"East
+        US 2","zones":["2","3","1"]},{"location":"Central US","zones":["2","3","1"]},{"location":"West
+        Europe","zones":["2","3","1"]},{"location":"East US 2 EUAP","zones":["1","2","3"]},{"location":"Central
+        US EUAP","zones":["1","2"]},{"location":"France Central","zones":["2","3","1"]},{"location":"Southeast
+        Asia","zones":["2","3","1"]},{"location":"West US 2","zones":["2","3","1"]},{"location":"North
+        Europe","zones":["2","3","1"]},{"location":"East US","zones":["2","3","1"]},{"location":"UK
+        South","zones":["2","3","1"]},{"location":"Japan East","zones":["2","3","1"]},{"location":"Australia
+        East","zones":[]},{"location":"South Africa North","zones":[]},{"location":"South
+        Central US","zones":[]},{"location":"Canada Central","zones":[]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"azureFirewallFqdnTags","locations":[],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"capabilities":"None"},{"resourceType":"virtualNetworkTaps","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2018-08-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"privateLinkServices","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01"],"defaultApiVersion":"2018-08-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"ddosProtectionPlans","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01","2018-04-01","2018-03-01","2018-02-01"],"defaultApiVersion":"2018-02-01","apiProfiles":[{"profileVersion":"2017-03-09-profile","apiVersion":"2018-02-01"}],"capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"networkProfiles","locations":["West US","East
+        US","North Europe","West Europe","East Asia","Southeast Asia","North Central
+        US","South Central US","Central US","East US 2","Japan East","Japan West","Brazil
+        South","Australia East","Australia Southeast","Central India","South India","West
+        India","Canada Central","Canada East","West Central US","West US 2","UK West","UK
+        South","Korea Central","Korea South","France Central","Australia Central","South
+        Africa North","UAE North","Switzerland North","Germany West Central","Norway
+        East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01","2018-06-01","2018-05-01"],"defaultApiVersion":"2018-05-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"checkFrontdoorNameAvailability","locations":["global","Central
+        US","East US","East US 2","North Central US","South Central US","West US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Brazil
+        South","Australia East","Australia Southeast"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2018-08-01"],"defaultApiVersion":"2019-05-01","capabilities":"None"},{"resourceType":"frontdoorWebApplicationFirewallManagedRuleSets","locations":["global","Central
+        US","East US","East US 2","North Central US","South Central US","West US","North
+        Europe","West Europe","East Asia","Southeast Asia","Japan East","Japan West","Brazil
+        South","Australia East","Australia Southeast"],"apiVersions":["2019-11-01","2019-10-01","2019-09-01","2019-08-01","2019-03-01"],"defaultApiVersion":"2019-03-01","capabilities":"None"},{"resourceType":"locations/bareMetalTenants","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-07-01"],"capabilities":"None"},{"resourceType":"bastionHosts","locations":["West
+        US","East US","North Europe","West Europe","East Asia","Southeast Asia","North
+        Central US","South Central US","Central US","East US 2","Japan East","Japan
+        West","Brazil South","Australia East","Australia Southeast","Central India","South
+        India","West India","Canada Central","Canada East","West Central US","West
+        US 2","UK West","UK South","Korea Central","Korea South","France Central","Australia
+        Central","South Africa North","UAE North","Switzerland North","Germany West
+        Central","Norway East","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01"],"defaultApiVersion":"2018-10-01","capabilities":"SupportsTags,
+        SupportsLocation"},{"resourceType":"virtualRouters","locations":["UAE North","Australia
+        Central 2","UAE Central","Germany North","Central India","Korea South","Switzerland
+        North","Switzerland West","Japan West","France South","South Africa West","West
+        India","Canada East","South India","Germany West Central","Norway East","Norway
+        West","South Africa North","East Asia","Southeast Asia","Korea Central","Brazil
+        South","Japan East","UK West","West US","East US","North Europe","West Europe","West
+        Central US","South Central US","Australia East","Australia Central","Australia
+        Southeast","UK South","East US 2","West US 2","North Central US","Canada Central","France
+        Central","Central US","Central US EUAP","East US 2 EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01"],"defaultApiVersion":"2019-07-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"natGateways","locations":["Central
+        US EUAP"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-07-01","2019-06-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01"],"defaultApiVersion":"2018-11-01","zoneMappings":[{"location":"Central
+        US EUAP","zones":["1","2"]}],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"frontdoorOperationResults","locations":["global"],"apiVersions":["2019-11-01","2019-10-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2019-03-01","2018-08-01"],"defaultApiVersion":"2019-05-01","capabilities":"None"},{"resourceType":"frontdoors","locations":["Central
+        US EUAP","East US 2 EUAP","global","Central US","East US","East US 2","North
+        Central US","South Central US","West US","North Europe","West Europe","East
+        Asia","Southeast Asia","Japan East","Japan West","Brazil South","Australia
+        East","Australia Southeast"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2019-05-01","2019-04-01","2019-02-01","2018-12-01","2018-11-01","2018-10-01","2018-08-01","2018-05-01"],"defaultApiVersion":"2019-05-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"frontdoorWebApplicationFirewallPolicies","locations":["East
+        US 2 EUAP","global","Central US","East US","East US 2","North Central US","South
+        Central US","West US","North Europe","West Europe","East Asia","Southeast
+        Asia","Japan East","Japan West","Brazil South","Australia East","Australia
+        Southeast"],"apiVersions":["2019-11-01","2019-10-01","2019-09-01","2019-08-01","2019-03-01","2018-08-01"],"defaultApiVersion":"2019-03-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"webApplicationFirewallPolicies","locations":["East
+        US 2 EUAP","global","Central US","East US","East US 2","North Central US","South
+        Central US","West US","North Europe","West Europe","East Asia","Southeast
+        Asia","Japan East","Japan West","Brazil South","Australia East","Australia
+        Southeast"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01","2018-08-01"],"defaultApiVersion":"2018-08-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"},{"resourceType":"networkExperimentProfiles","locations":["Central
+        US EUAP","East US 2 EUAP","global","Central US","East US","East US 2","North
+        Central US","South Central US","West US","West US 2","North Europe","West
+        Europe","East Asia","Southeast Asia","Japan East","Japan West","Brazil South","Australia
+        East","Australia Southeast"],"apiVersions":["2019-11-01","2019-09-01","2019-08-01"],"defaultApiVersion":"2019-11-01","capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SupportsTags, SupportsLocation"}],"registrationState":"Registered","registrationPolicy":"RegistrationRequired"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '77426'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet?api-version=2019-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"myvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet\",\r\n
+        \ \"etag\": \"W/\\\"1f1194cd-8e8a-44e4-af68-8ec61b752685\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"30c58031-d2a5-474e-b304-9a688ebc4efd\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '769'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:35 GMT
+      etag:
+      - W/"1f1194cd-8e8a-44e4-af68-8ec61b752685"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 51c92fda-76c1-4f37-a38e-8b1b458860d7
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet?api-version=2018-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"myvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet\",\r\n
+        \ \"etag\": \"W/\\\"1f1194cd-8e8a-44e4-af68-8ec61b752685\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"30c58031-d2a5-474e-b304-9a688ebc4efd\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '769'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:36 GMT
+      etag:
+      - W/"1f1194cd-8e8a-44e4-af68-8ec61b752685"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 043d8cee-defc-41c8-980b-4860094e9de9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet",
+      "location": "eastus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {"dnsServers": []}, "subnets": [{"properties":
+      {"addressPrefix": "10.0.0.0/24", "addressPrefixes": ["10.0.0.0/24"]}, "name":
+      "vm-subnetSubnet"}], "virtualNetworkPeerings": [], "resourceGuid": "30c58031-d2a5-474e-b304-9a688ebc4efd",
+      "provisioningState": "Succeeded", "enableDdosProtection": false, "enableVmProtection":
+      false}, "etag": "W/\\"1f1194cd-8e8a-44e4-af68-8ec61b752685\\""}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '702'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet?api-version=2018-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"myvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet\",\r\n
+        \ \"etag\": \"W/\\\"b5b5c3ea-467e-4238-8691-b4a8ad83ef7c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"30c58031-d2a5-474e-b304-9a688ebc4efd\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"vm-subnetSubnet\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/vm-subnetSubnet\",\r\n
+        \       \"etag\": \"W/\\\"b5b5c3ea-467e-4238-8691-b4a8ad83ef7c\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\"\r\n        },\r\n        \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n      }\r\n    ],\r\n    \"virtualNetworkPeerings\":
+        [],\r\n    \"enableDdosProtection\": false,\r\n    \"enableVmProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/063dc299-82cb-4506-b52d-ef8fcfb90534?api-version=2018-01-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1311'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ebe53ed1-e88d-4a10-94f5-9ea100945ed1
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus/operations/063dc299-82cb-4506-b52d-ef8fcfb90534?api-version=2018-01-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6f652bf1-aaba-454b-bdc4-7ebf9f73403d
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet?api-version=2018-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"myvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet\",\r\n
+        \ \"etag\": \"W/\\\"d3f47fd3-df81-4aac-95b8-c2c91639b0aa\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"30c58031-d2a5-474e-b304-9a688ebc4efd\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"vm-subnetSubnet\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/vm-subnetSubnet\",\r\n
+        \       \"etag\": \"W/\\\"d3f47fd3-df81-4aac-95b8-c2c91639b0aa\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\"\r\n        },\r\n        \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n      }\r\n    ],\r\n    \"virtualNetworkPeerings\":
+        [],\r\n    \"enableDdosProtection\": false,\r\n    \"enableVmProtection\":
+        false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1313'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:42 GMT
+      etag:
+      - W/"d3f47fd3-df81-4aac-95b8-c2c91639b0aa"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 653fce54-53f0-41b8-b9c6-c22f2be34c9f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
+      "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
+      [{"type": "Microsoft.Network/networkSecurityGroups", "name": "vm-subnetNSG",
+      "apiVersion": "2015-06-15", "location": "eastus", "tags": {}, "dependsOn": [],
+      "properties": {"securityRules": [{"name": "default-allow-ssh", "properties":
+      {"protocol": "Tcp", "sourcePortRange": "*", "destinationPortRange": "22", "sourceAddressPrefix":
+      "*", "destinationAddressPrefix": "*", "access": "Allow", "priority": 1000, "direction":
+      "Inbound"}}]}}, {"apiVersion": "2018-01-01", "type": "Microsoft.Network/publicIPAddresses",
+      "name": "vm-subnetPublicIP", "location": "eastus", "tags": {}, "dependsOn":
+      [], "properties": {"publicIPAllocationMethod": null}}, {"apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces", "name": "vm-subnetVMNic", "location":
+      "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/networkSecurityGroups/vm-subnetNSG",
+      "Microsoft.Network/publicIpAddresses/vm-subnetPublicIP"], "properties": {"ipConfigurations":
+      [{"name": "ipconfigvm-subnet", "properties": {"privateIPAllocationMethod": "Dynamic",
+      "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/vm-subnetSubnet"},
+      "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/publicIPAddresses/vm-subnetPublicIP"}}}],
+      "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkSecurityGroups/vm-subnetNSG"}}},
+      {"apiVersion": "2019-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
+      "vm-subnet", "location": "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/vm-subnetVMNic"],
+      "properties": {"hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "networkProfile":
+      {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic"}]},
+      "storageProfile": {"osDisk": {"createOption": "fromImage", "name": null, "caching":
+      "ReadWrite", "managedDisk": {"storageAccountType": null}}, "imageReference":
+      {"publisher": "Canonical", "offer": "UbuntuServer", "sku": "18.04-LTS", "version":
+      "latest"}}, "osProfile": {"computerName": "vm-subnet", "adminUsername": "ubuntu",
+      "adminPassword": "[parameters(\''adminPassword\'')]"}}}], "outputs": {}}, "parameters":
+      {"adminPassword": {"value": "testPassword0"}}, "mode": "Incremental"}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '3043'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Resources/deployments/vm_deploy_BdNrb2GJWKMCakhyMargJra4tNaLLv4d","name":"vm_deploy_BdNrb2GJWKMCakhyMargJra4tNaLLv4d","type":"Microsoft.Resources/deployments","properties":{"templateHash":"16212250144170181300","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-02-12T12:11:43.6448304Z","duration":"PT3.21508S","correlationId":"2c28d26f-a11a-4991-a22b-ceccbd9c9d42","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkSecurityGroups/vm-subnetNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-subnetNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/publicIPAddresses/vm-subnetPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-subnetPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-subnetVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-subnetVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Compute/virtualMachines/vm-subnet","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-subnet"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_subnet000001/providers/Microsoft.Resources/deployments/vm_deploy_BdNrb2GJWKMCakhyMargJra4tNaLLv4d/operationStatuses/08586200973850478786?api-version=2019-07-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2502'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:11:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.0.81
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586200973850478786?api-version=2019-07-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:12:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.0.81
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586200973850478786?api-version=2019-07-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:12:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.0.81
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586200973850478786?api-version=2019-07-01
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:13:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.0.81
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586200973850478786?api-version=2019-07-01
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:13:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.0.81
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_subnet000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Resources/deployments/vm_deploy_BdNrb2GJWKMCakhyMargJra4tNaLLv4d","name":"vm_deploy_BdNrb2GJWKMCakhyMargJra4tNaLLv4d","type":"Microsoft.Resources/deployments","properties":{"templateHash":"16212250144170181300","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-02-12T12:13:34.4692106Z","duration":"PT1M54.0394602S","correlationId":"2c28d26f-a11a-4991-a22b-ceccbd9c9d42","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"networkSecurityGroups","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkSecurityGroups/vm-subnetNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-subnetNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/publicIPAddresses/vm-subnetPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-subnetPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-subnetVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-subnetVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Compute/virtualMachines/vm-subnet","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-subnet"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Compute/virtualMachines/vm-subnet"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkSecurityGroups/vm-subnetNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/publicIPAddresses/vm-subnetPublicIP"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3391'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:13:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/10.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Compute/virtualMachines/vm-subnet?$expand=instanceView&api-version=2019-07-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vm-subnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Compute/virtualMachines/vm-subnet\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"d8908412-446b-43f7-b25d-420fc5c2d172\",\r\n
+        \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
+        \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
+        \"Canonical\",\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\":
+        \"18.04-LTS\",\r\n        \"version\": \"latest\",\r\n        \"exactVersion\":
+        \"18.04.202002080\"\r\n      },\r\n      \"osDisk\": {\r\n        \"osType\":
+        \"Linux\",\r\n        \"name\": \"vm-subnet_disk1_1803d4b4b20a400386d8d9f103890f4c\",\r\n
+        \       \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n
+        \       \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\",\r\n
+        \         \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_SUBNETSXT72VNGF6WE54AFEA6LN2OLLUOSAJ2ZHGL3P4IEYG3QLDHOMC26ZNGQN/providers/Microsoft.Compute/disks/vm-subnet_disk1_1803d4b4b20a400386d8d9f103890f4c\"\r\n
+        \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
+        []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vm-subnet\",\r\n
+        \     \"adminUsername\": \"ubuntu\",\r\n      \"linuxConfiguration\": {\r\n
+        \       \"disablePasswordAuthentication\": false,\r\n        \"provisionVMAgent\":
+        true\r\n      },\r\n      \"secrets\": [],\r\n      \"allowExtensionOperations\":
+        true,\r\n      \"requireGuestProvisionSignal\": true\r\n    },\r\n    \"networkProfile\":
+        {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic\"}]},\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\": {\r\n      \"computerName\":
+        \"vm-subnet\",\r\n      \"osName\": \"ubuntu\",\r\n      \"osVersion\": \"18.04\",\r\n
+        \     \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.46\",\r\n        \"statuses\":
+        [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
+        \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
+        \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
+        \"2020-02-12T12:13:46+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-subnet_disk1_1803d4b4b20a400386d8d9f103890f4c\",\r\n
+        \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
+        \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
+        succeeded\",\r\n              \"time\": \"2020-02-12T12:12:31.8962852+00:00\"\r\n
+        \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
+        \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
+        succeeded\",\r\n          \"time\": \"2020-02-12T12:13:14.7088155+00:00\"\r\n
+        \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
+        \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
+        \       }\r\n      ]\r\n    }\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3217'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:13:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31944
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic?api-version=2018-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vm-subnetVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic\",\r\n
+        \ \"etag\": \"W/\\\"8d2b8086-3868-480e-927a-9603c502661d\\\"\",\r\n  \"location\":
+        \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"9388f986-2717-4ccd-aa80-8491299991ec\",\r\n
+        \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm-subnet\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic/ipConfigurations/ipconfigvm-subnet\",\r\n
+        \       \"etag\": \"W/\\\"8d2b8086-3868-480e-927a-9603c502661d\\\"\",\r\n
+        \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
+        \"Dynamic\",\r\n          \"publicIPAddress\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/publicIPAddresses/vm-subnetPublicIP\"\r\n
+        \         },\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/vm-subnetSubnet\"\r\n
+        \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
+        \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
+        [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
+        \"ggamkmff0jhepmyetjui3pco5f.bx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-1A-09-FF\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkSecurityGroups/vm-subnetNSG\"\r\n
+        \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Compute/virtualMachines/vm-subnet\"\r\n
+        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/networkInterfaces\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2621'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:13:48 GMT
+      etag:
+      - W/"8d2b8086-3868-480e-927a-9603c502661d"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0749990d-a90d-46e6-a12a-bf2230e6ac09
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --location --name --admin-username --image --admin-password
+        --authentication-type --vnet-name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/publicIPAddresses/vm-subnetPublicIP?api-version=2018-01-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vm-subnetPublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/publicIPAddresses/vm-subnetPublicIP\",\r\n
+        \ \"etag\": \"W/\\\"c211948b-308c-4717-a643-dc48a4078b45\\\"\",\r\n  \"location\":
+        \"eastus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"resourceGuid\": \"2379ca07-a095-48ac-9007-1211edc8e4fd\",\r\n
+        \   \"ipAddress\": \"13.82.219.183\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
+        4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic/ipConfigurations/ipconfigvm-subnet\"\r\n
+        \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
+        \ \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1021'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:13:48 GMT
+      etag:
+      - W/"c211948b-308c-4717-a643-dc48a4078b45"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 68610122-3241-41eb-a374-57b7dbe29498
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vm list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-compute/10.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Compute/virtualMachines?api-version=2019-07-01
+  response:
+    body:
+      string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"vm-subnet\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Compute/virtualMachines/vm-subnet\",\r\n
+        \     \"type\": \"Microsoft.Compute/virtualMachines\",\r\n      \"location\":
+        \"eastus\",\r\n      \"tags\": {},\r\n      \"properties\": {\r\n        \"vmId\":
+        \"d8908412-446b-43f7-b25d-420fc5c2d172\",\r\n        \"hardwareProfile\":
+        {\r\n          \"vmSize\": \"Standard_DS1_v2\"\r\n        },\r\n        \"storageProfile\":
+        {\r\n          \"imageReference\": {\r\n            \"publisher\": \"Canonical\",\r\n
+        \           \"offer\": \"UbuntuServer\",\r\n            \"sku\": \"18.04-LTS\",\r\n
+        \           \"version\": \"latest\",\r\n            \"exactVersion\": \"18.04.202002080\"\r\n
+        \         },\r\n          \"osDisk\": {\r\n            \"osType\": \"Linux\",\r\n
+        \           \"name\": \"vm-subnet_disk1_1803d4b4b20a400386d8d9f103890f4c\",\r\n
+        \           \"createOption\": \"FromImage\",\r\n            \"caching\": \"ReadWrite\",\r\n
+        \           \"managedDisk\": {\r\n              \"storageAccountType\": \"Premium_LRS\",\r\n
+        \             \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI_TEST_VM_SUBNETSXT72VNGF6WE54AFEA6LN2OLLUOSAJ2ZHGL3P4IEYG3QLDHOMC26ZNGQN/providers/Microsoft.Compute/disks/vm-subnet_disk1_1803d4b4b20a400386d8d9f103890f4c\"\r\n
+        \           },\r\n            \"diskSizeGB\": 30\r\n          },\r\n          \"dataDisks\":
+        []\r\n        },\r\n        \"osProfile\": {\r\n          \"computerName\":
+        \"vm-subnet\",\r\n          \"adminUsername\": \"ubuntu\",\r\n          \"linuxConfiguration\":
+        {\r\n            \"disablePasswordAuthentication\": false,\r\n            \"provisionVMAgent\":
+        true\r\n          },\r\n          \"secrets\": [],\r\n          \"allowExtensionOperations\":
+        true,\r\n          \"requireGuestProvisionSignal\": true\r\n        },\r\n
+        \       \"networkProfile\": {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic\"}]},\r\n
+        \       \"provisioningState\": \"Succeeded\"\r\n      }\r\n    }\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2129'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:13:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/HighCostGet3Min;139,Microsoft.Compute/HighCostGet30Min;697
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.0.81
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet?api-version=2019-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"myvnet\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet\",\r\n
+        \ \"etag\": \"W/\\\"55c2e5b1-e0e7-4659-81ce-273bc8bc1619\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"30c58031-d2a5-474e-b304-9a688ebc4efd\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"vm-subnetSubnet\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/vm-subnetSubnet\",\r\n
+        \       \"etag\": \"W/\\\"55c2e5b1-e0e7-4659-81ce-273bc8bc1619\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"ipConfigurations\":
+        [\r\n            {\r\n              \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_subnet000001/providers/Microsoft.Network/networkInterfaces/vm-subnetVMNic/ipConfigurations/ipconfigvm-subnet\"\r\n
+        \           }\r\n          ],\r\n          \"delegations\": [],\r\n          \"privateEndpointNetworkPolicies\":
+        \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n
+        \       },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1797'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Feb 2020 12:13:51 GMT
+      etag:
+      - W/"55c2e5b1-e0e7-4659-81ce-273bc8bc1619"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ae638a45-eae7-40ff-b2d7-90dea6dc67f5
+    status:
+      code: 200
+      message: OK
+version: 1

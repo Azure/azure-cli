@@ -36,7 +36,7 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     for vault in client.list():
         id_comps = parse_resource_id(vault.id)
-        if id_comps['name'] == vault_name:
+        if 'name' in id_comps and id_comps['name'].lower() == vault_name.lower():
             return id_comps['resource_group']
     return None
 
@@ -167,24 +167,20 @@ def validate_policy_permissions(ns):
 
 
 def validate_private_endpoint_connection_id(cmd, ns):
-    connection_id = ns.connection_id
-    connection_name = ns.private_endpoint_connection_name
-    vault_name = ns.vault_name
+    if ns.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(ns.connection_id)
+        ns.resource_group_name = result['resource_group']
+        ns.vault_name = result['name']
+        ns.private_endpoint_connection_name = result['child_name_1']
 
-    if not connection_id:
-        if not all([connection_name, vault_name]):
-            raise argparse.ArgumentError(
-                None, 'specify both: --connection-name/-n and --vault-name')
-        ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
-    else:
-        if any([connection_name, vault_name]):
-            raise argparse.ArgumentError(
-                None, 'you don\'t need to specify --connection-name/-n or --vault-name if --connection-id is specified')
+    if ns.vault_name and not ns.resource_group_name:
+        ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, ns.vault_name)
 
-        id_parts = connection_id.split('/')
-        ns.private_endpoint_connection_name = id_parts[-1]
-        ns.vault_name = id_parts[-3]
-        ns.resource_group_name = id_parts[-7]
+    if not all([ns.vault_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME]')
+
+    del ns.connection_id
 
 
 def validate_principal(ns):
