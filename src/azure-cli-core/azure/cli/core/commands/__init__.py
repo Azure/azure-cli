@@ -34,6 +34,7 @@ from knack.commands import CLICommand, CommandGroup
 from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
 from knack.invocation import CommandInvoker
 from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
+from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resolve_experimental_info
 from knack.log import get_logger
 from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
@@ -724,11 +725,31 @@ class AzCliCommandInvoker(CommandInvoker):
                 del preview_kwargs['_get_message']
                 previews.append(ImplicitPreviewItem(**preview_kwargs))
 
+        experimentals = [] + getattr(parsed_args, '_argument_experimentals', [])
+        if cmd.experimental_info:
+            experimentals.append(cmd.experimental_info)
+        else:
+            # search for implicit command experimental status
+            path_comps = cmd.name.split()[:-1]
+            implicit_experimental_info = None
+            while path_comps and not implicit_experimental_info:
+                implicit_experimental_info = resolve_experimental_info(self.cli_ctx, ' '.join(path_comps))
+                del path_comps[-1]
+
+            if implicit_experimental_info:
+                experimental_kwargs = implicit_experimental_info.__dict__.copy()
+                experimental_kwargs['object_type'] = 'command'
+                del experimental_kwargs['_get_tag']
+                del experimental_kwargs['_get_message']
+                experimentals.append(ImplicitExperimentalItem(**experimental_kwargs))
+
         colorama.init()
         for d in deprecations:
             print(d.message, file=sys.stderr)
         for p in previews:
-            print(p.message, file=sys.stderr)
+                print(p.message, file=sys.stderr)
+        for e in experimentals:
+            print(e.message, file=sys.stderr)
         colorama.deinit()
 
     def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
@@ -1162,6 +1183,11 @@ class AzCommandGroup(CommandGroup):
                 self.command_loader.cli_ctx,
                 object_type='command'
             )
+        if kwargs.get('is_experimental', False):
+            merged_kwargs['experimental_info'] = ExperimentalItem(
+                self.command_loader.cli_ctx,
+                object_type='command'
+            )
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         self.command_loader._cli_command(command_name,  # pylint: disable=protected-access
@@ -1204,6 +1230,7 @@ class AzCommandGroup(CommandGroup):
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
         merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        merged_kwargs['experimental_info'] = kwargs.get('experimental_info', None)
 
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
@@ -1237,6 +1264,7 @@ class AzCommandGroup(CommandGroup):
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
         merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        merged_kwargs['experimental_info'] = kwargs.get('experimental_info', None)
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
@@ -1257,6 +1285,7 @@ class AzCommandGroup(CommandGroup):
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
         merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        merged_kwargs['experimental_info'] = kwargs.get('experimental_info', None)
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)

@@ -18,6 +18,7 @@ from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.preview import PreviewItem
+from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
 
@@ -162,7 +163,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     # Changing this error message requires updating CI script that checks for failed
                     # module loading.
                     import azure.cli.core.telemetry as telemetry
-                    logger.error("Error loading command module '%s'", mod)
+                    logger.error("Error loading command module '%s': %s", mod, ex)
                     telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
                                             summary='Error loading module: {}'.format(mod))
                     logger.debug(traceback.format_exc())
@@ -448,6 +449,11 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             kwargs['deprecate_info'].target = group_name
         if kwargs.get('is_preview', False):
             kwargs['preview_info'] = PreviewItem(
+                target=group_name,
+                object_type='command group'
+            )
+        if kwargs.get('is_experimental', False):
+            kwargs['experimental_info'] = ExperimentalItem(
                 target=group_name,
                 object_type='command group'
             )
