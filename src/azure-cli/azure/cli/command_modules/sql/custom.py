@@ -2071,25 +2071,7 @@ def server_ad_admin_set(
     return client.create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
-        properties=kwargs)
-
-
-def server_ad_admin_update(
-        instance,
-        login=None,
-        sid=None,
-        tenant_id=None):
-    '''
-    Updates a server' AD admin.
-    '''
-
-    # Apply params to instance
-    instance.login = login or instance.login
-    instance.sid = sid or instance.sid
-    instance.tenant_id = tenant_id or instance.tenant_id
-
-    return instance
-
+        parameters=kwargs)
 
 #####
 #           sql server firewall-rule
