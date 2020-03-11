@@ -441,6 +441,12 @@ def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     return object_id
 
 
+def _permissions_distinct(permissions):
+    if permissions:
+        return [_ for _ in {p for p in permissions}]
+    return permissions
+
+
 def set_policy(cmd, client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None, storage_permissions=None):
@@ -453,6 +459,12 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
+
+    key_permissions = _permissions_distinct(key_permissions)
+    secret_permissions = _permissions_distinct(secret_permissions)
+    certificate_permissions = _permissions_distinct(certificate_permissions)
+    storage_permissions = _permissions_distinct(storage_permissions)
+
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
                    if object_id.lower() == p.object_id.lower() and
