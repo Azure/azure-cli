@@ -75,7 +75,6 @@ def load_arguments(self, _):
         c.argument('enabled_for_deployment', arg_type=get_three_state_flag(), help='Allow Virtual Machines to retrieve certificates stored as secrets from the vault.')
         c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(), help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.')
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(), help='Allow Resource Manager to retrieve secrets from the vault.')
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Prevents manual purging of deleted vault, and all contained entities')
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
@@ -88,7 +87,12 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(SkuName, default=SkuName.standard.value))
         c.argument('no_self_perms', arg_type=get_three_state_flag(), help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities. If omitted, assume true as default value.')
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help="Enable 'soft delete' functionality for this key vault and all contained entities. If omitted, it will be set to true by default. Once set to true, it cannot be reverted to false.")
+        c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
+
+    with self.argument_context('keyvault update') as c:
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help="Enable 'soft delete' functionality for this key vault and all contained entities. Once set to true, it cannot be reverted to false.")
+        c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
     with self.argument_context('keyvault recover') as c:
         c.argument('vault_name', help='Name of the deleted vault', required=True, completer=None,
