@@ -150,7 +150,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         self.wait_for_replication_status("Mirrored", rg_r, account_name_r, pool_name_r, volume_name_r)
 
         # break
-        self.cmd("az netappfiles volume replication pause -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r))
+        self.cmd("az netappfiles volume replication suspend -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r))
         self.wait_for_replication_status("Broken", rg_r, account_name_r, pool_name_r, volume_name_r)
 
         # resume
@@ -158,7 +158,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         self.wait_for_replication_status("Mirrored", rg_r, account_name_r, pool_name_r, volume_name_r)
 
         # break
-        self.cmd("az netappfiles volume replication pause -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r))
+        self.cmd("az netappfiles volume replication suspend -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r))
         self.wait_for_replication_status("Broken", rg_r, account_name_r, pool_name_r, volume_name_r)
 
         # delete

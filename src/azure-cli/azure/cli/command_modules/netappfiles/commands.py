@@ -131,7 +131,7 @@ def load_command_table(self, _):
                          client_factory=volumes_mgmt_client_factory,
                          doc_string_source='azure.mgmt.netapp.models#Volume',
                          exception_handler=netappfiles_exception_handler)
-        g.command('pause', 'break_replication')
+        g.command('suspend', 'break_replication')
         g.command('resume', 'resync_replication')
         g.command('remove', 'delete_replication')
         g.command('status', 'replication_status_method')

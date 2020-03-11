@@ -393,9 +393,9 @@ examples:
         az netappfiles volume replication approve -g mygroup --account-name myaccname --pool-name mypoolname --name mysourcevolname --remote-volume-resource-id /subscriptions/69a75bda-882e-44d5-8431-63421204131c/resourceGroups/mygroup1/providers/Microsoft.NetApp/netAppAccounts/myaccount1/capacityPools/mypool1/volumes/mydestinationvolume
 """
 
-helps['netappfiles volume replication pause'] = """
+helps['netappfiles volume replication suspend'] = """
 type: command
-short-summary: Break a volume replication for the specified destination volume. The replication process is paused until resumed or deleted.
+short-summary: Suspend/break a volume replication for the specified destination volume. The replication process is suspended until resumed or deleted.
 parameters:
   - name: --account-name -a
     short-summary: The name of the ANF account
@@ -404,9 +404,9 @@ parameters:
   - name: --name --volume-name -n -v
     short-summary: The name of the replication destination volume
 examples:
-  - name: Pause the replication process
+  - name: Suspend the replication process
     text: >
-        az netappfiles volume replication pause -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
+        az netappfiles volume replication suspend -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
 
 helps['netappfiles volume replication resume'] = """
@@ -452,7 +452,7 @@ parameters:
   - name: --name --volume-name -n -v
     short-summary: The name of the replication destination volume
 examples:
-  - name: Get the replication status for the volume. Returns whether the replication is healthy, the replication schedule and the mirror state (whether replication is paused/broken or synced/mirrored)
+  - name: Get the replication status for the volume. Returns whether the replication is healthy, the replication schedule and the mirror state (whether replication is suspened/broken or synced/mirrored)
     text: >
         az netappfiles volume replication status -g mygroup --account-name myaccname --pool-name mypoolname --name mydestinationvolname
 """
