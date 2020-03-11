@@ -5,7 +5,6 @@
 
 from knack.util import CLIError
 
-from azure.mgmt.cdn.models import ErrorResponseException
 from azure.cli.core.commands import CliCommandType
 
 from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profiles, cf_origins, cf_resource_usage,
@@ -14,6 +13,7 @@ from ._client_factory import (cf_cdn, cf_custom_domain, cf_endpoints, cf_profile
 
 def _not_found(message):
     def _inner_not_found(ex):
+        from azure.mgmt.cdn.models import ErrorResponseException
         if isinstance(ex, ErrorResponseException) \
                 and ex.response is not None \
                 and ex.response.status_code == 404:
