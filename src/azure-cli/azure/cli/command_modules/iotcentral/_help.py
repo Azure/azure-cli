@@ -28,9 +28,9 @@ examples:
   - name: Create an IoT Central application in the standard pricing tier ST2, in the region of the resource group.
     text: >
         az iotcentral app create --resource-group MyResourceGroup --name my-app-resource --subdomain my-app-subdomain
-  - name: Create an IoT Central application with the standard pricing tier ST2 in the 'westus' region, with a custom display name, based on the iotc-default template.
+  - name: Create an IoT Central application with the standard pricing tier ST2 in the 'westus' region, with a custom display name, based on the iotc-pnp-preview template.
     text: >
-        az iotcentral app create --resource-group MyResourceGroup --name my-app-resource-name --sku S1 --location westus --subdomain my-app-subdomain --template iotc-default@1.0.0 --display-name 'My Custom Display Name'
+        az iotcentral app create --resource-group MyResourceGroup --name my-app-resource-name --sku S1 --location westus --subdomain my-app-subdomain --template iotc-pnp-preview@1.0.0 --display-name 'My Custom Display Name'
 """
 
 helps['iotcentral app delete'] = """
