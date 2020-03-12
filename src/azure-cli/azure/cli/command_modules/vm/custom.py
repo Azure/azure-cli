@@ -618,7 +618,6 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment,
                                                                 build_vm_linux_log_analytics_workspace_agent,
-                                                                build_vm_daExtension_resource,
                                                                 build_vm_windows_log_analytics_workspace_agent)
     from msrestazure.tools import resource_id, is_valid_resource_id
 
@@ -804,9 +803,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         master_template.add_secure_parameter('workspaceId', workspace_id)
         if os_type.lower() == 'linux':
             vm_mmaExtension_resource = build_vm_linux_log_analytics_workspace_agent(cmd, vm_name, location)
-            vm_daExtensionName_resource = build_vm_daExtension_resource(cmd, vm_name, location)
             master_template.add_resource(vm_mmaExtension_resource)
-            master_template.add_resource(vm_daExtensionName_resource)
         elif os_type.lower() == 'windows':
             vm_mmaExtension_resource = build_vm_windows_log_analytics_workspace_agent(cmd, vm_name, location)
             master_template.add_resource(vm_mmaExtension_resource)
@@ -3173,7 +3170,7 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
     workspace = None
     extension_resources = vm.resources or []
     for resource in extension_resources:
-        if resource.name == "OMSExtension":
+        if resource.name == "MicrosoftMonitoringAgent" or resource.name == "OmsAgentForLinux":
             workspace = resource.settings.get('workspaceId', None)
     if workspace is None:
         raise CLIError('Cannot find the corresponding log analytics workspace. '
@@ -3185,7 +3182,6 @@ def set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name,
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
     log_client = _get_log_analytics_client(cmd)
-    workdpace =
     settings = {
         'workspaceId': "[reference('{}', '2015-11-01-preview').customerId]".format(workspace_id),
         'stopOnMultipleConnections': 'true'
