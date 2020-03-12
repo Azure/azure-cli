@@ -619,7 +619,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_msi_role_assignment,
                                                                 build_vm_linux_log_analytics_workspace_agent,
                                                                 build_vm_windows_log_analytics_workspace_agent)
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -844,7 +844,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                          vm.identity.user_assigned_identities))
 
     if workspace is not None:
-        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id)
+        workspace_name = parse_resource_id(workspace_id)['name']
+        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
     return vm
 
@@ -1090,7 +1091,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
-              priority=None, max_price=None, proximity_placement_group=None, workspace_id=None, **kwargs):
+              priority=None, max_price=None, proximity_placement_group=None, workspace=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1134,14 +1135,16 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if proximity_placement_group is not None:
         vm.proximity_placement_group = {'id': proximity_placement_group}
 
-    if workspace_id is not None:
-        set_log_analytics_workspace_extension(cmd=cmd,
-                                              resource_group_name=resource_group_name,
-                                              vm=vm,
-                                              vm_name=vm_name,
-                                              workspace_id=workspace_id)
-        # os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
-        # _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id)
+    if workspace is not None:
+        workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
+        workspace_name = parse_resource_id(workspace_id)['name']
+        _set_log_analytics_workspace_extension(cmd=cmd,
+                                               resource_group_name=resource_group_name,
+                                               vm=vm,
+                                               vm_name=vm_name,
+                                               workspace_name=workspace_name)
+        os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
+        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -3125,16 +3128,14 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
     return workspace_id
 
 
-def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id):
+def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name):
     from ._client_factory import cf_log_analytics_data_sources
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.mgmt.loganalytics.models import DataSource
-    from msrestazure.tools import parse_resource_id
     from msrestazure.azure_exceptions import CloudError
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     data_sources_client = cf_log_analytics_data_sources(cmd.cli_ctx, subscription_id)
-    workspace_name = parse_resource_id(workspace_id)['name']
     data_source_name_template = "DataSource_{}_{}"
 
     default_data_sources = None
@@ -3178,16 +3179,18 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
     return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
 
 
-def set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_id):
+def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_name):
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
     log_client = _get_log_analytics_client(cmd)
+    customer_id = log_client.get(resource_group_name, workspace_name).customer_id
     settings = {
-        'workspaceId': "[reference('{}', '2015-11-01-preview').customerId]".format(workspace_id),
+        'workspaceId': customer_id,
         'stopOnMultipleConnections': 'true'
     }
+    primary_shared_key = log_client.get_shared_keys(resource_group_name, workspace_name).primary_shared_key
     protected_settings = {
-        'workspaceKey': "[listKeys('{}', '2015-11-01-preview').primarySharedKey]".format(workspace_id),
+        'workspaceKey': primary_shared_key,
     }
     return set_extension(cmd, resource_group_name, vm_name, vm_extension_name,
                          extension_mappings[vm_extension_name]['publisher'],
