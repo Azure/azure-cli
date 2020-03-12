@@ -213,7 +213,8 @@ class MainCommandsLoader(CLICommandsLoader):
                             cmd.command_source = ExtensionCommandSource(
                                 extension_name=ext_name,
                                 overrides_command=cmd_name in module_commands,
-                                preview=ext.preview)
+                                preview=ext.preview,
+                                experimental=ext.experimental)
 
                         self.command_table.update(extension_command_table)
                         self.command_group_table.update(extension_group_table)
