@@ -994,13 +994,15 @@ class ExtensionCommandSource(object):
             return "This command is from the following extension: {}".format(self.extension_name)
         return "This command is from an extension."
 
-    def get_preview_experimental_warn_msg(self):
-        # If experimental is true, it overrides preview
+    def get_preview_warn_msg(self):
+        if self.preview:
+            return "The extension is in preview"
+        return None
+
+    def get_experimental_warn_msg(self):
         if self.experimental:
             return "The extension is experimental and not covered by customer support. " \
                    "Please use with discretion."
-        if self.preview:
-            return "The extension is in preview"
         return None
 
 
