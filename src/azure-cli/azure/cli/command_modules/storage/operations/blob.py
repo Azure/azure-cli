@@ -6,8 +6,9 @@
 from __future__ import print_function
 
 import os
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timezone
+
+from azure.cli.core.util import sdk_no_wait
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
                                                     create_file_share_from_storage_client,
@@ -28,6 +29,17 @@ def delete_container(client, container_name, fail_not_exist=False, lease_id=None
     return client.delete_container(
         container_name, fail_not_exist=fail_not_exist, lease_id=lease_id, if_modified_since=if_modified_since,
         if_unmodified_since=if_unmodified_since, timeout=timeout)
+
+
+def restore_blob_ranges(cmd, client, resource_group_name, account_name, time_to_restore, blob_ranges=None,
+                        no_wait=False):
+
+    if blob_ranges is None:
+        BlobRestoreRange = cmd.get_models("BlobRestoreRange")
+        blob_ranges = [BlobRestoreRange(start_range="", end_range="")]
+
+    return sdk_no_wait(no_wait, client.restore_blob_ranges, resource_group_name=resource_group_name,
+                       account_name=account_name, time_to_restore=time_to_restore, blob_ranges=blob_ranges)
 
 
 def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', timeout=None):

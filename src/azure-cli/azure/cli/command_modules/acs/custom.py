@@ -64,6 +64,7 @@ from azure.mgmt.containerservice.v2019_11_01.models import ManagedCluster
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAADProfile
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAddonProfile
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterIdentity
 from azure.mgmt.containerservice.v2019_11_01.models import AgentPool
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
@@ -532,8 +533,8 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     # always create application with 5 years expiration
     start_date = datetime.datetime.utcnow()
     end_date = start_date + relativedelta(years=5)
-    result = create_application(rbac_client.applications, name, url, [url], password=client_secret,
-                                start_date=start_date, end_date=end_date)
+    result, aad_session_key = create_application(rbac_client.applications, name, url, [url], password=client_secret,
+                                                 start_date=start_date, end_date=end_date)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
         hook.add(message='Creating service principal', value=0.1 * x, total_val=1.0)
@@ -545,10 +546,10 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
             logger.info(ex)
             time.sleep(2 + 2 * x)
     else:
-        return False
+        return False, aad_session_key
     hook.add(message='Finished service principal creation', value=1.0, total_val=1.0)
     logger.info('Finished service principal creation')
-    return service_principal
+    return service_principal, aad_session_key
 
 
 def _add_role_assignment(cli_ctx, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
@@ -1312,7 +1313,8 @@ def create_application(client, display_name, homepage, identifier_uris,
                                                    password_credentials=password_creds,
                                                    required_resource_access=required_resource_accesses)
     try:
-        return client.create(app_create_param)
+        result = client.create(app_create_param, raw=True)
+        return result.output, result.response.headers["ocp-aad-session-key"]
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -1550,18 +1552,18 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         protocol = 'http'
 
     proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
-    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy'.format(proxy_url,
-                                                                                                       protocol)
+    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
+                                                                                                        protocol)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
         # TODO: better error handling here.
         response = requests.post('http://localhost:8888/openport/{0}'.format(listen_port))
         result = json.loads(response.text)
-        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy'.format(result['url'],
-                                                                                                          protocol)
+        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
+            result['url'], protocol)
         term_id = os.environ.get('ACC_TERM_ID')
         if term_id:
-            response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
+            response = requests.post('http://localhost:8888/openLink/{0}'.format(term_id),
                                      json={"url": dashboardURL})
         logger.warning('To view the console, please open %s in a new tab', dashboardURL)
     else:
@@ -1647,6 +1649,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_count=3,
                nodepool_name="nodepool1",
                nodepool_tags=None,
+               nodepool_labels=None,
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1680,6 +1683,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                zones=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
+               enable_private_cluster=False,
+               enable_managed_identity=False,
                attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1700,6 +1705,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
         tags=nodepool_tags,
+        node_labels=nodepool_labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -1802,13 +1808,23 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
 
     api_server_access_profile = None
-    if api_server_authorized_ip_ranges:
-        api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+    if enable_private_cluster and load_balancer_sku.lower() != "standard":
+        raise CLIError("Please use standard load balancer for private cluster")
+    if api_server_authorized_ip_ranges or enable_private_cluster:
+        api_server_access_profile = _populate_api_server_access_profile(
+            api_server_authorized_ip_ranges,
+            enable_private_cluster
+        )
 
     # Check that both --disable-rbac and --enable-rbac weren't provided
     if all([disable_rbac, enable_rbac]):
         raise CLIError('specify either "--disable-rbac" or "--enable-rbac", not both.')
 
+    identity = None
+    if enable_managed_identity:
+        identity = ManagedClusterIdentity(
+            type="SystemAssigned"
+        )
     mc = ManagedCluster(
         location=location,
         tags=tags,
@@ -1821,8 +1837,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         network_profile=network_profile,
         addon_profiles=addon_profiles,
         aad_profile=aad_profile,
-        api_server_access_profile=api_server_access_profile
+        api_server_access_profile=api_server_access_profile,
+        identity=identity
     )
+
+    # Add AAD session key to header
+    custom_headers = {'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")}
 
     # Due to SPN replication latency, we do a few retries here
     max_retry = 30
@@ -1851,7 +1871,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 result = sdk_no_wait(no_wait,
                                      client.create_or_update,
                                      resource_group_name=resource_group_name,
-                                     resource_name=name, parameters=mc)
+                                     resource_name=name,
+                                     parameters=mc,
+                                     custom_headers=custom_headers)
             return result
         except CloudError as ex:
             retry_exception = ex
@@ -2711,6 +2733,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       enable_cluster_autoscaler=False,
                       node_taints=None,
                       tags=None,
+                      labels=None,
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2736,6 +2759,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     agent_pool = AgentPool(
         name=nodepool_name,
         tags=tags,
+        node_labels=labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
@@ -2878,6 +2902,7 @@ def _ensure_aks_service_principal(cli_ctx,
                                   dns_name_prefix=None,
                                   location=None,
                                   name=None):
+    aad_session_key = None
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
@@ -2887,7 +2912,7 @@ def _ensure_aks_service_principal(cli_ctx,
         salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
         url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        service_principal, aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
             raise CLIError('Could not create a service principal with the right permissions. '
                            'Are you an Owner on this project?')
@@ -2900,6 +2925,7 @@ def _ensure_aks_service_principal(cli_ctx,
     return {
         'client_secret': client_secret,
         'service_principal': service_principal,
+        'aad_session_key': aad_session_key,
     }
 
 
@@ -2944,12 +2970,12 @@ def _ensure_osa_aad(cli_ctx,
                                required_resource_accesses=[required_osa_aad_access])
             logger.info('Updated AAD: %s', aad_client_app_id)
         else:
-            result = create_application(client=rbac_client.applications,
-                                        display_name=name,
-                                        identifier_uris=[app_id_name],
-                                        homepage=app_id_name,
-                                        password=aad_client_app_secret,
-                                        required_resource_accesses=[required_osa_aad_access])
+            result, _aad_session_key = create_application(client=rbac_client.applications,
+                                                          display_name=name,
+                                                          identifier_uris=[app_id_name],
+                                                          homepage=app_id_name,
+                                                          password=aad_client_app_secret,
+                                                          required_resource_accesses=[required_osa_aad_access])
             aad_client_app_id = result.app_id
             logger.info('Created an AAD: %s', aad_client_app_id)
         # Get the TenantID
@@ -2980,7 +3006,7 @@ def _ensure_service_principal(cli_ctx,
         salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
         url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        service_principal, _aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
             raise CLIError('Could not create a service principal with the right permissions. '
                            'Are you an Owner on this project?')

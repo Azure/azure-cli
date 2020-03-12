@@ -1233,7 +1233,8 @@ def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_n
 
 # region ApplicationGatewayWAFPolicy ManagedRule ManagedRuleSet
 def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
-                             rule_set_type, rule_set_version, rule_group_name, rules):
+                             rule_set_type, rule_set_version,
+                             rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
     Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
@@ -1243,11 +1244,15 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
 
     waf_policy = client.get(resource_group_name, policy_name)
 
-    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules]
-    rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name, rules=managed_rule_overrides)
+    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules is not None else []
+
+    rule_group_override = None
+    if rule_group_name is not None:
+        rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
+                                                       rules=managed_rule_overrides)
     new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
                                           rule_set_version=rule_set_version,
-                                          rule_group_overrides=[rule_group_override])
+                                          rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
 
     for rule_set in waf_policy.managed_rules.managed_rule_sets:
         if rule_set.rule_set_type == rule_set_type:
@@ -1256,7 +1261,8 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
                     rule_override.rules.extend(managed_rule_overrides)
                     break
             else:
-                rule_set.rule_group_overrides.append(rule_group_override)
+                if rule_group_override is not None:
+                    rule_set.rule_group_overrides.append(rule_group_override)
             break
     else:
         waf_policy.managed_rules.managed_rule_sets.append(new_managed_rule_set)
@@ -4381,8 +4387,138 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
-def show_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, resource_group_name=None):
-    return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
+# combination of resource_group_name and nsg is for old output
+# combination of location and flow_log_name is for new output
+def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
+                          flow_log_name=None):
+    # deprecated approach to show flow log
+    if nsg is not None:
+        return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
+
+    # new approach to show flow log
+    from ._client_factory import cf_flow_logs
+    client = cf_flow_logs(cmd.cli_ctx, None)
+    return client.get(watcher_rg, watcher_name, flow_log_name)
+
+
+def create_nw_flow_log(cmd,
+                       client,
+                       location,
+                       watcher_rg,
+                       watcher_name,
+                       flow_log_name,
+                       nsg,
+                       storage_account=None,
+                       resource_group_name=None,
+                       enabled=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    FlowLog = cmd.get_models('FlowLog')
+    flow_log = FlowLog(location=location,
+                       target_resource_id=nsg,
+                       storage_id=storage_account,
+                       enabled=enabled,
+                       tags=tags)
+
+    if retention > 0:
+        RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
+        retention_policy = RetentionPolicyParameters(days=retention, enabled=(retention > 0))
+        flow_log.retention_policy = retention_policy
+
+    if log_format is not None or log_version is not None:
+        FlowLogFormatParameters = cmd.get_models('FlowLogFormatParameters')
+        format_config = FlowLogFormatParameters(type=log_format, version=log_version)
+        flow_log.format = format_config
+
+    if traffic_analytics_workspace is not None:
+        TrafficAnalyticsProperties, TrafficAnalyticsConfigurationProperties = \
+            cmd.get_models('TrafficAnalyticsProperties', 'TrafficAnalyticsConfigurationProperties')
+
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        traffic_analytics_config = TrafficAnalyticsConfigurationProperties(
+            enabled=traffic_analytics_enabled,
+            workspace_id=workspace.properties['customerId'],
+            workspace_region=workspace.location,
+            workspace_resource_id=workspace.id,
+            traffic_analytics_interval=traffic_analytics_interval
+        )
+        traffic_analytics = TrafficAnalyticsProperties(
+            network_watcher_flow_analytics_configuration=traffic_analytics_config
+        )
+
+        flow_log.flow_analytics_configuration = traffic_analytics
+
+    return client.create_or_update(watcher_rg, watcher_name, flow_log_name, flow_log)
+
+
+def update_nw_flow_log_getter(client, watcher_rg, watcher_name, flow_log_name):
+    return client.get(watcher_rg, watcher_name, flow_log_name)
+
+
+def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, parameters):
+    return client.create_or_update(watcher_rg, watcher_name, flow_log_name, parameters)
+
+
+def update_nw_flow_log(cmd,
+                       instance,
+                       location,
+                       resource_group_name=None,    # dummy parameter to let it appear in command
+                       enabled=None,
+                       nsg=None,
+                       storage_account=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('enabled', enabled)
+        c.set_param('tags', tags)
+        c.set_param('storage_id', storage_account)
+        c.set_param('target_resource_id', nsg)
+
+    with cmd.update_context(instance.retention_policy) as c:
+        c.set_param('days', retention)
+        c.set_param('enabled', retention > 0)
+
+    with cmd.update_context(instance.format) as c:
+        c.set_param('type', log_format)
+        c.set_param('version', log_version)
+
+    if traffic_analytics_workspace is not None:
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        with cmd.update_context(
+                instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+            c.set_param('enabled', traffic_analytics_enabled)
+            c.set_param('workspace_id', workspace.properties['customerId'])
+            c.set_param('workspace_region', workspace.location)
+            c.set_param('workspace_resource_id', workspace.id)
+            c.set_param('traffic_analytics_interval', traffic_analytics_interval)
+
+    return instance
+
+
+def list_nw_flow_log(client, watcher_rg, watcher_name, location):
+    return client.list(watcher_rg, watcher_name)
+
+
+def delete_nw_flow_log(client, watcher_rg, watcher_name, location, flow_log_name):
+    return client.delete(watcher_rg, watcher_name, flow_log_name)
 
 
 def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, storage_account,

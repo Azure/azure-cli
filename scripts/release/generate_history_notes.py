@@ -14,9 +14,11 @@
 
 import fileinput
 import json
+import os
 import re
 import subprocess
 import requests
+from requests.auth import HTTPBasicAuth
 
 base_url = 'https://api.github.com/repos/azure/azure-cli'
 commit_pr_url = '{}/commits/commit_id/pulls'.format(base_url)
@@ -27,6 +29,7 @@ history_notes = {}
 
 def generate_history_notes():
     dev_commits = get_commits()
+    print("Get PRs for {} commits.".format(len(dev_commits)))
     for commit in dev_commits:
         prs = get_prs_for_commit(commit['sha'])
         # parse PR if one commit is mapped to one PR
@@ -118,7 +121,7 @@ def get_commits():
 def get_prs_for_commit(commit: str):
     headers = {'Accept': 'application/vnd.github.groot-preview+json'}
     url = commit_pr_url.replace('commit_id', commit)
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, auth=HTTPBasicAuth('anything', os.environ.get('PAT_TOKEN')))
     if response.status_code != 200:
         raise Exception("Request to {} failed with {}".format(
             url, response.status_code))
