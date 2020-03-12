@@ -1148,76 +1148,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
-
-
-def _prepare_workspace(cmd, resource_group_name, workspace):
-    from msrestazure.tools import is_valid_resource_id
-    from ._client_factory import cf_log_analytics
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.azure_exceptions import CloudError
-
-    workspace_id = None
-    if not is_valid_resource_id(workspace):
-        workspace_name = workspace
-        subscription_id = get_subscription_id(cmd.cli_ctx)
-        log_client = cf_log_analytics(cmd.cli_ctx, subscription_id)
-        workspace_result = None
-        try:
-            workspace_result = log_client.get(resource_group_name, workspace_name)
-        except CloudError:
-            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
-            sku = Sku(name=SkuNameEnum.per_gb2018.value)
-            retention_time = 30  # default value
-            location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-            workspace_instance = Workspace(location=location,
-                                           sku=sku,
-                                           retention_in_days=retention_time)
-            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
-                                                                                             workspace_name,
-                                                                                             workspace_instance))
-        workspace_id = workspace_result.id
-    else:
-        workspace_id = workspace
-    return workspace_id
-
-
-def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id):
-    from ._client_factory import cf_log_analytics_data_sources
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.mgmt.loganalytics.models import DataSource
-    from msrestazure.tools import parse_resource_id
-    from msrestazure.azure_exceptions import CloudError
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    data_sources_client = cf_log_analytics_data_sources(cmd.cli_ctx, subscription_id)
-    workspace_name = parse_resource_id(workspace_id)['name']
-    data_source_name_template = "DataSource_{}_{}"
-
-    default_data_sources = None
-    if os_type.lower() == 'linux':
-        from ._workspace_data_source_settings import default_linux_data_sources
-        default_data_sources = default_linux_data_sources
-    elif os_type.lower() == 'windows':
-        from ._workspace_data_source_settings import default_windows_data_sources
-        default_data_sources = default_windows_data_sources
-
-    if default_data_sources is not None:
-        for data_source_kind, data_source_settings in default_data_sources.items():
-            for data_source_setting in data_source_settings:
-                data_source = DataSource(kind=data_source_kind,
-                                         properties=data_source_setting)
-                data_source_name = data_source_name_template.format(data_source_kind, _gen_guid())
-                try:
-                    data_sources_client.create_or_update(resource_group_name,
-                                                         workspace_name,
-                                                         data_source_name,
-                                                         data_source)
-                except CloudError as ex:
-                    logger.warning("Failed to set data source due to %s. "
-                                   "Skip this step and need manual work later.", ex.message)
-    else:
-        logger.warning("Unsupported OS type. Skip the default settings for log analytics workspace.")
-
 # endregion
 
 
@@ -3162,6 +3092,80 @@ def get_dedicated_host_instance_view(client, host_group_name, host_name, resourc
 
 
 # region VMMonitor
+def _get_log_analytics_client(cmd):
+    from ._client_factory import cf_log_analytics
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    return cf_log_analytics(cmd.cli_ctx, subscription_id)
+
+
+def _prepare_workspace(cmd, resource_group_name, workspace):
+    from msrestazure.tools import is_valid_resource_id
+
+    from msrestazure.azure_exceptions import CloudError
+
+    workspace_id = None
+    if not is_valid_resource_id(workspace):
+        workspace_name = workspace
+        log_client = _get_log_analytics_client(cmd)
+        workspace_result = None
+        try:
+            workspace_result = log_client.get(resource_group_name, workspace_name)
+        except CloudError:
+            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
+            sku = Sku(name=SkuNameEnum.per_gb2018.value)
+            retention_time = 30  # default value
+            location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+            workspace_instance = Workspace(location=location,
+                                           sku=sku,
+                                           retention_in_days=retention_time)
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
+                                                                                             workspace_name,
+                                                                                             workspace_instance))
+        workspace_id = workspace_result.id
+    else:
+        workspace_id = workspace
+    return workspace_id
+
+
+def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id):
+    from ._client_factory import cf_log_analytics_data_sources
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.mgmt.loganalytics.models import DataSource
+    from msrestazure.tools import parse_resource_id
+    from msrestazure.azure_exceptions import CloudError
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    data_sources_client = cf_log_analytics_data_sources(cmd.cli_ctx, subscription_id)
+    workspace_name = parse_resource_id(workspace_id)['name']
+    data_source_name_template = "DataSource_{}_{}"
+
+    default_data_sources = None
+    if os_type.lower() == 'linux':
+        from ._workspace_data_source_settings import default_linux_data_sources
+        default_data_sources = default_linux_data_sources
+    elif os_type.lower() == 'windows':
+        from ._workspace_data_source_settings import default_windows_data_sources
+        default_data_sources = default_windows_data_sources
+
+    if default_data_sources is not None:
+        for data_source_kind, data_source_settings in default_data_sources.items():
+            for data_source_setting in data_source_settings:
+                data_source = DataSource(kind=data_source_kind,
+                                         properties=data_source_setting)
+                data_source_name = data_source_name_template.format(data_source_kind, _gen_guid())
+                try:
+                    data_sources_client.create_or_update(resource_group_name,
+                                                         workspace_name,
+                                                         data_source_name,
+                                                         data_source)
+                except CloudError as ex:
+                    logger.warning("Failed to set data source due to %s. "
+                                   "Skip this step and need manual work later.", ex.message)
+    else:
+        logger.warning("Unsupported OS type. Skip the default settings for log analytics workspace.")
+
+
 def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_query, timespan=None):
     """Executes a query against the Log Analytics workspace linked with a vm."""
     from azure.loganalytics.models import QueryBody
@@ -3180,6 +3184,8 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
 def set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_id):
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
+    log_client = _get_log_analytics_client(cmd)
+    workdpace =
     settings = {
         'workspaceId': "[reference('{}', '2015-11-01-preview').customerId]".format(workspace_id),
         'stopOnMultipleConnections': 'true'
