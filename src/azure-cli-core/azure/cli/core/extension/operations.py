@@ -224,8 +224,8 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
-    extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls,
-                 pip_proxy=pip_proxy)
+    extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256,
+                                  pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
     _augment_telemetry_with_ext_info(extension_name)
     try:
         if extension_name and get_extension(extension_name).experimental:
