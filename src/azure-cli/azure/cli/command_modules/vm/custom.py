@@ -45,6 +45,8 @@ _LINUX_ACCESS_EXT = 'VMAccessForLinux'
 _WINDOWS_ACCESS_EXT = 'VMAccessAgent'
 _LINUX_DIAG_EXT = 'LinuxDiagnostic'
 _WINDOWS_DIAG_EXT = 'IaaSDiagnostics'
+_LINUX_OMS_AGENT_EXT = 'OmsAgentForLinux'
+_WINDOWS_OMS_AGENT_EXT = 'MicrosoftMonitoringAgent'
 extension_mappings = {
     _LINUX_ACCESS_EXT: {
         'version': '1.5',
@@ -61,6 +63,14 @@ extension_mappings = {
     _WINDOWS_DIAG_EXT: {
         'version': '1.5',
         'publisher': 'Microsoft.Azure.Diagnostics'
+    },
+    _LINUX_OMS_AGENT_EXT: {
+        'version': '1.0',
+        'publisher': 'Microsoft.EnterpriseCloud.Monitoring'
+    },
+    _WINDOWS_OMS_AGENT_EXT: {
+        'version': '1.0',
+        'publisher': 'Microsoft.EnterpriseCloud.Monitoring'
     }
 }
 
@@ -1083,7 +1093,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
-              priority=None, max_price=None, proximity_placement_group=None, **kwargs):
+              priority=None, max_price=None, proximity_placement_group=None, workspace_id=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1126,6 +1136,15 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if proximity_placement_group is not None:
         vm.proximity_placement_group = {'id': proximity_placement_group}
+
+    if workspace_id is not None:
+        set_log_analytics_workspace_extension(cmd=cmd,
+                                              resource_group_name=resource_group_name,
+                                              vm=vm,
+                                              vm_name=vm_name,
+                                              workspace_id=workspace_id)
+        # os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
+        # _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id)
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -3156,6 +3175,23 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
         raise CLIError('Cannot find the corresponding log analytics workspace. '
                        'Please check the status of log analytics workpsace.')
     return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
+
+
+def set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_id):
+    is_linux_os = _is_linux_os(vm)
+    vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
+    settings = {
+        'workspaceId': "[reference('{}', '2015-11-01-preview').customerId]".format(workspace_id),
+        'stopOnMultipleConnections': 'true'
+    }
+    protected_settings = {
+        'workspaceKey': "[listKeys('{}', '2015-11-01-preview').primarySharedKey]".format(workspace_id),
+    }
+    return set_extension(cmd, resource_group_name, vm_name, vm_extension_name,
+                         extension_mappings[vm_extension_name]['publisher'],
+                         extension_mappings[vm_extension_name]['version'],
+                         settings,
+                         protected_settings)
 # endregion
 
 
