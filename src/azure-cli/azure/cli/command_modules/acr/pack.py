@@ -36,6 +36,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
                    source_location,
                    builder,
                    pack_image_tag='stable',
+                   agent_pool_name=None,
                    pull=False,
                    no_format=False,
                    no_logs=False,
@@ -87,7 +88,8 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         credentials=get_custom_registry_credentials(
             cmd=cmd,
             auth_mode=auth_mode
-        )
+        ),
+        agent_pool_name=agent_pool_name
     )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(

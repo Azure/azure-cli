@@ -44,6 +44,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     task_name,
                     registry_name,
                     context_path,
+                    agent_pool_name=None,
                     file=None,
                     cmd_value=None,
                     git_access_token=None,
@@ -191,7 +192,8 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         credentials=get_custom_registry_credentials(
             cmd=cmd,
             auth_mode=auth_mode
-        )
+        ),
+        agent_pool_name=agent_pool_name
     )
 
     try:
@@ -299,6 +301,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     task_name,
                     registry_name,
                     resource_group_name=None,
+                    agent_pool_name=None,
                     # task parameters
                     status=None,
                     platform=None,
@@ -461,7 +464,8 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         credentials=get_custom_registry_credentials(
             cmd=cmd,
             auth_mode=auth_mode
-        )
+        ),
+        agent_pool_name=agent_pool_name
     )
 
     return client.update(resource_group_name, registry_name, task_name, taskUpdateParameters)
@@ -768,6 +772,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
                  client,  # cf_acr_runs
                  task_name,
                  registry_name,
+                 agent_pool_name=None,
                  set_value=None,
                  set_secret=None,
                  file=None,
@@ -807,7 +812,8 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
             registry_name,
             TaskRunRequest(
                 task_id=task_id,
-                override_task_step_properties=override_task_step_properties
+                override_task_step_properties=override_task_step_properties,
+                agent_pool_name=agent_pool_name
             )
         )
     )

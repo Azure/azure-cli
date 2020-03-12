@@ -27,6 +27,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             client,
             registry_name,
             source_location,
+            agent_pool_name=None,
             file=None,
             values=None,
             set_value=None,
@@ -73,7 +74,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             credentials=get_custom_registry_credentials(
                 cmd=cmd,
                 auth_mode=auth_mode
-            )
+            ),
+            agent_pool_name=agent_pool_name
         )
     else:
         yaml_template = get_yaml_template(cmd_value, timeout, file)
@@ -91,7 +93,8 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             credentials=get_custom_registry_credentials(
                 cmd=cmd,
                 auth_mode=auth_mode
-            )
+            ),
+            agent_pool_name=agent_pool_name
         )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
