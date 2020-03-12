@@ -2073,6 +2073,22 @@ def server_ad_admin_set(
         resource_group_name=resource_group_name,
         parameters=kwargs)
 
+def server_ad_admin_update(
+        instance,
+        login=None,
+        sid=None,
+        tenant_id=None):
+    '''
+    Updates a server' AD admin.
+    '''
+    
+    # Apply params to instance
+    instance.login = login or instance.login
+    instance.sid = sid or instance.sid
+    instance.tenant_id = tenant_id or instance.tenant_id
+
+    return instance
+
 #####
 #           sql server firewall-rule
 #####

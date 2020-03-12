@@ -418,7 +418,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'server_ad_admin_set')
         g.command('list', 'list_by_server')
         g.command('delete', 'delete')
-        g.custom_command('update','server_ad_admin_set')
+        g.generic_update_command('update',
+                                 custom_func_name='server_ad_admin_update',
+                                 setter_arg_name='parameters')
 
     server_keys_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerKeysOperations.{}',
