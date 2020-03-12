@@ -2081,7 +2081,7 @@ def server_ad_admin_update(
     '''
     Updates a server' AD admin.
     '''
-    
+
     # Apply params to instance
     instance.login = login or instance.login
     instance.sid = sid or instance.sid
