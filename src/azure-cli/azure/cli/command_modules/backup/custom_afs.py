@@ -160,8 +160,13 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
     afs_restore_request.source_resource_id = source_resource_id
     afs_restore_request.restore_request_type = restore_request_type
 
-    restore_file_specs = [RestoreFileSpecs(path=source_file_path, file_spec_type=source_file_type,
-                                           target_folder_path=target_folder)]
+    restore_file_specs = None
+
+    if source_file_path is not None:
+        restore_file_specs = []
+        for filepath in source_file_path:
+            restore_file_specs.append(RestoreFileSpecs(path=filepath, file_spec_type=source_file_type,
+                                                       target_folder_path=target_folder))
 
     if restore_mode == "AlternateLocation":
         target_resource_id = _get_storage_account_id(cmd.cli_ctx, target_storage_account_name, resource_group_name)
