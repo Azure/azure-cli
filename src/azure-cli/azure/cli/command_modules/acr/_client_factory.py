@@ -59,5 +59,11 @@ def cf_acr_token_credentials(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, VERSION_2019_05_01_PREVIEW).registries
 
 
+def get_acr_testing_client(cli_ctx):
+    """Returns the client for managing container registries. """
+    from .v2019_06_01_preview import ContainerRegistryManagementClient
+    return get_mgmt_service_client(cli_ctx, ContainerRegistryManagementClient)
+
+
 def cf_acr_agentpool(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).agent_pools
+    return get_acr_testing_client(cli_ctx).agent_pools
