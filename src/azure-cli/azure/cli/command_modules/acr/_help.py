@@ -113,7 +113,7 @@ examples:
 
 helps['acr create'] = """
 type: command
-short-summary: Creates an Azure Container Registry.
+short-summary: Create an Azure Container Registry.
 examples:
   - name: Create a managed container registry with the Standard SKU.
     text: >
@@ -594,7 +594,7 @@ examples:
 
 helps['acr task create'] = """
 type: command
-short-summary: Creates a series of steps for building, testing and OS & Framework patching containers. Tasks support triggers from git commits and base image updates.
+short-summary: Create a series of steps for building, testing and OS & Framework patching containers. Tasks support triggers from git commits and base image updates.
 examples:
   - name: Create a task without the source location.
     text: >
@@ -1044,7 +1044,7 @@ short-summary: Manage private Tasks agent pools with Azure Container Registries.
 
 helps['acr agentpool create'] = """
 type: command
-short-summary: Creates an agent pool for an Azure Container Registry.
+short-summary: Create an agent pool for an Azure Container Registry.
 examples:
   - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry'.
     text: >
