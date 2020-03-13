@@ -344,23 +344,28 @@ class TestHandleException(unittest.TestCase):
             self.assertEqual(config.use_local_config, False)
         self.assertTrue(config.use_local_config)
 
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
     @mock.patch('requests.request', autospec=True)
-    def test_send_raw_requests(self, request_mock):
+    def test_send_raw_requests(self, request_mock, get_raw_token_mock):
         from azure.cli.core.commands.client_factory import UA_AGENT
         return_val = mock.MagicMock()
         return_val.is_ok = True
         request_mock.return_value = return_val
+        get_raw_token_mock.return_value = ("Bearer", "eyJ0eXAiOiJKV1", None), None, None
 
         cli_ctx = mock.MagicMock()
         cli_ctx.data = {
             'command': 'rest',
             'safe_params': ['method', 'uri']
         }
-        test_arm_endpoint = 'https://arm.com/'
+        test_arm_resource_id = 'https://management.core.windows.net/'
+        cli_ctx.cloud.endpoints.active_directory_resource_id = test_arm_resource_id
+        test_arm_endpoint = 'https://management.azure.com/'
+        cli_ctx.cloud.endpoints.resource_manager = test_arm_endpoint
+
         test_url = 'subscription/1234/good'
         tets_uri_parameters = ['p1=v1', "{'p2': 'v2'}"]
         test_body = '{"b1": "v1"}'
-        cli_ctx.cloud.endpoints.resource_manager = test_arm_endpoint
 
         expected_header = {
             'User-Agent': UA_AGENT,
@@ -369,12 +374,26 @@ class TestHandleException(unittest.TestCase):
             'ParameterSetName': 'method uri'
         }
 
+        # Test Authorization header is skipped
         send_raw_request(cli_ctx, 'PUT', test_url, uri_parameters=tets_uri_parameters, body=test_body,
                          skip_authorization_header=True, generated_client_request_id_name=None)
 
+        get_raw_token_mock.assert_not_called()
+        request_mock.assert_called_with('PUT', test_arm_endpoint + test_url,
+                                    params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
+                                    headers=expected_header, verify=(not should_disable_connection_verify()))
+
+        # Test Authorization header is added
+        expected_header_with_auth = expected_header.copy()
+        expected_header_with_auth['Authorization'] = 'Bearer eyJ0eXAiOiJKV1'
+
+        send_raw_request(cli_ctx, 'PUT', test_url, uri_parameters=tets_uri_parameters, body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_resource_id)
         request_mock.assert_called_with('PUT', test_arm_endpoint + test_url,
                                         params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
-                                        headers=expected_header, verify=(not should_disable_connection_verify()))
+                                        headers=expected_header_with_auth, verify=(not should_disable_connection_verify()))
 
     @staticmethod
     def _get_mock_HttpOperationError(response_text):
