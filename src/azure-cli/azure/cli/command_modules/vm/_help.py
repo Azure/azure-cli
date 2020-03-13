@@ -831,7 +831,7 @@ examples:
     text: |
         az vm create -n MyVm -g MyResourceGroup --image debian --vnet-name MyVnet --subnet subnet1 \\
             --availability-set MyAvailabilitySet --public-ip-address-dns-name MyUniqueDnsName \\
-            --ssh-key-value @key-file
+            --ssh-key-values @key-file
   - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate ssh key pairs.
     text: |
         az vm create -n MyVm -g MyResourceGroup --public-ip-address-dns-name MyUniqueDnsName \\
