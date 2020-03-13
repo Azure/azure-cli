@@ -728,7 +728,6 @@ class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
 
 
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
-    #  convert to ScenarioTest and re-record when ISSUE #6011 is fixed
     @ResourceGroupPreparer(location='westeurope')
     @SqlServerPreparer(location='westeurope')
     def test_aad_admin(self, resource_group, server):
