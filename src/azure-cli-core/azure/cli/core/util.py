@@ -583,7 +583,12 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     uri_parameters = result or None
 
     if '://' not in uri:
+        # Default to Azure Resource Manager
         uri = cli_ctx.cloud.endpoints.resource_manager + uri.lstrip('/')
+        # Use configured ARM's resource ID, following the same behavior as
+        # azure.cli.core.commands.client_factory._get_mgmt_service_client
+        resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
+
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
     from azure.cli.core._profile import Profile
