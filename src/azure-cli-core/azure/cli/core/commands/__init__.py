@@ -1157,11 +1157,9 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
+        merged_kwargs['preview_info'] = None
         if kwargs.get('is_preview', False):
-            merged_kwargs['preview_info'] = PreviewItem(
-                self.command_loader.cli_ctx,
-                object_type='command'
-            )
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         self.command_loader._cli_command(command_name,  # pylint: disable=protected-access
@@ -1203,7 +1201,9 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs_custom = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command=True))
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        merged_kwargs['preview_info'] = None
+        if kwargs.get('is_preview', False):
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
 
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
@@ -1236,7 +1236,9 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        merged_kwargs['preview_info'] = None
+        if kwargs.get('is_preview', False):
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
@@ -1256,7 +1258,9 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        merged_kwargs['preview_info'] = None
+        if kwargs.get('is_preview', False):
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
