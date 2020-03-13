@@ -2073,6 +2073,7 @@ def server_ad_admin_set(
         resource_group_name=resource_group_name,
         parameters=kwargs)
 
+
 def server_ad_admin_update(
         instance,
         login=None,

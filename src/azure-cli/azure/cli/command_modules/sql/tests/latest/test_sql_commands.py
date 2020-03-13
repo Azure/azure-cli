@@ -731,7 +731,7 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='westeurope')
     @SqlServerPreparer(location='westeurope')
     def test_aad_admin(self, resource_group, server):
-        
+
         self.kwargs.update({
             'rg': resource_group,
             'sn': server,
