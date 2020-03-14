@@ -6,9 +6,10 @@
 from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 # pylint: disable=no-name-in-module,import-error
 from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAPIServerAccessProfile
+from knack.util import CLIError
 
 
-def _populate_api_server_access_profile(api_server_authorized_ip_ranges, enable_private_cluster, instance=None):
+def _populate_api_server_access_profile(api_server_authorized_ip_ranges, enable_private_cluster=False, instance=None):
     if instance is None or instance.api_server_access_profile is None:
         profile = ManagedClusterAPIServerAccessProfile()
     else:
@@ -21,6 +22,9 @@ def _populate_api_server_access_profile(api_server_authorized_ip_ranges, enable_
         authorized_ip_ranges = []
     else:
         authorized_ip_ranges = [ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
+
+    if profile.enable_private_cluster and authorized_ip_ranges:
+        raise CLIError('authorized_ip_ranges is not supported for private cluster')
 
     profile.authorized_ip_ranges = authorized_ip_ranges
     return profile
