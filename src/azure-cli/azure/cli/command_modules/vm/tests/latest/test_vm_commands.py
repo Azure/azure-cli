@@ -4219,7 +4219,7 @@ class VMCreateNSGRule(ScenarioTest):
 
         self.cmd('vm create -g {rg} -n {vm} --image centos --nsg-rule NONE')
         self.cmd('network nsg show -g {rg} -n {vm}NSG', checks=[
-            self.not_exists('securityRules')
+            self.check('securityRules', '[]')
         ])
 
 
