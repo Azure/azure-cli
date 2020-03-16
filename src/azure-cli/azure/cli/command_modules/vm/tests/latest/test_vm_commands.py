@@ -727,6 +727,16 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ])
     """
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_max_shares_')
+    def test_vm_disk_max_shares_(self, resource_group):
+        self.kwargs.update({
+            'disk': 'd1'
+        })
+
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --max-shares 3', checks=[
+            self.check('maxShares', 3)
+        ])
+
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 

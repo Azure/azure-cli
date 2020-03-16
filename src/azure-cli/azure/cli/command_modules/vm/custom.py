@@ -250,7 +250,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
                         disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None,
-                        encryption_type=None, disk_encryption_set=None):
+                        encryption_type=None, disk_encryption_set=None, max_shares=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -310,6 +310,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.disk_iops_read_write = disk_iops_read_write
     if disk_mbps_read_write is not None:
         disk.disk_mbps_read_write = disk_mbps_read_write
+    if max_shares is not None:
+        disk.max_shares = max_shares
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.create_or_update, resource_group_name, disk_name, disk)
