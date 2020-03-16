@@ -85,8 +85,8 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string
-        from azure.cli.core.commands.constants import SURVEY_PROMPT
-        import colorama
+        from azure.cli.core.commands.constants import SURVEY_PROMPT, SURVEY_PROMPT_COLOR
+
         ver_string, updates_available = get_az_version_string()
         print(ver_string)
         if updates_available == -1:
@@ -98,9 +98,7 @@ class AzCli(CLI):
         else:
             print('Your CLI is up-to-date.')
 
-        colorama.init()  # This could be removed when knack fix is released
-        print('\n' + SURVEY_PROMPT)
-        colorama.deinit()  # This could be removed when knack fix is released
+        print('\n' + (SURVEY_PROMPT_COLOR if self.enable_color else SURVEY_PROMPT))
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
@@ -448,6 +446,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             kwargs['deprecate_info'].target = group_name
         if kwargs.get('is_preview', False):
             kwargs['preview_info'] = PreviewItem(
+                cli_ctx=self.cli_ctx,
                 target=group_name,
                 object_type='command group'
             )
