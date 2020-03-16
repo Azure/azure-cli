@@ -2706,7 +2706,6 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization,
                                 verify=not should_disable_connection_verify())
-        time.sleep(2)
         try:
             res_dict = response.json()
         except json.decoder.JSONDecodeError:
