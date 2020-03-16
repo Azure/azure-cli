@@ -722,10 +722,11 @@ class AzCliCommandInvoker(CommandInvoker):
                 del preview_kwargs['_get_message']
                 previews.append(ImplicitPreviewItem(**preview_kwargs))
 
-        for d in deprecations:
-            print(d.message, file=sys.stderr)
-        for p in previews:
-            print(p.message, file=sys.stderr)
+        if not self.cli_ctx.only_show_errors:
+            for d in deprecations:
+                print(d.message, file=sys.stderr)
+            for p in previews:
+                print(p.message, file=sys.stderr)
 
     def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
