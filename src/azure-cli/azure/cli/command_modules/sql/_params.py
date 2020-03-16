@@ -1100,7 +1100,7 @@ def load_arguments(self, _):
     with self.argument_context('sql server ad-admin create') as c:
         # Create args that will be used to build up the ServerAzureADAdministrator object
         create_args_for_complex_type(
-            c, 'properties', ServerAzureADAdministrator, [
+            c, 'parameters', ServerAzureADAdministrator, [
                 'login',
                 'sid',
             ])
