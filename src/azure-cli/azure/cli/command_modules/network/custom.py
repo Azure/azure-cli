@@ -1233,7 +1233,8 @@ def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_n
 
 # region ApplicationGatewayWAFPolicy ManagedRule ManagedRuleSet
 def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
-                             rule_set_type, rule_set_version, rule_group_name, rules):
+                             rule_set_type, rule_set_version,
+                             rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
     Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
@@ -1243,11 +1244,15 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
 
     waf_policy = client.get(resource_group_name, policy_name)
 
-    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules]
-    rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name, rules=managed_rule_overrides)
+    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules is not None else []
+
+    rule_group_override = None
+    if rule_group_name is not None:
+        rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
+                                                       rules=managed_rule_overrides)
     new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
                                           rule_set_version=rule_set_version,
-                                          rule_group_overrides=[rule_group_override])
+                                          rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
 
     for rule_set in waf_policy.managed_rules.managed_rule_sets:
         if rule_set.rule_set_type == rule_set_type:
@@ -1256,7 +1261,8 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
                     rule_override.rules.extend(managed_rule_overrides)
                     break
             else:
-                rule_set.rule_group_overrides.append(rule_group_override)
+                if rule_group_override is not None:
+                    rule_set.rule_group_overrides.append(rule_group_override)
             break
     else:
         waf_policy.managed_rules.managed_rule_sets.append(new_managed_rule_set)

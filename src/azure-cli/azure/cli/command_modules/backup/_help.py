@@ -409,18 +409,18 @@ examples:
 
 helps['backup restore restore-azurefileshare'] = """
 type: command
-short-summary: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
+short-summary: Restore backed up Azure file shares to the same file-share or another file-share in registered storage accounts.
 examples:
-  - name: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
+  - name: Restore backed up Azure file shares to the same file-share or another file-share in registered storage accounts.
     text: az backup restore restore-azurefileshare --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation
 """
 
 helps['backup restore restore-azurefiles'] = """
 type: command
-short-summary: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
+short-summary: Restore backed up Azure files within a file-share to the same file-share or another file-share in registered storage accounts.
 examples:
-  - name: Restore backed up Azure Workloads in a Recovery services vault to another registered container or to the same container.
-    text: az backup restore restore-azurefiles --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation --source-file-type File --source-file-path MyPath
+  - name: Restore backed up Azure files within a file-share to the same file-share or another file-share in registered storage accounts.
+    text: az backup restore restore-azurefiles --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --item-name MyItem --rp-name recoverypoint --resolve-conflict Overwrite --restore-mode OriginalLocation --source-file-type File --source-file-path Filepath1 Filepath2
 """
 
 helps['backup restore restore-azurewl'] = """

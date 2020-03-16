@@ -469,10 +469,14 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy managed-rule rule-set',
                                min_api='2019-09-01') as c:
-        c.argument('rule_set_type', options_list='--type', help='The type of the web application firewall rule set.')
+        c.argument('rule_set_type', options_list='--type',
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
+                   help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   help='The version of the web application firewall rule set type.')
+                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
+                   help='The version of the web application firewall rule set type. '
+                        '0.1 is used for Microsoft_BotManagerRuleSet')
         c.argument('rule_group_name',
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
@@ -1363,7 +1367,7 @@ def load_arguments(self, _):
     # this argument group "network watcher flow-log show" should be removed
     with self.argument_context('network watcher flow-log show') as c:
         c.argument('nsg',
-                   deprecate_info=c.deprecate(redirect='--location and --watcher combination', hide=False),
+                   deprecate_info=c.deprecate(redirect='--location and --name combination', hide=False),
                    help='Name or ID of the network security group.')
 
     with self.argument_context('network watcher flow-log', arg_group='Format', min_api='2018-10-01') as c:
