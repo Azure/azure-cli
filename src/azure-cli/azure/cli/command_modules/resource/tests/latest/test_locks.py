@@ -290,6 +290,22 @@ class ResourceLockTests(ScenarioTest):
 
         self._sleep_for_lock_operation()
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lock_with_resource_id')
+    def test_lock_with_three_level_resource_id(self, resource_group):
+        cosmos_name = self.create_random_name('cli-cosmos', 30)
+        db_name = self.create_random_name('cli-db', 30)
+        collection_name = self.create_random_name('cli-collection', 50)
+
+        cosmos = self.cmd('cosmosdb create --kind MongoDB -n {} -g {}'.format(cosmos_name, resource_group)).get_output_in_json()
+        db = self.cmd('cosmosdb mongodb database create -n {} --account-name {} -g {}'.format(db_name, cosmos_name, resource_group)).get_output_in_json()
+        collection_id = self.cmd('cosmosdb mongodb collection create -n {} -d {} -a {} -g {} --shard "ShardingKey"'
+                              .format(collection_name, db_name, cosmos_name, resource_group)).get_output_in_json()['id']
+        lock_name = self.create_random_name('cli-lock', 30)
+        self.cmd('lock create -n {} --resource {} --lock-type CanNotDelete'.format(lock_name, collection_id))
+        self.cmd('lock delete --name {} --resource {}'.format(lock_name, collection_id))
+
+        self._sleep_for_lock_operation()
+
     def _sleep_for_lock_operation(self):
         if self.is_live:
             sleep(5)
