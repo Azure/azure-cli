@@ -687,8 +687,6 @@ class AzCliCommandInvoker(CommandInvoker):
         self._resolve_extension_override_warning(cmd)
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
-        import colorama
-
         deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
         if cmd.deprecate_info:
             deprecations.append(cmd.deprecate_info)
@@ -743,14 +741,13 @@ class AzCliCommandInvoker(CommandInvoker):
                 del experimental_kwargs['_get_message']
                 experimentals.append(ImplicitExperimentalItem(**experimental_kwargs))
 
-        colorama.init()
-        for d in deprecations:
-            print(d.message, file=sys.stderr)
-        for p in previews:
+        if not self.cli_ctx.only_show_errors:
+            for d in deprecations:
+                print(d.message, file=sys.stderr)
+            for p in previews:
                 print(p.message, file=sys.stderr)
-        for e in experimentals:
-            print(e.message, file=sys.stderr)
-        colorama.deinit()
+            for e in experimentals:
+                print(e.message, file=sys.stderr)
 
     def _resolve_extension_override_warning(self, cmd):  # pylint: disable=no-self-use
         if isinstance(cmd.command_source, ExtensionCommandSource) and cmd.command_source.overrides_command:
@@ -885,11 +882,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                                 logger.info(result)
 
     def __call__(self, poller):
-        import colorama
         from msrest.exceptions import ClientException
-
-        # https://github.com/azure/azure-cli/issues/3555
-        colorama.init()
 
         correlation_message = ''
         self.cli_ctx.get_progress_controller().begin()
@@ -931,7 +924,6 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             handle_long_running_operation_exception(client_exception)
 
         self.cli_ctx.get_progress_controller().end()
-        colorama.deinit()
 
         return result
 
