@@ -24,7 +24,7 @@ def _populate_api_server_access_profile(api_server_authorized_ip_ranges, enable_
         authorized_ip_ranges = [ip.strip() for ip in api_server_authorized_ip_ranges.split(",")]
 
     if profile.enable_private_cluster and authorized_ip_ranges:
-        raise CLIError('authorized_ip_ranges is not supported for private cluster')
+        raise CLIError('--api-server-authorized-ip-ranges is not supported for private cluster')
 
     profile.authorized_ip_ranges = authorized_ip_ranges
     return profile
