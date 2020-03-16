@@ -380,8 +380,8 @@ class TestHandleException(unittest.TestCase):
 
         get_raw_token_mock.assert_not_called()
         request_mock.assert_called_with('PUT', test_arm_endpoint + test_url,
-                                    params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
-                                    headers=expected_header, verify=(not should_disable_connection_verify()))
+                                        params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
+                                        headers=expected_header, verify=(not should_disable_connection_verify()))
 
         # Test Authorization header is added
         expected_header_with_auth = expected_header.copy()
