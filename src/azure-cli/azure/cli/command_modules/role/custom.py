@@ -1360,7 +1360,7 @@ def create_service_principal_for_rbac(
                                        _RETRY_TIMES)
                         continue
                     elif _error_caused_by_role_assignment_exists(ex):
-                        logger.warning('  Role assignment already exits.\n')
+                        logger.warning('  Role assignment already exists.\n')
                         break
                     else:
                         # dump out history for diagnoses
