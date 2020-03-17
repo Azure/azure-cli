@@ -79,9 +79,12 @@ def acr_agentpool_delete(cmd,
         cmd, registry_name, resource_group_name)
 
     try:
-        return client.delete(resource_group_name=resource_group_name,
-                             registry_name=registry_name,
-                             agent_pool_name=agent_pool_name)
+        response = client.delete(resource_group_name=resource_group_name,
+                                 registry_name=registry_name,
+                                 agent_pool_name=agent_pool_name)
+        if response.status_code == 404:
+            response.status_code = 200
+        return response
     except ValidationError as e:
         raise CLIError(e)
 
