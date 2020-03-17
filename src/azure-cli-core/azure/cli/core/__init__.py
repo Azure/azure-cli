@@ -453,6 +453,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             )
         if kwargs.get('is_experimental', False):
             kwargs['experimental_info'] = ExperimentalItem(
+                cli_ctx=self.cli_ctx,
                 target=group_name,
                 object_type='command group'
             )
