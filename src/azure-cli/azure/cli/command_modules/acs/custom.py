@@ -1813,7 +1813,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if api_server_authorized_ip_ranges or enable_private_cluster:
         api_server_access_profile = _populate_api_server_access_profile(
             api_server_authorized_ip_ranges,
-            enable_private_cluster
+            enable_private_cluster=enable_private_cluster
         )
 
     # Check that both --disable-rbac and --enable-rbac weren't provided
@@ -2132,7 +2132,7 @@ def aks_update(cmd, client, resource_group_name, name,
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
         instance.api_server_access_profile = \
-            _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance)
+            _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=instance)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
