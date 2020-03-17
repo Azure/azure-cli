@@ -14,7 +14,7 @@ import mock
 import uuid
 
 from knack.util import CLIError
-from azure_devtools.scenario_tests import AllowLargeResponse, record_only
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only, live_only
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
@@ -1384,6 +1384,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
 
 class VMMonitorTestUpdateWindows(ScenarioTest):
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_update_with_workspace_windows', location='eastus')
     def test_vm_update_with_workspace_windows(self, resource_group):
 
