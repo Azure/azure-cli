@@ -727,21 +727,42 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ])
     """
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_max_shares_')
-    def test_vm_disk_max_shares_(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_max_shares_etc_')
+    def test_vm_disk_max_shares_etc(self, resource_group):
+        # Test disk create: add --disk-iops-read-only, --disk-mbps-read-only, --max-shares, --image-reference, --gallery-image-reference
+        subs_id = self.get_subscription_id()
         self.kwargs.update({
             'disk1': 'd1',
-            'disk2': 'd2'
+            'disk2': 'd2',
+            'disk3': 'd3',
+            'disk4': 'd4',
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202002180'
         })
 
-        self.cmd('disk create -g {rg} -n {disk1} --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
+        self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
             self.check('diskIopsReadOnly', 200),
             self.check('diskMbpsReadOnly', 30)
         ])
 
-        self.cmd('disk create -g {rg} -n {disk2} --size-gb 10 --max-shares 3', checks=[
-            self.check('maxShares', 3)
+        self.cmd('disk create -g {rg} -n {disk2} --image-reference {image}', checks=[
+            self.check('creationData.imageReference.id', '{image}')
         ])
+
+        self.cmd('sig create -g {rg} --gallery-name g1')
+        self.cmd('sig image-definition create -g {rg} --gallery-name g1 --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('disk create -g {rg} -n disk --size-gb 10')
+        self.cmd('snapshot create -g {rg} -n s1 --source disk')
+        gallery_image = self.cmd('sig image-version create -g {rg} --gallery-name g1 --gallery-image-definition image --gallery-image-version 1.0.0 --os-snapshot s1').get_output_in_json()['id']
+        self.kwargs.update({
+            'gallery_image': gallery_image
+        })
+        self.cmd('disk create -g {rg} -n {disk3} --gallery-image-reference {gallery_image}', checks=[
+            self.check('creationData.galleryImageReference.id', '{gallery_image}')
+        ])
+
+        # self.cmd('disk create -g {rg} -n {disk4} --size-gb 10 --max-shares 3', checks=[
+        #     self.check('maxShares', 3)
+        # ])
 
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):

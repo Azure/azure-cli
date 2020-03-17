@@ -251,7 +251,9 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
                         disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None,
                         encryption_type=None, disk_encryption_set=None, max_shares=None,
-                        disk_iops_read_only=None, disk_mbps_read_only=None):
+                        disk_iops_read_only=None, disk_mbps_read_only=None,
+                        image_reference=None, image_reference_lun=None,
+                        gallery_image_reference=None, gallery_image_reference_lun=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -265,6 +267,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         option = DiskCreateOption.copy
     elif for_upload:
         option = DiskCreateOption.upload
+    elif image_reference or gallery_image_reference:
+        option = DiskCreateOption.from_image
     else:
         option = DiskCreateOption.empty
 
@@ -278,8 +282,18 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     if upload_size_bytes is not None and for_upload is not True:
         raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
 
+    if image_reference is not None:
+        image_reference = {'id': image_reference}
+        if image_reference_lun is not None:
+            image_reference['lun'] = image_reference_lun
+
+    if gallery_image_reference is not None:
+        gallery_image_reference = {'id': gallery_image_reference}
+        if gallery_image_reference_lun is not None:
+            gallery_image_reference['lun'] = gallery_image_reference_lun
+
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
-                                 image_reference=None,
+                                 image_reference=image_reference, gallery_image_reference=gallery_image_reference,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id,
                                  upload_size_bytes=upload_size_bytes)
