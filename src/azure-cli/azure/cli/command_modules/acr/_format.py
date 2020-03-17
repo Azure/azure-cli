@@ -220,6 +220,7 @@ def _taskrun_format_group(item):
                                    _get_value(item, 'runResult', 'finishTime')))
     ])
 
+
 def _agentpool_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
@@ -229,6 +230,7 @@ def _agentpool_format_group(item):
         ('TIER', _get_value(item, 'tier')),
         ('VNET', _get_value(item, 'virtualNetworkSubnetResourceId'))
     ])
+
 
 def _build_format_group(item):
     return OrderedDict([

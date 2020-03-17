@@ -18,6 +18,7 @@ DEFAULT_OS = 'Linux'
 
 logger = get_logger(__name__)
 
+
 def acr_agentpool_create(cmd,
                          client,
                          agent_pool_name,
