@@ -1005,7 +1005,8 @@ def _get_branch_name(context_path):
     # Context formats https://docs.docker.com/engine/reference/commandline/build/#git-repositories
     # The regex matches from the first '#' to the next ':', space, or end of line.
     # It doesn't consider pull and tags scenarios.
-    branch = re.search(r'(?<=#)([^:\n\s]*)', context_path)
-    if branch:
-        return branch.group()
+    if context_path:
+        branch = re.search(r'(?<=#)([^:\n\s]*)', context_path)
+        if branch:
+            return branch.group()
     return None
