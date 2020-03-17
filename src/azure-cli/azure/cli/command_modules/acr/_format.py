@@ -223,6 +223,7 @@ def _taskrun_format_group(item):
 def _agentpool_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
+        ('COUNT', _get_value(item, 'count')),
         ('STATE', _get_value(item, 'provisioningState')),
         ('OS', _get_value(item, 'os')),
         ('TIER', _get_value(item, 'tier')),

@@ -313,7 +313,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_agentpool_delete')
         g.command('list', 'acr_agentpool_list')
         g.show_command('show', 'acr_agentpool_show')
-        g.show_command('show-queue', 'acr_agentpool_show_queue')
 
     with self.command_group('acr private-endpoint-connection', acr_private_endpoint_connection_util,
                             is_preview=True) as g:

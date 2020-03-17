@@ -1049,24 +1049,21 @@ examples:
   - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry'.
     text: >
         az acr agentpool create -n MyAgentName -r MyRegistry
-  - name: Create the agent pool 'MyAgentName' with n agent count.
+  - name: Create the agent pool 'MyAgentName' with 2 agent count.
     text: >
-        az acr agentpool create -n MyAgentName -r MyRegistry --count n
+        az acr agentpool create -n MyAgentName -r MyRegistry --count 2
   - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry' in VNET 'MyVnetId'.
     text: >
-        az acr agentpool create -n MyAgentName -r MyRegistry --vnet-id MyVnetId
+        az acr agentpool create -n MyAgentName -r MyRegistry --vnet-id /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/Microsoft.ClassicNetwork/virtualNetworks/<myNetwork>/subnets/<subNet>
 """
 
 helps['acr agentpool update'] = """
 type: command
 short-summary: Update an agent pool for an Azure Container Registry.
 examples:
-  - name: Update the agent pool 'MyAgentName' count
+  - name: Update the agent pool 'MyAgentName' count to 5
     text: >
-        az acr agentpool update -n MyAgentName -r MyRegistry --tag NewCount
-  - name: Update the agent pool 'MyAgentName' tag
-    text: >
-        az acr agentpool update -n MyAgentName -r MyRegistry --tag MyTag
+        az acr agentpool update -n MyAgentName -r MyRegistry --count 5
 """
 
 helps['acr agentpool delete'] = """
@@ -1084,7 +1081,7 @@ short-summary: List the agent pools for an Azure Container Registry.
 examples:
   - name: List agent pools and show the result in a table.
     text: >
-        az acr agentpool list -r MyRegistry
+        az acr agentpool list -r MyRegistry -o table
 """
 
 helps['acr agentpool show'] = """
@@ -1096,14 +1093,6 @@ examples:
         az acr agentpool show -n MyAgentName -r MyRegistry -o table
 """
 
-helps['acr agentpool show-queue'] = """
-type: command
-short-summary: Get the agent pool queue count.
-examples:
-  - name: Get the agent pool queue count, displaying only the value.
-    text: >
-        az acr agentpool show -n MyAgentName -r MyRegistry -o tsv
-"""
 
 helps['acr update'] = """
 type: command
