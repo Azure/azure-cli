@@ -650,6 +650,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container create') as c:
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
+        c.argument('account_name', help='')
+        c.argument('default_encryption_scope', help='Default the container to use specified encryption scope for '
+                   'all writes.')
+        c.argument('deny_encryption_scope_override', options_list=['--deny-encryption-scope-override', '-d'],
+                   arg_type=get_three_state_flag(),
+                   help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage container delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the container does not exist.')

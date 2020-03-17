@@ -321,7 +321,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                      transform_acl_list_output)
         from azure.cli.command_modules.storage._format import (transform_container_list, transform_boolean_for_table,
                                                                transform_container_show)
-        from ._validators import process_container_delete_parameters
+        from ._validators import process_container_delete_parameters, validate_client_auth_parameter
 
         g.storage_command_oauth('list', 'list_containers', transform=transform_storage_list_output,
                                 table_transformer=transform_container_list)
@@ -331,10 +331,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('show', 'get_container_properties', table_transformer=transform_container_show,
                                 exception_handler=show_exception_handler)
-        g.storage_command_oauth('create', 'create_container',
-                                transform=create_boolean_result_output_transformer(
-                                    'created'),
-                                table_transformer=transform_boolean_for_table)
+        g.storage_custom_command_oauth('create', 'create_container', validator=validate_client_auth_parameter,
+                                       client_factory=None,
+                                       transform=create_boolean_result_output_transformer('created'),
+                                       table_transformer=transform_boolean_for_table)
         g.storage_custom_command_oauth('generate-sas', 'generate_container_shared_access_signature',
                                        min_api='2018-11-09')
         g.storage_command_oauth(

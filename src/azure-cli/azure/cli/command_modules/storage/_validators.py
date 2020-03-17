@@ -102,19 +102,20 @@ def validate_bypass(namespace):
         namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
 
 
+def get_config_value(cmd, section, key, default):
+    return cmd.cli_ctx.config.get(section, key, default)
+
+
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
     n = namespace
 
-    def get_config_value(section, key, default):
-        return cmd.cli_ctx.config.get(section, key, default)
-
     if hasattr(n, 'auth_mode'):
-        auth_mode = n.auth_mode or get_config_value('storage', 'auth_mode', None)
+        auth_mode = n.auth_mode or get_config_value(cmd, 'storage', 'auth_mode', None)
         del n.auth_mode
         if not n.account_name:
-            n.account_name = get_config_value('storage', 'account', None)
+            n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
             n.token_credential = _create_token_credential(cmd.cli_ctx)
 
@@ -130,7 +131,7 @@ def validate_client_parameters(cmd, namespace):
         return
 
     if not n.connection_string:
-        n.connection_string = get_config_value('storage', 'connection_string', None)
+        n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
     if n.connection_string:
@@ -141,11 +142,11 @@ def validate_client_parameters(cmd, namespace):
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
-        n.account_name = get_config_value('storage', 'account', None)
+        n.account_name = get_config_value(cmd, 'storage', 'account', None)
     if not n.account_key:
-        n.account_key = get_config_value('storage', 'key', None)
+        n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
-        n.sas_token = get_config_value('storage', 'sas_token', None)
+        n.sas_token = get_config_value(cmd, 'storage', 'sas_token', None)
 
     # strip the '?' from sas token. the portal and command line are returns sas token in different
     # forms
@@ -1185,3 +1186,22 @@ def validate_private_endpoint_connection_id(cmd, namespace):
         raise CLIError('incorrect usage: [--id ID | --name NAME --account-name NAME]')
 
     del namespace.connection_id
+
+
+def pop_data_client_auth(ns):
+    del ns.auth_mode
+    del ns.account_key
+    del ns.connection_string
+    del ns.sas_token
+
+
+def validate_client_auth_parameter(cmd, ns):
+    if ns.default_encryption_scope or ns.deny_encryption_scope_override is not None:
+        # simply try to retrieve the remaining variables from environment variables
+        if not ns.account_name:
+            ns.account_name = get_config_value(cmd, 'storage', 'account', None)
+        if ns.account_name and not ns.resource_group_name:
+            ns.resource_group_name = _query_account_rg(cmd.cli_ctx, account_name=ns.account_name)[0]
+        pop_data_client_auth(ns)
+    else:
+        validate_client_parameters(cmd, ns)
