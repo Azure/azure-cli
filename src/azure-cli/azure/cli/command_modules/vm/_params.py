@@ -514,7 +514,7 @@ def load_arguments(self, _):
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In VM mode, you manually create and add a virtual machine of any configuration to the scale set. In ScaleSetVM mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
                    arg_type=get_enum_type(['VM', 'ScaleSetVM']), is_preview=True)
         c.argument('scale_in_policy', scale_in_policy_type)
-        c.argument('automatic_repairs_grace_period', min_api='2018-10-01', is_preview=True,
+        c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
@@ -545,10 +545,8 @@ def load_arguments(self, _):
                    help='Enable terminate notification')
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
-        c.argument('enable_automatic_repairs', min_api='2018-10-01', arg_type=get_three_state_flag(),
-                   help='Enable automatic repairs', is_preview=True)
 
-    with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs', is_preview=True) as c:
+    with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
         c.argument(
             'automatic_repairs_grace_period',
