@@ -57,7 +57,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     commit_trigger_enabled=True,
                     pull_request_trigger_enabled=False,
                     schedule=None,
-                    branch=None,
                     no_push=False,
                     no_cache=False,
                     arg=None,
@@ -120,9 +119,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                                                         pull_request_trigger_enabled)
     # if source_trigger_events contains any event types we assume they are enabled
     if source_trigger_events:
-        if not branch:
-            branch = _get_branch_name(context_path)
-            branch = 'master' if not branch else branch
+        branch = _get_branch_name(context_path)
 
         SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
             'SourceTrigger', 'SourceProperties', 'AuthInfo', 'TriggerStatus')
@@ -131,7 +128,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 source_repository=SourceProperties(
                     source_control_type=source_control_type,
                     repository_url=context_path,
-                    branch=branch,
+                    branch=branch if branch else 'master',
                     source_control_auth_properties=AuthInfo(
                         token=git_access_token,
                         token_type=DEFAULT_TOKEN_TYPE,
@@ -308,7 +305,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     commit_trigger_enabled=None,
                     pull_request_trigger_enabled=None,
                     git_access_token=None,
-                    branch=None,
                     image_names=None,
                     no_push=None,
                     no_cache=None,
