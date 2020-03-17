@@ -1367,7 +1367,7 @@ def load_arguments(self, _):
     # this argument group "network watcher flow-log show" should be removed
     with self.argument_context('network watcher flow-log show') as c:
         c.argument('nsg',
-                   deprecate_info=c.deprecate(redirect='--location and --watcher combination', hide=False),
+                   deprecate_info=c.deprecate(redirect='--location and --name combination', hide=False),
                    help='Name or ID of the network security group.')
 
     with self.argument_context('network watcher flow-log', arg_group='Format', min_api='2018-10-01') as c:

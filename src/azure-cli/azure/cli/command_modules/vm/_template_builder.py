@@ -152,38 +152,40 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
     return nic
 
 
-def build_nsg_resource(_, name, location, tags, nsg_rule_type):
-
-    rule_name = 'rdp' if nsg_rule_type == 'rdp' else 'default-allow-ssh'
-    rule_dest_port = '3389' if nsg_rule_type == 'rdp' else '22'
-
-    nsg_properties = {
-        'securityRules': [
-            {
-                'name': rule_name,
-                'properties': {
-                    'protocol': 'Tcp',
-                    'sourcePortRange': '*',
-                    'destinationPortRange': rule_dest_port,
-                    'sourceAddressPrefix': '*',
-                    'destinationAddressPrefix': '*',
-                    'access': 'Allow',
-                    'priority': 1000,
-                    'direction': 'Inbound'
-                }
-            }
-        ]
-    }
-
+def build_nsg_resource(_, name, location, tags, nsg_rule):
     nsg = {
         'type': 'Microsoft.Network/networkSecurityGroups',
         'name': name,
         'apiVersion': '2015-06-15',
         'location': location,
         'tags': tags,
-        'dependsOn': [],
-        'properties': nsg_properties
+        'dependsOn': []
     }
+
+    if nsg_rule != 'NONE':
+        rule_name = 'rdp' if nsg_rule == 'RDP' else 'default-allow-ssh'
+        rule_dest_port = '3389' if nsg_rule == 'RDP' else '22'
+
+        nsg_properties = {
+            'securityRules': [
+                {
+                    'name': rule_name,
+                    'properties': {
+                        'protocol': 'Tcp',
+                        'sourcePortRange': '*',
+                        'destinationPortRange': rule_dest_port,
+                        'sourceAddressPrefix': '*',
+                        'destinationAddressPrefix': '*',
+                        'access': 'Allow',
+                        'priority': 1000,
+                        'direction': 'Inbound'
+                    }
+                }
+            ]
+        }
+
+        nsg['properties'] = nsg_properties
+
     return nsg
 
 

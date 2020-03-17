@@ -714,10 +714,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                     cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
 
         if nsg_type == 'new':
-            nsg_rule_type = 'rdp' if os_type.lower() == 'windows' else 'ssh'
+            if nsg_rule is None:
+                nsg_rule = 'RDP' if os_type.lower() == 'windows' else 'SSH'
             nsg = nsg or '{}NSG'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg))
-            master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule_type))
+            master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule))
 
         if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
