@@ -730,10 +730,16 @@ class VMManagedDiskScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_max_shares_')
     def test_vm_disk_max_shares_(self, resource_group):
         self.kwargs.update({
-            'disk': 'd1'
+            'disk1': 'd1',
+            'disk2': 'd2'
         })
 
-        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --max-shares 3', checks=[
+        self.cmd('disk create -g {rg} -n {disk1} --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
+            self.check('diskIopsReadOnly', 200),
+            self.check('diskMbpsReadOnly', 30)
+        ])
+
+        self.cmd('disk create -g {rg} -n {disk2} --size-gb 10 --max-shares 3', checks=[
             self.check('maxShares', 3)
         ])
 
