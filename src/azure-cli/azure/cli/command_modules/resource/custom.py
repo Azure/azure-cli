@@ -2004,9 +2004,15 @@ def _validate_lock_params_match_lock(
             _resource_type = resource.get('type', None)
             _resource_name = resource.get('name', None)
         else:
-            _resource_type = resource.get('child_type_1', None)
-            _resource_name = resource.get('child_name_1', None)
-            parent = (resource['type'] + '/' + resource['name'])
+            if resource.get('child_type_3', None) is None:
+                _resource_type = resource.get('child_type_1', None)
+                _resource_name = resource.get('child_name_1', None)
+                parent = (resource['type'] + '/' + resource['name'])
+            else:
+                _resource_type = resource.get('child_type_2', None)
+                _resource_name = resource.get('child_name_2', None)
+                parent = (resource['type'] + '/' + resource['name'] + '/' +
+                          resource['child_type_1'] + '/' + resource['child_name_1'])
             if parent != parent_resource_path:
                 raise CLIError(
                     'Unexpected --parent for lock {}, expected {}'.format(
