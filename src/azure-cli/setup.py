@@ -146,7 +146,8 @@ DEPENDENCIES = [
     'websocket-client~=0.56.0',
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
-    'jsondiff==1.2.0'
+    'jsondiff==1.2.0',
+    'azure-mgmt-core==1.0.0b1'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

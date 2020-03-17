@@ -143,7 +143,8 @@ def cf_sa_for_keys(cli_ctx, _):
     logger = get_logger(__name__)
     logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     client = storage_client_factory(cli_ctx)
-    client.config.enable_http_logger = False
+    if hasattr(client, 'config'):
+        client.config.enable_http_logger = False
     return client.storage_accounts
 
 

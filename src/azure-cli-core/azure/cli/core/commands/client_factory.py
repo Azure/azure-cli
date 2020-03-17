@@ -144,7 +144,8 @@ def _get_mgmt_service_client(cli_ctx,
     else:
         client = client_type(cred, **client_kwargs)
 
-    configure_common_settings(cli_ctx, client)
+    if hasattr(client, 'config'):
+        configure_common_settings(cli_ctx, client)
 
     return client, subscription_id
 
