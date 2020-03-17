@@ -5,7 +5,7 @@
 
 from time import sleep
 import unittest
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, record_only
+from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer, record_only, live_only
 from azure.cli.command_modules.resource.custom import _parse_lock_id
 
 
@@ -290,6 +290,7 @@ class ResourceLockTests(ScenarioTest):
 
         self._sleep_for_lock_operation()
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_lock_with_resource_id')
     def test_lock_with_three_level_resource_id(self, resource_group):
         cosmos_name = self.create_random_name('cli-cosmos', 30)
