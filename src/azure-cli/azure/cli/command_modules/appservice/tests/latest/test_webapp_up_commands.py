@@ -130,8 +130,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', result['runtime_version']),
-            #JMESPathCheck('tags.cli', 'webapp_up'),
+            JMESPathCheck('linuxFxVersion', result['runtime_version'])
         ])
 
         self.cmd('webapp config appsettings list', checks=[
