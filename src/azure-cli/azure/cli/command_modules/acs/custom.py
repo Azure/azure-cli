@@ -1761,7 +1761,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     outbound_type = _set_outbound_type(outbound_type, vnet_subnet_id, load_balancer_sku, load_balancer_profile)
 
     network_profile = None
-    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, 
+    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip,
             docker_bridge_address, network_policy, outbound_type]):
         if not network_plugin:
             raise CLIError('Please explicitly specify the network plugin type')
