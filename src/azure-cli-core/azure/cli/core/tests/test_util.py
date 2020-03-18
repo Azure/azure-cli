@@ -15,6 +15,7 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id)
+from azure.cli.core.mock import DummyCli
 
 
 class TestUtils(unittest.TestCase):
@@ -353,17 +354,16 @@ class TestHandleException(unittest.TestCase):
         request_mock.return_value = return_val
         get_raw_token_mock.return_value = ("Bearer", "eyJ0eXAiOiJKV1", None), None, None
 
-        cli_ctx = mock.MagicMock()
+        cli_ctx = DummyCli()
         cli_ctx.data = {
             'command': 'rest',
             'safe_params': ['method', 'uri']
         }
         test_arm_resource_id = 'https://management.core.windows.net/'
-        cli_ctx.cloud.endpoints.active_directory_resource_id = test_arm_resource_id
         test_arm_endpoint = 'https://management.azure.com/'
-        cli_ctx.cloud.endpoints.resource_manager = test_arm_endpoint
 
-        test_url = 'subscription/1234/good'
+        arm_resource_id = '/subscriptions/01/resourcegroups/02?api-version=2019-07-01'
+        full_arm_rest_url = test_arm_endpoint.rstrip('/') + arm_resource_id
         tets_uri_parameters = ['p1=v1', "{'p2': 'v2'}"]
         test_body = '{"b1": "v1"}'
 
@@ -373,25 +373,42 @@ class TestHandleException(unittest.TestCase):
             'CommandName': 'rest',
             'ParameterSetName': 'method uri'
         }
-
-        # Test Authorization header is skipped
-        send_raw_request(cli_ctx, 'PUT', test_url, uri_parameters=tets_uri_parameters, body=test_body,
-                         skip_authorization_header=True, generated_client_request_id_name=None)
-
-        get_raw_token_mock.assert_not_called()
-        request_mock.assert_called_with('PUT', test_arm_endpoint + test_url,
-                                        params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
-                                        headers=expected_header, verify=(not should_disable_connection_verify()))
-
-        # Test Authorization header is added
         expected_header_with_auth = expected_header.copy()
         expected_header_with_auth['Authorization'] = 'Bearer eyJ0eXAiOiJKV1'
 
-        send_raw_request(cli_ctx, 'PUT', test_url, uri_parameters=tets_uri_parameters, body=test_body,
+        # Test Authorization header is skipped
+        send_raw_request(cli_ctx, 'PUT', arm_resource_id, uri_parameters=tets_uri_parameters, body=test_body,
+                         skip_authorization_header=True, generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_not_called()
+        request_mock.assert_called_with('PUT', full_arm_rest_url,
+                                        params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
+                                        headers=expected_header, verify=(not should_disable_connection_verify()))
+
+        # Test uri /subscriptions/01/resourcegroups/02?api-version=2019-07-01
+        send_raw_request(cli_ctx, 'PUT', arm_resource_id, uri_parameters=tets_uri_parameters, body=test_body,
                          generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_resource_id)
-        request_mock.assert_called_with('PUT', test_arm_endpoint + test_url,
+        request_mock.assert_called_with('PUT', full_arm_rest_url,
+                                        params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
+                                        headers=expected_header_with_auth, verify=(not should_disable_connection_verify()))
+
+        # Test uri https://management.azure.com/subscriptions/01/resourcegroups/02?api-version=2019-07-01
+        send_raw_request(cli_ctx, 'PUT', full_arm_rest_url, uri_parameters=tets_uri_parameters,
+                         body=test_body, generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_resource_id)
+        request_mock.assert_called_with('PUT', full_arm_rest_url,
+                                        params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
+                                        headers=expected_header_with_auth, verify=(not should_disable_connection_verify()))
+
+        # Test uri https://graph.microsoft.com/beta/appRoleAssignments/01
+        send_raw_request(cli_ctx, 'PATCH', 'https://graph.microsoft.com/beta/appRoleAssignments/01',
+                         uri_parameters=tets_uri_parameters, body=test_body, generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, 'https://graph.microsoft.com/')
+        request_mock.assert_called_with('PATCH', 'https://graph.microsoft.com/beta/appRoleAssignments/01',
                                         params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
                                         headers=expected_header_with_auth, verify=(not should_disable_connection_verify()))
 
