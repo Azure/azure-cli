@@ -3219,7 +3219,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
-        create_webapp(cmd, rg_name, name, plan, runtime_version if _is_linux else None, tags={"cli": 'webapp_up'},
+        create_webapp(cmd, rg_name, name, plan, runtime_version if _is_linux else None,
                       using_webapp_up=True, language=language)
         _configure_default_logging(cmd, rg_name, name)
     else:  # for existing app if we might need to update the stack runtime settings
