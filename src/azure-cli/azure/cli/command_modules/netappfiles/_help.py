@@ -337,15 +337,15 @@ parameters:
   - name: --subnet
     short-summary: The ARM Id or name of the subnet for the vnet. If omitted 'default' will be used
   - name: --protocol-types
-    short-summary: Space seperated list of protocols that the volume can use
+    short-summary: Space seperated list of protocols that the volume can use, available protocols are "NFSv4.1", "NFSv3", "CIFS"
   - name: --volume-type
-    short-summary: Whether the volume should be a data protection volume ("DataProtection")
+    short-summary: Whether the volume should be a data protection volume ("DataProtection"), empty if this is not a data protection volume
   - name: --endpoint-type
     short-summary: Whether the volume is source ("src") or destination ("dst")
   - name: --remote-volume-resource-id
     short-summary: The volume id of the remote volume of the replication (the destination for "src" volume endpoints and the source for "dst" endpoints)
   - name: --replication-schedule
-    short-summary: The replication schedule, e.g. "_10minutely"
+    short-summary: The replication schedule, e.g. "_10minutely, hourly, daily, weekly, monthly"
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
 examples:
