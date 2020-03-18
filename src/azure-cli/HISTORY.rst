@@ -973,6 +973,7 @@ Release History
 
 **HDInsight**
 
+* `az hdinsight create`: Support customers specify minimal supported tls version by using parameter `--minimal-tls-version`. The allowed value is 1.0,1.1,1.2.
 * `az hdinsight resize`: Make parameter `--workernode-count/-c` required
 * GA release
 
