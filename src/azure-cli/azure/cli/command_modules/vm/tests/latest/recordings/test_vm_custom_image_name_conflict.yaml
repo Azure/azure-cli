@@ -22,7 +22,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_custom_image_conflict000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image_conflict000001","name":"cli_test_vm_custom_image_conflict000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-03-18T03:08:58Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image_conflict000001","name":"cli_test_vm_custom_image_conflict000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-03-18T09:04:23Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Mar 2020 03:09:05 GMT
+      - Wed, 18 Mar 2020 09:04:30 GMT
       expires:
       - '-1'
       pragma:
@@ -110,13 +110,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Wed, 18 Mar 2020 03:09:07 GMT
+      - Wed, 18 Mar 2020 09:04:31 GMT
       etag:
       - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Wed, 18 Mar 2020 03:14:07 GMT
+      - Wed, 18 Mar 2020 09:09:31 GMT
       source-age:
-      - '0'
+      - '131'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -125,23 +125,23 @@ interactions:
       - 1.1 varnish (Varnish/6.0)
       - 1.1 varnish
       x-cache:
-      - HIT, HIT
+      - HIT, MISS
       x-cache-hits:
-      - 4, 1
+      - 3, 0
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 0b4ca750790206afe7d729febd63d971d3f1e05e
+      - 2b19b353a2fac411d7a190f40f27c7c4afa1a858
       x-frame-options:
       - deny
       x-geo-block-list:
       - ''
       x-github-request-id:
-      - 933A:0591:39A08:3EE76:5E718720
+      - 968C:2194:7F706:89061:5E71E41B
       x-served-by:
-      - cache-sin18049-SIN
+      - cache-sin18039-SIN
       x-timer:
-      - S1584500947.758325,VS0,VE340
+      - S1584522271.965590,VS0,VE240
       x-xss-protection:
       - 1; mode=block
     status:
@@ -179,7 +179,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Mar 2020 03:09:07 GMT
+      - Wed, 18 Mar 2020 09:04:31 GMT
       expires:
       - '-1'
       pragma:
@@ -225,7 +225,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Mar 2020 03:09:09 GMT
+      - Wed, 18 Mar 2020 09:04:33 GMT
       expires:
       - '-1'
       pragma:
@@ -243,7 +243,7 @@ interactions:
     body: 'b''{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
       "metadata": {"description": "Secure adminPassword"}}}, "variables": {}, "resources":
-      [{"type": "Microsoft.Storage/storageAccounts", "name": "vhdstorage1ebdd8f757b18c",
+      [{"type": "Microsoft.Storage/storageAccounts", "name": "vhdstorage518a630e678e97",
       "apiVersion": "2015-06-15", "location": "westus", "tags": {}, "dependsOn": [],
       "properties": {"accountType": "Premium_LRS"}}, {"name": "test-vmVNET", "type":
       "Microsoft.Network/virtualNetworks", "location": "westus", "apiVersion": "2015-06-15",
@@ -262,12 +262,12 @@ interactions:
       "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image_conflict000001/providers/Microsoft.Network/publicIPAddresses/test-vmPublicIP"}}}],
       "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image_conflict000001/providers/Microsoft.Network/networkSecurityGroups/test-vmNSG"}}},
       {"apiVersion": "2019-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
-      "test-vm", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Storage/storageAccounts/vhdstorage1ebdd8f757b18c",
+      "test-vm", "location": "westus", "tags": {}, "dependsOn": ["Microsoft.Storage/storageAccounts/vhdstorage518a630e678e97",
       "Microsoft.Network/networkInterfaces/test-vmVMNic"], "properties": {"hardwareProfile":
       {"vmSize": "Standard_DS1_v2"}, "networkProfile": {"networkInterfaces": [{"id":
       "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_custom_image_conflict000001/providers/Microsoft.Network/networkInterfaces/test-vmVMNic"}]},
-      "storageProfile": {"osDisk": {"createOption": "fromImage", "name": "osdisk_1ebdd8f757",
-      "caching": "ReadWrite", "vhd": {"uri": "https://vhdstorage1ebdd8f757b18c.blob.core.windows.net/vhds/osdisk_1ebdd8f757.vhd"}},
+      "storageProfile": {"osDisk": {"createOption": "fromImage", "name": "osdisk_518a630e67",
+      "caching": "ReadWrite", "vhd": {"uri": "https://vhdstorage518a630e678e97.blob.core.windows.net/vhds/osdisk_518a630e67.vhd"}},
       "imageReference": {"publisher": "Debian", "offer": "debian-10", "sku": "10",
       "version": "latest"}}, "osProfile": {"computerName": "test-vm", "adminUsername":
       "ubuntu", "adminPassword": "[parameters(\''adminPassword\'')]"}}}], "outputs":
@@ -299,8 +299,8 @@ interactions:
     body:
       string: '{"error":{"code":"InvalidTemplateDeployment","message":"The template
         deployment failed because of policy violation. Please see details for more
-        information.","details":[{"code":"RequestDisallowedByPolicy","target":"vhdstorage1ebdd8f757b18c","message":"Resource
-        ''vhdstorage1ebdd8f757b18c'' was disallowed by policy. Policy identifiers:
+        information.","details":[{"code":"RequestDisallowedByPolicy","target":"vhdstorage518a630e678e97","message":"Resource
+        ''vhdstorage518a630e678e97'' was disallowed by policy. Policy identifiers:
         ''[{\"policyAssignment\":{\"name\":\"Secure transfer to storage accounts should
         be enabled\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments/927bd18474de422cb584c993\"},\"policyDefinition\":{\"name\":\"Secure
         transfer to storage accounts should be enabled\",\"id\":\"/providers/Microsoft.Authorization/policyDefinitions/404c3081-a854-4457-ae30-26a93ef643f9\"}}]''.","additionalInfo":[{"type":"PolicyViolation","info":{"policyDefinitionDisplayName":"Secure
@@ -314,7 +314,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 18 Mar 2020 03:09:13 GMT
+      - Wed, 18 Mar 2020 09:04:35 GMT
       expires:
       - '-1'
       pragma:
