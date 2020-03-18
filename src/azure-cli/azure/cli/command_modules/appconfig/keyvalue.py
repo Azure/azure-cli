@@ -140,6 +140,7 @@ def export_config(cmd,
                   prefix="",  # prefix to remove
                   yes=False,
                   skip_features=False,
+                  skip_keyvault=False,
                   # to-file parameters
                   path=None,
                   format_=None,
@@ -172,23 +173,18 @@ def export_config(cmd,
     src_kvs = __read_kv_from_config_store(
         cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
 
+    if skip_keyvault:
+        src_kvs = [keyvaule for keyvaule in src_kvs if keyvaule.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
+
     # We need to separate KV from feature flags
     __discard_features_from_retrieved_kv(src_kvs)
 
     if not skip_features:
         # Get all Feature flags with matching label
-        if destination == 'file':
-            if format_ == 'properties':
-                skip_features = True
-            else:
-                # src_features is a list of FeatureFlag objects
-                src_features = list_feature(cmd,
-                                            feature='*',
-                                            label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
-                                            name=name,
-                                            connection_string=connection_string,
-                                            all_=True)
-        elif destination == 'appconfig':
+        if (destination == 'file' and format_ == 'properties') or destination == 'appservice':
+            skip_features = True
+            logger.warning("Exporting feature flag to yaml file or appservice is currently not supported.")
+        else:
             # src_features is a list of FeatureFlag objects
             src_features = list_feature(cmd,
                                         feature='*',
