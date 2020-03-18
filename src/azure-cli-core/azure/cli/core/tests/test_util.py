@@ -359,7 +359,7 @@ class TestHandleException(unittest.TestCase):
             'command': 'rest',
             'safe_params': ['method', 'uri']
         }
-        test_arm_resource_id = 'https://management.core.windows.net/'
+        test_arm_active_directory_resource_id = 'https://management.core.windows.net/'
         test_arm_endpoint = 'https://management.azure.com/'
 
         arm_resource_id = '/subscriptions/01/resourcegroups/02?api-version=2019-07-01'
@@ -389,7 +389,7 @@ class TestHandleException(unittest.TestCase):
         send_raw_request(cli_ctx, 'PUT', arm_resource_id, uri_parameters=tets_uri_parameters, body=test_body,
                          generated_client_request_id_name=None)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_resource_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
         request_mock.assert_called_with('PUT', full_arm_rest_url,
                                         params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
                                         headers=expected_header_with_auth, verify=(not should_disable_connection_verify()))
@@ -398,7 +398,7 @@ class TestHandleException(unittest.TestCase):
         send_raw_request(cli_ctx, 'PUT', full_arm_rest_url, uri_parameters=tets_uri_parameters,
                          body=test_body, generated_client_request_id_name=None)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_resource_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
         request_mock.assert_called_with('PUT', full_arm_rest_url,
                                         params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
                                         headers=expected_header_with_auth, verify=(not should_disable_connection_verify()))
@@ -410,7 +410,7 @@ class TestHandleException(unittest.TestCase):
         send_raw_request(cli_ctx, 'PUT', full_arm_rest_url_with_port, uri_parameters=tets_uri_parameters,
                          body=test_body, generated_client_request_id_name=None)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_resource_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
         request_mock.assert_called_with('PUT', full_arm_rest_url_with_port,
                                         params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
                                         headers=expected_header_with_auth, verify=(not should_disable_connection_verify()))
