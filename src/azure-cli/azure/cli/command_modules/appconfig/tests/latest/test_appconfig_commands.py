@@ -362,8 +362,8 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
 
         # skip features while exporting
         self.kwargs.update({
-            'key':"key_vault_reference",
-            'secret_identifier':"https://testkeyvault.vault.azure.net/secrets/mysecret"
+            'key': "key_vault_reference",
+            'secret_identifier': "https://testkeyvault.vault.azure.net/secrets/mysecret"
         })
         self.cmd(
             'appconfig kv set-keyvault -n {config_store_name} --key {key} --secret-identifier {secret_identifier} -y')
