@@ -29,6 +29,7 @@ AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
 EXT_METADATA_MAXCLICOREVERSION = 'azext.maxCliCoreVersion'
 EXT_METADATA_ISPREVIEW = 'azext.isPreview'
+EXT_METADATA_ISEXPERIMENTAL = 'azext.isExperimental'
 
 WHEEL_INFO_RE = re.compile(
     r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
@@ -57,6 +58,7 @@ class Extension(object):
         self._version = None
         self._metadata = None
         self._preview = None
+        self._experimental = None
 
     @property
     def version(self):
@@ -94,6 +96,19 @@ class Extension(object):
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview
+
+    @property
+    def experimental(self):
+        """
+        Lazy load experimental status.
+        Returns the experimental status of the extension.
+        """
+        try:
+            if not isinstance(self._experimental, bool):
+                self._experimental = bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL))
+        except Exception:  # pylint: disable=broad-except
+            logger.debug("Unable to get extension experimental status: %s", traceback.format_exc())
+        return self._experimental
 
     def get_version(self):
         raise NotImplementedError()
