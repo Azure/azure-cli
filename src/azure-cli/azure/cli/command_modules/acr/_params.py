@@ -333,10 +333,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr agentpool') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
         c.argument('agent_pool_name', options_list=['--name', '-n'], help='The name of the agent pool.')
-        c.argument('count', type=int, help='The count of the agent pool.')
-        c.argument('tier', help='Sets the VM your agent pool will run on. Valid values are: S1(Standard_D2_v3), S2(Standard_D4_v3) or S3(Standard_D8_v3)')
+        c.argument('count', options_list=['--count', '-c'], type=int, help='The count of the agent pool.')
+        c.argument('tier', help='Sets the VM your agent pool will run on. Valid values are: S1(2 vCPUs, 3 MiB RAM), S2(4 vCPUs, 8 MiB RAM) or S3(8 vCPUs, 16 MiB RAM)')
         c.argument('os_type', options_list=['--os'], help='The os of the agent pool.', deprecate_info=c.deprecate(hide=True))
-        c.argument('vnet_id', options_list=['--vnet-id'], help='The Virtual Network Subnet Resource Id of the agent machine.')
+        c.argument('subnet_id', options_list=['--subnet-id'], help='The Virtual Network Subnet Resource Id of the agent machine.')
 
     with self.argument_context('acr agentpool show') as c:
         c.argument('queue_count', help="Get only the queue count", action='store_true')

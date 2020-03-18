@@ -1055,9 +1055,9 @@ examples:
   - name: Create the agent pool 'MyAgentName' with 2 agent count.
     text: >
         az acr agentpool create -n MyAgentName -r MyRegistry --count 2
-  - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry' in VNET 'MyVnetId'.
+  - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry' in VNET subnet.
     text: >
-        az acr agentpool create -n MyAgentName -r MyRegistry --vnet-id /subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroupName}/providers/Microsoft.ClassicNetwork/virtualNetworks/<myNetwork>/subnets/<subNet>
+        az acr agentpool create -n MyAgentName -r MyRegistry --subnet-id /subscriptions/<SubscriptionId>/resourceGroups/<ResourceGroupName>/providers/Microsoft.ClassicNetwork/virtualNetworks/<myNetwork>/subnets/<subNet>
 """
 
 helps['acr agentpool update'] = """

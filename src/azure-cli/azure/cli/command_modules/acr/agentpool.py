@@ -27,7 +27,7 @@ def acr_agentpool_create(cmd,
                          count=DEFAULT_COUNT,
                          tier=DEFAULT_TIER,
                          os_type=DEFAULT_OS,
-                         vnet_id=None):
+                         subnet_id=None):
 
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
@@ -39,7 +39,7 @@ def acr_agentpool_create(cmd,
         count=count,
         tier=tier.upper(),
         os=os_type,
-        VirtualNetworkSubnetResourceId=vnet_id
+        virtual_network_subnet_resource_id=subnet_id
     )
 
     try:
@@ -83,6 +83,12 @@ def acr_agentpool_delete(cmd,
         response = client.delete(resource_group_name=resource_group_name,
                                  registry_name=registry_name,
                                  agent_pool_name=agent_pool_name)
+
+        """ Since agent pool is a tracked resource in arm, arm also pings the async deletion api at the
+        same time to get the status. If arm gets the 200 status first and knows that the resource is deleted,
+        it marks the resource as deleted and stop routing further requests to the resource including the
+        async deletion status api. Hence arm will directly return 404. Consider this as successful delete.
+        """
         if response.status_code == 404:
             response.status_code = 200
         return response
