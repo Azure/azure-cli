@@ -388,7 +388,7 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
 
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
-        kwargs.update({'raw': True, 'polling': False})
+        kwargs.update({'polling': False})
     return func(*args, **kwargs)
 
 

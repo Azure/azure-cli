@@ -7,7 +7,7 @@
 
 import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
-from azure.cli.core.util import get_file_json, shell_safe_json_parse, sdk_no_wait
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -27,7 +27,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            net_bios_domain_name=None, forest_name=None, domain_guid=None, domain_sid=None,
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
-                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None, no_wait=False):
+                           routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -114,7 +114,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             publish_internet_endpoints=str2bool(publish_internet_endpoints)
         )
 
-    return sdk_no_wait(no_wait, scf.storage_accounts.begin_create, resource_group_name, account_name, params)
+    return scf.storage_accounts.create(resource_group_name, account_name, params)
 
 
 def list_storage_accounts(cmd, resource_group_name=None):
