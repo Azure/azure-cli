@@ -368,8 +368,9 @@ def should_disable_connection_verify():
 
 def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
-    from msrest.polling.poller import LROPoller
-    return (AzureOperationPoller, LROPoller)
+    from msrest.polling.poller import LROPoller as MSRestLROPoller
+    from azure.core.polling import LROPoller as AzureCoreLROPoller
+    return AzureOperationPoller, MSRestLROPoller, AzureCoreLROPoller
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):

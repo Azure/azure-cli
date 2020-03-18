@@ -432,19 +432,19 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     parameters = VaultCreateOrUpdateParameters(location=location,
                                                tags=tags,
                                                properties=properties)
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=parameters)
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         vault_name=vault_name,
+                                         parameters=parameters)
 
 
 def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_name):
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=parameters.location,
-                                       properties=parameters.properties))
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         vault_name=vault_name,
+                                         parameters=VaultCreateOrUpdateParameters(
+                                             location=parameters.location,
+                                             properties=parameters.properties))
 
 
 def update_keyvault(cmd, instance, enabled_for_deployment=None,
@@ -589,12 +589,12 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
         if to_modify:
             rules.ip_rules.append(IPRule(value=ip_address))
 
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=vault.location,
-                                       tags=vault.tags,
-                                       properties=vault.properties))
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         vault_name=vault_name,
+                                         parameters=VaultCreateOrUpdateParameters(
+                                             location=vault.location,
+                                             tags=vault.tags,
+                                             properties=vault.properties))
 
 
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
