@@ -193,6 +193,11 @@ class DevExtension(Extension):
                             key = key.lower()
                             if key == 'version':
                                 metadata[key] = '{}'.format(val.strip())
+                            elif key == 'name':
+                                # temporary fix extension name is None
+                                # until wheel upgrade and metadata structure in azure-cli-extensions has upgraded too.
+                                # https://github.com/Azure/azure-cli/pull/12583
+                                metadata[key] = val.strip()
                         except ValueError:
                             continue
 
