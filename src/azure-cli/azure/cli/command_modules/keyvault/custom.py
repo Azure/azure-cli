@@ -1020,6 +1020,19 @@ def download_certificate(client, file_path, vault_base_url=None, certificate_nam
         raise ex
 
 
+def backup_certificate(client, file_path, vault_base_url=None,
+                       certificate_name=None, identifier=None):  # pylint: disable=unused-argument
+    cert = client.backup_certificate(vault_base_url, certificate_name).value
+    with open(file_path, 'wb') as output:
+        output.write(cert)
+
+
+def restore_certificate(client, vault_base_url, file_path):
+    with open(file_path, 'rb') as file_in:
+        data = file_in.read()
+    return client.restore_certificate(vault_base_url, data)
+
+
 def add_certificate_contact(cmd, client, vault_base_url, contact_email, contact_name=None,
                             contact_phone=None):
     """ Add a contact to the specified vault to receive notifications of certificate operations. """

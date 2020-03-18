@@ -147,6 +147,10 @@ def load_command_table(self, _):
         g.keyvault_custom('import', 'import_certificate')
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
+        g.keyvault_custom('backup', 'backup_certificate',
+                          doc_string_source=data_doc_string.format('backup_certificate'))
+        g.keyvault_custom('restore', 'restore_certificate',
+                          doc_string_source=data_doc_string.format('restore_certificate'))
 
     with self.command_group('keyvault certificate pending', kv_data_sdk) as g:
         g.keyvault_command('merge', 'merge_certificate')
