@@ -403,6 +403,18 @@ class TestHandleException(unittest.TestCase):
                                         params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
                                         headers=expected_header_with_auth, verify=(not should_disable_connection_verify()))
 
+        # Test uri https://management.azure.com:443/subscriptions/01/resourcegroups/02?api-version=2019-07-01
+        # Port is included
+        test_arm_endpoint_with_port = 'https://management.azure.com:443/'
+        full_arm_rest_url_with_port = test_arm_endpoint_with_port.rstrip('/') + arm_resource_id
+        send_raw_request(cli_ctx, 'PUT', full_arm_rest_url_with_port, uri_parameters=tets_uri_parameters,
+                         body=test_body, generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_resource_id)
+        request_mock.assert_called_with('PUT', full_arm_rest_url_with_port,
+                                        params={'p1': 'v1', 'p2': 'v2'}, data=test_body,
+                                        headers=expected_header_with_auth, verify=(not should_disable_connection_verify()))
+
         # Test uri https://graph.microsoft.com/beta/appRoleAssignments/01
         send_raw_request(cli_ctx, 'PATCH', 'https://graph.microsoft.com/beta/appRoleAssignments/01',
                          uri_parameters=tets_uri_parameters, body=test_body, generated_client_request_id_name=None)
