@@ -85,7 +85,7 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 
-from ._helpers import _populate_api_server_access_profile, _set_vm_set_type
+from ._helpers import _populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type
 
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
@@ -1669,6 +1669,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_outbound_ip_prefixes=None,
                load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
+               outbound_type=None,
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
@@ -1757,8 +1758,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                         acr_name_or_id=attach_acr,
                         subscription_id=subscription_id)
 
+    outbound_type = _set_outbound_type(outbound_type, vnet_subnet_id, load_balancer_sku, load_balancer_profile)
+
     network_profile = None
-    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy]):
+    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, 
+            docker_bridge_address, network_policy, outbound_type]):
         if not network_plugin:
             raise CLIError('Please explicitly specify the network plugin type')
         if pod_cidr and network_plugin == "azure":
@@ -1772,6 +1776,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             network_policy=network_policy,
             load_balancer_sku=load_balancer_sku.lower(),
             load_balancer_profile=load_balancer_profile,
+            outbound_type=outbound_type
         )
     else:
         if load_balancer_sku.lower() == "standard" or load_balancer_profile:
@@ -1779,6 +1784,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 network_plugin="kubenet",
                 load_balancer_sku=load_balancer_sku.lower(),
                 load_balancer_profile=load_balancer_profile,
+                outbound_type=outbound_type,
             )
 
     addon_profiles = _handle_addons_args(
