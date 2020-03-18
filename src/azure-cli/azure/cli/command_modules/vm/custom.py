@@ -693,10 +693,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                     cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
 
         if nsg_type == 'new':
-            nsg_rule_type = 'rdp' if os_type.lower() == 'windows' else 'ssh'
+            if nsg_rule is None:
+                nsg_rule = 'RDP' if os_type.lower() == 'windows' else 'SSH'
             nsg = nsg or '{}NSG'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg))
-            master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule_type))
+            master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule))
 
         if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
@@ -1914,7 +1915,9 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
 
 def list_vm_secrets(cmd, resource_group_name, vm_name):
     vm = get_vm(cmd, resource_group_name, vm_name)
-    return vm.os_profile.secrets
+    if vm.os_profile:
+        return vm.os_profile.secrets
+    return []
 
 
 def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=None):
@@ -2174,7 +2177,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
-                os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None):
+                os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
+                automatic_repairs_grace_period=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2403,7 +2407,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             terminate_notification_time=terminate_notification_time, max_price=max_price,
             scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
             data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
-            data_disk_mbps=data_disk_mbps)
+            data_disk_mbps=data_disk_mbps, automatic_repairs_grace_period=automatic_repairs_grace_period)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2653,7 +2657,8 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
-                scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None, **kwargs):
+                scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None,
+                enable_automatic_repairs=None, automatic_repairs_grace_period=None, **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -2685,6 +2690,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
+
+    if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None:
+        AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
+        vmss.automatic_repairs_policy = \
+            AutomaticRepairsPolicy(enabled="true", grace_period=automatic_repairs_grace_period)
 
     if ultra_ssd_enabled is not None:
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
@@ -2854,8 +2864,9 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     # pylint: disable=no-member
-    return None if not vmss.virtual_machine_profile.extension_profile \
-        else vmss.virtual_machine_profile.extension_profile.extensions
+    if vmss.virtual_machine_profile and vmss.virtual_machine_profile.extension_profile:
+        return vmss.virtual_machine_profile.extension_profile.extensions
+    return None
 
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
@@ -2876,7 +2887,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         extensions = extension_profile.extensions
         if extensions:
             extension_profile.extensions = [x for x in extensions if
-                                            x.type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
+                                            x.type1.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
     ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
                                           publisher=publisher,

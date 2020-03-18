@@ -143,7 +143,7 @@ def load_arguments(self, _):
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Assigns a system assigned identity to the policy assignment.")
@@ -190,12 +190,17 @@ def load_arguments(self, _):
 
     with self.argument_context('group deployment create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
-        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
-                   help='Auxiliary subscriptions which will be used during deployment across tenants.')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
+                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
 
     with self.argument_context('group deployment validate') as c:
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
@@ -209,11 +214,13 @@ def load_arguments(self, _):
 
     with self.argument_context('deployment create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('deployment operation') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
@@ -223,11 +230,13 @@ def load_arguments(self, _):
 
     with self.argument_context('deployment sub create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('deployment sub validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('deployment group') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list, required=True)
@@ -237,13 +246,18 @@ def load_arguments(self, _):
 
     with self.argument_context('deployment group create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
-        c.argument('aux_subscriptions', nargs='*', options_list=['--aux-subs'],
-                   help='Auxiliary subscriptions which will be used during deployment across tenants.')
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
+                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
 
     with self.argument_context('deployment group validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('deployment mg') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
@@ -251,11 +265,13 @@ def load_arguments(self, _):
 
     with self.argument_context('deployment mg create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('deployment mg validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('deployment operation mg') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
@@ -265,11 +281,13 @@ def load_arguments(self, _):
 
     with self.argument_context('deployment tenant create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('deployment tenant validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('group export') as c:
         c.argument('include_comments', action='store_true')

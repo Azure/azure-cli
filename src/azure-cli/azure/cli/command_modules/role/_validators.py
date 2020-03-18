@@ -13,6 +13,12 @@ from ._client_factory import _graph_client_factory
 VARIANT_GROUP_ID_ARGS = ['object_id', 'group_id', 'group_object_id']
 
 
+def _get_group_count_and_id(namespace, group_filter):
+    client = _graph_client_factory(namespace.cmd.cli_ctx)
+    result = list(client.groups.list(filter=group_filter))
+    return len(result), result[0].object_id if len(result) == 1 else None
+
+
 def validate_group(namespace):
     # For AD auto-commands, here we resolve logic names to object ids needed by SDK methods
     attr, value = next(((x, getattr(namespace, x)) for x in VARIANT_GROUP_ID_ARGS
@@ -20,18 +26,21 @@ def validate_group(namespace):
     try:
         uuid.UUID(value)
     except ValueError:
-        client = _graph_client_factory(namespace.cmd.cli_ctx)
-        sub_filters = []
-        sub_filters.append("startswith(displayName,'{}')".format(value))
-        sub_filters.append("displayName eq '{}'".format(value))
-        result = list(client.groups.list(filter=' or '.join(sub_filters)))
-        count = len(result)
-        if count == 1:
-            setattr(namespace, attr, result[0].object_id)
-        elif count == 0:
-            raise CLIError("No group matches the name of '{}'".format(value))
+        exact_match_count, object_id = _get_group_count_and_id(namespace, "displayName eq '{}'".format(value))
+        if exact_match_count == 1:
+            setattr(namespace, attr, object_id)
+        elif exact_match_count == 0:
+            prefix_match_count, object_id = _get_group_count_and_id(
+                namespace, "startswith(displayName,'{}')".format(value)
+            )
+            if prefix_match_count == 1:
+                setattr(namespace, attr, object_id)
+            elif prefix_match_count == 0:
+                raise CLIError("No group matches the name of '{}'".format(value))
+            else:
+                raise CLIError("More than one group match the name of '{}'".format(value))
         else:
-            raise CLIError("More than one groups match the name of '{}'".format(value))
+            raise CLIError("More than one group match the name of '{}'".format(value))
 
 
 def validate_member_id(namespace):

@@ -151,14 +151,96 @@ type: group
 short-summary: Manage vault private endpoint connections.
 """
 
+helps['keyvault private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for a Key Vault.
+examples:
+  - name: Approve a private endpoint connection request for a Key Vault by ID.
+    text: |
+        az keyvault private-endpoint-connection approve --id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.KeyVault/vaults/mykv/privateEndpointConnections/mykv.00000000-0000-0000-0000-000000000000"
+  - name: Approve a private endpoint connection request for a Key Vault by ID.
+    text: |
+        id = (az keyvault show -n mykv --query "privateEndpointConnections[0].id")
+        az keyvault private-endpoint-connection approve --id $id
+  - name: Approve a private endpoint connection request for a Key Vault using vault name and connection name.
+    text: |
+        az keyvault private-endpoint-connection approve -g myrg --vault-name mykv --name myconnection
+  - name: Approve a private endpoint connection request for a Key Vault using vault name and connection name.
+    text: |
+        name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
+        az keyvault private-endpoint-connection approve -g myrg --vault-name mykv --name $name
+"""
+
+helps['keyvault private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for a Key Vault.
+examples:
+  - name: Reject a private endpoint connection request for a Key Vault by ID.
+    text: |
+        az keyvault private-endpoint-connection reject --id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.KeyVault/vaults/mykv/privateEndpointConnections/mykv.00000000-0000-0000-0000-000000000000"
+  - name: Reject a private endpoint connection request for a Key Vault by ID.
+    text: |
+        id = (az keyvault show -n mykv --query "privateEndpointConnections[0].id")
+        az keyvault private-endpoint-connection reject --id $id
+  - name: Reject a private endpoint connection request for a Key Vault using vault name and connection name.
+    text: |
+        az keyvault private-endpoint-connection reject -g myrg --vault-name mykv --name myconnection
+  - name: Reject a private endpoint connection request for a Key Vault using vault name and connection name.
+    text: |
+        name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
+        az keyvault private-endpoint-connection reject -g myrg --vault-name mystorageaccount --name $name
+"""
+
 helps['keyvault private-endpoint-connection delete'] = """
 type: command
 short-summary: Delete the specified private endpoint connection associated with a Key Vault.
+examples:
+  - name: Delete a private endpoint connection request for a Key Vault by ID.
+    text: |
+        az keyvault private-endpoint-connection delete --id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.KeyVault/vaults/mykv/privateEndpointConnections/mykv.00000000-0000-0000-0000-000000000000"
+  - name: Delete a private endpoint connection request for a Key Vault by ID.
+    text: |
+        id = (az keyvault show -n mykv --query "privateEndpointConnections[0].id")
+        az keyvault private-endpoint-connection delete --id $id
+  - name: Delete a private endpoint connection request for a Key Vault using account name and connection name.
+    text: |
+        az keyvault private-endpoint-connection delete -g myrg --vault-name mykv --name myconnection
+  - name: Delete a private endpoint connection request for a Key Vault using account name and connection name.
+    text: |
+        name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
+        az keyvault private-endpoint-connection delete -g myrg --vault-name mykv --name $name
 """
 
 helps['keyvault private-endpoint-connection show'] = """
 type: command
 short-summary: Show details of a private endpoint connection associated with a Key Vault.
+examples:
+  - name: Show details of a private endpoint connection request for a Key Vault by ID.
+    text: |
+        az keyvault private-endpoint-connection show --id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.KeyVault/vaults/mykv/privateEndpointConnections/mykv.00000000-0000-0000-0000-000000000000"
+  - name: Show details of a private endpoint connection request for a Key Vault by ID.
+    text: |
+        id = (az keyvault show -n mykv --query "privateEndpointConnections[0].id")
+        az keyvault private-endpoint-connection show --id $id
+  - name: Show details of a private endpoint connection request for a Key Vault using vault name and connection name.
+    text: |
+        az keyvault private-endpoint-connection show -g myrg --vault-name mykv --name myconnection
+  - name: Show details of a private endpoint connection request for a Key Vault using vault name and connection name.
+    text: |
+        name = (az keyvault show -n mykv --query "privateEndpointConnections[0].name")
+        az keyvault private-endpoint-connection show -g myrg --vault-name mykv --name $name
+"""
+
+helps['keyvault private-endpoint-connection wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the private endpoint connection is met.
+examples:
+  - name: Pause CLI until the private endpoint connection is approved/rejected by ID.
+    text: |
+        az keyvault private-endpoint-connection wait --id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myrg/providers/Microsoft.KeyVault/vaults/mykv/privateEndpointConnections/mykv.00000000-0000-0000-0000-000000000000" --created
+  - name: Pause CLI until the private endpoint connection is approved/rejected using vault name and connection name.
+    text: |
+        az keyvault private-endpoint-connection wait -g myrg --vault-name mykv --name myconnection --created
 """
 
 helps['keyvault private-link-resource'] = """
@@ -166,9 +248,13 @@ type: group
 short-summary: Manage vault private link resources.
 """
 
-helps['keyvault private-link-resource show'] = """
+helps['keyvault private-link-resource list'] = """
 type: command
-short-summary: Show the private link resources supported for a Key Vault.
+short-summary: List the private link resources supported for a Key Vault.
+examples:
+  - name: Get the private link resources that need to be created for a Key Vault.
+    text: |
+        az keyvault private-link-resource list --vault-name mykv
 """
 
 helps['keyvault recover'] = """

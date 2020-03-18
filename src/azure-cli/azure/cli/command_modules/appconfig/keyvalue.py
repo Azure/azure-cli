@@ -254,6 +254,12 @@ def set_key(cmd,
         cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
+    if content_type:
+        if content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+            logger.warning("There is a dedicated command to set key vault reference. 'appconfig kv set-keyvault -h'")
+        elif content_type.lower() == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+            logger.warning("There is a dedicated command to set feature flag. 'appconfig feature set -h'")
+
     retry_times = 3
     retry_interval = 1
 

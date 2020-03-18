@@ -926,3 +926,25 @@ class CosmosDBTests(ScenarioTest):
 
         db_througput_update = self.cmd('az cosmosdb table throughput update -g {rg} -a {acc} -n {tb_name} --throughput {tp2}').get_output_in_json()
         assert db_througput_update["resource"]["throughput"] == tp2
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_key_vault_key_uri')
+    def test_cosmosdb_key_vault_key_uri(self, resource_group):
+        kv_name = self.create_random_name(prefix='cli', length=15)
+        key_name = self.create_random_name(prefix='cli', length=15)
+        key_uri = "https://{}.vault.azure.net/keys/{}".format(kv_name, key_name)
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'kv_name': kv_name,
+            'key_name': key_name,
+            'key_uri': key_uri,
+            'location': "eastus2"
+        })
+
+        self.cmd('az keyvault create --resource-group {rg} -n {kv_name} --enable-soft-delete true --enable-purge-protection true')
+        self.cmd('az keyvault set-policy -n {kv_name} -g {rg} --spn a232010e-820c-4083-83bb-3ace5fc29d0b --key-permissions get unwrapKey wrapKey')
+        self.cmd('az keyvault key create -n {key_name} --kty RSA --size 3072 --vault-name {kv_name}')
+
+        cmk_output = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={location} failoverPriority=0 --key-uri {key_uri}').get_output_in_json()
+
+        assert cmk_output["keyVaultKeyUri"] == key_uri

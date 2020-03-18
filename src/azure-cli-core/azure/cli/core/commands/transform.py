@@ -63,3 +63,13 @@ def _resource_group_transform(_, **kwargs):
 
 def _x509_from_base64_to_hex_transform(_, **kwargs):
     _add_x509_hex(kwargs['event_data']['result'])
+
+
+def gen_dict_to_list_transform(key='value'):
+
+    def _dict_to_list_transform(result):
+        if hasattr(result, key):
+            return getattr(result, key)
+        return result
+
+    return _dict_to_list_transform

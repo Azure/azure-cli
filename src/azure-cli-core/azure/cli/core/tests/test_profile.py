@@ -591,6 +591,60 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(mock_get_token.call_count, 2)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    def test_get_login_credentials_aux_tenants(self, mock_get_token, mock_read_cred_file):
+        cli = DummyCli()
+        raw_token2 = 'some...secrets2'
+        token_entry2 = {
+            "resource": "https://management.core.windows.net/",
+            "tokenType": "Bearer",
+            "_authority": "https://login.microsoftonline.com/common",
+            "accessToken": raw_token2,
+        }
+        some_token_type = 'Bearer'
+        mock_read_cred_file.return_value = [TestProfile.token_entry1, token_entry2]
+        mock_get_token.side_effect = [(some_token_type, TestProfile.raw_token1), (some_token_type, raw_token2)]
+        # setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_subscription_id2 = '12345678-1bf0-4dda-aec3-cb9272f09591'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_tenant_id2 = '12345678-38d6-4fb2-bad9-b7b93a3e4321'
+        test_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
+                                             'MSI-DEV-INC', self.state1, test_tenant_id)
+        test_subscription2 = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id2),
+                                              'MSI-DEV-INC2', self.state1, test_tenant_id2)
+        consolidated = profile._normalize_properties(self.user1,
+                                                     [test_subscription, test_subscription2],
+                                                     False)
+        profile._set_subscriptions(consolidated)
+        # test only input aux_tenants
+        cred, subscription_id, _ = profile.get_login_credentials(subscription_id=test_subscription_id,
+                                                                 aux_tenants=[test_tenant_id2])
+
+        # verify
+        self.assertEqual(subscription_id, test_subscription_id)
+
+        # verify the cred._tokenRetriever is a working lambda
+        token_type, token = cred._token_retriever()
+        self.assertEqual(token, self.raw_token1)
+        self.assertEqual(some_token_type, token_type)
+
+        token2 = cred._external_tenant_token_retriever()
+        self.assertEqual(len(token2), 1)
+        self.assertEqual(token2[0][1], raw_token2)
+
+        self.assertEqual(mock_get_token.call_count, 2)
+
+        # test input aux_tenants and aux_subscriptions
+        with self.assertRaisesRegexp(CLIError,
+                                     "Please specify only one of aux_subscriptions and aux_tenants, not both"):
+            cred, subscription_id, _ = profile.get_login_credentials(subscription_id=test_subscription_id,
+                                                                     aux_subscriptions=[test_subscription_id2],
+                                                                     aux_tenants=[test_tenant_id2])
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
     def test_get_login_credentials_msi_system_assigned(self, mock_msi_auth, mock_read_cred_file):
         mock_read_cred_file.return_value = []
@@ -1792,6 +1846,48 @@ class TestProfile(unittest.TestCase):
 
         self.assertEqual(len(all_subscriptions), 1)
         self.assertEqual(all_subscriptions[0].tenant_id, self.tenant_id)
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
+    def test_find_using_common_tenant_mfa_warning(self, _get_authorization_code_mock, mock_auth_context):
+        # Assume 2 tenants. Home tenant tenant1 doesn't require MFA, but tenant2 does
+        import adal
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        tenant2_mfa_id = 'tenant2-0000-0000-0000-000000000000'
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id), TenantStub(tenant2_mfa_id)]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        token_cache = adal.TokenCache()
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
+
+        adal_error_mfa = adal.AdalError(error_msg="", error_response={
+            'error': 'interaction_required',
+            'error_description': "AADSTS50076: Due to a configuration change made by your administrator, "
+                                 "or because you moved to a new location, you must use multi-factor "
+                                 "authentication to access '797f4846-ba00-4fd7-ba43-dac1f8f63013'.\n"
+                                 "Trace ID: 00000000-0000-0000-0000-000000000000\n"
+                                 "Correlation ID: 00000000-0000-0000-0000-000000000000\n"
+                                 "Timestamp: 2020-03-10 04:42:59Z",
+            'error_codes': [50076],
+            'timestamp': '2020-03-10 04:42:59Z',
+            'trace_id': '00000000-0000-0000-0000-000000000000',
+            'correlation_id': '00000000-0000-0000-0000-000000000000',
+            'error_uri': 'https://login.microsoftonline.com/error?code=50076',
+            'suberror': 'basic_action'})
+
+        # adal_error_mfa are raised on the second call
+        mock_auth_context.acquire_token.side_effect = [self.token_entry1, adal_error_mfa]
+
+        # action
+        all_subscriptions = finder._find_using_common_tenant(access_token="token1",
+                                                             resource='https://management.core.windows.net/')
+
+        # assert
+        # subscriptions are correctly returned
+        self.assertEqual(all_subscriptions, [self.subscription1])
+        self.assertEqual(mock_auth_context.acquire_token.call_count, 2)
+
+        # With pytest, use -o log_cli=True to manually check the log
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
