@@ -6,10 +6,12 @@
 import time
 import requests
 import adal
+import time
 
 from msrest.authentication import Authentication
 from azure.core.credentials import AccessToken
 from azure.cli.core.util import in_cloud_console
+from azure.core.credentials import AccessToken
 
 from knack.util import CLIError
 
