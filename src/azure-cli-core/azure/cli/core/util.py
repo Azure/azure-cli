@@ -602,7 +602,7 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             # use active_directory_resource_id for resource.
             # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
             if uri.lower().startswith(endpoints.resource_manager.rstrip('/')):
-                resource = cli_ctx.cloud.endpoints.active_directory_resource_id
+                resource = endpoints.active_directory_resource_id
             else:
                 from azure.cli.core.cloud import CloudEndpointNotSetException
                 for p in [x for x in dir(endpoints) if not x.startswith('_')]:
