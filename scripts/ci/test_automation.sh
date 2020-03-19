@@ -53,9 +53,5 @@ fi
 az -v
 az -h
 
-# for the test below
-export ADO_PULL_REQUEST_TARGET_BRANCH=$(System.PullRequest.TargetBranch)
-echo "${ADO_PULL_REQUEST_TARGET_BRANCH}"
-
 title 'Running tests'
 python -m automation test --ci --profile $target_profile
