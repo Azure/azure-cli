@@ -308,9 +308,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('generate', 'acr_token_credential_generate')
 
     with self.command_group('acr agentpool', acr_agentpool_util, is_preview=True) as g:
-        g.command('create', 'acr_agentpool_create')
-        g.command('update', 'acr_agentpool_update')
-        g.command('delete', 'acr_agentpool_delete')
+        g.command('create', 'acr_agentpool_create', supports_no_wait=True)
+        g.command('update', 'acr_agentpool_update', supports_no_wait=True)
+        g.command('delete', 'acr_agentpool_delete', supports_no_wait=True)
         g.command('list', 'acr_agentpool_list')
         g.show_command('show', 'acr_agentpool_show')
 

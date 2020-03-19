@@ -71,3 +71,15 @@ def get_succeeded_run_status(cmd):
 def get_acr_task_models(cmd):
     from azure.cli.core.profiles import get_sdk
     return get_sdk(cmd.cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, 'models')
+
+
+def get_succeeded_agentpool_status(cmd):
+    AgentPoolStatus = cmd.get_models('ProvisioningState')
+    return [AgentPoolStatus.succeeded.value]
+
+
+def get_finished_agentpool_status(cmd):
+    AgentPoolStatus = cmd.get_models('ProvisioningState')
+    return [AgentPoolStatus.succeeded.value,
+            AgentPoolStatus.failed.value,
+            AgentPoolStatus.canceled.value]
