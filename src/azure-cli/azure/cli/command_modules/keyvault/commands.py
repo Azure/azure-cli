@@ -147,10 +147,6 @@ def load_command_table(self, _):
         g.keyvault_custom('import', 'import_certificate')
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
-        g.keyvault_custom('backup', 'backup_certificate',
-                          doc_string_source=data_doc_string.format('backup_certificate'))
-        g.keyvault_custom('restore', 'restore_certificate',
-                          doc_string_source=data_doc_string.format('restore_certificate'))
 
     with self.command_group('keyvault certificate pending', kv_data_sdk) as g:
         g.keyvault_command('merge', 'merge_certificate')
@@ -173,6 +169,13 @@ def load_command_table(self, _):
         g.keyvault_custom('list', 'list_certificate_issuer_admins')
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
+
+    if data_api_version != '2016_10_01':
+        with self.command_group('keyvault certificate', kv_data_sdk) as g:
+            g.keyvault_custom('backup', 'backup_certificate',
+                              doc_string_source=data_doc_string.format('backup_certificate'))
+            g.keyvault_custom('restore', 'restore_certificate',
+                              doc_string_source=data_doc_string.format('restore_certificate'))
 
     if data_api_version != '2016_10_01':
         with self.command_group('keyvault storage', kv_data_sdk) as g:
