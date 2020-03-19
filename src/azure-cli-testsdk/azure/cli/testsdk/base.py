@@ -31,6 +31,10 @@ ENV_COMMAND_COVERAGE = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
 COVERAGE_FILE = 'az_command_coverage.txt'
 
 
+class DummyChecker:
+    pass
+
+
 class CheckerMixin(object):
 
     def _apply_kwargs(self, val):
