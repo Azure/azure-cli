@@ -31,6 +31,9 @@ class NetworkApplicationSecurityGroupScenario(ScenarioTest):
             'asg': 'asg1'
         })
 
+        from pprint import pprint
+        pprint(self.kwargs)
+
         count1 = len(self.cmd('network asg list').get_output_in_json())
         self.cmd('network asg create -g {rg} -n {asg} --tags foo=doo',
                  checks=self.check('tags.foo', 'doo'))
