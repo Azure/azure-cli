@@ -53,11 +53,11 @@ def _is_greater_than_cur_version(cur_version):
     return filter_func
 
 
-def resolve_from_index(extension_name, cur_version=None, index_url=None):
+def resolve_from_index(cli_ctx, extension_name, cur_version=None, index_url=None):
     """
     Gets the download Url and digest for the matching extension
     """
-    candidates = get_index_extensions(index_url=index_url).get(extension_name, [])
+    candidates = get_index_extensions(cli_ctx, index_url=index_url).get(extension_name, [])
     if not candidates:
         raise NoExtensionCandidatesError("No extension found with name '{}'".format(extension_name))
 
