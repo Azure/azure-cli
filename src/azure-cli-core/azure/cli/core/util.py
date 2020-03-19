@@ -626,13 +626,13 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     try:
         # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
         s = Session()
-        req = Request(method='GET', url=uri, headers=headers, params=uri_parameters, data=body)
+        req = Request(method=method, url=uri, headers=headers, params=uri_parameters, data=body)
         prepped = s.prepare_request(req)
 
         # Merge environment settings into session
         settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
         _log_request(prepped)
-        r = s.send(prepped, **settings )
+        r = s.send(prepped, **settings)
         _log_response(r)
     except Exception as ex:  # pylint: disable=broad-except
         raise CLIError(ex)
@@ -710,6 +710,7 @@ def _log_response(response, **kwargs):
     except Exception as err:  # pylint: disable=broad-except
         logger.info("Failed to log response: %s", repr(err))
         return response
+
 
 class ConfiguredDefaultSetter(object):
 
