@@ -41,7 +41,9 @@ def _extract_modified_files(target_branch=os.environ.get('ADO_PULL_REQUEST_TARGE
 
     if target_branch == ado_raw_env_replacement:
         # in ADO env but not in PR stage
-        return ['core']
+
+        # dummy file name src/azure-cli-core/azure/cli/core/__init__.py
+        return [os.path.join('src', 'azure-cli-core', 'azure', 'cli', 'core', '__init__.py')]
     else:
         qualified_target_branch = 'origin/{}'.format(target_branch)
 
