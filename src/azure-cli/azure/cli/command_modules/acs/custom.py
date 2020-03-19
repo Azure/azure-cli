@@ -1762,7 +1762,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     network_profile = None
     if any([network_plugin, pod_cidr, service_cidr, dns_service_ip,
-            docker_bridge_address, network_policy, outbound_type]):
+            docker_bridge_address, network_policy]):
         if not network_plugin:
             raise CLIError('Please explicitly specify the network plugin type')
         if pod_cidr and network_plugin == "azure":
