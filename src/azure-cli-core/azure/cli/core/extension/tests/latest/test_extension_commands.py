@@ -248,18 +248,18 @@ class TestExtensionCommands(unittest.TestCase):
     def test_list_available_extensions_default(self):
         with mock.patch('azure.cli.core.extension.operations.get_index_extensions', autospec=True) as c:
             list_available_extensions(self.cmd)
-            c.assert_called_once_with(None)
+            c.assert_called_once_with(self.cmd.cli_ctx, None)
 
     def test_list_available_extensions_operations_index_url(self):
         with mock.patch('azure.cli.core.extension.operations.get_index_extensions', autospec=True) as c:
             index_url = 'http://contoso.com'
             list_available_extensions(self.cmd, index_url=index_url)
-            c.assert_called_once_with(index_url)
+            c.assert_called_once_with(self.cmd.cli_ctx, index_url)
 
     def test_list_available_extensions_show_details(self):
         with mock.patch('azure.cli.core.extension.operations.get_index_extensions', autospec=True) as c:
             list_available_extensions(self.cmd, show_details=True)
-            c.assert_called_once_with(None)
+            c.assert_called_once_with(self.cmd.cli_ctx, None)
 
     def test_list_available_extensions_no_show_details(self):
         sample_index_extensions = {
