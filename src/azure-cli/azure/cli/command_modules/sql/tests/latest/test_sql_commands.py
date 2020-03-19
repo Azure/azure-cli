@@ -711,6 +711,72 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 
+class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
+    def test_sql_mi_operation_mgmt(self):
+        managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+
+        is_playback = os.path.exists(self.recording_file)
+        if is_playback:
+            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
+        else:
+            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
+
+        license_type = 'LicenseIncluded'
+        loc = 'eastus2euap'
+        v_cores = 8
+        storage_size_in_gb = '128'
+        edition = 'GeneralPurpose'
+        family = 'Gen5'
+        resource_group = "DejanDuVnetRG"
+        user = admin_login
+        
+        print('Creating MI...\n')
+
+        # test create sql managed_instance
+        self.cmd('sql mi create -g {} -n {} -l {} '
+                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
+                 .format(resource_group, managed_instance_name, loc, user, admin_password, subnet, license_type, v_cores, storage_size_in_gb, edition, family),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('vCores', v_cores),
+                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                     JMESPathCheck('licenseType', license_type),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family),
+                     JMESPathCheck('sku.capacity', v_cores),
+                     JMESPathCheck('identity', None)]).get_output_in_json()
+                     
+        edition_updated = 'BusinessCritical'
+        print('Updating MI...\n')
+
+       # test update sql managed_instance
+        self.cmd('sql mi update -g {} -n {} --edition {} --no-wait'
+                 .format(resource_group, managed_instance_name, edition_updated))
+
+        print('Listing all operations...\n')
+
+        # List operations
+        ops = list(
+            self.cmd('sql mi op list -g {} --mi {}'
+                     .format(resource_group, managed_instance_name),
+                     checks=[
+                         JMESPathCheck('length(@)', 2),
+                         JMESPathCheck('[0].resourceGroup', resource_group),
+                         JMESPathCheck('[0].managedInstanceName', managed_instance_name)
+                     ])
+                .get_output_in_json())
+                
+        print('Canceling operation...\n')
+        
+        # Cancel operation
+        self.cmd('sql mi op cancel -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, ops[1]['name']))
+
+
 class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()

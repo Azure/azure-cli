@@ -36,6 +36,10 @@ def get_sql_database_operations_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).database_operations
 
 
+def get_sql_managed_instance_operations_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_instance_operations
+
+
 def get_sql_database_blob_auditing_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).database_blob_auditing_policies
 
