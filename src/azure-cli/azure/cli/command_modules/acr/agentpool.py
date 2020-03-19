@@ -48,8 +48,8 @@ def acr_agentpool_create(cmd,
                                  registry_name=registry_name,
                                  agent_pool_name=agent_pool_name,
                                  agent_pool=agentpool_create_parameters)
-        if (no_wait and response._response.status_code == 201):
-            response._response.status_code = 200
+        if no_wait:
+            return client.get(resource_group_name, registry_name, agent_pool_name)
         return response
     except ValidationError as e:
         raise CLIError(e)
@@ -71,8 +71,8 @@ def acr_agentpool_update(cmd,
                                  registry_name=registry_name,
                                  agent_pool_name=agent_pool_name,
                                  count=count)
-        if (no_wait and response._response.status_code == 201):
-            response._response.status_code = 200
+        if no_wait:
+            return client.get(resource_group_name, registry_name, agent_pool_name)
         return response
     except ValidationError as e:
         raise CLIError(e)
@@ -89,18 +89,17 @@ def acr_agentpool_delete(cmd,
         cmd, registry_name, resource_group_name)
 
     try:
-        """ Since agent pool is a tracked resource in arm, arm also pings the async deletion api at the
-        same time to get the status. If arm gets the 200 status first and knows that the resource is deleted,
-        it marks the resource as deleted and stop routing further requests to the resource including the
-        async deletion status api. Hence arm will directly return 404. Consider this as successful delete."""
         response = client.delete(resource_group_name=resource_group_name,
                                  registry_name=registry_name,
                                  agent_pool_name=agent_pool_name)
 
-        if (no_wait and response._response.status_code == 202):
-            response._response.status_code = 204
-            return response
+        if no_wait:
+            return client.get(resource_group_name, registry_name, agent_pool_name)
 
+        #Since agent pool is a tracked resource in arm, arm also pings the async deletion api at the
+        #same time to get the status. If arm gets the 200 status first and knows that the resource is deleted,
+        #it marks the resource as deleted and stop routing further requests to the resource including the
+        #async deletion status api. Hence arm will directly return 404. Consider this as successful delete.
         from ._agentpool_polling import delete_agentpool_with_polling
         delete_agentpool_with_polling(cmd, client, agent_pool_name, registry_name, resource_group_name)
         return response
