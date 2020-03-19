@@ -64,7 +64,7 @@ class WebAppUpE2ETests(ScenarioTest):
 
         self.cmd('webapp config show', checks=[
             JMESPathCheck('linuxFxVersion', result['runtime_version']),
-            JMESPathCheck('tags.cli', 'webapp_up'),
+            JMESPathCheck('tags.cli', 'None'),
         ])
 
         self.cmd('webapp config appsettings list', checks=[
@@ -130,7 +130,8 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('linuxFxVersion', result['runtime_version'])
+            JMESPathCheck('linuxFxVersion', result['runtime_version']),
+            JMESPathCheck('tags.cli', 'None'),
         ])
 
         self.cmd('webapp config appsettings list', checks=[
@@ -197,7 +198,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('tags.cli', 'webapp_up'),
+            JMESPathCheck('tags.cli', 'None'),
             JMESPathCheck('windowsFxVersion', None)
         ])
 
@@ -266,7 +267,7 @@ class WebAppUpE2ETests(ScenarioTest):
         ])
 
         self.cmd('webapp config show', checks=[
-            JMESPathCheck('tags.cli', 'webapp_up'),
+            JMESPathCheck('tags.cli', 'None'),
             JMESPathCheck('windowsFxVersion', None)
         ])
 
