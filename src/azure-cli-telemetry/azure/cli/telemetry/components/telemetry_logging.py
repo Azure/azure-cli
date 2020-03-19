@@ -26,6 +26,9 @@ def config_logging_for_upload(config_dir):
     if folder:
         handler = logging.handlers.RotatingFileHandler(os.path.join(folder, TELEMETRY_LOG_NAME),
                                                        maxBytes=10 * 1024 * 1024, backupCount=5)
+
+        print(vars(handler))
+
         del logging.root.handlers[:]
         formatter = logging.Formatter('%(process)d : %(asctime)s : %(levelname)s : %(name)s : %(message)s', None)
         handler.setFormatter(formatter)
