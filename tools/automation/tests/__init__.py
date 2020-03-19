@@ -53,7 +53,7 @@ def _extract_modified_files(target_branch=None):
     if modified_files:
         print('modified files in src/ :', '\n'.join(modified_files))
     else:
-        print('no modified files in src/')
+        print('no modified files in src/, no need to run automation test')
 
     return modified_files
 
@@ -74,7 +74,7 @@ def _extract_top_level_modified_modules():
     if modified_modules:
         print('related top level modules:', list(modified_modules))
     else:
-        print('mo related top level modules.')
+        print('no related top level modules modified, no need to run automation test')
 
     return modified_modules
 
@@ -115,7 +115,7 @@ def execute(args):
                     display("no tests found in module: {}".format(mod))
             args.tests = test_paths
 
-            selected_modules = filter_user_selected_modules_with_tests(modified_modules, args.profile)
+            selected_modules = []
     elif not (args.tests or args.src_file):
         # Default is to run with modules (possibly via environment variable)
         if os.environ.get('AZURE_CLI_TEST_MODULES', None):
