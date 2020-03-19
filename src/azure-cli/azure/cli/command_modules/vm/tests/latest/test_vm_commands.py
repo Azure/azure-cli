@@ -736,7 +736,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk2': 'd2',
             'disk3': 'd3',
             'disk4': 'd4',
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202002180'
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202002180',
+            'g1': self.create_random_name('g1', 20)
         })
 
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
@@ -748,11 +749,11 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('creationData.imageReference.id', '{image}')
         ])
 
-        self.cmd('sig create -g {rg} --gallery-name g1')
-        self.cmd('sig image-definition create -g {rg} --gallery-name g1 --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1')
+        self.cmd('sig create -g {rg} --gallery-name {g1}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {g1} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1')
         self.cmd('disk create -g {rg} -n disk --size-gb 10')
         self.cmd('snapshot create -g {rg} -n s1 --source disk')
-        gallery_image = self.cmd('sig image-version create -g {rg} --gallery-name g1 --gallery-image-definition image --gallery-image-version 1.0.0 --os-snapshot s1').get_output_in_json()['id']
+        gallery_image = self.cmd('sig image-version create -g {rg} --gallery-name {g1} --gallery-image-definition image --gallery-image-version 1.0.0 --os-snapshot s1').get_output_in_json()['id']
         self.kwargs.update({
             'gallery_image': gallery_image
         })
@@ -760,9 +761,9 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('creationData.galleryImageReference.id', '{gallery_image}')
         ])
 
-        # self.cmd('disk create -g {rg} -n {disk4} --size-gb 10 --max-shares 3', checks=[
-        #     self.check('maxShares', 3)
-        # ])
+        self.cmd('disk create -g {rg} -n {disk4} --size-gb 10 --max-shares 1 -l centraluseuap', checks=[
+            self.check('maxShares', 1)
+        ])
 
 
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
