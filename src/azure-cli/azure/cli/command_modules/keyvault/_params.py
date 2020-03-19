@@ -291,11 +291,11 @@ def load_arguments(self, _):
     with self.argument_context('keyvault certificate set-attributes') as c:
         c.attributes_argument('certificate', CertificateAttributes, ignore=['expires', 'not_before'])
 
-    with self.argument_context('keyvault certificate backup', min_api='2018-02-14') as c:
+    with self.argument_context('keyvault certificate backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='Local file path in which to store certificate backup.')
 
-    with self.argument_context('keyvault certificate restore', min_api='2018-02-14') as c:
+    with self.argument_context('keyvault certificate restore') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
                    help='Local certificate backup from which to restore certificate.')
 
