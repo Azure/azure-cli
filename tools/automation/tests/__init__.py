@@ -111,10 +111,10 @@ def execute(args):
         if any(base_mod in modified_modules for base_mod in ['core', 'testsdk', 'telemetry']):
             pass    # if modified modules contains those 3 modules, run all tests
         else:
-            test_paths = []
+            test_paths = set()
             for mod in modified_modules:
                 try:
-                    test_paths.append(os.path.normpath(test_index[mod]))
+                    test_paths.add(os.path.normpath(test_index[mod]))
                 except KeyError:
                     display("no tests found in module: {}".format(mod))
             args.tests = test_paths
