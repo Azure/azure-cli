@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from .._client_factory import cf_monitor
-from ..util import _gen_guid
+from ..util import gen_guid
 from azure.cli.core.commands.transform import _parse_id
 from knack.log import get_logger
 from knack.util import CLIError
@@ -40,7 +40,7 @@ def _clone_and_replace_action_group(source_monitor_client, target_monitor_client
         else:
             resource_group_name, name = _parse_id(action.action_group_id).values()
             action_group = source_monitor_client.action_groups.get(resource_group_name, name)
-            name = CLONED_NAME.format(name, _gen_guid())
+            name = CLONED_NAME.format(name, gen_guid())
             resource_group_name, _ = _parse_id(target_resource).values()
             new_action_group = target_monitor_client.action_groups.create_or_update(resource_group_name,
                                                                                     name,
@@ -56,7 +56,7 @@ def _clone_and_replace_action_group(source_monitor_client, target_monitor_client
 def _clone_alert_rule(monitor_client, alert_rule, target_resource):
     alert_rule.scopes = [target_resource]
     resource_group_name, name = _parse_id(target_resource).values()
-    name = CLONED_NAME.format(name, _gen_guid())
+    name = CLONED_NAME.format(name, gen_guid())
     return monitor_client.metric_alerts.create_or_update(resource_group_name=resource_group_name,
                                                          rule_name=name,
                                                          parameters=alert_rule)
@@ -100,8 +100,8 @@ def _clone_monitor_metrics_alerts(cmd, source_resource, target_resource, always_
 
 
 def _is_resource_type_same_and_sub_same(source_resource, target_resource):
-    source_dict = parse_resource_id(source_resource)
-    target_dict = parse_resource_id(target_resource)
+    source_dict = parse_resource_id(source_resource.lower())
+    target_dict = parse_resource_id(target_resource.lower())
     same_rp = source_dict['namespace'] == target_dict['namespace'] and source_dict['type'] == target_dict['type']
     same_sub = source_dict['subscription'] == target_dict['subscription']
     return same_rp, same_sub

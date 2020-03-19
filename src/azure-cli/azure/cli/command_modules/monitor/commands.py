@@ -251,5 +251,5 @@ def load_command_table(self, _):
         g.command('enable', 'enable_intelligence_pack')
         g.command('disable', 'disable_intelligence_pack')
 
-    with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom) as g:
+    with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom, is_preview=True) as g:
         g.custom_command('clone', 'clone_existed_settings')
