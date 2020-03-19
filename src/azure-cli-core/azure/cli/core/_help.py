@@ -114,11 +114,15 @@ class CLIPrintMixin(CLIHelp):
             return
         if isinstance(help_file.command_source, ExtensionCommandSource):
             logger.warning(help_file.command_source.get_command_warn_msg())
-            # If experimental is true, it overrides preview
-            if help_file.command_source.experimental:
-                logger.warning(help_file.command_source.get_experimental_warn_msg())
-            elif help_file.command_source.preview:
-                logger.warning(help_file.command_source.get_preview_warn_msg())
+
+            # Extension preview/experimental warning is disabled because it can be confusing when displayed together
+            # with command or command group preview/experimental warning. See #12556
+
+            # # If experimental is true, it overrides preview
+            # if help_file.command_source.experimental:
+            #     logger.warning(help_file.command_source.get_experimental_warn_msg())
+            # elif help_file.command_source.preview:
+            #     logger.warning(help_file.command_source.get_preview_warn_msg())
 
 
 class AzCliHelp(CLIPrintMixin, CLIHelp):
