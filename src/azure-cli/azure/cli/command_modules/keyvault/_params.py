@@ -22,10 +22,11 @@ from ._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, validate_key_import_source,
     validate_key_type, validate_policy_permissions,
-    validate_principal, validate_resource_group_name,
-    validate_x509_certificate_chain,
+    validate_principal,
+    validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
-    validate_vault_id, validate_sas_definition_id, validate_storage_account_id, validate_storage_disabled_attribute,
+    validate_vault_id, validate_sas_definition_id,
+    validate_storage_account_id, validate_storage_disabled_attribute,
     validate_deleted_vault_name)
 
 # CUSTOM CHOICE LISTS
@@ -87,6 +88,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(SkuName, default=SkuName.standard.value))
         c.argument('no_self_perms', arg_type=get_three_state_flag(), help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities. If omitted, assume true as default value.')
 
     with self.argument_context('keyvault recover') as c:
         c.argument('vault_name', help='Name of the deleted vault', required=True, completer=None,
@@ -108,15 +110,34 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault set-policy', arg_group='Permission') as c:
         c.argument('object_id', validator=validate_principal)
-        c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*', help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
-        c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*', help='Space-separated list of secret permissions to assign.')
-        c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space-separated list of certificate permissions to assign.')
-        c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*', help='Space-separated list of storage permissions to assign.')
+        c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*',
+                   help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
+        c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*',
+                   help='Space-separated list of secret permissions to assign.')
+        c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*',
+                   help='Space-separated list of certificate permissions to assign.')
+        c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*',
+                   help='Space-separated list of storage permissions to assign.')
 
     with self.argument_context('keyvault network-rule', min_api='2018-02-14') as c:
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
+
+    for item in ['approve', 'reject', 'delete', 'show', 'wait']:
+        with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
+            c.extra('connection_id', options_list=['--id'], required=False,
+                    help='The ID of the private endpoint connection associated with the Key Vault. '
+                         'If specified --vault-name and --name/-n, this should be omitted.')
+            c.argument('description', help='Comments for the {} operation.'.format(item))
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the Key Vault. '
+                            'Required if --id is not specified')
+            c.argument('vault_name', vault_name_type, required=False,
+                       help='Name of the Key Vault. Required if --id is not specified')
+
+    with self.argument_context('keyvault private-link-resource', min_api='2018-02-14') as c:
+        c.argument('vault_name', vault_name_type, help='Name of the Key Vault.')
     # endregion
 
     # region Shared
@@ -126,7 +147,7 @@ def load_arguments(self, _):
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
             c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
 
-        for cmd in ['backup', 'delete', 'download', 'set-attributes', 'show']:
+        for cmd in ['backup', 'delete', 'download', 'list-versions', 'set-attributes', 'show']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 try:
                     c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
@@ -216,7 +237,6 @@ def load_arguments(self, _):
     # endregion
 
     # region KeyVault Storage Account
-
     with self.argument_context('keyvault storage', arg_group='Id') as c:
         c.argument('storage_account_name', options_list=['--name', '-n'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list('storage_account'))
         c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)

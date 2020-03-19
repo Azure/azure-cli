@@ -50,6 +50,10 @@ def task_output_format(result):
     return _output_format(result, _task_format_group)
 
 
+def task_identity_format(result):
+    return _output_format(result, _task_identity_format_group)
+
+
 def taskrun_output_format(result):
     return _output_format(result, _taskrun_format_group)
 
@@ -185,6 +189,18 @@ def _task_format_group(item):
         ('STATUS', _get_value(item, 'status')),
         ('SOURCE REPOSITORY', _get_value(item, 'step', 'contextPath')),
         ('TRIGGERS', _get_triggers(item))
+    ])
+
+
+def _task_identity_format_group(item):
+    identities = _get_array_value(item, 'userAssignedIdentities')
+    identities_by_line = str('\n'.join(identities)) if identities else ' '
+
+    return OrderedDict([
+        ('PRINCIPAL ID', _get_value(item, 'principalId')),
+        ('TENANT ID', _get_value(item, 'tenantId')),
+        ('TYPE', _get_value(item, 'type')),
+        ('USER ASSIGNED IDENTITIES', identities_by_line)
     ])
 
 

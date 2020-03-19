@@ -226,20 +226,41 @@ examples:
         az acr helm show -n MyRegistry mychart --version 0.3.2
 """
 
+helps['acr helm install-cli'] = """
+type: command
+short-summary: Download and install Helm command-line tool.
+examples:
+  - name: Install the default version of Helm CLI to the default location
+    text: >
+        az acr helm install-cli
+  - name: Install a specified version of Helm CLI to the default location
+    text: >
+        az acr helm install-cli --client-version x.x.x
+  - name: Install the default version of Helm CLI to a specified location
+    text: >
+        az acr helm install-cli --install-location /folder/filename
+  - name: Install a specified version of Helm CLI to a specified location
+    text: >
+        az acr helm install-cli --client-version x.x.x --install-location /folder/filename
+"""
+
 helps['acr import'] = """
 type: command
 short-summary: Imports an image to an Azure Container Registry from another Container Registry. Import removes the need to docker pull, docker tag, docker push.
 examples:
-  - name: Import an image to the target registry and inherits sourcerepository:sourcetag from the source registry.
+  - name: Import an image from 'sourceregistry' to 'MyRegistry'. The image inherits its source repository and tag names.
     text: >
         az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
-  - name: Import an image from a registry in a different subscription.
+  - name: Import an image from a public repository on Docker Hub. The image uses the specified repository and tag names.
+    text: >
+        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
+  - name: Import an image from a private repository using its username and password. This also applies to registries outside Azure.
+    text: >
+        az acr import -n MyRegistry --source myprivateregistry.azurecr.io/hello-world:latest -u username -p password
+  - name: Import an image from an Azure container registry in a different subscription.
     text: |
         az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag \\
             -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
-  - name: Import an image from a public repository in Docker Hub
-    text: >
-        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
 """
 
 helps['acr list'] = """
@@ -1119,3 +1140,95 @@ examples:
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
+
+# region private-endpoint-connection
+# be careful to keep long-summary consistent in this region
+helps['acr private-endpoint-connection'] = """
+type: group
+short-summary: Manage container registry private endpoint connections
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection list'] = """
+type: command
+short-summary: List all private endpoint connections to a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection show'] = """
+type: command
+short-summary:  Show details of a container registry's private endpoint connection
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection delete'] = """
+type: command
+short-summary:  Delete a private endpoint connection request for a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-link-resource'] = """
+type: group
+short-summary: Manage registry private link resources.
+"""
+
+helps['acr private-link-resource list'] = """
+type: command
+short-summary: list the private link resources supported for a registry
+"""
+# endregion
+
+# region encryption
+helps['acr encryption'] = """
+type: group
+short-summary: Manage container registry encryption
+long-summary: For more information, see http://aka.ms/acr/cmk
+"""
+
+helps['acr encryption rotate-key'] = """
+type: command
+short-summary: Rotate (update) the container registry's encryption key
+long-summary: For more information, see http://aka.ms/acr/cmk
+"""
+
+helps['acr encryption show'] = """
+type: command
+short-summary: Show the container registry's encryption details
+long-summary: For more information, see http://aka.ms/acr/cmk
+"""
+# endregion
+
+# region identity
+helps['acr identity'] = """
+type: group
+short-summary: Manage service (managed) identities for a container registry
+"""
+
+helps['acr identity assign'] = """
+type: command
+short-summary: Assign a managed identity to a container registry
+long-summary: Managed identities can be user-assigned or system-assigned
+"""
+
+helps['acr identity remove'] = """
+type: command
+short-summary: Remove a managed identity from a container registry
+"""
+
+helps['acr identity show'] = """
+type: command
+short-summary: Show the container registry's identity details
+"""
+# endregion

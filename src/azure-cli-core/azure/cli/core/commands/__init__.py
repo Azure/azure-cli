@@ -976,12 +976,13 @@ def _load_module_command_loader(loader, args, mod):
 class ExtensionCommandSource(object):
     """ Class for commands contributed by an extension """
 
-    def __init__(self, overrides_command=False, extension_name=None, preview=False):
+    def __init__(self, overrides_command=False, extension_name=None, preview=False, experimental=False):
         super(ExtensionCommandSource, self).__init__()
         # True if the command overrides a CLI command
         self.overrides_command = overrides_command
         self.extension_name = extension_name
         self.preview = preview
+        self.experimental = experimental
 
     def get_command_warn_msg(self):
         if self.overrides_command:
@@ -996,6 +997,12 @@ class ExtensionCommandSource(object):
     def get_preview_warn_msg(self):
         if self.preview:
             return "The extension is in preview"
+        return None
+
+    def get_experimental_warn_msg(self):
+        if self.experimental:
+            return "The extension is experimental and not covered by customer support. " \
+                   "Please use with discretion."
         return None
 
 
@@ -1157,11 +1164,9 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
+        merged_kwargs['preview_info'] = None
         if kwargs.get('is_preview', False):
-            merged_kwargs['preview_info'] = PreviewItem(
-                self.command_loader.cli_ctx,
-                object_type='command'
-            )
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         self.command_loader._cli_command(command_name,  # pylint: disable=protected-access
@@ -1203,7 +1208,9 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs_custom = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command=True))
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        merged_kwargs['preview_info'] = None
+        if kwargs.get('is_preview', False):
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
 
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
@@ -1236,7 +1243,9 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        merged_kwargs['preview_info'] = None
+        if kwargs.get('is_preview', False):
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
@@ -1256,7 +1265,9 @@ class AzCommandGroup(CommandGroup):
         merged_kwargs = self._flatten_kwargs(kwargs, get_command_type_kwarg(custom_command))
         # don't inherit deprecation or preview info from command group
         merged_kwargs['deprecate_info'] = kwargs.get('deprecate_info', None)
-        merged_kwargs['preview_info'] = kwargs.get('preview_info', None)
+        merged_kwargs['preview_info'] = None
+        if kwargs.get('is_preview', False):
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
 
         if getter_type:
             merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)

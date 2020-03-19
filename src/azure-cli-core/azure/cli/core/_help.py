@@ -78,7 +78,7 @@ class CLIPrintMixin(CLIHelp):
         from colorama import Style
         indent = 0
         _print_indent('Examples', indent)
-        for e in AzCliHelp.example_provider(help_file):
+        for e in help_file.examples:
             indent = 1
             _print_indent(u'{0}'.format(e.short_summary), indent)
             indent = 2
@@ -114,7 +114,10 @@ class CLIPrintMixin(CLIHelp):
             return
         if isinstance(help_file.command_source, ExtensionCommandSource):
             logger.warning(help_file.command_source.get_command_warn_msg())
-            if help_file.command_source.preview:
+            # If experimental is true, it overrides preview
+            if help_file.command_source.experimental:
+                logger.warning(help_file.command_source.get_experimental_warn_msg())
+            elif help_file.command_source.preview:
                 logger.warning(help_file.command_source.get_preview_warn_msg())
 
 
@@ -147,10 +150,21 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self._register_help_loaders()
         self._name_to_content = {}
 
-    # override
     def show_help(self, cli_name, nouns, parser, is_group):
         self.update_loaders_with_help_file_contents(nouns)
-        super(AzCliHelp, self).show_help(cli_name, nouns, parser, is_group)
+
+        import colorama
+        colorama.init(autoreset=True)
+        delimiters = ' '.join(nouns)
+        help_file = self.command_help_cls(self, delimiters, parser) if not is_group \
+            else self.group_help_cls(self, delimiters, parser)
+        help_file.load(parser)
+        if not nouns:
+            help_file.command = ''
+        else:
+            AzCliHelp.update_examples(help_file)
+        self._print_detailed_help(cli_name, help_file)
+
         print(SURVEY_PROMPT)
 
     def _register_help_loaders(self):
@@ -192,8 +206,8 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
     # This method is meant to be a hook that can be overridden by an extension or module.
     @staticmethod
-    def example_provider(help_file):
-        return help_file.examples
+    def update_examples(help_file):
+        pass
 
 
 class CliHelpFile(KnackHelpFile):

@@ -44,7 +44,7 @@ def resolve_client_arg_name(operation, kwargs):
 
 
 def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=None, api_version=None,
-                            aux_subscriptions=None, **kwargs):
+                            aux_subscriptions=None, aux_tenants=None, **kwargs):
     """
      :params subscription_id: the current account's subscription
      :param aux_subscriptions: mainly for cross tenant scenarios, say vnet peering.
@@ -66,6 +66,7 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
     client, _ = _get_mgmt_service_client(cli_ctx, client_type, subscription_id=subscription_id,
                                          api_version=api_version, sdk_profile=sdk_profile,
                                          aux_subscriptions=aux_subscriptions,
+                                         aux_tenants=aux_tenants,
                                          **kwargs)
     return client
 
@@ -118,13 +119,15 @@ def _get_mgmt_service_client(cli_ctx,
                              resource=None,
                              sdk_profile=None,
                              aux_subscriptions=None,
+                             aux_tenants=None,
                              **kwargs):
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     profile = Profile(cli_ctx=cli_ctx)
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource,
-                                                             aux_subscriptions=aux_subscriptions)
+                                                             aux_subscriptions=aux_subscriptions,
+                                                             aux_tenants=aux_tenants)
 
     client_kwargs = {}
     if base_url_bound:

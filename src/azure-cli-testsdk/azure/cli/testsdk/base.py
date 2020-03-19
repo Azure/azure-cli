@@ -54,6 +54,11 @@ class CheckerMixin(object):
         query = self._apply_kwargs(query)
         return JMESPathCheckExists(query)
 
+    def not_exists(self, query):
+        from azure.cli.testsdk.checkers import JMESPathCheckNotExists
+        query = self._apply_kwargs(query)
+        return JMESPathCheckNotExists(query)
+
     def greater_than(self, query, expected_results):
         from azure.cli.testsdk.checkers import JMESPathCheckGreaterThan
         query = self._apply_kwargs(query)

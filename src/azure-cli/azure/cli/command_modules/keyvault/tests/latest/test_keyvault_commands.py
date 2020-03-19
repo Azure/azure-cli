@@ -33,7 +33,12 @@ KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
 def _create_keyvault(test, kwargs, additional_args=None):
     # need premium KeyVault to store keys in HSM
-    kwargs['add'] = additional_args or ''
+    # if --enable-soft-delete is not specified, turn that off to prevent the tests from leaving waste behind
+    if additional_args is None:
+        additional_args = ''
+    if '--enable-soft-delete' not in additional_args:
+        additional_args += ' --enable-soft-delete false'
+    kwargs['add'] = additional_args
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
 
 
@@ -49,6 +54,97 @@ class DateTimeParseTest(unittest.TestCase):
         self.assertEqual(_asn1_to_iso8601("20170424163720Z"), expected)
 
 
+class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_plr')
+    def test_keyvault_private_link_resource(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-plr-', 24),
+            'loc': 'centraluseuap'
+        })
+
+        _create_keyvault(self, self.kwargs)
+        self.cmd('keyvault private-link-resource list --vault-name {kv}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].groupId', 'vault')
+                 ])
+
+
+class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pec')
+    def test_keyvault_private_endpoint_connection(self, resource_group):
+        self.kwargs.update({
+            'kv': self.create_random_name('cli-test-kv-pec-', 24),
+            'loc': 'centraluseuap',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        # Prepare vault and network
+        keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
+        self.kwargs['kv_id'] = keyvault['id']
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+                      '--connection-name {pe_connection} --private-connection-resource-id {kv_id} '
+                      '--group-ids vault').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+
+        # Show the connection at vault side
+        keyvault = self.cmd('keyvault show -n {kv}',
+                            checks=self.check('length(properties.privateEndpointConnections)', 1)).get_output_in_json()
+        self.kwargs['kv_pec_id'] = keyvault['properties']['privateEndpointConnections'][0]['id']
+        self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
+                 checks=self.check('id', '{kv_pec_id}'))
+        self.kwargs['kv_pec_name'] = self.kwargs['kv_pec_id'].split('/')[-1]
+        self.cmd('keyvault private-endpoint-connection show --vault-name {kv} --name {kv_pec_name}',
+                 checks=self.check('name', '{kv_pec_name}'))
+        self.cmd('keyvault private-endpoint-connection show --vault-name {kv} -n {kv_pec_name}',
+                 checks=self.check('name', '{kv_pec_name}'))
+
+        # Try running `set-policy` on the linked vault
+        self.kwargs['policy_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
+                 checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd('keyvault private-endpoint-connection reject --id {kv_pec_id} '
+                 '--description "{rejection_desc}" --no-wait', checks=self.is_empty())
+
+        self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
+                     self.check('provisioningState', 'Updating')
+                 ])
+
+        self.cmd('keyvault private-endpoint-connection wait --id {kv_pec_id} --created')
+        self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+        self.cmd('keyvault private-endpoint-connection approve --vault-name {kv} --name {kv_pec_name} '
+                 '--description "{approval_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
+
+
 class KeyVaultMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_mgmt')
     def test_keyvault_mgmt(self, resource_group):
@@ -61,13 +157,15 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         })
 
         # test create keyvault with default access policy set
-        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc}', checks=[
+        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --enable-soft-delete false', checks=[
             self.check('name', '{kv}'),
             self.check('location', '{loc}'),
             self.check('resourceGroup', '{rg}'),
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 1),
-            self.check('properties.sku.name', 'standard')
+            self.check('properties.sku.name', 'standard'),
+            self.check('properties.enableSoftDelete', False),
+            self.check('properties.enablePurgeProtection', None),
         ]).get_output_in_json()
         self.kwargs['policy_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         self.cmd('keyvault show -n {kv}', checks=[
@@ -90,13 +188,13 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('properties.sku.name', 'premium'),
         ])
         # test updating updating other properties
-        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
+        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete '
                  '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
                  '--bypass AzureServices --default-action Deny',
                  checks=[
                      self.check('name', '{kv}'),
                      self.check('properties.enableSoftDelete', True),
-                     self.check('properties.enablePurgeProtection', True),
+                     self.check('properties.enablePurgeProtection', None),
                      self.check('properties.enabledForDeployment', True),
                      self.check('properties.enabledForDiskEncryption', True),
                      self.check('properties.enabledForTemplateDeployment', True),
@@ -113,23 +211,38 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         # test keyvault delete
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault list -g {rg}', checks=self.is_empty())
+        self.cmd('keyvault purge -n {kv}')
+        # ' will be parsed by shlex, so need escaping
+        self.cmd(r"az keyvault list-deleted --query [?name==\'{kv}\']", checks=self.is_empty())
 
         # test create keyvault further
-        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --no-self-perms', checks=[
+        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --no-self-perms --enable-soft-delete false', checks=[
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 0)
         ])
 
+        # test premium sku
+        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --sku premium --enable-soft-delete false', checks=[
+            self.check('properties.sku.name', 'premium')
+        ])
+
+        # test enableSoftDelete is True if omitted
         self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true '
                  '--enabled-for-disk-encryption true --enabled-for-template-deployment true',
                  checks=[
+                     self.check('properties.enableSoftDelete', True),
                      self.check('properties.enabledForDeployment', True),
                      self.check('properties.enabledForDiskEncryption', True),
                      self.check('properties.enabledForTemplateDeployment', True)
                  ])
-        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --sku premium', checks=[
-            self.check('properties.sku.name', 'premium')
-        ])
+        self.cmd('keyvault delete -n {kv3}')
+        self.cmd('keyvault purge -n {kv3}')
+
+        # test explicitly set '--enable-soft-delete true --enable-purge-protection true'
+        # unfortunately this will leave some waste behind, so make it the last test to lowered the execution count
+        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-soft-delete true --enable-purge-protection true',
+                 checks=[self.check('properties.enableSoftDelete', True),
+                         self.check('properties.enablePurgeProtection', True)])
 
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
@@ -140,7 +253,6 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
             'loc': 'westus',
             'key': 'key1'
         })
-
         _create_keyvault(self, self.kwargs)
 
         # create a key
@@ -156,17 +268,25 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 1))
 
         # create a new key version
-        key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software --disabled --ops encrypt decrypt --tags test=foo', checks=[
-            self.check('attributes.enabled', False),
-            self.check('length(key.keyOps)', 2),
-            self.check('tags', {'test': 'foo'})
-        ]).get_output_in_json()
+        key = self.cmd('keyvault key create --vault-name {kv} -n {key} -p software --disabled --ops encrypt decrypt '
+                       '--tags test=foo',
+                       checks=[
+                           self.check('attributes.enabled', False),
+                           self.check('length(key.keyOps)', 2),
+                           self.check('tags', {'test': 'foo'})
+                       ]).get_output_in_json()
         second_kid = key['key']['kid']
+        pure_kid = '/'.join(second_kid.split('/')[:-1])  # Remove version field
+        self.kwargs['kid'] = second_kid
+        self.kwargs['pkid'] = pure_kid
+
         # list key versions
         self.cmd('keyvault key list-versions --vault-name {kv} -n {key}',
                  checks=self.check('length(@)', 2))
         self.cmd('keyvault key list-versions --vault-name {kv} -n {key} --maxresults 10',
                  checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --id {kid}', checks=self.check('length(@)', 2))
+        self.cmd('keyvault key list-versions --id {pkid}', checks=self.check('length(@)', 2))
 
         # show key (latest)
         self.cmd('keyvault key show --vault-name {kv} -n {key}',
@@ -364,7 +484,7 @@ class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
                  checks=self.check('value', 'ABC123'))
         data = self.cmd('keyvault secret delete --vault-name {kv} -n {sec}').get_output_in_json()
         if self.is_live:
-            time.sleep(20)
+            time.sleep(40)
 
         self.kwargs['secret_id'] = data['id']
         self.kwargs['secret_recovery_id'] = data['recoveryId']
@@ -552,10 +672,8 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
 
 
 class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_pending')
     def test_keyvault_pending_certificate(self, resource_group):
-
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-cr-pe-', 24),
             'loc': 'westus',
@@ -592,7 +710,6 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
 
 # TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
 class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_download')
     def test_keyvault_certificate_download(self, resource_group):
         import OpenSSL.crypto

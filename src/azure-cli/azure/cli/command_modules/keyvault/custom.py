@@ -526,7 +526,7 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
 
 
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
-    """ Removes a network rule from the network ACLs for a Key Vault. """
+    """ Remove a network rule from the network ACLs for a Key Vault. """
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -566,7 +566,7 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
-    """ Lists the network rules from the network ACLs for a Key Vault. """
+    """ List the network rules from the network ACLs for a Key Vault. """
     vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
     return vault.properties.network_acls
 
@@ -1153,4 +1153,73 @@ def restore_storage_account(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
         return client.restore_storage_account(vault_base_url, data)
+# endregion
+
+
+# region private_endpoint
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, vault_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None,
+                                               no_wait=False):
+    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
+                                                            resource_type=ResourceType.MGMT_KEYVAULT)
+
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    new_status = PrivateEndpointServiceConnectionStatus.approved \
+        if is_approved else PrivateEndpointServiceConnectionStatus.rejected
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+
+    retval = client.put(resource_group_name=resource_group_name,
+                        vault_name=vault_name,
+                        private_endpoint_connection_name=private_endpoint_connection_name,
+                        properties=private_endpoint_connection)
+
+    if no_wait:
+        return retval
+
+    new_retval = \
+        _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name)
+
+    if new_retval:
+        return new_retval
+    return retval
+
+
+def _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name):
+    retries = 0
+    max_retries = 10
+    wait_second = 1
+    while retries < max_retries:
+        pl = client.get(resource_group_name=resource_group_name,
+                        vault_name=vault_name,
+                        private_endpoint_connection_name=private_endpoint_connection_name)
+
+        if pl.provisioning_state == 'Succeeded':
+            return pl
+        time.sleep(wait_second)
+        retries += 1
+
+    return None
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+                                        description=None, no_wait=False):
+    """Approve a private endpoint connection request for a Key Vault."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=True,
+        description=description, no_wait=no_wait
+    )
+
+
+def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+                                       description=None, no_wait=False):
+    """Reject a private endpoint connection request for a Key Vault."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=False,
+        description=description, no_wait=no_wait
+    )
 # endregion
