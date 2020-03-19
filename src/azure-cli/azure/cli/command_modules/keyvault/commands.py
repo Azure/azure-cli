@@ -63,25 +63,26 @@ def load_command_table(self, _):
     with self.command_group('keyvault', kv_vaults_sdk, client_factory=keyvault_client_vaults_factory) as g:
         g.custom_command('create', 'create_keyvault', supports_no_wait=True,
                          doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties')
-        g.custom_command('recover', 'recover_keyvault')
+        g.custom_command('recover', 'recover_keyvault', supports_no_wait=True)
         g.custom_command('list', 'list_keyvault')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
-        g.command('purge', 'purge_deleted')
-        g.custom_command('set-policy', 'set_policy')
-        g.custom_command('delete-policy', 'delete_policy')
+        g.command('purge', 'begin_purge_deleted', supports_no_wait=True)
+        g.custom_command('set-policy', 'set_policy', supports_no_wait=True)
+        g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
         g.command('list-deleted', 'list_deleted')
         g.generic_update_command(
             'update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
             custom_func_name='update_keyvault',
-            doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties')
+            doc_string_source='azure.mgmt.keyvault.v' + mgmt_api_version + '.models#VaultProperties',
+            supports_no_wait=True)
 
     with self.command_group('keyvault network-rule',
                             kv_vaults_sdk,
                             min_api='2018-02-14',
                             client_factory=keyvault_client_vaults_factory) as g:
-        g.custom_command('add', 'add_network_rule')
-        g.custom_command('remove', 'remove_network_rule')
+        g.custom_command('add', 'add_network_rule', supports_no_wait=True)
+        g.custom_command('remove', 'remove_network_rule', supports_no_wait=True)
         g.custom_command('list', 'list_network_rules')
 
     with self.command_group('keyvault private-endpoint-connection',

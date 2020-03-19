@@ -259,9 +259,9 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
                                                        'sku': Sku(name=SkuName.standard.value),
                                                        'create_mode': CreateMode.recover.value})
 
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=params)
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         vault_name=vault_name,
+                                         parameters=params)
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
@@ -562,12 +562,12 @@ def set_policy(cmd, client, resource_group_name, vault_name,
             if certificate_permissions is None else certificate_permissions
         storage = policy.permissions.storage if storage_permissions is None else storage_permissions
         policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=vault.location,
-                                       tags=vault.tags,
-                                       properties=vault.properties))
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         vault_name=vault_name,
+                                         parameters=VaultCreateOrUpdateParameters(
+                                             location=vault.location,
+                                             tags=vault.tags,
+                                             properties=vault.properties))
 
 
 def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
@@ -644,12 +644,12 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
         return vault
 
     # otherwise update
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=vault.location,
-                                       tags=vault.tags,
-                                       properties=vault.properties))
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         vault_name=vault_name,
+                                         parameters=VaultCreateOrUpdateParameters(
+                                             location=vault.location,
+                                             tags=vault.tags,
+                                             properties=vault.properties))
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
@@ -680,12 +680,12 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
                                         object_id.lower() != p.object_id.lower()]
     if len(vault.properties.access_policies) == prev_policies_len:
         raise CLIError('No matching policies found')
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   vault_name=vault_name,
-                                   parameters=VaultCreateOrUpdateParameters(
-                                       location=vault.location,
-                                       tags=vault.tags,
-                                       properties=vault.properties))
+    return client.begin_create_or_update(resource_group_name=resource_group_name,
+                                         vault_name=vault_name,
+                                         parameters=VaultCreateOrUpdateParameters(
+                                             location=vault.location,
+                                             tags=vault.tags,
+                                             properties=vault.properties))
 # endregion
 
 
