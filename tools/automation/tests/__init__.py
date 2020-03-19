@@ -36,12 +36,14 @@ def _extract_module_name(path):
     raise ValueError('unexpected error: unable to extract name from path: {}'.format(path))
 
 
-def _extract_modified_files(target_branch=None):
-    if target_branch is None:
-        ado_pr_target_branch = os.environ.get('ADO_PULL_REQUEST_TARGET_BRANCH')
-        qualified_target_branch = 'origin/{}'.format(ado_pr_target_branch)
+def _extract_modified_files(target_branch=os.environ.get('ADO_PULL_REQUEST_TARGET_BRANCH')):
+    ado_raw_env_replacement = '$(System.PullRequest.TargetBranch)'
+
+    if target_branch == ado_raw_env_replacement:
+        # in ADO env but not in PR stage
+        return ['core']
     else:
-        qualified_target_branch = target_branch
+        qualified_target_branch = 'origin/{}'.format(target_branch)
 
     cmd_tpl = 'git --no-pager diff --name-only --diff-filter=ACMRT {} -- src/'
     cmd = cmd_tpl.format(qualified_target_branch)
@@ -105,7 +107,7 @@ def execute(args):
 
         modified_modules = _extract_top_level_modified_modules()
         if any(base_mod in modified_modules for base_mod in ['core', 'testsdk', 'telemetry']):
-            pass
+            pass    # if modified modules contains those 3 modules, run all tests
         else:
             test_paths = []
             for mod in modified_modules:
