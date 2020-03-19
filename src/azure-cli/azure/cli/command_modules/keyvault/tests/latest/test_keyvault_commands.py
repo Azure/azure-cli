@@ -33,7 +33,12 @@ KEYS_DIR = os.path.join(TEST_DIR, 'keys')
 
 def _create_keyvault(test, kwargs, additional_args=None):
     # need premium KeyVault to store keys in HSM
-    kwargs['add'] = additional_args or ''
+    # if --enable-soft-delete is not specified, turn that off to prevent the tests from leaving waste behind
+    if additional_args is None:
+        additional_args = ''
+    if '--enable-soft-delete' not in additional_args:
+        additional_args += ' --enable-soft-delete false'
+    kwargs['add'] = additional_args
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
 
 
@@ -58,8 +63,11 @@ class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
         })
 
         _create_keyvault(self, self.kwargs)
-        self.cmd('keyvault private-link-resource show --vault-name {kv}',
-                 checks=self.check('value[0].groupId', 'vault'))
+        self.cmd('keyvault private-link-resource list --vault-name {kv}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].groupId', 'vault')
+                 ])
 
 
 class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
@@ -112,39 +120,29 @@ class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
             'rejection_desc': 'You are rejected!'
         })
         self.cmd('keyvault private-endpoint-connection reject --id {kv_pec_id} '
-                 '--rejection-description "{rejection_desc}"', checks=[
+                 '--description "{rejection_desc}" --no-wait', checks=self.is_empty())
+
+        self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
+                 checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Rejected'),
                      self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
                      self.check('provisioningState', 'Updating')
                  ])
 
-        max_retries = 20
-        retries = 0
-        while self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}').\
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                time.sleep(5)
-            retries += 1
-
+        self.cmd('keyvault private-endpoint-connection wait --id {kv_pec_id} --created')
         self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
-
-        self.cmd('keyvault private-endpoint-connection approve --vault-name {kv} --name {kv_pec_name} '
-                 '--approval-description "{approval_desc}"', checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
-                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
-                     self.check('provisioningState', 'Updating')
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
+                     self.check('provisioningState', 'Succeeded')
                  ])
 
-        retries = 0
-        while self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}'). \
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                time.sleep(5)
-            retries += 1
-
-        self.cmd('keyvault private-endpoint-connection show --id {kv_pec_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
+        self.cmd('keyvault private-endpoint-connection approve --vault-name {kv} --name {kv_pec_name} '
+                 '--description "{approval_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
+                     self.check('provisioningState', 'Succeeded')
+                 ])
 
 
 class KeyVaultMgmtScenarioTest(ScenarioTest):
@@ -159,13 +157,15 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         })
 
         # test create keyvault with default access policy set
-        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc}', checks=[
+        keyvault = self.cmd('keyvault create -g {rg} -n {kv} -l {loc} --enable-soft-delete false', checks=[
             self.check('name', '{kv}'),
             self.check('location', '{loc}'),
             self.check('resourceGroup', '{rg}'),
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 1),
-            self.check('properties.sku.name', 'standard')
+            self.check('properties.sku.name', 'standard'),
+            self.check('properties.enableSoftDelete', False),
+            self.check('properties.enablePurgeProtection', None),
         ]).get_output_in_json()
         self.kwargs['policy_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         self.cmd('keyvault show -n {kv}', checks=[
@@ -188,13 +188,13 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('properties.sku.name', 'premium'),
         ])
         # test updating updating other properties
-        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
+        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete '
                  '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
                  '--bypass AzureServices --default-action Deny',
                  checks=[
                      self.check('name', '{kv}'),
                      self.check('properties.enableSoftDelete', True),
-                     self.check('properties.enablePurgeProtection', True),
+                     self.check('properties.enablePurgeProtection', None),
                      self.check('properties.enabledForDeployment', True),
                      self.check('properties.enabledForDiskEncryption', True),
                      self.check('properties.enabledForTemplateDeployment', True),
@@ -211,23 +211,38 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         # test keyvault delete
         self.cmd('keyvault delete -n {kv}')
         self.cmd('keyvault list -g {rg}', checks=self.is_empty())
+        self.cmd('keyvault purge -n {kv}')
+        # ' will be parsed by shlex, so need escaping
+        self.cmd(r"az keyvault list-deleted --query [?name==\'{kv}\']", checks=self.is_empty())
 
         # test create keyvault further
-        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --no-self-perms', checks=[
+        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --no-self-perms --enable-soft-delete false', checks=[
             self.check('type(properties.accessPolicies)', 'array'),
             self.check('length(properties.accessPolicies)', 0)
         ])
 
+        # test premium sku
+        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --sku premium --enable-soft-delete false', checks=[
+            self.check('properties.sku.name', 'premium')
+        ])
+
+        # test enableSoftDelete is True if omitted
         self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true '
                  '--enabled-for-disk-encryption true --enabled-for-template-deployment true',
                  checks=[
+                     self.check('properties.enableSoftDelete', True),
                      self.check('properties.enabledForDeployment', True),
                      self.check('properties.enabledForDiskEncryption', True),
                      self.check('properties.enabledForTemplateDeployment', True)
                  ])
-        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --sku premium', checks=[
-            self.check('properties.sku.name', 'premium')
-        ])
+        self.cmd('keyvault delete -n {kv3}')
+        self.cmd('keyvault purge -n {kv3}')
+
+        # test explicitly set '--enable-soft-delete true --enable-purge-protection true'
+        # unfortunately this will leave some waste behind, so make it the last test to lowered the execution count
+        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --enable-soft-delete true --enable-purge-protection true',
+                 checks=[self.check('properties.enableSoftDelete', True),
+                         self.check('properties.enablePurgeProtection', True)])
 
 
 class KeyVaultKeyScenarioTest(ScenarioTest):
@@ -469,7 +484,7 @@ class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
                  checks=self.check('value', 'ABC123'))
         data = self.cmd('keyvault secret delete --vault-name {kv} -n {sec}').get_output_in_json()
         if self.is_live:
-            time.sleep(20)
+            time.sleep(40)
 
         self.kwargs['secret_id'] = data['id']
         self.kwargs['secret_recovery_id'] = data['recoveryId']

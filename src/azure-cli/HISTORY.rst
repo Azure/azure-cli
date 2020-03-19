@@ -3,6 +3,130 @@
 Release History
 ===============
 
+2.2.0
+++++++
+
+**ACR**
+
+* Fix: `az acr login` wrongly raise error
+* Add new command `az acr helm install-cli`
+* Add private link and CMK support
+* add 'private-link-resource list' command
+
+**AKS**
+
+* fix the aks browse in cloud shell
+* az aks: Fix monitoring addon and agentpool NoneType errors
+* Add --nodepool-tags to node pool when creating azure kubernetes cluster
+* Add --tags when adding or updating a nodepool to cluster
+* aks create: add `--enable-private-cluster`
+* add --nodepool-labels when creating azure kubernetes cluster
+* add --labels when adding a new nodepool to azure kubernetes cluster
+* add missing / in the dashboard url
+* Support create aks clusters enabling managed identity
+* az aks: Validate network plugin to be either "azure" or "kubenet"
+* az aks: Add aad session key support
+* [BREAKING CHANGE] az aks: support msi changes for GF and BF for omsagent (Container monitoring)(#1)
+* az aks use-dev-spaces: Adding endpoint type option to the use-dev-spaces command to customize the endpoint created on an Azure Dev Spaces controller
+
+**AppConfig**
+
+* Unblock using "kv set" to add keyvault reference and feature …
+
+**AppService**
+
+* az webapp create : Fix issue when running the command with --runtime
+* az functionapp deployment source config-zip: Add an error message if resource group or function name are invalid/don't exist
+* functionapp create: Fix the warning message that appears with `functionapp create` today which cites a `--functions_version` flag but erroneously uses a `_` instead of a `-` in the flag name
+* az functionapp create: Updated the way linuxFxVersion and container image name were being set for linux function apps
+* az functionapp deployment source config-zip: Fix an issue caused by app settings change racing condition during zip deploy, giving 5xx errors during deployment
+* Fix #5720946: az webapp backup fails to set name
+
+**ARM**
+
+* az resource: Improve the examples of the resource module
+* az policy assignment list: Support listing policy assignments at Management Group scope
+* Add `az deployment group` and `az deployment operation group` for template deployment at resource groups. This is a duplicate of `az group deployment` and `az group deployment operation`
+* Add `az deployment sub` and `az deployment operation sub` for template deployment at subscription scope. This is a duplicate of `az deployment` and `az deployment operation`
+* Add `az deployment mg` and `az deployment operation mg` for template deployment at management groups
+* Add `az deployment tenant` and `az deployment operation tenant` for template deployment at tenant scope
+* az policy assignment create: Add a description to the `--location` parameter
+* az group deployment create: Add parameter `--aux-tenants` to support cross tenants
+
+**CDN**
+
+* Add CDN WAF commands
+
+**Compute**
+
+* az sig image-version: add --data-snapshot-luns
+* az ppg show: add --colocation-status to enable fetching the colocation status of all the resources in the proximity placement group
+* az vmss create/update: support automatic repairs
+* [BREAKING CHANGE] az image template: rename template to builder
+* az image builder create: add --image-template
+
+**Cosmos DB**
+
+* Add Sql stored procedure, udf and trigger cmdlets
+* az cosmosdb create: add --key-uri to support adding key vault encryption information
+
+**KeyVault**
+
+* keyvault create: enable soft-delete by default
+
+**Monitor**
+
+* az monitor metrics alert create: support `~` in `--condition`
+
+**Network**
+
+* az network application-gateway rewrite-rule create: support url configuration
+* az network dns zone import: --zone-name will be case insensitive in the future
+* az network private-endpoint/private-link-service: remove preview label
+* az network bastion: support bastion
+* az network vnet list-available-ips: support list available ips in a vnet
+* az network watcher flow-log create/list/delete/update: add new commands to manage watcher flow log and exposing --location to identify watcher explicitly
+* az network watcher flow-log configure: deprecated
+* az network watcher flow-log show: support --location and --name to get ARM-formatted result, deprecated old formatted output
+
+**Policy**
+
+* az policy assignment create: Fix the bug that automatically generated name of policy assignment exceeds the limit
+
+**RBAC**
+
+* az ad group show: fix --group value treated as regex problem
+
+**RDBMS**
+
+* Bump the azure-mgmt-rdbms SDK version to 2.0.0
+* az postgres private-endpoint-connection: manage postgres private endpoint connections
+* az postgres private-link-resource: manage postgres private link resources
+* az mysql private-endpoint-connection: manage mysql private endpoint connections
+* az mysql private-link-resource: manage mysql private link resources
+* az mariadb private-endpoint-connection: manage mariadb private endpoint connections
+* az mariadb private-link-resource: manage mariadb private link resources
+* Updating RDBMS Private Endpoint Tests
+
+**SQL**
+
+* Sql midb Add: list-deleted, show-deleted, update-retention, show-retention
+* (sql server create:) Add optional public-network-access 'Enable'/'Disable' flag to sql server create
+* (sql server update:) make some customer-facing change
+* Add minimal_tls_version property for MI and SQL DB
+
+**Storage**
+
+* az storage blob delete-batch: Misbehaving `--dryrun` flag
+* az storage account network-rule add (bug fix): add operation should be idempotent
+* az storage account create/update: Add Routing Preference support
+* Upgrade azure-mgmt-storage version to 8.0.0
+* az storage container immutability create: add --allow-protected-append-write parameter
+* az storage account private-link-resource list: Add support to list private link resources for storage account
+* az storage account private-endpoint-connection approve/reject/show/delete: Support to manage private endpoint connections
+* az storage account blob-service-properties update: add --enable-restore-policy and --restore-days
+* az storage blob restore: Add support to restore blob ranges
+
 2.1.0
 ++++++
 
@@ -161,6 +285,7 @@ Release History
 
 **IoT Central**
 
+* Update error details, update default application template and prompt message.
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
 **Key Vault**

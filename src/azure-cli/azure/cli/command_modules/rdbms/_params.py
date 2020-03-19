@@ -125,3 +125,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     for scope in ['mariadb server replica list', 'mysql server replica list', 'postgres server replica list']:
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
+
+    for item in ['approve', 'reject', 'delete', 'show']:
+        for scope in ['mariadb server private-endpoint-connection {}', 'mysql server private-endpoint-connection {}', 'postgres server private-endpoint-connection {}']:
+            with self.argument_context(scope.format(item)) as c:
+                c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                           help='The name of the private endpoint connection associated with the Server. '
+                                'Required if --id is not specified')
+                c.extra('connection_id', options_list=['--id'], required=False,
+                        help='The ID of the private endpoint connection associated with the Server. '
+                             'If specified --server-name/-s and --name/-n, this should be omitted.')
+                c.argument('server_name', options_list=['--server-name', '-s'], required=False,
+                           help='Name of the Server. Required if --id is not specified')
+                c.argument('resource_group_name', help='The resource group name of specified server.',
+                           required=False)
+                c.argument('description', help='Comments for {} operation.'.format(item))
+
+    for scope in ['mariadb server private-link-resource', 'mysql server private-link-resource', 'postgres server private-link-resource']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'], required=True, help='Name of the Server.')

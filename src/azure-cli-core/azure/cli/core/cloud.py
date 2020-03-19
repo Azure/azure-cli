@@ -20,6 +20,9 @@ logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
+# Add names of clouds that don't allow telemetry data collection here such as JEDI.
+CLOUDS_FORBIDDING_TELEMETRY = []
+
 
 class CloudNotRegisteredException(Exception):
     def __init__(self, cloud_name):
@@ -68,7 +71,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  media_resource_id=None,
                  ossrdbms_resource_id=None,
                  log_analytics_resource_id=None,
-                 app_insights_resource_id=None):
+                 app_insights_resource_id=None,
+                 app_insights_telemetry_channel_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -85,6 +89,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.ossrdbms_resource_id = ossrdbms_resource_id
         self.log_analytics_resource_id = log_analytics_resource_id
         self.app_insights_resource_id = app_insights_resource_id
+        self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -231,7 +236,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         media_resource_id='https://rest.media.azure.net',
         ossrdbms_resource_id='https://ossrdbms-aad.database.windows.net',
         app_insights_resource_id='https://api.applicationinsights.io',
-        log_analytics_resource_id='https://api.loganalytics.io'),
+        log_analytics_resource_id='https://api.loganalytics.io',
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
@@ -256,7 +262,8 @@ AZURE_CHINA_CLOUD = Cloud(
         media_resource_id='https://rest.media.chinacloudapi.cn',
         ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn',
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
-        log_analytics_resource_id='https://api.loganalytics.azure.cn'),
+        log_analytics_resource_id='https://api.loganalytics.azure.cn',
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -279,7 +286,8 @@ AZURE_US_GOV_CLOUD = Cloud(
         media_resource_id='https://rest.media.usgovcloudapi.net',
         ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net',
         app_insights_resource_id='https://api.applicationinsights.us',
-        log_analytics_resource_id='https://api.loganalytics.us'),
+        log_analytics_resource_id='https://api.loganalytics.us',
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
@@ -526,3 +534,7 @@ def remove_cloud(cli_ctx, cloud_name):
     config.remove_section(cloud_name)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:
         config.write(configfile)
+
+
+def cloud_forbid_telemetry(cli_ctx):
+    return get_active_cloud_name(cli_ctx) in CLOUDS_FORBIDDING_TELEMETRY

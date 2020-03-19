@@ -52,13 +52,13 @@ from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
 from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
-from .utils import _normalize_sku, get_sku_name
+from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            should_create_new_rg, set_location, does_app_already_exist, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
-from ._constants import (RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP, NODE_VERSION_DEFAULT_FUNCTIONAPP,
-                         RUNTIME_TO_IMAGE_FUNCTIONAPP, NODE_VERSION_DEFAULT)
+from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
+                         FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT)
 
 logger = get_logger(__name__)
 
@@ -132,7 +132,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         match = helper.resolve(runtime)
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
-        match['setter'](cmd, match, site_config)
+        match['setter'](cmd=cmd, stack=match, site_config=site_config)
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
         if not match['displayName'].startswith('node'):
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
@@ -308,6 +308,9 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
 def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_remote=False, timeout=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
+    if app is None:
+        raise CLIError('The function app \'{}\' was not found in resource group \'{}\'. '
+                       'Please make sure these values are correct.'.format(name, resource_group_name))
     parse_plan_id = parse_resource_id(app.server_farm_id)
     plan_info = None
     retry_delay = 10  # seconds
@@ -353,7 +356,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     headers = authorization
-    headers['content-type'] = 'application/octet-stream'
+    headers['Content-Type'] = 'application/octet-stream'
+    headers['Cache-Control'] = 'no-cache'
     headers['User-Agent'] = UA_AGENT
 
     import requests
@@ -380,54 +384,92 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
 def add_remote_build_app_settings(cmd, resource_group_name, name, slot):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
-    enable_oryx_build = None
     scm_do_build_during_deployment = None
     website_run_from_package = None
+    enable_oryx_build = None
+
+    app_settings_should_not_have = []
+    app_settings_should_contain = {}
+
     for keyval in settings:
         value = keyval['value'].lower()
-        if keyval['name'] == 'ENABLE_ORYX_BUILD':
-            enable_oryx_build = value in ('true', '1')
         if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
             scm_do_build_during_deployment = value in ('true', '1')
         if keyval['name'] == 'WEBSITE_RUN_FROM_PACKAGE':
             website_run_from_package = value
+        if keyval['name'] == 'ENABLE_ORYX_BUILD':
+            enable_oryx_build = value
 
-    if not ((enable_oryx_build is True) and (scm_do_build_during_deployment is True)):
-        logger.warning("Setting ENABLE_ORYX_BUILD to true")
+    if scm_do_build_during_deployment is not True:
         logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to true")
         update_app_settings(cmd, resource_group_name, name, [
-            "ENABLE_ORYX_BUILD=true",
             "SCM_DO_BUILD_DURING_DEPLOYMENT=true"
         ], slot)
-        time.sleep(5)
+        app_settings_should_contain['SCM_DO_BUILD_DURING_DEPLOYMENT'] = 'true'
 
-    if website_run_from_package is not None:
+    if website_run_from_package:
         logger.warning("Removing WEBSITE_RUN_FROM_PACKAGE app setting")
         delete_app_settings(cmd, resource_group_name, name, [
             "WEBSITE_RUN_FROM_PACKAGE"
         ], slot)
-        time.sleep(5)
+        app_settings_should_not_have.append('WEBSITE_RUN_FROM_PACKAGE')
+
+    if enable_oryx_build:
+        logger.warning("Removing ENABLE_ORYX_BUILD app setting")
+        delete_app_settings(cmd, resource_group_name, name, [
+            "ENABLE_ORYX_BUILD"
+        ], slot)
+        app_settings_should_not_have.append('ENABLE_ORYX_BUILD')
+
+    # Wait for scm site to get the latest app settings
+    if app_settings_should_not_have or app_settings_should_contain:
+        logger.warning("Waiting SCM site to be updated with the latest app settings")
+        scm_is_up_to_date = False
+        retries = 10
+        while not scm_is_up_to_date and retries >= 0:
+            scm_is_up_to_date = validate_app_settings_in_scm(
+                cmd, resource_group_name, name, slot,
+                should_contain=app_settings_should_contain,
+                should_not_have=app_settings_should_not_have)
+            retries -= 1
+            time.sleep(5)
+
+        if retries < 0:
+            logger.warning("App settings may not be propagated to the SCM site.")
 
 
 def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
-    enable_oryx_build = None
     scm_do_build_during_deployment = None
+
+    app_settings_should_contain = {}
+
     for keyval in settings:
         value = keyval['value'].lower()
-        if keyval['name'] == 'ENABLE_ORYX_BUILD':
-            enable_oryx_build = value in ('true', '1')
         if keyval['name'] == 'SCM_DO_BUILD_DURING_DEPLOYMENT':
             scm_do_build_during_deployment = value in ('true', '1')
 
-    if not ((enable_oryx_build is False) and (scm_do_build_during_deployment is False)):
-        logger.warning("Setting ENABLE_ORYX_BUILD to false")
+    if scm_do_build_during_deployment is not False:
         logger.warning("Setting SCM_DO_BUILD_DURING_DEPLOYMENT to false")
         update_app_settings(cmd, resource_group_name, name, [
-            "ENABLE_ORYX_BUILD=false",
             "SCM_DO_BUILD_DURING_DEPLOYMENT=false"
         ], slot)
-        time.sleep(5)
+        app_settings_should_contain['SCM_DO_BUILD_DURING_DEPLOYMENT'] = 'false'
+
+    # Wait for scm site to get the latest app settings
+    if app_settings_should_contain:
+        logger.warning("Waiting SCM site to be updated with the latest app settings")
+        scm_is_up_to_date = False
+        retries = 10
+        while not scm_is_up_to_date and retries >= 0:
+            scm_is_up_to_date = validate_app_settings_in_scm(
+                cmd, resource_group_name, name, slot,
+                should_contain=app_settings_should_contain)
+            retries -= 1
+            time.sleep(5)
+
+        if retries < 0:
+            logger.warning("App settings may not be propagated to the SCM site")
 
 
 def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
@@ -751,6 +793,47 @@ def get_app_settings(cmd, resource_group_name, name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     slot_app_setting_names = client.web_apps.list_slot_configuration_names(resource_group_name, name).app_setting_names
     return _build_app_settings_output(result.properties, slot_app_setting_names)
+
+
+# Check if the app setting is propagated to the Kudu site correctly by calling api/settings endpoint
+# should_have [] is a list of app settings which are expected to be set
+# should_not_have [] is a list of app settings which are expected to be absent
+# should_contain {} is a dictionary of app settings which are expected to be set with precise values
+# Return True if validation succeeded
+def validate_app_settings_in_scm(cmd, resource_group_name, name, slot=None,
+                                 should_have=None, should_not_have=None, should_contain=None):
+    scm_settings = _get_app_settings_from_scm(cmd, resource_group_name, name, slot)
+    scm_setting_keys = set(scm_settings.keys())
+
+    if should_have and not set(should_have).issubset(scm_setting_keys):
+        return False
+
+    if should_not_have and set(should_not_have).intersection(scm_setting_keys):
+        return False
+
+    temp_setting = scm_settings.copy()
+    temp_setting.update(should_contain or {})
+    if temp_setting != scm_settings:
+        return False
+
+    return True
+
+
+@retryable_method(3, 5)
+def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    settings_url = '{}/api/settings'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
+    headers = {
+        'Content-Type': 'application/octet-stream',
+        'Cache-Control': 'no-cache',
+        'User-Agent': UA_AGENT
+    }
+
+    import requests
+    response = requests.get(settings_url, headers=headers, auth=(username, password), timeout=3)
+
+    return response.json() or {}
 
 
 def get_connection_strings(cmd, resource_group_name, name, slot=None):
@@ -1470,7 +1553,7 @@ def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
     db_setting = _create_db_setting(cmd, db_name, db_type=db_type, db_connection_string=db_connection_string)
-    backup_request = BackupRequest(backup_request_name=backup_name,
+    backup_request = BackupRequest(backup_name=backup_name,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
         return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
@@ -2039,10 +2122,11 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_id_parts = parse_resource_id(kv_id)
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
+    kv_subscription = kv_id_parts['subscription']
     cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
-    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name):
+    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
         logger.warning('Unable to verify Key Vault permissions.')
         logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
         logger.warning(lnk_msg)
@@ -2083,10 +2167,15 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
                                                 certificate_envelope=easy_cert_def)
 
 
-def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name):
+def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
     from azure.graphrbac.models import GraphErrorException
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription = get_subscription_id(cmd.cli_ctx)
+    # Cannot check if key vault is in another subscription
+    if subscription != key_vault_subscription:
+        return False
     kv_client = keyvault_client_vaults_factory(cmd.cli_ctx, None)
     vault = kv_client.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
     # Check for Microsoft.Azure.WebSites app registration
@@ -2189,7 +2278,7 @@ class _StackRuntimeHelper(object):
         return self._stacks
 
     @staticmethod
-    def update_site_config(stack, site_config):
+    def update_site_config(stack, site_config, cmd=None):
         for k, v in stack['configs'].items():
             setattr(site_config, k, v)
         return site_config
@@ -2339,7 +2428,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     # pylint: disable=too-many-statements, too-many-branches
     if functions_version is None:
         logger.warning("No functions version specified so defaulting to 2. In the future, specifying a version will "
-                       "be required. To create a 2.x function you would pass in the flag `--functions_version 2`")
+                       "be required. To create a 2.x function you would pass in the flag `--functions-version 2`")
         functions_version = '2'
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -2394,7 +2483,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     if runtime_version is not None:
         if runtime is None:
             raise CLIError('Must specify --runtime to use --runtime-version')
-        allowed_versions = RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version][runtime].keys()
+        allowed_versions = FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version][runtime]
         if runtime_version not in allowed_versions:
             raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
                            '--functions_version {}. Supported versions are: {}'
@@ -2420,13 +2509,11 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-                if runtime not in RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version].keys():
-                    raise CLIError("An appropriate linux image for runtime:'{}' was not found".format(runtime))
+                if runtime not in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version]:
+                    raise CLIError("An appropriate linux image for runtime:'{}', "
+                                   "functions_version: '{}' was not found".format(runtime, functions_version))
         if deployment_container_image_name is None:
-            site_config.linux_fx_version = _get_linux_fx_functionapp(is_consumption,
-                                                                     functions_version,
-                                                                     runtime,
-                                                                     runtime_version)
+            site_config.linux_fx_version = _get_linux_fx_functionapp(functions_version, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
     # adding appsetting to site to make it a function
@@ -2466,8 +2553,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
     if consumption_plan_location and is_linux:
-        logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully"
-                       "created but is not active until content is published using"
+        logger.warning("Your Linux function app '%s', that uses a consumption plan has been successfully "
+                       "created but is not active until content is published using "
                        "Azure Portal or the Functions Core Tools.", name)
     else:
         _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
@@ -2494,21 +2581,20 @@ def _get_extension_version_functionapp(functions_version):
     return '~2'
 
 
-def _get_linux_fx_functionapp(is_consumption, functions_version, runtime, runtime_version):
+def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):
+    if runtime == 'dotnet':
+        return runtime.upper()
     if runtime_version is None:
-        runtime_version = RUNTIME_TO_DEFAULT_VERSION_FUNCTIONAPP[functions_version][runtime]
-    if is_consumption:
-        return '{}|{}'.format(runtime.upper(), runtime_version)
-    # App service or Elastic Premium
-    return _format_fx_version(RUNTIME_TO_IMAGE_FUNCTIONAPP[functions_version][runtime][runtime_version])
+        runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]
+    return '{}|{}'.format(runtime.upper(), runtime_version)
 
 
 def _get_website_node_version_functionapp(functions_version, runtime, runtime_version):
     if runtime is None or runtime != 'node':
-        return NODE_VERSION_DEFAULT_FUNCTIONAPP[functions_version]
+        return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
     if runtime_version is not None:
         return '~{}'.format(runtime_version)
-    return NODE_VERSION_DEFAULT_FUNCTIONAPP[functions_version]
+    return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
 
 
 def try_create_application_insights(cmd, functionapp):

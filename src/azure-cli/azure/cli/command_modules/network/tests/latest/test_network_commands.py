@@ -919,6 +919,7 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
             'ip': 'pip1',
             'set': 'ruleset1',
             'rule': 'rule1',
+            'rule2': 'rule2',
             'var': 'http_req_Authorization'
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
@@ -937,6 +938,26 @@ class NetworkAppGatewayRewriteRuleset(ScenarioTest):
         self.cmd('network application-gateway rewrite-rule list -g {rg} --gateway-name {gw} --rule-set-name {set}')
         self.cmd('network application-gateway rewrite-rule list-request-headers')
         self.cmd('network application-gateway rewrite-rule list-response-headers')
+
+        # manage rewrite rules with url configuration
+        self.cmd('network application-gateway rewrite-rule create -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} '
+                 '--sequence 123 --request-headers foo=bar --response-headers cat=hat '
+                 '--modified-path "/def" --modified-query-string "a=b&c=d%20f"',
+                 checks=[
+                     self.check('actionSet.urlConfiguration.modifiedPath', '/def'),
+                     self.check('actionSet.urlConfiguration.modifiedQueryString', 'a=b&c=d%20f'),
+                     self.check('actionSet.urlConfiguration.reroute', False)
+                 ])
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} '
+                 '--sequence 321 --request-headers bar=foo --response-headers hat=cat '
+                 '--modified-path "/def2" --modified-query-string "a=b&c=d%20f12" --enable-reroute',
+                 checks=[
+                     self.check('actionSet.urlConfiguration.modifiedPath', '/def2'),
+                     self.check('actionSet.urlConfiguration.modifiedQueryString', 'a=b&c=d%20f12'),
+                     self.check('actionSet.urlConfiguration.reroute', True)
+                 ])
+        self.cmd('network application-gateway rewrite-rule update -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2} --set ruleSequence=321 --remove actionSet.responseHeaderConfigurations 0 --no-wait')
+        self.cmd('network application-gateway rewrite-rule show -g {rg} --gateway-name {gw} --rule-set-name {set} -n {rule2}')
 
         # manage rewrite rule conditions
         self.cmd('network application-gateway rewrite-rule condition create -g {rg} --gateway-name {gw} --rule-set-name {set} --rule-name {rule} --variable {var} --pattern "^Bearer" --ignore-case false --negate --no-wait')
@@ -1049,11 +1070,24 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
         # add two managed rule set to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0')
+                 ])
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp1} --rules 921100 921110')
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp2} --rules 913100')
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type Microsoft_BotManagerRuleSet --version 0.1',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1')
+                 ])
 
         # add one exclusion rule to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
@@ -1070,6 +1104,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
+            self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),
@@ -2452,6 +2488,31 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_test')
+    def test_network_vnet_list_available_ips(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'rt': 'Microsoft.Network/virtualNetworks',
+            'rg': resource_group
+        })
+
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --subnet-name default', checks=[
+            self.check('newVNet.provisioningState', 'Succeeded'),
+            self.check('newVNet.addressSpace.addressPrefixes[0]', '10.0.0.0/16')
+        ])
+        self.kwargs['prefixes'] = '20.0.0.0/16 10.0.0.0/16'
+        self.cmd('network vnet update --resource-group {rg} --name {vnet} --address-prefixes {prefixes} --dns-servers 1.2.3.4', checks=[
+            self.check('length(addressSpace.addressPrefixes)', 2),
+            self.check('dhcpOptions.dnsServers[0]', '1.2.3.4')
+        ])
+
+        self.cmd('network vnet subnet create --resource-group {rg} --vnet-name {vnet} --name {subnet} --address-prefix 20.0.0.0/24')
+
+        self.cmd('network vnet list-available-ips -g {rg} --name {vnet}', checks=[
+            self.check('length(@)', 5)
+        ])
+
 
 class NetworkVNetCachingScenarioTest(ScenarioTest):
 
@@ -3324,6 +3385,39 @@ class NetworkServiceAliasesScenarioTest(ScenarioTest):
         })
         self.cmd('network list-service-aliases -l centralus')
         self.cmd('network list-service-aliases -l centralus -g {rg}')
+
+
+class NetworkBastionHostScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_bastion_host')
+    def test_network_batsion_host_create(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'vm': 'clivm',
+            'vnet': 'vnet',
+            'subnet1': 'AzureBastionSubnet',
+            'subnet2': 'vmSubnet',
+            'ip1': 'ip1',
+            'bastion': 'clibastion'
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet1}')
+        self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
+                 '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password')
+        self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1}', checks=[
+            self.check('type', 'Microsoft.Network/bastionHosts'),
+            self.check('name', '{bastion}')
+        ])
+        self.cmd('network bastion list')
+        self.cmd('network bastion list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network bastion show -g {rg} -n {bastion}', checks=[
+            self.check('type', 'Microsoft.Network/bastionHosts'),
+            self.check('name', '{bastion}')
+        ])
+        self.cmd('network bastion delete -g {rg} -n {bastion}')
 
 
 if __name__ == '__main__':

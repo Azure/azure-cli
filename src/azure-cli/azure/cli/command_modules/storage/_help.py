@@ -206,6 +206,105 @@ examples:
     crafted: true
 """
 
+helps['storage account private-endpoint-connection'] = """
+type: group
+short-summary: Manage storage account private endpoint connection.
+"""
+
+helps['storage account private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for storage account.
+examples:
+  - name: Approve a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection approve --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Approve a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection approve --id $id
+  - name: Approve a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection approve -g myRg --account-name mystorageaccount --name myconnection
+  - name: Approve a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection approve -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection request for storage account.
+examples:
+  - name: Delete a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection delete --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Delete a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection delete --id $id
+  - name: Delete a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection delete -g myRg --account-name mystorageaccount --name myconnection
+  - name: Delete a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection delete -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for storage account.
+examples:
+  - name: Reject a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection reject --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Reject a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection reject --id $id
+  - name: Reject a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection reject -g myRg --account-name mystorageaccount --name myconnection
+  - name: Reject a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection reject -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection request for storage account.
+examples:
+  - name: Show details of a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection show --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Show details of a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection show --id $id
+  - name: Show details of a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection show -g myRg --account-name mystorageaccount --name myconnection
+  - name: Show details of a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection show -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-link-resource'] = """
+type: group
+short-summary: Manage storage account private link resources.
+"""
+
+helps['storage account private-link-resource list'] = """
+type: command
+short-summary: Get the private link resources that need to be created for a storage account.
+examples:
+  - name: Get the private link resources that need to be created for a storage account.
+    text: |
+        az storage account private-link-resource list --account-name mystorageaccount -g MyResourceGroup
+"""
+
 helps['storage account revoke-delegation-keys'] = """
 type: command
 short-summary: Revoke all user delegation keys for a storage account.
@@ -475,6 +574,24 @@ examples:
 helps['storage blob metadata'] = """
 type: group
 short-summary: Manage blob metadata.
+"""
+
+helps['storage blob restore'] = """
+type: command
+short-summary: Restore blobs in the specified blob ranges.
+examples:
+  - name: Restore blobs in two specified blob ranges. For examples, (container1/blob1, container2/blob2) and (container2/blob3..container2/blob4).
+    text: az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t 2020-02-27T03:59:59Z -r container1/blob1 container2/blob2 -r container2/blob3 container2/blob4
+  - name: Restore blobs in the specified blob ranges from account start to account end.
+    text: az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t 2020-02-27T03:59:59Z -r "" ""
+  - name: Restore blobs in the specified blob range.
+    text: |
+        time=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2
+  - name: Restore blobs in the specified blob range without wait and query blob restore status with 'az storage account show'.
+    text: |
+        time=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2 --no-wait
 """
 
 helps['storage blob service-properties'] = """
@@ -953,6 +1070,9 @@ examples:
     - name: Copy a file asynchronously from source uri to destination storage account with sas token.
       text: |
         az storage file copy start --source-uri "https://srcaccount.file.core.windows.net/myshare/mydir/myfile?<sastoken>" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
+    - name: Copy a file asynchronously from file snapshot to destination storage account with sas token.
+      text: |
+        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --file-snapshot "2020-03-02T13:51:54.0000000Z" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
 """
 
 helps['storage file copy start-batch'] = """

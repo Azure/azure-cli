@@ -534,7 +534,10 @@ class Profile(object):
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
-    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None):
+    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
+        if aux_tenants and aux_subscriptions:
+            raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
+
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
@@ -543,12 +546,14 @@ class Profile(object):
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
 
         external_tenants_info = []
-        ext_subs = [aux_sub for aux_sub in (aux_subscriptions or []) if aux_sub != subscription_id]
-        for ext_sub in ext_subs:
-            sub = self.get_subscription(ext_sub)
-            if sub[_TENANT_ID] != account[_TENANT_ID]:
-                # external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
-                external_tenants_info.append(sub)
+        if aux_tenants:
+            external_tenants_info = [tenant for tenant in aux_tenants if tenant != account[_TENANT_ID]]
+        if aux_subscriptions:
+            ext_subs = [aux_sub for aux_sub in aux_subscriptions if aux_sub != subscription_id]
+            for ext_sub in ext_subs:
+                sub = self.get_subscription(ext_sub)
+                if sub[_TENANT_ID] != account[_TENANT_ID]:
+                    external_tenants_info.append(sub[_TENANT_ID])
 
         if identity_type is None:
             def _retrieve_token():
@@ -564,13 +569,13 @@ class Profile(object):
 
             def _retrieve_tokens_from_external_tenants():
                 external_tokens = []
-                for s in external_tenants_info:
+                for sub_tenant_id in external_tenants_info:
                     if user_type == _USER:
                         external_tokens.append(self._creds_cache.retrieve_token_for_user(
-                            username_or_sp_id, s[_TENANT_ID], resource))
+                            username_or_sp_id, sub_tenant_id, resource))
                     else:
                         external_tokens.append(self._creds_cache.retrieve_token_for_service_principal(
-                            username_or_sp_id, resource, s[_TENANT_ID], resource))
+                            username_or_sp_id, resource, sub_tenant_id, resource))
                 return external_tokens
 
             from azure.cli.core.adal_authentication import AdalAuthentication
@@ -874,7 +879,13 @@ class SubscriptionFinder(object):
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
                 # with other tenants.
-                logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                msg = (getattr(ex, 'error_response', None) or {}).get('error_description') or ''
+                if 'AADSTS50076' in msg:
+                    logger.warning("Tenant %s requires Multi-Factor Authentication (MFA). "
+                                   "To access this tenant, use 'az login --tenant' to explicitly "
+                                   "login to this tenant.", tenant_id)
+                else:
+                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,

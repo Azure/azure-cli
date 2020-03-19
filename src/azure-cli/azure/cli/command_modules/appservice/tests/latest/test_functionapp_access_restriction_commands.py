@@ -98,6 +98,34 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @StorageAccountPreparer()
+    def test_functionapp_access_restriction_add_ip_address_validation(self, resource_group, location):
+        self.kwargs.update({
+            'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
+            'loc': location
+        })
+
+        self.cmd('functionapp create -g {rg} -n {app_name} --consumption-plan-location {loc} -s {sa}', checks=[
+            JMESPathCheck('state', 'Running')
+        ])
+
+        self.cmd('functionapp config access-restriction add -g {rg} -n {app_name} --rule-name ipv4 --action Allow --ip-address 130.220.0.0 --priority 200', checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[0].name', 'ipv4'),
+            JMESPathCheck('[0].action', 'Allow'),
+            JMESPathCheck('[0].ipAddress', '130.220.0.0/32'),
+            JMESPathCheck('[1].name', 'Deny all'),
+            JMESPathCheck('[1].action', 'Deny')
+        ])
+
+        self.cmd('functionapp config access-restriction add -g {rg} -n {app_name} --rule-name ipv6 --action Allow --ip-address 2004::1000 --priority 200', checks=[
+            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('[1].name', 'ipv6'),
+            JMESPathCheck('[1].action', 'Allow'),
+            JMESPathCheck('[1].ipAddress', '2004::1000/128')
+        ])
+
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    @StorageAccountPreparer()
     def test_functionapp_access_restriction_add_service_endpoint(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
