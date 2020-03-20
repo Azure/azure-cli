@@ -108,7 +108,7 @@ def load_command_table(self, _):
         min_api='2018-05-01'
     )
 
-    print(network_dns_reference_sdk)
+    dummy = network_dns_reference_sdk
 
     network_endpoint_service_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#AvailableEndpointServicesOperations.{}',
