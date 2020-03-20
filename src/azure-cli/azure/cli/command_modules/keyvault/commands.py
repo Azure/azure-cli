@@ -11,6 +11,8 @@ from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_client_private_endpoint_connections_factory,
     keyvault_client_private_link_resources_factory, keyvault_data_plane_factory)
 
+from ._transformers import filter_out_managed_resources
+
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
     validate_private_endpoint_connection_id)
@@ -101,7 +103,7 @@ def load_command_table(self, _):
 
     # Data Plane Commands
     with self.command_group('keyvault key', kv_data_sdk) as g:
-        g.keyvault_command('list', 'get_keys')
+        g.keyvault_command('list', 'get_keys', transform=filter_out_managed_resources)
         g.keyvault_command('list-versions', 'get_key_versions')
         g.keyvault_command('list-deleted', 'get_deleted_keys')
         g.keyvault_custom('create', 'create_key', doc_string_source=data_doc_string.format('create_key'))
@@ -117,7 +119,7 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_key')
 
     with self.command_group('keyvault secret', kv_data_sdk) as g:
-        g.keyvault_command('list', 'get_secrets')
+        g.keyvault_command('list', 'get_secrets', transform=filter_out_managed_resources)
         g.keyvault_command('list-versions', 'get_secret_versions')
         g.keyvault_command('list-deleted', 'get_deleted_secrets')
         g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace)

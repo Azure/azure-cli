@@ -843,6 +843,14 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate show --id {cert_id}',
                  checks=self.check('id', versions[0]))
 
+        # plan to not display the managed keys/secrets
+        self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
+        self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
+        self.cmd('keyvault key show --vault-name {kv} -n cert1',
+                 checks=self.check('managed', True))
+        self.cmd('keyvault secret show --vault-name {kv} -n cert1',
+                 checks=self.check('managed', True))
+
         # update certificate attributes
         self.cmd('keyvault certificate set-attributes --vault-name {kv} -n cert1 --enabled false -p @"{policy_path}"', checks=[
             self.check('id', versions[1]),
