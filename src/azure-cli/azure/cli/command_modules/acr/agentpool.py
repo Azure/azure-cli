@@ -8,9 +8,9 @@ from knack.log import get_logger
 from knack.util import CLIError
 from ._utils import (
     get_registry_by_name,
-    validate_managed_registry
+    validate_managed_registry,
+    user_confirmation
 )
-
 
 DEFAULT_COUNT = 1
 DEFAULT_TIER = 'S1'
@@ -27,7 +27,6 @@ def acr_agentpool_create(cmd,
                          count=DEFAULT_COUNT,
                          tier=DEFAULT_TIER,
                          os_type=DEFAULT_OS,
-                         no_wait=False,
                          subnet_id=None):
 
     registry, resource_group_name = get_registry_by_name(
@@ -44,13 +43,10 @@ def acr_agentpool_create(cmd,
     )
 
     try:
-        response = client.create(resource_group_name=resource_group_name,
-                                 registry_name=registry_name,
-                                 agent_pool_name=agent_pool_name,
-                                 agent_pool=agentpool_create_parameters)
-        if no_wait:
-            return client.get(resource_group_name, registry_name, agent_pool_name)
-        return response
+        return client.create(resource_group_name=resource_group_name,
+                             registry_name=registry_name,
+                             agent_pool_name=agent_pool_name,
+                             agent_pool=agentpool_create_parameters)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -60,20 +56,16 @@ def acr_agentpool_update(cmd,
                          agent_pool_name,
                          registry_name,
                          resource_group_name=None,
-                         no_wait=False,
                          count=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
 
     try:
-        response = client.update(resource_group_name=resource_group_name,
-                                 registry_name=registry_name,
-                                 agent_pool_name=agent_pool_name,
-                                 count=count)
-        if no_wait:
-            return client.get(resource_group_name, registry_name, agent_pool_name)
-        return response
+        return client.update(resource_group_name=resource_group_name,
+                             registry_name=registry_name,
+                             agent_pool_name=agent_pool_name,
+                             count=count)
     except ValidationError as e:
         raise CLIError(e)
 
@@ -83,26 +75,29 @@ def acr_agentpool_delete(cmd,
                          agent_pool_name,
                          registry_name,
                          no_wait=False,
+                         yes=False,
                          resource_group_name=None):
 
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
 
+    user_confirmation("Are you sure you want to delete the agentpool '{}' in registry '{}'?".format(
+        agent_pool_name, registry_name), yes)
     try:
         response = client.delete(resource_group_name=resource_group_name,
                                  registry_name=registry_name,
                                  agent_pool_name=agent_pool_name)
 
         if no_wait:
-            return client.get(resource_group_name, registry_name, agent_pool_name)
+            logger.warning("Started to delete the agent pool '%s': %s", agent_pool_name, response.status())
+            return response
 
-        #Since agent pool is a tracked resource in arm, arm also pings the async deletion api at the
-        #same time to get the status. If arm gets the 200 status first and knows that the resource is deleted,
-        #it marks the resource as deleted and stop routing further requests to the resource including the
-        #async deletion status api. Hence arm will directly return 404. Consider this as successful delete.
+        # Since agent pool is a tracked resource in arm, arm also pings the async deletion api at the
+        # same time to get the status. If arm gets the 200 status first and knows that the resource is deleted,
+        # it marks the resource as deleted and stop routing further requests to the resource including the
+        # async deletion status api. Hence arm will directly return 404. Consider this as successful delete.
         from ._agentpool_polling import delete_agentpool_with_polling
-        delete_agentpool_with_polling(cmd, client, agent_pool_name, registry_name, resource_group_name)
-        return response
+        return delete_agentpool_with_polling(cmd, client, agent_pool_name, registry_name, resource_group_name)
     except ValidationError as e:
         raise CLIError(e)
 

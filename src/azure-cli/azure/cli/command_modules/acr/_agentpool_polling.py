@@ -71,6 +71,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
                                self._registry_name,
                                self._agent_pool_name
                            ))
+        self.operation_result = "Agent '{}' was successfully deleted".format(self._agent_pool_name)
 
     def status(self):
         return self.operation_status
