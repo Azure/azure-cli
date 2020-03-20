@@ -945,7 +945,7 @@ def build_vm_linux_log_analytics_workspace_agent(_, vm_name, location):
         'properties': {
             'publisher': 'Microsoft.EnterpriseCloud.Monitoring',
             'type': 'OmsAgentForLinux',
-            'typeHandlerVersion': '1.4',
+            'typeHandlerVersion': '1.0',
             'autoUpgradeMinorVersion': 'true',
             'settings': {
                 'workspaceId': "[reference(parameters('workspaceId'), '2015-11-01-preview').customerId]",
@@ -957,31 +957,10 @@ def build_vm_linux_log_analytics_workspace_agent(_, vm_name, location):
         }
     }
 
-    mmaExtension_resource['name'] = vm_name + '/OMSExtension'
+    mmaExtension_resource['name'] = vm_name + '/OmsAgentForLinux'
     mmaExtension_resource['location'] = location
     mmaExtension_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name]
     return mmaExtension_resource
-
-
-def build_vm_daExtension_resource(_, vm_name, location):
-    '''
-    This is used for log analytics workspace
-    '''
-    daExtensionName_resource = {
-        'type': 'Microsoft.Compute/virtualMachines/extensions',
-        'apiVersion': '2018-10-01',
-        'properties': {
-            'publisher': 'Microsoft.Azure.Monitoring.DependencyAgent',
-            'type': 'DependencyAgentLinux',
-            'typeHandlerVersion': '9.5',
-            'autoUpgradeMinorVersion': 'true'
-        }
-    }
-
-    daExtensionName_resource['name'] = vm_name + '/DependencyAgentLinux'
-    daExtensionName_resource['location'] = location
-    daExtensionName_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/{0}/extensions/OMSExtension'.format(vm_name)]  # pylint: disable=line-too-long
-    return daExtensionName_resource
 
 
 def build_vm_windows_log_analytics_workspace_agent(_, vm_name, location):
