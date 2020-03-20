@@ -761,8 +761,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('creationData.galleryImageReference.id', '{gallery_image}')
         ])
 
-        self.cmd('disk create -g {rg} -n {disk4} --size-gb 10 --max-shares 1 -l centraluseuap', checks=[
-            self.check('maxShares', 1)
+        self.cmd('disk create -g {rg} -n {disk4} --size-gb 256 --max-shares 2 -l centraluseuap', checks=[
+            self.check('maxShares', 2)
         ])
 
 
