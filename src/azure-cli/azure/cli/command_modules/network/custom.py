@@ -348,7 +348,7 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
         ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None,
-        hostnames=host_names
+        host_names=host_names
     )
 
     if cmd.supported_api_version(min_api='2019-09-01'):
@@ -381,7 +381,7 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
             instance.firewall_policy = SubResource(id=firewall_policy)
 
     if host_names is not None:
-        instance.hostnames = host_names or None
+        instance.host_names = host_names or None
 
     instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
     return parent

@@ -760,15 +760,15 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 
         self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --frontend-port {port} --host-names "*.contoso.com" "www.microsoft.com"')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
-            self.check('length(hostnames)', 2),
-            self.check('hostnames[0]', "*.contoso.com"),
-            self.check('hostnames[1]', "www.microsoft.com")
+            self.check('length(hostNames)', 2),
+            self.check('hostNames[0]', "*.contoso.com"),
+            self.check('hostNames[1]', "www.microsoft.com")
         ])
         self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --host-names "*.contoso.com" "www.bing.com"')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
-            self.check('length(hostnames)', 2),
-            self.check('hostnames[0]', "*.contoso.com"),
-            self.check('hostnames[1]', "www.bing.com")
+            self.check('length(hostNames)', 2),
+            self.check('hostNames[0]', "*.contoso.com"),
+            self.check('hostNames[1]', "www.bing.com")
         ])
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
