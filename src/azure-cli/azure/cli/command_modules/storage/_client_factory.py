@@ -217,3 +217,21 @@ def cf_blob_service(cli_ctx, kwargs):
 def cf_blob_client(cli_ctx, kwargs):
     return cf_blob_service(cli_ctx, kwargs).get_blob_client(container=kwargs['container_name'],
                                                             blob=kwargs['blob_name'])
+
+
+def generic_data_service_factory_track2(cli_ctx, **kwargs):
+    service = kwargs.pop('service', None)
+    account_name = kwargs.pop('account_name', None)
+    credential = kwargs.pop('account_name', None) or kwargs.pop('account_key', None)
+    connection_string = kwargs.pop('connection_string', None)
+    account_url = "https://{}.dfs.core.windows.net".format(account_name)
+    if credential:
+        client = service(account_url=account_url, credential=credential, **kwargs)
+    if connection_string:
+        client = service.from_connection_string(conn_str=connection_string)
+    return client
+
+
+def cf_adls_file_system(cli_ctx, kwargs):
+    t_adls_file_system = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_TRACK2, 'filedatalake#FileSystemClient')
+    return generic_data_service_factory_track2(cli_ctx, service=t_adls_file_system, **kwargs)

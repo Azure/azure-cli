@@ -12,7 +12,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_blob_data_gen_update, cf_sa_for_keys,
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
                                                                cf_private_link, cf_private_endpoint,
-                                                               cf_mgmt_encryption_scope, cf_mgmt_file_services)
+                                                               cf_mgmt_encryption_scope, cf_mgmt_file_services,
+                                                               cf_adls_file_system)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -628,3 +629,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                           exception_handler=show_exception_handler,
                           transform=transform_entity_result)
         g.storage_custom_command('insert', 'insert_table_entity')
+
+    adls_fs_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storage.filedatalake._file_system_client#FileSystemClient.{}',
+        client_factory=cf_adls_file_system,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+    with self.command_group('storage fs', adls_fs_sdk) as g:
+        g.storage_command('create', 'create_file_system')
+
