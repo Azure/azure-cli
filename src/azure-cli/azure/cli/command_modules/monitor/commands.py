@@ -12,7 +12,9 @@ def load_command_table(self, _):
     from ._client_factory import (
         cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts, cf_log_analytics_workspace, cf_diagnostics_category)
+        cf_metric_alerts, cf_log_analytics_workspace, cf_diagnostics_category,
+        cf_private_link_resources, cf_private_link_scoped_resources, cf_private_link_scope_operation_status,
+        cf_private_link_scopes, cf_private_endpoint_connections)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace
@@ -126,6 +128,47 @@ def load_command_table(self, _):
     log_analytics_workspace_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#WorkspacesOperations.{}',
         client_factory=cf_log_analytics_workspace,
+        exception_handler=monitor_exception_handler
+    )
+
+    private_link_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=cf_private_link_resources,
+        operation_group='private_link_resources',
+        exception_handler=monitor_exception_handler
+    )
+
+    private_link_scoped_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkScopedResourcesOperations.{}',
+        client_factory=cf_private_link_scoped_resources,
+        operation_group='private_link_scoped_resources',
+        exception_handler=monitor_exception_handler
+    )
+
+    private_link_scope_operation_status_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkScopeOperationStatusOperations.{}',
+        client_factory=cf_private_link_scope_operation_status,
+        operation_group='private_link_scope_operation_status',
+        exception_handler=monitor_exception_handler
+    )
+
+    private_link_scopes_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#PrivateLinkScopesOperations.{}',
+        client_factory=cf_private_link_scopes,
+        operation_group='private_link_scopes',
+        exception_handler=monitor_exception_handler
+    )
+
+    private_endpoint_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=cf_private_endpoint_connections,
+        operation_group='private_endpoint_connections',
+        exception_handler=monitor_exception_handler
+    )
+
+    private_link_scope_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.private_link_scope#{}',
+        client_factory=cf_private_link_scopes,
         exception_handler=monitor_exception_handler
     )
 
@@ -253,3 +296,7 @@ def load_command_table(self, _):
 
     with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom, is_preview=True) as g:
         g.custom_command('clone', 'clone_existed_settings')
+
+    with self.command_group('monitor private-link-scope', private_link_scopes_sdk, custom_command_type=private_link_scope_custom) as g:
+        g.command('show', 'get')
+
