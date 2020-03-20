@@ -299,4 +299,4 @@ def load_command_table(self, _):
 
     with self.command_group('monitor private-link-scope', private_link_scopes_sdk, custom_command_type=private_link_scope_custom) as g:
         g.command('show', 'get')
-
+        g.custom_show_command('show', 'show_private_link_scope')
