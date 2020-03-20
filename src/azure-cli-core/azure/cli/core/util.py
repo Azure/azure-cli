@@ -542,9 +542,10 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
                      generated_client_request_id_name='x-ms-client-request-id'):
     import uuid
     from requests import Session, Request
+    from requests.structures import CaseInsensitiveDict
     from azure.cli.core.commands.client_factory import UA_AGENT
 
-    result = {}
+    result = CaseInsensitiveDict()
     for s in headers or []:
         try:
             temp = shell_safe_json_parse(s)
@@ -553,9 +554,15 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             key, value = s.split('=', 1)
             result[key] = value
     headers = result
-    headers.update({
-        'User-Agent': UA_AGENT,
-    })
+
+    # If Authorization header is already provided, don't bother with the token
+    if 'Authorization' in headers:
+        skip_authorization_header = True
+
+    # Allow the user to provide custom User-Agent
+    if 'User-Agent' not in headers:
+        headers['User-Agent'] = UA_AGENT
+
     if generated_client_request_id_name:
         headers[generated_client_request_id_name] = str(uuid.uuid4())
 
@@ -662,7 +669,9 @@ def _log_request(request):
         logger.info("Request headers:")
         for header, value in request.headers.items():
             if header.lower() == 'authorization':
-                value = value[:15] + '*****'
+                # Trim at least half of the token but keep at most 20 characters
+                preserve_length = min(int(len(value) * 0.5), 20)
+                value = value[:preserve_length] + '*****'
             logger.info("    %r: %r", header, value)
         logger.info("Request body:")
 
