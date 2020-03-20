@@ -1205,4 +1205,8 @@ examples:
 helps['monitor clone'] = """
 type: command
 short-summary: Clone metrics alert rules from one resource to another resource.
+examples:
+  - name: Clone the metric alert settings from one VM to another
+    text: |
+        az monitor clone --source-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm1 --target-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm2
 """
