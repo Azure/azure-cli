@@ -665,7 +665,8 @@ Release History
 * Add new command `az reservations reservation-order calculate` to calculate the price for a reservation
 * Add new command `az reservations reservation-order purchase` to purchase a new reservation
 
-**Rest**
+**REST**
+
 * `az rest` is now GA
 
 **SQL**
