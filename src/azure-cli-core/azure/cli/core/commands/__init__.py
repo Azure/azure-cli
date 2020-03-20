@@ -1285,9 +1285,9 @@ class AzCommandGroup(CommandGroup):
         if is_preview and is_experimental:
             raise CLIError(PREVIEW_EXPERIMENTAL_CONFLICT_ERROR.format("command", self.group_name + " " + command_name))
         if is_preview:
-            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx,object_type='command')
+            merged_kwargs['preview_info'] = PreviewItem(self.command_loader.cli_ctx, object_type='command')
         if is_experimental:
-            merged_kwargs['experimental_info'] = ExperimentalItem(self.command_loader.cli_ctx,object_type='command')
+            merged_kwargs['experimental_info'] = ExperimentalItem(self.command_loader.cli_ctx, object_type='command')
 
 
 def register_cache_arguments(cli_ctx):
