@@ -212,15 +212,17 @@ class MainCommandsLoader(CLICommandsLoader):
                             cmd.command_source = ExtensionCommandSource(
                                 extension_name=ext_name,
                                 overrides_command=cmd_name in module_commands,
-                                preview=ext.preview)
+                                preview=ext.preview,
+                                experimental=ext.experimental)
 
                         self.command_table.update(extension_command_table)
                         self.command_group_table.update(extension_group_table)
                         elapsed_time = timeit.default_timer() - start_time
                         logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
-                    except Exception:  # pylint: disable=broad-except
+                    except Exception as ex:  # pylint: disable=broad-except
                         self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
-                        logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
+                        logger.warning("Unable to load extension '%s: %s'. Use --debug for more information.",
+                                       ext_name, ex)
                         logger.debug(traceback.format_exc())
 
         def _wrap_suppress_extension_func(func, ext):

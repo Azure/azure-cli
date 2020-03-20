@@ -989,12 +989,13 @@ def _load_module_command_loader(loader, args, mod):
 class ExtensionCommandSource(object):
     """ Class for commands contributed by an extension """
 
-    def __init__(self, overrides_command=False, extension_name=None, preview=False):
+    def __init__(self, overrides_command=False, extension_name=None, preview=False, experimental=False):
         super(ExtensionCommandSource, self).__init__()
         # True if the command overrides a CLI command
         self.overrides_command = overrides_command
         self.extension_name = extension_name
         self.preview = preview
+        self.experimental = experimental
 
     def get_command_warn_msg(self):
         if self.overrides_command:
@@ -1009,6 +1010,12 @@ class ExtensionCommandSource(object):
     def get_preview_warn_msg(self):
         if self.preview:
             return "The extension is in preview"
+        return None
+
+    def get_experimental_warn_msg(self):
+        if self.experimental:
+            return "The extension is experimental and not covered by customer support. " \
+                   "Please use with discretion."
         return None
 
 

@@ -419,6 +419,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('policy definition delete -n policy2')
         self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
+    @AllowLargeResponse(4096)
     def test_subscription_level_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -456,6 +457,7 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('length([])', 5)
         ])
 
+    @AllowLargeResponse(4096)
     def test_subscription_level_deployment_old_command(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -534,42 +536,44 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
 
 
 class DeploymentTestAtManagementGroup(ScenarioTest):
-    def tearDown(self):
-        self.cmd('group delete -n cli_test_management_group_deployment --yes')
-        self.cmd('account management-group delete -n cli_test_management_group_deployment')
 
     def test_management_group_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
-            'dn': self.create_random_name('azure-cli-management-group-deployment', 60)
+            'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
+            'mg': 'azure-cli-management-group3bxh',
+            'sub-rg': self.create_random_name('azure-cli-sub-resource-group', 60),
         })
 
-        self.cmd('account management-group create --name cli_test_management_group_deployment', checks=[])
+        self.cmd('account management-group create --name {mg}', checks=[])
 
-        self.cmd('deployment mg validate --management-group-id cli_test_management_group_deployment --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
-            self.check('properties.provisioningState', 'Succeeded')
-        ])
+        self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file {tf} '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+                 checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
-        self.cmd('deployment mg create --management-group-id cli_test_management_group_deployment --location WestUS -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
-            self.check('properties.provisioningState', 'Succeeded'),
-        ])
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file {tf} '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+                 checks=[self.check('properties.provisioningState', 'Succeeded'), ])
 
-        self.cmd('deployment mg list --management-group-id cli_test_management_group_deployment', checks=[
+        self.cmd('deployment mg list --management-group-id {mg}', checks=[
             self.check('[0].name', '{dn}'),
         ])
 
-        self.cmd('deployment mg show --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
+        self.cmd('deployment mg show --management-group-id {mg} -n {dn}', checks=[
             self.check('name', '{dn}')
         ])
 
-        self.cmd('deployment mg export --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
+        self.cmd('deployment mg export --management-group-id {mg} -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation mg list --management-group-id cli_test_management_group_deployment -n {dn}', checks=[
+        self.cmd('deployment operation mg list --management-group-id {mg} -n {dn}', checks=[
             self.check('length([])', 4)
         ])
+
+        # clean
+        self.cmd('account management-group delete -n {mg}')
 
 
 class DeploymentTestAtTenantScope(ScenarioTest):

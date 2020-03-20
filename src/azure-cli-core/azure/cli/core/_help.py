@@ -120,7 +120,10 @@ class CLIPrintMixin(CLIHelp):
             return
         if isinstance(help_file.command_source, ExtensionCommandSource):
             logger.warning(help_file.command_source.get_command_warn_msg())
-            if help_file.command_source.preview:
+            # If experimental is true, it overrides preview
+            if help_file.command_source.experimental:
+                logger.warning(help_file.command_source.get_experimental_warn_msg())
+            elif help_file.command_source.preview:
                 logger.warning(help_file.command_source.get_preview_warn_msg())
 
 
