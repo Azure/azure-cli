@@ -169,7 +169,6 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             AzCliHelp.update_examples(help_file)
         self._print_detailed_help(cli_name, help_file)
 
-        from colorama import Fore, Style
         print(SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else SURVEY_PROMPT)
 
     def _register_help_loaders(self):
