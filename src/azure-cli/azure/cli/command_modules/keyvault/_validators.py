@@ -391,6 +391,6 @@ def _extract_subresource_name_from_single_output(output, id_parameter):
 def extract_subresource_name(id_parameter='id'):
     def _extract_subresource_name(output):
         if isinstance(output, Iterable):
-            return [_extract_subresource_name_from_single_output(_, id_parameter) for _ in output]
+            return [_extract_subresource_name_from_single_output(item, id_parameter) for item in output]
         return _extract_subresource_name_from_single_output(output, id_parameter)
     return _extract_subresource_name
