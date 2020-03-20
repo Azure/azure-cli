@@ -5,6 +5,9 @@
 
 import os
 from knack.util import CLIError
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def validate_headers(namespace):
@@ -85,3 +88,14 @@ def validate_retention_days(namespace):
     days = namespace.days
     if days and (days < 0 or days > 365):
         raise CLIError("Invalid value for days: should be from 0 to 365")
+
+
+def validate_registry_name(cmd, namespace):
+    """Omit login server endpoint suffix."""
+    registry = namespace.registry_name
+    if registry:
+        suffix = cmd.cli_ctx.cloud.suffixes.acr_login_server_endpoint
+        pos = registry.find(suffix)
+        if pos > 0:
+            logger.warning("The login server endpoint suffix '%s' is automatically omitted.", suffix)
+            namespace.registry_name = registry[:pos]
