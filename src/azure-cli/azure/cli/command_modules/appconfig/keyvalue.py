@@ -244,6 +244,24 @@ def export_config(cmd,
     elif destination == 'appservice':
         __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
 
+def export_secret(cmd,
+                  name=None,
+                  connection_string=None,
+                  label=None,
+                  key=None,
+                  prefix="",  # prefix to remove
+                  # to-file parameters
+                  path=None,
+                  format_=None):
+
+    # fetch key values from user's configstore
+    src_kvs = __read_kv_from_config_store(
+        cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
+
+    __discard_features_from_retrieved_kv(src_kvs)
+    keyvault_references = [keyvaule for keyvaule in src_kvs if keyvaule.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
+    for key in keyvault_references:
+        
 
 def set_key(cmd,
             key,
