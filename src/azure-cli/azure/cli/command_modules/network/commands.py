@@ -150,6 +150,8 @@ def load_command_table(self, _):
         min_api='2018-08-01'
     )
 
+    print(network_er_links_sdk)
+
     network_erca_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#ExpressRouteCircuitAuthorizationsOperations.{}',
         client_factory=cf_express_route_circuit_authorizations,
