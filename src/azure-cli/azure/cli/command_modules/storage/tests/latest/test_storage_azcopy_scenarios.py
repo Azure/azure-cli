@@ -245,8 +245,8 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
         self.cmd('storage blob show -n {} -c {} --account-name {}'
-                 .format('readme', first_container, first_account), checks=[
-                  JMESPathCheck('properties.contentSettings.contentType', content_type)])
+                 .format('readme', first_container, first_account),
+                 checks=[JMESPathCheck('properties.contentSettings.contentType', content_type)])
 
         # Upload entire directory
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
@@ -312,7 +312,6 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
             .format(diskname, resource_group))
         self.cmd('storage copy -s "{}" -d "{}" --blob-type PageBlob'
                  .format(local_file, sasURL))
-
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')
