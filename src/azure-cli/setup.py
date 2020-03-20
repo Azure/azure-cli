@@ -130,7 +130,7 @@ DEPENDENCIES = [
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'jsmin~=2.2.2',
-    'knack~=0.6,>=0.6.3',
+    'knack==0.7.0rc1',
     'mock~=4.0',
     'paramiko>=2.0.8,<3.0.0',
     'pygments~=2.4',
