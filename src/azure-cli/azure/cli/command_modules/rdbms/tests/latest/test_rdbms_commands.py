@@ -102,7 +102,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
         geoloc = 'koreasouth'
-        minimal_tls_version = 'TLS1_1'
+        minimal_tls_version = 'TLS1_0'
 
         # test create server
         if database_engine == 'mariadb':
