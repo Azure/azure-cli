@@ -469,9 +469,10 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
             logger.warning(
                 """
                 The disks of the managed VM will be restored as unmanaged since targetRG parameter is not provided.
-                This will NOT leverage the instant restore functionality and hence can be significantly slow based on given storage account.
+                This will NOT leverage the instant restore functionality.
+                Hence it can be significantly slow based on given storage account.
                 To leverage instant restore, provide the target RG parameter.
-                Otherwise, provide the intent next time by passing the restoreAsUnmanaged parameter
+                Otherwise, provide the intent next time by passing the --restore-as-unmanaged-disks parameter
                 """)
 
     _validate_restore_disk_parameters(restore_only_osdisk, diskslist)
