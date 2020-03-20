@@ -740,7 +740,6 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_ag_http_listener')
     def test_network_ag_http_listener_with_multi_host_names(self, resource_group):
 
@@ -773,7 +772,6 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_http_settings')
     def test_network_ag_http_settings(self, resource_group):
