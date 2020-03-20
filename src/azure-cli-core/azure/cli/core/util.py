@@ -582,8 +582,12 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             result[key] = value
     uri_parameters = result or None
 
+    # If uri is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
+    # default to Azure Resource Manager.
+    # https://management.azure.com/ + subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
     if '://' not in uri:
         uri = cli_ctx.cloud.endpoints.resource_manager + uri.lstrip('/')
+
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
     from azure.cli.core._profile import Profile
@@ -594,15 +598,21 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     if not skip_authorization_header and uri.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
-            from azure.cli.core.cloud import CloudEndpointNotSetException
-            for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                try:
-                    value = getattr(endpoints, p)
-                except CloudEndpointNotSetException:
-                    continue
-                if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
-                    resource = value
-                    break
+            # If uri starts with ARM endpoint, like https://management.azure.com/,
+            # use active_directory_resource_id for resource.
+            # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
+            if uri.lower().startswith(endpoints.resource_manager.rstrip('/')):
+                resource = endpoints.active_directory_resource_id
+            else:
+                from azure.cli.core.cloud import CloudEndpointNotSetException
+                for p in [x for x in dir(endpoints) if not x.startswith('_')]:
+                    try:
+                        value = getattr(endpoints, p)
+                    except CloudEndpointNotSetException:
+                        continue
+                    if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
+                        resource = value
+                        break
         if resource:
             token_info, _, _ = profile.get_raw_token(resource)
             logger.debug('Retrievd AAD token for resource: %s', resource or 'ARM')
