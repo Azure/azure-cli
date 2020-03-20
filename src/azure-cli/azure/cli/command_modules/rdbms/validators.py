@@ -50,8 +50,8 @@ def retention_validator(ns):
 
 def tls_validator(ns):
     if ns.minimal_tls_version:
-        if ns.ssl_enforcement != 'Enabled':
-            raise CLIError('Cannot specify TLS version when ssl_enforcement is not Enabled')
+        if ns.ssl_enforcement is not None and ns.ssl_enforcement != 'Enabled':
+            raise CLIError('Cannot specify TLS version when ssl_enforcement is explicitly Disabled')
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.

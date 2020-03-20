@@ -3,6 +3,10 @@
 Release History
 ===============
 
+**RDBMS**
+
+* Support specifying minimal TLS version for client connections to Postgres and MySQL
+
 **AppConfig**
 
 * Add support for importing/exporting feature flags

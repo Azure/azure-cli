@@ -102,25 +102,46 @@ class ServerMgmtScenarioTest(ScenarioTest):
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
         geoloc = 'koreasouth'
+        minimal_tls_version = 'TLS1_1'
 
         # test create server
-        self.cmd('{} server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {} '
-                 '--sku-name {} --tags key=1 --geo-redundant-backup {} '
-                 '--backup-retention {}'
-                 .format(database_engine, resource_group_1, servers[0], loc,
-                         admin_login, admin_passwords[0], skuname,
-                         geoRedundantBackup, backupRetention),
-                 checks=[
-                     JMESPathCheck('name', servers[0]),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', admin_login),
-                     JMESPathCheck('sslEnforcement', 'Enabled'),
-                     JMESPathCheck('tags.key', '1'),
-                     JMESPathCheck('sku.capacity', old_cu),
-                     JMESPathCheck('sku.tier', edition),
-                     JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
-                     JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
+        if database_engine == 'mariadb':
+            self.cmd('{} server create -g {} --name {} -l {} '
+                    '--admin-user {} --admin-password {} '
+                    '--sku-name {} --tags key=1 --geo-redundant-backup {} '
+                    '--backup-retention {}'
+                    .format(database_engine, resource_group_1, servers[0], loc,
+                            admin_login, admin_passwords[0], skuname,
+                            geoRedundantBackup, backupRetention),
+                    checks=[
+                        JMESPathCheck('name', servers[0]),
+                        JMESPathCheck('resourceGroup', resource_group_1),
+                        JMESPathCheck('administratorLogin', admin_login),
+                        JMESPathCheck('sslEnforcement', 'Enabled'),
+                        JMESPathCheck('tags.key', '1'),
+                        JMESPathCheck('sku.capacity', old_cu),
+                        JMESPathCheck('sku.tier', edition),
+                        JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                        JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
+        else:
+             self.cmd('{} server create -g {} --name {} -l {} '
+                    '--admin-user {} --admin-password {} '
+                    '--sku-name {} --tags key=1 --geo-redundant-backup {} '
+                    '--backup-retention {} --minimal-tls-version {}'
+                    .format(database_engine, resource_group_1, servers[0], loc,
+                            admin_login, admin_passwords[0], skuname,
+                            geoRedundantBackup, backupRetention, minimal_tls_version),
+                    checks=[
+                        JMESPathCheck('name', servers[0]),
+                        JMESPathCheck('resourceGroup', resource_group_1),
+                        JMESPathCheck('administratorLogin', admin_login),
+                        JMESPathCheck('sslEnforcement', 'Enabled'),
+                        JMESPathCheck('tags.key', '1'),
+                        JMESPathCheck('sku.capacity', old_cu),
+                        JMESPathCheck('sku.tier', edition),
+                        JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                        JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup),
+                        JMESPathCheck('minimalTlsVersion', minimal_tls_version)])
 
         # test show server
         result = self.cmd('{} server show -g {} --name {}'
