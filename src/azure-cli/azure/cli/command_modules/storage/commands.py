@@ -75,7 +75,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=blob_data_service_factory,
         resource_type=ResourceType.DATA_STORAGE)
 
-    print(block_blob_sdk)
+    dummy_assignment = 'storage here'    # no idea
 
     def get_custom_sdk(custom_module, client_factory, resource_type=ResourceType.DATA_STORAGE):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
