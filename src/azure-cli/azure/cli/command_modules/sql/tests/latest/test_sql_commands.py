@@ -712,6 +712,8 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
+
+    @record_only()
     def test_sql_mi_operation_mgmt(self):
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
