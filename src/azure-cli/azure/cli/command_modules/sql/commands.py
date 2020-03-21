@@ -27,7 +27,6 @@ from ._util import (
     get_sql_database_blob_auditing_policies_operations,
     get_sql_database_sensitivity_labels_operations,
     get_sql_database_operations_operations,
-    get_sql_managed_instance_operations_operations,
     get_sql_database_threat_detection_policies_operations,
     get_sql_database_transparent_data_encryption_activities_operations,
     get_sql_database_transparent_data_encryptions_operations,
@@ -42,6 +41,7 @@ from ._util import (
     get_sql_managed_instance_azure_ad_administrators_operations,
     get_sql_managed_instance_encryption_protectors_operations,
     get_sql_managed_instance_keys_operations,
+    get_sql_managed_instance_operations_operations,
     get_sql_managed_instances_operations,
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
@@ -183,16 +183,6 @@ def load_command_table(self, _):
     with self.command_group('sql db op', database_operations_operations) as g:
 
         g.command('list', 'list_by_database')
-        g.command('cancel', 'cancel')
-
-    managed_instance_operations_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceOperations.{}',
-        client_factory=get_sql_managed_instance_operations_operations)
-
-    with self.command_group('sql mi op', managed_instance_operations_operations) as g:
-
-        g.command('list', 'list_by_managed_instance')
-        g.command('get', 'get')
         g.command('cancel', 'cancel')
 
     transparent_data_encryptions_operations = CliCommandType(
@@ -500,6 +490,16 @@ def load_command_table(self, _):
     ###############################################
     #                sql managed instance         #
     ###############################################
+    
+    managed_instance_operations_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceOperations.{}',
+        client_factory=get_sql_managed_instance_operations_operations)
+
+    with self.command_group('sql mi op', managed_instance_operations_operations) as g:
+
+        g.command('list', 'list_by_managed_instance')
+        g.command('show', 'get')
+        g.command('cancel', 'cancel')
 
     managed_instances_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstancesOperations.{}',

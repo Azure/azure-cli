@@ -163,11 +163,6 @@ examples:
     text: az sql db op cancel -g mygroup -s myserver -d mydb -n d2896mydb-2ba8-4c84-bac1-387c430cce40
 """
 
-helps['sql mi op'] = """
-type: group
-short-summary: Manage operations on a managed instance.
-"""
-
 helps['sql mi op cancel'] = """
 type: command
 examples:
@@ -548,6 +543,11 @@ examples:
     text: az sql mi list
   - name: List all managed instances in a resource group.
     text: az sql mi list -g mygroup
+"""
+
+helps['sql mi op'] = """
+type: group
+short-summary: Manage operations on a managed instance.
 """
 
 helps['sql mi show'] = """

@@ -711,10 +711,17 @@ def load_arguments(self, _):
                    required=True,
                    help='Name of the Azure SQL Managed Instance.')
 
+    with self.argument_context('sql mi op cancel') as c:
         c.argument('operation_id',
                    options_list=['--name', '-n'],
                    required=True,
                    help='The unique name of the operation to cancel.')
+
+    with self.argument_context('sql mi op show') as c:
+        c.argument('operation_id',
+                   options_list=['--name', '-n'],
+                   required=True,
+                   help='The unique name of the operation to show.')
 
     #####
     #           sql db replica
