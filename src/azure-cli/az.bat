@@ -2,6 +2,7 @@
 setlocal
 
 SET PYTHONPATH=%~dp0\src;%PYTHONPATH%
+SET AZ_INSTALLER=PIP_WIN
 
 IF EXIST "%~dp0\python.exe" (
   "%~dp0\python.exe" -m azure.cli %*
