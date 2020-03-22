@@ -570,6 +570,17 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_short_term_retention_mi', supports_no_wait=True)
         g.custom_command('show', 'get_short_term_retention_mi')
 
+    managed_instance_long_term_retention_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceLongTermRetentionPoliciesOperations.{}',
+        client_factory=get_sql_managed_instance_long_term_retention_policies_operations)
+
+    with self.command_group('sql midb long-term-retention-policy',
+                            managed_instance_long_term_retention_policies_operations,
+                            client_factory=get_sql_managed_instance_long_term_retention_policies_operations) as g:
+
+        g.custom_command('set', 'update_long_term_retention_mi', supports_no_wait=True)
+        g.custom_command('show', 'get_long_term_retention_mi')
+
     ###############################################
     #                sql virtual cluster         #
     ###############################################

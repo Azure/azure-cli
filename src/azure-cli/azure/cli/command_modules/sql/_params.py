@@ -1500,6 +1500,34 @@ def load_arguments(self, _):
                    help='If specified, shows retention days for a deleted database, instead of an existing database.'
                    'Must match the deleted time of a deleted database on the source Managed Instance.')
 
+    with self.argument_context('sql midb long-term-retention-policy set') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'weekly_retention',
+                'monthly_retention',
+                'yearly_retention',
+                'week_of_year'
+            ])
+
+        c.argument('weekly_retention',
+                    options_list=['--weekly-retention'],
+                    help='The Weekly Retention. If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                    'There is a minimum of 7 days and a maximum of 10 years.')
+
+        c.argument('monthly_retention',
+                    options_list=['--monthly-retention'],
+                    help='The Monthly Retention. If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                    'There is a minimum of 7 days and a maximum of 10 years.')
+
+        c.argument('yearly_retention',
+                    options_list=['--yearly-retention'],
+                    help='The Yearly Retention. If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.''
+                    'There is a minimum of 7 days and a maximum of 10 years.)
+
+        c.argument('week_of_year',
+                    options_list=['--week-of-year'],
+                    help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
+
     ###############################################
     #                sql virtual cluster          #
     ###############################################
