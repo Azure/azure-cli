@@ -2524,6 +2524,9 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             site_config.linux_fx_version = _get_linux_fx_functionapp(functions_version, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
+        if runtime == "java":
+            site_config.java_version = _get_java_version_functionapp(functions_version, runtime_version)
+
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
                                                   value=_get_extension_version_functionapp(functions_version)))
@@ -2603,6 +2606,14 @@ def _get_website_node_version_functionapp(functions_version, runtime, runtime_ve
     if runtime_version is not None:
         return '~{}'.format(runtime_version)
     return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
+
+
+def _get_java_version_functionapp(functions_version, runtime_version):
+    if runtime_version is None:
+        runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version]['java']
+    if runtime_version == '8':
+        return '1.8'
+    return runtime_version
 
 
 def try_create_application_insights(cmd, functionapp):
