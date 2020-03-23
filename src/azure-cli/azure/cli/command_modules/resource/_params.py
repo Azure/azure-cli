@@ -48,6 +48,9 @@ def load_arguments(self, _):
                                                     help="a template file path in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
+    filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
+                                  help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
+                                       'To get more information, please visit https://docs.microsoft.com/en-us/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -202,6 +205,9 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
+    with self.argument_context('group deployment list') as c:
+        c.argument('filter_string', arg_type=filter_type)
+
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
 
@@ -225,6 +231,9 @@ def load_arguments(self, _):
     with self.argument_context('deployment operation') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
 
+    with self.argument_context('deployment list') as c:
+        c.argument('filter_string', arg_type=filter_type)
+
     with self.argument_context('deployment sub') as c:
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
 
@@ -237,6 +246,9 @@ def load_arguments(self, _):
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+
+    with self.argument_context('deployment sub list') as c:
+        c.argument('filter_string', arg_type=filter_type)
 
     with self.argument_context('deployment group') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list, required=True)
@@ -259,6 +271,9 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
+    with self.argument_context('deployment group list') as c:
+        c.argument('filter_string', arg_type=filter_type)
+
     with self.argument_context('deployment mg') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -272,6 +287,9 @@ def load_arguments(self, _):
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+
+    with self.argument_context('deployment mg list') as c:
+        c.argument('filter_string', arg_type=filter_type)
 
     with self.argument_context('deployment operation mg') as c:
         c.argument('management_group_id', arg_type=management_group_id_type)
@@ -288,6 +306,9 @@ def load_arguments(self, _):
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+
+    with self.argument_context('deployment tenant list') as c:
+        c.argument('filter_string', arg_type=filter_type)
 
     with self.argument_context('group export') as c:
         c.argument('include_comments', action='store_true')
