@@ -174,7 +174,7 @@ def export_config(cmd,
         cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
 
     if skip_keyvault:
-        src_kvs = [keyvaule for keyvaule in src_kvs if keyvaule.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
+        src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
 
     # We need to separate KV from feature flags
     __discard_features_from_retrieved_kv(src_kvs)
