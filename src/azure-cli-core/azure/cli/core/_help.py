@@ -7,7 +7,7 @@ from __future__ import print_function
 import argparse
 
 from azure.cli.core.commands import ExtensionCommandSource
-from azure.cli.core.commands.constants import SURVEY_PROMPT
+from azure.cli.core.commands.constants import SURVEY_PROMPT, SURVEY_PROMPT_COLOR
 
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
@@ -64,6 +64,7 @@ class CLIPrintMixin(CLIHelp):
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
         super(CLIPrintMixin, self)._print_detailed_help(cli_name, help_file)
+        self._print_az_find_message(help_file.command, self.cli_ctx.enable_color)
 
     @staticmethod
     def _get_choices_defaults_sources_str(p):
@@ -75,7 +76,6 @@ class CLIPrintMixin(CLIHelp):
 
     @staticmethod
     def _print_examples(help_file):
-        from colorama import Style
         indent = 0
         _print_indent('Examples', indent)
         for e in help_file.examples:
@@ -86,9 +86,15 @@ class CLIPrintMixin(CLIHelp):
                 _print_indent(u'{0}'.format(e.long_summary), indent)
             _print_indent(u'{0}'.format(e.command), indent)
             print('')
+
+    @staticmethod
+    def _print_az_find_message(command, enable_color):
+        from colorama import Style
         indent = 0
-        message = 'For more specific examples, use: az find "az {}"'.format(help_file.command)
-        _print_indent(Style.BRIGHT + message + Style.RESET_ALL + '\n', indent)
+        message = 'For more specific examples, use: az find "az {}"'.format(command)
+        if enable_color:
+            message = Style.BRIGHT + message + Style.RESET_ALL
+        _print_indent(message + '\n', indent)
 
     @staticmethod
     def _process_value_sources(p):
@@ -153,8 +159,6 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
     def show_help(self, cli_name, nouns, parser, is_group):
         self.update_loaders_with_help_file_contents(nouns)
 
-        import colorama
-        colorama.init(autoreset=True)
         delimiters = ' '.join(nouns)
         help_file = self.command_help_cls(self, delimiters, parser) if not is_group \
             else self.group_help_cls(self, delimiters, parser)
@@ -165,7 +169,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             AzCliHelp.update_examples(help_file)
         self._print_detailed_help(cli_name, help_file)
 
-        print(SURVEY_PROMPT)
+        print(SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else SURVEY_PROMPT)
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders
@@ -288,6 +292,7 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
                     'name_source': [action.metavar or action.dest],
                     'deprecate_info': getattr(action, 'deprecate_info', None),
                     'preview_info': getattr(action, 'preview_info', None),
+                    'experimental_info': getattr(action, 'experimental_info', None),
                     'description': action.help,
                     'choices': action.choices,
                     'required': False,
