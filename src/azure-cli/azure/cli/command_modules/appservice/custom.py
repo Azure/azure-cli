@@ -2485,9 +2485,17 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError('Must specify --runtime to use --runtime-version')
         allowed_versions = FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version][runtime]
         if runtime_version not in allowed_versions:
+            if runtime == 'dotnet':
+                raise CLIError('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined '
+                               'by --functions-version. Dotnet version {} is not supported by Functions version {}.'
+                               .format(runtime_version, functions_version))
             raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
-                           '--functions_version {}. Supported versions are: {}'
+                           '--functions-version {}. Supported versions are: {}.'
                            .format(runtime_version, runtime, functions_version, ', '.join(allowed_versions)))
+        if runtime == 'dotnet':
+            logger.warning('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined by '
+                           '--functions-version. Dotnet version will be %s for this function app.',
+                           FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime])
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
