@@ -52,7 +52,7 @@ def load_command_table(self, _):
     with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
         g.show_command('show', 'get')
         g.command('list-keys', 'list_keys', deprecate_info=g.deprecate(redirect='cosmosdb keys list', hide=True))
-        g.command('list-read-only-keys', 'list_read_only_keys', deprecate_info=g.deprecate(redirect='cosmosdb keys list --read-only-keys', hide=True))
+        g.command('list-read-only-keys', 'list_read_only_keys', deprecate_info=g.deprecate(redirect='cosmosdb keys list --type read-only-keys', hide=True))
         g.command('list-connection-strings', 'list_connection_strings', table_transformer=list_connection_strings_output, deprecate_info=g.deprecate(redirect='cosmosdb keys list --type connection-strings', hide=True))
         g.command('regenerate-key', 'regenerate_key', deprecate_info=g.deprecate(redirect='cosmosdb keys regenerate', hide=True))
         g.command('check-name-exists', 'check_name_exists')
