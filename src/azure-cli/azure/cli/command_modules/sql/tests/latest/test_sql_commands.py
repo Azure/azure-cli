@@ -736,7 +736,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         
         print('Creating MI...\n')
 
-        # test create sql managed_instance
+        # Create sql managed_instance
         self.cmd('sql mi create -g {} -n {} -l {} '
                  '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
                  .format(resource_group, managed_instance_name, loc, user, admin_password, subnet, license_type, v_cores, storage_size_in_gb, edition, family),
@@ -755,7 +755,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         edition_updated = 'BusinessCritical'
         print('Updating MI...\n')
 
-       # test update sql managed_instance
+       # Update sql managed_instance
         self.cmd('sql mi update -g {} -n {} --edition {} --no-wait'
                  .format(resource_group, managed_instance_name, edition_updated))
 
