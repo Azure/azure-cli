@@ -271,6 +271,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     enabled_for_template_deployment=None,
                     enable_soft_delete=None,
                     enable_purge_protection=None,
+                    retention_days=None,
                     bypass=None,
                     default_action=None,
                     no_self_perms=None,
@@ -370,7 +371,8 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
                                  enable_soft_delete=enable_soft_delete,
-                                 enable_purge_protection=enable_purge_protection)
+                                 enable_purge_protection=enable_purge_protection,
+                                 soft_delete_retention_in_days=int(retention_days))
     if hasattr(properties, 'network_acls'):
         properties.network_acls = network_acls
     parameters = VaultCreateOrUpdateParameters(location=location,
@@ -396,6 +398,7 @@ def update_keyvault(cmd, instance, enabled_for_deployment=None,
                     enabled_for_template_deployment=None,
                     enable_soft_delete=None,
                     enable_purge_protection=None,
+                    retention_days=None,
                     bypass=None,
                     default_action=None,):
     if enabled_for_deployment is not None:
@@ -412,6 +415,9 @@ def update_keyvault(cmd, instance, enabled_for_deployment=None,
 
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
+
+    if retention_days is not None:
+        instance.properties.soft_delete_retention_in_days = int(retention_days)
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
         if instance.properties.network_acls is None:
