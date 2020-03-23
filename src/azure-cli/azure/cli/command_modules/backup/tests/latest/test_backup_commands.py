@@ -465,12 +465,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['job2'] = trigger_restore_job2_json['name']
         self.cmd('backup job wait -g {rg} -v {vault} -n {job2}')
 
-        trigger_restore_job2_details = self.cmd('backup job show -g {rg} -v {vault} -n {job2}', checks=[
+        self.cmd('backup job show -g {rg} -v {vault} -n {job2}', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "Restore"),
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
-        ]).get_output_in_json()
+        ])
 
     @record_only()
     @ResourceGroupPreparer()
