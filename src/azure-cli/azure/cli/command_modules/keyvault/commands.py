@@ -171,6 +171,13 @@ def load_command_table(self, _):
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
     if data_api_version != '2016_10_01':
+        with self.command_group('keyvault certificate', kv_data_sdk) as g:
+            g.keyvault_custom('backup', 'backup_certificate',
+                              doc_string_source=data_doc_string.format('backup_certificate'))
+            g.keyvault_custom('restore', 'restore_certificate',
+                              doc_string_source=data_doc_string.format('restore_certificate'))
+
+    if data_api_version != '2016_10_01':
         with self.command_group('keyvault storage', kv_data_sdk) as g:
             g.keyvault_command('add', 'set_storage_account')
             g.keyvault_command('list', 'get_storage_accounts')

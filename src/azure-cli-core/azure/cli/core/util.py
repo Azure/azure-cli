@@ -13,6 +13,7 @@ import platform
 import ssl
 import six
 import re
+import logging
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
@@ -540,7 +541,7 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
                      body=None, skip_authorization_header=False, resource=None, output_file=None,
                      generated_client_request_id_name='x-ms-client-request-id'):
     import uuid
-    import requests
+    from requests import Session, Request
     from azure.cli.core.commands.client_factory import UA_AGENT
 
     result = {}
@@ -623,9 +624,16 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
                            "If access token is required, use --resource to specify the resource")
     try:
-        r = requests.request(method, uri, params=uri_parameters, data=body, headers=headers,
-                             verify=not should_disable_connection_verify())
-        logger.debug("Response Header : %s", r.headers if r else '')
+        # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
+        s = Session()
+        req = Request(method=method, url=uri, headers=headers, params=uri_parameters, data=body)
+        prepped = s.prepare_request(req)
+
+        # Merge environment settings into session
+        settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
+        _log_request(prepped)
+        r = s.send(prepped, **settings)
+        _log_response(r)
     except Exception as ex:  # pylint: disable=broad-except
         raise CLIError(ex)
 
@@ -639,6 +647,69 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             for chunk in r.iter_content(chunk_size=128):
                 fd.write(chunk)
     return r
+
+
+def _log_request(request):
+    """Log a client request. Copied from msrest
+    https://github.com/Azure/msrest-for-python/blob/3653d29fc44da408898b07c710290a83d196b777/msrest/http_logger.py#L39
+    """
+    if not logger.isEnabledFor(logging.DEBUG):
+        return
+
+    try:
+        logger.info("Request URL: %r", request.url)
+        logger.info("Request method: %r", request.method)
+        logger.info("Request headers:")
+        for header, value in request.headers.items():
+            if header.lower() == 'authorization':
+                value = value[:15] + '*****'
+            logger.info("    %r: %r", header, value)
+        logger.info("Request body:")
+
+        # We don't want to log the binary data of a file upload.
+        import types
+        if isinstance(request.body, types.GeneratorType):
+            logger.info("File upload")
+        else:
+            logger.info(str(request.body))
+    except Exception as err:  # pylint: disable=broad-except
+        logger.info("Failed to log request: %r", err)
+
+
+def _log_response(response, **kwargs):
+    """Log a server response. Copied from msrest
+    https://github.com/Azure/msrest-for-python/blob/3653d29fc44da408898b07c710290a83d196b777/msrest/http_logger.py#L68
+    """
+    if not logger.isEnabledFor(logging.DEBUG):
+        return None
+
+    try:
+        logger.info("Response status: %r", response.status_code)
+        logger.info("Response headers:")
+        for res_header, value in response.headers.items():
+            logger.info("    %r: %r", res_header, value)
+
+        # We don't want to log binary data if the response is a file.
+        logger.info("Response content:")
+        pattern = re.compile(r'attachment; ?filename=["\w.]+', re.IGNORECASE)
+        header = response.headers.get('content-disposition')
+
+        if header and pattern.match(header):
+            filename = header.partition('=')[2]
+            logger.info("File attachments: %s", filename)
+        elif response.headers.get("content-type", "").endswith("octet-stream"):
+            logger.info("Body contains binary data.")
+        elif response.headers.get("content-type", "").startswith("image"):
+            logger.info("Body contains image data.")
+        else:
+            if kwargs.get('stream', False):
+                logger.info("Body is streamable")
+            else:
+                logger.info(response.content.decode("utf-8-sig"))
+        return response
+    except Exception as err:  # pylint: disable=broad-except
+        logger.info("Failed to log response: %s", repr(err))
+        return response
 
 
 class ConfiguredDefaultSetter(object):
