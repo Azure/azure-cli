@@ -65,7 +65,7 @@ class TestVmCustom(unittest.TestCase):
         publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
             None, _WINDOWS_ACCESS_EXT)
         self.assertEqual('Microsoft.Compute', publisher)
-        self.assertEqual('2.0', version)
+        self.assertEqual('2.4', version)
         self.assertEqual(None, auto_upgrade)
 
         # when there is existing extension with higher version, stick to that
