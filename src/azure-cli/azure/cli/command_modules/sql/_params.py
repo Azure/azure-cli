@@ -1476,6 +1476,39 @@ def load_arguments(self, _):
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. ' + time_format_help)
 
+    with self.argument_context('sql midb ltr restore') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'target_managed_database_name',
+                'target_managed_instance_name',
+                'target_resource_group_name',
+                'restore_long_term_retention_backup'
+            ])
+
+        c.argument('target_managed_database_name',
+                   options_list=['--dest-name'],
+                   required=True,
+                   help='Name of the managed database that will be created as the restore destination.')
+
+        c.argument('target_managed_instance_name',
+                   options_list=['--dest-mi'],
+                   help='Name of the managed instance to restore managed database to. '
+                   'This can be same managed instance, or another managed instance on same subscription. '
+                   'When not specified it defaults to source managed instance.')
+
+        c.argument('target_resource_group_name',
+                   options_list=['--dest-resource-group'],
+                   help='Name of the resource group of the managed instance to restore managed database to. '
+                   'When not specified it defaults to source resource group.')
+
+        restore_ltr_backup_arg_group = 'Restore LTR Backup'
+
+        c.argument('restore_long_term_retention_backup',
+                   options_list['--ltr-backup'],
+                   arg_group=restore_ltr_backup_arg_group,
+                   required=True,
+                   help='The long term retention managed instance backup object to restore.'
+
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
@@ -1510,23 +1543,28 @@ def load_arguments(self, _):
             ])
 
         c.argument('weekly_retention',
-                    options_list=['--weekly-retention'],
                     help='The Weekly Retention. If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
                     'There is a minimum of 7 days and a maximum of 10 years.')
 
         c.argument('monthly_retention',
-                    options_list=['--monthly-retention'],
                     help='The Monthly Retention. If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
                     'There is a minimum of 7 days and a maximum of 10 years.')
 
         c.argument('yearly_retention',
-                    options_list=['--yearly-retention'],
                     help='The Yearly Retention. If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.''
                     'There is a minimum of 7 days and a maximum of 10 years.)
 
         c.argument('week_of_year',
-                    options_list=['--week-of-year'],
                     help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
+
+    with self.argument_context('sql midb long-term-retention-backup') as c:
+        c.argument('location_name',
+                    arg_type=get_location_type(self.cli_ctx))
+
+        c.argument('resource_group_name',
+                   required=False,
+                   help='If specified, the resource group the for which a managed instance/database resource belongs to.')
+
 
     ###############################################
     #                sql virtual cluster          #

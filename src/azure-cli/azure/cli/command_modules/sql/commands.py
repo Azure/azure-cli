@@ -559,6 +559,11 @@ def load_command_table(self, _):
         g.command('list', 'list_by_instance')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
 
+    with self.command_group('sql midb ltr restore',
+                            managed_databases_operations,
+                            client_factory=get_sql_managed_databases_operations) as g:
+        g.custom_command('restore', 'managed_db_restore_ltr_backup', supports_no_wait=True)
+
     managed_backup_short_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedBackupShortTermRetentionPoliciesOperations.{}',
         client_factory=get_sql_managed_backup_short_term_retention_policies_operations)
@@ -570,7 +575,7 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_short_term_retention_mi', supports_no_wait=True)
         g.custom_command('show', 'get_short_term_retention_mi')
 
-    managed_instance_long_term_retention_policies_operations = CliCommandType(
+    managed_database_long_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceLongTermRetentionPoliciesOperations.{}',
         client_factory=get_sql_managed_instance_long_term_retention_policies_operations)
 
@@ -579,7 +584,21 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_instance_long_term_retention_policies_operations) as g:
 
         g.custom_command('set', 'update_long_term_retention_mi', supports_no_wait=True)
-        g.custom_command('show', 'get_long_term_retention_mi')
+        g.show_command('show', 'get')
+
+    managed_database_long_term_retention_backups_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionManagedInstanceBackupsOperations.{}',
+        client_factory-get_sql_long_term_retention_managed_instance_backups_operations)
+
+    with self.command_group('sql midb long-term-retention-backup',
+                            long_term_retention_managed_instance_backups_operations,
+                            client_factory=get_sql_long_term_retention_managed_instance_backups_operations) as g:
+        g.show_command('show', 'get')
+        g.custom_command('list-by-database', 'list_by_database_long_term_retention_mi_backup')
+        g.custom_command('list-by-instance', 'list_by_instance_long_term_retention_mi_backup')
+        g.custom_command('list-by-location', 'list_by_location_long_term_retention_mi_backup')
+        g.command('delete', 'delete')
+
 
     ###############################################
     #                sql virtual cluster         #

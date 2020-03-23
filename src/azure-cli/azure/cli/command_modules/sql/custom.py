@@ -21,6 +21,7 @@ from azure.mgmt.sql.models import (
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
     IdentityType,
+	LongTermRetentionManagedInstanceBackup,
     PartnerInfo,
     PerformanceLevelUnit,
     ReplicationRole,
@@ -35,6 +36,7 @@ from azure.mgmt.sql.models import (
     StorageKeyType,
     InstanceFailoverGroup,
     ManagedInstancePairInfo,
+	ManagedInstanceLongTermRetentionPolicy,
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
@@ -2628,6 +2630,36 @@ def managed_db_restore(
         parameters=kwargs)
 
 
+def managed_db_restore_ltr_backup(
+        cmd,
+        client,
+        target_managed_database_name,
+        target_managed_instance_name=None,
+        target_resource_group_name=None,
+        **kwargs):
+    '''
+    Restores a managed db from an LTR backup (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
+    '''
+
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name)
+
+    kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
+    kwargs['long_term_retention_backup_resource_id'] = _get_managed_database_backup(
+        cmd.cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name)
+
+    return client.create_or_update(
+        database_name=target_managed_database_name,
+        managed_instance_name=target_managed_instance_name,
+        resource_group_name=target_resource_group_name,
+        parameters=kwargs)
+
+
 def update_short_term_retention_mi(
         cmd,
         client,
@@ -2698,6 +2730,123 @@ def get_short_term_retention_mi(
 
     return policy
 
+
+def update_long_term_retention_mi(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        weekly_retention=None,
+        monthly_retention=None,
+        yearly_retention=None,
+        week_of_year=None):
+    '''
+    Updates long term retention for managed database
+    '''
+    if not (weekly_retention or monthly_retention or yearly_retention):
+        raise CLIError('Please specify retention setting(s).')
+
+    if yearly_retention and not week_of_year
+        raise CLIError('Please specify week of year for yearly retention.')
+
+    policy = client.create_or_update(
+        database_name=database_name,
+        managed_instance_name=managed_instance_name,
+        resource_group_name=resource_group_name,
+        weekly_retention=weekly_retention,
+        monthly_retention=monthly_retention,
+        yearly_retention=yearly_retention,
+        week_of_year=week_of_year)
+
+    return policy
+
+
+def list_by_database_long_term_retention_mi_backup(
+        cmd,
+        client,
+        location_name,
+        managed_instance_name,
+        database_name,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None)
+    '''
+    Lists the long term retention backups for a Managed Database
+    '''
+
+    if resource_group_name:
+        backups = client.list_by_resource_group_database(
+            resource_group_name=resource_group_name,
+            location_name=location_name,
+            managed_instance_name=managed_instance_name,
+            database_name=database_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+    else:
+        backups = client.list_by_database(
+            location_name=location_name,
+            managed_instance_name=managed_instance_name,
+            database_name=database_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+
+    return backups
+
+
+def list_by_instance_long_term_retention_mi_backup(
+        cmd,
+        client,
+        location_name,
+        managed_instance_name,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None)
+    '''
+    Lists the long term retention backups within a Managed Instance
+    '''
+
+    if resource_group_name:
+        backups = client.list_by_resource_group_instance(
+            resource_group_name=resource_group_name,
+            location_name=location_name,
+            managed_instance_name=managed_instance_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+    else:
+        backups = client.list_by_instance(
+            location_name=location_name,
+            managed_instance_name=managed_instance_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+
+        return backups
+
+
+def list_by_location_long_term_retention_mi_backup(
+        cmd,
+        client
+        location_name,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None)
+    '''
+    Lists the long term retentionb backups within a specified region.
+    '''
+
+    if resource_group_name:
+        backups = client.list_by_resource_group_location(
+            resource_group_name=resource_groupname,
+            location_name=location_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+    else:
+        backups = client.list_by_location(
+            location_name=location_name,
+            only_latest_per_database=only_latest_per_database,
+            database_state=database_state)
+
+    return backups
 
 ###############################################
 #              sql failover-group             #
