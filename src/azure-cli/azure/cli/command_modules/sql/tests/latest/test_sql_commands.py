@@ -3194,6 +3194,77 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
                      self.check('retentionDays', '{retention_days_dec}')])
 
 
+class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    def test_sql_managed_db_long_term_retention(self, resource_group, resource_group_location):
+
+        resource_prefix = 'MIDBLongTermRetention'
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'database_name': self.create_random_name(resource_prefix, 50),
+            'vault_name': self.create_random_name(resource_prefix, 50),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '32',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy",
+            'weekly_retention': "P1W",
+            'monthly_retention': "P1M",
+            'yearly_retention': "P1Y",
+            'week_of_year': 12
+        })
+
+        # create sql managed_instance
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                 '-u {admin_login} -p {admin_password} --subnet {subnet_id} --license-type {license_type} '
+                 '--capacity {v_cores} --storage {storage_size_in_gb} --edition {edition} --family {family} '
+                 '--collation {collation} --proxy-override {proxy_override} --public-data-endpoint-enabled --assign-identity',
+                 checks=[
+                     self.check('name', '{managed_instance_name}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('administratorLogin', '{admin_login}'),
+                     self.check('vCores', '{v_cores}'),
+                     self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                     self.check('licenseType', '{license_type}'),
+                     self.check('sku.tier', '{edition}'),
+                     self.check('sku.family', '{family}'),
+                     self.check('sku.capacity', '{v_cores}'),
+                     self.check('collation', '{collation}'),
+                     self.check('proxyOverride', '{proxy_override}'),
+                     self.check('publicDataEndpointEnabled', 'True')]).get_output_in_json()
+
+        # create database
+        self.cmd('sql midb create -g {rg} --mi {managed_instance_name} -n {database_name} --collation {collation}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('name', '{database_name}'),
+                     self.check('location', '{loc}'),
+                     self.check('collation', '{collation}'),
+                     self.check('status', 'Online')])
+
+        # test update long term retention on live database
+        self.cmd('sql midb long-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --weekly_retention {weekly_retention} --monthly_retention {monthly_retention} --yearly_retention {yearly_retention} --week_of_year {week_of_year}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('weeklyRetention', '{weekly_retention}'),
+                     self.check('monthlyRetention', '{monthly_retention}'),
+                     self.check('yearlyRetention', '{yearly_retention}')])
+
+        # test get long term retention on live database
+        self.cmd('sql midb long-term-retention-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
+                 checks=[
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('weeklyRetention', '{weekly_retention}'),
+                     self.check('monthlyRetention', '{monthly_retention}'),
+                     self.check('yearlyRetention', '{yearly_retention}')])
+
+
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
