@@ -353,4 +353,35 @@ def load_arguments(self, _):
                         "all monitor settings would be cloned instead of expanding its scope.")
         c.argument('monitor_types', options_list=['--types', '-t'], arg_type=get_enum_type(['metricsAlert']),
                    nargs='+', help='List of types of monitor settings which would be cloned.', default=['metricsAlert'])
+
+    # region Private Link Resources
+    for item in ['create', 'update', 'show', 'delete', 'list']:
+        with self.argument_context('monitor private-link-scope {}'.format(item)) as c:
+            c.ignore('location')
+            c.argument('scope_name', options_list=['--name', '-n'], help='Name of the Azure Monitor Private Link Scope.')
+
+    with self.argument_context('monitor private-link-scope assigned-resource') as c:
+        c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.')
+        c.argument('resource_name', options_list=['--name', '-n'], help='Name of the assigned resource.')
+        c.argument('linked_resource_id', options_list=['--linked-resource'], help='Name or ID of the linked resource. It should be one of log analytics workspace or application insights component.')
+
+    with self.argument_context('monitor private-link-scope private-link-resource') as c:
+        c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.')
+        c.argument('group_name', options_list=['--name', '-n'], help='Name of the private link resource.')
+
+    with self.argument_context('monitor private-link-scope private-endpoint-connection') as c:
+        c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.')
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with the private link scope.')
+    for item in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('monitor private-link-scope private-endpoint-connection {}'.format(item)) as c:
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the private link scope.')
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the private link scope. You can get '
+                    'it using `az monitor private-link-scope show`.')
+            c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.', required=False)
+            c.argument('resource_group_name', help='The resource group name of specified private link scope.',
+                       required=False)
+            c.argument('description', help='Comments for {} operation.'.format(item))
     # endregion

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
 from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
 
 
@@ -317,3 +318,17 @@ def get_action_group_id_validator(dest):
             action_group_ids.append(group.lower())
         setattr(namespace, dest, action_group_ids)
     return validate_action_group_ids
+
+
+def validate_private_endpoint_connection_id(cmd, namespace):
+    if namespace.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(namespace.connection_id)
+        namespace.resource_group_name = result['resource_group']
+        namespace.scope_name = result['name']
+        namespace.private_endpoint_connection_name = result['child_name_1']
+
+    if not all([namespace.account_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --account-name NAME]')
+
+    del namespace.connection_id

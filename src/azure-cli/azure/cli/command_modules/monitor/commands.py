@@ -17,7 +17,7 @@ def load_command_table(self, _):
         cf_private_link_scopes, cf_private_endpoint_connections)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
-    from .validators import process_autoscale_create_namespace
+    from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id
 
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
@@ -300,3 +300,29 @@ def load_command_table(self, _):
     with self.command_group('monitor private-link-scope', private_link_scopes_sdk, custom_command_type=private_link_scope_custom) as g:
         g.command('show', 'get')
         g.custom_show_command('show', 'show_private_link_scope')
+        g.custom_command('list', 'list_private_link_scope')
+        g.custom_command('create', 'create_private_link_scope')
+        g.custom_command('update', 'update_private_link_scope')
+        g.custom_command('delete', 'delete_private_link_scope')
+
+    with self.command_group('monitor private-link-scope assigned-resource', private_link_scoped_resources_sdk, custom_command_type=private_link_scope_custom) as g:
+        g.custom_show_command('show', 'show_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
+        g.custom_command('list', 'list_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
+        g.custom_command('create', 'create_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
+        g.custom_command('update', 'update_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
+        g.custom_command('delete', 'delete_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
+
+    with self.command_group('monitor private-link-scope private-link-resource', private_link_resources_sdk, custom_command_type=private_link_scope_custom) as g:
+        g.custom_show_command('show', 'show_private_link_resource', client_factory=cf_private_link_resources)
+        g.custom_command('list', 'list_private_link_resource', client_factory=cf_private_link_resources)
+
+    with self.command_group('monitor private-link-scope private-endpoint-connection', private_endpoint_connections_sdk, custom_command_type=private_link_scope_custom) as g:
+        g.custom_show_command('show', 'show_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
+                              validator=validate_private_endpoint_connection_id)
+        g.custom_command('list', 'list_private_endpoint_connection', client_factory=cf_private_endpoint_connections)
+        g.custom_command('approve', 'approve_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'delete_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
+                         validator=validate_private_endpoint_connection_id)
