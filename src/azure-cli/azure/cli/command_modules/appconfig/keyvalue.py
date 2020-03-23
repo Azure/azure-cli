@@ -287,6 +287,7 @@ def export_secret(cmd,
                 yaml.safe_dump(secrets, fp, sort_keys=False)
             elif format_ == 'properties':
                 javaproperties.dump(secrets, fp)
+        return
     return secrets
 
 
