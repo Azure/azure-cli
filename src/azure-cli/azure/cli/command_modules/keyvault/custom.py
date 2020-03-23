@@ -25,7 +25,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from azure.cli.core import telemetry
 from azure.cli.core.profiles import ResourceType
 
-from ._validators import secret_text_encoding_values
+from ._validators import _construct_vnet, secret_text_encoding_values
 
 logger = get_logger(__name__)
 
@@ -264,6 +264,49 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
                                    parameters=params)
 
 
+def _parse_network_acls(cmd, resource_group_name, network_acls):
+    if not network_acls:
+        return None
+
+    logger.info('network_acls: {}'.format(network_acls))
+
+    try:
+        network_acls_json = json.loads(network_acls)
+    except:  # pylint: disable=bare-except
+        with open(network_acls) as f:
+            logger.info('network_acls_filename: {}'.format(network_acls))
+            network_acls_json = json.load(f)
+
+    try:
+        network_acls_json = json.loads(json.dumps(network_acls_json))
+    except:  # pylint: disable=bare-except
+        raise CLIError('Please specify a valid JSON to parameter --network-acls')
+
+    logger.info('network_acls_json: {}'.format(network_acls_json))
+
+    VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
+    IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    network_acls = _create_network_rule_set(cmd)
+
+    network_acls.virtual_network_rules = []
+    for vnet_rule in network_acls_json.get('vnet', []):
+        items = vnet_rule.split('/')
+        if len(items) != 2:
+            raise CLIError('Invalid VNet rule: {}. Format: {{vnet}}/{{subnet}}'.format(vnet_rule))
+
+        vnet_name = items[0].lower()
+        subnet_name = items[1].lower()
+        vnet = _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name)
+        network_acls.virtual_network_rules.append(VirtualNetworkRule(id=vnet))
+
+    network_acls.ip_rules = []
+    for ip_rule in network_acls_json.get('ip', []):
+        network_acls.ip_rules.append(IPRule(value=ip_rule))
+
+    return network_acls
+
+
 def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     resource_group_name, vault_name, location=None, sku=None,
                     enabled_for_deployment=None,
@@ -272,6 +315,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     enable_soft_delete=None,
                     enable_purge_protection=None,
                     retention_days=None,
+                    network_acls=None,
                     bypass=None,
                     default_action=None,
                     no_self_perms=None,
@@ -303,9 +347,10 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     subscription = profile.get_subscription()
 
     # if bypass or default_action was specified create a NetworkRuleSet
-    # if neither were specified we make network_acls None
+    # if neither were specified we will parse it from parameter `--network-acls`
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
-        network_acls = _create_network_rule_set(cmd, bypass, default_action) if bypass or default_action else None
+        network_acls = _create_network_rule_set(cmd, bypass, default_action) \
+            if bypass or default_action else _parse_network_acls(cmd, resource_group_name, network_acls)
 
     if no_self_perms:
         access_policies = []

@@ -89,6 +89,9 @@ def load_arguments(self, _):
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help="Enable 'soft delete' functionality for this key vault and all contained entities. If omitted, it will be set to true by default. Once set to true, it cannot be reverted to false.")
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
+        c.argument('network_acls', help='Network ACLs. It accepts a JSON filename or a JSON string. '
+                                        'JSON format: {\"ip\":[ip1, ip2...],'
+                                        '\"vnet\":[vnet_name_1/subnet_name_1,vnet_name_2/subnet_name_2...]}')
 
     with self.argument_context('keyvault update') as c:
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help="Enable 'soft delete' functionality for this key vault and all contained entities. Once set to true, it cannot be reverted to false.")

@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 
+import json
 import os
 import time
 import unittest
@@ -1241,20 +1242,56 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
     def test_keyvault_network_rule(self, resource_group):
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-nr-', 24),
+            'kv2': self.create_random_name('cli-test-kv-nr-', 24),
+            'kv3': self.create_random_name('cli-test-kv-nr-', 24),
             'vnet': self.create_random_name('cli-test-vnet-', 24),
             'loc': 'eastus2',
             'subnet': self.create_random_name('cli-test-subnet-', 24),
-            'ip': '1.2.3.4/32'
+            'ip': '1.2.3.4/32',
+            'ip2': '2.3.4.0/24'
         })
 
         subnet = self._create_subnet(self, self.kwargs).get_output_in_json()
-        _create_keyvault(self, self.kwargs).get_output_in_json()
-
         self.kwargs.update({
             # key vault service will convert subnet ID to lowercase, so convert subnet ID to lowercase in advance
             'subnetId': subnet['id'].lower()
         })
 
+        # test creating network rules while creating vault
+        network_acls = {
+            'ip': [self.kwargs['ip'], self.kwargs['ip2']],
+            'vnet': ['{}/{}'.format(self.kwargs['vnet'], self.kwargs['subnet'])]
+        }
+        json_filename = os.path.join(TEST_DIR, 'network_acls.json')
+        with open(json_filename, 'w') as f:
+            json.dump(network_acls, f)
+        json_string = json.dumps(network_acls).replace('"', '\\"')
+
+        self.kwargs.update({
+            'network_acls_json_string': json_string,
+            'network_acls_json_filename': json_filename
+        })
+        self.cmd('keyvault create -n {kv2} -l {loc} -g {rg} --network-acls "{network_acls_json_string}"', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 2),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}'),
+            self.check('properties.networkAcls.ipRules[1].value', '{ip2}'),
+            self.check('length(properties.networkAcls.virtualNetworkRules)', 1),
+            self.check('properties.networkAcls.virtualNetworkRules[0].id', '{subnetId}')
+        ])
+
+        self.cmd('keyvault create -n {kv3} -l {loc} -g {rg} --network-acls "{network_acls_json_filename}"', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 2),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}'),
+            self.check('properties.networkAcls.ipRules[1].value', '{ip2}'),
+            self.check('length(properties.networkAcls.virtualNetworkRules)', 1),
+            self.check('properties.networkAcls.virtualNetworkRules[0].id', '{subnetId}')
+        ])
+
+        if os.path.isfile(json_filename):
+            os.remove(json_filename)
+
+        # basic tests
+        _create_keyvault(self, self.kwargs)
         self.cmd('keyvault update --name {kv} --resource-group {rg} --default-action Deny')
 
         # add network-rule for subnet
