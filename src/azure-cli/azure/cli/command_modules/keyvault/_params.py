@@ -291,12 +291,24 @@ def load_arguments(self, _):
     with self.argument_context('keyvault certificate set-attributes') as c:
         c.attributes_argument('certificate', CertificateAttributes, ignore=['expires', 'not_before'])
 
+    with self.argument_context('keyvault certificate backup') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help='Local file path in which to store certificate backup.')
+
+    with self.argument_context('keyvault certificate restore') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help='Local certificate backup from which to restore certificate.')
+
     for item in ['create', 'set-attributes', 'import']:
         with self.argument_context('keyvault certificate ' + item) as c:
-            c.argument('certificate_policy', options_list=['--policy', '-p'], help='JSON encoded policy defintion. Use @{file} to load from a file(e.g. @my_policy.json).', type=get_json_object)
+            c.argument('certificate_policy', options_list=['--policy', '-p'],
+                       help='JSON encoded policy defintion. Use @{file} to load from a file(e.g. @my_policy.json).',
+                       type=get_json_object)
 
     with self.argument_context('keyvault certificate import') as c:
-        c.argument('certificate_data', options_list=['--file', '-f'], completer=FilesCompleter(), help='PKCS12 file or PEM file containing the certificate and private key.', type=certificate_type)
+        c.argument('certificate_data', options_list=['--file', '-f'], completer=FilesCompleter(),
+                   help='PKCS12 file or PEM file containing the certificate and private key.',
+                   type=certificate_type)
         c.argument('password', help="If the private key in certificate is encrypted, the password used for encryption.")
         c.extra('disabled', arg_type=get_three_state_flag(), help='Import the certificate in disabled state.')
 
