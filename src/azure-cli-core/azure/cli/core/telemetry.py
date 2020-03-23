@@ -173,6 +173,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
+        set_custom_properties(result, 'InstallSource', os.getenv('AZ_INSTALL'))
 
         return result
 
