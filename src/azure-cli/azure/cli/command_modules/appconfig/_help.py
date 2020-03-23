@@ -121,6 +121,16 @@ examples:
     text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label * --dest-label ExportedKeys
 """
 
+helps['appconfig kv export-secret'] = """
+type: command
+short-summary: Export values of key vault reference from your App Configuration.
+examples:
+  - name: Export all key-vault reference values to a json file.
+    text: az appconfig kv export-secret -n MyAppConfiguration --label test --path D:/abc.json --format json
+  - name: Export key-vault reference values to memory.
+    text: az appconfig kv export -n MyAppConfiguration --label test
+"""
+
 helps['appconfig kv import'] = """
 type: command
 short-summary: Import configurations into your App Configuration from another place.

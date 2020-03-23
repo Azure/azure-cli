@@ -82,6 +82,7 @@ def load_command_table(self, _):
         g.command('import', 'import_config')
         g.command('export', 'export_config')
         g.command('set-keyvault', 'set_keyvault')
+        g.command('export-secret', 'export_secret')
 
     # FeatureManagement Commands
     with self.command_group('appconfig feature',

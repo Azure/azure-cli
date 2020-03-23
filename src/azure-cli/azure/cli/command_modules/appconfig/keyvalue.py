@@ -7,6 +7,8 @@
 
 import json
 import time
+import javaproperties
+import yaml
 
 from itertools import chain
 from knack.log import get_logger
@@ -25,7 +27,8 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
                           __write_kv_and_features_to_file, __read_kv_from_config_store,
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
                           __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
-                          __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
+                          __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview,
+                          __get_keyvault_client)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -244,24 +247,48 @@ def export_config(cmd,
     elif destination == 'appservice':
         __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
 
+
 def export_secret(cmd,
                   name=None,
                   connection_string=None,
                   label=None,
                   key=None,
-                  prefix="",  # prefix to remove
-                  # to-file parameters
+                  prefix="",
                   path=None,
                   format_=None):
-
     # fetch key values from user's configstore
     src_kvs = __read_kv_from_config_store(
         cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
 
     __discard_features_from_retrieved_kv(src_kvs)
-    keyvault_references = [keyvaule for keyvaule in src_kvs if keyvaule.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
-    for key in keyvault_references:
-        
+    kv_references = [keyvaule for keyvaule in src_kvs if keyvaule.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
+    keyvault_client = __get_keyvault_client(cmd.cli_ctx)
+    secrets = {}
+
+    from azure.keyvault.key_vault_id import SecretId
+    for kv in kv_references:
+        try:
+            secret_id = json.loads(kv.value)["uri"]
+            kv_identifier = SecretId(uri=secret_id)
+        except (TypeError, ValueError) as error:
+            logger.warning("Invalid key vault reference for key:%s value:%s. Error:%s", kv.key, kv.value, error)
+            continue
+
+        secret = keyvault_client.get_secret(vault_base_url=kv_identifier.vault,
+                                            secret_name=kv_identifier.name,
+                                            secret_version=kv_identifier.version)
+        secrets[kv.key] = secret.value
+
+    if path:
+        with open(path, 'w') as fp:
+            if format_ == 'json':
+                json.dump(secrets, fp, indent=2, ensure_ascii=False)
+            elif format_ == 'yaml':
+                yaml.safe_dump(secrets, fp, sort_keys=False)
+            elif format_ == 'properties':
+                javaproperties.dump(secrets, fp)
+    return secrets
+
 
 def set_key(cmd,
             key,

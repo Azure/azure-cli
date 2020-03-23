@@ -824,6 +824,19 @@ def __compact_key_values(key_values):
     return compacted
 
 
+def __get_keyvault_client(cli_ctx):
+    
+    from azure.cli.core._profile import Profile
+    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+    from azure.cli.core.profiles import ResourceType, get_api_version
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
+
+    def _get_token(server, resource, scope):  # pylint: disable=unused-argument
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+
+    return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
+
+
 class Undef(object):  # pylint: disable=too-few-public-methods
     '''
     Dummy undef class used to preallocate space for kv exporting.
