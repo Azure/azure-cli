@@ -534,7 +534,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
         for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if operation.startswith(rt.import_prefix):
+            if operation.startswith(rt.import_prefix + '.'):
                 operation = operation.replace(rt.import_prefix,
                                               get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
                                                                      operation_group=operation_group))
