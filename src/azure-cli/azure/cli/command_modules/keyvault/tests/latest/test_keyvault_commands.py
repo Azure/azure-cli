@@ -792,7 +792,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
             'loc': 'westus'
         })
 
-        _create_keyvault(self, self.kwargs)
+        keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
 
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
@@ -849,12 +850,25 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
             self.check('policy.x509CertificateProperties.validityInMonths', 60)
         ])
 
-        # delete certificate
+        # backup and then delete certificate
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} '
+                 '--certificate-permissions backup delete get restore list')
+
+        bak_file = 'backup.cert'
+        self.kwargs['bak_file'] = bak_file
+        self.cmd('keyvault certificate backup --vault-name {kv} -n cert1 --file {bak_file}')
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
         self.cmd('keyvault certificate list --vault-name {kv}',
                  checks=self.is_empty())
         self.cmd('keyvault certificate list --vault-name {kv} --maxresults 10',
                  checks=self.is_empty())
+
+        # restore certificate from backup
+        self.cmd('keyvault certificate restore --vault-name {kv} --file {bak_file}')
+        self.cmd('keyvault certificate list --vault-name {kv}',
+                 checks=self.check('length(@)', 1))
+        if os.path.isfile(bak_file):
+            os.remove(bak_file)
 
 
 def _generate_certificate(path, keyfile=None, password=None):
