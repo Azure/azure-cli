@@ -152,38 +152,40 @@ def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_a
     return nic
 
 
-def build_nsg_resource(_, name, location, tags, nsg_rule_type):
-
-    rule_name = 'rdp' if nsg_rule_type == 'rdp' else 'default-allow-ssh'
-    rule_dest_port = '3389' if nsg_rule_type == 'rdp' else '22'
-
-    nsg_properties = {
-        'securityRules': [
-            {
-                'name': rule_name,
-                'properties': {
-                    'protocol': 'Tcp',
-                    'sourcePortRange': '*',
-                    'destinationPortRange': rule_dest_port,
-                    'sourceAddressPrefix': '*',
-                    'destinationAddressPrefix': '*',
-                    'access': 'Allow',
-                    'priority': 1000,
-                    'direction': 'Inbound'
-                }
-            }
-        ]
-    }
-
+def build_nsg_resource(_, name, location, tags, nsg_rule):
     nsg = {
         'type': 'Microsoft.Network/networkSecurityGroups',
         'name': name,
         'apiVersion': '2015-06-15',
         'location': location,
         'tags': tags,
-        'dependsOn': [],
-        'properties': nsg_properties
+        'dependsOn': []
     }
+
+    if nsg_rule != 'NONE':
+        rule_name = 'rdp' if nsg_rule == 'RDP' else 'default-allow-ssh'
+        rule_dest_port = '3389' if nsg_rule == 'RDP' else '22'
+
+        nsg_properties = {
+            'securityRules': [
+                {
+                    'name': rule_name,
+                    'properties': {
+                        'protocol': 'Tcp',
+                        'sourcePortRange': '*',
+                        'destinationPortRange': rule_dest_port,
+                        'sourceAddressPrefix': '*',
+                        'destinationAddressPrefix': '*',
+                        'access': 'Allow',
+                        'priority': 1000,
+                        'direction': 'Inbound'
+                    }
+                }
+            ]
+        }
+
+        nsg['properties'] = nsg_properties
+
     return nsg
 
 
@@ -943,7 +945,7 @@ def build_vm_linux_log_analytics_workspace_agent(_, vm_name, location):
         'properties': {
             'publisher': 'Microsoft.EnterpriseCloud.Monitoring',
             'type': 'OmsAgentForLinux',
-            'typeHandlerVersion': '1.4',
+            'typeHandlerVersion': '1.0',
             'autoUpgradeMinorVersion': 'true',
             'settings': {
                 'workspaceId': "[reference(parameters('workspaceId'), '2015-11-01-preview').customerId]",
@@ -955,31 +957,10 @@ def build_vm_linux_log_analytics_workspace_agent(_, vm_name, location):
         }
     }
 
-    mmaExtension_resource['name'] = vm_name + '/OMSExtension'
+    mmaExtension_resource['name'] = vm_name + '/OmsAgentForLinux'
     mmaExtension_resource['location'] = location
     mmaExtension_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/' + vm_name]
     return mmaExtension_resource
-
-
-def build_vm_daExtension_resource(_, vm_name, location):
-    '''
-    This is used for log analytics workspace
-    '''
-    daExtensionName_resource = {
-        'type': 'Microsoft.Compute/virtualMachines/extensions',
-        'apiVersion': '2018-10-01',
-        'properties': {
-            'publisher': 'Microsoft.Azure.Monitoring.DependencyAgent',
-            'type': 'DependencyAgentLinux',
-            'typeHandlerVersion': '9.5',
-            'autoUpgradeMinorVersion': 'true'
-        }
-    }
-
-    daExtensionName_resource['name'] = vm_name + '/DependencyAgentLinux'
-    daExtensionName_resource['location'] = location
-    daExtensionName_resource['dependsOn'] = ['Microsoft.Compute/virtualMachines/{0}/extensions/OMSExtension'.format(vm_name)]  # pylint: disable=line-too-long
-    return daExtensionName_resource
 
 
 def build_vm_windows_log_analytics_workspace_agent(_, vm_name, location):

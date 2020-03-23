@@ -7,6 +7,11 @@ trigger:
     include:
     - '*'
 
+pr:
+  branches:
+    include:
+      - '*'
+
 jobs:
 - job: CheckPullRequestTitle
   displayName: "Check the Format of Pull Request Title"
@@ -398,8 +403,8 @@ jobs:
     - bash: ./scripts/ci/test_profile_integration.sh
       displayName: 'Run Integration Test against Profiles'
 
-- job: RunAutomationReducedPython3_6
-  displayName: Run Automation Reduced Python 3.6
+- job: RunAutomationPython3_6
+  displayName: Run Automation Python 3.6
   dependsOn: BuildPythonWheel
   timeoutInMinutes: 90
 
@@ -423,7 +428,7 @@ jobs:
       targetType: 'filePath'
       filePath: ./scripts/ci/test_automation.sh
     env:
-      REDUCE_SDK: 'True'
+      ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
 - job: RunAutomationReduced20190301
   displayName: Run Automation Reduced Python 3.6, Profile 2019-03-01
@@ -451,6 +456,7 @@ jobs:
     env:
       REDUCE_SDK: 'True'
       AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+      ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
 - job: RunAutomation20180301
   displayName: Run Automation, Profile 2018-03-01
@@ -477,9 +483,10 @@ jobs:
       filePath: ./scripts/ci/test_automation.sh
     env:
       AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
+      ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
-- job: RunAutomationReducedPython3_8
-  displayName: Run Automation Reduced Python 3.8
+- job: RunAutomationPython3_8
+  displayName: Run Automation Python 3.8
   dependsOn: BuildPythonWheel
   timeoutInMinutes: 90
 
@@ -503,7 +510,7 @@ jobs:
       targetType: 'filePath'
       filePath: ./scripts/ci/test_automation.sh
     env:
-      REDUCE_SDK: 'True'
+      ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
 - job: RunAutomationReduced20190301Python3_8
   displayName: Run Automation Reduced Python 3.8, Profile 2019-03-01
@@ -531,6 +538,7 @@ jobs:
     env:
       REDUCE_SDK: 'True'
       AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+      ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
@@ -578,7 +586,8 @@ jobs:
       targetType: 'filePath'
       filePath: ./scripts/ci/test_automation.sh
     env:
-      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'      
+      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
+      ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula

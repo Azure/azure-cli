@@ -285,6 +285,7 @@ Release History
 
 **IoT Central**
 
+* Update error details, update default application template and prompt message.
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
 **Key Vault**
@@ -664,7 +665,8 @@ Release History
 * Add new command `az reservations reservation-order calculate` to calculate the price for a reservation
 * Add new command `az reservations reservation-order purchase` to purchase a new reservation
 
-**Rest**
+**REST**
+
 * `az rest` is now GA
 
 **SQL**

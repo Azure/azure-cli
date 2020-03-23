@@ -447,6 +447,12 @@ def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     return object_id
 
 
+def _permissions_distinct(permissions):
+    if permissions:
+        return [_ for _ in {p for p in permissions}]
+    return permissions
+
+
 def set_policy(cmd, client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None, storage_permissions=None):
@@ -459,6 +465,12 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
+
+    key_permissions = _permissions_distinct(key_permissions)
+    secret_permissions = _permissions_distinct(secret_permissions)
+    certificate_permissions = _permissions_distinct(certificate_permissions)
+    storage_permissions = _permissions_distinct(storage_permissions)
+
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
                    if object_id.lower() == p.object_id.lower() and
@@ -1024,6 +1036,19 @@ def download_certificate(client, file_path, vault_base_url=None, certificate_nam
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex
+
+
+def backup_certificate(client, file_path, vault_base_url=None,
+                       certificate_name=None, identifier=None):  # pylint: disable=unused-argument
+    cert = client.backup_certificate(vault_base_url, certificate_name).value
+    with open(file_path, 'wb') as output:
+        output.write(cert)
+
+
+def restore_certificate(client, vault_base_url, file_path):
+    with open(file_path, 'rb') as file_in:
+        data = file_in.read()
+    return client.restore_certificate(vault_base_url, data)
 
 
 def add_certificate_contact(cmd, client, vault_base_url, contact_email, contact_name=None,
