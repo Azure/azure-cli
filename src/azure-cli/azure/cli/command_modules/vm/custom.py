@@ -293,6 +293,15 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
 
     if image_reference is not None:
+        if not is_valid_resource_id(image_reference):
+            # URN
+            terms = image_reference.split(':')
+            if len(terms) != 4:
+                raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
+            publisher, offer, sku, version = terms[0], terms[1], terms[2], terms[3]
+            if version.lower() == 'latest':
+                version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
+
         image_reference = {'id': image_reference}
         if image_reference_lun is not None:
             image_reference['lun'] = image_reference_lun
