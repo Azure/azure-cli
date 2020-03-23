@@ -1504,10 +1504,10 @@ def load_arguments(self, _):
         restore_ltr_backup_arg_group = 'Restore LTR Backup'
 
         c.argument('restore_long_term_retention_backup',
-                   options_list['--ltr-backup'],
+                   options_list=['--ltr-backup'],
                    arg_group=restore_ltr_backup_arg_group,
                    required=True,
-                   help='The long term retention managed instance backup object to restore.'
+                   help='The long term retention managed instance backup object to restore.')
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
@@ -1543,28 +1543,30 @@ def load_arguments(self, _):
             ])
 
         c.argument('weekly_retention',
-                    help='The Weekly Retention. If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
-                    'There is a minimum of 7 days and a maximum of 10 years.')
+                   help='The Weekly Retention.'
+                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                   'There is a minimum of 7 days and a maximum of 10 years.')
 
         c.argument('monthly_retention',
-                    help='The Monthly Retention. If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
-                    'There is a minimum of 7 days and a maximum of 10 years.')
+                   help='The Monthly Retention.'
+                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                   'There is a minimum of 7 days and a maximum of 10 years.')
 
         c.argument('yearly_retention',
-                    help='The Yearly Retention. If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.''
-                    'There is a minimum of 7 days and a maximum of 10 years.)
+                   help='The Yearly Retention.'
+                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                   'There is a minimum of 7 days and a maximum of 10 years.')
 
         c.argument('week_of_year',
-                    help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
+                   help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
 
     with self.argument_context('sql midb long-term-retention-backup') as c:
         c.argument('location_name',
-                    arg_type=get_location_type(self.cli_ctx))
+                   arg_type=get_location_type(self.cli_ctx))
 
         c.argument('resource_group_name',
                    required=False,
-                   help='If specified, the resource group the for which a managed instance/database resource belongs to.')
-
+                   help='If specified, the resource group that the managed instance/database resource belongs to.')
 
     ###############################################
     #                sql virtual cluster          #

@@ -21,7 +21,6 @@ from azure.mgmt.sql.models import (
     FailoverGroupReadOnlyEndpoint,
     FailoverGroupReadWriteEndpoint,
     IdentityType,
-    LongTermRetentionManagedInstanceBackup,
     PartnerInfo,
     PerformanceLevelUnit,
     ReplicationRole,
@@ -36,7 +35,6 @@ from azure.mgmt.sql.models import (
     StorageKeyType,
     InstanceFailoverGroup,
     ManagedInstancePairInfo,
-    ManagedInstanceLongTermRetentionPolicy,
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
     InstanceFailoverGroupReadWriteEndpoint,
@@ -2631,11 +2629,7 @@ def managed_db_restore(
 
 
 def managed_db_restore_ltr_backup(
-        cmd,
         client,
-        database_name,
-        managed_instance_name,
-        resource_group_name,
         backup_id,
         target_managed_database_name,
         target_managed_instance_name=None,
@@ -2644,11 +2638,6 @@ def managed_db_restore_ltr_backup(
     '''
     Restores a managed db from an LTR backup (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
     '''
-
-    kwargs['location'] = _get_managed_instance_location(
-        cmd.cli_ctx,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
 
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
     kwargs['long_term_retention_backup_resource_id'] = backup_id
@@ -2732,7 +2721,6 @@ def get_short_term_retention_mi(
 
 
 def update_long_term_retention_mi(
-        cmd,
         client,
         database_name,
         managed_instance_name,
@@ -2763,7 +2751,6 @@ def update_long_term_retention_mi(
 
 
 def list_by_database_long_term_retention_mi_backup(
-        cmd,
         client,
         location_name,
         managed_instance_name,
@@ -2795,7 +2782,6 @@ def list_by_database_long_term_retention_mi_backup(
 
 
 def list_by_instance_long_term_retention_mi_backup(
-        cmd,
         client,
         location_name,
         managed_instance_name,
@@ -2824,7 +2810,6 @@ def list_by_instance_long_term_retention_mi_backup(
 
 
 def list_by_location_long_term_retention_mi_backup(
-        cmd,
         client,
         location_name,
         resource_group_name=None,
@@ -2836,7 +2821,7 @@ def list_by_location_long_term_retention_mi_backup(
 
     if resource_group_name:
         backups = client.list_by_resource_group_location(
-            resource_group_name=resource_groupname,
+            resource_group_name=resource_group_name,
             location_name=location_name,
             only_latest_per_database=only_latest_per_database,
             database_state=database_state)
