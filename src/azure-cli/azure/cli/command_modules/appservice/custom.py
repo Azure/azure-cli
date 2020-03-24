@@ -141,7 +141,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                       value=node_default_version))
 
-    #This is to keep the existing appsettings for a newly created webapp on existing webapp name.
+    # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
     name_validation = client.check_name_availability(name, 'Site')
     if not name_validation.name_available:
         existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings')
