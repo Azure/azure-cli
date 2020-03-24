@@ -270,17 +270,22 @@ def _parse_network_acls(cmd, resource_group_name, network_acls):
 
     logger.info('network_acls: {}'.format(network_acls))
 
+    network_acls_json = None
     try:
         network_acls_json = json.loads(network_acls)
     except:  # pylint: disable=bare-except
-        with open(network_acls) as f:
-            logger.info('network_acls_filename: {}'.format(network_acls))
-            network_acls_json = json.load(f)
+        pass  # it should be a JSON filename
 
-    try:
-        network_acls_json = json.loads(json.dumps(network_acls_json))
-    except:  # pylint: disable=bare-except
-        raise CLIError('Please specify a valid JSON to parameter --network-acls')
+    if not network_acls_json:
+        if not os.path.exists(network_acls):
+            raise CLIError('--network-acls is neither a valid JSON string nor a valid filename')
+
+        try:
+            with open(network_acls) as f:
+                logger.info('network_acls_filename: {}'.format(network_acls))
+                network_acls_json = json.load(f)
+        except:  # pylint: disable=bare-except
+            raise CLIError('{} is not a valid JSON file'.format(network_acls))
 
     logger.info('network_acls_json: {}'.format(network_acls_json))
 
