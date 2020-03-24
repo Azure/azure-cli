@@ -145,6 +145,14 @@ jobs:
         addToPath: true
         architecture: 'x64'
     - bash: |
+        echo $(Build.BuildUri)
+        echo $(Build.BuildId)
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - bash: |
         cd ..
         pwd
         ls
@@ -155,7 +163,8 @@ jobs:
         pip install azdev
         azdev setup -c azure-cli -r azure-cli-extensions
         az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
-        azdev test $(Target) --live -a "-n 16"
+        # azdev test $(Target) --live -a "-n 8"
+        azdev test redis --live -a "-n 8"
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
@@ -163,3 +172,4 @@ jobs:
         testRunTitle: 'Azure CLI live test results of $(Target)'
         # mergeTestResults: true
         # testResultsFormat: 'JUnit'
+    
