@@ -67,7 +67,7 @@ DEPENDENCIES = [
     'requests~=2.20',
     'six~=1.12',
     'wheel==0.30.0',
-    'azure-mgmt-resource~=8.0.1',
+    'azure-mgmt-resource==8.0.1',
 ]
 
 TESTS_REQUIRE = [
