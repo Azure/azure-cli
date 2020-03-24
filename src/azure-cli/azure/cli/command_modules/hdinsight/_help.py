@@ -61,6 +61,11 @@ examples:
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" \\
         --storage-account MyStorageAccount
+  - name: Create a cluster with minimal tls version.
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount --minimal-tls-version 1.2
   - name: Create a cluster with the Enterprise Security Package (ESP).
     text: |-
         az hdinsight create --esp -t spark -g MyResourceGroup -n MyCluster \\

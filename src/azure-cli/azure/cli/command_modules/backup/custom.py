@@ -196,7 +196,7 @@ def check_protection_enabled_for_vm(cmd, vm_id):
 
 
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name, diskslist=None,
-                             disk_list_setting=None):
+                             disk_list_setting=None, exclude_all_data_disks=None):
     vm_name, vm_rg = _get_resource_name_and_rg(resource_group_name, vm)
     vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
@@ -246,6 +246,11 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
                                                             is_inclusion_list=is_inclusion_list)
         extended_properties = ExtendedProperties(disk_exclusion_properties=disk_exclusion_properties)
         vm_item_properties.extended_properties = extended_properties
+    elif exclude_all_data_disks:
+        disk_exclusion_properties = DiskExclusionProperties(disk_lun_list=[],
+                                                            is_inclusion_list=True)
+        extended_properties = ExtendedProperties(disk_exclusion_properties=disk_exclusion_properties)
+        vm_item_properties.extended_properties = extended_properties
 
     vm_item = ProtectedItemResource(properties=vm_item_properties)
 
@@ -256,7 +261,7 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
 
 
 def update_protection_for_vm(cmd, client, resource_group_name, vault_name, item, diskslist=None,
-                             disk_list_setting=None):
+                             disk_list_setting=None, exclude_all_data_disks=None):
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = item.name
     vm_type = '/'.join(item.properties.virtual_machine_id.split('/')[-3:-1])
@@ -275,6 +280,11 @@ def update_protection_for_vm(cmd, client, resource_group_name, vault_name, item,
                 is_inclusion_list = True
             disk_exclusion_properties = DiskExclusionProperties(disk_lun_list=diskslist,
                                                                 is_inclusion_list=is_inclusion_list)
+        extended_properties = ExtendedProperties(disk_exclusion_properties=disk_exclusion_properties)
+        vm_item_properties.extended_properties = extended_properties
+    elif exclude_all_data_disks:
+        disk_exclusion_properties = DiskExclusionProperties(disk_lun_list=[],
+                                                            is_inclusion_list=True)
         extended_properties = ExtendedProperties(disk_exclusion_properties=disk_exclusion_properties)
         vm_item_properties.extended_properties = extended_properties
 
