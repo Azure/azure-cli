@@ -121,11 +121,13 @@ examples:
     crafted: true
   - name: Create a key vault with network ACLs specified (use JSON string).
     text: |
-        az keyvault create --location westus2 --name MyKeyVault --resource-group MyResourceGroup
-        --network-acls "{\\"ip\\": [\\"1.2.3.4\\", \\"2.3.4.0/24\\"], \\"vnet\\": [\\"vnet_name_1/subnet_name1\\", \\"vnet_name_2/subnet_name2\\"]}"
+        az keyvault create --location westus2 --name MyKeyVault --resource-group MyResourceGroup --network-acls "{\\"ip\\": [\\"1.2.3.4\\", \\"2.3.4.0/24\\"], \\"vnet\\": [\\"vnet_name_1/subnet_name1\\", \\"vnet_name_2/subnet_name2\\", \"/subscriptions/000000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVNet/subnets/MySubnet\"]}"
   - name: Create a key vault with network ACLs specified (use JSON file).
     text: |
         az keyvault create --location westus2 --name MyKeyVault --resource-group MyResourceGroup --network-acls network-acls-example.json
+  - name: Create a key vault with network ACLs specified (use --network-acls, --network-acls-ips and --network-acls-vnets at the same time).
+    text: |
+        az keyvault create --location westus2 --name MyKeyVault --resource-group MyResourceGroup --network-acls network-acls-example.json --network-acls-ips 3.4.5.0/24 4.5.6.0/24 --network-acls-vnets vnet1/subnet1 vnet2/subnet2 /subscriptions/000000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/vnet3/subnets/subnet3
 """
 
 helps['keyvault delete'] = """

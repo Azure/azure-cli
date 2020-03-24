@@ -1232,11 +1232,13 @@ class KeyVaultStorageAccountScenarioTest(ScenarioTest):
 
 
 class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
-    def _create_subnet(test, kwargs, additional_args=None):
-        test.cmd('network vnet create -g {rg} -n {vnet} -l {loc} ')
-        test.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} --name {subnet} '
-                 '--address-prefixes 10.0.0.0/21 --service-endpoints Microsoft.KeyVault')
-        return test.cmd('network vnet subnet show -g {rg} --vnet-name {vnet} --name {subnet}')
+    def _create_subnet(self, vnet_name='{vnet}', subnet_name='{subnet}'):
+        self.cmd('network vnet create -g {{rg}} -n {vnet_name} -l {{loc}}'.format(vnet_name=vnet_name))
+        self.cmd('network vnet subnet create -g {{rg}} --vnet-name {vnet_name} --name {subnet_name} '
+                 '--address-prefixes 10.0.0.0/21 --service-endpoints Microsoft.KeyVault'.
+                 format(vnet_name=vnet_name, subnet_name=subnet_name))
+        return self.cmd('network vnet subnet show -g {{rg}} --vnet-name {vnet_name} --name {subnet_name}'.
+                        format(vnet_name=vnet_name, subnet_name=subnet_name))
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_network_rule')
     def test_keyvault_network_rule(self, resource_group):
@@ -1244,14 +1246,22 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             'kv': self.create_random_name('cli-test-kv-nr-', 24),
             'kv2': self.create_random_name('cli-test-kv-nr-', 24),
             'kv3': self.create_random_name('cli-test-kv-nr-', 24),
+            'kv4': self.create_random_name('cli-test-kv-nr-', 24),
+            'kv5': self.create_random_name('cli-test-kv-nr-', 24),
             'vnet': self.create_random_name('cli-test-vnet-', 24),
+            'vnet2': self.create_random_name('cli-test-vnet-', 24),
+            'vnet3': self.create_random_name('cli-test-vnet-', 24),
             'loc': 'eastus2',
             'subnet': self.create_random_name('cli-test-subnet-', 24),
+            'subnet2': self.create_random_name('cli-test-subnet-', 24),
+            'subnet3': self.create_random_name('cli-test-subnet-', 24),
             'ip': '1.2.3.4/32',
-            'ip2': '2.3.4.0/24'
+            'ip2': '2.3.4.0/24',
+            'ip3': '3.4.5.0/24',
+            'ip4': '4.5.0.0/16'
         })
 
-        subnet = self._create_subnet(self, self.kwargs).get_output_in_json()
+        subnet = self._create_subnet().get_output_in_json()
         self.kwargs.update({
             # key vault service will convert subnet ID to lowercase, so convert subnet ID to lowercase in advance
             'subnetId': subnet['id'].lower()
@@ -1263,9 +1273,11 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             'vnet': ['{}/{}'.format(self.kwargs['vnet'], self.kwargs['subnet'])]
         }
         json_filename = os.path.join(TEST_DIR, 'network_acls.json')
+        network_acls2 = network_acls
+        network_acls2['vnet'] = [self.kwargs['subnetId']]
         with open(json_filename, 'w') as f:
-            json.dump(network_acls, f)
-        json_string = json.dumps(network_acls).replace('"', '\\"')
+            json.dump(network_acls2, f)
+        json_string = json.dumps(network_acls2).replace('"', '\\"')
 
         self.kwargs.update({
             'network_acls_json_string': json_string,
@@ -1286,6 +1298,37 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             self.check('length(properties.networkAcls.virtualNetworkRules)', 1),
             self.check('properties.networkAcls.virtualNetworkRules[0].id', '{subnetId}')
         ])
+
+        subnet2 = self._create_subnet(vnet_name='{vnet2}', subnet_name='{subnet2}').get_output_in_json()
+        subnet3 = self._create_subnet(vnet_name='{vnet3}', subnet_name='{subnet3}').get_output_in_json()
+        self.kwargs.update({
+            'subnetId2': subnet2['id'].lower(),
+            'subnetId3': subnet3['id'].lower()
+        })
+
+        self.cmd('keyvault create -n {kv4} -l {loc} -g {rg} --network-acls-ips {ip3} {ip4} '
+                 '--network-acls-vnets {subnetId2} {vnet3}/{subnet3}', checks=[
+                     self.check('length(properties.networkAcls.ipRules)', 2),
+                     self.check('properties.networkAcls.ipRules[0].value', '{ip3}'),
+                     self.check('properties.networkAcls.ipRules[1].value', '{ip4}'),
+                     self.check('length(properties.networkAcls.virtualNetworkRules)', 2),
+                     self.check('properties.networkAcls.virtualNetworkRules[0].id', '{subnetId2}'),
+                     self.check('properties.networkAcls.virtualNetworkRules[1].id', '{subnetId3}')
+                 ])
+
+        self.cmd('keyvault create -n {kv5} -l {loc} -g {rg} --network-acls "{network_acls_json_filename}" '
+                 '--network-acls-ips {ip3} {ip4} '
+                 '--network-acls-vnets {subnetId2} {vnet3}/{subnet3}', checks=[
+                     self.check('length(properties.networkAcls.ipRules)', 4),
+                     self.check('properties.networkAcls.ipRules[0].value', '{ip}'),
+                     self.check('properties.networkAcls.ipRules[1].value', '{ip2}'),
+                     self.check('properties.networkAcls.ipRules[2].value', '{ip3}'),
+                     self.check('properties.networkAcls.ipRules[3].value', '{ip4}'),
+                     self.check('length(properties.networkAcls.virtualNetworkRules)', 3),
+                     self.check('properties.networkAcls.virtualNetworkRules[0].id', '{subnetId}'),
+                     self.check('properties.networkAcls.virtualNetworkRules[1].id', '{subnetId2}'),
+                     self.check('properties.networkAcls.virtualNetworkRules[2].id', '{subnetId3}')
+                 ])
 
         if os.path.isfile(json_filename):
             os.remove(json_filename)
