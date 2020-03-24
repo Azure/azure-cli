@@ -87,69 +87,69 @@ jobs:
         env:
           ADO_PULL_REQUEST_TARGET_BRANCH: '$(System.PullRequest.TargetBranch)'
 
-- job: RunAutomationReduced20190301
-  displayName: Run Automation Reduced Python 3.6, Profile 2019-03-01
-  dependsOn: BuildPythonWheel
+  - job: RunAutomationReduced20190301
+    displayName: Run Automation Reduced Python 3.6, Profile 2019-03-01
+    dependsOn: BuildPythonWheel
 
-  pool:
-    vmImage: 'ubuntu-16.04'
-    strategy:
-      matrix:
-        Python36:
-          python.version: '3.6'
-        Python38:
-          python.version: '3.8'
-  steps:
-    - task: UsePythonVersion@0
-        displayName: 'Use Python $(python.version)'
+    pool:
+      vmImage: 'ubuntu-16.04'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python38:
+            python.version: '3.8'
+    steps:
+      - task: UsePythonVersion@0
+          displayName: 'Use Python $(python.version)'
+          inputs:
+            versionSpec: '$(python.version)'
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download Python Wheels'
         inputs:
-          versionSpec: '$(python.version)'
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Python Wheels'
-      inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-        artifactName: pypi
-    - bash: |
-        pip install --force-reinstall wheel
-    - task: Bash@3
-      displayName: 'Run Test Automation'
-      inputs:
-        targetType: 'filePath'
-        filePath: ./scripts/ci/test_automation.sh
-      env:
-        REDUCE_SDK: 'True'
-        AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
-        ADO_PULL_REQUEST_TARGET_BRANCH: '$(System.PullRequest.TargetBranch)'
-
-- job: RunAutomation20180301
-  displayName: Run Automation, Profile 2018-03-01
-  dependsOn: BuildPythonWheel
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-    strategy:
-      matrix:
-        Python36:
-          python.version: '3.6'
-        Python38:
-          python.version: '3.8'
-  steps:
-    - task: UsePythonVersion@0
-        displayName: 'Use Python $(python.version)'
+          TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+          artifactName: pypi
+      - bash: |
+          pip install --force-reinstall wheel
+      - task: Bash@3
+        displayName: 'Run Test Automation'
         inputs:
-          versionSpec: '$(python.version)'
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Python Wheels'
-      inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-        artifactName: pypi
-    - bash: |
-        pip install --force-reinstall wheel
-    - task: Bash@3
-      displayName: 'Run Test Automation'
-      inputs:
-        targetType: 'filePath'
-        filePath: ./scripts/ci/test_automation.sh
-      env:
-        AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
-        ADO_PULL_REQUEST_TARGET_BRANCH: '$(System.PullRequest.TargetBranch)'
+          targetType: 'filePath'
+          filePath: ./scripts/ci/test_automation.sh
+        env:
+          REDUCE_SDK: 'True'
+          AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+          ADO_PULL_REQUEST_TARGET_BRANCH: '$(System.PullRequest.TargetBranch)'
+
+  - job: RunAutomation20180301
+    displayName: Run Automation, Profile 2018-03-01
+    dependsOn: BuildPythonWheel
+
+    pool:
+      vmImage: 'ubuntu-16.04'
+      strategy:
+        matrix:
+          Python36:
+            python.version: '3.6'
+          Python38:
+            python.version: '3.8'
+    steps:
+      - task: UsePythonVersion@0
+          displayName: 'Use Python $(python.version)'
+          inputs:
+            versionSpec: '$(python.version)'
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download Python Wheels'
+        inputs:
+          TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+          artifactName: pypi
+      - bash: |
+          pip install --force-reinstall wheel
+      - task: Bash@3
+        displayName: 'Run Test Automation'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/ci/test_automation.sh
+        env:
+          AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
+          ADO_PULL_REQUEST_TARGET_BRANCH: '$(System.PullRequest.TargetBranch)'
