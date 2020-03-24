@@ -47,11 +47,11 @@ class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few
 def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     update_custom_util = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
-    
+
     iotcentral_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.iotcentral.operations#IoTCentaralOperations.{}'
     )
-    
+
     # iot dps commands
     with self.command_group('iot dps', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_list')
