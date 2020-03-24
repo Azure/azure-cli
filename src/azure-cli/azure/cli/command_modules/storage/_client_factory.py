@@ -229,9 +229,9 @@ def generic_data_service_factory_track2(cli_ctx, **kwargs):
         client = service(account_url=account_url, credential=credential, **kwargs)
     if connection_string:
         client = service.from_connection_string(conn_str=connection_string)
-    return client(**kwargs)
+    return client
 
 
 def cf_adls_file_system(cli_ctx, kwargs):
-    t_adls_file_system = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_TRACK2, 'filedatalake#FileSystemClient')
+    t_adls_file_system = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE, '_file_system_client#FileSystemClient')
     return generic_data_service_factory_track2(cli_ctx, service=t_adls_file_system, **kwargs)
