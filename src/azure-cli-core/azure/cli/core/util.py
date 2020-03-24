@@ -671,7 +671,7 @@ def _log_request(request):
             if header.lower() == 'authorization':
                 # Trim at least half of the token but keep at most 20 characters
                 preserve_length = min(int(len(value) * 0.5), 20)
-                value = value[:preserve_length] + '*****'
+                value = value[:preserve_length] + '...'
             logger.info("    %r: %r", header, value)
         logger.info("Request body:")
 
