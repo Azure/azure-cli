@@ -357,7 +357,7 @@ def load_arguments(self, _):
     # region Private Link Resources
     for item in ['create', 'update', 'show', 'delete', 'list']:
         with self.argument_context('monitor private-link-scope {}'.format(item)) as c:
-            c.ignore('location')
+            c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
             c.argument('scope_name', options_list=['--name', '-n'], help='Name of the Azure Monitor Private Link Scope.')
 
     with self.argument_context('monitor private-link-scope assigned-resource') as c:

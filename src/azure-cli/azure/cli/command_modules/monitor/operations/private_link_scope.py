@@ -20,7 +20,7 @@ def list_private_link_scope(client, resource_group_name=None):
     return client.list_by_resource_group(resource_group_name=resource_group_name)
 
 
-def create_private_link_scope(client, resource_group_name, scope_name, location='global', tags=None):
+def create_private_link_scope(client, resource_group_name, scope_name, location=None, tags=None):
     return client.create_or_update(resource_group_name=resource_group_name,
                                    scope_name=scope_name,
                                    location=location,

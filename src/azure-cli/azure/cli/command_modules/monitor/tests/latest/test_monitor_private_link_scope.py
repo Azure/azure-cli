@@ -7,7 +7,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 
 class TestMonitorPrivateLinkScope(ScenarioTest):
-    @ResourceGroupPreparer(location='global')
+    @ResourceGroupPreparer(location='centralus')
     def test_monitor_private_link_scope_scenario(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
@@ -20,4 +20,4 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
             'pe_connection': self.create_random_name('cli-pec-', 24),
         })
 
-        self.cmd('monitor private-link-scope create -n {scope} -g {rg}')
+        self.cmd('monitor private-link-scope create -n {scope} -g {rg} -l global')

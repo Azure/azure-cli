@@ -1,51 +1,6 @@
 interactions:
 - request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - monitor private-link-scope create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-resource/8.0.1
-        Azure-SDK-For-Python AZURECLI/2.2.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","date":"2020-03-23T04:44:07Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '479'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Mon, 23 Mar 2020 04:44:17 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "southcentralus"}'
+    body: '{"location": "global"}'
     headers:
       Accept:
       - application/json
@@ -56,11 +11,11 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '30'
+      - '22'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -n -g
+      - -n -g -l
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-monitor/0.8.0
         Azure-SDK-For-Python AZURECLI/2.2.0
@@ -70,28 +25,37 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/microsoft.insights/privateLinkScopes/clitestscopename?api-version=2019-10-17-preview
   response:
     body:
-      string: '{"error":{"code":"LocationNotAvailableForResourceType","message":"The
-        provided location ''southcentralus'' is not available for resource type ''microsoft.insights/privateLinkScopes''.
-        List of available regions for the resource type is ''global''."}}'
+      string: "{\r\n  \"error\": {\r\n    \"code\": \"BadRequest\",\r\n    \"message\":
+        \"Value cannot be null.\\r\\nParameter name: Properties\",\r\n    \"innererror\":
+        {\r\n      \"trace\": [\r\n        \"System.ArgumentNullException\"\r\n      ]\r\n
+        \   }\r\n  }\r\n}"
     headers:
+      access-control-expose-headers:
+      - Request-Context
       cache-control:
       - no-cache
       content-length:
-      - '243'
+      - '216'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 23 Mar 2020 04:44:18 GMT
+      - Tue, 24 Mar 2020 02:00:20 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      request-context:
+      - appId=cid-v1:7f83c1fe-8c94-4d55-9337-4ddc696f61ed
+      server:
+      - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+      x-powered-by:
+      - ASP.NET
     status:
       code: 400
       message: Bad Request
