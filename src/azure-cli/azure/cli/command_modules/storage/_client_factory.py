@@ -239,17 +239,28 @@ def resolve_client_parameters(**kwargs):
     return kwargs
 
 
+def get_account_url(account_name, service):
+    from knack.util import CLIError
+    if account_name is None:
+        raise CLIError("Please provide storage account name or connection string.")
+    return "https://{}.{}.core.windows.net".format(account_name, service)
+
+
 def cf_adls_file_system(cli_ctx, kwargs):
-    t_adls_file_system = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE, '_file_system_client#FileSystemClient')
-    account_name = kwargs.pop('account_name', None)
+    t_adls_file_system = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
+                                 '_file_system_client#FileSystemClient')
+
     connection_string = kwargs.pop('connection_string', None)
-    credential = kwargs.pop('sas_token', None) or kwargs.pop('account_key', None)
-    account_url = "https://{}.{}.core.windows.net".format(account_name, 'dfs')
-    if account_url and credential:
-        client = t_adls_file_system(account_url=account_url,
-                                    credential=credential,
-                                    file_system_name=kwargs.pop('file_system_name'))
     if connection_string:
-        client = t_adls_file_system.from_connection_string(connection_string=connection_string,
-                                                           file_system_name=kwargs.pop('file_system_name'))
-    return client
+        return t_adls_file_system.from_connection_string(connection_string=connection_string,
+                                                         file_system_name=kwargs.pop('file_system_name'))
+
+    account_url = get_account_url(account_name=kwargs.pop('account_name', None), service='dfs')
+    credential = kwargs.pop('sas_token', None) \
+                 or kwargs.pop('account_key', None) \
+                 or kwargs.pop('token_credential', None)
+
+    if account_url and credential:
+        return t_adls_file_system(account_url=account_url,
+                                  credential=credential,
+                                  file_system_name=kwargs.pop('file_system_name'))
