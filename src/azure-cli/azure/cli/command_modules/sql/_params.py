@@ -82,8 +82,18 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
             unit_map=None):
         self.unit = unit
         self.result_type = result_type
-        self.unit_map = unit_map or dict(B=1, kB=1024, MB=1024 * 1024, GB=1024 * 1024 * 1024,
-                                         TB=1024 * 1024 * 1024 * 1024)
+        self.unit_map = unit_map or dict(
+            B=1,
+            kB=1024,
+            MB=1024 *
+            1024,
+            GB=1024 *
+            1024 *
+            1024,
+            TB=1024 *
+            1024 *
+            1024 *
+            1024)
 
     def __call__(self, value):
         numeric_part = ''.join(itertools.takewhile(str.isdigit, value))
@@ -342,12 +352,15 @@ def _configure_db_dw_create_params(
 
     # *** Step 0: Validation ***
 
-    # DW does not support all create modes. Check that engine and create_mode are consistent.
+    # DW does not support all create modes. Check that engine and create_mode
+    # are consistent.
     if engine == Engine.dw and create_mode not in [
             CreateMode.default,
             CreateMode.point_in_time_restore,
             CreateMode.restore]:
-        raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
+        raise ValueError(
+            'Engine {} does not support create mode {}'.format(
+                engine, create_mode))
 
     # *** Step 1: Create extra params ***
 
@@ -380,7 +393,8 @@ def _configure_db_dw_create_params(
     #   az sql dw create -h >> $file
     #   az sql dw update -h >> $file
     #
-    # Then compare 'help_original.txt' <-> 'help_updated.txt' in your favourite text diff tool.
+    # Then compare 'help_original.txt' <-> 'help_updated.txt' in your
+    # favourite text diff tool.
     create_args_for_complex_type(
         arg_ctx, 'parameters', Database, [
             'catalog_collation',
@@ -420,8 +434,9 @@ def _configure_db_dw_create_params(
                      help='The service objective for the new database. For example: ' +
                      (db_service_objective_examples if engine == Engine.db else dw_service_objective_examples))
 
-    arg_ctx.argument('elastic_pool_id',
-                     help='The name or resource id of the elastic pool to create the database in.')
+    arg_ctx.argument(
+        'elastic_pool_id',
+        help='The name or resource id of the elastic pool to create the database in.')
 
     # *** Step 3: Ignore params that are not applicable (based on engine & create mode) ***
 
@@ -431,8 +446,12 @@ def _configure_db_dw_create_params(
         arg_ctx.ignore('catalog_collation')
 
     # Only applicable to point in time restore or deleted restore create mode.
-    if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
-        arg_ctx.ignore('restore_point_in_time', 'source_database_deletion_date')
+    if create_mode not in [
+            CreateMode.restore,
+            CreateMode.point_in_time_restore]:
+        arg_ctx.ignore(
+            'restore_point_in_time',
+            'source_database_deletion_date')
 
     # 'collation', 'tier', and 'max_size_bytes' are ignored (or rejected) when creating a copy
     # or secondary because their values are determined by the source db.
@@ -487,8 +506,9 @@ def load_arguments(self, _):
         c.argument('location_name', arg_type=get_location_type(self.cli_ctx))
         c.argument('usage_name', options_list=['--usage', '-u'])
         c.argument('tags', arg_type=tags_type)
-        c.argument('allow_data_loss',
-                   help='If specified, the failover operation will allow data loss.')
+        c.argument(
+            'allow_data_loss',
+            help='If specified, the failover operation will allow data loss.')
 
     with self.argument_context('sql db') as c:
         _configure_db_dw_params(c)
@@ -499,26 +519,30 @@ def load_arguments(self, _):
         c.argument('database_name',
                    options_list=['--name', '-n'],
                    help='Name of the Azure SQL Database.',
-                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   # Allow --ids command line argument. id_part=child_name_1 is
+                   # 2nd name in uri
                    id_part='child_name_1')
 
         # SKU-related params are different from DB versus DW, so we want this configuration to apply here
         # in 'sql db' group but not in 'sql dw' group. If we wanted to apply to both, we would put the
         # configuration into _configure_db_dw_params().
-        c.argument('tier',
-                   arg_type=tier_param_type,
-                   help='The edition component of the sku. Allowed values include: Basic, Standard, '
-                   'Premium, GeneralPurpose, BusinessCritical, Hyperscale.')
+        c.argument(
+            'tier',
+            arg_type=tier_param_type,
+            help='The edition component of the sku. Allowed values include: Basic, Standard, '
+            'Premium, GeneralPurpose, BusinessCritical, Hyperscale.')
 
-        c.argument('capacity',
-                   arg_type=capacity_param_type,
-                   arg_group=sku_component_arg_group,
-                   help='The capacity component of the sku in integer number of DTUs or vcores.')
+        c.argument(
+            'capacity',
+            arg_type=capacity_param_type,
+            arg_group=sku_component_arg_group,
+            help='The capacity component of the sku in integer number of DTUs or vcores.')
 
-        c.argument('family',
-                   arg_type=family_param_type,
-                   help='The compute generation component of the sku (for vcore skus only). '
-                   'Allowed values include: Gen4, Gen5.')
+        c.argument(
+            'family',
+            arg_type=family_param_type,
+            help='The compute generation component of the sku (for vcore skus only). '
+            'Allowed values include: Gen4, Gen5.')
 
     with self.argument_context('sql db create') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.default)
@@ -526,8 +550,9 @@ def load_arguments(self, _):
     with self.argument_context('sql db copy') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.copy)
 
-        c.argument('dest_name',
-                   help='Name of the database that will be created as the copy destination.')
+        c.argument(
+            'dest_name',
+            help='Name of the database that will be created as the copy destination.')
 
         c.argument('dest_resource_group_name',
                    options_list=['--dest-resource-group'],
@@ -544,28 +569,34 @@ def load_arguments(self, _):
                    help='The new name that the database will be renamed to.')
 
     with self.argument_context('sql db restore') as c:
-        _configure_db_dw_create_params(c, Engine.db, CreateMode.point_in_time_restore)
+        _configure_db_dw_create_params(
+            c, Engine.db, CreateMode.point_in_time_restore)
 
-        c.argument('dest_name',
-                   help='Name of the database that will be created as the restore destination.')
+        c.argument(
+            'dest_name',
+            help='Name of the database that will be created as the restore destination.')
 
         restore_point_arg_group = 'Restore Point'
 
-        c.argument('restore_point_in_time',
-                   options_list=['--time', '-t'],
-                   arg_group=restore_point_arg_group,
-                   help='The point in time of the source database that will be restored to create the'
-                   ' new database. Must be greater than or equal to the source database\'s'
-                   ' earliestRestoreDate value. Either --time or --deleted-time (or both) must be specified. ' +
-                   time_format_help)
+        c.argument(
+            'restore_point_in_time',
+            options_list=[
+                '--time',
+                '-t'],
+            arg_group=restore_point_arg_group,
+            help='The point in time of the source database that will be restored to create the'
+            ' new database. Must be greater than or equal to the source database\'s'
+            ' earliestRestoreDate value. Either --time or --deleted-time (or both) must be specified. ' +
+            time_format_help)
 
-        c.argument('source_database_deletion_date',
-                   options_list=['--deleted-time'],
-                   arg_group=restore_point_arg_group,
-                   help='If specified, restore from a deleted database instead of from an existing database.'
-                   ' Must match the deleted time of a deleted database in the same server.'
-                   ' Either --time or --deleted-time (or both) must be specified. ' +
-                   time_format_help)
+        c.argument(
+            'source_database_deletion_date',
+            options_list=['--deleted-time'],
+            arg_group=restore_point_arg_group,
+            help='If specified, restore from a deleted database instead of from an existing database.'
+            ' Must match the deleted time of a deleted database in the same server.'
+            ' Either --time or --deleted-time (or both) must be specified. ' +
+            time_format_help)
 
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
@@ -573,16 +604,20 @@ def load_arguments(self, _):
         c.ignore('expand')
 
     with self.argument_context('sql db list') as c:
-        c.argument('elastic_pool_name',
-                   options_list=['--elastic-pool'],
-                   help='If specified, lists only the databases in this elastic pool')
+        c.argument(
+            'elastic_pool_name',
+            options_list=['--elastic-pool'],
+            help='If specified, lists only the databases in this elastic pool')
 
     with self.argument_context('sql db list-editions') as c:
-        c.argument('show_details',
-                   options_list=['--show-details', '-d'],
-                   help='List of additional details to include in output.',
-                   nargs='+',
-                   arg_type=get_enum_type(DatabaseCapabilitiesAdditionalDetails))
+        c.argument(
+            'show_details',
+            options_list=[
+                '--show-details',
+                '-d'],
+            help='List of additional details to include in output.',
+            nargs='+',
+            arg_type=get_enum_type(DatabaseCapabilitiesAdditionalDetails))
 
         c.argument('available', arg_type=available_param_type)
 
@@ -591,34 +626,42 @@ def load_arguments(self, _):
         # We could used get_enum_type here, but that will validate the inputs which means there
         # will be no way to query for new editions/service objectives that are made available after
         # this version of CLI is released.
-        c.argument('edition',
-                   arg_type=tier_param_type,
-                   arg_group=search_arg_group,
-                   help='Edition to search for. If unspecified, all editions are shown.')
+        c.argument(
+            'edition',
+            arg_type=tier_param_type,
+            arg_group=search_arg_group,
+            help='Edition to search for. If unspecified, all editions are shown.')
 
-        c.argument('service_objective',
-                   arg_group=search_arg_group,
-                   help='Service objective to search for. If unspecified, all service objectives are shown.')
+        c.argument(
+            'service_objective',
+            arg_group=search_arg_group,
+            help='Service objective to search for. If unspecified, all service objectives are shown.')
 
-        c.argument('dtu',
-                   arg_group=search_arg_group,
-                   help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
+        c.argument(
+            'dtu',
+            arg_group=search_arg_group,
+            help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
 
-        c.argument('vcores',
-                   arg_group=search_arg_group,
-                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+        c.argument(
+            'vcores',
+            arg_group=search_arg_group,
+            help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
 
     with self.argument_context('sql db update') as c:
-        c.argument('service_objective',
-                   arg_group=sku_arg_group,
-                   help='The name of the new service objective. If this is a standalone db service'
-                   ' objective and the db is currently in an elastic pool, then the db is removed from'
-                   ' the pool.')
+        c.argument(
+            'service_objective',
+            arg_group=sku_arg_group,
+            help='The name of the new service objective. If this is a standalone db service'
+            ' objective and the db is currently in an elastic pool, then the db is removed from'
+            ' the pool.')
 
-        c.argument('elastic_pool_id',
-                   help='The name or resource id of the elastic pool to move the database into.')
+        c.argument(
+            'elastic_pool_id',
+            help='The name or resource id of the elastic pool to move the database into.')
 
-        c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
+        c.argument(
+            'max_size_bytes',
+            help='The new maximum size of the database expressed in bytes.')
 
     with self.argument_context('sql db export') as c:
         # Create args that will be used to build up the ExportRequest object
@@ -646,7 +689,8 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(StorageKeyType))
 
     with self.argument_context('sql db import') as c:
-        # Create args that will be used to build up the ImportExtensionRequest object
+        # Create args that will be used to build up the ImportExtensionRequest
+        # object
         create_args_for_complex_type(c, 'parameters', ImportExtensionRequest, [
             'administrator_login',
             'administrator_login_password',
@@ -708,10 +752,11 @@ def load_arguments(self, _):
     with self.argument_context('sql db replica create') as c:
         _configure_db_dw_create_params(c, Engine.db, CreateMode.secondary)
 
-        c.argument('partner_resource_group_name',
-                   options_list=['--partner-resource-group'],
-                   help='Name of the resource group to create the new replica in.'
-                   ' If unspecified, defaults to the origin resource group.')
+        c.argument(
+            'partner_resource_group_name',
+            options_list=['--partner-resource-group'],
+            help='Name of the resource group to create the new replica in.'
+            ' If unspecified, defaults to the origin resource group.')
 
         c.argument('partner_server_name',
                    options_list=['--partner-server'],
@@ -721,23 +766,27 @@ def load_arguments(self, _):
         c.argument('database_name',
                    help='Name of the database to fail over.')
 
-        c.argument('server_name',
-                   help='Name of the server containing the secondary replica that will become'
-                   ' the new primary. ' + server_configure_help)
+        c.argument(
+            'server_name',
+            help='Name of the server containing the secondary replica that will become'
+            ' the new primary. ' +
+            server_configure_help)
 
-        c.argument('resource_group_name',
-                   help='Name of the resource group containing the secondary replica that'
-                   ' will become the new primary.')
+        c.argument(
+            'resource_group_name',
+            help='Name of the resource group containing the secondary replica that'
+            ' will become the new primary.')
 
     with self.argument_context('sql db replica delete-link') as c:
         c.argument('partner_server_name',
                    options_list=['--partner-server'],
                    help='Name of the server that the other replica is in.')
 
-        c.argument('partner_resource_group_name',
-                   options_list=['--partner-resource-group'],
-                   help='Name of the resource group that the other replica is in. If unspecified,'
-                   ' defaults to the first database\'s resource group.')
+        c.argument(
+            'partner_resource_group_name',
+            options_list=['--partner-resource-group'],
+            help='Name of the resource group that the other replica is in. If unspecified,'
+            ' defaults to the first database\'s resource group.')
 
     #####
     #           sql db audit-policy & threat-policy
@@ -806,11 +855,12 @@ def load_arguments(self, _):
                    help='List of email addresses that alerts are sent to.',
                    nargs='+')
 
-        c.argument('email_account_admins',
-                   arg_group=notification_arg_group,
-                   options_list=['--email-account-admins'],
-                   help='Whether the alert is sent to the account administrators.',
-                   arg_type=get_enum_type(SecurityAlertPolicyEmailAccountAdmins))
+        c.argument(
+            'email_account_admins',
+            arg_group=notification_arg_group,
+            options_list=['--email-account-admins'],
+            help='Whether the alert is sent to the account administrators.',
+            arg_type=get_enum_type(SecurityAlertPolicyEmailAccountAdmins))
 
         # TODO: use server default
 
@@ -842,12 +892,14 @@ def load_arguments(self, _):
         c.argument('database_name',
                    options_list=['--name', '-n'],
                    help='Name of the data warehouse.',
-                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   # Allow --ids command line argument. id_part=child_name_1 is
+                   # 2nd name in uri
                    id_part='child_name_1')
 
-        c.argument('service_objective',
-                   help='The service objective of the data warehouse. For example: ' +
-                   dw_service_objective_examples)
+        c.argument(
+            'service_objective',
+            help='The service objective of the data warehouse. For example: ' +
+            dw_service_objective_examples)
 
         c.argument('collation',
                    help='The collation of the data warehouse.')
@@ -876,7 +928,8 @@ def load_arguments(self, _):
         c.argument('elastic_pool_name',
                    options_list=['--name', '-n'],
                    help='The name of the elastic pool.',
-                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   # Allow --ids command line argument. id_part=child_name_1 is
+                   # 2nd name in uri
                    id_part='child_name_1')
 
         # --db-dtu-max and --db-dtu-min were the original param names, which is consistent with the
@@ -885,13 +938,21 @@ def load_arguments(self, _):
         # list-editions --show-details db-max-dtu db-min-dtu` parameter values. These are more
         # consistent with other az sql commands, but the original can't be removed due to
         # compatibility.
-        c.argument('max_capacity',
-                   options_list=['--db-dtu-max', '--db-max-dtu', '--db-max-capacity'],
-                   help='The maximum capacity (in DTUs or vcores) any one database can consume.')
+        c.argument(
+            'max_capacity',
+            options_list=[
+                '--db-dtu-max',
+                '--db-max-dtu',
+                '--db-max-capacity'],
+            help='The maximum capacity (in DTUs or vcores) any one database can consume.')
 
-        c.argument('min_capacity',
-                   options_list=['--db-dtu-min', '--db-min-dtu', '--db-min-capacity'],
-                   help='The minumum capacity (in DTUs or vcores) each database is guaranteed.')
+        c.argument(
+            'min_capacity',
+            options_list=[
+                '--db-dtu-min',
+                '--db-min-dtu',
+                '--db-min-capacity'],
+            help='The minumum capacity (in DTUs or vcores) each database is guaranteed.')
 
         # --storage was the original param name, which is consistent with the underlying REST API.
         # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
@@ -906,19 +967,22 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
 
-        c.argument('tier',
-                   arg_type=tier_param_type,
-                   help='The edition component of the sku. Allowed values include: Basic, Standard, '
-                   'Premium, GeneralPurpose, BusinessCritical.')
+        c.argument(
+            'tier',
+            arg_type=tier_param_type,
+            help='The edition component of the sku. Allowed values include: Basic, Standard, '
+            'Premium, GeneralPurpose, BusinessCritical.')
 
-        c.argument('capacity',
-                   arg_type=capacity_or_dtu_param_type,
-                   help='The capacity component of the sku in integer number of DTUs or vcores.')
+        c.argument(
+            'capacity',
+            arg_type=capacity_or_dtu_param_type,
+            help='The capacity component of the sku in integer number of DTUs or vcores.')
 
-        c.argument('family',
-                   arg_type=family_param_type,
-                   help='The compute generation component of the sku (for vcore skus only). '
-                   'Allowed values include: Gen4, Gen5.')
+        c.argument(
+            'family',
+            arg_type=family_param_type,
+            help='The compute generation component of the sku (for vcore skus only). '
+            'Allowed values include: Gen4, Gen5.')
 
     with self.argument_context('sql elastic-pool create') as c:
         # Create args that will be used to build up the ElasticPool object
@@ -932,7 +996,8 @@ def load_arguments(self, _):
                 'zone_redundant',
             ])
 
-        # Create args that will be used to build up the ElasticPoolPerDatabaseSettings object
+        # Create args that will be used to build up the
+        # ElasticPoolPerDatabaseSettings object
         create_args_for_complex_type(
             c, 'per_database_settings', ElasticPoolPerDatabaseSettings, [
                 'max_capacity',
@@ -952,12 +1017,16 @@ def load_arguments(self, _):
 
     with self.argument_context('sql elastic-pool list-editions') as c:
         # Note that `ElasticPoolCapabilitiesAdditionalDetails` intentionally match param names to
-        # other commands, such as `sql elastic-pool create --db-max-dtu --db-min-dtu --max-size`.
-        c.argument('show_details',
-                   options_list=['--show-details', '-d'],
-                   help='List of additional details to include in output.',
-                   nargs='+',
-                   arg_type=get_enum_type(ElasticPoolCapabilitiesAdditionalDetails))
+        # other commands, such as `sql elastic-pool create --db-max-dtu
+        # --db-min-dtu --max-size`.
+        c.argument(
+            'show_details',
+            options_list=[
+                '--show-details',
+                '-d'],
+            help='List of additional details to include in output.',
+            nargs='+',
+            arg_type=get_enum_type(ElasticPoolCapabilitiesAdditionalDetails))
 
         c.argument('available',
                    arg_type=available_param_type)
@@ -967,18 +1036,21 @@ def load_arguments(self, _):
         # We could used 'arg_type=get_enum_type' here, but that will validate the inputs which means there
         # will be no way to query for new editions that are made available after
         # this version of CLI is released.
-        c.argument('edition',
-                   arg_type=tier_param_type,
-                   arg_group=search_arg_group,
-                   help='Edition to search for. If unspecified, all editions are shown.')
+        c.argument(
+            'edition',
+            arg_type=tier_param_type,
+            arg_group=search_arg_group,
+            help='Edition to search for. If unspecified, all editions are shown.')
 
-        c.argument('dtu',
-                   arg_group=search_arg_group,
-                   help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
+        c.argument(
+            'dtu',
+            arg_group=search_arg_group,
+            help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
 
-        c.argument('vcores',
-                   arg_group=search_arg_group,
-                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
+        c.argument(
+            'vcores',
+            arg_group=search_arg_group,
+            help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
 
     with self.argument_context('sql elastic-pool update') as c:
         c.argument('database_dtu_max',
@@ -1007,12 +1079,23 @@ def load_arguments(self, _):
     ###############################################
 
     with self.argument_context('sql failover-group') as c:
-        c.argument('failover_group_name', options_list=['--name', '-n'], help="The name of the Failover Group")
+        c.argument(
+            'failover_group_name',
+            options_list=[
+                '--name',
+                '-n'],
+            help="The name of the Failover Group")
         c.argument('server_name', arg_type=server_param_type)
-        c.argument('partner_server', help="The name of the partner server of a Failover Group")
-        c.argument('partner_resource_group', help="The name of the resource group of the partner server")
-        c.argument('failover_policy', help="The failover policy of the Failover Group",
-                   arg_type=get_enum_type(FailoverPolicyType))
+        c.argument(
+            'partner_server',
+            help="The name of the partner server of a Failover Group")
+        c.argument(
+            'partner_resource_group',
+            help="The name of the resource group of the partner server")
+        c.argument(
+            'failover_policy',
+            help="The failover policy of the Failover Group",
+            arg_type=get_enum_type(FailoverPolicyType))
         c.argument('grace_period',
                    arg_type=grace_period_param_type)
         c.argument('add_db', nargs='+',
@@ -1036,25 +1119,34 @@ def load_arguments(self, _):
         c.argument('administrator_login_password',
                    options_list=['--admin-password', '-p'])
 
-        c.argument('assign_identity',
-                   options_list=['--assign_identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
-                   'for use with key management services like Azure KeyVault.')
+        c.argument(
+            'assign_identity',
+            options_list=[
+                '--assign_identity',
+                '-i'],
+            help='Generate and assign an Azure Active Directory Identity for this server'
+            'for use with key management services like Azure KeyVault.')
 
-        c.argument('minimal_tls_version',
-                   arg_type=get_enum_type(SqlServerMinimalTlsVersionType),
-                   help='The minimal TLS version enforced by the sql server for inbound connections.')
+        c.argument(
+            'minimal_tls_version',
+            arg_type=get_enum_type(SqlServerMinimalTlsVersionType),
+            help='The minimal TLS version enforced by the sql server for inbound connections.')
 
-        c.argument('enable_public_network',
-                   options_list=['--enable-public-network', '-e'],
-                   arg_type=get_three_state_flag(),
-                   help='Set whether public network access to server is allowed or not. When false,'
-                   'only connections made through Private Links can reach this server.',
-                   is_preview=True)
+        c.argument(
+            'enable_public_network',
+            options_list=[
+                '--enable-public-network',
+                '-e'],
+            arg_type=get_three_state_flag(),
+            help='Set whether public network access to server is allowed or not. When false,'
+            'only connections made through Private Links can reach this server.',
+            is_preview=True)
 
     with self.argument_context('sql server create') as c:
-        c.argument('location',
-                   arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
+        c.argument(
+            'location',
+            arg_type=get_location_type_with_default_from_resource_group(
+                self.cli_ctx))
 
         # Create args that will be used to build up the Server object
         create_args_for_complex_type(
@@ -1071,10 +1163,13 @@ def load_arguments(self, _):
         c.argument('administrator_login_password',
                    required=True)
 
-        c.argument('assign_identity',
-                   options_list=['--assign-identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this server'
-                   'for use with key management services like Azure KeyVault.')
+        c.argument(
+            'assign_identity',
+            options_list=[
+                '--assign-identity',
+                '-i'],
+            help='Generate and assign an Azure Active Directory Identity for this server'
+            'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql server update') as c:
         c.argument('administrator_login_password',
@@ -1098,7 +1193,8 @@ def load_arguments(self, _):
         c.ignore('tenant_id')
 
     with self.argument_context('sql server ad-admin create') as c:
-        # Create args that will be used to build up the ServerAzureADAdministrator object
+        # Create args that will be used to build up the
+        # ServerAzureADAdministrator object
         create_args_for_complex_type(
             c, 'parameters', ServerAzureADAdministrator, [
                 'login',
@@ -1127,9 +1223,10 @@ def load_arguments(self, _):
                    options_list=('--name', '-n'),
                    help='Name of the DNS alias.')
 
-        c.argument('original_server_name',
-                   options_list=('--original-server'),
-                   help='The name of the server to which alias is currently pointing')
+        c.argument(
+            'original_server_name',
+            options_list=('--original-server'),
+            help='The name of the server to which alias is currently pointing')
 
         c.argument('original_resource_group_name',
                    options_list=('--original-resource-group'),
@@ -1151,18 +1248,21 @@ def load_arguments(self, _):
         c.argument('firewall_rule_name',
                    options_list=['--name', '-n'],
                    help='The name of the firewall rule.',
-                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   # Allow --ids command line argument. id_part=child_name_1 is
+                   # 2nd name in uri
                    id_part='child_name_1')
 
-        c.argument('start_ip_address',
-                   options_list=['--start-ip-address'],
-                   help='The start IP address of the firewall rule. Must be IPv4 format. Use value'
-                   ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
+        c.argument(
+            'start_ip_address',
+            options_list=['--start-ip-address'],
+            help='The start IP address of the firewall rule. Must be IPv4 format. Use value'
+            ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
-        c.argument('end_ip_address',
-                   options_list=['--end-ip-address'],
-                   help='The end IP address of the firewall rule. Must be IPv4 format. Use value'
-                   ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
+        c.argument(
+            'end_ip_address',
+            options_list=['--end-ip-address'],
+            help='The end IP address of the firewall rule. Must be IPv4 format. Use value'
+            ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
     #####
     #           sql server key
@@ -1204,15 +1304,19 @@ def load_arguments(self, _):
         c.argument('virtual_network_rule_name',
                    options_list=['--name', '-n'])
 
-        c.argument('virtual_network_subnet_id',
-                   options_list=['--subnet'],
-                   help='Name or ID of the subnet that allows access to an Azure Sql Server. '
-                   'If subnet name is provided, --vnet-name must be provided.')
+        c.argument(
+            'virtual_network_subnet_id',
+            options_list=['--subnet'],
+            help='Name or ID of the subnet that allows access to an Azure Sql Server. '
+            'If subnet name is provided, --vnet-name must be provided.')
 
-        c.argument('ignore_missing_vnet_service_endpoint',
-                   options_list=['--ignore-missing-endpoint', '-i'],
-                   help='Create firewall rule before the virtual network has vnet service endpoint enabled',
-                   arg_type=get_three_state_flag())
+        c.argument(
+            'ignore_missing_vnet_service_endpoint',
+            options_list=[
+                '--ignore-missing-endpoint',
+                '-i'],
+            help='Create firewall rule before the virtual network has vnet service endpoint enabled',
+            arg_type=get_three_state_flag())
 
     with self.argument_context('sql server vnet-rule create') as c:
         c.extra('vnet_name',
@@ -1226,13 +1330,15 @@ def load_arguments(self, _):
         c.argument('managed_instance_name',
                    help='The managed instance name',
                    options_list=['--name', '-n'],
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   # Allow --ids command line argument. id_part=name is 1st
+                   # name in uri
                    id_part='name')
 
-        c.argument('tier',
-                   arg_type=tier_param_type,
-                   help='The edition component of the sku. Allowed values include: '
-                   'GeneralPurpose, BusinessCritical.')
+        c.argument(
+            'tier',
+            arg_type=tier_param_type,
+            help='The edition component of the sku. Allowed values include: '
+            'GeneralPurpose, BusinessCritical.')
 
         c.argument('family',
                    arg_type=family_param_type,
@@ -1249,33 +1355,37 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(DatabaseLicenseType),
                    help='The license type to apply for this managed instance.')
 
-        c.argument('vcores',
-                   arg_type=capacity_param_type,
-                   help='The capacity of the managed instance in integer number of vcores.')
+        c.argument(
+            'vcores',
+            arg_type=capacity_param_type,
+            help='The capacity of the managed instance in integer number of vcores.')
 
         c.argument('collation',
                    help='The collation of the managed instance.')
 
-        c.argument('proxy_override',
-                   arg_type=get_enum_type(ServerConnectionType),
-                   help='The connection type used for connecting to the instance.')
+        c.argument(
+            'proxy_override',
+            arg_type=get_enum_type(ServerConnectionType),
+            help='The connection type used for connecting to the instance.')
 
-        c.argument('minimal_tls_version',
-                   arg_type=get_enum_type(SqlManagedInstanceMinimalTlsVersionType),
-                   help='The minimal TLS version enforced by the managed instance for inbound connections.',
-                   is_preview=True)
+        c.argument(
+            'minimal_tls_version',
+            arg_type=get_enum_type(SqlManagedInstanceMinimalTlsVersionType),
+            help='The minimal TLS version enforced by the managed instance for inbound connections.',
+            is_preview=True)
 
-        c.argument('public_data_endpoint_enabled',
-                   arg_type=get_three_state_flag(),
-                   help='Whether or not the public data endpoint is enabled for the instance.')
+        c.argument('public_data_endpoint_enabled', arg_type=get_three_state_flag(
+        ), help='Whether or not the public data endpoint is enabled for the instance.')
 
-        c.argument('timezone_id',
-                   help='The time zone id for the instance to set. '
-                   'A list of time zone ids is exposed through the sys.time_zone_info (Transact-SQL) view.')
+        c.argument(
+            'timezone_id', help='The time zone id for the instance to set. '
+            'A list of time zone ids is exposed through the sys.time_zone_info (Transact-SQL) view.')
 
     with self.argument_context('sql mi create') as c:
-        c.argument('location',
-                   arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
+        c.argument(
+            'location',
+            arg_type=get_location_type_with_default_from_resource_group(
+                self.cli_ctx))
 
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
@@ -1293,7 +1403,8 @@ def load_arguments(self, _):
                 'timezone_id',
             ])
 
-        # Create args that will be used to build up the Managed Instance's Sku object
+        # Create args that will be used to build up the Managed Instance's Sku
+        # object
         create_args_for_complex_type(
             c, 'sku', Sku, [
                 'family',
@@ -1316,16 +1427,20 @@ def load_arguments(self, _):
                 help='The virtual network name',
                 validator=validate_subnet)
 
-        c.argument('virtual_network_subnet_id',
-                   options_list=['--subnet'],
-                   required=True,
-                   help='Name or ID of the subnet that allows access to an Azure Sql Managed Instance. '
-                   'If subnet name is provided, --vnet-name must be provided.')
+        c.argument(
+            'virtual_network_subnet_id',
+            options_list=['--subnet'],
+            required=True,
+            help='Name or ID of the subnet that allows access to an Azure Sql Managed Instance. '
+            'If subnet name is provided, --vnet-name must be provided.')
 
-        c.argument('assign_identity',
-                   options_list=['--assign-identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this managed instance '
-                   'for use with key management services like Azure KeyVault.')
+        c.argument(
+            'assign_identity',
+            options_list=[
+                '--assign-identity',
+                '-i'],
+            help='Generate and assign an Azure Active Directory Identity for this managed instance '
+            'for use with key management services like Azure KeyVault.')
 
     with self.argument_context('sql mi update') as c:
         # Create args that will be used to build up the ManagedInstance object
@@ -1337,13 +1452,17 @@ def load_arguments(self, _):
         c.argument('administrator_login_password',
                    options_list=['--admin-password', '-p'])
 
-        c.argument('assign_identity',
-                   options_list=['--assign-identity', '-i'],
-                   help='Generate and assign an Azure Active Directory Identity for this managed instance '
-                   'for use with key management services like Azure KeyVault. '
-                   'If identity is already assigned - do nothing.')
+        c.argument(
+            'assign_identity',
+            options_list=[
+                '--assign-identity',
+                '-i'],
+            help='Generate and assign an Azure Active Directory Identity for this managed instance '
+            'for use with key management services like Azure KeyVault. '
+            'If identity is already assigned - do nothing.')
 
-        # Create args that will be used to build up the Managed Instance's Sku object
+        # Create args that will be used to build up the Managed Instance's Sku
+        # object
         create_args_for_complex_type(
             c, 'sku', Sku, [
                 'family',
@@ -1381,7 +1500,8 @@ def load_arguments(self, _):
                    arg_type=aad_admin_sid_param_type)
 
     with self.argument_context('sql mi ad-admin create') as c:
-        # Create args that will be used to build up the ManagedInstanceAdministrator object
+        # Create args that will be used to build up the
+        # ManagedInstanceAdministrator object
         create_args_for_complex_type(
             c, 'properties', ManagedInstanceAdministrator, [
                 'login',
@@ -1389,7 +1509,8 @@ def load_arguments(self, _):
             ])
 
     with self.argument_context('sql mi ad-admin update') as c:
-        # Create args that will be used to build up the ManagedInstanceAdministrator object
+        # Create args that will be used to build up the
+        # ManagedInstanceAdministrator object
         create_args_for_complex_type(
             c, 'properties', ManagedInstanceAdministrator, [
                 'login',
@@ -1416,13 +1537,15 @@ def load_arguments(self, _):
     with self.argument_context('sql midb') as c:
         c.argument('managed_instance_name',
                    arg_type=managed_instance_param_type,
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   # Allow --ids command line argument. id_part=name is 1st
+                   # name in uri
                    id_part='name')
 
         c.argument('database_name',
                    options_list=['--name', '-n'],
                    help='The name of the Azure SQL Managed Database.',
-                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   # Allow --ids command line argument. id_part=child_name_1 is
+                   # 2nd name in uri
                    id_part='child_name_1')
 
     with self.argument_context('sql midb create') as c:
@@ -1431,10 +1554,11 @@ def load_arguments(self, _):
                 'collation',
             ])
 
-        c.argument('collation',
-                   required=False,
-                   help='The collation of the Azure SQL Managed Database collation to use, '
-                   'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
+        c.argument(
+            'collation',
+            required=False,
+            help='The collation of the Azure SQL Managed Database collation to use, '
+            'e.g.: SQL_Latin1_General_CP1_CI_AS or Latin1_General_100_CS_AS_SC')
 
     with self.argument_context('sql midb restore') as c:
         create_args_for_complex_type(
@@ -1445,36 +1569,44 @@ def load_arguments(self, _):
                 'restore_point_in_time'
             ])
 
-        c.argument('deleted_time',
-                   options_list=['--deleted-time'],
-                   help='If specified, restore from a deleted database instead of from an existing database.'
-                   ' Must match the deleted time of a deleted database on the source Managed Instance.')
+        c.argument(
+            'deleted_time',
+            options_list=['--deleted-time'],
+            help='If specified, restore from a deleted database instead of from an existing database.'
+            ' Must match the deleted time of a deleted database on the source Managed Instance.')
 
-        c.argument('target_managed_database_name',
-                   options_list=['--dest-name'],
-                   required=True,
-                   help='Name of the managed database that will be created as the restore destination.')
+        c.argument(
+            'target_managed_database_name',
+            options_list=['--dest-name'],
+            required=True,
+            help='Name of the managed database that will be created as the restore destination.')
 
-        c.argument('target_managed_instance_name',
-                   options_list=['--dest-mi'],
-                   help='Name of the managed instance to restore managed database to. '
-                   'This can be same managed instance, or another managed instance on same subscription. '
-                   'When not specified it defaults to source managed instance.')
+        c.argument(
+            'target_managed_instance_name',
+            options_list=['--dest-mi'],
+            help='Name of the managed instance to restore managed database to. '
+            'This can be same managed instance, or another managed instance on same subscription. '
+            'When not specified it defaults to source managed instance.')
 
-        c.argument('target_resource_group_name',
-                   options_list=['--dest-resource-group'],
-                   help='Name of the resource group of the managed instance to restore managed database to. '
-                   'When not specified it defaults to source resource group.')
+        c.argument(
+            'target_resource_group_name',
+            options_list=['--dest-resource-group'],
+            help='Name of the resource group of the managed instance to restore managed database to. '
+            'When not specified it defaults to source resource group.')
 
         restore_point_arg_group = 'Restore Point'
 
-        c.argument('restore_point_in_time',
-                   options_list=['--time', '-t'],
-                   arg_group=restore_point_arg_group,
-                   required=True,
-                   help='The point in time of the source database that will be restored to create the'
-                   ' new database. Must be greater than or equal to the source database\'s'
-                   ' earliestRestoreDate value. ' + time_format_help)
+        c.argument(
+            'restore_point_in_time',
+            options_list=[
+                '--time',
+                '-t'],
+            arg_group=restore_point_arg_group,
+            required=True,
+            help='The point in time of the source database that will be restored to create the'
+            ' new database. Must be greater than or equal to the source database\'s'
+            ' earliestRestoreDate value. ' +
+            time_format_help)
 
     with self.argument_context('sql midb ltr restore') as c:
         create_args_for_complex_type(
@@ -1484,24 +1616,29 @@ def load_arguments(self, _):
                 'target_resource_group_name'
             ])
 
-        c.argument('backup_id',
-                   help='The resource id of the long term retention backup to be restored.')
+        c.argument(
+            'long_term_retention_backup_resource_id',
+            options_list=['--backup-id'],
+            help='The resource id of the long term retention backup to be restored.')
 
-        c.argument('target_managed_database_name',
-                   options_list=['--dest-name'],
-                   required=True,
-                   help='Name of the managed database that will be created as the restore destination.')
+        c.argument(
+            'target_managed_database_name',
+            options_list=['--dest-name'],
+            required=True,
+            help='Name of the managed database that will be created as the restore destination.')
 
-        c.argument('target_managed_instance_name',
-                   options_list=['--dest-mi'],
-                   help='Name of the managed instance to restore managed database to. '
-                   'This can be same managed instance, or another managed instance on same subscription. '
-                   'When not specified it defaults to source managed instance.')
+        c.argument(
+            'target_managed_instance_name',
+            options_list=['--dest-mi'],
+            help='Name of the managed instance to restore managed database to. '
+            'This can be same managed instance, or another managed instance on same subscription. '
+            'When not specified it defaults to source managed instance.')
 
-        c.argument('target_resource_group_name',
-                   options_list=['--dest-resource-group'],
-                   help='Name of the resource group of the managed instance to restore managed database to. '
-                   'When not specified it defaults to source resource group.')
+        c.argument(
+            'target_resource_group_name',
+            options_list=['--dest-resource-group'],
+            help='Name of the resource group of the managed instance to restore managed database to. '
+            'When not specified it defaults to source resource group.')
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
@@ -1510,22 +1647,25 @@ def load_arguments(self, _):
                 'retention_days'
             ])
 
-        c.argument('deleted_time',
-                   options_list=['--deleted-time'],
-                   help='If specified, updates retention days for a deleted database, instead of an existing database.'
-                   'Must match the deleted time of a deleted database on the source Managed Instance.')
+        c.argument(
+            'deleted_time',
+            options_list=['--deleted-time'],
+            help='If specified, updates retention days for a deleted database, instead of an existing database.'
+            'Must match the deleted time of a deleted database on the source Managed Instance.')
 
-        c.argument('retention_days',
-                   options_list=['--retention-days'],
-                   required=True,
-                   help='New backup short term retention policy in days.'
-                   'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
+        c.argument(
+            'retention_days',
+            options_list=['--retention-days'],
+            required=True,
+            help='New backup short term retention policy in days.'
+            'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
 
     with self.argument_context('sql midb short-term-retention-policy show') as c:
-        c.argument('deleted_time',
-                   options_list=['--deleted-time'],
-                   help='If specified, shows retention days for a deleted database, instead of an existing database.'
-                   'Must match the deleted time of a deleted database on the source Managed Instance.')
+        c.argument(
+            'deleted_time',
+            options_list=['--deleted-time'],
+            help='If specified, shows retention days for a deleted database, instead of an existing database.'
+            'Must match the deleted time of a deleted database on the source Managed Instance.')
 
     with self.argument_context('sql midb long-term-retention-policy set') as c:
         create_args_for_complex_type(
@@ -1536,31 +1676,33 @@ def load_arguments(self, _):
                 'week_of_year'
             ])
 
-        c.argument('weekly_retention',
-                   help='The Weekly Retention.'
-                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
-                   'There is a minimum of 7 days and a maximum of 10 years.')
+        c.argument(
+            'weekly_retention', help='The Weekly Retention.'
+            'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+            'There is a minimum of 7 days and a maximum of 10 years.')
 
-        c.argument('monthly_retention',
-                   help='The Monthly Retention.'
-                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
-                   'There is a minimum of 7 days and a maximum of 10 years.')
+        c.argument(
+            'monthly_retention', help='The Monthly Retention.'
+            'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+            'There is a minimum of 7 days and a maximum of 10 years.')
 
-        c.argument('yearly_retention',
-                   help='The Yearly Retention.'
-                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
-                   'There is a minimum of 7 days and a maximum of 10 years.')
+        c.argument(
+            'yearly_retention', help='The Yearly Retention.'
+            'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+            'There is a minimum of 7 days and a maximum of 10 years.')
 
-        c.argument('week_of_year',
-                   help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
+        c.argument(
+            'week_of_year',
+            help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
 
     with self.argument_context('sql midb long-term-retention-backup') as c:
         c.argument('location_name',
                    arg_type=get_location_type(self.cli_ctx))
 
-        c.argument('resource_group_name',
-                   required=False,
-                   help='If specified, the resource group that the managed instance/database resource belongs to.')
+        c.argument(
+            'resource_group_name',
+            required=False,
+            help='If specified, the resource group that the managed instance/database resource belongs to.')
 
     ###############################################
     #                sql virtual cluster          #
@@ -1569,7 +1711,8 @@ def load_arguments(self, _):
         c.argument('virtual_cluster_name',
                    help='The virtual cluster name',
                    options_list=['--name', '-n'],
-                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   # Allow --ids command line argument. id_part=name is 1st
+                   # name in uri
                    id_part='name')
 
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -1587,12 +1730,14 @@ def load_arguments(self, _):
                    arg_type=managed_instance_param_type,
                    options_list=['--source-mi', '--mi'])
 
-        c.argument('partner_managed_instance',
-                   help="The name of the partner managed instance of a Instance Failover Group",
-                   options_list=['--partner-mi'])
+        c.argument(
+            'partner_managed_instance',
+            help="The name of the partner managed instance of a Instance Failover Group",
+            options_list=['--partner-mi'])
 
-        c.argument('partner_resource_group',
-                   help="The name of the resource group of the partner managed instance")
+        c.argument(
+            'partner_resource_group',
+            help="The name of the resource group of the partner managed instance")
 
         c.argument('failover_policy',
                    help="The failover policy of the Instance Failover Group",

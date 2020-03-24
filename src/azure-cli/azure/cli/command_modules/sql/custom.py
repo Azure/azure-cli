@@ -2631,7 +2631,7 @@ def managed_db_restore(
 def managed_db_restore_ltr_backup(
         cmd,
         client,
-        backup_id,
+        long_term_retention_backup_resource_id,
         target_managed_database_name,
         target_managed_instance_name,
         target_resource_group_name,
@@ -2645,7 +2645,7 @@ def managed_db_restore_ltr_backup(
         resource_group_name=target_resource_group_name)
 
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
-    kwargs['long_term_retention_backup_resource_id'] = backup_id
+    kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
 
     return client.create_or_update(
         database_name=target_managed_database_name,
