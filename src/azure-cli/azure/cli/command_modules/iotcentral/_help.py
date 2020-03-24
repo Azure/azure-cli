@@ -30,7 +30,7 @@ examples:
         az iotcentral app create --resource-group MyResourceGroup --name my-app-resource --subdomain my-app-subdomain
   - name: Create an IoT Central application with the standard pricing tier ST2 in the 'westus' region, with a custom display name, based on the iotc-pnp-preview template.
     text: >
-        az iotcentral app create --resource-group MyResourceGroup --name my-app-resource-name --sku S1 --location westus --subdomain my-app-subdomain --template iotc-pnp-preview --display-name 'My Custom Display Name'
+        az iotcentral app create --resource-group MyResourceGroup --name my-app-resource-name --sku ST2 --location westus --subdomain my-app-subdomain --template iotc-pnp-preview --display-name 'My Custom Display Name'
 """
 
 helps['iotcentral app delete'] = """
