@@ -268,7 +268,7 @@ def _get_network_acls_json_dict(json_string_or_filename):
     if not json_string_or_filename:
         return {}
 
-    logger.info('json_string_or_filename: {}'.format(json_string_or_filename))
+    logger.info('json_string_or_filename: %s', json_string_or_filename)
 
     network_acls_json = None
     try:
@@ -282,12 +282,12 @@ def _get_network_acls_json_dict(json_string_or_filename):
 
         try:
             with open(json_string_or_filename) as f:
-                logger.info('network_acls_filename: {}'.format(json_string_or_filename))
+                logger.info('network_acls_filename: %s', json_string_or_filename)
                 network_acls_json = json.load(f)
         except:  # pylint: disable=bare-except
             raise CLIError('{} is not a valid JSON file'.format(json_string_or_filename))
 
-    logger.info('network_acls_json: {}'.format(network_acls_json))
+    logger.info('network_acls_json: %s', network_acls_json)
     return network_acls_json
 
 
