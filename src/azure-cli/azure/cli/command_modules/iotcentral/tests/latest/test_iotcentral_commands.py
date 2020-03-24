@@ -6,7 +6,7 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 
-class IoTCentralTest(ScenarioTest):
+class IoTCentralTestDeprecated(ScenarioTest):
 
     @ResourceGroupPreparer()  # name_prefix not required, but can be useful
     def test_iotcentral_app(self, resource_group, resource_group_location):
