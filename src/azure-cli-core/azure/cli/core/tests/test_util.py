@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from collections import namedtuple
+import os
 import sys
 import unittest
 import mock
@@ -215,9 +216,13 @@ class TestUtils(unittest.TestCase):
         actual = get_az_user_agent()
         self.assertEqual(actual, 'AZURECLI/7.8.9')
 
+    @mock.patch.dict('os.environ')
     @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
     @mock.patch('requests.Session.send', autospec=True)
     def test_send_raw_requests(self, send_mock, get_raw_token_mock):
+        if 'AZURE_HTTP_USER_AGENT' in os.environ:
+            del os.environ['AZURE_HTTP_USER_AGENT']  # Clear env var possibly added by DevOps
+
         return_val = mock.MagicMock()
         return_val.is_ok = True
         send_mock.return_value = return_val
