@@ -222,14 +222,14 @@ def cf_blob_client(cli_ctx, kwargs):
 def generic_data_service_factory_track2(cli_ctx, **kwargs):
     service = kwargs.pop('service', None)
     account_name = kwargs.pop('account_name', None)
-    credential = kwargs.pop('account_name', None) or kwargs.pop('account_key', None)
+    credential = kwargs.pop('sas_token', None) or kwargs.pop('account_key', None)
     connection_string = kwargs.pop('connection_string', None)
     account_url = "https://{}.dfs.core.windows.net".format(account_name)
     if credential:
         client = service(account_url=account_url, credential=credential, **kwargs)
     if connection_string:
         client = service.from_connection_string(conn_str=connection_string)
-    return client
+    return client(**kwargs)
 
 
 def cf_adls_file_system(cli_ctx, kwargs):

@@ -1087,4 +1087,5 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('marker', validator=validate_marker, nargs='+')
 
     with self.argument_context('storage fs create') as c:
-        c.extra('file_system_name', options_list=['--name', '-n'], help="File system name.", required=True)
+        c.extra('file_system_name', options_list=['--name', '-n'],
+                help="File system name.", required=True)

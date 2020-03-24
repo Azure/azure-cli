@@ -631,10 +631,16 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('insert', 'insert_table_entity')
 
     adls_fs_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.filedatalake._file_system_client#FileSystemClient.{}',
+        operations_tmpl='azure.multiapi.storagetrack2.filedatalake._file_system_client#FileSystemClient.{}',
         client_factory=cf_adls_file_system,
-        resource_type=ResourceType.MGMT_STORAGE
+        resource_type=ResourceType.DATA_STORAGE_TRACK2
     )
-    with self.command_group('storage fs', adls_fs_sdk) as g:
+    custom_adls_fs_sdk = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.adls#{}',
+        client_factory=cf_adls_file_system,
+        resource_type=ResourceType.DATA_STORAGE_TRACK2
+    )
+
+    with self.command_group('storage fs', adls_fs_sdk, custom_command_type=custom_adls_fs_sdk) as g:
         g.storage_command('create', 'create_file_system')
 
