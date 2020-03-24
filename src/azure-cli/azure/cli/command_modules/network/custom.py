@@ -130,6 +130,10 @@ def list_network_watchers(cmd, resource_group_name=None):
 
 # region ApplicationGateways
 # pylint: disable=too-many-locals
+def _is_v2_sku(sku):
+    return 'v2' in sku
+
+
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
@@ -154,7 +158,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     tags = tags or {}
-    sku_tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
+    sku_tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
     http_listener_protocol = 'https' if (cert_data or key_vault_secret_id) else 'http'
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     virtual_network_name = virtual_network_name or '{}Vnet'.format(application_gateway_name)
@@ -183,10 +187,13 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     if public_ip_address_type == 'new':
         ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+        public_ip_sku = None
+        if _is_v2_sku(sku):
+            public_ip_sku = 'Standard'
         master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
-                                                              None, None, None))
+                                                              None, public_ip_sku, None))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
@@ -224,7 +231,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
                                custom_error_pages=None, max_capacity=None):
     if sku is not None:
-        instance.sku.tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
+        instance.sku.tier = sku.split('_', 1)[0] if _is_v2_sku(sku) else sku
 
     try:
         if min_capacity is not None:
