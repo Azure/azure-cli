@@ -121,7 +121,7 @@ examples:
     crafted: true
   - name: Create a key vault with network ACLs specified (use JSON string).
     text: |
-        az keyvault create --location westus2 --name MyKeyVault --resource-group MyResourceGroup 
+        az keyvault create --location westus2 --name MyKeyVault --resource-group MyResourceGroup
         --network-acls "{\\"ip\\": [\\"1.2.3.4\\", \\"2.3.4.0/24\\"], \\"vnet\\": [\\"vnet_name_1/subnet_name1\\", \\"vnet_name_2/subnet_name2\\"]}"
   - name: Create a key vault with network ACLs specified (use JSON file).
     text: |
