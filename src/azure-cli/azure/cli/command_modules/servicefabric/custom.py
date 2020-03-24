@@ -1159,7 +1159,7 @@ def _create_certificate(cmd,
                 vault = _create_keyvault(
                     cmd, cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
             vault_uri = vault.properties.vault_uri
-            certificate_name = _get_certificate_name(resource_group_name)
+            certificate_name = _get_certificate_name(certificate_subject_name, resource_group_name)
             logger.info("Import certificate")
             result = import_certificate(
                 cli_ctx, vault_uri, certificate_name, certificate_file, password=certificate_password)
@@ -1181,7 +1181,7 @@ def _create_certificate(cmd,
                 logger.info("Wait for key vault ready")
                 time.sleep(20)
             vault_uri = vault.properties.vault_uri
-            certificate_name = _get_certificate_name(resource_group_name)
+            certificate_name = _get_certificate_name(certificate_subject_name, resource_group_name)
 
             policy = _get_default_policy(cli_ctx, certificate_subject_name)
             logger.info("Creating self-signed certificate")
@@ -1367,16 +1367,24 @@ def _get_vault_name(resource_group_name, vault_name):
     return vault_name
 
 
-def _get_certificate_name(resource_group_name):
-    certificate_name = resource_group_name
+def _get_certificate_name(certificate_subject_name, resource_group_name):
+    if certificate_subject_name is None:
+        certificate_name = resource_group_name
+    else:
+        certificate_name = certificate_subject_name
+
     name = ""
     for n in certificate_name:
         if n.isalpha() or n == '-' or n.isdigit():
             name += n
     certificate_name = name
-    import datetime
-    suffix = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    return "{}{}".format(certificate_name, suffix)
+
+    if certificate_subject_name is None:
+        import datetime
+        suffix = datetime.datetime.now().strftime("%Y%m%d%H%M")
+        certificate_name = "{}{}".format(certificate_name, suffix)
+
+    return certificate_name
 
 
 # pylint: disable=inconsistent-return-statements
