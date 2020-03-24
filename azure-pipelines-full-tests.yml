@@ -13,6 +13,26 @@ pr:
       - '*'
 
 jobs:
+  - job: ExtractMetadata
+    displayName: Extract Metadata
+
+    condition: succeeded()
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+      - task: Bash@3
+        displayName: 'Extract Version'
+        inputs:
+          targetType: 'filePath'
+          filePath: scripts/release/get_version.sh
+
+
+      - task: PublishPipelineArtifact@0
+        displayName: 'Publish Artifact: metadata'
+        inputs:
+          TargetPath: $(Build.ArtifactStagingDirectory)
+          ArtifactName: metadata
+
   - job: BuildPythonWheel
     displayName: Build Python Wheels
 
