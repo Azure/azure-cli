@@ -145,14 +145,6 @@ jobs:
         addToPath: true
         architecture: 'x64'
     - bash: |
-        echo $(Build.BuildUri)
-        echo $(Build.BuildId)
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '3.8'
-        addToPath: true
-        architecture: 'x64'
-    - bash: |
         cd ..
         pwd
         ls
@@ -173,3 +165,14 @@ jobs:
         # mergeTestResults: true
         # testResultsFormat: 'JUnit'
     
+- job: SendEmail
+  displayName: Live Test Python 3.8
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - bash: |
+        echo $(Build.BuildUri)
+        echo $(Build.BuildId)
