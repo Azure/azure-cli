@@ -203,10 +203,12 @@ def load_arguments(self, _):
     with self.argument_context('backup protection enable-for-vm') as c:
         c.argument('diskslist', diskslist_type)
         c.argument('disk_list_setting', arg_type=get_enum_type(['include', 'exclude']), options_list=['--disk-list-setting'], help=disk_list_setting_help)
+        c.argument('exclude_all_data_disks', arg_type=get_three_state_flag(), help='Option to specify to backup OS disk only.')
 
     with self.argument_context('backup protection update-for-vm') as c:
         c.argument('diskslist', diskslist_type)
         c.argument('disk_list_setting', arg_type=get_enum_type(['include', 'exclude', 'resetexclusionsettings']), options_list=['--disk-list-setting'], help=disk_list_setting_help)
+        c.argument('exclude_all_data_disks', arg_type=get_three_state_flag(), help='Option to specify to backup OS disk only.')
 
     with self.argument_context('backup protection enable-for-azurefileshare') as c:
         c.argument('azure_file_share', options_list=['--azure-file-share'], help='Name of the Azure FileShare.')

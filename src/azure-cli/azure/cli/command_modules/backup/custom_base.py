@@ -245,13 +245,13 @@ def check_protection_enabled_for_vm(cmd, vm_id):
 
 
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name, diskslist=None,
-                             disk_list_setting=None):
+                             disk_list_setting=None, exclude_all_data_disks=None):
     return custom.enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name,
-                                           diskslist, disk_list_setting)
+                                           diskslist, disk_list_setting, exclude_all_data_disks)
 
 
-def update_protection_for_vm(cmd, client, resource_group_name, vault_name, container_name, item_name, diskslist,
-                             disk_list_setting):
+def update_protection_for_vm(cmd, client, resource_group_name, vault_name, container_name, item_name, diskslist=None,
+                             disk_list_setting=None, exclude_all_data_disks=None):
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     item = show_item(cmd, items_client, resource_group_name, vault_name, container_name, item_name,
                      "AzureIaasVM", "VM")
@@ -260,7 +260,7 @@ def update_protection_for_vm(cmd, client, resource_group_name, vault_name, conta
     if isinstance(item, list):
         raise CLIError("Multiple items found. Please give native names instead.")
     return custom.update_protection_for_vm(cmd, client, resource_group_name, vault_name, item, diskslist,
-                                           disk_list_setting)
+                                           disk_list_setting, exclude_all_data_disks)
 
 
 def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name, policy_name, protectable_item_type,

@@ -116,8 +116,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('hub_name', hub_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
         c.argument('sku', arg_type=get_enum_type(IotHubSku),
-                   help='Pricing tier for Azure IoT Hub. Default value is F1, which is free. '
-                        'Note that only one free IoT hub instance is allowed in each '
+                   help='Pricing tier for Azure IoT Hub. '
+                        'Note that only one free IoT hub instance (F1) is allowed in each '
                         'subscription. Exception will be thrown if free instances exceed one.')
         c.argument('unit', help='Units in your IoT Hub.', type=int)
         c.argument('partition_count',

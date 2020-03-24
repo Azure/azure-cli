@@ -879,7 +879,13 @@ class SubscriptionFinder(object):
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
                 # with other tenants.
-                logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                msg = (getattr(ex, 'error_response', None) or {}).get('error_description') or ''
+                if 'AADSTS50076' in msg:
+                    logger.warning("Tenant %s requires Multi-Factor Authentication (MFA). "
+                                   "To access this tenant, use 'az login --tenant' to explicitly "
+                                   "login to this tenant.", tenant_id)
+                else:
+                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,

@@ -59,18 +59,22 @@ def configure_load_balancer_profile(managed_outbound_ip_count, outbound_ips, out
     outbound_ip_resources = _get_load_balancer_outbound_ips(outbound_ips)
     outbound_ip_prefix_resources = _get_load_balancer_outbound_ip_prefixes(outbound_ip_prefixes)
 
-    if managed_outbound_ip_count:
-        profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
-            count=managed_outbound_ip_count
-        )
-    if outbound_ip_resources:
-        profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
-            public_ips=outbound_ip_resources
-        )
-    if outbound_ip_prefix_resources:
-        profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
-            public_ip_prefixes=outbound_ip_prefix_resources
-        )
+    if managed_outbound_ip_count or outbound_ip_resources or outbound_ip_prefix_resources:
+        profile.managed_outbound_ips = None
+        profile.outbound_ips = None
+        profile.outbound_ip_prefixes = None
+        if managed_outbound_ip_count:
+            profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
+                count=managed_outbound_ip_count
+            )
+        if outbound_ip_resources:
+            profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
+                public_ips=outbound_ip_resources
+            )
+        if outbound_ip_prefix_resources:
+            profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
+                public_ip_prefixes=outbound_ip_prefix_resources
+            )
     if outbound_ports:
         profile.allocated_outbound_ports = outbound_ports
     if idle_timeout:

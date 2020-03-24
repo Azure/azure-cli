@@ -166,6 +166,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('properties.sku.name', 'standard'),
             self.check('properties.enableSoftDelete', False),
             self.check('properties.enablePurgeProtection', None),
+            self.check('properties.softDeleteRetentionInDays', 90)
         ]).get_output_in_json()
         self.kwargs['policy_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
         self.cmd('keyvault show -n {kv}', checks=[
@@ -190,7 +191,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         # test updating updating other properties
         self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete '
                  '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
-                 '--bypass AzureServices --default-action Deny',
+                 '--bypass AzureServices --default-action Deny --retention-days 17',
                  checks=[
                      self.check('name', '{kv}'),
                      self.check('properties.enableSoftDelete', True),
@@ -199,8 +200,14 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                      self.check('properties.enabledForDiskEncryption', True),
                      self.check('properties.enabledForTemplateDeployment', True),
                      self.check('properties.networkAcls.bypass', 'AzureServices'),
-                     self.check('properties.networkAcls.defaultAction', 'Deny')])
+                     self.check('properties.networkAcls.defaultAction', 'Deny'),
+                     self.check('properties.softDeleteRetentionInDays', 17),
+                 ])
         # test policy set/delete
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapKey',
+                 checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
+        self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapkey',
+                 checks=self.check('length(properties.accessPolicies[0].permissions.keys)', 2))
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
         self.cmd('keyvault delete-policy -g {rg} -n {kv} --object-id {policy_id}', checks=[
@@ -216,27 +223,23 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         self.cmd(r"az keyvault list-deleted --query [?name==\'{kv}\']", checks=self.is_empty())
 
         # test create keyvault further
-        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} --no-self-perms --enable-soft-delete false', checks=[
-            self.check('type(properties.accessPolicies)', 'array'),
-            self.check('length(properties.accessPolicies)', 0)
-        ])
-
-        # test premium sku
-        self.cmd('keyvault create -g {rg} -n {kv4} -l {loc} --sku premium --enable-soft-delete false', checks=[
-            self.check('properties.sku.name', 'premium')
-        ])
-
-        # test enableSoftDelete is True if omitted
-        self.cmd('keyvault create -g {rg} -n {kv3} -l {loc} --enabled-for-deployment true '
-                 '--enabled-for-disk-encryption true --enabled-for-template-deployment true',
+        self.cmd('keyvault create -g {rg} -n {kv2} -l {loc} '  # enableSoftDelete is True if omitted
+                 '--retention-days 7 '
+                 '--sku premium '
+                 '--enabled-for-deployment true --enabled-for-disk-encryption true --enabled-for-template-deployment true '
+                 '--no-self-perms ',  # no self permission assigned
                  checks=[
                      self.check('properties.enableSoftDelete', True),
+                     self.check('properties.softDeleteRetentionInDays', 7),
+                     self.check('properties.sku.name', 'premium'),
                      self.check('properties.enabledForDeployment', True),
                      self.check('properties.enabledForDiskEncryption', True),
-                     self.check('properties.enabledForTemplateDeployment', True)
+                     self.check('properties.enabledForTemplateDeployment', True),
+                     self.check('type(properties.accessPolicies)', 'array'),
+                     self.check('length(properties.accessPolicies)', 0),
                  ])
-        self.cmd('keyvault delete -n {kv3}')
-        self.cmd('keyvault purge -n {kv3}')
+        self.cmd('keyvault delete -n {kv2}')
+        self.cmd('keyvault purge -n {kv2}')
 
         # test explicitly set '--enable-soft-delete true --enable-purge-protection true'
         # unfortunately this will leave some waste behind, so make it the last test to lowered the execution count
@@ -788,7 +791,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
             'loc': 'westus'
         })
 
-        _create_keyvault(self, self.kwargs)
+        keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
+        self.kwargs['obj_id'] = keyvault['properties']['accessPolicies'][0]['objectId']
 
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
@@ -838,6 +842,14 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate show --id {cert_id}',
                  checks=self.check('id', versions[0]))
 
+        # plan to not display the managed keys/secrets
+        self.cmd('keyvault key list --vault-name {kv}', checks=self.is_empty())
+        self.cmd('keyvault secret list --vault-name {kv}', checks=self.is_empty())
+        self.cmd('keyvault key show --vault-name {kv} -n cert1',
+                 checks=self.check('managed', True))
+        self.cmd('keyvault secret show --vault-name {kv} -n cert1',
+                 checks=self.check('managed', True))
+
         # update certificate attributes
         self.cmd('keyvault certificate set-attributes --vault-name {kv} -n cert1 --enabled false -p @"{policy_path}"', checks=[
             self.check('id', versions[1]),
@@ -845,12 +857,25 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
             self.check('policy.x509CertificateProperties.validityInMonths', 60)
         ])
 
-        # delete certificate
+        # backup and then delete certificate
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} '
+                 '--certificate-permissions backup delete get restore list')
+
+        bak_file = 'backup.cert'
+        self.kwargs['bak_file'] = bak_file
+        self.cmd('keyvault certificate backup --vault-name {kv} -n cert1 --file {bak_file}')
         self.cmd('keyvault certificate delete --vault-name {kv} -n cert1')
         self.cmd('keyvault certificate list --vault-name {kv}',
                  checks=self.is_empty())
         self.cmd('keyvault certificate list --vault-name {kv} --maxresults 10',
                  checks=self.is_empty())
+
+        # restore certificate from backup
+        self.cmd('keyvault certificate restore --vault-name {kv} --file {bak_file}')
+        self.cmd('keyvault certificate list --vault-name {kv}',
+                 checks=self.check('length(@)', 1))
+        if os.path.isfile(bak_file):
+            os.remove(bak_file)
 
 
 def _generate_certificate(path, keyfile=None, password=None):

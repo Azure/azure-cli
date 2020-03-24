@@ -374,7 +374,7 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
 
 
 def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
-                   sku=IotHubSku.f1.value,
+                   sku=IotHubSku.s1.value,
                    unit=1,
                    partition_count=4,
                    retention_day=1,

@@ -398,10 +398,10 @@ long-summary: For an introduction to Azure IoT Hub, see https://docs.microsoft.c
 examples:
   - name: Create an IoT Hub with the free pricing tier F1, in the region of the resource group.
     text: >
-        az iot hub create --resource-group MyResourceGroup --name MyIotHub
+        az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku F1 --partition-count 2
   - name: Create an IoT Hub with the standard pricing tier S1 and 4 partitions, in the 'westus' region.
     text: >
-        az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku S1 --location westus --partition-count 4
+        az iot hub create --resource-group MyResourceGroup --name MyIotHub --location westus
 """
 
 helps['iot hub delete'] = """
