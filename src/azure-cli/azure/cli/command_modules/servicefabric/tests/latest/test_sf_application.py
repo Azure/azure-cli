@@ -103,7 +103,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
             'service_type': 'CalcServiceType'
         })
 
-        _create_cluster(self, self.kwargs)
+        _create_cluster_with_separate_kv(self, self.kwargs)
         self._app_type_test()
         self._app_type_version_test()
         self._app_service_test()
