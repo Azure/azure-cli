@@ -58,7 +58,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
     DATA_STORAGE = ('azure.multiapi.storage', None)
-    DATA_STORAGE_BLOB = ('azure.multiapi.storagev2.blob', None)
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', None)
     MGMT_ADVISOR = ('azure.mgmt.advisor', None)
@@ -94,7 +93,8 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
     MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
     MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
-    DATA_STORAGE_TRACK2 = ('azure.multiapi.storagetrack2', None)
+    DATA_STORAGE_BLOB = ('azure.multiapi.storagev2.blob', None)
+    DATA_STORAGE_FILEDATALAKE = ('azure.multiapi.storagev2.filedatalake', None)
 
     def __init__(self, import_prefix, client_name):
         """Constructor.
@@ -156,6 +156,7 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
+        ResourceType.DATA_STORAGE_FILEDATALAKE: '2018-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2017-04-01',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
