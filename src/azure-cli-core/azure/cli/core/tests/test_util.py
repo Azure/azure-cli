@@ -378,28 +378,57 @@ class TestHandleException(unittest.TestCase):
         expected_header_with_auth = expected_header.copy()
         expected_header_with_auth['Authorization'] = 'Bearer eyJ0eXAiOiJKV1'
 
-        # Test Authorization header is skipped
+        # Test basic usage
         # Mock Put Blob https://docs.microsoft.com/en-us/rest/api/storageservices/put-blob
         # Authenticate with service SAS https://docs.microsoft.com/en-us/rest/api/storageservices/create-service-sas
-        sas_token = ['sv=2019-02-02', 'srt=s', "{'ss': 'bf'}"]
+        sas_token = ['sv=2019-02-02', '{"srt": "s"}', "{'ss': 'bf'}"]
         send_raw_request(cli_ctx, 'PUT', 'https://myaccount.blob.core.windows.net/mycontainer/myblob?timeout=30',
                          uri_parameters=sas_token, body=test_body,
-                         skip_authorization_header=True, generated_client_request_id_name=None)
+                         generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_not_called()
         request = send_mock.call_args.args[1]
         self.assertEqual(request.method, 'PUT')
         self.assertEqual(request.url, 'https://myaccount.blob.core.windows.net/mycontainer/myblob?timeout=30&sv=2019-02-02&srt=s&ss=bf')
         self.assertEqual(request.body, '{"b1": "v1"}')
+        # Verify no Authorization header
         self.assertDictEqual(dict(request.headers), expected_header)
         self.assertEqual(send_mock.call_args.kwargs["verify"], not should_disable_connection_verify())
 
+        # Test Authorization header is skipped
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url, body=test_body, skip_authorization_header=True,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_not_called()
+        request = send_mock.call_args.args[1]
+        self.assertDictEqual(dict(request.headers), expected_header)
+
+        # Test Authorization header is already provided
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url,
+                         body=test_body, headers={'Authorization=Basic ABCDE'},
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_not_called()
+        request = send_mock.call_args.args[1]
+        self.assertDictEqual(dict(request.headers), {**expected_header, 'Authorization': 'Basic ABCDE'})
+
+        # Test Authorization header is auto appended
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url,
+                         body=test_body,
+                         generated_client_request_id_name=None)
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        request = send_mock.call_args.args[1]
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
+
         # Test ARM resource ID /subscriptions/01/resourcegroups/02?api-version=2019-07-01
-        send_raw_request(cli_ctx, 'GET', arm_resource_id)
+        send_raw_request(cli_ctx, 'GET', arm_resource_id, body=test_body,
+                         generated_client_request_id_name=None)
 
         get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
         request = send_mock.call_args.args[1]
         self.assertEqual(request.url, 'https://management.azure.com/subscriptions/01/resourcegroups/02?api-version=2019-07-01')
+        self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
         # Test full ARM URL https://management.azure.com/subscriptions/01/resourcegroups/02?api-version=2019-07-01
         send_raw_request(cli_ctx, 'GET', full_arm_rest_url)
@@ -417,7 +446,7 @@ class TestHandleException(unittest.TestCase):
         request = send_mock.call_args.args[1]
         self.assertEqual(request.url, 'https://management.azure.com:443/subscriptions/01/resourcegroups/02?api-version=2019-07-01')
 
-        # Test MS Graph API https://graph.microsoft.com/beta/appRoleAssignments/01
+        # Test non-ARM API, such as MS Graph API https://graph.microsoft.com/beta/appRoleAssignments/01
         send_raw_request(cli_ctx, 'PATCH', 'https://graph.microsoft.com/beta/appRoleAssignments/01',
                          body=test_body, generated_client_request_id_name=None)
 
@@ -425,6 +454,13 @@ class TestHandleException(unittest.TestCase):
         request = send_mock.call_args.args[1]
         self.assertEqual(request.method, 'PATCH')
         self.assertEqual(request.url, 'https://graph.microsoft.com/beta/appRoleAssignments/01')
+
+        # Test custom case-insensitive User-Agent
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url, headers={'user-agent=MY UA'})
+
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        request = send_mock.call_args.args[1]
+        self.assertEqual(request.headers['User-Agent'], 'MY UA')
 
     @staticmethod
     def _get_mock_HttpOperationError(response_text):
