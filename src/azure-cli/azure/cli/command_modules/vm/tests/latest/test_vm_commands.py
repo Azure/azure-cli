@@ -727,7 +727,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ])
     """
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_max_shares_etc_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_max_shares_etc_', location='westus')
     def test_vm_disk_max_shares_etc(self, resource_group):
         # Test disk create: add --disk-iops-read-only, --disk-mbps-read-only, --max-shares, --image-reference, --gallery-image-reference
         subs_id = self.get_subscription_id()
@@ -736,8 +736,12 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk2': 'd2',
             'disk3': 'd3',
             'disk4': 'd4',
+            'disk5': 'd5',
+            'disk6': 'd6',
             'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/UbuntuServer/Skus/18.04-LTS/Versions/18.04.202002180',
-            'g1': self.create_random_name('g1', 20)
+            'image2': 'image2',
+            'g1': self.create_random_name('g1', 20),
+            'vm': 'vm1'
         })
 
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
@@ -749,6 +753,23 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('creationData.imageReference.id', '{image}')
         ])
 
+        self.cmd('disk create -g {rg} -n {disk3} --image-reference Canonical:UbuntuServer:18.04-LTS:18.04.202002180', checks=[
+            self.check('creationData.imageReference.id', '{image}')
+        ])
+
+        """
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
+        self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
+        time.sleep(70)
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        self.cmd('vm generalize -g {rg} -n {vm}')
+        image_id = self.cmd('image create -g {rg} -n {image2} --source {vm}').get_output_in_json()['id']
+        # image_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/diskEncryptionSets/image2'.format(subs_id, resource_group)
+        self.cmd('disk create -g {rg} -n {disk4} --image-reference {image2}', checks=[
+            self.check('creationData.imageReference.id', image_id)
+        ])
+        """
+
         self.cmd('sig create -g {rg} --gallery-name {g1}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {g1} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1')
         self.cmd('disk create -g {rg} -n disk --size-gb 10')
@@ -757,11 +778,11 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.kwargs.update({
             'gallery_image': gallery_image
         })
-        self.cmd('disk create -g {rg} -n {disk3} --gallery-image-reference {gallery_image}', checks=[
+        self.cmd('disk create -g {rg} -n {disk4} --gallery-image-reference {gallery_image}', checks=[
             self.check('creationData.galleryImageReference.id', '{gallery_image}')
         ])
 
-        self.cmd('disk create -g {rg} -n {disk4} --size-gb 256 --max-shares 2 -l centraluseuap', checks=[
+        self.cmd('disk create -g {rg} -n {disk6} --size-gb 256 --max-shares 2 -l centraluseuap', checks=[
             self.check('maxShares', 2)
         ])
 
@@ -4053,9 +4074,9 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('encryption.diskEncryptionSetId', '{des1_id}', False),
             self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
         ])
-        self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk} --os-type linux')
+        self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk} --os-type linux --nsg-rule NONE')
 
-        self.cmd('vm create -g {rg} -n {vm2} --image centos --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-sets {des2} {des3}')
+        self.cmd('vm create -g {rg} -n {vm2} --image centos --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-sets {des2} {des3} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des1_id}', False),
             self.check('storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', '{des2_id}', False),

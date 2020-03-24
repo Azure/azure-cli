@@ -294,14 +294,26 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     if image_reference is not None:
         if not is_valid_resource_id(image_reference):
-            # URN
+            # URN or name
             terms = image_reference.split(':')
-            if len(terms) != 4:
+            if len(terms) == 4:  # URN
+                disk_publisher, disk_offer, disk_sku, disk_version = terms[0], terms[1], terms[2], terms[3]
+                if disk_version.lower() == 'latest':
+                    disk_version = _get_latest_image_version(cmd.cli_ctx, location, disk_publisher, disk_offer,
+                                                             disk_sku)
+                client = _compute_client_factory(cmd.cli_ctx)
+                response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
+                                                             disk_version)
+                image_reference = response.id
+            elif len(terms) == 1:  # name
+                subscription_id = get_subscription_id(cmd.cli_ctx)
+                image_reference = resource_id(
+                    subscription=subscription_id, resource_group=resource_group_name,
+                    namespace='Microsoft.Compute', type='images', name=image_reference
+                )
+            else:  # error
                 raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
-            publisher, offer, sku, version = terms[0], terms[1], terms[2], terms[3]
-            if version.lower() == 'latest':
-                version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
-
+        # image_reference is an ID now
         image_reference = {'id': image_reference}
         if image_reference_lun is not None:
             image_reference['lun'] = image_reference_lun
