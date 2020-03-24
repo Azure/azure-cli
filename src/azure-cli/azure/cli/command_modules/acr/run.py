@@ -3,9 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-import uuid
-import tempfile
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
@@ -16,13 +13,12 @@ from ._utils import (
     validate_managed_registry,
     get_validate_platform,
     get_custom_registry_credentials,
-    get_yaml_template
+    get_yaml_template,
+    prepare_source_location
 )
 from ._client_factory import cf_acr_registries_tasks
-from ._archive_utils import upload_source_code, check_remote_source_code
 
 RUN_NOT_SUPPORTED = 'Run is only available for managed registries.'
-NULL_SOURCE_LOCATION = "/dev/null"
 
 logger = get_logger(__name__)
 
@@ -116,34 +112,3 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
     return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
-
-
-def prepare_source_location(source_location, client_registries, registry_name, resource_group_name):
-    if source_location.lower() == NULL_SOURCE_LOCATION:
-        source_location = None
-    elif os.path.exists(source_location):
-        if not os.path.isdir(source_location):
-            raise CLIError(
-                "Source location should be a local directory path or remote URL.")
-
-        tar_file_path = os.path.join(tempfile.gettempdir(
-        ), 'run_archive_{}.tar.gz'.format(uuid.uuid4().hex))
-
-        try:
-            source_location = upload_source_code(
-                client_registries, registry_name, resource_group_name,
-                source_location, tar_file_path, "", "")
-        except Exception as err:
-            raise CLIError(err)
-        finally:
-            try:
-                logger.debug(
-                    "Deleting the archived source code from '%s'...", tar_file_path)
-                os.remove(tar_file_path)
-            except OSError:
-                pass
-    else:
-        source_location = check_remote_source_code(source_location)
-        logger.warning("Sending context to registry: %s...", registry_name)
-
-    return source_location

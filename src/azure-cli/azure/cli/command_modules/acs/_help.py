@@ -252,6 +252,14 @@ parameters:
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
     long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+  - name: --load-balancer-outbound-ports
+    type: int
+    short-summary: Load balancer outbound allocated ports.
+    long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, set to 0 which uses the default allocation based on the number of VMs.
+  - name: --load-balancer-idle-timeout
+    type: int
+    short-summary: Load balancer idle timeout in minutes.
+    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
   - name: --enable-cluster-autoscaler
     type: bool
     short-summary: Enable cluster autoscaler, default value is false.
@@ -271,7 +279,9 @@ parameters:
     long-summary: |-
         These addons are available:
             http_application_routing - configure ingress with automatic public DNS name creation.
-            monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one. Specify "--workspace-resource-id" to use an existing workspace.
+            monitoring - turn on Log Analytics monitoring. Uses the Log Analytics Default Workspace if it exists, else creates one.
+                         Specify "--workspace-resource-id" to use an existing workspace.
+                         If monitoring addon is enabled --no-wait argument will have no effect
             virtual-node - enable AKS Virtual Node (PREVIEW). Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
   - name: --disable-rbac
     type: bool
@@ -315,9 +325,15 @@ parameters:
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
+  - name: --enable-private-cluster
+    type: string
+    short-summary: Enable private cluster.
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+  - name: --enable-managed-identity
+    type: bool
+    short-summary: Using a system assigned managed identity to manage cluster resource group.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -327,10 +343,12 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
   - name: Create a kubernetes cluster with k8s 1.13.9 but use vmas.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.13.9 --vm-set-type AvailabilitySet
-  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer(basic) and default vm set type(AvailabilitySet).
+  - name: Create a kubernetes cluster with default kubernetes version, default SKU load balancer (Standard) and default vm set type (VirtualMachineScaleSet).
     text: az aks create -g MyResourceGroup -n MyManagedCluster
   - name: Create a kubernetes cluster with standard SKU load balancer and two AKS created IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
+  - name: Create a kubernetes cluster with a standard SKU load balancer, with two outbound AKS managed IPs an idle flow timeout of 5 minutes and 8000 allocated ports per machine
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2 --load-balancer-idle-timeout 5 --load-balancer-outbound-ports 8000
   - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IPs for the load balancer outbound connection usage.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
   - name: Create a kubernetes cluster with standard SKU load balancer and use the provided public IP prefixes for the load balancer outbound connection usage.
@@ -339,6 +357,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku basic --vm-set-type AvailabilitySet
   - name: Create a kubernetes cluster with authorized apiserver IP ranges.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 193.168.1.0/24,194.168.1.0/24,195.168.1.0
+  - name: Create a kubernetes cluster which enables managed identity.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
 """
 
 helps['aks update'] = """
@@ -363,15 +383,23 @@ parameters:
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
-    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+    long-summary: Desired number of managed outbound IPs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ips
     type: string
     short-summary: Load balancer outbound IP resource IDs.
-    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+    long-summary: Comma-separated public IP resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
   - name: --load-balancer-outbound-ip-prefixes
     type: string
     short-summary: Load balancer outbound IP prefix resource IDs.
-    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only.
+    long-summary: Comma-separated public IP prefix resource IDs for load balancer outbound connection. Valid for Standard SKU load balancer cluster only. If updated, it will wipe off the existing setting on Load balancer managed outbound IP count; Load balancer outbound IP resource IDs and Load balancer outbound IP prefix resource IDs.
+  - name: --load-balancer-outbound-ports
+    type: int
+    short-summary: Load balancer outbound allocated ports.
+    long-summary: Desired static number of outbound ports per VM in the load balancer backend pool. By default, set to 0 which uses the default allocation based on the number of VMs.
+  - name: --load-balancer-idle-timeout
+    type: int
+    short-summary: Load balancer idle timeout in minutes.
+    long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -386,6 +414,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ips <ip-resource-id-1,ip-resource-id-2>
+  - name: Create a kubernetes cluster with a standard SKU load balancer, with two outbound AKS managed IPs an idle flow timeout of 5 minutes and 8000 allocated ports per machine
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2 --load-balancer-idle-timeout 5 --load-balancer-outbound-ports 8000
   - name: Update a kubernetes cluster with standard SKU load balancer to use the provided public IP prefixes for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-outbound-ip-prefixes <ip-prefix-resource-id-1,ip-prefix-resource-id-2>
   - name: Attach AKS cluster to ACR by name "acrName"
@@ -427,6 +457,7 @@ long-summary: |-
     These addons are available:
         http_application_routing - configure ingress with automatic public DNS name creation.
         monitoring - turn on Log Analytics monitoring. Requires "--workspace-resource-id".
+                     If monitoring addon is enabled --no-wait argument will have no effect
         virtual-node - enable AKS Virtual Node (PREVIEW). Requires --subnet-name to provide the name of an existing subnet for the Virtual Node to use.
 parameters:
   - name: --addons -a
@@ -591,6 +622,9 @@ parameters:
   - name: --node-taints
     type: string
     short-summary: The node taints for the node pool. You can't change the node taints through CLI after the node pool is created.
+  - name: --labels
+    type: string
+    short-summary: The node labels for the node pool. You can't change the node labels through CLI after the node pool is created. See https://aka.ms/node-labels for syntax of labels.
 """
 
 helps['aks nodepool delete'] = """
@@ -829,16 +863,24 @@ parameters:
   - name: --space -s
     type: string
     short-summary: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+  - name: --endpoint -e
+    type: string
+    short-summary: The endpoint type to be used for a Azure Dev Spaces controller. See https://aka.ms/azds-networking for more information.
 examples:
   - name: Use Azure Dev Spaces with a managed Kubernetes cluster, interactively selecting a dev space.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks
-  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \\ client components and selecting a new or existing dev space 'my-space'.
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, updating to the latest Azure Dev Spaces \
+            client components and selecting a new or existing dev space 'my-space'.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks --update --space my-space
-  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \\ 'develop/my-space' without prompting for confirmation.
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster, selecting a new or existing dev space \
+            'develop/my-space' without prompting for confirmation.
     text: |-
         az aks use-dev-spaces -g my-aks-group -n my-aks -s develop/my-space -y
+  - name: Use Azure Dev Spaces with a managed Kubernetes cluster with a private endpoint.
+    text: |-
+        az aks use-dev-spaces -g my-aks-group -n my-aks -e private
 """
 
 helps['aks wait'] = """
@@ -896,9 +938,9 @@ parameters:
   - name: --customer-admin-group-id
     type: string
     short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
-  - name: --workspace-resource-id
+  - name: --workspace-id
     type: string
-    short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.
+    short-summary: The resource id of an existing Log Analytics Workspace to use for storing monitoring data.
 
 
 examples:
@@ -911,7 +953,7 @@ examples:
   - name: Create an Openshift cluster using a custom vnet
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
   - name: Create an Openshift cluster with Log Analytics monitoring enabled
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-resource-id {WORKSPACE_RESOURCE_ID}
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
 """
 
 helps['openshift delete'] = """
@@ -958,4 +1000,27 @@ examples:
   - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
     text: |-
         az openshift wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
+"""
+
+helps['openshift monitor'] = """
+type: group
+short-summary: Commands to manage Log Analytics monitoring. Requires "--workspace-id".
+"""
+
+helps['openshift monitor enable'] = """
+type: command
+short-summary: Enable Log Analytics monitoring. Requires "--workspace-id".
+examples:
+  - name: Enable Log Analytics in a managed OpenShift cluster.
+    text: |-
+        az openshift monitor enable -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
+"""
+
+helps['openshift monitor disable'] = """
+type: command
+short-summary: Disable Log Analytics monitoring.
+examples:
+  - name: Disable Log Analytics monitoring.
+    text: |-
+        az openshift monitor disable -g MyResourceGroup -n MyManagedCluster
 """

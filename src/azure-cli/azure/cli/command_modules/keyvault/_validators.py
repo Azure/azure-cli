@@ -36,7 +36,7 @@ def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
     for vault in client.list():
         id_comps = parse_resource_id(vault.id)
-        if id_comps['name'] == vault_name:
+        if 'name' in id_comps and id_comps['name'].lower() == vault_name.lower():
             return id_comps['resource_group']
     return None
 
@@ -164,6 +164,23 @@ def validate_policy_permissions(ns):
             None,
             'specify at least one: --key-permissions, --secret-permissions, '
             '--certificate-permissions --storage-permissions')
+
+
+def validate_private_endpoint_connection_id(cmd, ns):
+    if ns.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(ns.connection_id)
+        ns.resource_group_name = result['resource_group']
+        ns.vault_name = result['name']
+        ns.private_endpoint_connection_name = result['child_name_1']
+
+    if ns.vault_name and not ns.resource_group_name:
+        ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, ns.vault_name)
+
+    if not all([ns.vault_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME]')
+
+    del ns.connection_id
 
 
 def validate_principal(ns):
@@ -301,19 +318,20 @@ def validate_subnet(cmd, namespace):
 
 
 def validate_vault_id(entity_type):
-
     def _validate(ns):
         from azure.keyvault.key_vault_id import KeyVaultIdentifier
-        name = getattr(ns, entity_type.replace('deleted', '') + '_name', None)
+
+        pure_entity_type = entity_type.replace('deleted', '')
+        name = getattr(ns, pure_entity_type + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
         identifier = getattr(ns, 'identifier', None)
 
         if identifier:
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
-            setattr(ns, entity_type + '_name', ident.name)
+            setattr(ns, pure_entity_type + '_name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
-            if hasattr(ns, entity_type + '_version'):
-                setattr(ns, entity_type + '_version', ident.version)
+            if hasattr(ns, pure_entity_type + '_version'):
+                setattr(ns, pure_entity_type + '_version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME [--version VERSION]')
 

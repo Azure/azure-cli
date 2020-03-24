@@ -8,6 +8,7 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup, find_packages
+import sys
 
 try:
     from azure_bdist_wheel import cmdclass
@@ -17,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.77"
+VERSION = "2.2.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -27,7 +28,6 @@ except OSError:
     pass
 else:
     import re
-    import sys
 
     m = re.search(r'__version__\s*=\s*[\'"](.+?)[\'"]', content)
     if not m:
@@ -42,10 +42,7 @@ CLASSIFIERS = [
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
@@ -60,41 +57,41 @@ DEPENDENCIES = [
     'azure-cli-nspkg~=3.0,>=3.0.3',
     'azure-cli-telemetry>=1.0.2,<2.0',
     'azure-cosmos~=3.0,>=3.0.2',
-    'azure-datalake-store~=0.0.45',
+    'azure-datalake-store~=0.0.48',
     'azure-functions-devops-build~=0.0.22',
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
     'azure-mgmt-apimanagement>=0.1.0',
     'azure-mgmt-applicationinsights~=0.1.1',
-    'azure-mgmt-appconfiguration~=0.3.0',
+    'azure-mgmt-appconfiguration~=0.4.0',
     'azure-mgmt-authorization~=0.52.0',
     'azure-mgmt-batch~=7.0',
     'azure-mgmt-batchai~=2.0',
     'azure-mgmt-billing~=0.2',
     'azure-mgmt-botservice~=0.2.0',
-    'azure-mgmt-cdn~=3.1',
+    'azure-mgmt-cdn==4.1.0rc1',
     'azure-mgmt-cognitiveservices~=5.0.0',
-    'azure-mgmt-compute~=10.0',
+    'azure-mgmt-compute~=11.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry~=3.0.0rc7',
-    'azure-mgmt-containerservice~=8.0.0',
-    'azure-mgmt-cosmosdb~=0.8.0',
+    'azure-mgmt-containerregistry~=3.0.0rc9',
+    'azure-mgmt-containerservice~=8.1.0',
+    'azure-mgmt-cosmosdb~=0.12.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
     'azure-mgmt-datalake-store~=0.5.0',
     'azure-mgmt-datamigration~=0.1.0',
-    'azure-mgmt-deploymentmanager~=0.1.0',
+    'azure-mgmt-deploymentmanager~=0.2.0',
     'azure-mgmt-devtestlabs~=2.2',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
-    'azure-mgmt-eventhub~=2.6',
-    'azure-mgmt-hdinsight~=1.1.0',
+    'azure-mgmt-eventhub~=3.0.0',
+    'azure-mgmt-hdinsight~=1.3.0',
     'azure-mgmt-imagebuilder~=0.2.1',
-    'azure-mgmt-iotcentral~=1.0',
+    'azure-mgmt-iotcentral~=3.0.0',
     'azure-mgmt-iothub~=0.8.2',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-keyvault~=1.1',
+    'azure-mgmt-keyvault~=2.1',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=0.2',
     'azure-mgmt-managedservices~=1.0',
@@ -105,27 +102,27 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=0.7.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.7.0',
-    'azure-mgmt-network~=7.0.0',
-    'azure-mgmt-policyinsights~=0.3.1',
+    'azure-mgmt-network~=9.0.0',
+    'azure-mgmt-policyinsights~=0.4.0',
     'azure-mgmt-privatedns~=0.1.0',
-    'azure-mgmt-rdbms~=1.8',
+    'azure-mgmt-rdbms~=2.0.0',
     'azure-mgmt-recoveryservices~=0.4.0',
-    'azure-mgmt-recoveryservicesbackup~=0.4.0',
-    'azure-mgmt-redis~=6.0',
+    'azure-mgmt-recoveryservicesbackup~=0.6.0',
+    'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource~=4.0',
+    'azure-mgmt-resource~=8.0.1',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',
     'azure-mgmt-servicebus~=0.6.0',
-    'azure-mgmt-servicefabric~=0.2.0',
+    'azure-mgmt-servicefabric~=0.4.0',
     'azure-mgmt-signalr~=0.3.0',
-    'azure-mgmt-sql~=0.15',
-    'azure-mgmt-sqlvirtualmachine~=0.4.0',
-    'azure-mgmt-storage~=5.0.0',
+    'azure-mgmt-sql~=0.17.0',
+    'azure-mgmt-sqlvirtualmachine~=0.5.0',
+    'azure-mgmt-storage~=8.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
-    'azure-mgmt-web~=0.42.0',
+    'azure-mgmt-web~=0.44.0',
     'azure-multiapi-storage~=0.2.4',
     'azure-loganalytics~=0.1.0',
     'azure-storage-blob>=1.3.1,<2.0.0',
@@ -134,14 +131,12 @@ DEPENDENCIES = [
     'fabric~=2.4',
     'jsmin~=2.2.2',
     'knack~=0.6,>=0.6.3',
-    'mock~=2.0',
+    'mock~=4.0',
     'paramiko>=2.0.8,<3.0.0',
-    'pydocumentdb>=2.0.1,<3.0.0',
     'pygments~=2.4',
     'pyOpenSSL>=17.1.0',
     'pytz==2019.1',
-    'pyyaml~=5.1',
-    'psutil~=5.6',
+    'pyyaml~=5.2',
     'requests~=2.22',
     'scp~=0.13.2',
     'six~=1.12',
@@ -158,6 +153,9 @@ with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
+
+if sys.version_info < (3, 4):
+    raise ImportError("azure-cli requires Python 3.4 or later.")
 
 setup(
     name='azure-cli',
@@ -184,9 +182,11 @@ setup(
         'azure.cli.command_modules.monitor.operations': ['autoscale-parameters-template.json'],
         'azure.cli.command_modules.servicefabric': [
             'template/windows/template.json',
-            'template/linux/template.json',
             'template/windows/parameter.json',
+            'template/linux/template.json',
             'template/linux/parameter.json',
+            'template/service/template.json',
+            'template/service/parameter.json'
         ],
     },
     cmdclass=cmdclass

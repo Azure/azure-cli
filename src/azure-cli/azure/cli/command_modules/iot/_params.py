@@ -111,8 +111,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('hub_name', hub_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
         c.argument('sku', arg_type=get_enum_type(IotHubSku),
-                   help='Pricing tier for Azure IoT Hub. Default value is F1, which is free. '
-                        'Note that only one free IoT hub instance is allowed in each '
+                   help='Pricing tier for Azure IoT Hub. '
+                        'Note that only one free IoT hub instance (F1) is allowed in each '
                         'subscription. Exception will be thrown if free instances exceed one.')
         c.argument('unit', help='Units in your IoT Hub.', type=int)
         c.argument('partition_count',
@@ -249,10 +249,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('hub_name', options_list=['--hub-name', '--name', '-n'])
         c.argument('policy_name', help='Shared access policy to use.')
         c.argument('key_type', arg_type=get_enum_type(KeyType), options_list=['--key'], help='The key to use.')
-
-    with self.argument_context('iot hub manual-failover') as c:
-        c.argument('failover_region', options_list=['--failover-region', '--fr'], help='The region that the IoT hub'
-                   'fails over to. Must be the paired region to the current IoT hub region.')
 
     # Arguments for Message Enrichments
     with self.argument_context('iot hub message-enrichment') as c:

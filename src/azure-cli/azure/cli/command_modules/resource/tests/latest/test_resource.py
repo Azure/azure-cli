@@ -9,10 +9,12 @@ import time
 import mock
 import unittest
 
+from azure.cli.core.parser import IncorrectUsageError
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
 from azure.cli.core.util import get_file_json
+from knack.util import CLIError
 
 
 class ResourceGroupScenarioTest(ScenarioTest):
@@ -24,9 +26,10 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.cmd('group exists -n {rg}',
                  checks=self.check('@', False))
 
-        self.cmd('group create -n {rg} -l westus --tag a=b c', checks=[
+        self.cmd('group create -n {rg} -l westus --tag a=b c --managed-by test_admin', checks=[
             self.check('name', '{rg}'),
-            self.check('tags', {'a': 'b', 'c': ''})
+            self.check('tags', {'a': 'b', 'c': ''}),
+            self.check('managedBy', 'test_admin')
         ])
         self.cmd('group exists -n {rg}',
                  checks=self.check('@', True))
@@ -47,6 +50,10 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.cmd('group update -g {rg} --set tags.b={tag} --force-string',
                  checks=self.check('tags.b', '{{\"k\":\"v\"}}'))
 
+        result = self.cmd('group export --name {rg} --query "contentVersion"')
+
+        self.assertEqual('"1.0.0.0"\n', result.output)
+
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):
 
@@ -59,8 +66,10 @@ class ResourceGroupNoWaitScenarioTest(ScenarioTest):
                  checks=self.is_empty())
         self.cmd('group exists -n {rg}',
                  checks=self.check('@', False))
-        self.cmd('group create -n {rg} -l westus',
-                 checks=self.check('name', '{rg}'))
+        self.cmd('group create -n {rg} -l westus --managed-by test_admin', checks=[
+            self.check('name', '{rg}'),
+            self.check('managedBy', 'test_admin')
+        ])
         self.cmd('group exists -n {rg}',
                  checks=self.check('@', True))
         self.cmd('group wait --exists -n {rg}',
@@ -293,6 +302,77 @@ class TagScenarioTest(ScenarioTest):
         self.cmd('tag list --query "[?tagName == \'{tag}\']"',
                  checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
+    def test_tag_update_by_patch(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30),
+            'tag': 'cli-test=test',
+            'resource_group_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
+        })
+
+        resource = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+                            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.kwargs['vault_id'] = resource['id']
+
+        self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
+
+        self.cmd('resource tag --ids {resource_group_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+
+        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_tag_default_location_scenario', location='westus')
+    def test_tag_default_location_scenario(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30),
+            'tag': 'cli-test=test'
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p '
+            '"{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.kwargs['vault_id'] = resource['id']
+
+        self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+
+        # Scenarios with default location
+        self.cmd('configure --defaults location={loc}')
+
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag}')
+
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} -l westus')
+
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} --l westus')
+
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} --location westus')
+
+        # Scenarios without default location
+        self.cmd('configure --defaults location=""')
+
+        self.cmd('resource list --tag {tag}', checks=self.check('[0].id', '{vault_id}'))
+
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} -l westus')
+
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} --l westus')
+
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('resource list --tag {tag} --location westus')
+
+        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+
 
 class ProviderRegistrationTest(ScenarioTest):
 
@@ -333,11 +413,13 @@ class ProviderOperationTest(ScenarioTest):
         ])
 
 
-class SubscriptionLevelDeploymentTest(LiveScenarioTest):
+class DeploymentTestAtSubscriptionScope(ScenarioTest):
     def tearDown(self):
         self.cmd('policy assignment delete -n location-lock')
         self.cmd('policy definition delete -n policy2')
+        self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
+    @AllowLargeResponse(4096)
     def test_subscription_level_deployment(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
@@ -345,18 +427,52 @@ class SubscriptionLevelDeploymentTest(LiveScenarioTest):
             'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the subscription_level_parameters.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
-            'dn': self.create_random_name('azure-cli-sub-level-desubscription_level_parametersployment', 60)
+            'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60)
         })
 
-        self.cmd('group create --name cli_test_subscription_level_deployment --location WestUS', checks=[
+        self.cmd('deployment sub validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
+
+        self.cmd('deployment sub validate --location WestUS --template-file {tf} --parameters "{params_uri}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment sub create -n {dn} --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment sub list', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment sub show -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment sub export -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation sub list -n {dn}', checks=[
+            self.check('length([])', 5)
+        ])
+
+    @AllowLargeResponse(4096)
+    def test_subscription_level_deployment_old_command(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'subscription_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'subscription_level_parameters.json').replace('\\', '\\\\'),
+            # params-uri below is the raw file url of the subscription_level_parameters.json above
+            'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/subscription_level_parameters.json',
+            'dn': self.create_random_name('azure-cli-subscription_level_deployment', 60)
+        })
 
         self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters @"{params_uri}"', checks=[
+        self.cmd('deployment validate --location WestUS --template-file {tf} --parameters "{params_uri}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -376,6 +492,124 @@ class SubscriptionLevelDeploymentTest(LiveScenarioTest):
         ])
 
         self.cmd('deployment operation list -n {dn}', checks=[
+            self.check('length([])', 5)
+        ])
+
+
+class DeploymentTestAtResourceGroup(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_group_deployment')
+    def test_resource_group_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-resource-group-deployment', 60)
+        })
+
+        self.cmd('group create --name cli_test_resource_group_deployment --location WestUS', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group validate --resource-group cli_test_resource_group_deployment --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group create --resource-group cli_test_resource_group_deployment -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group list --resource-group cli_test_resource_group_deployment', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment group show --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment group export --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation group list --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+            self.check('length([])', 2)
+        ])
+
+
+class DeploymentTestAtManagementGroup(ScenarioTest):
+
+    def test_management_group_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'management_group_level_template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'management_group_level_parameters.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-management-group-deployment', 60),
+            'mg': 'azure-cli-management-group3bxh',
+            'sub-rg': self.create_random_name('azure-cli-sub-resource-group', 60),
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment mg validate --management-group-id {mg} --location WestUS --template-file {tf} '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+                 checks=[self.check('properties.provisioningState', 'Succeeded'), ])
+
+        self.cmd('deployment mg create --management-group-id {mg} --location WestUS -n {dn} --template-file {tf} '
+                 '--parameters @"{params}" --parameters targetMG="{mg}" --parameters nestedRG="{sub-rg}"',
+                 checks=[self.check('properties.provisioningState', 'Succeeded'), ])
+
+        self.cmd('deployment mg list --management-group-id {mg}', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment mg show --management-group-id {mg} -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment mg export --management-group-id {mg} -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation mg list --management-group-id {mg} -n {dn}', checks=[
+            self.check('length([])', 4)
+        ])
+
+        # clean
+        self.cmd('account management-group delete -n {mg}')
+
+
+class DeploymentTestAtTenantScope(ScenarioTest):
+    def tearDown(self):
+        self.cmd('group delete -n cli_tenant_level_deployment --yes')
+        self.cmd('account management-group delete -n cli_tenant_level_deployment_mg')
+
+    def test_tenant_level_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'tenant_level_template.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-tenant-level-deployment', 60)
+        })
+
+        self.cmd('account management-group create --name cli_tenant_level_deployment_mg', checks=[])
+
+        self.cmd('deployment tenant validate --location WestUS --template-file {tf}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment tenant create --location WestUS -n {dn} --template-file {tf}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        self.cmd('deployment tenant list', checks=[
+            self.check('[0].name', '{dn}'),
+        ])
+
+        self.cmd('deployment tenant show -n {dn}', checks=[
+            self.check('name', '{dn}')
+        ])
+
+        self.cmd('deployment tenant export -n {dn}', checks=[
+        ])
+
+        self.cmd('deployment operation tenant list -n {dn}', checks=[
             self.check('length([])', 4)
         ])
 
@@ -403,6 +637,7 @@ class DeploymentTest(ScenarioTest):
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
+            'error_params': os.path.join(curr_dir, 'test-error-params.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the test_params.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/test-params.json',
             'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
@@ -417,6 +652,9 @@ class DeploymentTest(ScenarioTest):
         self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters "{params_uri}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
+
+        with self.assertRaises(CLIError):
+            self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{error_params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
 
         self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
@@ -436,6 +674,34 @@ class DeploymentTest(ScenarioTest):
         self.cmd('group deployment operation list -g {rg} -n {dn}', checks=[
             self.check('length([])', 2),
             self.check('[0].resourceGroup', '{rg}')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_large_params')
+    @AllowLargeResponse()
+    def test_group_deployment_with_large_params(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'large_tf': os.path.join(curr_dir, 'test-largesize-template.json').replace('\\', '\\\\'),
+            'large_params': os.path.join(curr_dir, 'test-largesize-parameters.json').replace('\\', '\\\\'),
+            'app_name': self.create_random_name('cli', 30)
+        })
+
+        self.cmd('group deployment validate -g {rg} --template-file {large_tf} --parameters @"{large_params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('group deployment validate -g {rg} --template-file {large_tf} --parameters "{large_params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('group deployment create -g {rg} --template-file {large_tf} --parameters @"{large_params}" --parameters function-app-name="{app_name}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('group deployment create -g {rg} --template-file {large_tf} --parameters "{large_params}" --parameters function-app-name="{app_name}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_on_error_deployment_lastsuccessful')
@@ -676,6 +942,9 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('enforcementMode', '{em}')
         ])
 
+        # ensure the policy assignment shows up in the list result
+        self.cmd('policy assignment list --scope {scope}', checks=self.check("length([?name=='{pan}'])", 1))
+
         # delete the assignment and validate it's gone
         self.cmd('policy assignment delete -n {pan} --scope {scope}')
         self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
@@ -694,6 +963,7 @@ class PolicyScenarioTest(ScenarioTest):
             'metadata': 'test',
             'updated_metadata': 'test2',
         })
+
         if (management_group):
             self.kwargs.update({'mg': management_group})
         if (subscription):
@@ -772,14 +1042,16 @@ class PolicyScenarioTest(ScenarioTest):
             'dpn': self.create_random_name('azure-cli-test-data-policy', 30),
             'dpdn': self.create_random_name('test_data_policy', 20),
             'dp_desc': 'desc_for_test_data_policy_123',
-            'dp_mode': 'Microsoft.KeyVault.Data',
+            'dp_mode': 'Microsoft.DataCatalog.Data',
             'psn': self.create_random_name('azure-cli-test-policyset', 30),
             'psdn': self.create_random_name('test_policyset', 20),
             'ps_desc': 'desc_for_test_policyset_123',
             'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
             'dprf': os.path.join(curr_dir, 'sample_data_policy_rule.json').replace('\\', '\\\\'),
             'psf': os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\'),
-            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'metadata': 'test',
+            'updated_metadata': 'test2',
         })
         if (management_group):
             self.kwargs.update({'mg': management_group})
@@ -803,21 +1075,23 @@ class PolicyScenarioTest(ScenarioTest):
         with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
             json.dump(policyset, outfile)
 
-        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --metadata category={metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}'),
-            self.check('description', '{ps_desc}')
+            self.check('description', '{ps_desc}'),
+            self.check('metadata.category', '{metadata}')
         ])
 
         # update it
         self.kwargs['ps_desc'] = self.kwargs['ps_desc'] + '_new'
         self.kwargs['psdn'] = self.kwargs['psdn'] + '_new'
 
-        cmd = self.cmdstring('policy set-definition update -n {psn} --display-name {psdn} --description {ps_desc}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition update -n {psn} --display-name {psdn} --description {ps_desc} --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('description', '{ps_desc}'),
-            self.check('displayName', '{psdn}')
+            self.check('displayName', '{psdn}'),
+            self.check('metadata.category', '{updated_metadata}')
         ])
 
         # list and show it
@@ -844,6 +1118,9 @@ class PolicyScenarioTest(ScenarioTest):
                 self.check('sku.tier', 'Free'),
             ])
 
+            # ensure the assignment appears in the list results
+            self.cmd('policy assignment list --resource-group {rg}', checks=self.check("length([?name=='{pan}'])", 1))
+
             # delete the assignment and validate it's gone
             self.cmd('policy assignment delete -n {pan} -g {rg}')
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
@@ -864,21 +1141,23 @@ class PolicyScenarioTest(ScenarioTest):
         with open(os.path.join(curr_dir, 'sample_policy_set_parameterized.json'), 'w') as outfile:
             json.dump(policyset, outfile)
 
-        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params {pdf}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc} --params {pdf} --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('name', '{psn}'),
             self.check('displayName', '{psdn}'),
             self.check('description', '{ps_desc}'),
             self.check('policyDefinitions[0].parameters.allowedLocations.value', "[parameters('allowedLocations')]"),
-            self.check('parameters.allowedLocations.type', 'Array')
+            self.check('parameters.allowedLocations.type', 'Array'),
+            self.check('metadata.category', '{updated_metadata}')
         ])
 
         # update the parameters on the policy set
         self.kwargs['pdf'] = os.path.join(curr_dir, 'sample_policy_param_def_2.json').replace('\\', '\\\\')
 
-        cmd = self.cmdstring('policy set-definition update -n {psn} --params {pdf}', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition update -n {psn} --params {pdf} --metadata category={updated_metadata}', management_group, subscription)
         self.cmd(cmd, checks=[
             self.check('parameters.allowedLocations.metadata.displayName', 'Allowed locations 2'),
+            self.check('metadata.category', '{updated_metadata}')
         ])
 
         # delete the parameterized policy set
@@ -919,6 +1198,9 @@ class PolicyScenarioTest(ScenarioTest):
             'location': resource_group_location,
             'em': 'DoNotEnforce'
         })
+
+        with self.assertRaises(IncorrectUsageError):
+            self.cmd('policy assignment create --policy \'test/error_policy\' -n {pan} -g {rg} --location {location} --assign-identity --enforcement-mode {em}')
 
         # create a policy assignment with managed identity using a built in policy definition
         assignmentIdentity = self.cmd('policy assignment create --policy {bip} -n {pan} -g {rg} --location {location} --assign-identity --enforcement-mode {em}', checks=[
@@ -1002,12 +1284,16 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policy_management_group(self, resource_group):
         management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
         self.cmd('account management-group create -n ' + management_group_name)
         try:
             self.resource_policy_operations(resource_group, management_group_name)
+
+            # Attempt to get a policy definition at an invalid management group scope
+            with self.assertRaises(IncorrectUsageError):
+                self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
         finally:
             self.cmd('account management-group delete -n ' + management_group_name)
 
@@ -1021,17 +1307,17 @@ class PolicyScenarioTest(ScenarioTest):
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policy_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
+                self.resource_policy_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
         else:
-            self.resource_policy_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
+            self.resource_policy_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policyset_default(self, resource_group):
         self.resource_policyset_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policyset_management_group(self, resource_group):
         management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
         self.cmd('account management-group create -n ' + management_group_name)
@@ -1042,16 +1328,80 @@ class PolicyScenarioTest(ScenarioTest):
 
     @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policyset_subscription_id(self, resource_group):
         # under playback, we mock it so the subscription id will be '00000000...' and it will match
         # the same sanitized value in the recording
         if not self.in_recording:
             with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
                             return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyset_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
+                self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
         else:
-            self.resource_policyset_operations(resource_group, None, 'e78961ba-36fe-4739-9212-e3031b4c8db7')
+            self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
+    @AllowLargeResponse()
+    def test_resource_policyset_grouping(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'pn': self.create_random_name('azure-cli-test-policy', 30),
+            'pdn': self.create_random_name('test_policy', 20),
+            'psn': self.create_random_name('azure-cli-test-policyset', 30),
+            'psdn': self.create_random_name('test_policyset', 20),
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'psf': os.path.join(curr_dir, 'sample_policy_set_grouping.json').replace('\\', '\\\\'),
+            'pgf': os.path.join(curr_dir, 'sample_policy_groups_def.json').replace('\\', '\\\\'),
+            'pgf2': os.path.join(curr_dir, 'sample_policy_groups_def2.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
+        })
+
+        # create a policy
+        policy = self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn}').get_output_in_json()
+
+        # create a policy set
+        policyset = get_file_json(self.kwargs['psf'])
+        policyset[0]['policyDefinitionId'] = policy['id']
+        policyset[1]['policyDefinitionId'] = policy['id']
+        with open(os.path.join(curr_dir, 'sample_policy_set_grouping.json'), 'w') as outfile:
+            json.dump(policyset, outfile)
+
+        self.cmd('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --definition-groups @"{pgf}"', checks=[
+            self.check('name', '{psn}'),
+            self.check('displayName', '{psdn}'),
+            self.check('length(policyDefinitionGroups)', 2),
+            self.check("length(policyDefinitionGroups[?name=='group1'])", 1),
+            self.check("length(policyDefinitionGroups[?name=='group2'])", 1),
+            self.check('length(policyDefinitions[0].groupNames)', 2),
+            self.check('length(policyDefinitions[1].groupNames)', 1)
+        ])
+
+        # update the groups
+        groups = get_file_json(self.kwargs['pgf'])
+        groups[0]['displayName'] = "Updated display name"
+        with open(os.path.join(curr_dir, 'sample_policy_groups_def2.json'), 'w') as outfile:
+            json.dump(groups, outfile)
+
+        self.cmd('policy set-definition update -n {psn} --definition-groups @"{pgf2}"', checks=[
+            self.check('length(policyDefinitionGroups)', 2),
+            self.check("length(policyDefinitionGroups[?name=='group1'])", 1),
+            self.check("length(policyDefinitionGroups[?name=='group2'])", 1),
+            self.check("length(policyDefinitionGroups[?displayName=='Updated display name\'])", 1)
+        ])
+
+        # show it
+        self.cmd('policy set-definition show -n {psn}',
+                 checks=self.check('length(policyDefinitionGroups)', 2))
+
+        # delete the policy set
+        self.cmd('policy set-definition delete -n {psn}')
+        time.sleep(10)  # ensure the policy is gone when run live.
+
+        self.cmd('policy set-definition list',
+                 checks=self.check("length([?name=='{psn}'])", 0))
+
+        # delete the policy
+        self.cmd('policy definition delete -n {pn}')
 
     @AllowLargeResponse(8192)
     def test_show_built_in_policy(self):
@@ -1069,6 +1419,41 @@ class PolicyScenarioTest(ScenarioTest):
                 self.check('id', '{id}')
             ])
 
+    # Because the policy assignment name is generated randomly and automatically, the value of each run is different,
+    # so it cannot be rerecord.
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_create_policy_assignment_random')
+    @AllowLargeResponse(4096)
+    @live_only()
+    def test_resource_create_policy_assignment_random(self, resource_group, management_group=None, subscription=None):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'pn': self.create_random_name('azure-cli-test-policy', 30),
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'pdn': self.create_random_name('test_policy', 20),
+            'desc': 'desc_for_test_policy_123',
+            'padn': self.create_random_name('test_assignment', 20),
+            'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\')
+        })
+
+        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}', management_group, subscription)
+
+        self.kwargs['pan_random'] = self.cmd('policy assignment create --policy {pn} --display-name {padn} -g {rg} --params {params}', checks=[
+            self.check('displayName', '{padn}'),
+            self.check('sku.name', 'A0'),
+            self.check('sku.tier', 'Free'),
+        ]).get_output_in_json()['name']
+
+        # clean policy assignment and policy
+        self.cmd('policy assignment delete -n {pan_random} -g {rg}')
+        self.cmd('policy assignment list --disable-scope-strict-match',
+                 checks=self.check("length([?name=='{pan_random}'])", 0))
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        self.cmd(cmd)
+        time.sleep(10)
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
+
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
@@ -1079,7 +1464,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             'adn': self.create_random_name('testappdefname', 20),
             'addn': self.create_random_name('test_appdef', 20),
             'ad_desc': 'test_appdef_123',
-            'uri': 'https://testclinew.blob.core.windows.net/files/vivekMAD.zip',
+            'uri': 'https://raw.githubusercontent.com/Azure/azure-managedapp-samples/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
             'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
             'lock': 'None'
         })
@@ -1162,8 +1547,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('managedapp definition list -g {rg}', checks=self.is_empty())
 
 
-# TODO: Change back to ScenarioTest and re-record when issue #5110 is fixed.
-class ManagedAppScenarioTest(LiveScenarioTest):
+class ManagedAppScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
 
@@ -1172,10 +1556,11 @@ class ManagedAppScenarioTest(LiveScenarioTest):
             'adn': 'testappdefname',
             'addn': 'test_appdef_123',
             'ad_desc': 'test_appdef_123',
-            'uri': 'https://wud.blob.core.windows.net/appliance/SingleStorageAccount.zip',
-            'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'uri': 'https://github.com/Azure/azure-managedapp-samples/raw/master/Managed%20Application%20Sample%20Packages/201-managed-storage-account/managedstorage.zip',
+            'auth': '872b463c-9606-4c8c-92a2-571a4d018650:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
             'lock': 'None',
-            'sub': self.get_subscription_id()
+            'sub': self.get_subscription_id(),
+            'rg': resource_group
         })
 
         self.kwargs['ad_id'] = self.cmd('managedapp definition create -n {adn} --package-file-uri {uri} --display-name {addn} --description {ad_desc} -l {loc} -a {auth} --lock-level {lock} -g {rg}').get_output_in_json()['id']
@@ -1185,11 +1570,12 @@ class ManagedAppScenarioTest(LiveScenarioTest):
             'man': 'mymanagedapp',
             'ma_loc': 'westcentralus',
             'ma_kind': 'servicecatalog',
-            'ma_rg': self.create_random_name('climanagedapp', 25)
+            'ma_rg': self.create_random_name('climanagedapp', 25),
+            'param': '\'{\"storageAccountNamePrefix\": {\"value\": \"mytest\"}, \"storageAccountType\": {\"value\": \"Standard_LRS\"}}\''
         })
         self.kwargs['ma_rg_id'] = '/subscriptions/{sub}/resourceGroups/{ma_rg}'.format(**self.kwargs)
 
-        self.kwargs['ma_id'] = self.cmd('managedapp create -n {man} -g {rg} -l {ma_loc} --kind {ma_kind} -m {ma_rg_id} -d {ad_id}', checks=[
+        self.kwargs['ma_id'] = self.cmd('managedapp create -n {man} -g {rg} -l {ma_loc} --kind {ma_kind} -m {ma_rg_id} -d {ad_id} --parameters {param}', checks=[
             self.check('name', '{man}'),
             self.check('type', 'Microsoft.Solutions/applications'),
             self.check('kind', 'servicecatalog'),
@@ -1228,6 +1614,10 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg={rg2} StorageAccountName1={sa1} StorageAccountName2={sa2}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
+
+        with self.assertRaises(CLIError):
+            self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg=test StorageAccountName1={sa1} StorageAccountName2={sa2}')
+
         self.cmd('group deployment create -g {rg1} -n {dn} --template-file "{tf}" --parameters CrossRg={rg2}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg1}'),
@@ -1244,6 +1634,255 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
             self.check('length([])', 3),
             self.check('[0].resourceGroup', '{rg1}')
         ])
+
+
+class CrossTenantDeploymentScenarioTest(LiveScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cross_tenant_deploy', location='eastus')
+    def test_group_deployment_cross_tenant(self, resource_group):
+        # Prepare Network Interface
+        self.kwargs.update({
+            'vm_rg': resource_group,
+            'vnet': 'clivmVNET',
+            'subnet': 'clivmSubnet',
+            'nsg': 'clivmNSG',
+            'ip': 'clivmPublicIp',
+            'nic': 'clivmVMNic'
+        })
+        self.cmd('network vnet create -n {vnet} -g {vm_rg} --subnet-name {subnet}')
+        self.cmd('network nsg create -n {nsg} -g {vm_rg}')
+        self.cmd('network public-ip create -n {ip} -g {vm_rg} --allocation-method Dynamic')
+        res = self.cmd('network nic create -n {nic} -g {vm_rg} --subnet {subnet} --vnet {vnet} --network-security-group {nsg} --public-ip-address {ip}').get_output_in_json()
+        self.kwargs.update({
+            'nic_id': res['NewNIC']['id']
+        })
+
+        # Prepare SIG in another tenant
+        self.kwargs.update({
+            'location': 'eastus',
+            'vm': self.create_random_name('cli_crosstenantvm', 40),
+            'gallery': self.create_random_name('cli_crosstenantgallery', 40),
+            'image': self.create_random_name('cli_crosstenantimage', 40),
+            'version': '1.1.2',
+            'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
+            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
+            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+        })
+        self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['rg']))
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['image']))
+        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['image']))
+
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+        self.cmd(
+            'vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
+        time.sleep(70)
+
+        self.cmd('vm deallocate -g {rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('vm generalize -g {rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('image create -g {rg} -n {captured} --source {vm} --subscription {aux_sub}')
+        res = self.cmd(
+            'sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1 --subscription {aux_sub}').get_output_in_json()
+        self.kwargs.update({
+            'sig_id': res['id']
+        })
+
+        # Cross tenant deploy
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'crosstenant_vm_deploy.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('cli-crosstenantdeployment', 40),
+            'dn1': self.create_random_name('cli-crosstenantdeployment1', 40),
+            'dn2': self.create_random_name('cli-crosstenantdeployment2', 40),
+            'dn3': self.create_random_name('cli-crosstenantdeployment3', 40)
+        })
+
+        self.cmd('group deployment validate -g {vm_rg} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('group deployment create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-subs "{aux_sub}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment show -g {vm_rg} -n {dn}', checks=[
+            self.check('name', '{dn}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        self.cmd('group deployment create -g {vm_rg} -n {dn1} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn1}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment show -g {vm_rg} -n {dn1}', checks=[
+            self.check('name', '{dn1}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        self.cmd('group deployment create -g {vm_rg} -n {dn2} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-subs "{aux_sub}" -j', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn2}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment show -g {vm_rg} -n {dn2}', checks=[
+            self.check('name', '{dn2}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        self.cmd('group deployment create -g {vm_rg} -n {dn3} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" -j', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn3}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('group deployment show -g {vm_rg} -n {dn3}', checks=[
+            self.check('name', '{dn3}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        with self.assertRaises(AssertionError):
+            self.cmd('group deployment create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" --aux-subs "{aux_sub}"')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_group_cross_tenant', location='eastus')
+    def test_deployment_group_cross_tenant(self, resource_group):
+        # Prepare Network Interface
+        self.kwargs.update({
+            'vm_rg': resource_group,
+            'vnet': 'clivmVNET',
+            'subnet': 'clivmSubnet',
+            'nsg': 'clivmNSG',
+            'ip': 'clivmPublicIp',
+            'nic': 'clivmVMNic'
+        })
+        self.cmd('network vnet create -n {vnet} -g {vm_rg} --subnet-name {subnet}')
+        self.cmd('network nsg create -n {nsg} -g {vm_rg}')
+        self.cmd('network public-ip create -n {ip} -g {vm_rg} --allocation-method Dynamic')
+        res = self.cmd('network nic create -n {nic} -g {vm_rg} --subnet {subnet} --vnet {vnet} --network-security-group {nsg} --public-ip-address {ip}').get_output_in_json()
+        self.kwargs.update({
+            'nic_id': res['NewNIC']['id']
+        })
+
+        # Prepare SIG in another tenant
+        self.kwargs.update({
+            'location': 'eastus',
+            'vm': self.create_random_name('cli_crosstenantvm', 40),
+            'gallery': self.create_random_name('cli_crosstenantgallery', 40),
+            'image': self.create_random_name('cli_crosstenantimage', 40),
+            'version': '1.1.2',
+            'captured': self.create_random_name('cli_crosstenantmanagedimage', 40),
+            'aux_sub': 'bead59b7-f469-4601-803a-790729c5213d',
+            'rg': self.create_random_name('cli_test_cross_tenant_rg', 40),
+            'aux_tenant': '72f988bf-86f1-41af-91ab-2d7cd011db47'
+        })
+        self.cmd('group create -g {rg} --location {location} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['rg']))
+        self.cmd('sig create -g {rg} --gallery-name {gallery} --subscription {aux_sub}', checks=self.check('name', self.kwargs['gallery']))
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['image']))
+        self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --subscription {aux_sub}',
+                 checks=self.check('name', self.kwargs['image']))
+
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --subscription {aux_sub}')
+        self.cmd(
+            'vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes" --subscription {aux_sub}')
+        time.sleep(70)
+
+        self.cmd('vm deallocate -g {rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('vm generalize -g {rg} -n {vm} --subscription {aux_sub}')
+        self.cmd('image create -g {rg} -n {captured} --source {vm} --subscription {aux_sub}')
+        res = self.cmd(
+            'sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1 --subscription {aux_sub}').get_output_in_json()
+        self.kwargs.update({
+            'sig_id': res['id']
+        })
+
+        # Cross tenant deploy
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'crosstenant_vm_deploy.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('cli-crosstenantdeployment', 40),
+            'dn1': self.create_random_name('cli-crosstenantdeployment1', 40),
+            'dn2': self.create_random_name('cli-crosstenantdeployment2', 40),
+            'dn3': self.create_random_name('cli-crosstenantdeployment3', 40)
+        })
+
+        self.cmd('deployment group validate -g {vm_rg} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-subs "{aux_sub}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('deployment group list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('deployment group show -g {vm_rg} -n {dn}', checks=[
+            self.check('name', '{dn}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        self.cmd('deployment group create -g {vm_rg} -n {dn1} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('deployment group list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn1}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('deployment group show -g {vm_rg} -n {dn1}', checks=[
+            self.check('name', '{dn1}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        self.cmd('deployment group create -g {vm_rg} -n {dn2} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-subs "{aux_sub}" -j', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('deployment group list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn2}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('deployment group show -g {vm_rg} -n {dn2}', checks=[
+            self.check('name', '{dn2}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        self.cmd('deployment group create -g {vm_rg} -n {dn3} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" -j', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('deployment group list -g {vm_rg}', checks=[
+            self.check('[0].name', '{dn3}'),
+            self.check('[0].resourceGroup', '{vm_rg}')
+        ])
+        self.cmd('deployment group show -g {vm_rg} -n {dn3}', checks=[
+            self.check('name', '{dn3}'),
+            self.check('resourceGroup', '{vm_rg}')
+        ])
+
+        with self.assertRaises(AssertionError):
+            self.cmd('deployment group create -g {vm_rg} -n {dn} --template-file "{tf}" --parameters SIG_ImageVersion_id={sig_id} NIC_id={nic_id} --aux-tenants "{aux_tenant}" --aux-subs "{aux_sub}"')
 
 
 class InvokeActionTest(ScenarioTest):

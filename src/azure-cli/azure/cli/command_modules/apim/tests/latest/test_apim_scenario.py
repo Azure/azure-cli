@@ -7,16 +7,16 @@ import os
 import unittest
 
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class ApimScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
-    def test_apim_core_service(self, resource_group, resource_group_location):
+    @StorageAccountPreparer(parameter_name='storage_account_for_backup')
+    def test_apim_core_service(self, resource_group, resource_group_location, storage_account_for_backup):
         service_name = self.create_random_name('cli-test-apim-', 50)
 
         # try to use the injected location, but if the location is not known
@@ -37,7 +37,7 @@ class ApimScenarioTest(ScenarioTest):
             'tags': ["foo=boo"]
         })
 
-        self.cmd('apim check-name -n {service_name}',
+        self.cmd('apim check-name -n {service_name} -o json',
                  checks=[self.check('nameAvailable', True)])
 
         self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert}',
@@ -54,9 +54,8 @@ class ApimScenarioTest(ScenarioTest):
                  checks=[self.check('nameAvailable', False),
                          self.check('reason', 'AlreadyExists')])
 
-        self.cmd('apim update -n {service_name} -g {rg} --publisher-name Fabrikam --set publisherEmail=publisher@fabrikam.com',
-                 checks=[self.check('publisherName', 'Fabrikam'),
-                         self.check('publisherEmail', 'publisher@fabrikam.com')])
+        self.cmd('apim update -n {service_name} -g {rg} --publisher-name {publisher_name} --set publisherEmail={publisher_email}',
+                 checks=[self.check('publisherName', '{publisher_name}'), self.check('publisherEmail', '{publisher_email}')])
 
         count = len(self.cmd('apim list').get_output_in_json())
 
@@ -66,13 +65,34 @@ class ApimScenarioTest(ScenarioTest):
             self.check('location', '{rg_loc_displayName}'),
             self.check('sku.name', '{sku_name}'),
             # recheck properties from update
-            self.check('publisherName', 'Fabrikam'),
-            self.check('publisherEmail', 'publisher@fabrikam.com')
+            self.check('publisherName', '{publisher_name}'),
+            self.check('publisherEmail', '{publisher_email}')
         ])
 
+        # backup command
+
+        account_container = 'backups'
+        account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -o tsv'.format(storage_account_for_backup, resource_group)).output[:-1]
+
+        self.cmd('az storage container create -n {} --account-name {} --account-key {}'.format(account_container, storage_account_for_backup, account_key))
+
+        self.kwargs.update({
+            'backup_name': service_name + '_test_backup',
+            'storage_account_name': storage_account_for_backup,
+            'storage_account_key': account_key,
+            'storage_account_container': account_container
+        })
+
+        self.cmd('apim backup -g {rg} -n {service_name} --backup-name {backup_name} --storage-account-name {storage_account_name} --storage-account-container {storage_account_container} --storage-account-key {storage_account_key}', checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # delete command
+
         self.cmd('apim delete -g {rg} -n {service_name} -y')
+
         final_count = len(self.cmd('apim list').get_output_in_json())
-        self.assertTrue(final_count, count - 1)
+        self.assertEqual(final_count, count - 1)
 
 
 KNOWN_LOCS = {'eastasia': 'East Asia',

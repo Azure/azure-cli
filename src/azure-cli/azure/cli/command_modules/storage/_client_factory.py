@@ -155,5 +155,21 @@ def cf_blob_container_mgmt(cli_ctx, _):
     return storage_client_factory(cli_ctx).blob_containers
 
 
+def cf_mgmt_blob_services(cli_ctx, _):
+    return storage_client_factory(cli_ctx).blob_services
+
+
+def cf_mgmt_file_shares(cli_ctx, _):
+    return storage_client_factory(cli_ctx).file_shares
+
+
 def cf_blob_data_gen_update(cli_ctx, kwargs):
     return blob_data_service_factory(cli_ctx, kwargs.copy())
+
+
+def cf_private_link(cli_ctx, _):
+    return storage_client_factory(cli_ctx).private_link_resources
+
+
+def cf_private_endpoint(cli_ctx, _):
+    return storage_client_factory(cli_ctx).private_endpoint_connections

@@ -24,6 +24,7 @@ from knack.util import CLIError
 from azure.cli.core.extension._resolve import resolve_project_url_from_index, NoExtensionCandidatesError
 from azure.cli.core.util import get_az_version_string, open_page_in_browser, can_launch_browser, in_cloud_console
 from azure.cli.core.azlogging import _UNKNOWN_COMMAND, _CMD_LOG_LINE_PREFIX
+from azure.cli.core.commands.constants import SURVEY_PROMPT
 
 _ONE_MIN_IN_SECS = 60
 
@@ -50,7 +51,8 @@ _MSG_INTR = \
     '\nWe appreciate your feedback!\n\n' \
     'For more information on getting started, visit: {}\n' \
     'If you have questions, visit our Stack Overflow page: {}\n'\
-    .format(_GET_STARTED_URL, _QUESTIONS_URL)
+    '{}\n'\
+    .format(_GET_STARTED_URL, _QUESTIONS_URL, SURVEY_PROMPT)
 
 _MSG_CMD_ISSUE = "\nEnter the number of the command you would like to create an issue for. Enter q to quit: "
 
@@ -90,7 +92,6 @@ Steps to reproduce the behavior. Note that argument values have been redacted, a
 ```
 {platform}
 {python_info}
-{shell}
 
 {cli_version}
 ```
@@ -482,18 +483,6 @@ class ErrorMinifier(object):
 
 
 def _build_issue_info_tup(command_log_file=None):
-    def _get_parent_proc_name():
-        import psutil
-        parent = psutil.Process(os.getpid()).parent()
-        if parent:
-            #  powershell.exe launches cmd.exe to launch the cli.
-            grandparent = parent.parent()
-            if grandparent and grandparent.name().lower().startswith("powershell"):
-                return grandparent.name()
-            # if powershell is not the grandparent, simply return the parent's name.
-            return parent.name()
-        return None
-
     format_dict = {"command_name": "", "errors_string": "",
                    "executed_command": ""}
 
@@ -524,7 +513,6 @@ def _build_issue_info_tup(command_log_file=None):
     format_dict["cli_version"] = _get_az_version_summary()
     format_dict["python_info"] = "Python {}".format(platform.python_version())
     format_dict["platform"] = "{}".format(platform.platform())
-    format_dict["shell"] = "Shell: {}".format(_get_parent_proc_name())
     format_dict["auto_gen_comment"] = _AUTO_GEN_COMMENT
 
     pretty_url_name = _get_extension_repo_url(ext_name) if is_ext else _CLI_ISSUES_URL

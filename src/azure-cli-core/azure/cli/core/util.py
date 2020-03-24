@@ -12,6 +12,7 @@ import binascii
 import platform
 import ssl
 import six
+import re
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
@@ -28,6 +29,12 @@ SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens wh
                      # pylint: disable=line-too-long
                      'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#working-behind-a-proxy. '
                      'Error detail: {}')
+
+_PROXYID_RE = re.compile(
+    '(?i)/subscriptions/(?P<subscription>[^/]*)(/resourceGroups/(?P<resource_group>[^/]*))?'
+    '(/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.*))?')
+
+_CHILDREN_RE = re.compile('(?i)/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
 
 
 def handle_exception(ex):  # pylint: disable=too-many-return-statements
@@ -202,6 +209,19 @@ def get_az_version_string():
     if not success:
         updates_available = -1
     return version_string, updates_available
+
+
+def get_az_version_json():
+    from azure.cli.core.extension import get_extensions
+    versions = {'extensions': {}}
+
+    for dist in get_installed_cli_distributions():
+        versions[dist.key] = dist.version
+    extensions = get_extensions()
+    if extensions:
+        for ext in extensions:
+            versions['extensions'][ext.name] = ext.version or 'Unknown'
+    return versions
 
 
 def get_json_object(json_string):
@@ -562,8 +582,12 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             result[key] = value
     uri_parameters = result or None
 
+    # If uri is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
+    # default to Azure Resource Manager.
+    # https://management.azure.com/ + subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
     if '://' not in uri:
         uri = cli_ctx.cloud.endpoints.resource_manager + uri.lstrip('/')
+
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
     from azure.cli.core._profile import Profile
@@ -574,11 +598,21 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     if not skip_authorization_header and uri.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
-            for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                value = getattr(endpoints, p)
-                if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
-                    resource = value
-                    break
+            # If uri starts with ARM endpoint, like https://management.azure.com/,
+            # use active_directory_resource_id for resource.
+            # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
+            if uri.lower().startswith(endpoints.resource_manager.rstrip('/')):
+                resource = endpoints.active_directory_resource_id
+            else:
+                from azure.cli.core.cloud import CloudEndpointNotSetException
+                for p in [x for x in dir(endpoints) if not x.startswith('_')]:
+                    try:
+                        value = getattr(endpoints, p)
+                    except CloudEndpointNotSetException:
+                        continue
+                    if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
+                        resource = value
+                        break
         if resource:
             token_info, _, _ = profile.get_raw_token(resource)
             logger.debug('Retrievd AAD token for resource: %s', resource or 'ARM')
@@ -591,6 +625,7 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     try:
         r = requests.request(method, uri, params=uri_parameters, data=body, headers=headers,
                              verify=not should_disable_connection_verify())
+        logger.debug("Response Header : %s", r.headers if r else '')
     except Exception as ex:  # pylint: disable=broad-except
         raise CLIError(ex)
 
@@ -636,3 +671,39 @@ def _ssl_context():
 def urlretrieve(url):
     req = urlopen(url, context=_ssl_context())
     return req.read()
+
+
+def parse_proxy_resource_id(rid):
+    """Parses a resource_id into its various parts.
+
+    Return an empty dictionary, if invalid resource id.
+
+    :param rid: The resource id being parsed
+    :type rid: str
+    :returns: A dictionary with with following key/value pairs (if found):
+
+        - subscription:            Subscription id
+        - resource_group:          Name of resource group
+        - namespace:               Namespace for the resource provider (i.e. Microsoft.Compute)
+        - type:                    Type of the root resource (i.e. virtualMachines)
+        - name:                    Name of the root resource
+        - child_type_{level}:      Type of the child resource of that level
+        - child_name_{level}:      Name of the child resource of that level
+        - last_child_num:          Level of the last child
+
+    :rtype: dict[str,str]
+    """
+    if not rid:
+        return {}
+    match = _PROXYID_RE.match(rid)
+    if match:
+        result = match.groupdict()
+        children = _CHILDREN_RE.finditer(result['children'] or '')
+        count = None
+        for count, child in enumerate(children):
+            result.update({
+                key + '_%d' % (count + 1): group for key, group in child.groupdict().items()})
+        result['last_child_num'] = count + 1 if isinstance(count, int) else None
+        result.pop('children', None)
+        return {key: value for key, value in result.items() if value is not None}
+    return None

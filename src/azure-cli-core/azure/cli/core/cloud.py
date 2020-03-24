@@ -20,6 +20,9 @@ logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
+# Add names of clouds that don't allow telemetry data collection here such as JEDI.
+CLOUDS_FORBIDDING_TELEMETRY = []
+
 
 class CloudNotRegisteredException(Exception):
     def __init__(self, cloud_name):
@@ -66,7 +69,10 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  active_directory_data_lake_resource_id=None,
                  vm_image_alias_doc=None,
                  media_resource_id=None,
-                 ossrdbms_resource_id=None):
+                 ossrdbms_resource_id=None,
+                 log_analytics_resource_id=None,
+                 app_insights_resource_id=None,
+                 app_insights_telemetry_channel_resource_id=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -81,6 +87,9 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.vm_image_alias_doc = vm_image_alias_doc
         self.media_resource_id = media_resource_id
         self.ossrdbms_resource_id = ossrdbms_resource_id
+        self.log_analytics_resource_id = log_analytics_resource_id
+        self.app_insights_resource_id = app_insights_resource_id
+        self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -172,7 +181,9 @@ def _arm_to_cli_mapper(arm_dict):
             vm_image_alias_doc=arm_dict['vmImageAliasDoc'],  # pylint: disable=line-too-long
             media_resource_id=arm_dict['media'],
             ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once ossrdbms_resource_id is available via ARM
-            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None),  # pylint: disable=line-too-long
+            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,  # pylint: disable=line-too-long
+            app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else None,
+            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None),  # pylint: disable=line-too-long
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
@@ -223,7 +234,10 @@ AZURE_PUBLIC_CLOUD = Cloud(
         active_directory_data_lake_resource_id='https://datalake.azure.net/',
         vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
         media_resource_id='https://rest.media.azure.net',
-        ossrdbms_resource_id='https://ossrdbms-aad.database.windows.net'),
+        ossrdbms_resource_id='https://ossrdbms-aad.database.windows.net',
+        app_insights_resource_id='https://api.applicationinsights.io',
+        log_analytics_resource_id='https://api.loganalytics.io',
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
@@ -246,7 +260,10 @@ AZURE_CHINA_CLOUD = Cloud(
         microsoft_graph_resource_id='https://microsoftgraph.chinacloudapi.cn',
         vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
         media_resource_id='https://rest.media.chinacloudapi.cn',
-        ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn'),
+        ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn',
+        app_insights_resource_id='https://api.applicationinsights.azure.cn',
+        log_analytics_resource_id='https://api.loganalytics.azure.cn',
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
@@ -267,7 +284,10 @@ AZURE_US_GOV_CLOUD = Cloud(
         microsoft_graph_resource_id='https://graph.microsoft.us/',
         vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
         media_resource_id='https://rest.media.usgovcloudapi.net',
-        ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net'),
+        ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net',
+        app_insights_resource_id='https://api.applicationinsights.us',
+        log_analytics_resource_id='https://api.loganalytics.us',
+        app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
@@ -514,3 +534,7 @@ def remove_cloud(cli_ctx, cloud_name):
     config.remove_section(cloud_name)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:
         config.write(configfile)
+
+
+def cloud_forbid_telemetry(cli_ctx):
+    return get_active_cloud_name(cli_ctx) in CLOUDS_FORBIDDING_TELEMETRY

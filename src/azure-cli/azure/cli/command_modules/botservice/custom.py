@@ -13,6 +13,7 @@ from azure.cli.command_modules.botservice.bot_publish_prep import BotPublishPrep
 from azure.cli.command_modules.botservice.bot_template_deployer import BotTemplateDeployer
 from azure.cli.command_modules.botservice.constants import CSHARP, JAVASCRIPT, TYPESCRIPT
 from azure.cli.command_modules.botservice.kudu_client import KuduClient
+from azure.cli.command_modules.botservice.name_availability import NameAvailability
 from azure.cli.command_modules.botservice.web_app_operations import WebAppOperations
 from azure.mgmt.botservice.models import (
     Bot,
@@ -20,6 +21,7 @@ from azure.mgmt.botservice.models import (
     ConnectionSetting,
     ConnectionSettingProperties,
     ConnectionSettingParameter,
+    ErrorException,
     Sku)
 
 from knack.util import CLIError
@@ -74,14 +76,45 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
             f.write(json.dumps(existing))
 
 
-def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password, language=None,  # pylint: disable=too-many-locals, too-many-statements
+def __handle_failed_name_check(name_response, cmd, client, resource_group_name, resource_name):
+    # Creates should be idempotent, verify if the bot already exists inside of the provided Resource Group
+    logger.debug('Failed name availability check for provided bot name "%s".\n'
+                 'Checking if bot exists in Resource Group "%s".', resource_name, resource_group_name)
+    try:
+        # If the bot exists, return the bot's information to the user
+        existing_bot = get_bot(cmd, client, resource_group_name, resource_name)
+        logger.warning('Provided bot name already exists in Resource Group. Returning bot information:')
+        return existing_bot
+    except ErrorException as e:
+        if e.error.error.code == 'ResourceNotFound':
+            code = e.error.error.code
+            message = e.error.error.message
+
+            logger.debug('Bot "%s" not found in Resource Group "%s".\n  Code: "%s"\n  Message: '
+                         '"%s"', resource_name, resource_group_name, code, message)
+            raise CLIError('Unable to create bot.\nReason: "{}"'.format(name_response.message))
+
+        # For other error codes, raise them to the user
+        raise e
+
+
+def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, password=None, language=None,  # pylint: disable=too-many-locals, too-many-statements, inconsistent-return-statements
            description=None, display_name=None, endpoint=None, tags=None, location='Central US',
-           sku_name='F0', version='v4', deploy_echo=None):
+           sku_name='F0', deploy_echo=None):
     # Kind parameter validation
     kind = kind.lower()
     registration_kind = 'registration'
     bot_kind = 'bot'
     webapp_kind = 'webapp'
+
+    # Mapping: registration is deprecated, we now use 'bot' kind for registration bots
+    if kind == registration_kind:
+        kind = bot_kind
+
+    # Check the resource name availability for the bot.
+    name_response = NameAvailability.check_name_availability(client, resource_name, kind)
+    if not name_response.valid:
+        return __handle_failed_name_check(name_response, cmd, client, resource_group_name, resource_name)
 
     if resource_name.find(".") > -1:
         logger.warning('"." found in --name parameter ("%s"). "." is an invalid character for Azure Bot resource names '
@@ -98,16 +131,9 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
         raise CLIError("--appid must be a valid GUID from a Microsoft Azure AD Application Registration. See "
                        "https://docs.microsoft.com/azure/active-directory/develop/quickstart-register-app for "
                        "more information on App Registrations. See 'az bot create --help' for more CLI information.")
-    if not password:
-        raise CLIError("--password cannot have a length of 0. This value is used to authorize calls to your bot. See "
-                       "'az bot create --help'.`")
 
     # If display name was not provided, just use the resource name
     display_name = display_name or resource_name
-
-    # Mapping: registration is deprecated, we now use 'bot' kind for registration bots
-    if kind == registration_kind:
-        kind = bot_kind
 
     logger.info('Creating Azure Bot Service.')
 
@@ -141,6 +167,10 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
             parameters=parameters
         )
 
+    if not password:
+        raise CLIError("--password cannot have a length of 0 for Web App Bots. This value is used to authorize calls "
+                       "to your bot. See 'az bot create --help'.")
+
     # Web app bots require deploying custom ARM templates, we do that in a separate method
     logger.info('Detected kind %s, validating parameters for the specified kind.', kind)
 
@@ -153,7 +183,7 @@ def create(cmd, client, resource_group_name, resource_name, kind, msa_app_id, pa
 
     creation_results = BotTemplateDeployer.create_app(
         cmd, logger, client, resource_group_name, resource_name, description, kind, msa_app_id, password,
-        location, sku_name, language, version, bot_template_type)
+        location, sku_name, language, bot_template_type)
 
     return creation_results
 
@@ -529,8 +559,7 @@ def prepare_webapp_deploy(language, code_dir=None, proj_file_path=None):
 
         with open(os.path.join(code_dir, '.deployment'), 'w') as f:
             f.write('[config]\n')
-            proj_file = proj_file_path.lower()
-            proj_file = proj_file if proj_file.endswith('.csproj') else proj_file + '.csproj'
+            proj_file = proj_file_path if proj_file_path.lower().endswith('.csproj') else proj_file_path + '.csproj'
             f.write('SCM_SCRIPT_GENERATOR_ARGS=--aspNetCore "{0}"\n'.format(proj_file))
         logger.info('.deployment file successfully created.')
     return True
@@ -647,7 +676,7 @@ def publish_app(cmd, client, resource_group_name, resource_name, code_dir=None, 
 
 def update(client, resource_group_name, resource_name, endpoint=None, description=None,
            display_name=None, tags=None, sku_name=None, app_insights_key=None,
-           app_insights_api_key=None, app_insights_app_id=None):
+           app_insights_api_key=None, app_insights_app_id=None, icon_url=None):
     bot = client.bots.get(
         resource_group_name=resource_group_name,
         resource_name=resource_name
@@ -658,6 +687,7 @@ def update(client, resource_group_name, resource_name, endpoint=None, descriptio
     bot_props.description = description if description else bot_props.description
     bot_props.display_name = display_name if display_name else bot_props.display_name
     bot_props.endpoint = endpoint if endpoint else bot_props.endpoint
+    bot_props.icon_url = icon_url if icon_url else bot_props.icon_url
 
     bot_props.developer_app_insight_key = app_insights_key if app_insights_key else bot_props.developer_app_insight_key
     bot_props.developer_app_insights_application_id = app_insights_app_id if app_insights_app_id \

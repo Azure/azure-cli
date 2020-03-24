@@ -4,11 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=too-many-lines
-
 import codecs
 import json
+import math
 import os
 import time
+import struct
+
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -16,7 +18,7 @@ from knack.util import CLIError
 from OpenSSL import crypto
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.hazmat.primitives.serialization import load_pem_private_key, Encoding, PublicFormat
 from cryptography.exceptions import UnsupportedAlgorithm
 
 
@@ -194,6 +196,9 @@ def _get_object_id_by_upn(graph_client, upn):
 
 
 def _get_object_id_from_subscription(graph_client, subscription):
+    if not subscription:
+        return None
+
     if subscription['user']:
         if subscription['user']['type'] == 'user':
             return _get_object_id_by_upn(graph_client, subscription['user']['name'])
@@ -436,6 +441,12 @@ def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     return object_id
 
 
+def _permissions_distinct(permissions):
+    if permissions:
+        return [_ for _ in {p for p in permissions}]
+    return permissions
+
+
 def set_policy(cmd, client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None, storage_permissions=None):
@@ -448,6 +459,12 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
+
+    key_permissions = _permissions_distinct(key_permissions)
+    secret_permissions = _permissions_distinct(secret_permissions)
+    certificate_permissions = _permissions_distinct(certificate_permissions)
+    storage_permissions = _permissions_distinct(storage_permissions)
+
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
                    if object_id.lower() == p.object_id.lower() and
@@ -521,7 +538,7 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
 
 
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
-    """ Removes a network rule from the network ACLs for a Key Vault. """
+    """ Remove a network rule from the network ACLs for a Key Vault. """
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -561,7 +578,7 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
-    """ Lists the network rules from the network ACLs for a Key Vault. """
+    """ List the network rules from the network ACLs for a Key Vault. """
     vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
     return vault.properties.network_acls
 
@@ -617,50 +634,53 @@ def restore_key(client, vault_base_url, file_path):
     return client.restore_key(vault_base_url, data)
 
 
+def _int_to_bytes(i):
+    h = hex(i)
+    if len(h) > 1 and h[0:2] == '0x':
+        h = h[2:]
+    # need to strip L in python 2.x
+    h = h.strip('L')
+    if len(h) % 2:
+        h = '0' + h
+    return codecs.decode(h, 'hex')
+
+
+def _private_rsa_key_to_jwk(rsa_key, jwk):
+    priv = rsa_key.private_numbers()
+    jwk.n = _int_to_bytes(priv.public_numbers.n)
+    jwk.e = _int_to_bytes(priv.public_numbers.e)
+    jwk.q = _int_to_bytes(priv.q)
+    jwk.p = _int_to_bytes(priv.p)
+    jwk.d = _int_to_bytes(priv.d)
+    jwk.dq = _int_to_bytes(priv.dmq1)
+    jwk.dp = _int_to_bytes(priv.dmp1)
+    jwk.qi = _int_to_bytes(priv.iqmp)
+
+
+def _private_ec_key_to_jwk(ec_key, jwk):
+    supported_curves = {
+        'secp256r1': 'P-256',
+        'secp384r1': 'P-384',
+        'secp521r1': 'P-521',
+        'secp256k1': 'SECP256K1'
+    }
+    curve = ec_key.private_numbers().public_numbers.curve.name
+
+    jwk.crv = supported_curves.get(curve, None)
+    if not jwk.crv:
+        raise CLIError("Import failed: Unsupported curve, {}.".format(curve))
+
+    jwk.x = _int_to_bytes(ec_key.private_numbers().public_numbers.x)
+    jwk.y = _int_to_bytes(ec_key.private_numbers().public_numbers.y)
+    jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
+
+
 def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
         Supports importing BYOK keys into HSM for premium key vaults. """
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
-
-    def _int_to_bytes(i):
-        h = hex(i)
-        if len(h) > 1 and h[0:2] == '0x':
-            h = h[2:]
-        # need to strip L in python 2.x
-        h = h.strip('L')
-        if len(h) % 2:
-            h = '0' + h
-        return codecs.decode(h, 'hex')
-
-    def _private_rsa_key_to_jwk(rsa_key, jwk):
-        priv = rsa_key.private_numbers()
-        jwk.n = _int_to_bytes(priv.public_numbers.n)
-        jwk.e = _int_to_bytes(priv.public_numbers.e)
-        jwk.q = _int_to_bytes(priv.q)
-        jwk.p = _int_to_bytes(priv.p)
-        jwk.d = _int_to_bytes(priv.d)
-        jwk.dq = _int_to_bytes(priv.dmq1)
-        jwk.dp = _int_to_bytes(priv.dmp1)
-        jwk.qi = _int_to_bytes(priv.iqmp)
-
-    def _private_ec_key_to_jwk(ec_key, jwk):
-        supported_curves = {
-            'secp256r1': 'P-256',
-            'secp384r1': 'P-384',
-            'secp521r1': 'P-521',
-            'secp256k1': 'SECP256K1'
-        }
-        curve = ec_key.private_numbers().public_numbers.curve.name
-
-        jwk.crv = supported_curves.get(curve, None)
-        if not jwk.crv:
-            raise CLIError("Import failed: Unsupported curve, {}.".format(curve))
-
-        jwk.x = _int_to_bytes(ec_key.private_numbers().public_numbers.x)
-        jwk.y = _int_to_bytes(ec_key.private_numbers().public_numbers.y)
-        jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     key_obj = JsonWebKey(key_ops=key_ops)
@@ -691,6 +711,131 @@ def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=N
         key_obj.t = byok_data
 
     return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+
+
+def _bytes_to_int(b):
+    """Convert bytes to hex integer"""
+    len_diff = 4 - len(b) % 4 if len(b) % 4 > 0 else 0
+    b = len_diff * b'\x00' + b  # We have to patch leading zeros for using struct.unpack
+    bytes_num = int(math.floor(len(b) / 4))
+    ans = 0
+    items = struct.unpack('>' + 'I' * bytes_num, b)
+    for sub_int in items:  # Accumulate all items into a big integer
+        ans *= 2 ** 32
+        ans += sub_int
+    return ans
+
+
+def _jwk_to_dict(jwk):
+    """Convert a `JsonWebKey` struct to a python dict"""
+    d = {}
+    if jwk.crv:
+        d['crv'] = jwk.crv
+    if jwk.kid:
+        d['kid'] = jwk.kid
+    if jwk.kty:
+        d['kty'] = jwk.kty
+    if jwk.d:
+        d['d'] = _bytes_to_int(jwk.d)
+    if jwk.dp:
+        d['dp'] = _bytes_to_int(jwk.dp)
+    if jwk.dq:
+        d['dq'] = _bytes_to_int(jwk.dq)
+    if jwk.e:
+        d['e'] = _bytes_to_int(jwk.e)
+    if jwk.k:
+        d['k'] = _bytes_to_int(jwk.k)
+    if jwk.n:
+        d['n'] = _bytes_to_int(jwk.n)
+    if jwk.p:
+        d['p'] = _bytes_to_int(jwk.p)
+    if jwk.q:
+        d['q'] = _bytes_to_int(jwk.q)
+    if jwk.qi:
+        d['qi'] = _bytes_to_int(jwk.qi)
+    if jwk.t:
+        d['t'] = _bytes_to_int(jwk.t)
+    if jwk.x:
+        d['x'] = _bytes_to_int(jwk.x)
+    if jwk.y:
+        d['y'] = _bytes_to_int(jwk.y)
+
+    return d
+
+
+def _extract_rsa_public_key_from_jwk(jwk_dict):
+    # https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends/cryptography_backend.py#L249-L254
+    e = jwk_dict.get('e', 256)
+    n = jwk_dict.get('n')
+    public = rsa.RSAPublicNumbers(e, n)
+    return public.public_key(default_backend())
+
+
+def _extract_ec_public_key_from_jwk(jwk_dict):
+    # https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends/cryptography_backend.py#L81-L100
+    if not all(k in jwk_dict for k in ['x', 'y', 'crv']):
+        raise CLIError('Invalid EC key: missing properties(x, y, crv)')
+
+    x = jwk_dict.get('x')
+    y = jwk_dict.get('y')
+    curves = {
+        'P-256': ec.SECP256R1,
+        'P-384': ec.SECP384R1,
+        'P-521': ec.SECP521R1,
+        'P-256K': ec.SECP256K1,
+        'SECP256K1': ec.SECP256K1
+    }
+    curve = curves[jwk_dict['crv']]
+    public = ec.EllipticCurvePublicNumbers(x, y, curve())
+    return public.public_key(default_backend())
+
+
+def download_key(client, file_path, vault_base_url=None, key_name=None, key_version='',
+                 encoding=None, identifier=None):  # pylint: disable=unused-argument
+    """ Download a key from a KeyVault. """
+    if os.path.isfile(file_path) or os.path.isdir(file_path):
+        raise CLIError("File or directory named '{}' already exists.".format(file_path))
+
+    key = client.get_key(vault_base_url, key_name, key_version)
+    json_web_key = _jwk_to_dict(key.key)
+    key_type = json_web_key['kty']
+    pub_key = ''
+
+    if key_type in ['RSA', 'RSA-HSM']:
+        pub_key = _extract_rsa_public_key_from_jwk(json_web_key)
+    elif key_type in ['EC', 'EC-HSM']:
+        pub_key = _extract_ec_public_key_from_jwk(json_web_key)
+    else:
+        raise CLIError('Unsupported key type: {}. (Supported key types: RSA, RSA-HSM, EC, EC-HSM)'.format(key_type))
+
+    def _to_der(k):
+        return k.public_bytes(
+            encoding=Encoding.DER,
+            format=PublicFormat.SubjectPublicKeyInfo
+        )
+
+    def _to_pem(k):
+        # https://github.com/mpdavis/python-jose/blob/eed086d7650ccbd4ea8b555157aff3b1b99f14b9/jose/backends/cryptography_backend.py#L329-L332
+        return k.public_bytes(
+            encoding=Encoding.PEM,
+            format=PublicFormat.SubjectPublicKeyInfo
+        )
+
+    methods = {
+        'DER': _to_der,
+        'PEM': _to_pem
+    }
+
+    if encoding not in methods.keys():
+        raise CLIError('Unsupported encoding: {}. (Supported encodings: DER, PEM)'.format(encoding))
+
+    try:
+        with open(file_path, 'wb') as f:
+            f.write(methods[encoding](pub_key))
+    except Exception as ex:  # pylint: disable=broad-except
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+        raise ex
 # endregion
 
 
@@ -1020,4 +1165,73 @@ def restore_storage_account(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
         return client.restore_storage_account(vault_base_url, data)
+# endregion
+
+
+# region private_endpoint
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, vault_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None,
+                                               no_wait=False):
+    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
+                                                            resource_type=ResourceType.MGMT_KEYVAULT)
+
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    new_status = PrivateEndpointServiceConnectionStatus.approved \
+        if is_approved else PrivateEndpointServiceConnectionStatus.rejected
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+
+    retval = client.put(resource_group_name=resource_group_name,
+                        vault_name=vault_name,
+                        private_endpoint_connection_name=private_endpoint_connection_name,
+                        properties=private_endpoint_connection)
+
+    if no_wait:
+        return retval
+
+    new_retval = \
+        _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name)
+
+    if new_retval:
+        return new_retval
+    return retval
+
+
+def _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name):
+    retries = 0
+    max_retries = 10
+    wait_second = 1
+    while retries < max_retries:
+        pl = client.get(resource_group_name=resource_group_name,
+                        vault_name=vault_name,
+                        private_endpoint_connection_name=private_endpoint_connection_name)
+
+        if pl.provisioning_state == 'Succeeded':
+            return pl
+        time.sleep(wait_second)
+        retries += 1
+
+    return None
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+                                        description=None, no_wait=False):
+    """Approve a private endpoint connection request for a Key Vault."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=True,
+        description=description, no_wait=no_wait
+    )
+
+
+def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+                                       description=None, no_wait=False):
+    """Reject a private endpoint connection request for a Key Vault."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=False,
+        description=description, no_wait=no_wait
+    )
 # endregion

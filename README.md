@@ -1,7 +1,6 @@
 # Microsoft Azure CLI
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
-[![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=dev)](https://travis-ci.org/Azure/azure-cli)
 [![Build Status](https://dev.azure.com/azure-sdk/public/_apis/build/status/cli/Azure.azure-cli?branchName=dev)](https://dev.azure.com/azure-sdk/public/_build/latest?definitionId=246&branchName=dev)
 [![Slack](https://img.shields.io/badge/Slack-azurecli.slack.com-blue.svg)](https://azurecli.slack.com)
 
@@ -103,7 +102,7 @@ To provide feedback from the command line, try the `az feedback` command.
 ### Docker
 
 We maintain a Docker image preconfigured with the Azure CLI.
-See our [Docker tags](https://hub.docker.com/r/microsoft/azure-cli/tags/) for available versions.
+See our [Docker tags](https://mcr.microsoft.com/v2/azure-cli/tags/list) for available versions.
 
 ```bash
 $ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it mcr.microsoft.com/azure-cli:<version>
@@ -148,6 +147,12 @@ $ pip3 install --upgrade --pre azure-cli --extra-index-url https://azurecliprod.
 ```
 
 The edge build is generated for each PR merged to the `dev` branch as a part of the Azure DevOps Pipelines. 
+
+## Get builds of arbitrary commit or PR
+
+If you would like to get builds of arbitrary commit or PR, see:
+
+[Try new features before release](doc/try_new_features_before_release.md)
 
 ## Developer Setup
 

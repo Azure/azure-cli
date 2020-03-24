@@ -52,6 +52,8 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
         matched = re.match('/subscriptions/(?P<subscription>[^/]*)/', scope)
         if matched:
             subscription_id = matched.groupdict()['subscription']
+        else:
+            raise CLIError("{} does not contain subscription Id.".format(scope))
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION, subscription_id=subscription_id)
 
 
@@ -64,7 +66,7 @@ def get_container_service_client(cli_ctx, **_):
 def get_osa_container_service_client(cli_ctx, **_):
     from azure.mgmt.containerservice import ContainerServiceClient
 
-    return get_mgmt_service_client(cli_ctx, ContainerServiceClient, api_version='2019-04-30')
+    return get_mgmt_service_client(cli_ctx, ContainerServiceClient, api_version='2019-09-30-preview')
 
 
 def get_graph_rbac_management_client(cli_ctx, **_):

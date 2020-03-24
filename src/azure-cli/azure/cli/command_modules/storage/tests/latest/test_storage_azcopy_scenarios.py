@@ -60,7 +60,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 30))
 
-        # syn with another folder
+        # sync with another folder
         self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
             os.path.join(test_dir, 'butter'), container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
@@ -71,6 +71,19 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         shutil.rmtree(os.path.join(test_dir, 'duff'))
         self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
             test_dir, container, storage_account))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 0))
+
+        # sync a subset of files in a directory
+        with open(os.path.join(test_dir, 'test.json'), 'w') as f:
+            f.write('updated.')
+        self.cmd('storage blob sync -s "{}" -c {} --account-name {} --include-pattern *.json'.format(
+            test_dir, container, storage_account))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 1))
+
+        self.cmd('storage blob delete-batch -s {} --account-name {}'.format(
+            container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 0))
 
@@ -118,17 +131,17 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude "file_*"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude-pattern "file_*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --exclude "file_1"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --exclude-pattern "file_1*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 32))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude "file_1"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --exclude-pattern "file_1*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 23))
@@ -139,20 +152,30 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --include "file_1"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --include-pattern "file_1*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 39))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --include "file_*"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --include-pattern "file_*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 30))
 
-        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --include "file_*"'.format(
+        self.cmd('storage remove -c {} -n butter --account-name {} --recursive --include-pattern "file_*"'.format(
             container, storage_account))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 21))
+
+        self.cmd('storage remove -c {} --include-path apple --account-name {} --include-pattern "file*" --exclude-pattern "file_1*" --recursive'.format(
+            container, storage_account))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 12))
+
+        self.cmd('storage remove -c {} --account-name {} --recursive'.format(
+            container, storage_account))
+        self.cmd('storage blob list -c {} --account-name {}'.format(
+            container, storage_account), checks=JMESPathCheck('length(@)', 0))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -189,6 +212,12 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
                          account_info, s2, d2)
         self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src2_file, s2) \
             .assert_with_checks(JMESPathCheck('exists', False))
+
+        self.storage_cmd('storage remove --share-name {}',
+                         account_info, s2)
+        self.storage_cmd('storage file list -s {}', account_info, s2) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1)) \
+            .assert_with_checks(JMESPathCheck('[0].type', 'dir'))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='first_account')
@@ -240,9 +269,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            '{}/file*'.format(first_container_url), local_folder))
-        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.cmd('storage copy -s "{}" --include-path "apple" --include-pattern file* -d "{}" --recursive'.format(
+            first_container_url, local_folder))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Copy a single blob to another single blob
@@ -324,9 +353,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files
-        self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path "{}" --recursive'
-                 .format(first_account, first_container, 'file*', local_folder))
-        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.cmd('storage copy --source-account-name {} --source-container {} --include-path {} --include-pattern {} --destination-local-path "{}" --recursive'
+                 .format(first_account, first_container, 'apple', 'file*', local_folder))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Copy a single blob to another single blob
@@ -394,9 +423,9 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files
-        self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(
-            '{}/file*'.format(share_url), local_folder))
-        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.cmd('storage copy -s "{}" --include-path "apple" --include-pattern file* -d "{}" --recursive'.format(
+            share_url, local_folder))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))
 
     @ResourceGroupPreparer()
@@ -438,7 +467,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(11, sum(len(f) for r, d, f in os.walk(local_folder)))
 
         # Download a set of files
-        self.cmd('storage copy --source-account-name {} --source-share {} --source-file-path {} --destination-local-path "{}" --recursive'
-                 .format(storage_account, share, 'file*', local_folder))
-        self.assertEqual(1, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.cmd('storage copy --source-account-name {} --source-share {} --include-path "apple" --include-pattern file* --destination-local-path "{}" --recursive'
+                 .format(storage_account, share, local_folder))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
         self.assertEqual(21, sum(len(f) for r, d, f in os.walk(local_folder)))

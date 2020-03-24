@@ -226,20 +226,41 @@ examples:
         az acr helm show -n MyRegistry mychart --version 0.3.2
 """
 
+helps['acr helm install-cli'] = """
+type: command
+short-summary: Download and install Helm command-line tool.
+examples:
+  - name: Install the default version of Helm CLI to the default location
+    text: >
+        az acr helm install-cli
+  - name: Install a specified version of Helm CLI to the default location
+    text: >
+        az acr helm install-cli --client-version x.x.x
+  - name: Install the default version of Helm CLI to a specified location
+    text: >
+        az acr helm install-cli --install-location /folder/filename
+  - name: Install a specified version of Helm CLI to a specified location
+    text: >
+        az acr helm install-cli --client-version x.x.x --install-location /folder/filename
+"""
+
 helps['acr import'] = """
 type: command
 short-summary: Imports an image to an Azure Container Registry from another Container Registry. Import removes the need to docker pull, docker tag, docker push.
 examples:
-  - name: Import an image to the target registry and inherits sourcerepository:sourcetag from the source registry.
+  - name: Import an image from 'sourceregistry' to 'MyRegistry'. The image inherits its source repository and tag names.
     text: >
         az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
-  - name: Import an image from a registry in a different subscription.
+  - name: Import an image from a public repository on Docker Hub. The image uses the specified repository and tag names.
+    text: >
+        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
+  - name: Import an image from a private repository using its username and password. This also applies to registries outside Azure.
+    text: >
+        az acr import -n MyRegistry --source myprivateregistry.azurecr.io/hello-world:latest -u username -p password
+  - name: Import an image from an Azure container registry in a different subscription.
     text: |
         az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag \\
             -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
-  - name: Import an image from a public repository in Docker Hub
-    text: >
-        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
 """
 
 helps['acr list'] = """
@@ -257,11 +278,14 @@ examples:
 helps['acr login'] = """
 type: command
 short-summary: Log in to an Azure Container Registry through the Docker CLI.
-long-summary: Docker must be installed on your machine. Once done, use 'docker logout <registry url>' to log out.
+long-summary: Docker must be installed on your machine. Once done, use 'docker logout <registry url>' to log out. (If you only need an access token and do not want to install Docker, specify '--expose-token')
 examples:
   - name: Log in to an Azure Container Registry
     text: >
         az acr login -n MyRegistry
+  - name: Get an Azure Container Registry access token
+    text: >
+        az acr login -n MyRegistry --expose-token
 """
 
 helps['acr network-rule'] = """
@@ -624,26 +648,26 @@ examples:
   - name: Add a registry login credential to a task using a plain text username and password.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'myusername' -p 'mysecret'
+            -u myusername -p mysecret
   - name: Add a registry login credential to a task using key vault secret URIs for the username and password and the task system-assigned identity.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'https://mykeyvault.vault.azure.net/secrets/secretusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' \\
+            -u https://mykeyvault.vault.azure.net/secrets/secretusername -p https://mykeyvault.vault.azure.net/secrets/secretpassword \\
             --use-identity [system]
   - name: Add a registry login credential to a task using key vault secret URIs for the username and password and a task user-assigned identity given by its client id.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'https://mykeyvault.vault.azure.net/secrets/secretusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' \\
+            -u https://mykeyvault.vault.azure.net/secrets/secretusername -p https://mykeyvault.vault.azure.net/secrets/secretpassword \\
             --use-identity 00000000-0000-0000-0000-000000000000
   - name: Add a registry login credential to a task using a plain text username and key vault secret URI for the password and the task user-assigned identity given by its client id.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'myusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword' \\
+            -u myusername -p https://mykeyvault.vault.azure.net/secrets/secretpassword \\
             --use-identity 00000000-0000-0000-0000-000000000000
   - name: Add a registry login credential to a task using a plain text username and key vault secret URI for the password and the default managed identity for the task if one exists.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'myusername' -p 'https://mykeyvault.vault.azure.net/secrets/secretpassword'
+            -u myusername -p https://mykeyvault.vault.azure.net/secrets/secretpassword
   - name: Add a registry login credential to a task that uses only the task system-assigned identity to authenticate to the registry.
     text: |
         az acr task credential add -n taskname -r registryname --login-server myregistry.docker.io \\
@@ -675,7 +699,7 @@ examples:
   - name: Update the credential for a task
     text: |
         az acr task credential update -n taskname -r registryname --login-server myregistry.docker.io \\
-            -u 'myusername2' -p 'mysecret'
+            -u myusername2 -p mysecret
 """
 
 helps['acr task delete'] = """
@@ -786,9 +810,12 @@ examples:
   - name: Trigger a task run.
     text: >
         az acr task run -n MyTask -r MyRegistry
-  - name: Trigger a task run by overriding the context and file passed during Task create.
+  - name: Trigger a task run by overriding the context and file passed during Task create with a remote repository.
     text: >
         az acr task run -n MyTask -r MyRegistry -c https://github.com/Azure-Samples/acr-build-helloworld-node.git -f Dockerfile
+  - name: Trigger a task run by overriding the context and file passed during Task create with a local context.
+    text: >
+        az acr task run -n MyTask -r MyRegistry -c . -f Dockerfile
   - name: Trigger a task run by adding or overriding build arguments set during Task create.
     text: |
         az acr task run -n MyTask -r MyRegistry --arg DOCKER_CLI_BASE_IMAGE=docker:18.03.0-ce-git
@@ -889,6 +916,48 @@ examples:
   - name: Update an existing run to be archived.
     text: >
         az acr task update-run -r MyRegistry --run-id runId --no-archive false
+"""
+
+helps['acr taskrun'] = """
+type: group
+short-summary: Manage taskruns using Azure Container Registries.
+"""
+
+
+helps['acr taskrun delete'] = """
+type: command
+short-summary: Delete a taskrun from an Azure Container Registry.
+examples:
+  - name: Delete a taskrun from an Azure Container Registry.
+    text: >
+        az acr taskrun delete -r MyRegistry -n MyTaskRun -g MyResourceGroup
+"""
+
+helps['acr taskrun list'] = """
+type: command
+short-summary: List the taskruns for an Azure Container Registry.
+examples:
+  - name: List taskruns and show the results in a table.
+    text: >
+        az acr taskrun list -r MyRegistry -g MyResourceGroup -o table
+"""
+
+helps['acr taskrun show'] = """
+type: command
+short-summary: Get the properties of a named taskrun for an Azure Container Registry.
+examples:
+  - name: Get the properties of a taskrun, displaying the results in a table.
+    text: >
+        az acr taskrun show -r MyRegistry -n MyTaskRun -o table
+"""
+
+helps['acr taskrun logs'] = """
+type: command
+short-summary: Show run logs for a particular taskrun.
+examples:
+  - name: Show run logs for a particular taskrun.
+    text: >
+        az acr taskrun logs -r MyRegistry -n MyTaskRun
 """
 
 helps['acr token'] = """
@@ -1071,3 +1140,95 @@ examples:
     text: >
         az acr webhook update -n MyWebhook -r MyRegistry --status disabled
 """
+
+# region private-endpoint-connection
+# be careful to keep long-summary consistent in this region
+helps['acr private-endpoint-connection'] = """
+type: group
+short-summary: Manage container registry private endpoint connections
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection list'] = """
+type: command
+short-summary: List all private endpoint connections to a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection show'] = """
+type: command
+short-summary:  Show details of a container registry's private endpoint connection
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-endpoint-connection delete'] = """
+type: command
+short-summary:  Delete a private endpoint connection request for a container registry
+long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+"""
+
+helps['acr private-link-resource'] = """
+type: group
+short-summary: Manage registry private link resources.
+"""
+
+helps['acr private-link-resource list'] = """
+type: command
+short-summary: list the private link resources supported for a registry
+"""
+# endregion
+
+# region encryption
+helps['acr encryption'] = """
+type: group
+short-summary: Manage container registry encryption
+long-summary: For more information, see http://aka.ms/acr/cmk
+"""
+
+helps['acr encryption rotate-key'] = """
+type: command
+short-summary: Rotate (update) the container registry's encryption key
+long-summary: For more information, see http://aka.ms/acr/cmk
+"""
+
+helps['acr encryption show'] = """
+type: command
+short-summary: Show the container registry's encryption details
+long-summary: For more information, see http://aka.ms/acr/cmk
+"""
+# endregion
+
+# region identity
+helps['acr identity'] = """
+type: group
+short-summary: Manage service (managed) identities for a container registry
+"""
+
+helps['acr identity assign'] = """
+type: command
+short-summary: Assign a managed identity to a container registry
+long-summary: Managed identities can be user-assigned or system-assigned
+"""
+
+helps['acr identity remove'] = """
+type: command
+short-summary: Remove a managed identity from a container registry
+"""
+
+helps['acr identity show'] = """
+type: command
+short-summary: Show the container registry's identity details
+"""
+# endregion

@@ -24,6 +24,7 @@ from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zo
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType, supported_api_version
 
+
 logger = get_logger(__name__)
 
 
@@ -75,8 +76,13 @@ def list_express_route_circuits(cmd, resource_group_name=None):
 
 
 def create_express_route_auth(cmd, resource_group_name, circuit_name, authorization_name):
+    ExpressRouteCircuitAuthorization = cmd.get_models('ExpressRouteCircuitAuthorization')
+
     client = network_client_factory(cmd.cli_ctx).express_route_circuit_authorizations
-    return client.create_or_update(resource_group_name, circuit_name, authorization_name)
+    return client.create_or_update(resource_group_name,
+                                   circuit_name,
+                                   authorization_name,
+                                   ExpressRouteCircuitAuthorization())
 
 
 def list_lbs(cmd, resource_group_name=None):
@@ -149,7 +155,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     tags = tags or {}
     sku_tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
-    http_listener_protocol = 'https' if cert_data else 'http'
+    http_listener_protocol = 'https' if (cert_data or key_vault_secret_id) else 'http'
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     virtual_network_name = virtual_network_name or '{}Vnet'.format(application_gateway_name)
 
@@ -550,21 +556,31 @@ def update_ag_rewrite_rule_set(instance, parent, item_name):
 
 
 def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, rule_set_name, rule_name,
-                           sequence=None, request_headers=None, response_headers=None, no_wait=False):
-    ApplicationGatewayRewriteRule, ApplicationGatewayRewriteRuleActionSet = cmd.get_models(
-        'ApplicationGatewayRewriteRule', 'ApplicationGatewayRewriteRuleActionSet')
+                           sequence=None, request_headers=None, response_headers=None, no_wait=False,
+                           modified_path=None, modified_query_string=None, enable_reroute=None):
+    (ApplicationGatewayRewriteRule,
+     ApplicationGatewayRewriteRuleActionSet,
+     ApplicationGatewayUrlConfiguration) = cmd.get_models('ApplicationGatewayRewriteRule',
+                                                          'ApplicationGatewayRewriteRuleActionSet',
+                                                          'ApplicationGatewayUrlConfiguration')
     if not request_headers and not response_headers:
         raise CLIError('usage error: --response-headers HEADER=VALUE | --request-headers HEADER=VALUE')
     ncf = network_client_factory(cmd.cli_ctx).application_gateways
     ag = ncf.get(resource_group_name, application_gateway_name)
     rule_set = find_child_item(ag, rule_set_name,
                                path='rewrite_rule_sets', key_path='name')
+    url_configuration = None
+    if any([modified_path, modified_query_string, enable_reroute]):
+        url_configuration = ApplicationGatewayUrlConfiguration(modified_path=modified_path,
+                                                               modified_query_string=modified_query_string,
+                                                               reroute=enable_reroute)
     new_rule = ApplicationGatewayRewriteRule(
         name=rule_name,
         rule_sequence=sequence,
         action_set=ApplicationGatewayRewriteRuleActionSet(
             request_header_configurations=request_headers,
-            response_header_configurations=response_headers
+            response_header_configurations=response_headers,
+            url_configuration=url_configuration
         )
     )
     upsert_to_collection(rule_set, 'rewrite_rules', new_rule, 'name')
@@ -576,11 +592,19 @@ def create_ag_rewrite_rule(cmd, resource_group_name, application_gateway_name, r
 
 
 def update_ag_rewrite_rule(instance, parent, cmd, rule_set_name, rule_name, sequence=None,
-                           request_headers=None, response_headers=None):
+                           request_headers=None, response_headers=None,
+                           modified_path=None, modified_query_string=None, enable_reroute=None):
     with cmd.update_context(instance) as c:
         c.set_param('rule_sequence', sequence)
         c.set_param('action_set.request_header_configurations', request_headers)
         c.set_param('action_set.response_header_configurations', response_headers)
+        ApplicationGatewayUrlConfiguration = cmd.get_models('ApplicationGatewayUrlConfiguration')
+        url_configuration = None
+        if any([modified_path, modified_query_string, enable_reroute]):
+            url_configuration = ApplicationGatewayUrlConfiguration(modified_path=modified_path,
+                                                                   modified_query_string=modified_query_string,
+                                                                   reroute=enable_reroute)
+        c.set_param('action_set.url_configuration', url_configuration)
     return parent
 
 
@@ -665,7 +689,7 @@ def delete_ag_rewrite_rule_condition(cmd, resource_group_name, application_gatew
 
 def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_name, protocol, host,
                     path, interval=30, timeout=120, threshold=8, no_wait=False, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None):
+                    min_servers=None, match_body=None, match_status_codes=None, port=None):
     ApplicationGatewayProbe, ProbeMatchCriteria = cmd.get_models(
         'ApplicationGatewayProbe', 'ApplicationGatewayProbeHealthResponseMatch')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -682,6 +706,8 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
         new_probe.pick_host_name_from_backend_http_settings = host_name_from_http_settings
         new_probe.min_servers = min_servers
         new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
+    if cmd.supported_api_version(min_api='2019-04-01'):
+        new_probe.port = port
 
     upsert_to_collection(ag, 'probes', new_probe, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
@@ -690,7 +716,7 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
 
 def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, path=None,
                     interval=None, timeout=None, threshold=None, host_name_from_http_settings=None,
-                    min_servers=None, match_body=None, match_status_codes=None):
+                    min_servers=None, match_body=None, match_status_codes=None, port=None):
     if protocol is not None:
         instance.protocol = protocol
     if host is not None:
@@ -715,12 +741,14 @@ def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, 
             instance.match.body = match_body
         if match_status_codes is not None:
             instance.match.status_codes = match_status_codes
+    if port is not None:
+        instance.port = port
     return parent
 
 
 def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway_name, item_name,
                                    address_pool=None, http_settings=None, http_listener=None, redirect_config=None,
-                                   url_path_map=None, rule_type='Basic', no_wait=False):
+                                   url_path_map=None, rule_type='Basic', no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayRequestRoutingRule, SubResource = cmd.get_models(
         'ApplicationGatewayRequestRoutingRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -740,6 +768,10 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
         url_path_map=SubResource(id=url_path_map) if url_path_map else None)
     if cmd.supported_api_version(min_api='2017-06-01'):
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
+
+    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
+    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
+        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
     upsert_to_collection(ag, 'request_routing_rules', new_rule, 'name')
     return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
                        resource_group_name, application_gateway_name, ag)
@@ -747,7 +779,7 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
 
 def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_pool=None,
                                    http_settings=None, http_listener=None, redirect_config=None, url_path_map=None,
-                                   rule_type=None):
+                                   rule_type=None, rewrite_rule_set=None):
     SubResource = cmd.get_models('SubResource')
     if address_pool is not None:
         instance.backend_address_pool = SubResource(id=address_pool)
@@ -761,6 +793,8 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
         instance.url_path_map = SubResource(id=url_path_map)
     if rule_type is not None:
         instance.rule_type = rule_type
+    if rewrite_rule_set is not None:
+        instance.rewrite_rule_set = SubResource(id=rewrite_rule_set)
     return parent
 
 
@@ -844,9 +878,9 @@ def update_ag_trusted_root_certificate(instance, parent, item_name, cert_data=No
 
 
 def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, item_name, paths,
-                           address_pool=None, http_settings=None, redirect_config=None,
+                           address_pool=None, http_settings=None, redirect_config=None, rewrite_rule_set=None,
                            default_address_pool=None, default_http_settings=None, default_redirect_config=None,
-                           no_wait=False, rule_name='default'):
+                           no_wait=False, rule_name='default', default_rewrite_rule_set=None, firewall_policy=None):
     ApplicationGatewayUrlPathMap, ApplicationGatewayPathRule, SubResource = cmd.get_models(
         'ApplicationGatewayUrlPathMap', 'ApplicationGatewayPathRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -868,6 +902,15 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
         new_map.default_redirect_configuration = \
             SubResource(id=default_redirect_config) if default_redirect_config else None
 
+    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
+    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
+        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
+        new_map.default_rewrite_rule_set = \
+            SubResource(id=default_rewrite_rule_set) if default_rewrite_rule_set else None
+
+    if cmd.supported_api_version(min_api='2019-09-01'):
+        new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
+
     # pull defaults from the rule specific properties if the default-* option isn't specified
     if new_rule.backend_address_pool and not new_map.default_backend_address_pool:
         new_map.default_backend_address_pool = new_rule.backend_address_pool
@@ -885,7 +928,8 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
 
 
 def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_pool=None,
-                           default_http_settings=None, default_redirect_config=None, raw=False):
+                           default_http_settings=None, default_redirect_config=None, raw=False,
+                           default_rewrite_rule_set=None):
     SubResource = cmd.get_models('SubResource')
     if default_address_pool == '':
         instance.default_backend_address_pool = None
@@ -901,12 +945,17 @@ def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_poo
         instance.default_redirect_configuration = None
     elif default_redirect_config:
         instance.default_redirect_configuration = SubResource(id=default_redirect_config)
+
+    if default_rewrite_rule_set == '':
+        instance.default_rewrite_rule_set = None
+    elif default_rewrite_rule_set:
+        instance.default_rewrite_rule_set = SubResource(id=default_rewrite_rule_set)
     return parent
 
 
 def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
                                 item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
-                                firewall_policy=None, no_wait=False):
+                                firewall_policy=None, no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -926,6 +975,10 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
             if url_map.default_redirect_configuration else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
+
+    rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
+    if cmd.supported_api_version(parameter_name=rewrite_rule_set_name):
+        new_rule.rewrite_rule_set = SubResource(id=rewrite_rule_set) if rewrite_rule_set else None
 
     if cmd.supported_api_version(min_api='2019-09-01'):
         new_rule.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
@@ -1180,7 +1233,8 @@ def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_n
 
 # region ApplicationGatewayWAFPolicy ManagedRule ManagedRuleSet
 def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
-                             rule_set_type, rule_set_version, rule_group_name, rules):
+                             rule_set_type, rule_set_version,
+                             rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
     Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
@@ -1190,11 +1244,15 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
 
     waf_policy = client.get(resource_group_name, policy_name)
 
-    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules]
-    rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name, rules=managed_rule_overrides)
+    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules is not None else []
+
+    rule_group_override = None
+    if rule_group_name is not None:
+        rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
+                                                       rules=managed_rule_overrides)
     new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
                                           rule_set_version=rule_set_version,
-                                          rule_group_overrides=[rule_group_override])
+                                          rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
 
     for rule_set in waf_policy.managed_rules.managed_rule_sets:
         if rule_set.rule_set_type == rule_set_type:
@@ -1203,7 +1261,8 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
                     rule_override.rules.extend(managed_rule_overrides)
                     break
             else:
-                rule_set.rule_group_overrides.append(rule_group_override)
+                if rule_group_override is not None:
+                    rule_set.rule_group_overrides.append(rule_group_override)
             break
     else:
         waf_policy.managed_rules.managed_rule_sets.append(new_managed_rule_set)
@@ -1615,6 +1674,7 @@ def _build_record(cmd, data):
 def import_zone(cmd, resource_group_name, zone_name, file_name):
     from azure.cli.core.util import read_file_content
     import sys
+    logger.warning("In the future, zone name will be case insensitive.")
     RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
     file_text = read_file_content(file_name)
@@ -1706,56 +1766,65 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
           .format(cum_records, total_records, zone_name), file=sys.stderr)
 
 
-def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address):
+def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
+                        ttl=None):
     AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
-def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address):
+def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
+                     ttl=None):
     ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            'arecords')
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name, 'arecords',
+                            ttl=ttl)
 
 
-def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag):
+def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag,
+                       ttl=None):
     CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
-def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname):
+def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=None):
     CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False)
+                            is_list=False, ttl=ttl)
 
 
-def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange):
+def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
+                      ttl=None):
     MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
-def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname, subscription_id=None):
+def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
+                      subscription_id=None, ttl=None):
     NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
-    return _add_save_record(cmd, record, record_type, record_set_name,
-                            resource_group_name, zone_name, subscription_id=subscription_id)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            subscription_id=subscription_id, ttl=ttl)
 
 
-def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname):
+def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=None):
     PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            ttl=ttl)
 
 
 def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
@@ -1900,14 +1969,18 @@ def _add_record(record_set, record, record_type, is_list=False):
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                     is_list=True, subscription_id=None):
+                     is_list=True, subscription_id=None, ttl=None):
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
+        logger.warning("The record set doesn't exist and is automatically created. "
+                       "In the future, an extra argument will be supported to confirm this auto creation.")
         RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        record_set = RecordSet(ttl=3600)
+        record_set = RecordSet()
+
+    record_set.ttl = ttl if ttl is not None else 3600
 
     _add_record(record_set, record, record_type, is_list)
 
@@ -1954,7 +2027,7 @@ def dict_matches_filter(d, filter_dict):
 
 def lists_match(l1, l2):
     try:
-        return Counter(l1) == Counter(l2)
+        return Counter(l1) == Counter(l2)  # pylint: disable=too-many-function-args
     except TypeError:
         return False
 # endregion
@@ -2411,7 +2484,8 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
                                 private_ip_address_version=None,
                                 virtual_network_name=None, public_ip_address=None,
                                 location=None, tags=None, load_balancer_name=None,
-                                visibility=None, auto_approval=None, fqdns=None):
+                                visibility=None, auto_approval=None, fqdns=None,
+                                enable_proxy_protocol=None):
     client = network_client_factory(cmd.cli_ctx).private_link_services
     FrontendIPConfiguration, PrivateLinkService, PrivateLinkServiceIpConfiguration, PublicIPAddress, Subnet = \
         cmd.get_models('FrontendIPConfiguration', 'PrivateLinkService', 'PrivateLinkServiceIpConfiguration',
@@ -2433,13 +2507,14 @@ def create_private_link_service(cmd, resource_group_name, service_name, subnet, 
         visbility=visibility,
         auto_approval=auto_approval,
         fqdns=fqdns,
-        tags=tags
+        tags=tags,
+        enable_proxy_protocol=enable_proxy_protocol
     )
     return client.create_or_update(resource_group_name, service_name, link_service)
 
 
 def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurations=None, load_balancer_name=None,
-                                visibility=None, auto_approval=None, fqdns=None):
+                                visibility=None, auto_approval=None, fqdns=None, enable_proxy_protocol=None):
     FrontendIPConfiguration = cmd.get_models('FrontendIPConfiguration')
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags)
@@ -2449,6 +2524,7 @@ def update_private_link_service(instance, cmd, tags=None, frontend_ip_configurat
         c.set_param('visibility', visibility)
         c.set_param('auto_approval', auto_approval)
         c.set_param('fqdns', fqdns)
+        c.set_param('enable_proxy_protocol', enable_proxy_protocol)
     return instance
 
 
@@ -2467,7 +2543,7 @@ def update_private_endpoint_connection(cmd, resource_group_name, service_name, p
     connection_state = PrivateLinkServiceConnectionState(
         status=connection_status,
         description=description,
-        action_required=action_required
+        actions_required=action_required
     )
     pe_connection = PrivateEndpointConnection(
         private_link_service_connection_state=connection_state
@@ -3420,13 +3496,129 @@ def configure_network_watcher(cmd, client, locations, resource_group_name=None, 
     return client.list_all()
 
 
-def create_nw_connection_monitor(cmd, client, connection_monitor_name, watcher_rg, watcher_name,  # pylint: disable=unused-argument
-                                 source_resource, resource_group_name=None, source_port=None, location=None,
-                                 dest_resource=None, dest_port=None, dest_address=None,
-                                 tags=None, do_not_start=None, monitoring_interval=60):
+def create_nw_connection_monitor(cmd,
+                                 client,
+                                 connection_monitor_name,
+                                 watcher_rg,
+                                 watcher_name,
+                                 resource_group_name=None,
+                                 location=None,
+                                 source_resource=None,
+                                 source_port=None,
+                                 dest_resource=None,
+                                 dest_port=None,
+                                 dest_address=None,
+                                 tags=None,
+                                 do_not_start=None,
+                                 monitoring_interval=None,
+                                 endpoint_source_name=None,
+                                 endpoint_source_resource_id=None,
+                                 endpoint_source_address=None,
+                                 endpoint_dest_name=None,
+                                 endpoint_dest_resource_id=None,
+                                 endpoint_dest_address=None,
+                                 test_config_name=None,
+                                 test_config_frequency=None,
+                                 test_config_protocol=None,
+                                 test_config_preferred_ip_version=None,
+                                 test_config_threshold_failed_percent=None,
+                                 test_config_threshold_round_trip_time=None,
+                                 test_config_tcp_disable_trace_route=None,
+                                 test_config_tcp_port=None,
+                                 test_config_icmp_disable_trace_route=None,
+                                 test_config_http_port=None,
+                                 test_config_http_method=None,
+                                 test_config_http_path=None,
+                                 test_config_http_valid_status_codes=None,
+                                 test_config_http_prefer_https=None,
+                                 test_group_name=None,
+                                 test_group_disable=None,
+                                 output_type=None,
+                                 workspace_ids=None,
+                                 notes=None):
+    v1_required_parameter_set = [
+        source_resource, source_port,
+        dest_resource, dest_address, dest_port
+    ]
+
+    v2_required_parameter_set = [
+        endpoint_source_name, endpoint_source_resource_id,
+        endpoint_dest_name, endpoint_dest_address,
+        test_config_name, test_config_protocol,
+        output_type, workspace_ids,
+    ]
+
+    if any(v1_required_parameter_set):  # V1 creation
+        connection_monitor = _create_nw_connection_monitor_v1(cmd,
+                                                              connection_monitor_name,
+                                                              watcher_rg,
+                                                              watcher_name,
+                                                              source_resource,
+                                                              resource_group_name,
+                                                              source_port,
+                                                              location,
+                                                              dest_resource,
+                                                              dest_port,
+                                                              dest_address,
+                                                              tags,
+                                                              do_not_start,
+                                                              monitoring_interval)
+        client = get_mgmt_service_client(cmd.cli_ctx,
+                                         ResourceType.MGMT_NETWORK,
+                                         api_version='2019-06-01').connection_monitors
+    elif any(v2_required_parameter_set):  # V2 creation
+        connection_monitor = _create_nw_connection_monitor_v2(cmd,
+                                                              location,
+                                                              tags,
+                                                              endpoint_source_name,
+                                                              endpoint_source_resource_id,
+                                                              endpoint_source_address,
+                                                              endpoint_dest_name,
+                                                              endpoint_dest_resource_id,
+                                                              endpoint_dest_address,
+                                                              test_config_name,
+                                                              test_config_frequency,
+                                                              test_config_protocol,
+                                                              test_config_preferred_ip_version,
+                                                              test_config_threshold_failed_percent,
+                                                              test_config_threshold_round_trip_time,
+                                                              test_config_tcp_port,
+                                                              test_config_tcp_disable_trace_route,
+                                                              test_config_icmp_disable_trace_route,
+                                                              test_config_http_port,
+                                                              test_config_http_method,
+                                                              test_config_http_path,
+                                                              test_config_http_valid_status_codes,
+                                                              test_config_http_prefer_https,
+                                                              test_group_name,
+                                                              test_group_disable,
+                                                              output_type,
+                                                              workspace_ids,
+                                                              notes)
+    else:
+        raise CLIError('Unknown operation')
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def _create_nw_connection_monitor_v1(cmd,
+                                     connection_monitor_name,
+                                     watcher_rg,
+                                     watcher_name,
+                                     source_resource,
+                                     resource_group_name=None,
+                                     source_port=None,
+                                     location=None,
+                                     dest_resource=None,
+                                     dest_port=None,
+                                     dest_address=None,
+                                     tags=None,
+                                     do_not_start=None,
+                                     monitoring_interval=60):
     ConnectionMonitor, ConnectionMonitorSource, ConnectionMonitorDestination = cmd.get_models(
         'ConnectionMonitor', 'ConnectionMonitorSource', 'ConnectionMonitorDestination')
-    connection_monitor = ConnectionMonitor(
+
+    cmv1 = ConnectionMonitor(
         location=location,
         tags=tags,
         source=ConnectionMonitorSource(
@@ -3439,8 +3631,580 @@ def create_nw_connection_monitor(cmd, client, connection_monitor_name, watcher_r
             address=dest_address
         ),
         auto_start=not do_not_start,
-        monitoring_interval_in_seconds=monitoring_interval)
+        monitoring_interval_in_seconds=monitoring_interval,
+        endpoints=None,
+        test_configurations=None,
+        test_groups=None,
+        outputs=None,
+        nots=None
+    )
+
+    return cmv1
+
+
+def _create_nw_connection_monitor_v2(cmd,
+                                     location=None,
+                                     tags=None,
+                                     endpoint_source_name=None,
+                                     endpoint_source_resource_id=None,
+                                     endpoint_source_address=None,
+                                     endpoint_dest_name=None,
+                                     endpoint_dest_resource_id=None,
+                                     endpoint_dest_address=None,
+                                     test_config_name=None,
+                                     test_config_frequency=None,
+                                     test_config_protocol=None,
+                                     test_config_preferred_ip_version=None,
+                                     test_config_threshold_failed_percent=None,
+                                     test_config_threshold_round_trip_time=None,
+                                     test_config_tcp_port=None,
+                                     test_config_tcp_disable_trace_route=False,
+                                     test_config_icmp_disable_trace_route=False,
+                                     test_config_http_port=None,
+                                     test_config_http_method=None,
+                                     test_config_http_path=None,
+                                     test_config_http_valid_status_codes=None,
+                                     test_config_http_prefer_https=None,
+                                     test_group_name=None,
+                                     test_group_disable=False,
+                                     output_type=None,
+                                     workspace_ids=None,
+                                     notes=None):
+    src_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
+                                                             endpoint_source_name,
+                                                             endpoint_source_resource_id,
+                                                             endpoint_source_address)
+    dst_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
+                                                             endpoint_dest_name,
+                                                             endpoint_dest_resource_id,
+                                                             endpoint_dest_address)
+    test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
+                                                                      test_config_name,
+                                                                      test_config_frequency,
+                                                                      test_config_protocol,
+                                                                      test_config_threshold_failed_percent,
+                                                                      test_config_threshold_round_trip_time,
+                                                                      test_config_preferred_ip_version,
+                                                                      test_config_tcp_port,
+                                                                      test_config_tcp_disable_trace_route,
+                                                                      test_config_icmp_disable_trace_route,
+                                                                      test_config_http_port,
+                                                                      test_config_http_method,
+                                                                      test_config_http_path,
+                                                                      test_config_http_valid_status_codes,
+                                                                      test_config_http_prefer_https)
+    test_group = _create_nw_connection_monitor_v2_test_group(cmd,
+                                                             test_group_name,
+                                                             test_group_disable,
+                                                             [test_config],
+                                                             [src_endpoint],
+                                                             [dst_endpoint])
+    if output_type:
+        outputs = []
+        if workspace_ids:
+            for workspace_id in workspace_ids:
+                output = _create_nw_connection_monitor_v2_output(cmd, output_type, workspace_id)
+                outputs.append(output)
+    else:
+        outputs = []
+
+    ConnectionMonitor = cmd.get_models('ConnectionMonitor')
+    cmv2 = ConnectionMonitor(location=location,
+                             tags=tags,
+                             auto_start=None,
+                             monitoring_interval_in_seconds=None,
+                             endpoints=[src_endpoint, dst_endpoint],
+                             test_configurations=[test_config],
+                             test_groups=[test_group],
+                             outputs=outputs,
+                             notes=notes)
+    return cmv2
+
+
+def _create_nw_connection_monitor_v2_endpoint(cmd,
+                                              name,
+                                              endpoint_resource_id=None,
+                                              address=None,
+                                              filter_type=None,
+                                              filter_items=None):
+    if (filter_type and not filter_items) or (not filter_type and filter_items):
+        raise CLIError('usage error: '
+                       '--filter-type and --filter-item for endpoint filter must be present at the same time.')
+
+    ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
+        'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
+
+    endpoint = ConnectionMonitorEndpoint(name=name, resource_id=endpoint_resource_id, address=address)
+
+    if filter_type and filter_items:
+        endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
+        endpoint.filter = endpoint_filter
+
+    return endpoint
+
+
+def _create_nw_connection_monitor_v2_test_configuration(cmd,
+                                                        name,
+                                                        test_frequency,
+                                                        protocol,
+                                                        threshold_failed_percent,
+                                                        threshold_round_trip_time,
+                                                        preferred_ip_version,
+                                                        tcp_port=None,
+                                                        tcp_disable_trace_route=None,
+                                                        icmp_disable_trace_route=None,
+                                                        http_port=None,
+                                                        http_method=None,
+                                                        http_path=None,
+                                                        http_valid_status_codes=None,
+                                                        http_prefer_https=None,
+                                                        http_request_headers=None):
+    (ConnectionMonitorTestConfigurationProtocol,
+     ConnectionMonitorTestConfiguration, ConnectionMonitorSuccessThreshold) = cmd.get_models(
+         'ConnectionMonitorTestConfigurationProtocol',
+         'ConnectionMonitorTestConfiguration', 'ConnectionMonitorSuccessThreshold')
+
+    test_config = ConnectionMonitorTestConfiguration(name=name,
+                                                     test_frequency_sec=test_frequency,
+                                                     protocol=protocol,
+                                                     preferred_ip_version=preferred_ip_version)
+
+    if threshold_failed_percent or threshold_round_trip_time:
+        threshold = ConnectionMonitorSuccessThreshold(checks_failed_percent=threshold_failed_percent,
+                                                      round_trip_time_ms=threshold_round_trip_time)
+        test_config.success_threshold = threshold
+
+    if protocol == ConnectionMonitorTestConfigurationProtocol.tcp:
+        ConnectionMonitorTcpConfiguration = cmd.get_models('ConnectionMonitorTcpConfiguration')
+        tcp_config = ConnectionMonitorTcpConfiguration(
+            port=tcp_port,
+            tcp_disable_trace_route=tcp_disable_trace_route
+        )
+        test_config.tcp_configuration = tcp_config
+    elif protocol == ConnectionMonitorTestConfigurationProtocol.icmp:
+        ConnectionMonitorIcmpConfiguration = cmd.get_models('ConnectionMonitorIcmpConfiguration')
+        icmp_config = ConnectionMonitorIcmpConfiguration(disable_trace_route=icmp_disable_trace_route)
+        test_config.icmp_configuration = icmp_config
+    elif protocol == ConnectionMonitorTestConfigurationProtocol.http:
+        ConnectionMonitorHttpConfiguration = cmd.get_models('ConnectionMonitorHttpConfiguration')
+        http_config = ConnectionMonitorHttpConfiguration(
+            port=http_port,
+            method=http_method,
+            path=http_path,
+            request_headers=http_request_headers,
+            valid_status_code_ranges=http_valid_status_codes,
+            prefer_https=http_prefer_https)
+        test_config.http_configuration = http_config
+    else:
+        raise CLIError('Unsupported protocol: "{}" for test configuration'.format(protocol))
+
+    return test_config
+
+
+def _create_nw_connection_monitor_v2_test_group(cmd,
+                                                name,
+                                                disable,
+                                                test_configurations,
+                                                source_endpoints,
+                                                destination_endpoints):
+    ConnectionMonitorTestGroup = cmd.get_models('ConnectionMonitorTestGroup')
+
+    test_group = ConnectionMonitorTestGroup(name=name,
+                                            disable=disable,
+                                            test_configurations=[tc.name for tc in test_configurations],
+                                            sources=[e.name for e in source_endpoints],
+                                            destinations=[e.name for e in destination_endpoints])
+    return test_group
+
+
+def _create_nw_connection_monitor_v2_output(cmd,
+                                            output_type,
+                                            workspace_id=None):
+    ConnectionMonitorOutput, OutputType = cmd.get_models('ConnectionMonitorOutput', 'OutputType')
+    output = ConnectionMonitorOutput(type=output_type)
+
+    if output_type == OutputType.workspace:
+        ConnectionMonitorWorkspaceSettings = cmd.get_models('ConnectionMonitorWorkspaceSettings')
+        workspace = ConnectionMonitorWorkspaceSettings(workspace_resource_id=workspace_id)
+        output.workspace_settings = workspace
+    else:
+        raise CLIError('Unsupported output type: "{}"'.format(output_type))
+
+    return output
+
+
+def add_nw_connection_monitor_v2_endpoint(cmd,
+                                          client,
+                                          watcher_rg,
+                                          watcher_name,
+                                          connection_monitor_name,
+                                          location,
+                                          name,
+                                          source_test_groups=None,
+                                          dest_test_groups=None,
+                                          endpoint_resource_id=None,
+                                          address=None,
+                                          filter_type=None,
+                                          filter_items=None):
+    ConnectionMonitorEndpoint, ConnectionMonitorEndpointFilter = cmd.get_models(
+        'ConnectionMonitorEndpoint', 'ConnectionMonitorEndpointFilter')
+
+    endpoint = ConnectionMonitorEndpoint(name=name, resource_id=endpoint_resource_id, address=address)
+
+    if filter_type and filter_items:
+        endpoint_filter = ConnectionMonitorEndpointFilter(type=filter_type, items=filter_items)
+        endpoint.filter = endpoint_filter
+
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    connection_monitor.endpoints.append(endpoint)
+
+    src_test_groups, dst_test_groups = set(source_test_groups or []), set(dest_test_groups or [])
+    for test_group in connection_monitor.test_groups:
+        if test_group.name in src_test_groups:
+            test_group.sources.append(endpoint.name)
+        if test_group.name in dst_test_groups:
+            test_group.destinations.append(endpoint.name)
+
     return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def remove_nw_connection_monitor_v2_endpoint(client,
+                                             watcher_rg,
+                                             watcher_name,
+                                             connection_monitor_name,
+                                             location,
+                                             name,
+                                             test_groups=None):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    # refresh endpoints
+    new_endpoints = [endpoint for endpoint in connection_monitor.endpoints if endpoint.name != name]
+    connection_monitor.endpoints = new_endpoints
+
+    # refresh test groups
+    if test_groups is not None:
+        temp_test_groups = [t for t in connection_monitor.test_groups if t.name in test_groups]
+    else:
+        temp_test_groups = connection_monitor.test_groups
+
+    for test_group in temp_test_groups:
+        if name in test_group.sources:
+            test_group.sources.remove(name)
+        if name in test_group.destinations:
+            test_group.destinations.remove(name)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def show_nw_connection_monitor_v2_endpoint(client,
+                                           watcher_rg,
+                                           watcher_name,
+                                           connection_monitor_name,
+                                           location,
+                                           name):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    for endpoint in connection_monitor.endpoints:
+        if endpoint.name == name:
+            return endpoint
+
+    raise CLIError('unknown endpoint: {}'.format(name))
+
+
+def list_nw_connection_monitor_v2_endpoint(client,
+                                           watcher_rg,
+                                           watcher_name,
+                                           connection_monitor_name,
+                                           location):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    return connection_monitor.endpoints
+
+
+def add_nw_connection_monitor_v2_test_configuration(cmd,
+                                                    client,
+                                                    watcher_rg,
+                                                    watcher_name,
+                                                    connection_monitor_name,
+                                                    location,
+                                                    name,
+                                                    protocol,
+                                                    test_groups,
+                                                    frequency=None,
+                                                    threshold_failed_percent=None,
+                                                    threshold_round_trip_time=None,
+                                                    preferred_ip_version=None,
+                                                    tcp_port=None,
+                                                    tcp_disable_trace_route=None,
+                                                    icmp_disable_trace_route=None,
+                                                    http_port=None,
+                                                    http_method=None,
+                                                    http_path=None,
+                                                    http_valid_status_codes=None,
+                                                    http_prefer_https=None,
+                                                    http_request_headers=None):
+    new_test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
+                                                                          name,
+                                                                          frequency,
+                                                                          protocol,
+                                                                          threshold_failed_percent,
+                                                                          threshold_round_trip_time,
+                                                                          preferred_ip_version,
+                                                                          tcp_port,
+                                                                          tcp_disable_trace_route,
+                                                                          icmp_disable_trace_route,
+                                                                          http_port,
+                                                                          http_method,
+                                                                          http_path,
+                                                                          http_valid_status_codes,
+                                                                          http_prefer_https,
+                                                                          http_request_headers)
+
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    connection_monitor.test_configurations.append(new_test_config)
+
+    for test_group in connection_monitor.test_groups:
+        if test_group.name in test_groups:
+            test_group.test_configurations.append(new_test_config.name)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def remove_nw_connection_monitor_v2_test_configuration(client,
+                                                       watcher_rg,
+                                                       watcher_name,
+                                                       connection_monitor_name,
+                                                       location,
+                                                       name,
+                                                       test_groups=None):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    # refresh test configurations
+    new_test_configurations = [t for t in connection_monitor.test_configurations if t.name != name]
+    connection_monitor.test_configurations = new_test_configurations
+
+    if test_groups is not None:
+        temp_test_groups = [t for t in connection_monitor.test_groups if t.name in test_groups]
+    else:
+        temp_test_groups = connection_monitor.test_groups
+
+    # refresh test groups
+    for test_group in temp_test_groups:
+        test_group.test_configurations.remove(name)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def show_nw_connection_monitor_v2_test_configuration(client,
+                                                     watcher_rg,
+                                                     watcher_name,
+                                                     connection_monitor_name,
+                                                     location,
+                                                     name):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    for test_config in connection_monitor.test_configurations:
+        if test_config.name == name:
+            return test_config
+
+    raise CLIError('unknown test configuration: {}'.format(name))
+
+
+def list_nw_connection_monitor_v2_test_configuration(client,
+                                                     watcher_rg,
+                                                     watcher_name,
+                                                     connection_monitor_name,
+                                                     location):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    return connection_monitor.test_configurations
+
+
+def add_nw_connection_monitor_v2_test_group(cmd,
+                                            client,
+                                            connection_monitor_name,
+                                            watcher_rg,
+                                            watcher_name,
+                                            location,
+                                            name,
+                                            endpoint_source_name,
+                                            endpoint_dest_name,
+                                            test_config_name,
+                                            disable=False,
+                                            endpoint_source_resource_id=None,
+                                            endpoint_source_address=None,
+                                            endpoint_dest_resource_id=None,
+                                            endpoint_dest_address=None,
+                                            test_config_frequency=None,
+                                            test_config_protocol=None,
+                                            test_config_preferred_ip_version=None,
+                                            test_config_threshold_failed_percent=None,
+                                            test_config_threshold_round_trip_time=None,
+                                            test_config_tcp_disable_trace_route=None,
+                                            test_config_tcp_port=None,
+                                            test_config_icmp_disable_trace_route=None,
+                                            test_config_http_port=None,
+                                            test_config_http_method=None,
+                                            test_config_http_path=None,
+                                            test_config_http_valid_status_codes=None,
+                                            test_config_http_prefer_https=None):
+    new_test_configuration_creation_requirements = [
+        test_config_protocol, test_config_preferred_ip_version,
+        test_config_threshold_failed_percent, test_config_threshold_round_trip_time,
+        test_config_tcp_disable_trace_route, test_config_tcp_port,
+        test_config_icmp_disable_trace_route,
+        test_config_http_port, test_config_http_method,
+        test_config_http_path, test_config_http_valid_status_codes, test_config_http_prefer_https
+    ]
+
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    new_test_group = _create_nw_connection_monitor_v2_test_group(cmd,
+                                                                 name,
+                                                                 disable,
+                                                                 [], [], [])
+
+    # deal with endpoint
+    if any([endpoint_source_address, endpoint_source_resource_id]):
+        src_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
+                                                                 endpoint_source_name,
+                                                                 endpoint_source_resource_id,
+                                                                 endpoint_source_address)
+        connection_monitor.endpoints.append(src_endpoint)
+    if any([endpoint_dest_address, endpoint_dest_resource_id]):
+        dst_endpoint = _create_nw_connection_monitor_v2_endpoint(cmd,
+                                                                 endpoint_dest_name,
+                                                                 endpoint_dest_resource_id,
+                                                                 endpoint_dest_address)
+        connection_monitor.endpoints.append(dst_endpoint)
+
+    new_test_group.sources.append(endpoint_source_name)
+    new_test_group.destinations.append(endpoint_dest_name)
+
+    # deal with test configuration
+    if any(new_test_configuration_creation_requirements):
+        test_config = _create_nw_connection_monitor_v2_test_configuration(cmd,
+                                                                          test_config_name,
+                                                                          test_config_frequency,
+                                                                          test_config_protocol,
+                                                                          test_config_threshold_failed_percent,
+                                                                          test_config_threshold_round_trip_time,
+                                                                          test_config_preferred_ip_version,
+                                                                          test_config_tcp_port,
+                                                                          test_config_tcp_disable_trace_route,
+                                                                          test_config_icmp_disable_trace_route,
+                                                                          test_config_http_port,
+                                                                          test_config_http_method,
+                                                                          test_config_http_path,
+                                                                          test_config_http_valid_status_codes,
+                                                                          test_config_http_prefer_https)
+        connection_monitor.test_configurations.append(test_config)
+    new_test_group.test_configurations.append(test_config_name)
+
+    connection_monitor.test_groups.append(new_test_group)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def remove_nw_connection_monitor_v2_test_group(client,
+                                               watcher_rg,
+                                               watcher_name,
+                                               connection_monitor_name,
+                                               location,
+                                               name):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    new_test_groups, removed_test_group = [], None
+    for t in connection_monitor.test_groups:
+        if t.name == name:
+            removed_test_group = t
+        else:
+            new_test_groups.append(t)
+
+    if removed_test_group is None:
+        raise CLIError('test group: "{}" not exist'.format(name))
+    connection_monitor.test_groups = new_test_groups
+
+    # deal with endpoints which are only referenced by this removed test group
+    removed_endpoints = []
+    for e in removed_test_group.sources + removed_test_group.destinations:
+        tmp = [t for t in connection_monitor.test_groups if (e in t.sources or e in t.destinations)]
+        if not tmp:
+            removed_endpoints.append(e)
+    connection_monitor.endpoints = [e for e in connection_monitor.endpoints if e.name not in removed_endpoints]
+
+    # deal with test configurations which are only referenced by this remove test group
+    removed_test_configurations = []
+    for c in removed_test_group.test_configurations:
+        tmp = [t for t in connection_monitor.test_groups if c in t.test_configurations]
+        if not tmp:
+            removed_test_configurations.append(c)
+    connection_monitor.test_configurations = [c for c in connection_monitor.test_configurations
+                                              if c.name not in removed_test_configurations]
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def show_nw_connection_monitor_v2_test_group(client,
+                                             watcher_rg,
+                                             watcher_name,
+                                             connection_monitor_name,
+                                             location,
+                                             name):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    for t in connection_monitor.test_groups:
+        if t.name == name:
+            return t
+
+    raise CLIError('unknown test group: {}'.format(name))
+
+
+def list_nw_connection_monitor_v2_test_group(client,
+                                             watcher_rg,
+                                             watcher_name,
+                                             connection_monitor_name,
+                                             location):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    return connection_monitor.test_groups
+
+
+def add_nw_connection_monitor_v2_output(cmd,
+                                        client,
+                                        watcher_rg,
+                                        watcher_name,
+                                        connection_monitor_name,
+                                        location,
+                                        out_type,
+                                        workspace_id=None):
+    output = _create_nw_connection_monitor_v2_output(cmd, out_type, workspace_id)
+
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+
+    if connection_monitor.outputs is None:
+        connection_monitor.outputs = []
+
+    connection_monitor.outputs.append(output)
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def remove_nw_connection_monitor_v2_output(client,
+                                           watcher_rg,
+                                           watcher_name,
+                                           connection_monitor_name,
+                                           location):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    connection_monitor.outputs = []
+
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def list_nw_connection_monitor_v2_output(client,
+                                         watcher_rg,
+                                         watcher_name,
+                                         connection_monitor_name,
+                                         location):
+    connection_monitor = client.get(watcher_rg, watcher_name, connection_monitor_name)
+    return connection_monitor.outputs
 
 
 def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name=None,
@@ -3623,8 +4387,138 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
-def show_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, resource_group_name=None):
-    return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
+# combination of resource_group_name and nsg is for old output
+# combination of location and flow_log_name is for new output
+def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
+                          flow_log_name=None):
+    # deprecated approach to show flow log
+    if nsg is not None:
+        return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
+
+    # new approach to show flow log
+    from ._client_factory import cf_flow_logs
+    client = cf_flow_logs(cmd.cli_ctx, None)
+    return client.get(watcher_rg, watcher_name, flow_log_name)
+
+
+def create_nw_flow_log(cmd,
+                       client,
+                       location,
+                       watcher_rg,
+                       watcher_name,
+                       flow_log_name,
+                       nsg,
+                       storage_account=None,
+                       resource_group_name=None,
+                       enabled=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    FlowLog = cmd.get_models('FlowLog')
+    flow_log = FlowLog(location=location,
+                       target_resource_id=nsg,
+                       storage_id=storage_account,
+                       enabled=enabled,
+                       tags=tags)
+
+    if retention > 0:
+        RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
+        retention_policy = RetentionPolicyParameters(days=retention, enabled=(retention > 0))
+        flow_log.retention_policy = retention_policy
+
+    if log_format is not None or log_version is not None:
+        FlowLogFormatParameters = cmd.get_models('FlowLogFormatParameters')
+        format_config = FlowLogFormatParameters(type=log_format, version=log_version)
+        flow_log.format = format_config
+
+    if traffic_analytics_workspace is not None:
+        TrafficAnalyticsProperties, TrafficAnalyticsConfigurationProperties = \
+            cmd.get_models('TrafficAnalyticsProperties', 'TrafficAnalyticsConfigurationProperties')
+
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        traffic_analytics_config = TrafficAnalyticsConfigurationProperties(
+            enabled=traffic_analytics_enabled,
+            workspace_id=workspace.properties['customerId'],
+            workspace_region=workspace.location,
+            workspace_resource_id=workspace.id,
+            traffic_analytics_interval=traffic_analytics_interval
+        )
+        traffic_analytics = TrafficAnalyticsProperties(
+            network_watcher_flow_analytics_configuration=traffic_analytics_config
+        )
+
+        flow_log.flow_analytics_configuration = traffic_analytics
+
+    return client.create_or_update(watcher_rg, watcher_name, flow_log_name, flow_log)
+
+
+def update_nw_flow_log_getter(client, watcher_rg, watcher_name, flow_log_name):
+    return client.get(watcher_rg, watcher_name, flow_log_name)
+
+
+def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, parameters):
+    return client.create_or_update(watcher_rg, watcher_name, flow_log_name, parameters)
+
+
+def update_nw_flow_log(cmd,
+                       instance,
+                       location,
+                       resource_group_name=None,    # dummy parameter to let it appear in command
+                       enabled=None,
+                       nsg=None,
+                       storage_account=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('enabled', enabled)
+        c.set_param('tags', tags)
+        c.set_param('storage_id', storage_account)
+        c.set_param('target_resource_id', nsg)
+
+    with cmd.update_context(instance.retention_policy) as c:
+        c.set_param('days', retention)
+        c.set_param('enabled', retention > 0)
+
+    with cmd.update_context(instance.format) as c:
+        c.set_param('type', log_format)
+        c.set_param('version', log_version)
+
+    if traffic_analytics_workspace is not None:
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        with cmd.update_context(
+                instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+            c.set_param('enabled', traffic_analytics_enabled)
+            c.set_param('workspace_id', workspace.properties['customerId'])
+            c.set_param('workspace_region', workspace.location)
+            c.set_param('workspace_resource_id', workspace.id)
+            c.set_param('traffic_analytics_interval', traffic_analytics_interval)
+
+    return instance
+
+
+def list_nw_flow_log(client, watcher_rg, watcher_name, location):
+    return client.list(watcher_rg, watcher_name)
+
+
+def delete_nw_flow_log(client, watcher_rg, watcher_name, location, flow_log_name):
+    return client.delete(watcher_rg, watcher_name, flow_log_name)
 
 
 def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, storage_account,
@@ -4222,6 +5116,17 @@ def update_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
     return ncf.virtual_network_peerings.create_or_update(
         resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
 
+
+def list_available_ips(cmd, resource_group_name, virtual_network_name):
+    client = network_client_factory(cmd.cli_ctx).virtual_networks
+    vnet = client.get(resource_group_name=resource_group_name,
+                      virtual_network_name=virtual_network_name)
+    start_ip = vnet.address_space.address_prefixes[0].split('/')[0]
+    available_ips = client.check_ip_address_availability(resource_group_name=resource_group_name,
+                                                         virtual_network_name=virtual_network_name,
+                                                         ip_address=start_ip)
+    return available_ips.available_ip_addresses
+
 # endregion
 
 
@@ -4784,4 +5689,42 @@ def update_virtual_router_peering(cmd, instance, peer_asn=None, peer_ip=None):
         c.set_param('peer_asn', peer_asn)
         c.set_param('peer_ip', peer_ip)
     return instance
+# endregion
+
+
+# region service aliases
+def list_service_aliases(cmd, location, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).available_service_aliases
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name=resource_group_name, location=location)
+    return client.list(location=location)
+# endregion
+
+
+# region bastion
+def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_network_name,
+                        public_ip_address, location=None, subnet='AzureBastionSubnet'):
+    client = network_client_factory(cmd.cli_ctx).bastion_hosts
+    (BastionHost,
+     BastionHostIPConfiguration,
+     SubResource) = cmd.get_models('BastionHost',
+                                   'BastionHostIPConfiguration',
+                                   'SubResource')
+    ip_config_name = "bastion_ip_config"
+    ip_configuration = BastionHostIPConfiguration(name=ip_config_name,
+                                                  subnet=SubResource(id=subnet),
+                                                  public_ip_address=SubResource(id=public_ip_address))
+
+    bastion_host = BastionHost(ip_configurations=[ip_configuration],
+                               location=location)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   bastion_host_name=bastion_host_name,
+                                   parameters=bastion_host)
+
+
+def list_bastion_host(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).bastion_hosts
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+    return client.list()
 # endregion

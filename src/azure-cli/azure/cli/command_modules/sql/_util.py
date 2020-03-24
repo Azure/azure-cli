@@ -40,6 +40,10 @@ def get_sql_database_blob_auditing_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).database_blob_auditing_policies
 
 
+def get_sql_database_sensitivity_labels_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).sensitivity_labels
+
+
 def get_sql_database_threat_detection_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).database_threat_detection_policies
 
@@ -92,6 +96,10 @@ def get_sql_restorable_dropped_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).restorable_dropped_databases
 
 
+def get_sql_restorable_dropped_managed_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).restorable_dropped_managed_databases
+
+
 def get_sql_server_azure_ad_administrators_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).server_azure_ad_administrators
 
@@ -138,6 +146,14 @@ def get_sql_managed_instance_azure_ad_administrators_operations(cli_ctx, _):
 
 def get_sql_managed_databases_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).managed_databases
+
+
+def get_sql_managed_backup_short_term_retention_policies_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_backup_short_term_retention_policies
+
+
+def get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).managed_restorable_dropped_database_backup_short_term_retention_policies
 
 
 def get_sql_virtual_clusters_operations(cli_ctx, _):

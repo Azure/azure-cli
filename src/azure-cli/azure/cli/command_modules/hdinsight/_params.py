@@ -96,8 +96,11 @@ def load_arguments(self, _):
                    help='The size of the data disk in GB, e.g. 1023.')
         c.argument('zookeepernode_size', arg_type=node_size_type)
         c.argument('edgenode_size', arg_type=node_size_type)
+        c.argument('kafka_management_node_size', arg_type=node_size_type)
         c.argument('workernode_count', options_list=['--workernode-count', '-c'], arg_group='Node',
                    help='The number of worker nodes in the cluster.')
+        c.argument('kafka_management_node_count', arg_group='Node',
+                   help='The number of kafka management node in the cluster')
 
         # Storage
         c.argument('storage_account', arg_group='Storage', validator=validate_storage_account,
@@ -160,6 +163,12 @@ def load_arguments(self, _):
                    help='Key version that is used for enabling disk encryption.')
         c.argument('encryption_algorithm', arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm),
                    arg_group='Customer Managed Key', help='Algorithm identifier for encryption.')
+
+        # Kafka Rest Proxy
+        c.argument('kafka_client_group_id', arg_group='Kafka Rest Proxy',
+                   help='The client AAD security group id for Kafka Rest Proxy')
+        c.argument('kafka_client_group_name', arg_group='Kafka Rest Proxy',
+                   help='The client AAD security group name for Kafka Rest Proxy')
 
         # Managed Service Identity
         c.argument('assign_identity', arg_group='Managed Service Identity', validator=validate_msi,

@@ -9,7 +9,7 @@ import re
 from knack.log import get_logger
 from knack.util import CLIError
 
-from ._utils import is_valid_connection_string, resolve_resource_group
+from ._utils import is_valid_connection_string, resolve_resource_group, get_store_name_from_connection_string
 from ._azconfig.models import QueryFields
 from ._featuremodels import FeatureQueryFields
 
@@ -76,7 +76,7 @@ def validate_export(namespace):
         if (namespace.dest_name is None) and (namespace.dest_connection_string is None):
             raise CLIError("usage error: --config-name NAME | --connection-string STR")
     elif destination == 'appservice':
-        if namespace.appservice_name is None:
+        if namespace.appservice_account is None:
             raise CLIError("usage error: --appservice-account NAME_OR_ID")
 
 
@@ -85,7 +85,10 @@ def validate_appservice_name_or_id(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, parse_resource_id
     if namespace.appservice_account:
         if not is_valid_resource_id(namespace.appservice_account):
-            resource_group, _ = resolve_resource_group(cmd, namespace.name)
+            config_store_name = namespace.name
+            if not config_store_name:
+                config_store_name = get_store_name_from_connection_string(namespace.connection_string)
+            resource_group, _ = resolve_resource_group(cmd, config_store_name)
             namespace.appservice_account = {
                 "subscription": get_subscription_id(cmd.cli_ctx),
                 "resource_group": resource_group,
@@ -147,3 +150,54 @@ def validate_filter_parameter(string):
         else:
             logger.warning("Ignoring filter parameter '%s' because parameter name is empty.", string)
     return result
+
+
+def validate_identity(namespace):
+    subcommand = namespace.command.split(' ')[-1]
+    identities = set()
+
+    if subcommand == 'create' and namespace.assign_identity:
+        identities = set(namespace.assign_identity)
+    elif subcommand in ('assign', 'remove') and namespace.identities:
+        identities = set(namespace.identities)
+    else:
+        return
+
+    for identity in identities:
+        from msrestazure.tools import is_valid_resource_id
+        if identity == '[all]' and subcommand == 'remove':
+            continue
+
+        if identity != '[system]' and not is_valid_resource_id(identity):
+            raise CLIError("Invalid identity '{}'. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity.".format(identity))
+
+
+def validate_secret_identifier(namespace):
+    """ Validate the format of keyvault reference secret identifier """
+    from azure.keyvault.key_vault_id import KeyVaultIdentifier
+
+    identifier = getattr(namespace, 'secret_identifier', None)
+    try:
+        # this throws an exception for invalid format of secret identifier
+        KeyVaultIdentifier(uri=identifier)
+    except Exception as e:
+        raise CLIError("Received an exception while validating the format of secret identifier.\n{0}".format(str(e)))
+
+
+def validate_key(namespace):
+    if namespace.key:
+        input_key = str(namespace.key).lower()
+        if input_key == '.' or input_key == '..' or '%' in input_key:
+            raise CLIError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
+    else:
+        raise CLIError("Key cannot be empty.")
+
+
+def validate_feature(namespace):
+    if namespace.feature:
+        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
+        invalid = re.search(invalid_pattern, namespace.feature)
+        if invalid:
+            raise CLIError("Feature name is invalid. Only alphanumeric characters, '.', '-' and '_' are allowed.")
+    else:
+        raise CLIError("Feature name cannot be empty.")

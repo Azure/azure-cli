@@ -22,6 +22,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -188,10 +189,6 @@ def new_cluster(cmd,
         if file_extension is None or file_extension.lower() != '.pfx'.lower():
             raise CLIError('\'--certificate_file\' should be a valid pfx file')
 
-    import datetime
-    suffix = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    deployment_name = 'AzurePSDeployment-' + suffix
-
     vault_id = None
     certificate_uri = None
     cert_thumbprint = None
@@ -249,16 +246,7 @@ def new_cluster(cmd,
         cert_thumbprint = parameters[CERTIFICATE_THUMBPRINT]['value']
         template = get_file_json(template_file)
 
-    logger.info("Validating the deployment")
-    validate_result = _deploy_arm_template_core(
-        cli_ctx, resource_group_name, template, parameters, deployment_name, 'incremental', True)
-    if validate_result.error is not None:
-        errors_detailed = _build_detailed_error(validate_result.error, [])
-        errors_detailed.insert(0, "Error validating template. See below for more information.")
-        raise CLIError('\n'.join(errors_detailed))
-    logger.info("Deployment is valid, and begin to deploy")
-    _deploy_arm_template_core(cli_ctx, resource_group_name, template,
-                              parameters, deployment_name, 'incremental', False)
+    validate_and_deploy_arm_template(cmd, resource_group_name, template, parameters)
 
     output_dict = {}
     output_dict['vm_user_name'] = vm_user_name
@@ -757,29 +745,39 @@ def add_cluster_node_type(cmd,
                           vm_sku=DEFAULT_SKU,
                           vm_tier=DEFAULT_TIER,
                           durability_level=DEFAULT_DURABILITY_LEVEL):
-    cli_ctx = cmd.cli_ctx
     if durability_level.lower() == 'gold':
-        if vm_sku.lower() != 'Standard_D15_v2' or vm_sku.lower() != 'Standard_G5':
+        if vm_sku.lower() != 'standard_d15_v2' and vm_sku.lower() != 'standard_g5':
             raise CLIError(
                 'Only Standard_D15_v2 and Standard_G5 supports Gold durability, please specify --vm-sku to right value')
     cluster = client.get(resource_group_name, cluster_name)
     if any(n for n in cluster.node_types if n.name.lower() == node_type):
-        raise CLIError("{} already exists in the cluster")
-    cluster.node_types.append(NodeTypeDescription(name=node_type,
+        raise CLIError("node type {} already exists in the cluster".format(node_type))
+
+    _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type, durability_level, vm_password, vm_user_name, vm_sku, vm_tier, capacity)
+    _add_node_type_to_sfrp(cmd, client, resource_group_name, cluster_name, cluster, node_type, capacity, durability_level)
+
+    return client.get(resource_group_name, cluster_name)
+
+
+def _add_node_type_to_sfrp(cmd, client, resource_group_name, cluster_name, cluster, node_type_name, capacity, durability_level):
+    cluster.node_types.append(NodeTypeDescription(name=node_type_name,
                                                   client_connection_endpoint_port=DEFAULT_CLIENT_CONNECTION_ENDPOINT,
                                                   http_gateway_endpoint_port=DEFAULT_HTTP_GATEWAY_ENDPOINT,
                                                   is_primary=False,
-                                                  vm_instance_count=int(
-                                                      capacity),
+                                                  vm_instance_count=int(capacity),
                                                   durability_level=durability_level,
                                                   application_ports=EndpointRangeDescription(
-                                                      DEFAULT_APPLICATION_START_PORT, DEFAULT_APPLICATION_END_PORT),
-                                                  ephemeral_ports=EndpointRangeDescription(DEFAULT_EPHEMERAL_START, DEFAULT_EPHEMERAL_END)))
+                                                      start_port=DEFAULT_APPLICATION_START_PORT, end_port=DEFAULT_APPLICATION_END_PORT),
+                                                  ephemeral_ports=EndpointRangeDescription(
+                                                      start_port=DEFAULT_EPHEMERAL_START, end_port=DEFAULT_EPHEMERAL_END)))
 
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
     poller = client.update(resource_group_name, cluster_name, patch_request)
-    LongRunningOperation(cli_ctx)(poller)
+    LongRunningOperation(cmd.cli_ctx)(poller)
 
+
+def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name, durability_level, vm_password, vm_user_name, vm_sku, vm_tier, capacity):
+    cli_ctx = cmd.cli_ctx
     subnet_name = "subnet_{}".format(1)
     network_client = network_client_factory(cli_ctx)
     location = _get_resource_group_by_name(cli_ctx, resource_group_name).location
@@ -811,11 +809,13 @@ def add_cluster_node_type(cmd,
     subnet = LongRunningOperation(cli_ctx)(poller)
 
     public_address_name = 'LBIP-{}-{}{}'.format(
-        cluster_name.lower(), node_type.lower(), index)
+        cluster_name.lower(), node_type_name.lower(), index)
     dns_label = '{}-{}{}'.format(cluster_name.lower(),
-                                 node_type.lower(), index)
+                                 node_type_name.lower(), index)
     lb_name = 'LB-{}-{}{}'.format(cluster_name.lower(),
-                                  node_type.lower(), index)
+                                  node_type_name.lower(), index)
+    if len(lb_name) >= 24:
+        lb_name = '{}{}'.format(lb_name[0:21], index)
     poller = network_client.public_ip_addresses.create_or_update(resource_group_name,
                                                                  public_address_name,
                                                                  PublicIPAddress(public_ip_allocation_method='Dynamic',
@@ -910,9 +910,16 @@ def add_cluster_node_type(cmd,
     for p in new_load_balancer.inbound_nat_pools:
         inbound_nat_pools.append(SubResource(id=p.id))
 
-    vm_network_profile = VirtualMachineScaleSetNetworkProfile(network_interface_configurations=[VirtualMachineScaleSetNetworkConfiguration(name='NIC-{}-{}'.format(node_type.lower(), node_type.lower()),
+    network_config_name = 'NIC-{}-{}'.format(node_type_name.lower(), node_type_name.lower())
+    if len(network_config_name) >= 24:
+        network_config_name = network_config_name[0:22]
+
+    ip_config_name = 'Nic-{}'.format(node_type_name.lower())
+    if len(ip_config_name) >= 24:
+        ip_config_name = network_config_name[0:22]
+    vm_network_profile = VirtualMachineScaleSetNetworkProfile(network_interface_configurations=[VirtualMachineScaleSetNetworkConfiguration(name=network_config_name,
                                                                                                                                            primary=True,
-                                                                                                                                           ip_configurations=[VirtualMachineScaleSetIPConfiguration(name='Nic-{}'.format(node_type.lower()),
+                                                                                                                                           ip_configurations=[VirtualMachineScaleSetIPConfiguration(name=ip_config_name,
                                                                                                                                                                                                     load_balancer_backend_address_pools=backend_address_pools,
                                                                                                                                                                                                     load_balancer_inbound_nat_pools=inbound_nat_pools,
                                                                                                                                                                                                     subnet=ApiEntityReference(id=subnet.id))])])
@@ -935,7 +942,7 @@ def add_cluster_node_type(cmd,
                 break
         for i in range(1, 6):
             acc = create_storage_account(
-                cli_ctx, resource_group_name.lower(), '{}{}'.format(storage_name, i), location)
+                cli_ctx, resource_group_name.lower(), '{}{}'.format(name, i), location)
             vhds.append('{}{}'.format(acc[0].primary_endpoints.blob, 'vhd'))
         return vhds
 
@@ -959,9 +966,9 @@ def add_cluster_node_type(cmd,
     version = 'latest'
     sku = os_dic[DEFAULT_OS]
     if cluster.vm_image.lower() == 'linux':
-        publisher = 'Microsoft.Azure.ServiceFabric'
+        publisher = 'Canonical'
         offer = 'UbuntuServer'
-        version = '6.0.11'
+        version = 'latest'
         sku = os_dic['UbuntuServer1604']
     storage_profile = VirtualMachineScaleSetStorageProfile(image_reference=ImageReference(publisher=publisher,
                                                                                           offer=offer,
@@ -970,9 +977,9 @@ def add_cluster_node_type(cmd,
                                                            os_disk=VirtualMachineScaleSetOSDisk(caching='ReadOnly',
                                                                                                 create_option='FromImage',
                                                                                                 name='vmssosdisk',
-                                                                                                vhd_containers=create_vhd(cli_ctx, resource_group_name, cluster_name, node_type, location)))
+                                                                                                vhd_containers=create_vhd(cli_ctx, resource_group_name, cluster_name, node_type_name, location)))
 
-    os_profile = VirtualMachineScaleSetOSProfile(computer_name_prefix=node_type,
+    os_profile = VirtualMachineScaleSetOSProfile(computer_name_prefix=node_type_name,
                                                  admin_password=vm_password,
                                                  admin_username=vm_user_name,
                                                  secrets=vmss.virtual_machine_profile.os_profile.secrets)
@@ -1005,9 +1012,9 @@ def add_cluster_node_type(cmd,
     if fabric_ext is None:
         raise CLIError("No valid fabric extension found")
 
-    fabric_ext.settings['nodeTypeRef'] = node_type
+    fabric_ext.settings['nodeTypeRef'] = node_type_name
     fabric_ext.settings['durabilityLevel'] = durability_level
-    if fabric_ext.settings['nicPrefixOverride']:
+    if 'nicPrefixOverride' not in fabric_ext.settings:
         fabric_ext.settings['nicPrefixOverride'] = address_prefix
     storage_client = storage_client_factory(cli_ctx)
     list_results = storage_client.storage_accounts.list_keys(
@@ -1031,16 +1038,15 @@ def add_cluster_node_type(cmd,
                                                                         network_profile=vm_network_profile)
 
     poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name,
-                                                                        node_type,
+                                                                        node_type_name,
                                                                         VirtualMachineScaleSet(location=location,
                                                                                                sku=ComputeSku(
-                                                                                                   vm_sku, vm_tier, capacity),
+                                                                                                   name=vm_sku, tier=vm_tier, capacity=capacity),
                                                                                                overprovision=False,
                                                                                                upgrade_policy=UpgradePolicy(
                                                                                                    mode=UpgradeMode.automatic),
                                                                                                virtual_machine_profile=virtual_machine_scale_set_profile))
     LongRunningOperation(cli_ctx)(poller)
-    return client.get(resource_group_name, cluster_name)
 
 
 def _verify_cert_function_parameter(certificate_file=None,

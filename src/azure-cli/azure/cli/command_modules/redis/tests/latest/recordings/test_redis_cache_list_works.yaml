@@ -1,136 +1,109 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2019-02-05T23:30:11Z"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group create]
-      Connection: [keep-alive]
-      Content-Length: ['110']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--location --name --tag]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.58]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_redis000001?api-version=2019-07-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001","name":"cli_test_redis000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-02-05T23:30:11Z"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['384']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 05 Feb 2019 23:28:00 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
-- request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [redis list]
-      Connection: [keep-alive]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-redis/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.58]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/Redis?api-version=2018-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Cache/Redis?api-version=2019-07-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfanclivnet","location":"Central
-        US","name":"alfanclivnet","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":3},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"30000","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"alfanclivnet.redis.cache.windows.net","port":6379,"sslPort":6380,"subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Network/virtualNetworks/AlfanCUSVNET/subnets/default","staticIP":"10.3.0.62","shardCount":2,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfancliprimary","location":"West
-        US","name":"alfancliprimary","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"alfancliprimary.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfancliprimary/linkedServers/alfanclisecondary"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/AlfanTestBadSku","location":"West
-        US","name":"AlfanTestBadSku","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"AlfanTestBadSku.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfanclisecondary","location":"East
-        US","name":"alfanclisecondary","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"alfanclisecondary.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfanclisecondary/linkedServers/alfancliprimary"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfanazcache","location":"Southeast
-        Asia","name":"alfanazcache","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Failed","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"alfanazcache.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]},"zones":["2"]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfantagtry","location":"West
-        US 2","name":"alfantagtry","type":"Microsoft.Cache/Redis","tags":{"test":"tryingzones"},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"alfantagtry.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfantagtry/linkedServers/alfantagtryagain"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfantagtryagain","location":"West
-        US 2","name":"alfantagtryagain","type":"Microsoft.Cache/Redis","tags":{"test":"tryingzones"},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"minimumTlsVersion":"1.2","redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"alfantagtryagain.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfantagtryagain/linkedServers/alfantagtry"}]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfanzone","location":"West
-        US 2","name":"alfanzone","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200","zonal-configuration":"{\r\n  \"primaryZoneId\":
-        \"1\",\r\n  \"preferredPrimaryZoneId\": \"1\",\r\n  \"zoneNodeTopology\":
-        {\r\n    \"1\": [\r\n      \"0\",\r\n      \"2\"\r\n    ],\r\n    \"2\": [\r\n      \"1\",\r\n      \"3\"\r\n    ]\r\n  }\r\n}"},"accessKeys":null,"hostName":"alfanzone.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]},"zones":["1","2"]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redissidh3u35tuslwvikc6qujaoktfspjlkellh4pziemwopyivcqlmj73yzj27ae/providers/Microsoft.Cache/Redis/cliredishzxzlwkhwiu4tlat","location":"West
-        US 2","name":"cliredishzxzlwkhwiu4tlat","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"cliredishzxzlwkhwiu4tlat.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis6i3nuewp7llg2trhiecut3zjfgaw5f4stxw6ym62zl5vbhft3lskxwn4k2ea6/providers/Microsoft.Cache/Redis/cliredisycaj4pm5kc33gsga","location":"West
-        US 2","name":"cliredisycaj4pm5kc33gsga","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cliredisycaj4pm5kc33gsga.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redisuouyfcosnm3wsxe57aabdy4hvsndxpfrhhlkm3tap6yqv4ylher67qqslzfyz/providers/Microsoft.Cache/Redis/cliredisxcbyujkxjozkz3mj","location":"West
-        US 2","name":"cliredisxcbyujkxjozkz3mj","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"cliredisxcbyujkxjozkz3mj.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rediselqqftdhizphfvxov6ed44xs6bt3wd2ohezgx7xtyycmhsjxvyqza2gc34p3m/providers/Microsoft.Cache/Redis/clirediszgzs7e5wjbp6dpce","location":"West
-        US 2","name":"clirediszgzs7e5wjbp6dpce","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"clirediszgzs7e5wjbp6dpce.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redishmzzfsjx4sbpklaid66ajzug4hptno4af3jc5rd3xj6gaxkc3feibapg6ryax/providers/Microsoft.Cache/Redis/cliredis6zd7mnxogh6a3klx","location":"West
-        US 2","name":"cliredis6zd7mnxogh6a3klx","type":"Microsoft.Cache/Redis","tags":{"test":"tryingzones"},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200","zonal-configuration":"{\r\n  \"primaryZoneId\":
-        \"2\",\r\n  \"preferredPrimaryZoneId\": \"2\",\r\n  \"zoneNodeTopology\":
-        {\r\n    \"2\": [\r\n      \"0\",\r\n      \"2\"\r\n    ],\r\n    \"1\": [\r\n      \"1\",\r\n      \"3\"\r\n    ]\r\n  }\r\n}"},"accessKeys":null,"hostName":"cliredis6zd7mnxogh6a3klx.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]},"zones":["2","1"]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redisv2pqnoh3jnppf2gttcblgib4dsa4qdm3d2ocpk52f4j3fm4lvwxau4mkzod2o/providers/Microsoft.Cache/Redis/cliredis6m4x5qrbvdbkm5h2","location":"West
-        US 2","name":"cliredis6m4x5qrbvdbkm5h2","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"minimumTlsVersion":"1.2","tenantSettings":{"hello":"1"},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cliredis6m4x5qrbvdbkm5h2.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfanclitagtest","location":"West
-        US 2","name":"alfanclitagtest","type":"Microsoft.Cache/Redis","tags":{"foo":"bar","key":"val"},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"tenantSettings":{"setting1":"value1","setting2":"value2"},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"alfanclitagtest.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_rediswd7fatw3etx7depteckzhbh4a77fnqbcvrpoc5u55w4vqewud4s3wehlfenpl/providers/Microsoft.Cache/Redis/cliredis4qcgznih53yvmfi3","location":"West
-        US 2","name":"cliredis4qcgznih53yvmfi3","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"3.2.7","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"minimumTlsVersion":"1.2","tenantSettings":{"{\"hello\":1}":""},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cliredis4qcgznih53yvmfi3.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AlfanRG/providers/Microsoft.Cache/Redis/alfanclizo","location":"West
-        US 2","name":"alfanclizo","type":"Microsoft.Cache/Redis","tags":{"foo":"bar"},"properties":{"provisioningState":"Creating","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"tenantSettings":{},"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"alfanclizo.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]},"zones":["1","2"]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis3jfceqv3w3trfqzrm2gbmr2gknf2ms6fxitig5ppvecdtfxofq64bjs2flaum/providers/Microsoft.Cache/Redis/cliredistxnbi2j2rhufkqin","location":"West
-        US 2","name":"cliredistxnbi2j2rhufkqin","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"3.2.7","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"tenantSettings":{},"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"cliredistxnbi2j2rhufkqin.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redisnzrf74dyadvjniohzhppep3tvhv5bfqdiqkkquhqldep65pqiaomgcff6wgnf/providers/Microsoft.Cache/Redis/cliredismg5hzo3s42iwhgpi","location":"West
-        US 2","name":"cliredismg5hzo3s42iwhgpi","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Creating","redisVersion":"3.2.7","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"tenantSettings":{},"redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"cliredismg5hzo3s42iwhgpi.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}}]}'}
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mechandr/providers/Microsoft.Cache/Redis/rdbcli","location":"Central
+        US","name":"rdbcli","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000},{"sslPort":15001}],"minimumTlsVersion":"1.2","redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","aof-backup-enabled":"false","rdb-backup-enabled":"True","rdb-backup-frequency":"60","rdb-backup-max-snapshot-count":"1","maxmemory-delta":"200","rdb-storage-connection-string":"DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=rdbaccount;AccountKey=[key
+        hidden]","aof-storage-connection-string-0":"DefaultEndpointsProtocol=https;BlobEndpoint=https://rdbaccount.blob.core.windows.net/;AccountName=rdbaccount;AccountKey=[key
+        hidden]","aof-storage-connection-string-1":"DefaultEndpointsProtocol=https;BlobEndpoint=https://aofrdb.blob.core.windows.net/;AccountName=aofrdb;AccountKey=[key
+        hidden]"},"accessKeys":null,"hostName":"rdbcli.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mechandr/providers/Microsoft.Cache/Redis/basicupdates","location":"Central
+        US","name":"basicupdates","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"4.0.14","sku":{"name":"Standard","family":"C","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000},{"sslPort":15001}],"minimumTlsVersion":"1.1","redisConfiguration":{"maxclients":"1000","maxmemory-reserved":"50","maxfragmentationmemory-reserved":"50","maxmemory-delta":"50"},"accessKeys":null,"hostName":"basicupdates.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mechandr/providers/Microsoft.Cache/Redis/basicupdate","location":"Central
+        US","name":"basicupdate","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"4.0.14","sku":{"name":"Basic","family":"C","capacity":0},"enableNonSslPort":false,"instances":[{"sslPort":15000}],"minimumTlsVersion":"1.1","redisConfiguration":{"maxclients":"256","maxmemory-reserved":"2","maxfragmentationmemory-reserved":"12","maxmemory-delta":"2"},"accessKeys":null,"hostName":"basicupdate.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mechandr/providers/Microsoft.Cache/Redis/zonereplicascale","location":"Central
+        US","name":"zonereplicascale","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000,"zone":"1"},{"sslPort":15001,"zone":"2"},{"sslPort":15002,"zone":"1"}],"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200","zonal-configuration":"{\r\n  \"preferredPrimaryZoneId\":
+        \"1\",\r\n  \"zoneNodeTopology\": {\r\n    \"1\": [\r\n      \"0\",\r\n      \"2\"\r\n    ],\r\n    \"2\":
+        [\r\n      \"1\"\r\n    ]\r\n  }\r\n}"},"accessKeys":null,"hostName":"zonereplicascale.redis.cache.windows.net","port":6379,"sslPort":6380,"replicasPerMaster":2,"linkedServers":[]},"zones":["1","2"]},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mechandr/providers/Microsoft.Cache/Redis/clireplica","location":"Central
+        US","name":"clireplica","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000},{"sslPort":15001}],"tenantSettings":{},"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"clireplica.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mechandr/providers/Microsoft.Cache/Redis/clireplica2","location":"Central
+        US","name":"clireplica2","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Succeeded","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000},{"sslPort":15001},{"sslPort":15002}],"minimumTlsVersion":"1.2","tenantSettings":{},"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"clireplica2.redis.cache.windows.net","port":6379,"sslPort":6380,"replicasPerMaster":2,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mechandr/providers/Microsoft.Cache/Redis/clireplica1","location":"Central
+        US","name":"clireplica1","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Scaling","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000},{"sslPort":15001}],"minimumTlsVersion":"1.2","tenantSettings":{},"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"200","maxfragmentationmemory-reserved":"300","maxmemory-delta":"200"},"accessKeys":null,"hostName":"clireplica1.redis.cache.windows.net","port":6379,"sslPort":6380,"linkedServers":[]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mechandr/providers/Microsoft.Cache/Redis/replicascale","location":"Central
+        US","name":"replicascale","type":"Microsoft.Cache/Redis","tags":{},"properties":{"provisioningState":"Failed","redisVersion":"4.0.14","sku":{"name":"Premium","family":"P","capacity":1},"enableNonSslPort":false,"instances":[{"sslPort":15000},{"sslPort":15001},{"sslPort":15002}],"redisConfiguration":{"maxclients":"7500","maxmemory-reserved":"96","maxfragmentationmemory-reserved":"144","maxmemory-delta":"96"},"accessKeys":null,"hostName":"replicascale.redis.cache.windows.net","port":6379,"sslPort":6380,"shardCount":1,"replicasPerMaster":2,"linkedServers":[]}}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['14264']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 05 Feb 2019 23:28:01 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-original-request-ids: [c78050dc-3cf1-4e9f-ae9f-c9512b74aa8b, fca6a335-8040-401c-9e8d-357bc8a7c725,
-        b584a23c-abea-40fa-a3a2-079043a95129, 2f42dafb-6e15-4095-9f89-f98efecdc67f,
-        691fefd0-5674-4e65-9b8d-8136f052d054]
-    status: {code: 200, message: OK}
+      cache-control:
+      - no-cache
+      content-length:
+      - '6426'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Dec 2019 23:50:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-rp-server-mvid:
+      - d4a16663-d537-49d1-8ba4-e2fdb635702d
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [redis list]
-      Connection: [keep-alive]
-      ParameterSetName: [-g]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          azure-mgmt-redis/6.0.0 Azure-SDK-For-Python AZURECLI/2.0.58]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - redis list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.1 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-redis/7.0.0rc1 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis?api-version=2018-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_redis000001/providers/Microsoft.Cache/Redis?api-version=2019-07-01
   response:
-    body: {string: '{"value":[]}'}
+    body:
+      string: '{"value":[]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['12']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 05 Feb 2019 23:28:02 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      ParameterSetName: [--name --yes --no-wait]
-      User-Agent: [python/3.6.5 (Windows-10-10.0.17763-SP0) msrest/0.6.4 msrest_azure/0.4.34
-          resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.58]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_redis000001?api-version=2019-07-01
-  response:
-    body: {string: ''}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['0']
-      date: ['Tue, 05 Feb 2019 23:28:02 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkVESVNNSlpSUlJKVVMzQkFPSTVCSVhHRlBQVU1ZNFhQTXxCNTI2MDU3MzY3MUM1NjlELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2019-07-01']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
-    status: {code: 202, message: Accepted}
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Dec 2019 23:50:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1

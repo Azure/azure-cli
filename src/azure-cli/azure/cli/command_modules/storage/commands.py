@@ -9,7 +9,9 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cloud_storage_account_service_factory,
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy,
-                                                               cf_blob_data_gen_update, cf_sa_for_keys)
+                                                               cf_blob_data_gen_update, cf_sa_for_keys,
+                                                               cf_mgmt_blob_services, cf_mgmt_file_shares,
+                                                               cf_private_link, cf_private_endpoint)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -24,11 +26,40 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.MGMT_STORAGE
     )
 
+    blob_service_mgmt_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#BlobServicesOperations.{}',
+        client_factory=cf_mgmt_blob_services,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    file_shares_mgmt_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#FileSharesOperations.{}',
+        client_factory=cf_mgmt_file_shares,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
     storage_account_sdk_keys = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#StorageAccountsOperations.{}',
         client_factory=cf_sa_for_keys,
         resource_type=ResourceType.MGMT_STORAGE
     )
+
+    private_link_resource_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=cf_private_link,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    private_endpoint_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=cf_private_endpoint,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    private_endpoint_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
+        client_factory=cf_private_endpoint,
+        resource_type=ResourceType.MGMT_STORAGE)
 
     storage_account_custom_type = CliCommandType(
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
@@ -84,7 +115,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                   transform=lambda x: getattr(x, 'keys', x))
         g.command('keys list', 'list_keys',
                   transform=lambda x: getattr(x, 'keys', x))
-        g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01', is_preview=True)
+        g.command('revoke-delegation-keys', 'revoke_user_delegation_keys', min_api='2019-04-01')
 
     with self.command_group('storage account', cloud_data_plane_sdk) as g:
         g.storage_command('generate-sas', 'generate_shared_access_signature')
@@ -98,6 +129,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     management_policy_custom_type = CliCommandType(
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
         client_factory=cf_mgmt_policy)
+
+    storage_blob_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.blob#{}',
+        client_factory=cf_sa,
+        resource_type=ResourceType.MGMT_STORAGE)
 
     with self.command_group('storage account management-policy', management_policy_sdk,
                             resource_type=ResourceType.MGMT_STORAGE, min_api='2018-11-01',
@@ -115,6 +151,32 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('add', 'add_network_rule')
         g.custom_command('list', 'list_network_rules')
         g.custom_command('remove', 'remove_network_rule')
+
+    with self.command_group('storage account private-endpoint-connection', private_endpoint_sdk,
+                            custom_command_type=private_endpoint_custom_type, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
+        from ._validators import validate_private_endpoint_connection_id
+        g.command('delete', 'delete', confirmation=True, validator=validate_private_endpoint_connection_id)
+        g.command('show', 'get', validator=validate_private_endpoint_connection_id)
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+
+    with self.command_group('storage account private-link-resource', private_link_resource_sdk,
+                            resource_type=ResourceType.MGMT_STORAGE) as g:
+        from azure.cli.core.commands.transform import gen_dict_to_list_transform
+        g.command('list', 'list_by_storage_account', is_preview=True, min_api='2019-06-01',
+                  transform=gen_dict_to_list_transform(key="value"))
+
+    with self.command_group('storage account blob-service-properties', blob_service_mgmt_sdk,
+                            custom_command_type=storage_account_custom_type,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2018-07-01', is_preview=True) as g:
+        g.show_command('show', 'get_service_properties')
+        g.generic_update_command('update',
+                                 getter_name='get_service_properties',
+                                 setter_name='set_service_properties',
+                                 custom_func_name='update_blob_service_properties')
 
     with self.command_group('storage logging', get_custom_sdk('logging', multi_service_properties_factory)) as g:
         from ._transformers import transform_logging_list_output
@@ -188,6 +250,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('copy cancel', 'abort_copy_blob')
         g.storage_custom_command_oauth(
             'copy start-batch', 'storage_blob_copy_batch')
+
+    with self.command_group('storage blob', storage_account_sdk, resource_type=ResourceType.MGMT_STORAGE,
+                            custom_command_type=storage_blob_custom_type) as g:
+        g.custom_command('restore', 'restore_blob_ranges', min_api='2019-06-01', is_preview=True, supports_no_wait=True)
 
     with self.command_group('storage blob incremental-copy',
                             operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',
@@ -303,6 +369,18 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.multiapi.storage.file.fileservice#FileService.{}',
         client_factory=file_data_service_factory,
         resource_type=ResourceType.DATA_STORAGE)
+
+    with self.command_group('storage share-rm', command_type=file_shares_mgmt_sdk,
+                            custom_command_type=get_custom_sdk('file',
+                                                               cf_mgmt_file_shares,
+                                                               resource_type=ResourceType.MGMT_STORAGE),
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-04-01', is_preview=True) as g:
+        g.command('create', 'create')
+        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('exists', '_file_share_exists', transform=create_boolean_result_output_transformer('exists'))
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.command('update', 'update')
 
     with self.command_group('storage share', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:

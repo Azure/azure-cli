@@ -102,7 +102,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     for scope in ['mariadb server firewall-rule', 'mysql server firewall-rule', 'postgres server firewall-rule']:
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
-            c.argument('firewall_rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the firewall rule.')
+            c.argument('firewall_rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the firewall rule. The firewall rule name cannot be empty. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the firewall rule name cannot exceed 128 characters.')
             c.argument('start_ip_address', options_list=['--start-ip-address'], help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
             c.argument('end_ip_address', options_list=['--end-ip-address'], help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
@@ -125,3 +125,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     for scope in ['mariadb server replica list', 'mysql server replica list', 'postgres server replica list']:
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], help='Name of the master server.')
+
+    for item in ['approve', 'reject', 'delete', 'show']:
+        for scope in ['mariadb server private-endpoint-connection {}', 'mysql server private-endpoint-connection {}', 'postgres server private-endpoint-connection {}']:
+            with self.argument_context(scope.format(item)) as c:
+                c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                           help='The name of the private endpoint connection associated with the Server. '
+                                'Required if --id is not specified')
+                c.extra('connection_id', options_list=['--id'], required=False,
+                        help='The ID of the private endpoint connection associated with the Server. '
+                             'If specified --server-name/-s and --name/-n, this should be omitted.')
+                c.argument('server_name', options_list=['--server-name', '-s'], required=False,
+                           help='Name of the Server. Required if --id is not specified')
+                c.argument('resource_group_name', help='The resource group name of specified server.',
+                           required=False)
+                c.argument('description', help='Comments for {} operation.'.format(item))
+
+    for scope in ['mariadb server private-link-resource', 'mysql server private-link-resource', 'postgres server private-link-resource']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--server-name', '-s'], required=True, help='Name of the Server.')

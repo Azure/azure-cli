@@ -16,13 +16,54 @@ helps['appconfig create'] = """
 type: command
 short-summary: Create an App Configuration.
 examples:
-  - name: Create an App Configuration with name, location and resource group.
-    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus
+  - name: Create an App Configuration with name, location, sku and resource group.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard
+  - name: Create an App Configuration with name, location, sku and resource group with system assigned identity.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity
+  - name: Create an App Configuration with name, location, sku and resource group with user assigned identity.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --assign-identity /subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity
+"""
+
+helps['appconfig identity'] = """
+type: group
+short-summary: Managed identities for App Configurations.
+"""
+
+helps['appconfig identity assign'] = """
+type: command
+short-summary: Update managed identities for an App Configuration.
+examples:
+  - name: Enable the system-assigned identity for an existing App Configuration
+    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration
+  - name: Assign a user-assigned managed identity for an existing App Configuration
+    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
+  - name: Assign both system-assigned and user assigned identities for an existing App Configuration
+    text: az appconfig identity assign -g MyResourceGroup -n MyAppConfiguration --identities [system] "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
+"""
+
+helps['appconfig identity remove'] = """
+type: command
+short-summary: Remove managed identities for an App Configuration.
+examples:
+  - name: Remove the system-assigned identity from a App Configuration.
+    text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration
+  - name: Remove a user assigned identity from a App Configuration.
+    text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration --identities "/subscriptions/<SUBSCRIPTON ID>/resourcegroups/<RESOURCEGROUP>/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myUserAssignedIdentity"
+  - name: Remove all identities from an App Configuration.
+    text: az appconfig identity remove -g MyResourceGroup -n MyAppConfiguration --identities [all]
+"""
+
+helps['appconfig identity show'] = """
+type: command
+short-summary: Display managed identities for an App Configuration.
+examples:
+  - name: Display managed identities for a task.
+    text: az appconfig identity show -g MyResourceGroup -n MyAppConfiguration
 """
 
 helps['appconfig credential'] = """
 type: group
-short-summary: Manage credentials for App Configurations
+short-summary: Manage credentials for App Configurations.
 """
 
 helps['appconfig credential list'] = """
@@ -68,24 +109,32 @@ helps['appconfig kv export'] = """
 type: command
 short-summary: Export configurations to another place from your App Configuration.
 examples:
-  - name: Export all keys with label test to a json file.
+  - name: Export all keys and feature flags with label test to a json file.
     text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json
-  - name: Export all keys with null label to another App Configuration.
-    text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration
-  - name: Export all keys with null label to an App Service appliaction.
+  - name: Export all keys with null label to an App Service application.
     text: az appconfig kv export -n MyAppConfiguration -d appservice  --appservice-account MyAppService
+  - name: Export all keys with label test excluding feature flags to a json file.
+    text: az appconfig kv export -n MyAppConfiguration --label test -d file --path D:/abc.json --format json --skip-features
+  - name: Export all keys and feature flags with all labels to another App Configuration.
+    text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label * --preserve-labels
+  - name: Export all keys and feature flags with all labels to another App Configuration and overwrite destination labels.
+    text: az appconfig kv export -n MyAppConfiguration -d appconfig --dest-name AnotherAppConfiguration --key * --label * --dest-label ExportedKeys
 """
 
 helps['appconfig kv import'] = """
 type: command
 short-summary: Import configurations into your App Configuration from another place.
 examples:
-  - name: Import all keys with label test from a file.
+  - name: Import all keys and feature flags from a file and apply test label.
     text: az appconfig kv import -n MyAppConfiguration --label test -s file --path D:/abc.json --format json
-  - name: Import all keys with null label from an App Configuration.
-    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration
-  - name: Import all keys with null label from an App Service appliaction.
+  - name: Import all keys and feature flags with null label and apply new label from an App Configuration.
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --label ImportedKeys
+  - name: Import all keys and apply null label from an App Service appliaction.
     text: az appconfig kv import -n MyAppConfiguration -s appservice --appservice-account MyAppService
+  - name: Import all keys with label test and apply test2 label excluding feature flags from an App Configuration.
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-label test --label test2 --src-name AnotherAppConfiguration --skip-features
+  - name: Import all keys and feature flags with all labels to another App Configuration.
+    text: az appconfig kv import -n MyAppConfiguration -s appconfig --src-name AnotherAppConfiguration --src-key * --src-label * --preserve-labels
 """
 
 helps['appconfig kv list'] = """
@@ -132,6 +181,16 @@ examples:
     text: az appconfig kv set -n MyAppConfiguration --key color --label MyLabel --value red
   - name: Set a key with null label using connection string.
     text: az appconfig kv set --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key color --value red --tags key1=value1 key2=value2
+"""
+
+helps['appconfig kv set-keyvault'] = """
+type: command
+short-summary: Set a keyvault reference.
+examples:
+  - name: Set a keyvault reference with label MyLabel.
+    text: az appconfig kv set-keyvault -n MyAppConfiguration --key HostSecret --label MyLabel --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret/Dummyversion
+  - name: Set a keyvault reference with null label and multiple tags using connection string.
+    text: az appconfig kv set-keyvault --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key HostSecret --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret --tags tag1=value1 tag2=value2
 """
 
 helps['appconfig kv show'] = """
@@ -193,6 +252,12 @@ short-summary: Update an App Configuration.
 examples:
   - name: Update tags of an App Configuration
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --tags key1=value1 key2=value2
+  - name: Upgrade sku of an App Configuration to standard
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --sku Standard
+  - name: Enable customer encryption key with system assigned identity
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name myKey --encryption-key-version keyVersion --encryption-key-vault https://keyVaultName.vault.azure.net
+  - name: Remove customer encryption key
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --encryption-key-name ""
 """
 
 helps['appconfig feature'] = """

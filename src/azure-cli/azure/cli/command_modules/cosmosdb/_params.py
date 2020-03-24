@@ -37,8 +37,8 @@ CASSANDRA_SCHEMA_EXAMPLE = """--schema "{\\"columns\\": [{\\"name\\": \\"columnA
 
 
 def load_arguments(self, _):
-
-    from azure.mgmt.cosmosdb.models import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind
+    from knack.arguments import CLIArgumentType
+    from azure.mgmt.cosmosdb.models import KeyKind, DefaultConsistencyLevel, DatabaseAccountKind, TriggerType, TriggerOperation
 
     with self.argument_context('cosmosdb') as c:
         c.argument('account_name', arg_type=name_type, help='Name of the Cosmos DB database account', completer=get_resource_name_completion_list('Microsoft.DocumentDb/databaseAccounts'), id_part='name')
@@ -46,6 +46,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb create') as c:
         c.argument('account_name', completer=None)
+        c.argument('key_uri', help="The URI of the key vault", is_preview=True)
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -62,6 +63,7 @@ def load_arguments(self, _):
             c.argument('enable_virtual_network', arg_type=get_three_state_flag(), help='Enables virtual network on the Cosmos DB database account')
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
             c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
+            c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
 
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
         with self.argument_context(scope) as c:
@@ -79,12 +81,12 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb network-rule add') as c:
         c.argument('subnet', help="Name or ID of the subnet")
-        c.argument('virtual_network', help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
-        c.argument("ignore_missing_vnet_service_endpoint", arg_type=get_three_state_flag(), help="Create firewall rule before the virtual network has vnet service endpoint enabled.")
+        c.argument('virtual_network', options_list=['--vnet-name', '--virtual-network'], help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
+        c.argument("ignore_missing_vnet_service_endpoint", options_list=['--ignore-missing-endpoint', '--ignore-missing-vnet-service-endpoint'], arg_type=get_three_state_flag(), help="Create firewall rule before the virtual network has vnet service endpoint enabled.")
 
     with self.argument_context('cosmosdb network-rule remove') as c:
         c.argument('subnet', help="Name or ID of the subnet")
-        c.argument('virtual_network', help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
+        c.argument('virtual_network', options_list=['--vnet-name', '--virtual-network'], help="The name of the VNET, which must be provided in conjunction with the name of the subnet")
 
     with self.argument_context('cosmosdb collection') as c:
         c.argument('collection_id', options_list=['--collection-name', '-c'], help='Collection Name')
@@ -96,16 +98,20 @@ def load_arguments(self, _):
     with self.argument_context('cosmosdb database') as c:
         c.argument('throughput', type=int, help='Offer Throughput (RU/s)')
 
+    account_name_type = CLIArgumentType(options_list=['--account-name', '-a'], help="Cosmosdb account name.")
+    database_name_type = CLIArgumentType(options_list=['--database-name', '-d'], help='Database name.')
+    container_name_type = CLIArgumentType(options_list=['--container-name', '-c'], help='Container name.')
+
 # SQL database
     with self.argument_context('cosmosdb sql database') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', help='The throughput of SQL database (RU/s). Default value is 400')
 
 # SQL container
     with self.argument_context('cosmosdb sql container') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('database_name', database_name_type)
         c.argument('container_name', options_list=['--name', '-n'], help="Container name")
         c.argument('partition_key_path', options_list=['--partition-key-path', '-p'], help='Partition Key Path, e.g., \'/address/zipcode\'')
         c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
@@ -114,15 +120,41 @@ def load_arguments(self, _):
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('throughput', help='The throughput of SQL container (RU/s). Default value is 400')
 
+# SQL stored procedure
+    with self.argument_context('cosmosdb sql stored-procedure') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('database_name', database_name_type)
+        c.argument('container_name', container_name_type)
+        c.argument('stored_procedure_name', options_list=['--name', '-n'], help="StoredProcedure name")
+        c.argument('stored_procedure_body', options_list=['--body', '-b'], completer=FilesCompleter(), help="StoredProcedure body, you can enter it as a string or as a file, e.g., --body @sprocbody-file.json")
+
+# SQL trigger
+    with self.argument_context('cosmosdb sql trigger') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('database_name', database_name_type)
+        c.argument('container_name', container_name_type)
+        c.argument('trigger_name', options_list=['--name', '-n'], help="Trigger name")
+        c.argument('trigger_body', options_list=['--body', '-b'], completer=FilesCompleter(), help="Trigger body, you can enter it as a string or as a file, e.g., --body @triggerbody-file.json")
+        c.argument('trigger_type', options_list=['--type', '-t'], arg_type=get_enum_type(TriggerType), help="Trigger type")
+        c.argument('trigger_operation', options_list=['--operation'], arg_type=get_enum_type(TriggerOperation), help="The operation of the trigger.")
+
+# SQL user defined function
+    with self.argument_context('cosmosdb sql user-defined-function') as c:
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('database_name', database_name_type)
+        c.argument('container_name', container_name_type)
+        c.argument('user_defined_function_name', options_list=['--name', '-n'], help="UserDefinedFunction name")
+        c.argument('user_defined_function_body', options_list=['--body', '-b'], completer=FilesCompleter(), help="UserDefinedFunction body, you can enter it as a string or as a file, e.g., --body @udfbody-file.json")
+
 # MongoDB
     with self.argument_context('cosmosdb mongodb database') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', help='The throughput of MongoDB database (RU/s). Default value is 400')
 
     with self.argument_context('cosmosdb mongodb collection') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('database_name', database_name_type)
         c.argument('collection_name', options_list=['--name', '-n'], help="Collection name")
         c.argument('shard_key_path', options_list=['--shard'], help="Sharding key path.")
         c.argument('indexes', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexes, you can enter it as a string or as a file, e.g., --idx @indexes-file.json or ' + MONGODB_INDEXES_EXAMPLE)
@@ -130,12 +162,12 @@ def load_arguments(self, _):
 
 # Cassandra
     with self.argument_context('cosmosdb cassandra keyspace') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('keyspace_name', options_list=['--name', '-n'], help="Keyspace name")
         c.argument('throughput', help='The throughput of Cassandra keyspace (RU/s). Default value is 400')
 
     with self.argument_context('cosmosdb cassandra table') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('keyspace_name', options_list=['--keyspace-name', '-k'], help="Keyspace name")
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
@@ -144,13 +176,13 @@ def load_arguments(self, _):
 
 # Gremlin
     with self.argument_context('cosmosdb gremlin database') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', help='The throughput Gremlin database (RU/s). Default value is 400')
 
     with self.argument_context('cosmosdb gremlin graph') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('database_name', database_name_type)
         c.argument('graph_name', options_list=['--name', '-n'], help="Graph name")
         c.argument('partition_key_path', options_list=['--partition-key-path', '-p'], help='Partition Key Path, e.g., \'/address/zipcode\'')
         c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
@@ -160,56 +192,56 @@ def load_arguments(self, _):
 
 # Table
     with self.argument_context('cosmosdb table') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('throughput', help='The throughput of Table (RU/s). Default value is 400')
 
 # Throughput
     with self.argument_context('cosmosdb sql database throughput') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', type=int, help='The throughput of SQL database (RU/s).')
 
     with self.argument_context('cosmosdb sql container throughput') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('database_name', database_name_type)
         c.argument('container_name', options_list=['--name', '-n'], help="Container name")
         c.argument('throughput', type=int, help='The throughput of SQL container (RU/s).')
 
     with self.argument_context('cosmosdb mongodb database throughput') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', type=int, help='The throughput of MongoDB database (RU/s).')
 
     with self.argument_context('cosmosdb mongodb collection throughput') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('database_name', database_name_type)
         c.argument('collection_name', options_list=['--name', '-n'], help="Collection name")
         c.argument('throughput', type=int, help='The throughput of MongoDB collection (RU/s).')
 
     with self.argument_context('cosmosdb cassandra keyspace throughput') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('keyspace_name', options_list=['--name', '-n'], help="Keyspace name")
         c.argument('throughput', type=int, help='The throughput of Cassandra keyspace (RU/s).')
 
     with self.argument_context('cosmosdb cassandra table throughput') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('keyspace_name', options_list=['--keyspace-name', '-k'], help="Keyspace name")
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('throughput', type=int, help='The throughput of Cassandra table (RU/s).')
 
     with self.argument_context('cosmosdb gremlin database throughput') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', type=int, help='The throughput of Gremlin database (RU/s).')
 
     with self.argument_context('cosmosdb gremlin graph throughput') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
-        c.argument('database_name', options_list=['--database-name', '-d'], help="Database name")
+        c.argument('account_name', account_name_type, id_part=None)
+        c.argument('database_name', database_name_type)
         c.argument('graph_name', options_list=['--name', '-n'], help="Grapth name")
         c.argument('throughput', type=int, help='The throughput Gremlin graph (RU/s).')
 
     with self.argument_context('cosmosdb table throughput') as c:
-        c.argument('account_name', options_list=['--account-name', '-a'], help="Cosmosdb account name", id_part=None)
+        c.argument('account_name', account_name_type, id_part=None)
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('throughput', type=int, help='The throughput of Table (RU/s).')

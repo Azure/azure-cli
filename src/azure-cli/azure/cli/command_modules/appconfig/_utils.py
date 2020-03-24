@@ -6,8 +6,6 @@ from __future__ import print_function
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-import sys
-
 from knack.prompting import NoTTYException, prompt_y_n
 from knack.util import CLIError
 
@@ -38,7 +36,7 @@ def resolve_resource_group(cmd, config_store_name):
     config_store_client = cf_configstore(cmd.cli_ctx)
     all_stores = config_store_client.list()
     for store in all_stores:
-        if store.name == config_store_name:
+        if store.name.lower() == config_store_name.lower():
             # Id has a fixed structure /subscriptions/subscriptionName/resourceGroups/groupName/providers/providerName/configurationStores/storeName"
             return store.id.split('/')[4], store.endpoint
     raise CLIError(
@@ -103,6 +101,10 @@ def is_valid_connection_string(connection_string):
     return False
 
 
-def error_print(error_message):
-    # used for printing to stderr, even for messages that are not necessarily error messages
-    print(error_message, file=sys.stderr)
+def get_store_name_from_connection_string(connection_string):
+    if is_valid_connection_string(connection_string):
+        segments = dict(seg.split("=", 1) for seg in connection_string.split(";"))
+        endpoint = segments.get("Endpoint")
+        if endpoint:
+            return endpoint.split("//")[1].split('.')[0]
+    return None

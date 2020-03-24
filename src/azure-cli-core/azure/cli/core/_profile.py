@@ -34,7 +34,12 @@ logger = get_logger(__name__)
 _IS_DEFAULT_SUBSCRIPTION = 'isDefault'
 _SUBSCRIPTION_ID = 'id'
 _SUBSCRIPTION_NAME = 'name'
+# Tenant of the token which is used to list the subscription
 _TENANT_ID = 'tenantId'
+# Home tenant of the subscription, which maps to tenantId in 'Subscriptions - List REST API'
+# https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+_HOME_TENANT_ID = 'homeTenantId'
+_MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
 _CLOUD_SHELL_ID = 'cloudShellID'
@@ -248,7 +253,7 @@ class Profile(object):
             except (UnicodeEncodeError, UnicodeDecodeError):  # mainly for Python 2.7 with ascii as the default encoding
                 display_name = re.sub(r'[^\x00-\x7f]', lambda x: '?', display_name)
 
-            consolidated.append({
+            subscription_dict = {
                 _SUBSCRIPTION_ID: s.id.rpartition('/')[2],
                 _SUBSCRIPTION_NAME: display_name,
                 _STATE: s.state.value,
@@ -259,7 +264,15 @@ class Profile(object):
                 _IS_DEFAULT_SUBSCRIPTION: False,
                 _TENANT_ID: s.tenant_id,
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
-            })
+            }
+            # for Subscriptions - List REST API 2019-06-01's subscription account
+            if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
+                if hasattr(s, 'home_tenant_id'):
+                    subscription_dict[_HOME_TENANT_ID] = s.home_tenant_id
+                if hasattr(s, 'managed_by_tenants'):
+                    subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
+
+            consolidated.append(subscription_dict)
 
             if cert_sn_issuer_auth:
                 consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
@@ -521,7 +534,10 @@ class Profile(object):
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
-    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None):
+    def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
+        if aux_tenants and aux_subscriptions:
+            raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
+
         account = self.get_subscription(subscription_id)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
@@ -530,12 +546,14 @@ class Profile(object):
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
 
         external_tenants_info = []
-        ext_subs = [aux_sub for aux_sub in (aux_subscriptions or []) if aux_sub != subscription_id]
-        for ext_sub in ext_subs:
-            sub = self.get_subscription(ext_sub)
-            if sub[_TENANT_ID] != account[_TENANT_ID]:
-                # external_tenants_info.append((sub[_USER_ENTITY][_USER_NAME], sub[_TENANT_ID]))
-                external_tenants_info.append(sub)
+        if aux_tenants:
+            external_tenants_info = [tenant for tenant in aux_tenants if tenant != account[_TENANT_ID]]
+        if aux_subscriptions:
+            ext_subs = [aux_sub for aux_sub in aux_subscriptions if aux_sub != subscription_id]
+            for ext_sub in ext_subs:
+                sub = self.get_subscription(ext_sub)
+                if sub[_TENANT_ID] != account[_TENANT_ID]:
+                    external_tenants_info.append(sub[_TENANT_ID])
 
         if identity_type is None:
             def _retrieve_token():
@@ -551,13 +569,13 @@ class Profile(object):
 
             def _retrieve_tokens_from_external_tenants():
                 external_tokens = []
-                for s in external_tenants_info:
+                for sub_tenant_id in external_tenants_info:
                     if user_type == _USER:
                         external_tokens.append(self._creds_cache.retrieve_token_for_user(
-                            username_or_sp_id, s[_TENANT_ID], resource))
+                            username_or_sp_id, sub_tenant_id, resource))
                     else:
                         external_tokens.append(self._creds_cache.retrieve_token_for_service_principal(
-                            username_or_sp_id, resource, s[_TENANT_ID], resource))
+                            username_or_sp_id, resource, sub_tenant_id, resource))
                 return external_tokens
 
             from azure.cli.core.adal_authentication import AdalAuthentication
@@ -587,7 +605,9 @@ class Profile(object):
         sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
         return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
-    def get_raw_token(self, resource=None, subscription=None):
+    def get_raw_token(self, resource=None, subscription=None, tenant=None):
+        if subscription and tenant:
+            raise CLIError("Please specify only one of subscription and tenant, not both")
         account = self.get_subscription(subscription)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
@@ -595,23 +615,32 @@ class Profile(object):
 
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         if identity_type:
+            # MSI
+            if tenant:
+                raise CLIError("Tenant shouldn't be specified for MSI account")
             msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
             msi_creds.set_token()
             token_entry = msi_creds.token
             creds = (token_entry['token_type'], token_entry['access_token'], token_entry)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            # Cloud Shell
+            if tenant:
+                raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
             creds = self._get_token_from_cloud_shell(resource)
-
-        elif user_type == _USER:
-            creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                              account[_TENANT_ID], resource)
         else:
-            creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                           resource,
-                                                                           account[_TENANT_ID])
+            tenant_dest = tenant if tenant else account[_TENANT_ID]
+            if user_type == _USER:
+                # User
+                creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                  tenant_dest, resource)
+            else:
+                # Service Principal
+                creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
+                                                                               resource,
+                                                                               tenant_dest)
         return (creds,
-                str(account[_SUBSCRIPTION_ID]),
-                str(account[_TENANT_ID]))
+                None if tenant else str(account[_SUBSCRIPTION_ID]),
+                str(tenant if tenant else account[_TENANT_ID]))
 
     def refresh_accounts(self, subscription_finder=None):
         subscriptions = self.load_cached_subscriptions()
@@ -755,11 +784,13 @@ class SubscriptionFinder(object):
                 return arm_client_factory(credentials)
             from azure.cli.core.profiles._shared import get_client_class
             from azure.cli.core.profiles import ResourceType, get_api_version
-            from azure.cli.core._debug import change_ssl_cert_verification
+            from azure.cli.core.commands.client_factory import configure_common_settings
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-            return change_ssl_cert_verification(client_type(credentials, api_version=api_version,
-                                                            base_url=self.cli_ctx.cloud.endpoints.resource_manager))
+            client = client_type(credentials, api_version=api_version,
+                                 base_url=self.cli_ctx.cloud.endpoints.resource_manager)
+            configure_common_settings(cli_ctx, client)
+            return client
 
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []
@@ -848,12 +879,32 @@ class SubscriptionFinder(object):
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
                 # with other tenants.
-                logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                msg = (getattr(ex, 'error_response', None) or {}).get('error_description') or ''
+                if 'AADSTS50076' in msg:
+                    logger.warning("Tenant %s requires Multi-Factor Authentication (MFA). "
+                                   "To access this tenant, use 'az login --tenant' to explicitly "
+                                   "login to this tenant.", tenant_id)
+                else:
+                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,
                 temp_credentials[_ACCESS_TOKEN])
-            all_subscriptions.extend(subscriptions)
+
+            # When a subscription can be listed by multiple tenants, only the first appearance is retained
+            for sub_to_add in subscriptions:
+                add_sub = True
+                for sub_to_compare in all_subscriptions:
+                    if sub_to_add.subscription_id == sub_to_compare.subscription_id:
+                        logger.warning("Subscription %s '%s' can be accessed from tenants %s(default) and %s. "
+                                       "To select a specific tenant when accessing this subscription, "
+                                       "please include --tenant in 'az login'.",
+                                       sub_to_add.subscription_id, sub_to_add.display_name,
+                                       sub_to_compare.tenant_id, sub_to_add.tenant_id)
+                        add_sub = False
+                        break
+                if add_sub:
+                    all_subscriptions.append(sub_to_add)
 
         return all_subscriptions
 
@@ -865,6 +916,9 @@ class SubscriptionFinder(object):
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
+            # map tenantId from REST API to homeTenantId
+            if hasattr(s, "tenant_id"):
+                setattr(s, 'home_tenant_id', s.tenant_id)
             setattr(s, 'tenant_id', tenant)
             all_subscriptions.append(s)
         self.tenants.append(tenant)
@@ -924,12 +978,21 @@ class CredsCache(object):
 
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
-        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID] and
-                   tenant == x[_SERVICE_PRINCIPAL_TENANT]]
+        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
-            raise CLIError("Please run 'az account set' to select active account.")
-        cred = matched[0]
-        context = self._auth_ctx_factory(self._ctx, cred[_SERVICE_PRINCIPAL_TENANT], None)
+            raise CLIError("Could not retrieve credential from local cache for service principal {}. "
+                           "Please run 'az login' for this service principal."
+                           .format(sp_id))
+        matched_with_tenant = [x for x in matched if tenant == x[_SERVICE_PRINCIPAL_TENANT]]
+        if matched_with_tenant:
+            cred = matched_with_tenant[0]
+        else:
+            logger.warning("Could not retrieve credential from local cache for service principal %s under tenant %s. "
+                           "Trying credential under tenant %s, assuming that is an app credential.",
+                           sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
+            cred = matched[0]
+
+        context = self._auth_ctx_factory(self._ctx, tenant, None)
         sp_auth = ServicePrincipalAuth(cred.get(_ACCESS_TOKEN, None) or
                                        cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None),
                                        use_cert_sn_issuer)

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from setuptools import setup
+import sys
 
 VERSION = "0.1.1"
 
@@ -12,12 +13,11 @@ CLASSIFIERS = [
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -29,12 +29,15 @@ DEPENDENCIES = [
     'nose>=1.3.7',
     'readme_renderer>=17.2',
     'requests',
-    'pyyaml',
+    'pyyaml~=5.2',
     'knack',
     'six>=1.10.0',
     'tabulate>=0.7.7',
     'colorama>=0.3.7'
 ]
+
+if sys.version_info < (3, 4):
+    raise ImportError("azure-cli requires Python 3.4 or later.")
 
 setup(
     name='azure-cli-dev-tools',

@@ -13,6 +13,7 @@ import copy
 from knack.log import get_logger
 from knack.util import CLIError
 
+from ._constants import FeatureFlagConstants
 from ._utils import resolve_connection_string, user_confirmation
 from ._azconfig.azconfig_client import AzconfigClient
 from ._azconfig.constants import StatusCodes
@@ -27,8 +28,6 @@ from ._featuremodels import (map_keyvalue_to_featureflag,
 
 
 logger = get_logger(__name__)
-FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
-FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
 
 # Feature commands #
 
@@ -40,7 +39,7 @@ def set_feature(cmd,
                 description=None,
                 yes=False,
                 connection_string=None):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
 
     # when creating a new Feature flag, these defaults will be used
     tags = {}
@@ -72,12 +71,12 @@ def set_feature(cmd,
             if retrieved_kv is None:
                 set_kv = KeyValue(
                     key,
-                    json.dumps(default_value),
+                    json.dumps(default_value, ensure_ascii=False),
                     label,
                     tags,
-                    FEATURE_FLAG_CONTENT_TYPE)
+                    FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE)
             else:
-                if retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+                if retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     logger.warning(
                         "This feature contains invalid content-type. The feature flag will be overwritten.")
                 # we make sure that value retrieved is a valid json and only has the fields supported by backend.
@@ -93,8 +92,9 @@ def set_feature(cmd,
                     label=label,
                     value=json.dumps(
                         feature_flag_value,
-                        default=lambda o: o.__dict__),
-                    content_type=FEATURE_FLAG_CONTENT_TYPE,
+                        default=lambda o: o.__dict__,
+                        ensure_ascii=False),
+                    content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE,
                     tags=retrieved_kv.tags if retrieved_kv.tags else tags)
                 set_kv.etag = retrieved_kv.etag
                 set_kv.last_modified = retrieved_kv.last_modified
@@ -103,7 +103,7 @@ def set_feature(cmd,
             # display
             feature_flag = map_keyvalue_to_featureflag(
                 set_kv, show_conditions=True)
-            entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True)
+            entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True, ensure_ascii=False)
 
         except Exception as exception:
             # Exceptions for ValueError and AttributeError already have customized message
@@ -186,7 +186,8 @@ def delete_feature(cmd,
                         failed_ff,
                         default=lambda o: o.__dict__,
                         indent=2,
-                        sort_keys=True))
+                        sort_keys=True,
+                        ensure_ascii=False))
         else:
             raise CLIError('Delete operation failed.' + str(http_exception))
 
@@ -206,7 +207,7 @@ def show_feature(cmd,
                  label=None,
                  fields=None,
                  connection_string=None):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -214,7 +215,7 @@ def show_feature(cmd,
         query_options = QueryKeyValueOptions(label=label)
         retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+        if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature flag '{}' does not exist.".format(feature))
 
@@ -294,7 +295,7 @@ def lock_feature(cmd,
                  label=None,
                  connection_string=None,
                  yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -306,7 +307,7 @@ def lock_feature(cmd,
         except HTTPException as exception:
             raise CLIError(str(exception))
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+        if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature '{}' you are trying to lock does not exist.".format(feature))
 
@@ -339,7 +340,7 @@ def unlock_feature(cmd,
                    label=None,
                    connection_string=None,
                    yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -351,7 +352,7 @@ def unlock_feature(cmd,
         except HTTPException as exception:
             raise CLIError(str(exception))
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+        if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature '{}' you are trying to unlock does not exist.".format(feature))
 
@@ -384,7 +385,7 @@ def enable_feature(cmd,
                    label=None,
                    connection_string=None,
                    yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -395,7 +396,7 @@ def enable_feature(cmd,
             query_options = QueryKeyValueOptions(label=label)
             retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -412,7 +413,8 @@ def enable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__))
+                                                                                     default=lambda o: o.__dict__,
+                                                                                     ensure_ascii=False))
 
             return map_keyvalue_to_featureflag(
                 keyvalue=updated_key_value, show_conditions=False)
@@ -438,7 +440,7 @@ def disable_feature(cmd,
                     label=None,
                     connection_string=None,
                     yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -449,7 +451,7 @@ def disable_feature(cmd,
             query_options = QueryKeyValueOptions(label=label)
             retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -466,7 +468,8 @@ def disable_feature(cmd,
             updated_key_value = __update_existing_key_value(azconfig_client=azconfig_client,
                                                             retrieved_kv=retrieved_kv,
                                                             updated_value=json.dumps(feature_flag_value,
-                                                                                     default=lambda o: o.__dict__))
+                                                                                     default=lambda o: o.__dict__,
+                                                                                     ensure_ascii=False))
 
             return map_keyvalue_to_featureflag(
                 keyvalue=updated_key_value, show_conditions=False)
@@ -498,7 +501,7 @@ def add_filter(cmd,
                yes=False,
                index=None,
                connection_string=None):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -517,7 +520,7 @@ def add_filter(cmd,
             query_options = QueryKeyValueOptions(label=label)
             retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -527,7 +530,7 @@ def add_filter(cmd,
             feature_flag_value = map_keyvalue_to_featureflagvalue(retrieved_kv)
             feature_filters = feature_flag_value.conditions['client_filters']
 
-            entry = json.dumps(new_filter.__dict__, indent=2)
+            entry = json.dumps(new_filter.__dict__, indent=2, ensure_ascii=False)
             confirmation_message = "Are you sure you want to add this filter?\n" + entry
             user_confirmation(confirmation_message, yes)
 
@@ -545,7 +548,8 @@ def add_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__))
+                                                                 default=lambda o: o.__dict__,
+                                                                 ensure_ascii=False))
 
             return new_filter
 
@@ -573,7 +577,7 @@ def delete_filter(cmd,
                   yes=False,
                   connection_string=None,
                   all_=False):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     azconfig_client = AzconfigClient(resolve_connection_string(cmd, name, connection_string))
 
     if index is None:
@@ -592,7 +596,7 @@ def delete_filter(cmd,
             retrieved_kv = azconfig_client.get_keyvalue(
                 key, QueryKeyValueOptions(label=label))
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -615,7 +619,7 @@ def delete_filter(cmd,
                         display_filter = copy.deepcopy(feature_filters[index])
 
                         confirmation_message = "Are you sure you want to delete this filter?\n" + \
-                            json.dumps(display_filter.__dict__, indent=2)
+                            json.dumps(display_filter.__dict__, indent=2, ensure_ascii=False)
                         user_confirmation(confirmation_message, yes)
 
                         del feature_filters[index]
@@ -633,7 +637,7 @@ def delete_filter(cmd,
                         feature_filters[match_index[0]])
 
                     confirmation_message = "Are you sure you want to delete this filter?\n" + \
-                        json.dumps(display_filter.__dict__, indent=2)
+                        json.dumps(display_filter.__dict__, indent=2, ensure_ascii=False)
                     user_confirmation(confirmation_message, yes)
 
                     del feature_filters[match_index[0]]
@@ -650,7 +654,8 @@ def delete_filter(cmd,
             __update_existing_key_value(azconfig_client=azconfig_client,
                                         retrieved_kv=retrieved_kv,
                                         updated_value=json.dumps(feature_flag_value,
-                                                                 default=lambda o: o.__dict__))
+                                                                 default=lambda o: o.__dict__,
+                                                                 ensure_ascii=False))
 
             return display_filter
 
@@ -678,7 +683,7 @@ def show_filter(cmd,
                 name=None,
                 label=None,
                 connection_string=None):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -689,7 +694,7 @@ def show_filter(cmd,
         query_options = QueryKeyValueOptions(label=label)
         retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+        if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature flag {} does not exist.".format(feature))
 
@@ -730,7 +735,7 @@ def list_filter(cmd,
                 connection_string=None,
                 top=None,
                 all_=False):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
@@ -738,7 +743,7 @@ def list_filter(cmd,
         query_options = QueryKeyValueOptions(label=label)
         retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-        if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+        if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
             raise CLIError(
                 "The feature flag {} does not exist.".format(feature))
 
@@ -766,7 +771,7 @@ def __clear_filter(azconfig_client,
                    feature,
                    label=None,
                    yes=False):
-    key = FEATURE_FLAG_PREFIX + feature
+    key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
 
     retry_times = 3
     retry_interval = 1
@@ -775,7 +780,7 @@ def __clear_filter(azconfig_client,
             query_options = QueryKeyValueOptions(label=label)
             retrieved_kv = azconfig_client.get_keyvalue(key, query_options)
 
-            if retrieved_kv is None or retrieved_kv.content_type != FEATURE_FLAG_CONTENT_TYPE:
+            if retrieved_kv is None or retrieved_kv.content_type != FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                 raise CLIError(
                     "The feature flag {} does not exist.".format(feature))
 
@@ -802,7 +807,8 @@ def __clear_filter(azconfig_client,
                 __update_existing_key_value(azconfig_client=azconfig_client,
                                             retrieved_kv=retrieved_kv,
                                             updated_value=json.dumps(feature_flag_value,
-                                                                     default=lambda o: o.__dict__))
+                                                                     default=lambda o: o.__dict__,
+                                                                     ensure_ascii=False))
 
             return display_filters
 
@@ -839,7 +845,7 @@ def __update_existing_key_value(azconfig_client,
                       value=updated_value,
                       label=retrieved_kv.label,
                       tags=retrieved_kv.tags,
-                      content_type=FEATURE_FLAG_CONTENT_TYPE)
+                      content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE)
     set_kv.etag = retrieved_kv.etag
     set_kv.last_modified = retrieved_kv.last_modified
 
@@ -880,7 +886,7 @@ def __list_all_keyvalues(azconfig_client,
     if feature.startswith("*") and feature != all_keys_pattern:
         key = feature
     else:
-        key = FEATURE_FLAG_PREFIX + feature
+        key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + feature
 
     # If user has specified fields, we still get all the fields and then
     # filter what we need from the response.
@@ -893,7 +899,7 @@ def __list_all_keyvalues(azconfig_client,
         if key != feature:
             valid_features = []
             for kv in retrieved_kv:
-                if kv.content_type == FEATURE_FLAG_CONTENT_TYPE:
+                if kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     valid_features.append(kv)
             return valid_features
 
@@ -923,8 +929,8 @@ def __custom_key_filtering(retrieved_kv, user_key_filter):
             internal_content_type = kv.content_type
             # filter only feature flags
             if internal_key.startswith(
-                    FEATURE_FLAG_PREFIX) and internal_content_type == FEATURE_FLAG_CONTENT_TYPE:
-                feature_name = internal_key[len(FEATURE_FLAG_PREFIX):]
+                    FeatureFlagConstants.FEATURE_FLAG_PREFIX) and internal_content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+                feature_name = internal_key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
                 # search for user pattern in actual feature name
                 if user_key_pattern_regex.search(feature_name):
                     filtered_kv.append(kv)

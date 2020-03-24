@@ -26,8 +26,6 @@ import webbrowser
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
-from ._helpers import _populate_api_server_access_profile, _set_load_balancer_sku, _set_vm_set_type
-
 # pylint: disable=import-error
 import yaml
 import dateutil.parser
@@ -56,32 +54,27 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2019_08_01.models import ContainerServiceStorageProfileTypes
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfile
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileManagedOutboundIPs
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPPrefixes
-from azure.mgmt.containerservice.v2019_08_01.models import ManagedClusterLoadBalancerProfileOutboundIPs
-from azure.mgmt.containerservice.v2019_08_01.models import AgentPool
-from azure.mgmt.containerservice.v2019_08_01.models import ResourceReference
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterIdentity
+from azure.mgmt.containerservice.v2019_11_01.models import AgentPool
 
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftAgentPoolProfileRole
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterIdentityProvider
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAADIdentityProvider
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedCluster
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftRouterProfile
-from azure.mgmt.containerservice.v2019_04_30.models import OpenShiftManagedClusterAuthProfile
-from azure.mgmt.containerservice.v2019_04_30.models import NetworkProfile
-from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedCluster as OpenShiftManagedClusterMonitor  # pylint: disable=line-too-long
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterIdentityProvider
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAADIdentityProvider
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedCluster
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftRouterProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAuthProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import NetworkProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterMonitorProfile
 
 from ._client_factory import cf_container_services
@@ -91,6 +84,11 @@ from ._client_factory import get_graph_rbac_management_client
 from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
+
+from ._helpers import _populate_api_server_access_profile, _set_vm_set_type
+
+from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
+                            update_load_balancer_profile, create_load_balancer_profile)
 
 logger = get_logger(__name__)
 
@@ -535,8 +533,8 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     # always create application with 5 years expiration
     start_date = datetime.datetime.utcnow()
     end_date = start_date + relativedelta(years=5)
-    result = create_application(rbac_client.applications, name, url, [url], password=client_secret,
-                                start_date=start_date, end_date=end_date)
+    result, aad_session_key = create_application(rbac_client.applications, name, url, [url], password=client_secret,
+                                                 start_date=start_date, end_date=end_date)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
         hook.add(message='Creating service principal', value=0.1 * x, total_val=1.0)
@@ -548,13 +546,13 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
             logger.info(ex)
             time.sleep(2 + 2 * x)
     else:
-        return False
+        return False, aad_session_key
     hook.add(message='Finished service principal creation', value=1.0, total_val=1.0)
     logger.info('Finished service principal creation')
-    return service_principal
+    return service_principal, aad_session_key
 
 
-def _add_role_assignment(cli_ctx, role, service_principal, delay=2, scope=None):
+def _add_role_assignment(cli_ctx, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
     # AAD can have delays in propagating data, so sleep and retry
     hook = cli_ctx.get_progress_controller(True)
     hook.add(message='Waiting for AAD role to propagate', value=0, total_val=1.0)
@@ -563,7 +561,7 @@ def _add_role_assignment(cli_ctx, role, service_principal, delay=2, scope=None):
         hook.add(message='Waiting for AAD role to propagate', value=0.1 * x, total_val=1.0)
         try:
             # TODO: break this out into a shared utility library
-            create_role_assignment(cli_ctx, role, service_principal, scope=scope)
+            create_role_assignment(cli_ctx, role, service_principal_msi_id, is_service_principal, scope=scope)
             break
         except CloudError as ex:
             if ex.message == 'The role assignment already exists.':
@@ -1315,7 +1313,8 @@ def create_application(client, display_name, homepage, identifier_uris,
                                                    password_credentials=password_creds,
                                                    required_resource_access=required_resource_accesses)
     try:
-        return client.create(app_create_param)
+        result = client.create(app_create_param, raw=True)
+        return result.output, result.response.headers["ocp-aad-session-key"]
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -1398,11 +1397,14 @@ def create_service_principal(cli_ctx, identifier, resolve_app=True, rbac_client=
     return rbac_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
-def create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None):
-    return _create_role_assignment(cli_ctx, role, assignee, resource_group_name, scope)
+def create_role_assignment(cli_ctx, role, assignee, is_service_principal, resource_group_name=None, scope=None):
+    return _create_role_assignment(cli_ctx,
+                                   role, assignee, resource_group_name,
+                                   scope, resolve_assignee=is_service_principal)
 
 
-def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None, resolve_assignee=True):
+def _create_role_assignment(cli_ctx, role, assignee,
+                            resource_group_name=None, scope=None, resolve_assignee=True):
     from azure.cli.core.profiles import ResourceType, get_sdk
     factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
@@ -1411,7 +1413,11 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
     scope = _build_role_scope(resource_group_name, scope, assignments_client.config.subscription_id)
 
     role_id = _resolve_role_id(role, scope, definitions_client)
+
+    # If the cluster has service principal resolve the service principal client id to get the object id,
+    # if not use MSI object id.
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
+
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
                                              'RoleAssignmentCreateParameters', mod='models',
                                              operation_group='role_assignments')
@@ -1545,35 +1551,37 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
     else:
         protocol = 'http'
 
-    proxy_url = '{0}://{1}:{2}/'.format(protocol, listen_address, listen_port)
+    proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
+    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
+                                                                                                        protocol)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
         # TODO: better error handling here.
         response = requests.post('http://localhost:8888/openport/{0}'.format(listen_port))
         result = json.loads(response.text)
+        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
+            result['url'], protocol)
         term_id = os.environ.get('ACC_TERM_ID')
         if term_id:
-            response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
-                                     json={"url": result['url']})
-        logger.warning('To view the console, please open %s in a new tab', result['url'])
+            response = requests.post('http://localhost:8888/openLink/{0}'.format(term_id),
+                                     json={"url": dashboardURL})
+        logger.warning('To view the console, please open %s in a new tab', dashboardURL)
     else:
         logger.warning('Proxy running on %s', proxy_url)
 
     logger.warning('Press CTRL+C to close the tunnel...')
     if not disable_browser:
-        wait_then_open_async(proxy_url)
+        wait_then_open_async(dashboardURL)
     try:
         try:
-            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                     "port-forward", "--address", listen_address, dashboard_pod,
-                                     "{0}:{1}".format(listen_port, dashboard_port)], stderr=subprocess.STDOUT)
+            subprocess.check_output(["kubectl", "--kubeconfig", browse_path, "proxy", "--address",
+                                     listen_address, "--port", listen_port], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as err:
             if err.output.find(b'unknown flag: --address'):
                 if listen_address != '127.0.0.1':
                     logger.warning('"--address" is only supported in kubectl v1.13 and later.')
                     logger.warning('The "--listen-address" argument will be ignored.')
-                subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                                 "port-forward", dashboard_pod, "{0}:{1}".format(listen_port, dashboard_port)])
+                subprocess.call(["kubectl", "--kubeconfig", browse_path, "proxy", "--port", listen_port])
     except KeyboardInterrupt:
         # Let command processing finish gracefully after the user presses [Ctrl+C]
         pass
@@ -1598,6 +1606,38 @@ def _validate_ssh_key(no_ssh_key, ssh_key_value):
             raise CLIError('Provided ssh key ({}) is invalid or non-existent'.format(shortened_key))
 
 
+def _add_monitoring_role_assignment(result, cluster_resource_id, cmd):
+    service_principal_msi_id = None
+    # Check if service principal exists, if it does, assign permissions to service principal
+    # Else, provide permissions to MSI
+    if (
+            hasattr(result, 'service_principal_profile') and
+            hasattr(result.service_principal_profile, 'client_id') and
+            result.service_principal_profile.client_id.lower() != 'msi'
+    ):
+        logger.info('valid service principal exists, using it')
+        service_principal_msi_id = result.service_principal_profile.client_id
+        is_service_principal = True
+    elif (
+            (hasattr(result, 'addon_profiles')) and
+            ('omsagent' in result.addon_profiles) and
+            (hasattr(result.addon_profiles['omsagent'], 'identity')) and
+            (hasattr(result.addon_profiles['omsagent'].identity, 'object_id'))
+    ):
+        logger.info('omsagent MSI exists, using it')
+        service_principal_msi_id = result.addon_profiles['omsagent'].identity.object_id
+        is_service_principal = False
+
+    if service_principal_msi_id is not None:
+        if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
+                                    service_principal_msi_id, is_service_principal, scope=cluster_resource_id):
+            logger.warning('Could not create a role assignment for Monitoring addon. '
+                           'Are you an Owner on this subscription?')
+    else:
+        logger.warning('Could not find service principal or user assigned MSI for role'
+                       'assignment')
+
+
 # pylint: disable=too-many-statements,too-many-branches
 def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
                dns_name_prefix=None,
@@ -1608,6 +1648,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_osdisk_size=0,
                node_count=3,
                nodepool_name="nodepool1",
+               nodepool_tags=None,
+               nodepool_labels=None,
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1625,6 +1667,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
+               load_balancer_outbound_ports=None,
+               load_balancer_idle_timeout=None,
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
@@ -1639,10 +1683,11 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                zones=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
+               enable_private_cluster=False,
+               enable_managed_identity=False,
                attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
-
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
@@ -1652,13 +1697,15 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         location = rg_location
 
     vm_set_type = _set_vm_set_type(vm_set_type, kubernetes_version)
-    load_balancer_sku = _set_load_balancer_sku(load_balancer_sku, kubernetes_version)
+    load_balancer_sku = set_load_balancer_sku(load_balancer_sku, kubernetes_version)
 
     if api_server_authorized_ip_ranges and load_balancer_sku == "basic":
         raise CLIError('--api-server-authorized-ip-ranges can only be used with standard load balancer')
 
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
+        tags=nodepool_tags,
+        node_labels=nodepool_labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -1697,10 +1744,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             logger.warning('Could not create a role assignment for subnet. '
                            'Are you an Owner on this subscription?')
 
-    load_balancer_profile = _get_load_balancer_profile(
+    load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
         load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes)
+        load_balancer_outbound_ip_prefixes,
+        load_balancer_outbound_ports,
+        load_balancer_idle_timeout)
 
     if attach_acr:
         _ensure_aks_acr(cmd.cli_ctx,
@@ -1759,13 +1808,23 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
 
     api_server_access_profile = None
-    if api_server_authorized_ip_ranges:
-        api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+    if enable_private_cluster and load_balancer_sku.lower() != "standard":
+        raise CLIError("Please use standard load balancer for private cluster")
+    if api_server_authorized_ip_ranges or enable_private_cluster:
+        api_server_access_profile = _populate_api_server_access_profile(
+            api_server_authorized_ip_ranges,
+            enable_private_cluster=enable_private_cluster
+        )
 
     # Check that both --disable-rbac and --enable-rbac weren't provided
     if all([disable_rbac, enable_rbac]):
         raise CLIError('specify either "--disable-rbac" or "--enable-rbac", not both.')
 
+    identity = None
+    if enable_managed_identity:
+        identity = ManagedClusterIdentity(
+            type="SystemAssigned"
+        )
     mc = ManagedCluster(
         location=location,
         tags=tags,
@@ -1778,33 +1837,43 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         network_profile=network_profile,
         addon_profiles=addon_profiles,
         aad_profile=aad_profile,
-        api_server_access_profile=api_server_access_profile
+        api_server_access_profile=api_server_access_profile,
+        identity=identity
     )
+
+    # Add AAD session key to header
+    custom_headers = {'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")}
 
     # Due to SPN replication latency, we do a few retries here
     max_retry = 30
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            result = sdk_no_wait(no_wait,
-                                 client.create_or_update,
-                                 resource_group_name=resource_group_name,
-                                 resource_name=name, parameters=mc)
-            # add cluster spn with Monitoring Metrics Publisher role assignment to the cluster resource
-            # mdm metrics supported only in azure public cloud so add the  role assignment only in this cloud
-            cloud_name = cmd.cli_ctx.cloud.name
-            if cloud_name.lower() == 'azurecloud' and monitoring:
-                from msrestazure.tools import resource_id
-                cluster_resource_id = resource_id(
-                    subscription=subscription_id,
-                    resource_group=resource_group_name,
-                    namespace='Microsoft.ContainerService', type='managedClusters',
-                    name=name
-                )
-                if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
-                                            service_principal_profile.client_id, scope=cluster_resource_id):
-                    logger.warning('Could not create a role assignment for monitoring addon. '
-                                   'Are you an Owner on this subscription?')
+            if monitoring:
+                # adding a wait here since we rely on the result for role assignment
+                result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
+                    resource_group_name=resource_group_name,
+                    resource_name=name,
+                    parameters=mc))
+                cloud_name = cmd.cli_ctx.cloud.name
+                # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
+                # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
+                if cloud_name.lower() == 'azurecloud':
+                    from msrestazure.tools import resource_id
+                    cluster_resource_id = resource_id(
+                        subscription=subscription_id,
+                        resource_group=resource_group_name,
+                        namespace='Microsoft.ContainerService', type='managedClusters',
+                        name=name
+                    )
+                    _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
+            else:
+                result = sdk_no_wait(no_wait,
+                                     client.create_or_update,
+                                     resource_group_name=resource_group_name,
+                                     resource_name=name,
+                                     parameters=mc,
+                                     custom_headers=custom_headers)
             return result
         except CloudError as ex:
             retry_exception = ex
@@ -1837,12 +1906,14 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
                       subnet_name=None, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    service_principal_client_id = instance.service_principal_profile.client_id
+
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, addons, enable=True,
                               workspace_resource_id=workspace_resource_id, subnet_name=subnet_name, no_wait=no_wait)
 
-    if 'omsagent' in instance.addon_profiles:
+    if 'omsagent' in instance.addon_profiles and instance.addon_profiles['omsagent'].enabled:
         _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles['omsagent'])
+        # adding a wait here since we rely on the result for role assignment
+        result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, name, instance))
         cloud_name = cmd.cli_ctx.cloud.name
         # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
         if cloud_name.lower() == 'azurecloud':
@@ -1853,13 +1924,12 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
                 namespace='Microsoft.ContainerService', type='managedClusters',
                 name=name
             )
-            if not _add_role_assignment(cmd.cli_ctx, 'Monitoring Metrics Publisher',
-                                        service_principal_client_id, scope=cluster_resource_id):
-                logger.warning('Could not create a role assignment for Monitoring addon. '
-                               'Are you an Owner on this subscription?')
+            _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
+    else:
+        result = sdk_no_wait(no_wait, client.create_or_update,
+                             resource_group_name, name, instance)
 
-    # send the managed cluster representation to update the addon profiles
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return result
 
 
 def aks_get_versions(cmd, client, location):
@@ -1967,14 +2037,18 @@ def aks_update(cmd, client, resource_group_name, name,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
+               load_balancer_outbound_ports=None,
+               load_balancer_idle_timeout=None,
                attach_acr=None,
                detach_acr=None,
                api_server_authorized_ip_ranges=None,
                no_wait=False):
     update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
-
-    update_lb_profile = load_balancer_managed_outbound_ip_count is not None or \
-        load_balancer_outbound_ips is not None or load_balancer_outbound_ip_prefixes is not None
+    update_lb_profile = is_load_balancer_profile_provided(load_balancer_managed_outbound_ip_count,
+                                                          load_balancer_outbound_ips,
+                                                          load_balancer_outbound_ip_prefixes,
+                                                          load_balancer_outbound_ports,
+                                                          load_balancer_idle_timeout)
 
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
@@ -1983,10 +2057,12 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--load-balancer-managed-outbound-ip-count",'
-                       '"--load-balancer-outbound-ips",'
-                       '"--load-balancer-outbound-ip-prefixes",'
-                       '"--attach-acr" or "--dettach-acr",'
+                       '"--load-balancer-managed-outbound-ip-count" or'
+                       '"--load-balancer-outbound-ips" or '
+                       '"--load-balancer-outbound-ip-prefixes" or'
+                       '"--load-balancer-outbound-ports" or'
+                       '"--load-balancer-idle-timeout" or'
+                       '"--attach-acr" or "--dettach-acr" or'
                        '"--"api-server-authorized-ip-ranges')
 
     instance = client.get(resource_group_name, name)
@@ -2044,18 +2120,19 @@ def aks_update(cmd, client, resource_group_name, name,
                         subscription_id=subscription_id,
                         detach=True)
 
-    load_balancer_profile = _get_load_balancer_profile(
-        load_balancer_managed_outbound_ip_count,
-        load_balancer_outbound_ips,
-        load_balancer_outbound_ip_prefixes)
-
-    if load_balancer_profile:
-        instance.network_profile.load_balancer_profile = load_balancer_profile
+    if update_lb_profile:
+        instance.network_profile.load_balancer_profile = update_load_balancer_profile(
+            load_balancer_managed_outbound_ip_count,
+            load_balancer_outbound_ips,
+            load_balancer_outbound_ip_prefixes,
+            load_balancer_outbound_ports,
+            load_balancer_idle_timeout,
+            instance.network_profile.load_balancer_profile)
 
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
         instance.api_server_access_profile = \
-            _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance)
+            _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=instance)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -2121,7 +2198,8 @@ DEV_SPACES_EXTENSION_NAME = 'dev-spaces'
 DEV_SPACES_EXTENSION_MODULE = 'azext_dev_spaces.custom'
 
 
-def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None, prompt=False):
+def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, space_name=None,
+                       endpoint_type='Public', prompt=False):
     """
     Use Azure Dev Spaces with a managed Kubernetes cluster.
 
@@ -2132,8 +2210,12 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     :type resource_group_name: String
     :param update: Update to the latest Azure Dev Spaces client components.
     :type update: bool
-    :param space_name: Name of the new or existing dev space to select. Defaults to an interactive selection experience.
+    :param space_name: Name of the new or existing dev space to select. Defaults to an \
+    interactive selection experience.
     :type space_name: String
+    :param endpoint_type: The endpoint type to be used for a Azure Dev Spaces controller. \
+    See https://aka.ms/azds-networking for more information.
+    :type endpoint_type: String
     :param prompt: Do not prompt for confirmation. Requires --space.
     :type prompt: bool
     """
@@ -2141,7 +2223,7 @@ def aks_use_dev_spaces(cmd, client, name, resource_group_name, update=False, spa
     if _get_or_add_extension(cmd, DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE, update):
         azext_custom = _get_azext_module(DEV_SPACES_EXTENSION_NAME, DEV_SPACES_EXTENSION_MODULE)
         try:
-            azext_custom.ads_use_dev_spaces(name, resource_group_name, update, space_name, prompt)
+            azext_custom.ads_use_dev_spaces(name, resource_group_name, update, space_name, endpoint_type, prompt)
         except TypeError:
             raise CLIError("Use '--update' option to get the latest Azure Dev Spaces client components.")
         except AttributeError as ae:
@@ -2650,6 +2732,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       max_count=None,
                       enable_cluster_autoscaler=False,
                       node_taints=None,
+                      tags=None,
+                      labels=None,
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2674,6 +2758,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     agent_pool = AgentPool(
         name=nodepool_name,
+        tags=tags,
+        node_labels=labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
@@ -2723,13 +2809,15 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          disable_cluster_autoscaler=False,
                          update_cluster_autoscaler=False,
                          min_count=None, max_count=None,
+                         tags=None,
                          no_wait=False):
 
     update_flags = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
     if update_flags != 1:
-        raise CLIError('Please specify "--enable-cluster-autoscaler" or '
-                       '"--disable-cluster-autoscaler" or '
-                       '"--update-cluster-autoscaler"')
+        if update_flags != 0 or tags is None:
+            raise CLIError('Please specify "--enable-cluster-autoscaler" or '
+                           '"--disable-cluster-autoscaler" or '
+                           '"--update-cluster-autoscaler"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     node_count = instance.count
@@ -2762,6 +2850,8 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         instance.enable_auto_scaling = False
         instance.min_count = None
         instance.max_count = None
+
+    instance.tags = tags
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
@@ -2812,34 +2902,31 @@ def _ensure_aks_service_principal(cli_ctx,
                                   dns_name_prefix=None,
                                   location=None,
                                   name=None):
-    file_name_aks = 'aksServicePrincipal.json'
+    aad_session_key = None
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
-        # --service-principal not specified, try to load it from local disk
-        principal_obj = load_acs_service_principal(subscription_id, file_name=file_name_aks)
-        if principal_obj:
-            service_principal = principal_obj.get('service_principal')
-            client_secret = principal_obj.get('client_secret')
-        else:
-            # Nothing to load, make one.
-            if not client_secret:
-                client_secret = _create_client_secret()
-            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        # --service-principal not specified, make one.
+        if not client_secret:
+            client_secret = _create_client_secret()
+        salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-            service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
-            if not service_principal:
-                raise CLIError('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
-            logger.info('Created a service principal: %s', service_principal)
-            # We don't need to add role assignment for this created SPN
+        service_principal, aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        if not service_principal:
+            raise CLIError('Could not create a service principal with the right permissions. '
+                           'Are you an Owner on this project?')
+        logger.info('Created a service principal: %s', service_principal)
+        # We don't need to add role assignment for this created SPN
     else:
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
-    store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
-    return load_acs_service_principal(subscription_id, file_name=file_name_aks)
+    return {
+        'client_secret': client_secret,
+        'service_principal': service_principal,
+        'aad_session_key': aad_session_key,
+    }
 
 
 def _ensure_osa_aad(cli_ctx,
@@ -2883,12 +2970,12 @@ def _ensure_osa_aad(cli_ctx,
                                required_resource_accesses=[required_osa_aad_access])
             logger.info('Updated AAD: %s', aad_client_app_id)
         else:
-            result = create_application(client=rbac_client.applications,
-                                        display_name=name,
-                                        identifier_uris=[app_id_name],
-                                        homepage=app_id_name,
-                                        password=aad_client_app_secret,
-                                        required_resource_accesses=[required_osa_aad_access])
+            result, _aad_session_key = create_application(client=rbac_client.applications,
+                                                          display_name=name,
+                                                          identifier_uris=[app_id_name],
+                                                          homepage=app_id_name,
+                                                          password=aad_client_app_secret,
+                                                          required_resource_accesses=[required_osa_aad_access])
             aad_client_app_id = result.app_id
             logger.info('Created an AAD: %s', aad_client_app_id)
         # Get the TenantID
@@ -2913,33 +3000,30 @@ def _ensure_service_principal(cli_ctx,
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
-        # --service-principal not specified, try to load it from local disk
-        principal_obj = load_acs_service_principal(subscription_id)
-        if principal_obj:
-            service_principal = principal_obj.get('service_principal')
-            client_secret = principal_obj.get('client_secret')
-        else:
-            # Nothing to load, make one.
-            if not client_secret:
-                client_secret = _create_client_secret()
-            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
-            url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+        # --service-principal not specified, make one.
+        if not client_secret:
+            client_secret = _create_client_secret()
+        salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+        url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-            service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
-            if not service_principal:
-                raise CLIError('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
-            logger.info('Created a service principal: %s', service_principal)
-            # add role first before save it
-            if not _add_role_assignment(cli_ctx, 'Contributor', service_principal):
-                logger.warning('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
+        service_principal, _aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        if not service_principal:
+            raise CLIError('Could not create a service principal with the right permissions. '
+                           'Are you an Owner on this project?')
+        logger.info('Created a service principal: %s', service_principal)
+        # add role first before save it
+        if not _add_role_assignment(cli_ctx, 'Contributor', service_principal):
+            logger.warning('Could not create a service principal with the right permissions. '
+                           'Are you an Owner on this project?')
     else:
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
-    store_acs_service_principal(subscription_id, client_secret, service_principal)
-    return load_acs_service_principal(subscription_id)
+
+    return {
+        'client_secret': client_secret,
+        'service_principal': service_principal,
+    }
 
 
 def _create_client_secret():
@@ -3041,10 +3125,11 @@ def _remove_nulls(managed_clusters):
         for attr in attrs:
             if getattr(managed_cluster, attr, None) is None:
                 delattr(managed_cluster, attr)
-        for ap_profile in managed_cluster.agent_pool_profiles:
-            for attr in ap_attrs:
-                if getattr(ap_profile, attr, None) is None:
-                    delattr(ap_profile, attr)
+        if managed_cluster.agent_pool_profiles is not None:
+            for ap_profile in managed_cluster.agent_pool_profiles:
+                for attr in ap_attrs:
+                    if getattr(ap_profile, attr, None) is None:
+                        delattr(ap_profile, attr)
         for attr in sp_attrs:
             if getattr(managed_cluster.service_principal_profile, attr, None) is None:
                 delattr(managed_cluster.service_principal_profile, attr)
@@ -3114,6 +3199,15 @@ def osa_list(cmd, client, resource_group_name=None):
     return _remove_osa_nulls(list(managed_clusters))
 
 
+def _format_workspace_id(workspace_id):
+    workspace_id = workspace_id.strip()
+    if not workspace_id.startswith('/'):
+        workspace_id = '/' + workspace_id
+    if workspace_id.endswith('/'):
+        workspace_id = workspace_id.rstrip('/')
+    return workspace_id
+
+
 def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=too-many-locals
                      location=None,
                      compute_vm_size="Standard_D4s_v3",
@@ -3126,7 +3220,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      vnet_peer=None,
                      tags=None,
                      no_wait=False,
-                     workspace_resource_id=None,
+                     workspace_id=None,
                      customer_admin_group_id=None):
 
     if location is None:
@@ -3197,37 +3291,22 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                 namespace='Microsoft.Network', type='virtualNetwork',
                 name=vnet_peer
             )
-    if workspace_resource_id is not None:
-        workspace_resource_id = workspace_resource_id.strip()
-        if not workspace_resource_id.startswith('/'):
-            workspace_resource_id = '/' + workspace_resource_id
-        if workspace_resource_id.endswith('/'):
-            workspace_resource_id = workspace_resource_id.rstrip('/')
-        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_resource_id)  # pylint: disable=line-too-long
+    if workspace_id is not None:
+        workspace_id = _format_workspace_id(workspace_id)
+        monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
     else:
         monitor_profile = None
 
     network_profile = NetworkProfile(vnet_cidr=vnet_prefix, peer_vnet_id=vnet_peer)
-
-    if monitor_profile is not None:
-        osamc = OpenShiftManagedClusterMonitor(
-            location=location, tags=tags,
-            open_shift_version="v3.11",
-            network_profile=network_profile,
-            auth_profile=auth_profile,
-            agent_pool_profiles=agent_pool_profiles,
-            master_pool_profile=agent_master_pool_profile,
-            router_profiles=[default_router_profile],
-            monitor_profile=monitor_profile)
-    else:
-        osamc = OpenShiftManagedCluster(
-            location=location, tags=tags,
-            open_shift_version="v3.11",
-            network_profile=network_profile,
-            auth_profile=auth_profile,
-            agent_pool_profiles=agent_pool_profiles,
-            master_pool_profile=agent_master_pool_profile,
-            router_profiles=[default_router_profile])
+    osamc = OpenShiftManagedCluster(
+        location=location, tags=tags,
+        open_shift_version="v3.11",
+        network_profile=network_profile,
+        auth_profile=auth_profile,
+        agent_pool_profiles=agent_pool_profiles,
+        master_pool_profile=agent_master_pool_profile,
+        router_profiles=[default_router_profile],
+        monitor_profile=monitor_profile)
 
     try:
         # long_running_operation_timeout=300
@@ -3271,48 +3350,17 @@ def openshift_scale(cmd, client, resource_group_name, name, compute_count, no_wa
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-def _get_load_balancer_outbound_ips(load_balancer_outbound_ips):
-    """parse load balancer profile outbound IP ids and return an array of references to the outbound IP resources"""
-    load_balancer_outbound_ip_resources = None
-    if load_balancer_outbound_ips:
-        load_balancer_outbound_ip_resources = \
-            [ResourceReference(id=x.strip()) for x in load_balancer_outbound_ips.split(',')]
-    return load_balancer_outbound_ip_resources
+def openshift_monitor_enable(cmd, client, resource_group_name, name, workspace_id, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    workspace_id = _format_workspace_id(workspace_id)
+    monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
+    instance.monitor_profile = monitor_profile
+
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
-def _get_load_balancer_outbound_ip_prefixes(load_balancer_outbound_ip_prefixes):
-    """parse load balancer profile outbound IP prefix ids and return an array \
-    of references to the outbound IP prefix resources"""
-    load_balancer_outbound_ip_prefix_resources = None
-    if load_balancer_outbound_ip_prefixes:
-        load_balancer_outbound_ip_prefix_resources = \
-            [ResourceReference(id=x.strip()) for x in load_balancer_outbound_ip_prefixes.split(',')]
-    return load_balancer_outbound_ip_prefix_resources
-
-
-def _get_load_balancer_profile(load_balancer_managed_outbound_ip_count,
-                               load_balancer_outbound_ips,
-                               load_balancer_outbound_ip_prefixes):
-    """parse and build load balancer profile"""
-    load_balancer_outbound_ip_resources = _get_load_balancer_outbound_ips(load_balancer_outbound_ips)
-    load_balancer_outbound_ip_prefix_resources = _get_load_balancer_outbound_ip_prefixes(
-        load_balancer_outbound_ip_prefixes)
-
-    load_balancer_profile = None
-    if any([load_balancer_managed_outbound_ip_count,
-            load_balancer_outbound_ip_resources,
-            load_balancer_outbound_ip_prefix_resources]):
-        load_balancer_profile = ManagedClusterLoadBalancerProfile()
-        if load_balancer_managed_outbound_ip_count:
-            load_balancer_profile.managed_outbound_ips = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
-                count=load_balancer_managed_outbound_ip_count
-            )
-        if load_balancer_outbound_ip_resources:
-            load_balancer_profile.outbound_ips = ManagedClusterLoadBalancerProfileOutboundIPs(
-                public_ips=load_balancer_outbound_ip_resources
-            )
-        if load_balancer_outbound_ip_prefix_resources:
-            load_balancer_profile.outbound_ip_prefixes = ManagedClusterLoadBalancerProfileOutboundIPPrefixes(
-                public_ip_prefixes=load_balancer_outbound_ip_prefix_resources
-            )
-    return load_balancer_profile
+def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=False):
+    instance = client.get(resource_group_name, name)
+    monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
+    instance.monitor_profile = monitor_profile
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)

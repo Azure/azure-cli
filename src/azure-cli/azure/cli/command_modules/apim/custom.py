@@ -2,10 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
-                                             ApiManagementServiceSkuProperties, VirtualNetworkType, SkuType)
+                                             ApiManagementServiceSkuProperties, ApiManagementServiceBackupRestoreParameters,
+                                             VirtualNetworkType, SkuType)
 
 # Service Operations
 
@@ -92,9 +94,16 @@ def check_name_availability(client, name):
     return client.api_management_service.check_name_availability(name)
 
 
-def apim_backup(client, resource_group_name, name):
+def apim_backup(client, resource_group_name, name, backup_name, storage_account_name,
+                storage_account_container, storage_account_key):
     """back up an API Management service to the configured storage account """
-    return client.api_management_service.backup(resource_group_name, name)
+    parameters = ApiManagementServiceBackupRestoreParameters(
+        storage_account=storage_account_name,
+        access_key=storage_account_key,
+        container_name=storage_account_container,
+        backup_name=backup_name)
+
+    return client.api_management_service.backup(resource_group_name, name, parameters)
 
 
 def apim_apply_network_configuration_updates(client, resource_group_name, name, location=None):

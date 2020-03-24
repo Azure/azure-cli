@@ -33,13 +33,15 @@ from azure.cli.command_modules.network._validators import (
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
-    validate_application_gateway_identity, validate_virtul_network_gateway)
+    validate_application_gateway_identity, validate_virtul_network_gateway,
+    NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
     get_sdk_completer)
 from azure.cli.core.util import get_json_object
+from azure.cli.core.profiles import ResourceType
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
@@ -52,8 +54,10 @@ def load_arguments(self, _):
      FlowLogFormatType, HTTPMethod, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
-     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType,
-     ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState) = self.get_models(
+     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType,
+     ExpressRouteLinkMacSecCipher, ExpressRouteLinkAdminState,
+     ConnectionMonitorEndpointFilterType, ConnectionMonitorTestConfigurationProtocol,
+     PreferredIPVersion, HTTPConfigurationMethod, OutputType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'ApplicationGatewaySslProtocol', 'AuthenticationMethod',
          'Direction',
@@ -61,8 +65,12 @@ def load_arguments(self, _):
          'FlowLogFormatType', 'HTTPMethod', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
-         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType',
-         'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState')
+         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType',
+         'ExpressRouteLinkMacSecCipher', 'ExpressRouteLinkAdminState',
+         'ConnectionMonitorEndpointFilterType', 'ConnectionMonitorTestConfigurationProtocol',
+         'PreferredIPVersion', 'HTTPConfigurationMethod', 'OutputType')
+
+    ZoneType = self.get_models('ZoneType', resource_type=ResourceType.MGMT_NETWORK_DNS)
 
     if self.supported_api_version(min_api='2018-02-01'):
         ExpressRoutePeeringType = self.get_models('ExpressRoutePeeringType')
@@ -233,6 +241,11 @@ def load_arguments(self, _):
         c.argument('request_headers', nargs='+', help='Space-separated list of HEADER=VALUE pairs.', validator=get_header_configuration_validator('request_headers'), completer=get_sdk_completer('application_gateways', 'list_available_request_headers'))
         c.argument('sequence', type=int, help='Determines the execution order of the rule in the rule set.')
 
+    with self.argument_context('network application-gateway rewrite-rule', arg_group='URL Configuration') as c:
+        c.argument('modified_path', help='Url path for url rewrite')
+        c.argument('modified_query_string', help='Query string for url rewrite.')
+        c.argument('enable_reroute', arg_type=get_three_state_flag(), help='If set as true, it will re-evaluate the url path map provided in path based request routing rules using modified path.')
+
     with self.argument_context('network application-gateway rewrite-rule condition') as c:
         c.argument('rule_name', rewrite_rule_name_type)
         c.argument('variable', help='The variable whose value is being evaluated.', completer=get_sdk_completer('application_gateways', 'list_available_server_variables'))
@@ -270,6 +283,11 @@ def load_arguments(self, _):
         c.argument('interval', help='The time interval in seconds between consecutive probes.')
         c.argument('threshold', help='The number of failed probes after which the back end server is marked down.')
         c.argument('timeout', help='The probe timeout in seconds.')
+        c.argument('port', type=int, min_api='2019-04-01',
+                   help='Custom port which will be used for probing the backend servers. '
+                        'The valid value ranges from 1 to 65535. '
+                        'In case not set, port from http settings will be used. '
+                        'This property is valid for Standard_v2 and WAF_v2 only.')
 
     with self.argument_context('network application-gateway rule') as c:
         c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
@@ -277,6 +295,7 @@ def load_arguments(self, _):
         c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
         c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
         c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
+        c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set.')
 
     with self.argument_context('network application-gateway ssl-cert') as c:
         c.argument('cert_data', options_list='--cert-file', type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_ssl_cert)
@@ -292,22 +311,25 @@ def load_arguments(self, _):
         c.argument('paths', nargs='+', help='Space-separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
         c.argument('address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
         c.argument('http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
-        c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
+        c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.', arg_group='First Rule')
+        c.argument('rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the rewrite rule set. If not specified, the default for the map will be used.', arg_group='First Rule')
 
     with self.argument_context('network application-gateway url-path-map create') as c:
         c.argument('default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+        c.argument('default_rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the default rewrite rule set, if different from --rewrite-rule-set.')
 
     with self.argument_context('network application-gateway url-path-map update') as c:
         c.argument('default_address_pool', help='The name or ID of the default backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('default_http_settings', help='The name or ID of the default HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+        c.argument('default_rewrite_rule_set', min_api='2019-04-01', help='The name or ID of the default rewrite rule set.')
 
     with self.argument_context('network application-gateway url-path-map rule') as c:
         c.argument('item_name', options_list=['--name', '-n'], help='The name of the url-path-map rule.', completer=ag_url_map_rule_completion_list, id_part='child_name_2')
         c.argument('url_path_map_name', options_list='--path-map-name', help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'), id_part='child_name_1')
         c.argument('address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_address_pools'))
         c.argument('http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-        for item in ['address_pool', 'http_settings', 'redirect_config', 'paths']:
+        for item in ['address_pool', 'http_settings', 'redirect_config', 'paths', 'rewrite_rule_set', 'firewall_policy']:
             c.argument(item, arg_group=None)
 
     with self.argument_context('network application-gateway url-path-map rule create') as c:
@@ -447,10 +469,14 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy managed-rule rule-set',
                                min_api='2019-09-01') as c:
-        c.argument('rule_set_type', options_list='--type', help='The type of the web application firewall rule set.')
+        c.argument('rule_set_type', options_list='--type',
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
+                   help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   help='The version of the web application firewall rule set type.')
+                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
+                   help='The version of the web application firewall rule set type. '
+                        '0.1 is used for Microsoft_BotManagerRuleSet')
         c.argument('rule_group_name',
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
@@ -497,8 +523,20 @@ def load_arguments(self, _):
         c.ignore('location')
 
         c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
-        c.argument('registration_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
-        c.argument('resolution_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
+
+        c.argument('registration_vnets',
+                   arg_group='Private Zone',
+                   nargs='+',
+                   help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone. '
+                        'Number of private DNS zones with virtual network auto-registration enabled is 1. '
+                        'If you need to increase this limit, please contact Azure Support: '
+                        'https://docs.microsoft.com/en-us/azure/azure-subscription-service-limits',
+                   validator=get_vnet_validator('registration_vnets'))
+        c.argument('resolution_vnets',
+                   arg_group='Private Zone',
+                   nargs='+',
+                   help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.',
+                   validator=get_vnet_validator('resolution_vnets'))
 
     with self.argument_context('network dns zone import') as c:
         c.argument('file_name', options_list=['--file-name', '-f'], type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
@@ -524,7 +562,11 @@ def load_arguments(self, _):
 
     for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
         with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
-            c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('record_set_name',
+                       options_list=['--record-set-name', '-n'],
+                       help='The name of the record set relative to the zone. '
+                            'Creates a new record set if one does not exist.')
 
         with self.argument_context('network dns record-set {} remove-record'.format(item)) as c:
             c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone.')
@@ -532,15 +574,16 @@ def load_arguments(self, _):
 
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+        c.argument('ttl', help='Record set TTL (time-to-live)')
 
     with self.argument_context('network dns record-set soa') as c:
         c.argument('relative_record_set_name', ignore_type, default='@')
 
     with self.argument_context('network dns record-set a') as c:
-        c.argument('ipv4_address', options_list=['--ipv4-address', '-a'], help='IPV4 address in string notation.')
+        c.argument('ipv4_address', options_list=['--ipv4-address', '-a'], help='IPv4 address in string notation.')
 
     with self.argument_context('network dns record-set aaaa') as c:
-        c.argument('ipv6_address', options_list=['--ipv6-address', '-a'], help='IPV6 address in string notation.')
+        c.argument('ipv6_address', options_list=['--ipv6-address', '-a'], help='IPv6 address in string notation.')
 
     with self.argument_context('network dns record-set caa') as c:
         c.argument('value', help='Value of the CAA record.')
@@ -716,7 +759,7 @@ def load_arguments(self, _):
         c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.', id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
-        c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az network private-resource show to obtain the list of group ids."')
+        c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az keyvault(storage/etc) private-link-resource list" to obtain the list of group ids.')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
         c.argument('manual_request', help='Use manual request to establish the connection', arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
@@ -734,6 +777,7 @@ def load_arguments(self, _):
         c.argument('private_endpoint_connections', nargs='+', help='Space-separated list of private endpoint connections.')
         c.argument('fqdns', nargs='+', help='Space-separated list of FQDNs.')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('enable_proxy_protocol', help='Enable proxy protocol for private link service.', arg_type=get_three_state_flag(), min_api='2019-09-01')
 
     with self.argument_context('network private-link-service', arg_group='IP Configuration') as c:
         c.argument('private_ip_address', private_ip_address_type)
@@ -948,15 +992,37 @@ def load_arguments(self, _):
 
         with self.argument_context('network nsg rule {}'.format(item), min_api='2017-06-01') as c:
             c.argument('source_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Source')
-            c.argument('source_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Source')
+            c.argument('source_address_prefixes',
+                       nargs='+',
+                       help="Space-separated list of CIDR prefixes or IP ranges. "
+                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
+                            "to match all IPs. Besides, it also supports all available Service Tags like "
+                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+                       arg_group='Source')
             c.argument('destination_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Destination')
-            c.argument('destination_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Destination')
+            c.argument('destination_address_prefixes',
+                       nargs='+',
+                       help="Space-separated list of CIDR prefixes or IP ranges. "
+                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
+                            "to match all IPs. Besides, it also supports all available Service Tags like "
+                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+                       arg_group='Destination')
 
         with self.argument_context('network nsg rule {}'.format(item), max_api='2017-03-01') as c:
             c.argument('source_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Source')
-            c.argument('source_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Source')
+            c.argument('source_address_prefix',
+                       help="Space-separated list of CIDR prefixes or IP ranges. "
+                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
+                            "to match all IPs. Besides, it also supports all available Service Tags like "
+                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+                       arg_group='Source')
             c.argument('destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
-            c.argument('destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
+            c.argument('destination_address_prefix',
+                       help="Space-separated list of CIDR prefixes or IP ranges. "
+                            "Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' "
+                            "to match all IPs. Besides, it also supports all available Service Tags like "
+                            "'ApiManagement', 'SqlManagement', 'AzureMonitor', etc.",
+                       arg_group='Destination')
 
         with self.argument_context('network nsg rule {}'.format(item), min_api='2017-09-01') as c:
             c.argument('source_asgs', nargs='+', help="Space-separated list of application security group names or IDs. Limited by backend server, temporarily this argument only supports one application security group name or ID", arg_group='Source', validator=get_asg_validator(self, 'source_asgs'))
@@ -975,23 +1041,271 @@ def load_arguments(self, _):
         c.argument('network_watcher_name', arg_type=ignore_type, options_list=['--__NETWORK_WATCHER_NAME'])
         c.argument('connection_monitor_name', name_arg_type, help='Connection monitor name.')
 
-    with self.argument_context('network watcher connection-monitor create') as c:
-        c.argument('monitoring_interval', help='Monitoring interval in seconds.', type=int)
-        c.argument('do_not_start', action='store_true', help='Create the connection monitor but do not start it immediately.')
-        c.argument('source_resource', help='Name or ID of the resource from which to originate traffic.')
+    # connection monitor V1 parameter set
+    with self.argument_context('network watcher connection-monitor', arg_group='V1 Endpoint') as c:
+        c.argument('source_resource', help='Name or ID of the resource from which to originate traffic. '
+                                           'Currently only Virtual Machines are supported.')
         c.argument('source_port', help='Port number from which to originate traffic.')
-        c.ignore('location')
-
-    with self.argument_context('network watcher connection-monitor', arg_group='Destination') as c:
-        c.argument('dest_resource', help='Name of ID of the resource to receive traffic.')
+        c.argument('dest_resource', help='Name of ID of the resource to receive traffic. '
+                                         'Currently only Virtual Machines are supported.')
         c.argument('dest_port', help='Port number on which to receive traffic.')
         c.argument('dest_address', help='The IP address or URI at which to receive traffic.')
+        c.argument('monitoring_interval', help='Monitoring interval in seconds.', type=int, default=60)
+        c.argument('do_not_start', action='store_true',
+                   help='Create the connection monitor but do not start it immediately.')
 
     nw_validator = get_network_watcher_from_location(remove=True, watcher_name='network_watcher_name', rg_name='resource_group_name')
     for scope in ['list', 'show', 'start', 'stop', 'delete', 'query']:
         with self.argument_context('network watcher connection-monitor {}'.format(scope)) as c:
             c.extra('location', get_location_type(self.cli_ctx), required=True)
             c.argument('resource_group_name', arg_type=ignore_type, validator=nw_validator)
+
+    # connection monitor V2 parameter set
+    with self.argument_context('network watcher connection-monitor', min_api='2019-11-01', arg_group='V2') as c:
+        c.argument('notes', help='Optional notes to be associated with the connection monitor')
+
+    # Argument Group for endpoint to create a V2 connection monitor
+    with self.argument_context('network watcher connection-monitor',
+                               arg_group='V2 Endpoint',
+                               min_api='2019-11-01') as c:
+        c.argument('endpoint_dest_name',
+                   help='The name of the source of connection monitor endpoint. '
+                        'If you are creating a V2 Connection Monitor, it\'s required')
+        c.argument('endpoint_dest_resource_id',
+                   help='Resource ID of the source of connection monitor endpoint')
+        c.argument('endpoint_dest_address',
+                   help='Address of the source of connection monitor endpoint (IP or domain name)')
+        c.argument('endpoint_source_name',
+                   help='The name of the destination of connection monitor endpoint. '
+                        'If you are creating a V2 Connection Monitor, it\'s required')
+        c.argument('endpoint_source_resource_id',
+                   help='Resource ID of the destination of connection monitor endpoint. '
+                        'If endpoint is intended to used as source, this option is required.')
+        c.argument('endpoint_source_address',
+                   help='Address of the destination of connection monitor endpoint (IP or domain name)')
+
+    # Argument Group for test configuration to create a V2 connection monitor
+    with self.argument_context('network watcher connection-monitor',
+                               arg_group='V2 Test Configuration',
+                               min_api='2019-11-01') as c:
+        c.argument('test_config_name',
+                   help='The name of the connection monitor test configuration. '
+                        'If you are creating a V2 Connection Monitor, it\'s required')
+        c.argument('test_config_frequency',
+                   options_list='--frequency',
+                   help='The frequency of test evaluation, in seconds',
+                   type=int,
+                   default=60)
+        c.argument('test_config_protocol',
+                   options_list='--protocol',
+                   help='The protocol to use in test evaluation',
+                   arg_type=get_enum_type(ConnectionMonitorTestConfigurationProtocol))
+        c.argument('test_config_preferred_ip_version',
+                   options_list='--preferred-ip-version',
+                   help='The preferred IP version to use in test evaluation. '
+                        'The connection monitor may choose to use a different version depending on other parameters',
+                   arg_type=get_enum_type(PreferredIPVersion))
+        c.argument('test_config_threshold_failed_percent',
+                   options_list='--threshold-failed-percent',
+                   help='The maximum percentage of failed checks permitted for a test to evaluate as successful',
+                   type=int)
+        c.argument('test_config_threshold_round_trip_time',
+                   options_list='--threshold-round-trip-time',
+                   help='The maximum round-trip time in milliseconds permitted for a test to evaluate as successful',
+                   type=int)
+        # TCP protocol configuration
+        c.argument('test_config_tcp_port',
+                   options_list='--tcp-port',
+                   help='The port to connect to',
+                   type=int)
+        c.argument('test_config_tcp_disable_trace_route',
+                   options_list='--tcp-disable-trace-route',
+                   help='Value indicating whether path evaluation with trace route should be disabled. '
+                        'false is default.',
+                   arg_type=get_three_state_flag())
+        # ICMP protocol configuration
+        c.argument('test_config_icmp_disable_trace_route',
+                   options_list='--icmp-disable-trace-route',
+                   help='Value indicating whether path evaluation with trace route should be disabled. '
+                        'false is default.',
+                   arg_type=get_three_state_flag())
+        # HTTP protocol configuration
+        c.argument('test_config_http_port',
+                   options_list='--http-port',
+                   help='The port to connect to',
+                   type=int)
+        c.argument('test_config_http_method',
+                   options_list='--http-method',
+                   help='The HTTP method to use',
+                   arg_type=get_enum_type(HTTPConfigurationMethod))
+        c.argument('test_config_http_path',
+                   options_list='--http-path',
+                   help='The path component of the URI. For instance, "/dir1/dir2"')
+        c.argument('test_config_http_valid_status_codes',
+                   options_list='--http-valid-status-codes',
+                   help='Space-separated list of HTTP status codes to consider successful. '
+                        'For instance, "2xx 301-304 418"',
+                   nargs='+')
+        c.argument('test_config_http_prefer_https',
+                   options_list='--https-prefer',
+                   help='Value indicating whether HTTPS is preferred '
+                        'over HTTP in cases where the choice is not explicit',
+                   arg_type=get_three_state_flag())
+
+    # Argument Group for test group to create a V2 connection monitor
+    with self.argument_context('network watcher connection-monitor',
+                               arg_group='V2 Test Group',
+                               min_api='2019-11-01') as c:
+        c.argument('test_group_name',
+                   help='The name of the connection monitor test group',
+                   default='DefaultTestGroup')
+        c.argument('test_group_disable',
+                   help='Value indicating whether test group is disabled. false is default.',
+                   arg_type=get_three_state_flag())
+
+    # Argument Group for output to create a V2 connection monitor
+    with self.argument_context('network watcher connection-monitor',
+                               arg_group='V2 Output',
+                               min_api='2019-11-01') as c:
+        c.argument('output_type',
+                   help='Connection monitor output destination type. Currently, only "Workspace" is supported',
+                   arg_type=get_enum_type(OutputType))
+        c.argument('workspace_ids',
+                   help='Space-separated list of ids of log analytics workspace',
+                   nargs='+')
+
+    # Argument Group for connection monitor V2 endpoint
+    with self.argument_context('network watcher connection-monitor endpoint', min_api='2019-11-01') as c:
+        c.argument('connection_monitor_name',
+                   options_list=['--connection-monitor'],
+                   help='Connection monitor name.')
+        c.argument('name',
+                   arg_type=name_arg_type,
+                   help='The name of the connection monitor endpoint')
+        c.argument('endpoint_resource_id',
+                   options_list=['--resource-id'],
+                   help='Resource ID of the connection monitor endpoint')
+        c.argument('address',
+                   help='Address of the connection monitor endpoint (IP or domain name)')
+        c.argument('filter_type',
+                   arg_type=get_enum_type(ConnectionMonitorEndpointFilterType),
+                   help="The behavior of the endpoint filter. Currently only 'Include' is supported.")
+        c.argument('filter_items',
+                   options_list=['--filter-item'],
+                   action=NWConnectionMonitorEndpointFilterItemAction,
+                   nargs='+',
+                   help="List of property=value pairs to define filter items. "
+                        "Property currently include: type, address. "
+                        "Property value of type supports 'AgentAddress' only now.")
+
+    with self.argument_context('network watcher connection-monitor endpoint',
+                               min_api='2019-11-01',
+                               arg_group='V2 Test Group') as c:
+        c.argument('test_groups',
+                   nargs='+',
+                   help='Space-separated list of names of test group which only need to be affected if specified')
+        c.argument('source_test_groups',
+                   nargs='+',
+                   help='Space-separated list of names for test group to reference as source')
+        c.argument('dest_test_groups',
+                   nargs='+',
+                   help='Space-separated list of names for test group to reference as destination')
+
+    # Argument Group for connection monitor V2 test configuration
+    with self.argument_context('network watcher connection-monitor test-configuration',
+                               min_api='2019-11-01') as c:
+        c.argument('connection_monitor_name',
+                   options_list=['--connection-monitor'],
+                   help='Connection monitor name')
+        c.argument('name',
+                   arg_type=name_arg_type,
+                   help='The name of the connection monitor test configuration')
+        c.argument('frequency',
+                   help='The frequency of test evaluation, in seconds',
+                   type=int,
+                   default=60)
+        c.argument('protocol',
+                   help='The protocol to use in test evaluation',
+                   arg_type=get_enum_type(ConnectionMonitorTestConfigurationProtocol))
+        c.argument('preferred_ip_version',
+                   help='The preferred IP version to use in test evaluation. '
+                        'The connection monitor may choose to use a different version depending on other parameters',
+                   arg_type=get_enum_type(PreferredIPVersion))
+        c.argument('threshold_failed_percent',
+                   help='The maximum percentage of failed checks permitted for a test to evaluate as successful',
+                   type=int)
+        c.argument('threshold_round_trip_time',
+                   help='The maximum round-trip time in milliseconds permitted for a test to evaluate as successful',
+                   type=int)
+        c.argument('test_groups',
+                   help='Space-separated list of names of test group which only need to be affected if specified',
+                   nargs='+')
+        # TCP protocol configuration
+        with self.argument_context('network watcher connection-monitor test-configuration',
+                                   min_api='2019-11-01',
+                                   arg_group='TCP Protocol') as c:
+            c.argument('tcp_port',
+                       help='The port to connect to',
+                       type=int)
+            c.argument('tcp_disable_trace_route',
+                       help='Value indicating whether path evaluation with trace route should be disabled. '
+                            'false is default.',
+                       arg_type=get_three_state_flag())
+        # ICMP protocol configuration
+        with self.argument_context('network watcher connection-monitor test-configuration',
+                                   min_api='2019-11-01',
+                                   arg_group='ICMP Protocol') as c:
+            c.argument('icmp_disable_trace_route',
+                       help='Value indicating whether path evaluation with trace route should be disabled. '
+                            'false is default.',
+                       arg_type=get_three_state_flag())
+        # HTTP protocol configuration
+        with self.argument_context('network watcher connection-monitor test-configuration',
+                                   min_api='2019-11-01',
+                                   arg_group='HTTP Protocol') as c:
+            c.argument('http_port',
+                       help='The port to connect to',
+                       type=int)
+            c.argument('http_method',
+                       help='The HTTP method to use',
+                       arg_type=get_enum_type(HTTPConfigurationMethod))
+            c.argument('http_path',
+                       help='The path component of the URI. For instance, "/dir1/dir2"')
+            c.argument('http_valid_status_codes',
+                       nargs='+',
+                       help='Space-separated list of HTTP status codes to consider successful. '
+                            'For instance, "2xx 301-304 418"')
+            c.argument('http_prefer_https',
+                       help='Value indicating whether HTTPS is preferred '
+                            'over HTTP in cases where the choice is not explicit',
+                       arg_type=get_three_state_flag())
+            c.argument('http_request_headers',
+                       options_list=['--http-request-header'],
+                       help='The HTTP headers to transmit with the request. '
+                            'List of property=value pairs to define HTTP headers.',
+                       nargs='+',
+                       action=NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction)
+
+    with self.argument_context('network watcher connection-monitor test-group', min_api='2019-11-01') as c:
+        c.argument('connection_monitor_name',
+                   options_list=['--connection-monitor'],
+                   help='Connection monitor name.')
+        c.argument('name',
+                   arg_type=name_arg_type,
+                   help='The name of the connection monitor test group')
+        c.argument('disable',
+                   help='Value indicating whether test group is disabled. false is default.',
+                   arg_type=get_three_state_flag())
+
+    with self.argument_context('network watcher connection-monitor output', min_api='2019-11-01') as c:
+        c.argument('connection_monitor_name',
+                   options_list=['--connection-monitor'],
+                   help='Connection monitor name.')
+        c.argument('out_type',
+                   options_list=['--type'],
+                   help='Connection monitor output destination type. Currently, only "Workspace" is supported',
+                   arg_type=get_enum_type(OutputType))
+        c.argument('workspace_id', help='The id of log analytics workspace')
 
     with self.argument_context('network watcher configure') as c:
         c.argument('locations', get_location_type(self.cli_ctx), options_list=['--locations', '-l'], nargs='+')
@@ -1038,8 +1352,23 @@ def load_arguments(self, _):
         c.argument('filters', type=get_json_object)
 
     with self.argument_context('network watcher flow-log') as c:
+        c.argument('location', get_location_type(self.cli_ctx),
+                   help='Location to identify the exclusive Network Watcher under a region. '
+                        'Only one Network Watcher can be existed per subscription and region.')
+        c.argument('flow_log_name', name_arg_type, help='The name of the flow logger', min_api='2019-11-01')
         c.argument('nsg', help='Name or ID of the network security group.')
-        c.argument('enabled', arg_type=get_three_state_flag())
+        c.argument('enabled', arg_type=get_three_state_flag(), help='Enable logging', default='true')
+        c.argument('retention', type=int, help='Number of days to retain logs')
+        c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs. '
+                                           'Must be in the same region of flow log.')
+
+    # temporary solution for compatible with old show command's parameter
+    # after old show command's parameter is deprecated and removed,
+    # this argument group "network watcher flow-log show" should be removed
+    with self.argument_context('network watcher flow-log show') as c:
+        c.argument('nsg',
+                   deprecate_info=c.deprecate(redirect='--location and --name combination', hide=False),
+                   help='Name or ID of the network security group.')
 
     with self.argument_context('network watcher flow-log', arg_group='Format', min_api='2018-10-01') as c:
         c.argument('log_format', options_list='--format', help='File type of the flow log.', arg_type=get_enum_type(FlowLogFormatType))
@@ -1047,7 +1376,9 @@ def load_arguments(self, _):
 
     with self.argument_context('network watcher flow-log', arg_group='Traffic Analytics', min_api='2018-10-01') as c:
         c.argument('traffic_analytics_interval', type=int, options_list='--interval', help='Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.', min_api='2018-12-01')
-        c.argument('traffic_analytics_workspace', options_list='--workspace', help='Name or ID of a Log Analytics workspace.')
+        c.argument('traffic_analytics_workspace',
+                   options_list='--workspace',
+                   help='Name or ID of a Log Analytics workspace. Must be in the same region of flow log')
         c.argument('traffic_analytics_enabled', options_list='--traffic-analytics', arg_type=get_three_state_flag(), help='Enable traffic analytics. Defaults to true if `--workspace` is provided.')
 
     for item in ['list', 'stop', 'delete', 'show', 'show-status']:
@@ -1254,7 +1585,7 @@ def load_arguments(self, _):
     with self.argument_context('network vnet peering') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('virtual_network_peering_name', options_list=['--name', '-n'], help='The name of the VNet peering.', id_part='child_name_1')
-        c.argument('remote_virtual_network', options_list=['--remote-vnet', c.deprecate(target='--remote-vnet-id', hide=True, expiration='2.1.0')], help='Resource ID or name of the remote VNet.')
+        c.argument('remote_virtual_network', options_list=['--remote-vnet', c.deprecate(target='--remote-vnet-id', hide=True, expiration='3.0.0')], help='Resource ID or name of the remote VNet.')
 
     with self.argument_context('network vnet peering create') as c:
         c.argument('allow_virtual_network_access', options_list='--allow-vnet-access', action='store_true', help='Allows access from the local VNet to the remote VNet.')
@@ -1278,10 +1609,11 @@ def load_arguments(self, _):
 
     with self.argument_context('network vnet subnet update') as c:
         c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string "" to detach it.')
+        c.argument('route_table', help='Name or ID of a route table to associate with the subnet. Use empty string "" to detach it. You can also append "--remove routeTable" in "az network vnet subnet update" to detach it.')
 
     for scope in ['network vnet subnet list', 'network vnet peering list']:
         with self.argument_context(scope) as c:
-            c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='2.1.0'))
+            c.argument('ids', deprecate_info=c.deprecate(hide=True, expiration='3.0.0'))
             c.argument('virtual_network_name', id_part=None)
 
     # endregion
@@ -1410,4 +1742,12 @@ def load_arguments(self, _):
 
     with self.argument_context('network traffic-manager endpoint list') as c:
         c.argument('profile_name', id_part=None)
+    # endregion
+
+    # region Bastion
+    with self.argument_context('network bastion') as c:
+        c.argument('bastion_host_name', help='Name of the Bastion Host.', options_list=['--name', '-n'])
+        c.argument('public_ip_address', help='Name or ID of the Azure public IP. The SKU of the public IP must be Standard.', validator=get_public_ip_validator())
+        c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
+        c.ignore('subnet')
     # endregion

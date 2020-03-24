@@ -41,6 +41,13 @@ def load_arguments(self, _):
     identity_role_type = CLIArgumentType(options_list=['--role'], help="Role name or id that will be assigned to the managed identity")
     extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true', is_preview=True,
                                                 help='Support to handle extended template content including multiline and comments in deployment')
+    deployment_name_type = CLIArgumentType(options_list=['--name', '-n'], required=True, help='The deployment name.')
+    deployment_create_name_type = CLIArgumentType(options_list=['--name', '-n'], required=False, help='The deployment name. Default to template file base name')
+    management_group_id_type = CLIArgumentType(options_list=['--management-group-id', '-m'], required=True, help='The management group id.')
+    deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
+                                                    help="a template file path in the file system")
+    deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
+    deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -136,7 +143,7 @@ def load_arguments(self, _):
         c.argument('notscopes', options_list='--not-scopes', nargs='+')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
 
     with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
         c.argument('assign_identity', nargs='*', validator=validate_msi, help="Assigns a system assigned identity to the policy assignment.")
@@ -156,6 +163,8 @@ def load_arguments(self, _):
         c.argument('description', help='Description of policy set definition.')
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter())
         c.argument('definitions', help='JSON formatted string or a path to a file or uri containing definitions.', type=file_type, completer=FilesCompleter())
+        c.argument('definition_groups', min_api='2019-09-01', help='JSON formatted string or a path to a file or uri containing policy definition groups. Groups are used to organize policy definitions within a policy set.', type=file_type, completer=FilesCompleter())
+        c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
         c.argument('management_group', arg_type=management_group_name_type)
         c.argument('subscription', arg_type=subscription_type)
         c.ignore('_subscription')  # disable global subscription
@@ -170,41 +179,115 @@ def load_arguments(self, _):
 
     with self.argument_context('group deployment') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list)
-        c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
-        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
-        c.argument('template_uri', help='a uri to a remote template file')
-        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
-        c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
-        c.argument('rollback_on_error', nargs='?', action=RollbackAction, help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
+        c.argument('deployment_name', arg_type=deployment_name_type)
+        c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'),
+                   help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
+        c.argument('parameters', arg_type=deployment_parameters_type)
+        c.argument('rollback_on_error', nargs='?', action=RollbackAction,
+                   help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
 
     with self.argument_context('group deployment create') as c:
-        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
-                   help='The deployment name. Default to template file base name')
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
+                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
 
     with self.argument_context('group deployment validate') as c:
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('group deployment operation show') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
 
     with self.argument_context('deployment') as c:
-        c.argument('deployment_name', options_list=['--name', '-n'], required=True, help='The deployment name.')
+        c.argument('deployment_name', arg_type=deployment_name_type)
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
-        c.argument('template_file', completer=FilesCompleter(), type=file_type, help="a template file path in the file system")
-        c.argument('template_uri', help='a uri to a remote template file')
-        c.argument('parameters', action='append', nargs='+', completer=FilesCompleter())
+        c.argument('template_file', arg_type=deployment_template_file_type)
+        c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('parameters', arg_type=deployment_parameters_type)
 
     with self.argument_context('deployment create') as c:
-        c.argument('deployment_name', options_list=['--name', '-n'], required=False,
-                   help='The deployment name. Default to template file base name')
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('deployment validate') as c:
-        c.argument('handle_extended_json_format', arg_type=extended_json_format_type)
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
-    with self.argument_context('deployment operation show') as c:
+    with self.argument_context('deployment operation') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
+
+    with self.argument_context('deployment sub') as c:
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+
+    with self.argument_context('deployment sub create') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+
+    with self.argument_context('deployment sub validate') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+
+    with self.argument_context('deployment group') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list, required=True)
+        c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
+        c.argument('rollback_on_error', nargs='?', action=RollbackAction,
+                   help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
+
+    with self.argument_context('deployment group create') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
+                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
+
+    with self.argument_context('deployment group validate') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+
+    with self.argument_context('deployment mg') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+
+    with self.argument_context('deployment mg create') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+
+    with self.argument_context('deployment mg validate') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+
+    with self.argument_context('deployment operation mg') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type)
+
+    with self.argument_context('deployment tenant') as c:
+        c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
+
+    with self.argument_context('deployment tenant create') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+
+    with self.argument_context('deployment tenant validate') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
+                   deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
 
     with self.argument_context('group export') as c:
         c.argument('include_comments', action='store_true')
@@ -212,6 +295,7 @@ def load_arguments(self, _):
 
     with self.argument_context('group create') as c:
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'], help='name of the new resource group', completer=None)
+        c.argument('managed_by', min_api='2016-09-01', help='The ID of the resource that manages this resource group.')
 
     with self.argument_context('tag') as c:
         c.argument('tag_name', options_list=['--name', '-n'])

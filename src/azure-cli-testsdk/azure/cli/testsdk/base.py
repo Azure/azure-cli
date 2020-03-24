@@ -43,16 +43,21 @@ class CheckerMixin(object):
             raise KeyError("Key '{}' not found in kwargs. Check spelling and ensure it has been registered."
                            .format(ex.args[0]))
 
-    def check(self, query, expected_results):
+    def check(self, query, expected_results, case_sensitive=True):
         from azure.cli.testsdk.checkers import JMESPathCheck
         query = self._apply_kwargs(query)
         expected_results = self._apply_kwargs(expected_results)
-        return JMESPathCheck(query, expected_results)
+        return JMESPathCheck(query, expected_results, case_sensitive)
 
     def exists(self, query):
         from azure.cli.testsdk.checkers import JMESPathCheckExists
         query = self._apply_kwargs(query)
         return JMESPathCheckExists(query)
+
+    def not_exists(self, query):
+        from azure.cli.testsdk.checkers import JMESPathCheckNotExists
+        query = self._apply_kwargs(query)
+        return JMESPathCheckNotExists(query)
 
     def greater_than(self, query, expected_results):
         from azure.cli.testsdk.checkers import JMESPathCheckGreaterThan
@@ -147,7 +152,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def create_guid(self):
         import uuid
         self.test_guid_count += 1
-        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4X" % self.test_guid_count)
+        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4x" % self.test_guid_count)
 
         if self.in_recording:
             name = uuid.uuid4()

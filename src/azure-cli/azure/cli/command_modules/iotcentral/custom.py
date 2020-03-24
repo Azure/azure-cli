@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 
 def iotcentral_app_create(
-        cmd, client, app_name, resource_group_name, subdomain, sku="S1",
+        cmd, client, app_name, resource_group_name, subdomain, sku="ST2",
         location=None, template=None, display_name=None
 ):
     cli_ctx = cmd.cli_ctx

@@ -26,6 +26,8 @@ from azure.mgmt.sql.models import (
     ReplicationRole,
     ResourceIdentity,
     SecurityAlertPolicyState,
+    SensitivityLabel,
+    SensitivityLabelSource,
     ServerKey,
     ServerKeyType,
     ServiceObjectiveName,
@@ -35,7 +37,8 @@ from azure.mgmt.sql.models import (
     ManagedInstancePairInfo,
     PartnerRegionInfo,
     InstanceFailoverGroupReadOnlyEndpoint,
-    InstanceFailoverGroupReadWriteEndpoint
+    InstanceFailoverGroupReadWriteEndpoint,
+    ServerPublicNetworkAccess
 )
 
 from knack.log import get_logger
@@ -43,8 +46,13 @@ from knack.log import get_logger
 from ._util import (
     get_sql_capabilities_operations,
     get_sql_servers_operations,
-    get_sql_managed_instances_operations
+    get_sql_managed_instances_operations,
+    get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
 )
+
+from datetime import datetime
+from dateutil.parser import parse
+import calendar
 
 logger = get_logger(__name__)
 
@@ -63,6 +71,18 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
     return server_client.get(
         server_name=server_name,
         resource_group_name=resource_group_name).location
+
+
+def _get_managed_restorable_dropped_database_backup_short_term_retention_client(cli_ctx):
+    '''
+    Returns client for managed restorable dropped databases.
+    '''
+
+    server_client = \
+        get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(cli_ctx, None)
+
+    # pylint: disable=no-member
+    return server_client
 
 
 def _get_managed_instance_location(cli_ctx, managed_instance_name, resource_group_name):
@@ -423,6 +443,19 @@ class FailoverPolicyType(Enum):
     manual = 'Manual'
 
 
+class SqlServerMinimalTlsVersionType(Enum):
+    tls_1_0 = "1.0"
+    tls_1_1 = "1.1"
+    tls_1_2 = "1.2"
+
+
+class SqlManagedInstanceMinimalTlsVersionType(Enum):
+    no_tls = "None"
+    tls_1_0 = "1.0"
+    tls_1_1 = "1.1"
+    tls_1_2 = "1.2"
+
+
 class ComputeModelType(str, Enum):
 
     provisioned = "Provisioned"
@@ -445,14 +478,62 @@ def _get_managed_db_resource_id(cli_ctx, resource_group_name, managed_instance_n
     '''
 
     # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
+
+    return resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Sql', type='managedInstances',
+        name=managed_instance_name,
+        child_type_1='databases',
+        child_name_1=database_name)
+
+
+def _to_filetimeutc(dateTime):
+    '''
+    Changes given datetime to filetimeutc string
+    '''
+
+    NET_epoch = datetime(1601, 1, 1)
+    UNIX_epoch = datetime(1970, 1, 1)
+
+    epoch_delta = (UNIX_epoch - NET_epoch)
+
+    log_time = parse(dateTime)
+
+    net_ts = calendar.timegm((log_time + epoch_delta).timetuple())
+
+    # units of seconds since NET epoch
+    filetime_utc_ts = net_ts * (10**7) + log_time.microsecond * 10
+
+    return filetime_utc_ts
+
+
+def _get_managed_dropped_db_resource_id(
+        cli_ctx,
+        resource_group_name,
+        managed_instance_name,
+        database_name,
+        deleted_time):
+    '''
+    Gets the Managed db resource id in this Azure environment.
+    '''
+
+    # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
     from six.moves.urllib.parse import quote  # pylint: disable=import-error
     from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import resource_id
 
-    return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/managedInstances/{}/databases/{}'.format(
-        quote(get_subscription_id(cli_ctx)),
-        quote(resource_group_name),
-        quote(managed_instance_name),
-        quote(database_name))
+    return (resource_id(
+        subscription=get_subscription_id(cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Sql', type='managedInstances',
+        name=managed_instance_name,
+        child_type_1='restorableDroppedDatabases',
+        child_name_1='{},{}'.format(
+            quote(database_name),
+            _to_filetimeutc(deleted_time))))
 
 
 def db_show_conn_str(
@@ -1162,6 +1243,8 @@ def db_update(
         tier=None,
         family=None,
         capacity=None,
+        read_scale=None,
+        read_replica_count=None,
         min_capacity=None,
         auto_pause_delay=None,
         compute_model=None):
@@ -1231,6 +1314,12 @@ def db_update(
 
     if zone_redundant is not None:
         instance.zone_redundant = zone_redundant
+
+    if read_scale is not None:
+        instance.read_scale = read_scale
+
+    if read_replica_count is not None:
+        instance.read_replica_count = read_replica_count
 
     #####
     # Set other (serverless related) properties
@@ -1424,6 +1513,14 @@ def db_audit_policy_update(
     if audit_actions_and_groups:
         instance.audit_actions_and_groups = audit_actions_and_groups
 
+    # If auditing is enabled, make sure that the actions and groups are set to default
+    # value in case they were removed previously (When disabling auditing)
+    if enabled and (not instance.audit_actions_and_groups or instance.audit_actions_and_groups == []):
+        instance.audit_actions_and_groups = [
+            "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP",
+            "FAILED_DATABASE_AUTHENTICATION_GROUP",
+            "BATCH_COMPLETED_GROUP"]
+
     if retention_days:
         instance.retention_days = retention_days
 
@@ -1474,6 +1571,99 @@ def db_threat_detection_policy_update(
         instance.email_account_admins = email_account_admins
 
     return instance
+
+
+def db_sensitivity_label_show(
+        client,
+        database_name,
+        server_name,
+        schema_name,
+        table_name,
+        column_name,
+        resource_group_name):
+
+    return client.get(
+        resource_group_name,
+        server_name,
+        database_name,
+        schema_name,
+        table_name,
+        column_name,
+        SensitivityLabelSource.current)
+
+
+def db_sensitivity_label_update(
+        cmd,
+        client,
+        database_name,
+        server_name,
+        schema_name,
+        table_name,
+        column_name,
+        resource_group_name,
+        label_name=None,
+        information_type=None):
+    '''
+    Updates a sensitivity label. Custom update function to apply parameters to instance.
+    '''
+
+    # Get the information protection policy
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.security import SecurityCenter
+    from msrestazure.azure_exceptions import CloudError
+
+    security_center_client = get_mgmt_service_client(cmd.cli_ctx, SecurityCenter, asc_location="centralus")
+
+    information_protection_policy = security_center_client.information_protection_policies.get(
+        scope='/providers/Microsoft.Management/managementGroups/{}'.format(_get_tenant_id()),
+        information_protection_policy_name="effective")
+
+    sensitivity_label = SensitivityLabel()
+
+    # Get the current label
+    try:
+        current_label = client.get(
+            resource_group_name,
+            server_name,
+            database_name,
+            schema_name,
+            table_name,
+            column_name,
+            SensitivityLabelSource.current)
+        # Initialize with existing values
+        sensitivity_label.label_name = current_label.label_name
+        sensitivity_label.label_id = current_label.label_id
+        sensitivity_label.information_type = current_label.information_type
+        sensitivity_label.information_type_id = current_label.information_type_id
+
+    except CloudError as ex:
+        if not(ex.error and ex.error.error and 'SensitivityLabelsLabelNotFound' in ex.error.error):
+            raise ex
+
+    # Find the label id and information type id in the policy by the label name provided
+    label_id = None
+    if label_name:
+        label_id = next((id for id in information_protection_policy.labels
+                         if information_protection_policy.labels[id].display_name.lower() ==
+                         label_name.lower()),
+                        None)
+        if label_id is None:
+            raise CLIError('The provided label name was not found in the information protection policy.')
+        sensitivity_label.label_id = label_id
+        sensitivity_label.label_name = label_name
+    information_type_id = None
+    if information_type:
+        information_type_id = next((id for id in information_protection_policy.information_types
+                                    if information_protection_policy.information_types[id].display_name.lower() ==
+                                    information_type.lower()),
+                                   None)
+        if information_type_id is None:
+            raise CLIError('The provided information type was not found in the information protection policy.')
+        sensitivity_label.information_type_id = information_type_id
+        sensitivity_label.information_type = information_type
+
+    return client.create_or_update(
+        resource_group_name, server_name, database_name, schema_name, table_name, column_name, sensitivity_label)
 
 
 ###############################################
@@ -1798,6 +1988,7 @@ def server_create(
         server_name,
         assign_identity=False,
         no_wait=False,
+        enable_public_network=None,
         **kwargs):
     '''
     Creates a server.
@@ -1805,6 +1996,11 @@ def server_create(
 
     if assign_identity:
         kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    if enable_public_network is not None:
+        kwargs['public_network_access'] = (
+            ServerPublicNetworkAccess.enabled if enable_public_network
+            else ServerPublicNetworkAccess.disabled)
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -1831,7 +2027,9 @@ def server_list(
 def server_update(
         instance,
         administrator_login_password=None,
-        assign_identity=False):
+        assign_identity=False,
+        minimal_tls_version=None,
+        enable_public_network=None):
     '''
     Updates a server. Custom update function to apply parameters to instance.
     '''
@@ -1843,6 +2041,13 @@ def server_update(
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+    instance.minimal_tls_version = (
+        minimal_tls_version or instance.minimal_tls_version)
+
+    if enable_public_network is not None:
+        instance.public_network_access = (
+            ServerPublicNetworkAccess.enabled if enable_public_network
+            else ServerPublicNetworkAccess.disabled)
 
     return instance
 
@@ -1866,7 +2071,7 @@ def server_ad_admin_set(
     return client.create_or_update(
         server_name=server_name,
         resource_group_name=resource_group_name,
-        properties=kwargs)
+        parameters=kwargs)
 
 
 def server_ad_admin_update(
@@ -1884,7 +2089,6 @@ def server_ad_admin_update(
     instance.tenant_id = tenant_id or instance.tenant_id
 
     return instance
-
 
 #####
 #           sql server firewall-rule
@@ -2091,19 +2295,17 @@ def encryption_protector_update(
 ###############################################
 
 
-def _find_managed_instance_sku_from_capabilities(cli_ctx, location, sku):
+def _find_managed_instance_sku_from_capabilities(
+        cli_ctx,
+        location,
+        sku):
     '''
     Given a requested sku which may have some properties filled in
-    (e.g. tier and capacity), finds the canonical matching sku
+    (e.g. tier and family), finds the canonical matching sku
     from the given location's capabilities.
     '''
 
     logger.debug('_find_managed_instance_sku_from_capabilities input: %s', sku)
-
-    if sku.name:
-        # User specified sku.name, so nothing else needs to be resolved.
-        logger.debug('_find_managed_instance_sku_from_capabilities return sku as is')
-        return sku
 
     if not _any_sku_values_specified(sku):
         # User did not request any properties of sku, so just wipe it out.
@@ -2175,6 +2377,7 @@ def managed_instance_list(
 
 
 def managed_instance_update(
+        cmd,
         instance,
         administrator_login_password=None,
         license_type=None,
@@ -2182,7 +2385,10 @@ def managed_instance_update(
         storage_size_in_gb=None,
         assign_identity=False,
         proxy_override=None,
-        public_data_endpoint_enabled=None):
+        public_data_endpoint_enabled=None,
+        tier=None,
+        family=None,
+        minimal_tls_version=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -2202,6 +2408,18 @@ def managed_instance_update(
         storage_size_in_gb or instance.storage_size_in_gb)
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
+    instance.minimal_tls_version = (
+        minimal_tls_version or instance.minimal_tls_version)
+
+    instance.sku.name = None
+    instance.sku.tier = (
+        tier or instance.sku.tier)
+    instance.sku.family = (
+        family or instance.sku.family)
+    instance.sku = _find_managed_instance_sku_from_capabilities(
+        cmd.cli_ctx,
+        instance.location,
+        instance.sku)
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
@@ -2368,6 +2586,7 @@ def managed_db_restore(
         target_managed_database_name,
         target_managed_instance_name=None,
         target_resource_group_name=None,
+        deleted_time=None,
         **kwargs):
     '''
     Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
@@ -2387,11 +2606,20 @@ def managed_db_restore(
         resource_group_name=resource_group_name)
 
     kwargs['create_mode'] = CreateMode.point_in_time_restore.value
-    kwargs['source_database_id'] = _get_managed_db_resource_id(
-        cmd.cli_ctx,
-        resource_group_name,
-        managed_instance_name,
-        database_name)
+
+    if deleted_time:
+        kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+            cmd.cli_ctx,
+            resource_group_name,
+            managed_instance_name,
+            database_name,
+            deleted_time)
+    else:
+        kwargs['source_database_id'] = _get_managed_db_resource_id(
+            cmd.cli_ctx,
+            resource_group_name,
+            managed_instance_name,
+            database_name)
 
     return client.create_or_update(
         database_name=target_managed_database_name,
@@ -2399,10 +2627,81 @@ def managed_db_restore(
         resource_group_name=target_resource_group_name,
         parameters=kwargs)
 
+
+def update_short_term_retention_mi(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        retention_days,
+        deleted_time=None):
+    '''
+    Updates short term retention for database
+    '''
+
+    if deleted_time:
+        database_name = '{},{}'.format(
+            database_name,
+            _to_filetimeutc(deleted_time))
+
+        client = \
+            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
+                cmd.cli_ctx,
+                None)
+
+        policy = client.create_or_update(
+            restorable_dropped_database_id=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            retention_days=retention_days)
+    else:
+        policy = client.create_or_update(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name,
+            retention_days=retention_days)
+
+    return policy
+
+
+def get_short_term_retention_mi(
+        cmd,
+        client,
+        database_name,
+        managed_instance_name,
+        resource_group_name,
+        deleted_time=None):
+    '''
+    Gets short term retention for database
+    '''
+
+    if deleted_time:
+        database_name = '{},{}'.format(
+            database_name,
+            _to_filetimeutc(deleted_time))
+
+        client = \
+            get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations(
+                cmd.cli_ctx,
+                None)
+
+        policy = client.get(
+            restorable_dropped_database_id=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name)
+    else:
+        policy = client.get(
+            database_name=database_name,
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name)
+
+    return policy
+
+
 ###############################################
 #              sql failover-group             #
 ###############################################
-
 
 def failover_group_create(
         cmd,

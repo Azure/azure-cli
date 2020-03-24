@@ -366,7 +366,7 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
 
 
 def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
-                   sku=IotHubSku.f1.value,
+                   sku=IotHubSku.s1.value,
                    unit=1,
                    partition_count=4,
                    retention_day=1,
@@ -888,8 +888,11 @@ def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
     return hub.properties.device_streams
 
 
-def iot_hub_manual_failover(cmd, client, hub_name, failover_region, resource_group_name=None, no_wait=False):
-    resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_wait=False):
+    hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
+    resource_group_name = hub.additional_properties['resourcegroup']
+    failover_region = next(x['location'] for x in hub.properties.additional_properties['locations']
+                           if x['role'].lower() == 'secondary')
     if no_wait:
         return client.iot_hub.manual_failover(hub_name, resource_group_name, failover_region)
     LongRunningOperation(cmd.cli_ctx)(client.iot_hub.manual_failover(hub_name, resource_group_name, failover_region))

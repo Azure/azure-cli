@@ -21,11 +21,21 @@ class IoTHubTest(ScenarioTest):
         ehConnectionString = self._get_eventhub_connectionstring(rg)
         subscription_id = self._get_current_subscription()
 
+        # Test hub life cycle in free tier
+        self.cmd('iot hub create -n {0} -g {1} --sku F1'.format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --sku F1 --partition-count 4'.format(hub, rg), expect_failure=True)
+        self.cmd('iot hub create -n {0} -g {1} --sku F1 --partition-count 2'.format(hub, rg),
+                 checks=[self.check('resourcegroup', rg),
+                         self.check('name', hub),
+                         self.check('sku.name', 'F1'),
+                         self.check('properties.eventHubEndpoints.events.partitionCount', '2')])
+        self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
+
         # Test 'az iot hub create'
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --sku S1 --fn true --fc containerName'
                  .format(hub, rg), expect_failure=True)
-        self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4 --retention-day 3'
+        self.cmd('iot hub create -n {0} -g {1} --retention-day 3'
                  ' --c2d-ttl 23 --c2d-max-delivery-count 89 --feedback-ttl 29 --feedback-lock-duration 35'
                  ' --feedback-max-delivery-count 40 --fileupload-notification-max-delivery-count 79'
                  ' --fileupload-notification-ttl 20'.format(hub, rg),
@@ -135,7 +145,7 @@ class IoTHubTest(ScenarioTest):
         policy = self.cmd('iot hub policy renew-key --hub-name {0} -n {1} --renew-key Primary'.format(hub, policy_name),
                           checks=[self.check('keyName', policy_name)]).get_output_in_json()
 
-        policy_name_conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
+        policy_name_conn_str_pattern = r'HostName={0}.azure-devices.net;SharedAccessKeyName={1};SharedAccessKey={2}'.format(
             hub, policy_name, policy['primaryKey'])
 
         # Test policy_name connection-string 'az iot hub show-connection-string'
@@ -379,7 +389,7 @@ class IoTHubTest(ScenarioTest):
                  checks=[self.check('length(properties.routing.enrichments)', 0)])
 
         # Test 'az iot hub manual-failover'
-        self.cmd('iot hub manual-failover -n {0} -g {1} --failover-region "{2}"'.format(hub, rg, 'westcentralus'),
+        self.cmd('iot hub manual-failover -n {0} -g {1}'.format(hub, rg),
                  checks=[self.check('location', location)])
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
