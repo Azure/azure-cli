@@ -145,7 +145,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     name_validation = client.check_name_availability(name, 'Site')
     if not name_validation.name_available:
         existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings')
-        site_config.app_settings=[]
+        site_config.app_settings = []
         site_config.app_settings += [NameValuePair(name=k, value=v) for k, v in existing_app_settings.properties.items()]
 
     if site_config.app_settings:
