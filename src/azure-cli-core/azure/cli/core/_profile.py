@@ -877,7 +877,10 @@ class SubscriptionFinder(object):
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
-            t.display_name = t.additional_properties['displayName']  # remove this line once SDK is fixed
+            if not hasattr(t, 'display_name'):  # Available since 2018-06-01
+                t.display_name = ""
+            if hasattr(t, 'additional_properties'):  # remove this line once SDK is fixed
+                t.display_name = t.additional_properties['displayName']
             temp_context = self._create_auth_context(tenant_id)
             try:
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
