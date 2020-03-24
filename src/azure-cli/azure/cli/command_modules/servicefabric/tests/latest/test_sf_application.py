@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-from test_util import _create_cluster
+from test_util import _create_cluster_with_separate_kv
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
 

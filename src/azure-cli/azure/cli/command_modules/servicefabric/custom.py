@@ -559,7 +559,7 @@ def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_typ
         raise CLIError("Can't delete node since current reliability level is {} requires at least {} nodes.".format(
             cluster.reliability_level,
             reliability_required_instance_count))
-    
+
     # update vmss
     vmss_poll = compute_client.virtual_machine_scale_sets.create_or_update(
         resource_group_name, vmss.name, vmss)
@@ -1242,7 +1242,7 @@ def _get_sf_vm_extension(vmss):
 def _get_cluster_id_in_sf_extension(fabric_ext):
     cluster_endpoint = fabric_ext.settings["clusterEndpoint"]
     endpoint_list = cluster_endpoint.split('/')
-    cluster_id = endpoint_list[len(endpoint_list)-1]
+    cluster_id = endpoint_list[len(endpoint_list) - 1]
     return cluster_id
 
 
