@@ -2629,6 +2629,7 @@ def managed_db_restore(
 
 
 def managed_db_restore_ltr_backup(
+        cmd,
         client,
         backup_id,
         target_managed_database_name,
@@ -2638,20 +2639,10 @@ def managed_db_restore_ltr_backup(
     '''
     Restores a managed database from a long term retention backup.
     '''
-    backup_id_arr = backup_id.split("/")
-    if len(backup_id_arr) == 14:
-        # backup_id format:
-        # /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/locations/{loc}
-        # /longTermRetentionManagedInstances/{mi}/longTermRetentionDatabases/{db}
-        # /longTermRetentionManagedInstanceBackups/{backup}
-        kwargs['location'] = backup_id_arr[7]
-    else:
-        # len(backup_id_arr) == 12
-        # backup_id format:
-        # /subscriptions/{sub}/providers/Microsoft.Sql/locations/{loc}
-        # /longTermRetentionManagedInstances/{mi}/longTermRetentionDatabases/{db}
-        # /longTermRetentionManagedInstanceBackups/{backup}
-        kwargs['location'] = backup_id_arr[5]
+    kwargs['location'] = _get_managed_instance_location(
+        cmd.cli_ctx,
+        managed_instance_name=target_managed_instance_name,
+        resource_group_name=target_resource_group_name)
 
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
     kwargs['long_term_retention_backup_resource_id'] = backup_id
