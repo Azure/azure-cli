@@ -27,7 +27,7 @@ class NatGatewayScenarioTests(ScenarioTest):
         self.cmd('az network public-ip create -g {rg} -n {ip_addr} --location {location} --zone {zone} --sku Standard ')
 
         # create public ip prefix
-        self.cmd('az network public-ip prefix create --length 28 --location {location} --name {ip_prefix} --resource-group {rg} --zone {zone}')
+        self.cmd('az network public-ip prefix create --length 29 --location {location} --name {ip_prefix} --resource-group {rg} --zone {zone}')
 
         self.cmd('az network nat gateway create --resource-group {rg} --public-ip-prefixes {ip_prefix} --name {name} --location {location} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone}', checks=[
             self.check('resourceGroup', '{rg}'),
