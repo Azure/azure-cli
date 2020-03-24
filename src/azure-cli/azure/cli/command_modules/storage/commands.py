@@ -13,7 +13,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
                                                                cf_private_link, cf_private_endpoint,
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
-                                                               cf_adls_file_system)
+                                                               cf_adls_file_system, cf_adls_directory,
+                                                               cf_adls_file)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -635,12 +636,27 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=cf_adls_file_system,
         resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
     )
-    custom_adls_fs_sdk = CliCommandType(
+    adls_directory_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.filedatalake._data_lake_directory_client#DataLakeDirectoryClient.{}',
+        client_factory=cf_adls_directory,
+        resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
+    )
+    adls_file_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.filedatalake._data_lake_file_client#DataLakeFileClient.{}',
+        client_factory=cf_adls_file,
+        resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
+    )
+    custom_adls_sdk = CliCommandType(
         operations_tmpl='azure.cli.command_modules.storage.operations.adls#{}',
         client_factory=cf_adls_file_system,
         resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
     )
 
-    with self.command_group('storage fs', adls_fs_sdk, custom_command_type=custom_adls_fs_sdk) as g:
+    with self.command_group('storage fs', adls_fs_sdk, custom_command_type=custom_adls_sdk) as g:
         g.storage_command('create', 'create_file_system')
 
+    with self.command_group('storage fs directory', adls_directory_sdk, custom_command_type=custom_adls_sdk) as g:
+        g.storage_command('create', 'create_directory')
+
+    with self.command_group('storage fs file', adls_file_sdk, custom_command_type=custom_adls_sdk) as g:
+        g.storage_command('create', 'create_file')
