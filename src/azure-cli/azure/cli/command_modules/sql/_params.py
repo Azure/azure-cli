@@ -1481,9 +1481,11 @@ def load_arguments(self, _):
             c, 'parameters', ManagedDatabase, [
                 'target_managed_database_name',
                 'target_managed_instance_name',
-                'target_resource_group_name',
-                'restore_long_term_retention_backup'
+                'target_resource_group_name'
             ])
+
+        c.argument('backup_id',
+                   help='The resource id of the long term retention backup to be restored.')
 
         c.argument('target_managed_database_name',
                    options_list=['--dest-name'],
@@ -1500,14 +1502,6 @@ def load_arguments(self, _):
                    options_list=['--dest-resource-group'],
                    help='Name of the resource group of the managed instance to restore managed database to. '
                    'When not specified it defaults to source resource group.')
-
-        restore_ltr_backup_arg_group = 'Restore LTR Backup'
-
-        c.argument('restore_long_term_retention_backup',
-                   options_list=['--ltr-backup'],
-                   arg_group=restore_ltr_backup_arg_group,
-                   required=True,
-                   help='The long term retention managed instance backup object to restore.')
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(

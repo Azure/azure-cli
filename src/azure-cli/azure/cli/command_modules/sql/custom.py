@@ -2632,12 +2632,26 @@ def managed_db_restore_ltr_backup(
         client,
         backup_id,
         target_managed_database_name,
-        target_managed_instance_name=None,
-        target_resource_group_name=None,
+        target_managed_instance_name,
+        target_resource_group_name,
         **kwargs):
     '''
-    Restores a managed db from an LTR backup (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
+    Restores a managed database from a long term retention backup.
     '''
+    backup_id_arr = backup_id.split("/")
+    if len(backup_id_arr) == 14:
+        # backup_id format:
+        # /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/locations/{loc}
+        # /longTermRetentionManagedInstances/{mi}/longTermRetentionDatabases/{db}
+        # /longTermRetentionManagedInstanceBackups/{backup}
+        kwargs['location'] = backup_id_arr[7]
+    else:
+        # len(backup_id_arr) == 12
+        # backup_id format:
+        # /subscriptions/{sub}/providers/Microsoft.Sql/locations/{loc}
+        # /longTermRetentionManagedInstances/{mi}/longTermRetentionDatabases/{db}
+        # /longTermRetentionManagedInstanceBackups/{backup}
+        kwargs['location'] = backup_id_arr[5]
 
     kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
     kwargs['long_term_retention_backup_resource_id'] = backup_id
@@ -2728,7 +2742,8 @@ def update_long_term_retention_mi(
         weekly_retention=None,
         monthly_retention=None,
         yearly_retention=None,
-        week_of_year=None):
+        week_of_year=None,
+        **kwargs):
     '''
     Updates long term retention for managed database
     '''
@@ -2738,14 +2753,19 @@ def update_long_term_retention_mi(
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
 
+    kwargs['weekly_retention'] = weekly_retention
+
+    kwargs['monthly_retention'] = monthly_retention
+
+    kwargs['yearly_retention'] = yearly_retention
+
+    kwargs['week_of_year'] = week_of_year
+
     policy = client.create_or_update(
         database_name=database_name,
         managed_instance_name=managed_instance_name,
         resource_group_name=resource_group_name,
-        weekly_retention=weekly_retention,
-        monthly_retention=monthly_retention,
-        yearly_retention=yearly_retention,
-        week_of_year=week_of_year)
+        parameters=kwargs)
 
     return policy
 
@@ -2806,7 +2826,7 @@ def list_by_instance_long_term_retention_mi_backup(
             only_latest_per_database=only_latest_per_database,
             database_state=database_state)
 
-        return backups
+    return backups
 
 
 def list_by_location_long_term_retention_mi_backup(

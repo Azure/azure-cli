@@ -561,10 +561,10 @@ def load_command_table(self, _):
         g.command('list', 'list_by_instance')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
 
-    with self.command_group('sql midb ltr restore',
+    with self.command_group('sql midb ltr',
                             managed_databases_operations,
                             client_factory=get_sql_managed_databases_operations) as g:
-        g.custom_command('restore', 'managed_db_restore_ltr_backup', supports_no_wait=True)
+        g.custom_command('restore', 'managed_db_restore_ltr_backup')
 
     managed_backup_short_term_retention_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedBackupShortTermRetentionPoliciesOperations.{}',
@@ -585,7 +585,7 @@ def load_command_table(self, _):
                             managed_database_long_term_retention_policies_operations,
                             client_factory=get_sql_managed_database_long_term_retention_policies_operations) as g:
 
-        g.custom_command('set', 'update_long_term_retention_mi', supports_no_wait=True)
+        g.custom_command('set', 'update_long_term_retention_mi')
         g.show_command('show', 'get')
 
     managed_database_long_term_retention_backups_operations = CliCommandType(
