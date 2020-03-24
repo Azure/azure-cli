@@ -689,6 +689,26 @@ type: command
 short-summary: List the private link resources supported for a MySQL server.
 """
 
+helps['mysql server encryption key'] = """
+type: group
+short-summary: Manage a server's encryption keys.
+"""
+
+helps['mysql server encryption key create'] = """
+type: command
+short-summary: Creates a server encryption key.
+"""
+
+helps['mysql server encryption key delete'] = """
+type: command
+short-summary: Deletes a server encryption key.
+"""
+
+helps['mysql server key show'] = """
+type: command
+short-summary: Shows a server encryption key.
+"""
+
 helps['postgres'] = """
 type: group
 short-summary: Manage Azure Database for PostgreSQL servers.
@@ -1025,4 +1045,24 @@ short-summary: Manage PostgreSQL server private link resources.
 helps['postgres server private-link-resource list'] = """
 type: command
 short-summary: List the private link resources supported for a PostgreSQL server.
+"""
+
+helps['postgres server encryption key'] = """
+type: group
+short-summary: Manage a server's encryption keys.
+"""
+
+helps['postgres server encryption key create'] = """
+type: command
+short-summary: Creates a server encryption key.
+"""
+
+helps['postgres server encryption key delete'] = """
+type: command
+short-summary: Deletes a server encryption key.
+"""
+
+helps['postgres server encryption key show'] = """
+type: command
+short-summary: Shows a server encryption key.
 """

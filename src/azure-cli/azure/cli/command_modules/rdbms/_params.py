@@ -32,6 +32,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('geo_redundant_backup', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--geo-redundant-backup'], help='Enable or disable geo-redundant backups. Default value is Disabled. Not supported in Basic pricing tier.')
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
+            c.argument('assign_identity',options_list=['--assign_identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
             c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
             c.argument('version', help='Server major version.')
@@ -39,6 +40,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server update'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')
             c.argument('sku_name', options_list=['--sku-name'], help='The name of the sku. Follows the convention {pricing tier}_{compute generation}_{vCores} in shorthand. Examples: B_Gen5_1, GP_Gen5_4, MO_Gen5_16.')
+            c.argument('assign_identity',options_list=['--assign_identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or resource ID of the source server to restore from.')
@@ -86,7 +88,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The storage capacity of the server (unit is megabytes). Minimum 5120 and increases in 1024 increments. Default is 51200.')
             c.argument('backup_retention', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained. Range of 7 to 35 days. Default is 7 days.', validator=retention_validator)
             c.argument('auto_grow', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--auto-grow'], help='Enable or disable autogrow of the storage. Default value is Enabled.')
+            c.argument('assign_identity',options_list=['--assign_identity'], help='Generate and assign an Azure Active Directory Identity for this server for use with key management services like Azure KeyVault.')
             c.argument('tags', tags_type)
+            
+            if scope == 'mariadb server':
+                c.ignore('assign_identity')
 
     for scope in ['mariadb server-logs', 'mysql server-logs', 'postgres server-logs']:
         with self.argument_context(scope) as c:
@@ -144,3 +150,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
     for scope in ['mariadb server private-link-resource', 'mysql server private-link-resource', 'postgres server private-link-resource']:
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'], required=True, help='Name of the Server.')
+ 
+    for scope in ['mysql server key', 'postgres server key']:
+        with self.argument_context(scope) as c:
+            c.argument('server_name', options_list=['--name', '-s'])
+            c.argument('kid', options_list=['--kid', '-k'], help='The Azure Key Vault key identifier of the server key. An example key identifier is "https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
