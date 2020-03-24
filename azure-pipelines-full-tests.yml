@@ -33,7 +33,7 @@ jobs:
 
   - job: BuildPythonWheel
     displayName: Build Python Wheels
-
+    dependsOn: ExtractMetadata
     condition: succeeded()
     pool:
       vmImage: 'ubuntu-16.04'
@@ -57,6 +57,8 @@ jobs:
 
   - job: AutomationTest
     displayName: Automation Test
+    dependsOn: BuildPythonWheel
+    condition: succeeded()
     pool:
       vmImage: 'ubuntu-16.04'
     strategy:
@@ -88,7 +90,7 @@ jobs:
   - job: RunAutomationReduced20190301
     displayName: Run Automation Reduced, Profile 2019-03-01
     dependsOn: BuildPythonWheel
-
+    condition: succeeded()
     pool:
       vmImage: 'ubuntu-16.04'
     strategy:
@@ -122,7 +124,7 @@ jobs:
   - job: RunAutomation20180301
     displayName: Run Automation, Profile 2018-03-01
     dependsOn: BuildPythonWheel
-
+    condition: succeeded()
     pool:
       vmImage: 'ubuntu-16.04'
     strategy:
