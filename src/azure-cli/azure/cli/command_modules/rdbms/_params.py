@@ -92,6 +92,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
             if scope == 'mariadb server':
                 c.ignore('minimal_tls_version')
+                c.ignore('public_network_access')
 
     for scope in ['mariadb server-logs', 'mysql server-logs', 'postgres server-logs']:
         with self.argument_context(scope) as c:

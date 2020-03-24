@@ -4,8 +4,10 @@ Release History
 ===============
 
 **RDBMS**
-Add --minimal-tls-version to enforce the minimal TLS version on the server for Postgres and MySQL
-Add --public-network-access to control whether a server supports public access or not
+
+* Bump the azure-mgmt-rdbms SDK version to 2.1.0
+* Add --minimal-tls-version to enforce the minimal TLS version on the server for Postgres and MySQL
+* Add --public-network-access to control whether a server supports public access or not
 
 2.2.0
 ++++++
