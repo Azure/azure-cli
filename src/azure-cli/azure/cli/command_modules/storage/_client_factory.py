@@ -221,10 +221,9 @@ def cf_blob_client(cli_ctx, kwargs):
 
 def generic_data_service_factory_track2(cli_ctx, **kwargs):
     service = kwargs.pop('service', None)
-    account_name = kwargs.pop('account_name', None)
-    credential = kwargs.pop('sas_token', None) or kwargs.pop('account_key', None)
+    credential = kwargs.pop('credential', None)
     connection_string = kwargs.pop('connection_string', None)
-    account_url = "https://{}.dfs.core.windows.net".format(account_name)
+    account_url = kwargs.pop('account_url', None)
     if credential:
         client = service(account_url=account_url, credential=credential, **kwargs)
     if connection_string:
@@ -232,6 +231,25 @@ def generic_data_service_factory_track2(cli_ctx, **kwargs):
     return client
 
 
+def resolve_client_parameters(**kwargs):
+    service = kwargs.pop('service', None)
+    account_name = kwargs.pop('account_name', None)
+    kwargs['credential'] = kwargs.pop('sas_token', None) or kwargs.pop('account_key', None)
+    kwargs['account_url'] = "https://{}.{}.core.windows.net".format(account_name, service)
+    return kwargs
+
+
 def cf_adls_file_system(cli_ctx, kwargs):
     t_adls_file_system = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE, '_file_system_client#FileSystemClient')
-    return generic_data_service_factory_track2(cli_ctx, service=t_adls_file_system, **kwargs)
+    account_name = kwargs.pop('account_name', None)
+    connection_string = kwargs.pop('connection_string', None)
+    credential = kwargs.pop('sas_token', None) or kwargs.pop('account_key', None)
+    account_url = "https://{}.{}.core.windows.net".format(account_name, 'dfs')
+    if account_url and credential:
+        client = t_adls_file_system(account_url=account_url,
+                                    credential=credential,
+                                    file_system_name=kwargs.pop('file_system_name'))
+    if connection_string:
+        client = t_adls_file_system.from_connection_string(connection_string=connection_string,
+                                                           file_system_name=kwargs.pop('file_system_name'))
+    return client
