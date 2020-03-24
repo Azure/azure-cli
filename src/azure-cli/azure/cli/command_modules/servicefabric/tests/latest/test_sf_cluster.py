@@ -7,7 +7,7 @@ import json
 import logging
 import os
 import time
-from test_util import _create_cluster, _create_cluster_with_separate_kv, _wait_for_cluster_state_ready, _add_selfsigned_cert_to_keyvault
+from azure.cli.command_modules.servicefabric.tests.latest.test_util import _create_cluster, _create_cluster_with_separate_kv, _wait_for_cluster_state_ready, _add_selfsigned_cert_to_keyvault
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
 

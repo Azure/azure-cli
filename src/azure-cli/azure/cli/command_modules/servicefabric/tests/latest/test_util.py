@@ -47,8 +47,8 @@ def _create_cluster_with_separate_kv(test, kwargs):
 
         if time.time() > timeout:
             raise CLIError("Cluster deployment timed out")
-        if not test.in_recording:
-            time.sleep(20)
+        if test.in_recording or test.is_live:
+            time.sleep(60)
 
 
 def _create_cluster(test, kwargs):
@@ -64,8 +64,8 @@ def _create_cluster(test, kwargs):
 
         if time.time() > timeout:
             raise CLIError("Cluster deployment timed out")
-        if not test.in_recording:
-            time.sleep(20)
+        if test.in_recording or test.is_live:
+            time.sleep(60)
 
 
 def _wait_for_cluster_state_ready(test, kwargs):
@@ -82,5 +82,5 @@ def _wait_for_cluster_state_ready(test, kwargs):
             if cluster['clusterState']:
                 state = cluster['clusterState']
             raise CLIError("Cluster deployment timed out. cluster state is not 'Ready'. State: {}".format(state))
-        if not test.in_recording:
-            time.sleep(20)
+        if test.in_recording or test.is_live:
+            time.sleep(60)
