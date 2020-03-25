@@ -155,8 +155,7 @@ jobs:
         pip install azdev
         azdev setup -c azure-cli -r azure-cli-extensions
         az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
-        # azdev test $(Target) --live -a "-n 8"
-        azdev test redis --live -a "-n 8"
+        azdev test $(Target) --live -a "-n 8"
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
@@ -164,9 +163,10 @@ jobs:
         testRunTitle: 'Azure CLI live test results of $(Target)'
         # mergeTestResults: true
         # testResultsFormat: 'JUnit'
-    
+
 - job: SendEmail
-  displayName: Live Test Python 3.8
+  displayName: Send email
+  dependsOn: LiveTestPython38
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -174,5 +174,6 @@ jobs:
         addToPath: true
         architecture: 'x64'
     - bash: |
-        echo $(Build.BuildUri)
-        echo $(Build.BuildId)
+        commit_id=`git ls-remote git@github.com:Azure/azure-cli.git HEAD`
+        pip install sendgrid
+        python scripts/ci/sendemail.py ${SENDGRID_KEY} $(Build.BuildId) $commit_id 
