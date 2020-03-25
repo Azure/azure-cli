@@ -105,11 +105,11 @@ class LocalContextAttribute(object):
     def __init__(self, name, actions, scopes=None):
         """ Local Context Attribute arguments
 
-        :param name: Argument name in local context, should make sure they are consistent for STORE and USE places
+        :param name: Argument name in local context. Make sure it is consistent for STORE and USE.
         :type name: str
-        :param actions: Which action should be taken for local context, value can be a list of STORE and USE
+        :param actions: Which action should be taken for local context. Allowed values: STORE, USE
         :type actions: list
-        :param scopes: The effective level of of this argument when saved to local context.
+        :param scopes: The effective commands or command groups of this argument when saved to local context.
         :type scopes: list
         """
         self.name = name
