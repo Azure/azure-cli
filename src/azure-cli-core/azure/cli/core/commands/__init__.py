@@ -27,7 +27,9 @@ from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
+from azure.cli.core.local_context import USE
 import azure.cli.core.telemetry as telemetry
+
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -38,6 +40,7 @@ from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resol
 from knack.log import get_logger
 from knack.util import CLIError, CommandResultItem, todict
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
+from knack.validators import DefaultStr
 
 try:
     t_JSONDecodeError = json.JSONDecodeError
@@ -284,9 +287,23 @@ class AzCliCommand(CLICommand):
         self._add_vscode_extension_metadata(arg, overrides)
 
         # same blunt mechanism like we handled id-parts, for create command, no name default
-        if self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME':
+        if not (self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME'):
+            super(AzCliCommand, self)._resolve_default_value_from_config_file(arg, overrides)
+
+        self._resolve_default_value_from_local_context(arg, overrides)
+
+    def _resolve_default_value_from_local_context(self, arg, overrides):
+        actions = overrides.settings.get('lc_actions', None)
+        if not actions or USE not in actions:
             return
-        super(AzCliCommand, self)._resolve_default_value_from_config_file(arg, overrides)
+        name = overrides.settings.get('lc_name', None)
+        if name:
+            local_context = self.cli_ctx.local_context
+            value = local_context.get(self.name, name)
+            if value:
+                logger.debug("local context '%s' for arg %s", value, arg.name)
+                overrides.settings['default'] = DefaultStr(value)
+                overrides.settings['required'] = False
 
     def load_arguments(self):
         super(AzCliCommand, self).load_arguments()
@@ -553,8 +570,12 @@ class AzCliCommandInvoker(CommandInvoker):
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
         parsed_args = self.parser.parse_args(args)
-
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
+
+        if command and command in self.commands_loader.command_table and command in self.parser.subparser_map and \
+                self.parser.subparser_map[command].specified_arguments:
+            self.cli_ctx.save_local_context(parsed_args, self.commands_loader.command_table[command].arguments,
+                                            self.parser.subparser_map[command].specified_arguments)
 
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.

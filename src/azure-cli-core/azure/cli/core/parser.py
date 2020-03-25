@@ -16,6 +16,7 @@ from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
+from azure.cli.core.local_context import IGNORE_DESTS
 
 from knack.log import get_logger
 from knack.parser import CLICommandParser
@@ -54,6 +55,8 @@ class AzCliCommandParser(CLICommandParser):
 
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
         self.command_source = kwargs.pop('_command_source', None)
+        self.subparser_map = {}
+        self.specified_arguments = []
         super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
 
     def load_command_table(self, command_loader):
@@ -89,6 +92,7 @@ class AzCliCommandParser(CLICommandParser):
                                                   formatter_class=fc,
                                                   cli_help=self.cli_help,
                                                   _command_source=metadata.command_source)
+            self.subparser_map[command_name] = command_parser
             command_parser.cli_ctx = self.cli_ctx
             command_validator = metadata.validator
             argument_validators = []
@@ -163,6 +167,8 @@ class AzCliCommandParser(CLICommandParser):
                                  default_completer=lambda _: ())
 
     def _check_value(self, action, value):
+        if action.dest and action.dest not in IGNORE_DESTS:
+            self.specified_arguments.append(action.dest)
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:

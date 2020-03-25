@@ -45,3 +45,18 @@ examples:
   - name: Clear default webapp and VM names.
     text: az configure --defaults vm='' web=''
 """
+
+helps['local-context'] = """
+type: group
+short-summary: Manage Local Context
+"""
+
+helps['local-context on'] = """
+type: command
+short-summary: Turn on local context in current directory
+"""
+
+helps['local-context off'] = """
+type: group
+short-summary: Turn off local context
+"""

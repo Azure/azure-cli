@@ -21,6 +21,7 @@ from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
+from .local_context import AzCLILocalContext, STORE, GLOBAL
 
 logger = get_logger(__name__)
 
@@ -56,7 +57,9 @@ class AzCli(CLI):
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
-
+        self.local_context = AzCLILocalContext(
+            dir_name=os.path.basename(self.config.config_dir), file_name='local_context'
+        )
         register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
@@ -104,6 +107,20 @@ class AzCli(CLI):
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
         return handle_exception(ex)
+
+    def save_local_context(self, args, arguments, specified_arguments):
+        for argument_name in specified_arguments:
+            if argument_name not in arguments:
+                continue
+            argtype = arguments[argument_name].type
+            actions = argtype.settings.get('lc_actions', None)
+            if not actions or STORE not in actions:
+                continue
+            value = getattr(args, argument_name)
+            name = argtype.settings.get('lc_name', None)
+            scopes = argtype.settings.get('lc_scopes', [GLOBAL])
+            if name and scopes:
+                self.local_context.set(scopes, name, value)
 
 
 class MainCommandsLoader(CLICommandsLoader):

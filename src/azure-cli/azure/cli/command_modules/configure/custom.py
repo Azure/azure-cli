@@ -247,3 +247,18 @@ def purge_cache_contents():
         shutil.rmtree(directory)
     except (OSError, IOError) as ex:
         logger.debug(ex)
+
+
+def turn_local_context_on(cmd):
+    cmd.cli_ctx.local_context.turn_on()
+
+
+def turn_local_context_off(cmd, yes=False):
+    if cmd.cli_ctx.local_context.is_on():
+        from azure.cli.core.util import user_confirmation
+        dir_path = cmd.cli_ctx.local_context.first_dir_path()
+        user_confirmation('Local context in {} will be removed and can\'t be recovered. Are you sure you want to '
+                          'continue this operation ?'.format(dir_path), yes)
+        cmd.cli_ctx.local_context.turn_off()
+    else:
+        raise CLIError('local context is not enabled in current directory and all its parent directories')

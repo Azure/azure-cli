@@ -8,6 +8,7 @@ import tempfile
 import unittest
 
 from azure.cli.testsdk import ScenarioTest
+from knack.util import CLIError
 
 
 class TestConfigure(unittest.TestCase):
@@ -54,6 +55,14 @@ class ConfigureGlobalDefaultsTest(ScenarioTest):
         actual = set([(x['name'], x['value']) for x in res])
         expected = set([('global', 'global1'), ('global2', 'global2')])
         self.assertTrue(actual == expected)
+
+
+class LocalContextTest(ScenarioTest):
+    def test_local_context_on_off(self):
+        self.cmd('local-context on')
+        with self.assertRaises(CLIError):
+            self.cmd('local-context on')
+        self.cmd('local-context off --yes')
 
 
 if __name__ == '__main__':
