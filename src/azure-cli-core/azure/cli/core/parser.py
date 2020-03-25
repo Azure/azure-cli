@@ -16,7 +16,6 @@ from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
-from azure.cli.core.local_context import IGNORE_DESTS
 
 from knack.log import get_logger
 from knack.parser import CLICommandParser
@@ -166,9 +165,13 @@ class AzCliCommandParser(CLICommandParser):
         argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
                                  default_completer=lambda _: ())
 
-    def _check_value(self, action, value):
-        if action.dest and action.dest not in IGNORE_DESTS:
+    def _get_values(self, action, arg_strings):
+        value = super(AzCliCommandParser, self)._get_values(action, arg_strings)
+        if action.dest and isinstance(action.dest, str) and not action.dest.startswith('_'):
             self.specified_arguments.append(action.dest)
+        return value
+
+    def _check_value(self, action, value):
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:

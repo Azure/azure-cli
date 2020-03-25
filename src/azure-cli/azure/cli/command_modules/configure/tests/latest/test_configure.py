@@ -57,13 +57,5 @@ class ConfigureGlobalDefaultsTest(ScenarioTest):
         self.assertTrue(actual == expected)
 
 
-class LocalContextTest(ScenarioTest):
-    def test_local_context_on_off(self):
-        self.cmd('local-context on')
-        with self.assertRaises(CLIError):
-            self.cmd('local-context on')
-        self.cmd('local-context off --yes')
-
-
 if __name__ == '__main__':
     unittest.main()

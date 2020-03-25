@@ -6,16 +6,15 @@
 import os
 import stat
 import shutil
-from six.moves import configparser
+import configparser
 
 from knack.log import get_logger
 from knack.config import _ConfigFile
 from knack.util import ensure_dir, CLIError
 
-STORE = 'store'
-USE = 'use'
-GLOBAL = '__global__'
-IGNORE_DESTS = ['_command_package', '_subcommand']
+STORE = 'STORE'   # action for a parameter in local context, STORE means its value will be saved to local context
+USE = 'USE'   # action for a parameter in local context, USE means will read value from local context for this parameter
+ALL = 'ALL'   # effective level of local context, ALL means all commands can share this parameter value
 logger = get_logger(__name__)
 
 
@@ -41,14 +40,14 @@ class AzCLILocalContext(object):
     def _add_to_file_chain(self, current_dir, dir_name, file_name):
         dir_path = os.path.join(current_dir, dir_name)
         file_path = os.path.join(dir_path, file_name)
-        if os.path.isfile(file_path):
+        if os.path.isfile(file_path) and os.access(file_path, os.R_OK) and os.access(file_path, os.W_OK):
             self._file_chain.append(_ConfigFile(dir_path, file_path))
 
     def get(self, command, argument):
         for local_context in self._file_chain:
             command_parts = command.split(' ')
             while True:
-                section = ' '.join(command_parts) if command_parts else GLOBAL
+                section = ' '.join(command_parts) if command_parts else ALL
                 try:
                     return local_context.get(section, argument)
                 except (configparser.NoSectionError, configparser.NoOptionError):
@@ -99,3 +98,28 @@ class AzCLILocalContext(object):
         if self.is_on():
             return os.path.dirname(os.path.dirname(self._file_chain[0].config_path))
         return None
+
+
+class LocalContextAttribute(object):
+    # pylint: disable=too-few-public-methods
+    def __init__(self, name, actions, scopes=None):
+        """ Local Context Attribute arguments
+
+        :param name: Argument name in local context, should make sure they are consistent for STORE and USE places
+        :type name: str
+        :param actions: Which action should be taken for local context, value can be a list of STORE and USE
+        :type actions: list
+        :param scopes: The effective level of of this argument when saved to local context.
+        :type scopes: list
+        """
+        self.name = name
+
+        if isinstance(actions, str):
+            actions = [actions]
+        self.actions = actions
+
+        if isinstance(scopes, str):
+            scopes = [scopes]
+        if scopes is None and STORE in actions:
+            scopes = [ALL]
+        self.scopes = scopes

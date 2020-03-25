@@ -21,7 +21,7 @@ from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
-from .local_context import AzCLILocalContext, STORE, GLOBAL
+from .local_context import AzCLILocalContext, STORE
 
 logger = get_logger(__name__)
 
@@ -108,19 +108,32 @@ class AzCli(CLI):
         from azure.cli.core.util import handle_exception
         return handle_exception(ex)
 
-    def save_local_context(self, args, arguments, specified_arguments):
+    def save_local_context(self, parsed_args, argument_definitions, specified_arguments):
+        """ Local Context Attribute arguments
+
+        Save argument value to local context if it is defined as STORE and user specify a value for it.
+
+        :param parsed_args: Parsed args which return by AzCliCommandParser parse_args
+        :type parsed_args: Namespace
+        :param argument_definitions: All available argument definitions
+        :type argument_definitions: dict
+        :param specified_arguments: Arguments which user specify in this command
+        :type specified_arguments: list
+        """
+
         for argument_name in specified_arguments:
-            if argument_name not in arguments:
+            # make sure STORE is defined
+            if argument_name not in argument_definitions:
                 continue
-            argtype = arguments[argument_name].type
-            actions = argtype.settings.get('lc_actions', None)
-            if not actions or STORE not in actions:
+            argtype = argument_definitions[argument_name].type
+            lca = argtype.settings.get('local_context_attribute', None)
+            if not lca or not lca.actions or STORE not in lca.actions:
                 continue
-            value = getattr(args, argument_name)
-            name = argtype.settings.get('lc_name', None)
-            scopes = argtype.settings.get('lc_scopes', [GLOBAL])
-            if name and scopes:
-                self.local_context.set(scopes, name, value)
+            # get the specified value
+            value = getattr(parsed_args, argument_name)
+            # save when name and scopes have value
+            if lca.name and lca.scopes:
+                self.local_context.set(lca.scopes, lca.name, value)
 
 
 class MainCommandsLoader(CLICommandsLoader):

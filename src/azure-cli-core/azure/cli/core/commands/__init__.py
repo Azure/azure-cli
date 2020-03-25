@@ -293,13 +293,12 @@ class AzCliCommand(CLICommand):
         self._resolve_default_value_from_local_context(arg, overrides)
 
     def _resolve_default_value_from_local_context(self, arg, overrides):
-        actions = overrides.settings.get('lc_actions', None)
-        if not actions or USE not in actions:
+        lca = overrides.settings.get('local_context_attribute', None)
+        if not lca or not lca.actions or USE not in lca.actions:
             return
-        name = overrides.settings.get('lc_name', None)
-        if name:
+        if lca.name:
             local_context = self.cli_ctx.local_context
-            value = local_context.get(self.name, name)
+            value = local_context.get(self.name, lca.name)
             if value:
                 logger.debug("local context '%s' for arg %s", value, arg.name)
                 overrides.settings['default'] = DefaultStr(value)

@@ -8,7 +8,7 @@ import unittest
 import shutil
 
 from knack.util import CLIError
-from azure.cli.core.local_context import AzCLILocalContext, GLOBAL
+from azure.cli.core.local_context import AzCLILocalContext, ALL
 
 
 class TestLocalContext(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestLocalContext(unittest.TestCase):
 
     def test_local_context(self):
         self.assertTrue(self.local_context.is_on())
-        self.local_context.set([GLOBAL], 'resource_group_name', 'test_rg')
+        self.local_context.set([ALL], 'resource_group_name', 'test_rg')
         self.assertEqual('test_rg', self.local_context.get('vm create', 'resource_group_name'))
         with self.assertRaises(CLIError):
             self.local_context.turn_on()

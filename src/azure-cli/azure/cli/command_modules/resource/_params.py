@@ -17,7 +17,7 @@ def load_arguments(self, _):
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
         get_enum_type, get_three_state_flag)
     from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.local_context import STORE, GLOBAL
+    from azure.cli.core.local_context import LocalContextAttribute, STORE, ALL
 
     from knack.arguments import ignore_type, CLIArgumentType
 
@@ -296,8 +296,10 @@ def load_arguments(self, _):
 
     with self.argument_context('group create') as c:
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
-                   help='name of the new resource group', completer=None, lc_actions=[STORE], lc_scopes=[GLOBAL],
-                   lc_name='resource_group_name')
+                   help='name of the new resource group', completer=None,
+                   local_context_attribute=LocalContextAttribute(
+                       name='resource_group_name', actions=[STORE], scopes=[ALL]
+                   ))
         c.argument('managed_by', min_api='2016-09-01', help='The ID of the resource that manages this resource group.')
 
     with self.argument_context('tag') as c:

@@ -57,6 +57,6 @@ short-summary: Turn on local context in current directory
 """
 
 helps['local-context off'] = """
-type: group
+type: command
 short-summary: Turn off local context
 """

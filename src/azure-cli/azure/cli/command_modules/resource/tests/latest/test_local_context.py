@@ -3,18 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
-import os
-import time
-import mock
 import unittest
-
-from azure.cli.core.parser import IncorrectUsageError
-from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
-from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
-from azure.cli.core.util import get_file_json
-from knack.util import CLIError
+from azure.cli.testsdk import ScenarioTest
 
 
 class LocalContextScenarioTest(ScenarioTest):
@@ -31,3 +21,7 @@ class LocalContextScenarioTest(ScenarioTest):
             self.check('location', self.kwargs['location'])
         ])
         self.cmd('local-context off --yes')
+
+
+if __name__ == '__main__':
+    unittest.main()
