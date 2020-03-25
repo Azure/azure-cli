@@ -356,6 +356,23 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_basic_with_waf_v2_sku')
+    def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
+        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
+
+        self.cmd('network application-gateway list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?resourceGroup == '{}']) == length(@)".format(resource_group), True)
+        ])
+
+        self.cmd('network application-gateway show --resource-group {rg} --name ag1', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', 'ag1'),
+            self.check('resourceGroup', resource_group),
+            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
+        ])
+
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
