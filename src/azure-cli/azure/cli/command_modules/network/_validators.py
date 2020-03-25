@@ -113,6 +113,11 @@ def get_vnet_validator(dest):
     return _validate_vnet_name_or_id
 
 
+def _validate_vpn_gateway_generation(namespace):
+    if namespace.gateway_type != 'Vpn' and namespace.vpn_gateway_generation:
+        raise CLIError('vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
+
+
 def validate_ddos_name_or_id(cmd, namespace):
 
     if namespace.ddos_protection_plan:
@@ -1049,6 +1054,8 @@ def process_vnet_gateway_create_namespace(cmd, namespace):
     ns = namespace
     get_default_location_from_resource_group(cmd, ns)
     validate_tags(ns)
+
+    _validate_vpn_gateway_generation(ns)
 
     get_virtual_network_validator()(cmd, ns)
 
