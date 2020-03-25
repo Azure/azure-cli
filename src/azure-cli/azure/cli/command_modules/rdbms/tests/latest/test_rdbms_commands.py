@@ -32,7 +32,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -101,11 +101,11 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'eastus'
+        loc = 'westus'
 
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
-        geoloc = 'eastus'
+        geoloc = 'westus'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
@@ -372,7 +372,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
         vnet_firewall_rule_1 = 'vnet_rule1'
         vnet_firewall_rule_2 = 'vnet_rule2'
-        location = 'eastus'
+        location = 'westus'
         vnet_name = 'clitestvnet'
         ignore_missing_endpoint = 'true'
         address_prefix = '10.0.0.0/16'
@@ -519,7 +519,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['properties']['groupId'], group_id)
 
     def _test_private_endpoint_connection(self, resource_group, server, database_engine):
-        loc = 'eastus'
+        loc = 'westus'
         vnet = self.create_random_name('cli-vnet-', 24)
         subnet = self.create_random_name('cli-subnet-', 24)
         pe_name_auto = self.create_random_name('cli-pe-', 24)
@@ -693,7 +693,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
-        self.cmd('keyvault create -g {} -n {}  --location eastus --enable-soft-delete true --enable-purge-protection true'
+        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true --enable-purge-protection true'
                  .format(resource_group, vault_name))
 
         # create key
@@ -748,7 +748,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                     self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
 
         # create a server
-        result = self.cmd('{} server create -g {} --name {} -l eastus '
+        result = self.cmd('{} server create -g {} --name {} -l westus '
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name GP_Gen5_2'
                           .format(database_engine, resource_group, server),
@@ -761,7 +761,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                               JMESPathCheck('masterServerId', '')]).get_output_in_json()
 
         # test replica create
-        self.cmd('{} server replica create -g {} -n {} -l eastus --sku-name GP_Gen5_4 '
+        self.cmd('{} server replica create -g {} -n {} -l westus --sku-name GP_Gen5_4 '
                  '--source-server {}'
                  .format(database_engine, resource_group, replicas[0], result['id']),
                  checks=[
@@ -852,7 +852,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                     self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
 
         # create a server
-        result = self.cmd('{} server create -g {} --name {} -l eastus '
+        result = self.cmd('{} server create -g {} --name {} -l westus '
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name {}'
                           .format(database_engine, resource_group, server, skuName),
@@ -877,7 +877,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
             sleep(120)
 
         # test replica create
-        self.cmd('{} server replica create -g {} -n {} -l eastus --sku-name {} '
+        self.cmd('{} server replica create -g {} -n {} -l westus --sku-name {} '
                  '--source-server {}'
                  .format(database_engine, resource_group, replicas[0], testSkuName, result['id']),
                  checks=[
