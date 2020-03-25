@@ -221,12 +221,12 @@ class DnsScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 2))
 
         for t in record_types:
-            self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1} --if-none-match'.format(t, args[t]))
+            self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1}'.format(t, args[t]))
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
                  checks=self.check('length(arecords)', 1))
 
-        self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11 --if-none-match')
+        self.cmd('network dns record-set a remove-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
 
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}', expect_failure=True)
 

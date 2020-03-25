@@ -1882,84 +1882,84 @@ def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, val
 
 
 def remove_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
-                           keep_empty_record_set=False, if_none_match=None):
+                           keep_empty_record_set=False):
     AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                          keep_empty_record_set=keep_empty_record_set, if_none_match=if_none_match)
+                          keep_empty_record_set=keep_empty_record_set)
 
 
 def remove_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
-                        keep_empty_record_set=False, if_none_match=None):
+                        keep_empty_record_set=False):
     ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                          keep_empty_record_set=keep_empty_record_set, if_none_match=if_none_match)
+                          keep_empty_record_set=keep_empty_record_set)
 
 
 def remove_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value,
-                          flags, tag, keep_empty_record_set=False, if_none_match=None):
+                          flags, tag, keep_empty_record_set=False):
     CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                          keep_empty_record_set=keep_empty_record_set, if_none_match=if_none_match)
+                          keep_empty_record_set=keep_empty_record_set)
 
 
 def remove_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname,
-                            keep_empty_record_set=False, if_none_match=None):
+                            keep_empty_record_set=False):
     CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                          is_list=False, keep_empty_record_set=keep_empty_record_set, if_none_match=if_none_match)
+                          is_list=False, keep_empty_record_set=keep_empty_record_set)
 
 
 def remove_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
-                         keep_empty_record_set=False, if_none_match=None):
+                         keep_empty_record_set=False):
     MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                          keep_empty_record_set=keep_empty_record_set, if_none_match=if_none_match)
+                          keep_empty_record_set=keep_empty_record_set)
 
 
 def remove_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
-                         keep_empty_record_set=False, if_none_match=None):
+                         keep_empty_record_set=False):
     NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                          keep_empty_record_set=keep_empty_record_set, if_none_match=if_none_match)
+                          keep_empty_record_set=keep_empty_record_set)
 
 
 def remove_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname,
-                          keep_empty_record_set=False, if_none_match=None):
+                          keep_empty_record_set=False):
     PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                          keep_empty_record_set=keep_empty_record_set, if_none_match=if_none_match)
+                          keep_empty_record_set=keep_empty_record_set)
 
 
 def remove_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
-                          port, target, keep_empty_record_set=False, if_none_match=None):
+                          port, target, keep_empty_record_set=False):
     SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
     record_type = 'srv'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                          keep_empty_record_set=keep_empty_record_set, if_none_match=if_none_match)
+                          keep_empty_record_set=keep_empty_record_set)
 
 
 def remove_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value,
-                          keep_empty_record_set=False, if_none_match=None):
+                          keep_empty_record_set=False):
     TxtRecord = cmd.get_models('TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = TxtRecord(value=value)
     record_type = 'txt'
     return _remove_record(cmd.cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                          keep_empty_record_set=keep_empty_record_set, if_none_match=if_none_match)
+                          keep_empty_record_set=keep_empty_record_set)
 
 
 def _add_record(record_set, record, record_type, is_list=False):
@@ -1995,7 +1995,7 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
 
 
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
-                   keep_empty_record_set, is_list=True, if_none_match=None):
+                   keep_empty_record_set, is_list=True):
     ncf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK_DNS).record_sets
     record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     record_property = _type_to_property_name(record_type)
@@ -2020,8 +2020,7 @@ def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group
         logger.info('Removing empty %s record set: %s', record_type, record_set_name)
         return ncf.delete(resource_group_name, zone_name, record_set_name, record_type)
 
-    return ncf.create_or_update(resource_group_name, zone_name, record_set_name, record_type, record_set,
-                                if_none_match='*' if if_none_match else None)
+    return ncf.create_or_update(resource_group_name, zone_name, record_set_name, record_type, record_set)
 
 
 def dict_matches_filter(d, filter_dict):
