@@ -55,7 +55,7 @@ DEPENDENCIES = [
     'argcomplete~=1.8',
     'azure-cli-telemetry',
     'colorama>=0.3.9',
-    'humanfriendly~=4.7',
+    'humanfriendly>=4.7,<9.0',
     'jmespath',
     'knack==0.7.0rc1',
     'msrest>=0.4.4',
