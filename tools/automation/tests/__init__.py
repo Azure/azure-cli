@@ -39,8 +39,8 @@ def _extract_module_name(path):
 def _extract_modified_files(target_branch=os.environ.get('ADO_PULL_REQUEST_TARGET_BRANCH')):
     ado_raw_env_replacement = '$(System.PullRequest.TargetBranch)'
 
-    if target_branch == ado_raw_env_replacement:
-        # in ADO env but not in PR stage
+    if target_branch is None or target_branch == ado_raw_env_replacement:
+        # in ADO env but not in PR stage or want to run full test
 
         # dummy file name src/azure-cli-core/azure/cli/core/__init__.py
         return [os.path.join('src', 'azure-cli-core', 'azure', 'cli', 'core', '__init__.py')]
