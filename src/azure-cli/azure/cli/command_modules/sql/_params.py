@@ -1676,33 +1676,47 @@ def load_arguments(self, _):
                 'week_of_year'
             ])
 
-        c.argument(
-            'weekly_retention', help='The Weekly Retention.'
-            'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
-            'There is a minimum of 7 days and a maximum of 10 years.')
+        c.argument('weekly_retention',
+                   help='The Weekly Retention.'
+                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                   'There is a minimum of 7 days and a maximum of 10 years.')
 
-        c.argument(
-            'monthly_retention', help='The Monthly Retention.'
-            'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
-            'There is a minimum of 7 days and a maximum of 10 years.')
+        c.argument('monthly_retention',
+                   help='The Monthly Retention.'
+                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                   'There is a minimum of 7 days and a maximum of 10 years.')
 
-        c.argument(
-            'yearly_retention', help='The Yearly Retention.'
-            'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
-            'There is a minimum of 7 days and a maximum of 10 years.')
+        c.argument('yearly_retention',
+                   help='The Yearly Retention.'
+                   'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
+                   'There is a minimum of 7 days and a maximum of 10 years.')
 
-        c.argument(
-            'week_of_year',
-            help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
+        c.argument('week_of_year',
+                   help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
 
     with self.argument_context('sql midb long-term-retention-backup') as c:
         c.argument('location_name',
+                   required=True,
                    arg_type=get_location_type(self.cli_ctx))
 
-        c.argument(
-            'resource_group_name',
-            required=False,
-            help='If specified, the resource group that the managed instance/database resource belongs to.')
+        c.argument('resource_group_name',
+                   required=False,
+                   help='If specified, the resource group that the managed instance/database resource belongs to.')
+
+    with self.argument_context('sql midb long-term-retention-backup show') as c:
+        c.argument('backup_name',
+                   options_list=['--backup-name', '-b'],
+                   required=True,
+                   help='The long term retention backup name.')
+
+    with self.argument_context('sql midb long-term-retention-backup list-by-database') as c:
+        c.argument('database_state',
+                   required=False,
+                   help='\'All\', \'Live\', or \'Deleted\'')
+
+        c.argument('only_latest_per_database',
+                   required=False,
+                   help='If true, will only return the latest backup for each database')
 
     ###############################################
     #                sql virtual cluster          #
