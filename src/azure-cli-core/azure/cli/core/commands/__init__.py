@@ -293,16 +293,17 @@ class AzCliCommand(CLICommand):
         self._resolve_default_value_from_local_context(arg, overrides)
 
     def _resolve_default_value_from_local_context(self, arg, overrides):
-        lca = overrides.settings.get('local_context_attribute', None)
-        if not lca or not lca.actions or USE not in lca.actions:
-            return
-        if lca.name:
-            local_context = self.cli_ctx.local_context
-            value = local_context.get(self.name, lca.name)
-            if value:
-                logger.debug("local context '%s' for arg %s", value, arg.name)
-                overrides.settings['default'] = DefaultStr(value)
-                overrides.settings['required'] = False
+        if self.cli_ctx.local_context.is_on():
+            lca = overrides.settings.get('local_context_attribute', None)
+            if not lca or not lca.actions or USE not in lca.actions:
+                return
+            if lca.name:
+                local_context = self.cli_ctx.local_context
+                value = local_context.get(self.name, lca.name)
+                if value:
+                    logger.debug("local context '%s' for arg %s", value, arg.name)
+                    overrides.settings['default'] = DefaultStr(value)
+                    overrides.settings['required'] = False
 
     def load_arguments(self):
         super(AzCliCommand, self).load_arguments()
@@ -571,11 +572,6 @@ class AzCliCommandInvoker(CommandInvoker):
         parsed_args = self.parser.parse_args(args)
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
 
-        if command and command in self.commands_loader.command_table and command in self.parser.subparser_map and \
-                self.parser.subparser_map[command].specified_arguments:
-            self.cli_ctx.save_local_context(parsed_args, self.commands_loader.command_table[command].arguments,
-                                            self.parser.subparser_map[command].specified_arguments)
-
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.
 
@@ -639,6 +635,12 @@ class AzCliCommandInvoker(CommandInvoker):
 
         event_data = {'result': results}
         self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
+
+        # save to local context if it is turned on after command executed successfully
+        if self.cli_ctx.local_context.is_on() and command and command in self.commands_loader.command_table and \
+                command in self.parser.subparser_map and self.parser.subparser_map[command].specified_arguments:
+            self.cli_ctx.save_local_context(parsed_args, self.commands_loader.command_table[command].arguments,
+                                            self.parser.subparser_map[command].specified_arguments)
 
         return CommandResultItem(
             event_data['result'],

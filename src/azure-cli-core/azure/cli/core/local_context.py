@@ -23,33 +23,29 @@ class AzCLILocalContext(object):
     def __init__(self, dir_name=None, file_name=None):
         self.dir_name = dir_name
         self.file_name = file_name
-        self._file_chain = []
-        self._load_file_chain()
+        self._local_context_file = None
+        self._load_local_context_file()
 
-    def _load_file_chain(self):
+    def _load_local_context_file(self):
         current_dir = os.getcwd()
         while current_dir:
-            self._add_to_file_chain(current_dir, self.dir_name, self.file_name)
+            dir_path = os.path.join(current_dir, self.dir_name)
+            file_path = os.path.join(dir_path, self.file_name)
+            if os.path.isfile(file_path) and os.access(file_path, os.R_OK) and os.access(file_path, os.W_OK):
+                self._local_context_file = _ConfigFile(dir_path, file_path)
+                break   # load only one local context
             # Stop if already in root drive
             if current_dir == os.path.dirname(current_dir):
                 break
             current_dir = os.path.dirname(current_dir)
-        # add root to _file_chain if exists
-        self._add_to_file_chain(current_dir, self.dir_name, self.file_name)
-
-    def _add_to_file_chain(self, current_dir, dir_name, file_name):
-        dir_path = os.path.join(current_dir, dir_name)
-        file_path = os.path.join(dir_path, file_name)
-        if os.path.isfile(file_path) and os.access(file_path, os.R_OK) and os.access(file_path, os.W_OK):
-            self._file_chain.append(_ConfigFile(dir_path, file_path))
 
     def get(self, command, argument):
-        for local_context in self._file_chain:
-            command_parts = command.split(' ')
+        if self.is_on():
+            command_parts = command.split()
             while True:
                 section = ' '.join(command_parts) if command_parts else ALL
                 try:
-                    return local_context.get(section, argument)
+                    return self._local_context_file.get(section, argument)
                 except (configparser.NoSectionError, configparser.NoOptionError):
                     pass
                 if not command_parts:
@@ -58,13 +54,12 @@ class AzCLILocalContext(object):
         return None
 
     def set(self, scopes, argument, value):
-        if self._file_chain:
-            local_context = self._file_chain[0]
+        if self.is_on():
             for scope in scopes:
-                local_context.set_value(scope, argument, value)
+                self._local_context_file.set_value(scope, argument, value)
 
     def is_on(self):
-        return len(self._file_chain) > 0
+        return self._local_context_file is not None
 
     def turn_on(self):
         current_dir = os.getcwd()
@@ -75,29 +70,30 @@ class AzCLILocalContext(object):
                 with open(file_path, 'w'):
                     pass
                 os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR)
-                self._file_chain.clear()
-                self._load_file_chain()
+                self._local_context_file = None
+                self._load_local_context_file()
             except Exception:  # pylint: disable=broad-except
-                raise CLIError('fail to turn on local context in {}.'.format(os.path.dirname(current_dir)))
-            logger.warning('local context in current directory is turned on.')
+                raise CLIError('fail to turn on local context in {}.'.format(current_dir))
+            logger.warning('local context in %s is turned on.', current_dir)
         else:
-            raise CLIError('local context is already turned on in current directory')
+            raise CLIError('local context is already turned on in {}'.format(current_dir))
 
     def turn_off(self):
         if self.is_on():
-            file_path = self._file_chain[0].config_path
+            file_path = self._local_context_file.config_path
             try:
                 os.remove(file_path)
                 parent_dir = os.path.dirname(file_path)
-                shutil.rmtree(parent_dir)
-                self._file_chain.clear()
+                if not os.listdir(parent_dir):
+                    shutil.rmtree(parent_dir)
+                self._local_context_file = None
                 logger.warning('local context in %s is turned off.', os.path.dirname(parent_dir))
             except Exception:  # pylint: disable=broad-except
                 raise CLIError('fail to turn off local context in {}.'.format(os.path.dirname(parent_dir)))
 
-    def first_dir_path(self):
+    def current_turn_on_dir(self):
         if self.is_on():
-            return os.path.dirname(os.path.dirname(self._file_chain[0].config_path))
+            return os.path.dirname(os.path.dirname(self._local_context_file.config_path))
         return None
 
 

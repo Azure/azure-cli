@@ -256,9 +256,9 @@ def turn_local_context_on(cmd):
 def turn_local_context_off(cmd, yes=False):
     if cmd.cli_ctx.local_context.is_on():
         from azure.cli.core.util import user_confirmation
-        dir_path = cmd.cli_ctx.local_context.first_dir_path()
+        dir_path = cmd.cli_ctx.local_context.current_turn_on_dir()
         user_confirmation('Local context in {} will be removed and can\'t be recovered. Are you sure you want to '
                           'continue this operation ?'.format(dir_path), yes)
         cmd.cli_ctx.local_context.turn_off()
     else:
-        raise CLIError('local context is not turned on in current directory and all its parent directories')
+        raise CLIError('local context is not turned on in {} and all its parent directories'.format(os.getcwd()))
