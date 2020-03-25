@@ -298,8 +298,7 @@ def load_arguments(self, _):
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
                    help='name of the new resource group', completer=None,
                    local_context_attribute=LocalContextAttribute(
-                       name='resource_group_name', actions=[STORE], scopes=[ALL]
-                   ))
+                       name='resource_group_name', actions=[STORE], scopes=[ALL]))
         c.argument('managed_by', min_api='2016-09-01', help='The ID of the resource that manages this resource group.')
 
     with self.argument_context('tag') as c:
