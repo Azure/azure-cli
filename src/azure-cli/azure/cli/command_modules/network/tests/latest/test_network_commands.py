@@ -356,6 +356,23 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_basic_with_waf_v2_sku')
+    def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
+        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
+
+        self.cmd('network application-gateway list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?resourceGroup == '{}']) == length(@)".format(resource_group), True)
+        ])
+
+        self.cmd('network application-gateway show --resource-group {rg} --name ag1', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', 'ag1'),
+            self.check('resourceGroup', resource_group),
+            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
+        ])
+
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
@@ -740,6 +757,39 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_http_listener')
+    def test_network_ag_http_listener_with_multi_host_names(self, resource_group):
+
+        self.kwargs.update({
+            'ag': 'ag1',
+            'res': 'application-gateway http-listener',
+            'name': 'mylistener',
+            'gateway_ip': 'ip1',
+            'port': 'cliport'
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} '
+                 '--sku WAF_v2 '
+                 '--public-ip-address {gateway_ip} ')
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} -n {port} --port 18080')
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --frontend-port {port} --host-names "*.contoso.com" "www.microsoft.com"')
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
+            self.check('length(hostNames)', 2),
+            self.check('hostNames[0]', "*.contoso.com"),
+            self.check('hostNames[1]', "www.microsoft.com")
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --host-names "*.contoso.com" "www.bing.com"')
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
+            self.check('length(hostNames)', 2),
+            self.check('hostNames[0]', "*.contoso.com"),
+            self.check('hostNames[1]', "www.bing.com")
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+
     @ResourceGroupPreparer(name_prefix='cli_test_ag_http_settings')
     def test_network_ag_http_settings(self, resource_group):
 
@@ -1070,11 +1120,24 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
         # add two managed rule set to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0')
+                 ])
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp1} --rules 921100 921110')
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp2} --rules 913100')
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type Microsoft_BotManagerRuleSet --version 0.1',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1')
+                 ])
 
         # add one exclusion rule to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
@@ -1091,6 +1154,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
+            self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),

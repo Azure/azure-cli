@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 #---------------------------------------------------------------------------------------------
 
-ARG PYTHON_VERSION="3.6.9"
+ARG PYTHON_VERSION="3.6.10"
 
-FROM python:${PYTHON_VERSION}-alpine3.10
+FROM python:${PYTHON_VERSION}-alpine3.11
 
 ARG CLI_VERSION
 
@@ -68,4 +68,5 @@ WORKDIR /
 RUN rm -rf ./azure-cli && \
     dos2unix /root/.bashrc /usr/local/bin/az
 
+ENV AZ_INSTALLER=DOCKER
 CMD bash

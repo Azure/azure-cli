@@ -105,7 +105,7 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         group = self._get_resource_group(**kwargs)
 
         if not self.dev_setting_name:
-            template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {}'
+            template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only'
             self.live_only_execute(self.cli_ctx, template.format(name, group, self.location, self.sku, self.kind))
         else:
             name = self.dev_setting_name

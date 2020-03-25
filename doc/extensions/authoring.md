@@ -121,7 +121,7 @@ See [Extension Metadata](metadata.md) for more information.
 
 ### Test your extension on Python 3
 
-- The CLI supports Python 3.5, 3.6, 3.7, 3.8 so verify that your extension does the same.
+- The CLI supports Python 3.6, 3.7, 3.8 so verify that your extension does the same.
 - You can create virtual environments for different versions and run your extension in them.
 - e.g. `python3.6 -m venv env36` and `python3.8 -m venv env38`.
 

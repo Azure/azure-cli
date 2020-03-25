@@ -299,7 +299,7 @@ def load_arguments(self, _):
         c.argument('availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
         c.argument('vmss', help='Name or ID of an existing virtual machine scale set that the virtual machine should be assigned to. None by default.')
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none (\'""\' in Azure CLI using PowerShell or --% operator).', arg_group='Network')
-        c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
+        c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux. NONE represents no NSG rule', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH', 'NONE']))
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
         c.argument('boot_diagnostics_storage',
                    help='pre-existing storage account name or its blob uri to capture boot diagnostics. Its sku should be one of Standard_GRS, Standard_LRS and Standard_RAGRS')
@@ -309,7 +309,7 @@ def load_arguments(self, _):
             VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
             c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
                        arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
-                       help="The eviction policy for the low priority virtual machine.")
+                       help="The eviction policy for the Spot priority virtual machine. Default eviction policy is Deallocate for a Spot priority virtual machine")
         c.argument('enable_agent', arg_type=get_three_state_flag(), min_api='2018-06-01',
                    help='Indicates whether virtual machine agent should be provisioned on the virtual machine. When this property is not specified, default behavior is to set it to true. This will ensure that VM Agent is installed on the VM so that extensions can be added to the VM later')
 
@@ -508,13 +508,13 @@ def load_arguments(self, _):
         c.argument('vm_sku', help='Size of VMs in the scale set. Default to "Standard_DS1_v2". See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
         c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
-                   help="The eviction policy for virtual machines in a low priority scale set.", is_preview=True)
+                   help="The eviction policy for virtual machines in a Spot priority scale set. Default eviction policy is Deallocate for a Spot priority scale set", is_preview=True)
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_COMPUTE, min_api='2018-06-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
         c.argument('computer_name_prefix', help='Computer name prefix for all of the virtual machines in the scale set. Computer name prefixes must be 1 to 15 characters long')
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In VM mode, you manually create and add a virtual machine of any configuration to the scale set. In ScaleSetVM mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
                    arg_type=get_enum_type(['VM', 'ScaleSetVM']), is_preview=True)
         c.argument('scale_in_policy', scale_in_policy_type)
-        c.argument('automatic_repairs_grace_period', min_api='2018-10-01', is_preview=True,
+        c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
@@ -545,10 +545,8 @@ def load_arguments(self, _):
                    help='Enable terminate notification')
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('scale_in_policy', scale_in_policy_type)
-        c.argument('enable_automatic_repairs', min_api='2018-10-01', arg_type=get_three_state_flag(),
-                   help='Enable automatic repairs', is_preview=True)
 
-    with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs', is_preview=True) as c:
+    with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
         c.argument(
             'automatic_repairs_grace_period',
@@ -767,14 +765,14 @@ def load_arguments(self, _):
             c.argument('license_type', help=license_msg, arg_type=get_enum_type(['Windows_Server', 'Windows_Client', 'None']))
             c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2019-03-01',
                        arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
-                       help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS")
+                       help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
             c.argument('max_price', min_api='2019-03-01', type=float, is_preview=True,
                        help='The maximum price (in US Dollars) you are willing to pay for a low priority VM/VMSS. -1 indicates that the low priority VM/VMSS should not be evicted for price reasons')
 
     with self.argument_context('vmss create') as c:
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01',
                    arg_type=get_enum_type(self.get_models('VirtualMachinePriorityTypes'), default=None),
-                   help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS")
+                   help="Priority. Use 'Spot' to run short-lived workloads in a cost-effective way. 'Low' enum will be deprecated in the future. Please use 'Spot' to deploy Azure spot VM and/or VMSS. Default to Regular.")
 
     with self.argument_context('sig') as c:
         c.argument('gallery_name', options_list=['--gallery-name', '-r'], help='gallery name')

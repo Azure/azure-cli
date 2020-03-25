@@ -203,10 +203,12 @@ def load_arguments(self, _):
     with self.argument_context('backup protection enable-for-vm') as c:
         c.argument('diskslist', diskslist_type)
         c.argument('disk_list_setting', arg_type=get_enum_type(['include', 'exclude']), options_list=['--disk-list-setting'], help=disk_list_setting_help)
+        c.argument('exclude_all_data_disks', arg_type=get_three_state_flag(), help='Option to specify to backup OS disk only.')
 
     with self.argument_context('backup protection update-for-vm') as c:
         c.argument('diskslist', diskslist_type)
         c.argument('disk_list_setting', arg_type=get_enum_type(['include', 'exclude', 'resetexclusionsettings']), options_list=['--disk-list-setting'], help=disk_list_setting_help)
+        c.argument('exclude_all_data_disks', arg_type=get_three_state_flag(), help='Option to specify to backup OS disk only.')
 
     with self.argument_context('backup protection enable-for-azurefileshare') as c:
         c.argument('azure_file_share', options_list=['--azure-file-share'], help='Name of the Azure FileShare.')
@@ -259,7 +261,7 @@ def load_arguments(self, _):
         c.argument('target_folder', options_list=['--target-folder'], help='Destination folder to which content will be restored. To restore content to root , leave the folder name empty')
         c.argument('target_storage_account', options_list=['--target-storage-account'], help='Destination storage account to which content will be restored')
         c.argument('source_file_type', arg_type=get_enum_type(['File', 'Directory']), options_list=['--source-file-type'], help='Specify the source file type to be selected')
-        c.argument('source_file_path', options_list=['--source-file-path'], help="""The absolute path of the file, to be restored within the file share, as a string. This path is the same path used in the 'az storage file download' or 'az storage file show' CLI commands.""")
+        c.argument('source_file_path', options_list=['--source-file-path'], nargs='+', help="""The absolute path of the file, to be restored within the file share, as a string. This path is the same path used in the 'az storage file download' or 'az storage file show' CLI commands.""")
 
     with self.argument_context('backup restore restore-azurewl') as c:
         c.argument('recovery_config', options_list=['--recovery-config'], help="""Specify the recovery configuration of a backed up item. The configuration object can be obtained from 'backup recoveryconfig show' command.""")

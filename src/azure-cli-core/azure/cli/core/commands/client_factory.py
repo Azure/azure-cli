@@ -3,20 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-
-from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
+from azure.cli.core.util import get_az_user_agent
 
 from knack.log import get_logger
 from knack.util import CLIError
 
 logger = get_logger(__name__)
-UA_AGENT = "AZURECLI/{}".format(core_version)
-ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
 def resolve_client_arg_name(operation, kwargs):
@@ -82,11 +78,7 @@ def configure_common_settings(cli_ctx, client):
 
     client.config.enable_http_logger = True
 
-    client.config.add_user_agent(UA_AGENT)
-    try:
-        client.config.add_user_agent(os.environ[ENV_ADDITIONAL_USER_AGENT])
-    except KeyError:
-        pass
+    client.config.add_user_agent(get_az_user_agent())
 
     try:
         command_ext_name = cli_ctx.data['command_extension_name']
@@ -185,12 +177,7 @@ def get_subscription_id(cli_ctx):
 def _get_add_headers_callback(cli_ctx):
 
     def _add_headers(request):
-        agents = [request.headers['User-Agent'], UA_AGENT]
-        try:
-            agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
-        except KeyError:
-            pass
-
+        agents = [request.headers['User-Agent'], get_az_user_agent()]
         request.headers['User-Agent'] = ' '.join(agents)
 
         try:
