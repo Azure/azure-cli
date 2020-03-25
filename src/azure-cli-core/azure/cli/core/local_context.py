@@ -90,6 +90,7 @@ class AzCLILocalContext(object):
                 os.remove(file_path)
                 parent_dir = os.path.dirname(file_path)
                 shutil.rmtree(parent_dir)
+                self._file_chain.clear()
                 logger.warning('local context in %s is turned off.', os.path.dirname(parent_dir))
             except Exception:  # pylint: disable=broad-except
                 raise CLIError('fail to turn off local context in {}.'.format(os.path.dirname(parent_dir)))
