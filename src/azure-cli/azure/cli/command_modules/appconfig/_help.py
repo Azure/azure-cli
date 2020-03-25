@@ -126,7 +126,7 @@ type: command
 short-summary: Export values of key vault reference from your App Configuration.
 examples:
   - name: Export key-vault reference values.
-    text: az appconfig kv export -n MyAppConfiguration --label test
+    text: az appconfig kv export-secret -n MyAppConfiguration --label test
   - name: Export all key-vault reference values to a json file.
     text: az appconfig kv export-secret -n MyAppConfiguration --label test --path D:/abc.json --format json
 """

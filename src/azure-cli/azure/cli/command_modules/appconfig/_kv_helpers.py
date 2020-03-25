@@ -825,7 +825,7 @@ def __compact_key_values(key_values):
 
 
 def __get_keyvault_client(cli_ctx):
-    
+
     from azure.cli.core._profile import Profile
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.profiles import ResourceType, get_api_version
