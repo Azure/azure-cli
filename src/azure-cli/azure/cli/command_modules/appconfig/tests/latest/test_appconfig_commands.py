@@ -13,7 +13,7 @@ import time
 import yaml
 
 from knack.util import CLIError
-from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenarioTest)
+from azure.cli.testsdk import (ResourceGroupPreparer, KeyVaultPreparer, ScenarioTest, LiveScenarioTest, live_only)
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
 
@@ -321,6 +321,41 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].value', keyvault_value),
                          self.check('[0].label', updated_label)])
+
+    @ResourceGroupPreparer()
+    @KeyVaultPreparer()
+    @live_only()
+    def test_kv_export_secrets(self, key_vault, resource_group):
+        config_store_name = self.create_random_name(prefix='KVTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        # Export secret test
+        secret_name = 'testSecret'
+        secret_value = 'testValue'
+        self.kwargs.update({
+            'secret_name': secret_name,
+            'secret_value': secret_value,
+            'keyvault_name': key_vault
+        })
+
+        secret = self.cmd('az keyvault secret set --vault-name {keyvault_name} -n {secret_name} --value {secret_value}').get_output_in_json()
+        self.kwargs.update({
+            'secret_identifier': secret["id"]
+        })
+
+        self.cmd('appconfig kv set-keyvault -n {config_store_name} --key {secret_name} --secret-identifier {secret_identifier} -y')
+
+        self.cmd('appconfig kv export-secret -n {config_store_name}',
+                 checks=[self.check(secret_name, secret_value)])
 
 
 class AppConfigImportExportScenarioTest(ScenarioTest):

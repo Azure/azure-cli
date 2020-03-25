@@ -146,7 +146,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv export-secret') as c:
         c.argument('key', help='If no key specified, export all by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
         c.argument('label', help="Only keys with this label will be exported. If no label specified, export keys with null label by default.")
-        c.argument('path', help='Local configuration file path. If not specified, export to memory.')
+        c.argument('path', help='File to store exported items.')
         c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='File format exporting to.')
         c.argument('prefix', help="Prefix to be trimmed from keys.")
 

@@ -260,7 +260,6 @@ def export_secret(cmd,
     src_kvs = __read_kv_from_config_store(
         cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
 
-    __discard_features_from_retrieved_kv(src_kvs)
     kv_references = [keyvaule for keyvaule in src_kvs if keyvaule.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
     keyvault_client = __get_keyvault_client(cmd.cli_ctx)
     secrets = {}
@@ -271,13 +270,16 @@ def export_secret(cmd,
             secret_id = json.loads(kv.value)["uri"]
             kv_identifier = SecretId(uri=secret_id)
         except (TypeError, ValueError) as error:
-            logger.warning("Invalid key vault reference for key:%s value:%s. Error:%s", kv.key, kv.value, error)
+            logger.error("Invalid key vault reference for key:%s value:%s. Error:%s", kv.key, kv.value, error)
             continue
 
-        secret = keyvault_client.get_secret(vault_base_url=kv_identifier.vault,
-                                            secret_name=kv_identifier.name,
-                                            secret_version=kv_identifier.version)
-        secrets[kv.key] = secret.value
+        try:
+            secret = keyvault_client.get_secret(vault_base_url=kv_identifier.vault,
+                                                secret_name=kv_identifier.name,
+                                                secret_version=kv_identifier.version)
+            secrets[kv.key] = secret.value
+        except Exception as exception:   # pylint: disable=broad-except
+            logger.error("Cannot fetch secret: %s. Exception: %s", secret_id, str(exception))
 
     if path:
         with open(path, 'w') as fp:
@@ -287,7 +289,7 @@ def export_secret(cmd,
                 yaml.safe_dump(secrets, fp, sort_keys=False)
             elif format_ == 'properties':
                 javaproperties.dump(secrets, fp)
-        return
+        return None
     return secrets
 
 
