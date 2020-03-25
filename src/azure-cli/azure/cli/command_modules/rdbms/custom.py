@@ -11,7 +11,6 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
 from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
-from azure.mgmt.rdbms.postgresql.operations._servers_operations import ServersOperations as PostgresSqlServersOperations
 from ._client_factory import get_mariadb_management_client, get_mysql_management_client, get_postgresql_management_client
 
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
@@ -45,7 +44,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
             location=location,
             tags=tags)
         if assign_identity:
-                parameters.identity=mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
+            parameters.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforPostgreSQL':
         from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
@@ -63,7 +62,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
             location=location,
             tags=tags)
         if assign_identity:
-                parameters.identity=postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
+            parameters.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforMariaDB':
         from azure.mgmt.rdbms import mariadb
         parameters = mariadb.models.ServerForCreate(
@@ -320,7 +319,6 @@ def _server_update_custom_func(instance,
         elif server_module_path.find('mysql'):
             from azure.mgmt.rdbms import mysql
             instance.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
-        
 
     params = ServerUpdateParameters(sku=instance.sku,
                                     storage_profile=instance.storage_profile,
@@ -477,33 +475,35 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, server_
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
         description=description)
 
+
 def server_key_create(client, resource_group_name, server_name, kid):
-   
+
     """Create Server Key."""
-    
+
     key_name = _get_server_key_name_from_uri(kid)
 
     return client.create_or_update(
-            resource_group_name=resource_group_name,
-            server_name=server_name,
-            key_name=key_name,
-            uri=kid
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name,
+        uri=kid
     )
 
+
 def server_key_get(client, resource_group_name, server_name, kid):
-    
+
     """Get Server Key."""
 
     key_name = _get_server_key_name_from_uri(kid)
-     
+
     return client.get(
-            resource_group_name=resource_group_name,
-            server_name=server_name,
-            key_name=key_name)
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
 
 
 def server_key_delete(cmd, client, resource_group_name, server_name, kid):
-      
+
     """Drop Server Key."""
     key_name = _get_server_key_name_from_uri(kid)
 
@@ -511,6 +511,7 @@ def server_key_delete(cmd, client, resource_group_name, server_name, kid):
         resource_group_name=resource_group_name,
         server_name=server_name,
         key_name=key_name)
+
 
 def _get_server_key_name_from_uri(uri):
     '''

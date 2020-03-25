@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import time
 
 from datetime import datetime
 from time import sleep
@@ -31,7 +32,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus2euap',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -271,6 +272,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
+        self._test_data_encryption(resource_group, server, database_engine)
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
@@ -282,6 +284,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
+        self._test_data_encryption(resource_group, server, database_engine)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
         firewall_rule_1 = 'rule1'
@@ -516,7 +519,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['properties']['groupId'], group_id)
 
     def _test_private_endpoint_connection(self, resource_group, server, database_engine):
-        loc = 'eastus2euap'
+        loc = 'eastus'
         vnet = self.create_random_name('cli-vnet-', 24)
         subnet = self.create_random_name('cli-subnet-', 24)
         pe_name_auto = self.create_random_name('cli-pe-', 24)
@@ -678,6 +681,59 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} server private-endpoint-connection delete --id {}'
                  .format(database_engine, server_pec_id))
+
+    def _test_data_encryption(self, resource_group, server, database_engine):
+        resource_prefix = 'ossrdbmsbyok'
+
+        # add identity to server
+        server_resp = self.cmd('{} server update -g {} --name {} --assign_identity'
+                               .format(database_engine, resource_group, server)).get_output_in_json()
+        server_identity = server_resp['identity']['principalId']
+
+        # create vault and acl server identity
+        vault_name = self.create_random_name(resource_prefix, 24)
+        self.cmd('keyvault create -g {} -n {}  --location eastus --enable-soft-delete true --enable-purge-protection true'
+                 .format(resource_group, vault_name))
+
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, vault_name, server_identity))
+
+        # create key
+        key_name = self.create_random_name(resource_prefix, 32)
+        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name, vault_name)).get_output_in_json()
+        kid = key_resp['key']['kid']
+
+        # add server key
+        server_key_resp = self.cmd('{} server key create -g {} --name {} --kid {}'
+                                   .format(database_engine, resource_group, server, kid),
+                                   checks=[JMESPathCheck('uri', kid)])
+
+        server_key_name = server_key_resp.get_output_in_json()['name']
+
+        # validate show key
+        self.cmd('{} server key show -g {} --name {} --kid {}'
+                 .format(database_engine, resource_group, server, kid),
+                 checks=[
+                     JMESPathCheck('uri', kid),
+                     JMESPathCheck('name', server_key_name)])
+
+        # validate list key (should return 1 items)
+        self.cmd('{} server key list -g {} --name {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # delete server key
+        self.cmd('{} server key delete -g {} --name {} --kid {} --yes'
+                 .format(database_engine, resource_group, server, kid))
+
+        # wait for key to be deleted
+        time.sleep(10)
+
+        # validate deleted server key via list (should return no item)
+        self.cmd('{} server key list -g {} -s {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 0)])
 
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods

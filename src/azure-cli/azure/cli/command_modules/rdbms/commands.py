@@ -188,9 +188,9 @@ def load_command_table(self, _):
     )
 
     mysql_key_sdk = CliCommandType(
-            operations_tmpl='azure.mgmt.rdbms.mysql.operations#ServerKeysOperations.{}',
-            client_factory=cf_mysql_server_keys_operations,
-            resource_type=ResourceType.MGMT_RDBMS
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations#ServerKeysOperations.{}',
+        client_factory=cf_mysql_server_keys_operations,
+        resource_type=ResourceType.MGMT_RDBMS
     )
 
     postgres_key_sdk = CliCommandType(
