@@ -276,8 +276,8 @@ def load_command_table(self, _):
                             client_factory=get_sql_database_threat_detection_policies_operations) as g:
 
         g.show_command('show', 'get')
-        g.generic_update_command(
-            'update', custom_func_name='db_threat_detection_policy_update')
+        g.generic_update_command('update',
+                                 custom_func_name='db_threat_detection_policy_update')
 
     database_usages_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseUsagesOperations.{}',
@@ -355,8 +355,7 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.command('list', 'list_by_server')
         g.custom_command('create', 'failover_group_create')
-        g.generic_update_command(
-            'update', custom_func_name='failover_group_update')
+        g.generic_update_command('update', custom_func_name='failover_group_update')
         g.command('delete', 'delete')
         g.custom_command('set-primary', 'failover_group_failover')
 
@@ -501,17 +500,11 @@ def load_command_table(self, _):
                             managed_instances_operations,
                             client_factory=get_sql_managed_instances_operations) as g:
 
-        g.custom_command(
-            'create',
-            'managed_instance_create',
-            supports_no_wait=True)
+        g.custom_command('create', 'managed_instance_create', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.show_command('show', 'get')
         g.custom_command('list', 'managed_instance_list')
-        g.generic_update_command(
-            'update',
-            custom_func_name='managed_instance_update',
-            supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='managed_instance_update', supports_no_wait=True)
 
     managed_instance_keys_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceKeysOperations.{}',
@@ -563,10 +556,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_databases_operations) as g:
 
         g.custom_command('create', 'managed_db_create', supports_no_wait=True)
-        g.custom_command(
-            'restore',
-            'managed_db_restore',
-            supports_no_wait=True)
+        g.custom_command('restore', 'managed_db_restore', supports_no_wait=True)
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
@@ -584,10 +574,7 @@ def load_command_table(self, _):
                             managed_backup_short_term_retention_policies_operations,
                             client_factory=get_sql_managed_backup_short_term_retention_policies_operations) as g:
 
-        g.custom_command(
-            'set',
-            'update_short_term_retention_mi',
-            supports_no_wait=True)
+        g.custom_command('set', 'update_short_term_retention_mi', supports_no_wait=True)
         g.custom_command('show', 'get_short_term_retention_mi')
 
     managed_database_long_term_retention_policies_operations = CliCommandType(
@@ -609,15 +596,9 @@ def load_command_table(self, _):
                             managed_database_long_term_retention_backups_operations,
                             client_factory=get_sql_managed_database_long_term_retention_backups_operations) as g:
         g.show_command('show', 'get')
-        g.custom_command(
-            'list-by-database',
-            'list_by_database_long_term_retention_mi_backup')
-        g.custom_command(
-            'list-by-instance',
-            'list_by_instance_long_term_retention_mi_backup')
-        g.custom_command(
-            'list-by-location',
-            'list_by_location_long_term_retention_mi_backup')
+        g.custom_command('list-by-database', 'list_by_database_long_term_retention_mi_backup')
+        g.custom_command('list-by-instance', 'list_by_instance_long_term_retention_mi_backup')
+        g.custom_command('list-by-location', 'list_by_location_long_term_retention_mi_backup')
         g.command('delete', 'delete')
 
     ###############################################
@@ -646,7 +627,6 @@ def load_command_table(self, _):
     with self.command_group('sql instance-failover-group', instance_failover_groups_operations, client_factory=get_sql_instance_failover_groups_operations) as g:
         g.command('show', 'get')
         g.custom_command('create', 'instance_failover_group_create')
-        g.generic_update_command(
-            'update', custom_func_name='instance_failover_group_update')
+        g.generic_update_command('update', custom_func_name='instance_failover_group_update')
         g.command('delete', 'delete')
         g.custom_command('set-primary', 'instance_failover_group_failover')
