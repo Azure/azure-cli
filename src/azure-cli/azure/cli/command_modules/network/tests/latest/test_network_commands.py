@@ -361,11 +361,10 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
 
-        ag_list = self.cmd('network application-gateway list --resource-group {rg}', checks=[
+        self.cmd('network application-gateway list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?resourceGroup == '{}']) == length(@)".format(resource_group), True)
-        ]).get_output_in_json()
-        ag_count = len(ag_list)
+        ])
 
         self.cmd('network application-gateway show --resource-group {rg} --name ag1', checks=[
             self.check('type(@)', 'object'),
