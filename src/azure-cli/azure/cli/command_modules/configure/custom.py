@@ -261,4 +261,4 @@ def turn_local_context_off(cmd, yes=False):
                           'continue this operation ?'.format(dir_path), yes)
         cmd.cli_ctx.local_context.turn_off()
     else:
-        raise CLIError('local context is not enabled in current directory and all its parent directories')
+        raise CLIError('local context is not turned on in current directory and all its parent directories')

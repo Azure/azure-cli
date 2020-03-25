@@ -81,7 +81,7 @@ class AzCLILocalContext(object):
                 raise CLIError('fail to turn on local context in {}.'.format(os.path.dirname(current_dir)))
             logger.warning('local context in current directory is turned on.')
         else:
-            raise CLIError('local context is already enabled in current directory')
+            raise CLIError('local context is already turned on in current directory')
 
     def turn_off(self):
         if self.is_on():
