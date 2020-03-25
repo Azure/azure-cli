@@ -543,7 +543,6 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     import uuid
     from requests import Session, Request
     from requests.structures import CaseInsensitiveDict
-    from azure.cli.core.commands.client_factory import UA_AGENT
 
     result = CaseInsensitiveDict()
     for s in headers or []:
@@ -559,9 +558,20 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     if 'Authorization' in headers:
         skip_authorization_header = True
 
-    # Allow the user to provide custom User-Agent
-    if 'User-Agent' not in headers:
-        headers['User-Agent'] = UA_AGENT
+    # Handle User-Agent
+    agents = [get_az_user_agent()]
+
+    # Borrow AZURE_HTTP_USER_AGENT from msrest
+    # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
+    _ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
+    import os
+    if _ENV_ADDITIONAL_USER_AGENT in os.environ:
+        agents.append(os.environ[_ENV_ADDITIONAL_USER_AGENT])
+
+    # Custom User-Agent provided as command argument
+    if 'User-Agent' in headers:
+        agents.append(headers['User-Agent'])
+    headers['User-Agent'] = ' '.join(agents)
 
     if generated_client_request_id_name:
         headers[generated_client_request_id_name] = str(uuid.uuid4())
@@ -787,3 +797,17 @@ def parse_proxy_resource_id(rid):
         result.pop('children', None)
         return {key: value for key, value in result.items() if value is not None}
     return None
+
+
+def get_az_user_agent():
+    # Dynamically load the core version
+    from azure.cli.core import __version__ as core_version
+
+    agents = ["AZURECLI/{}".format(core_version)]
+
+    # msrest already has this
+    # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
+    # if ENV_ADDITIONAL_USER_AGENT in os.environ:
+    #     agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
+
+    return ' '.join(agents)

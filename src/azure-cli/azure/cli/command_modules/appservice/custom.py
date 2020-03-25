@@ -43,7 +43,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait
-from azure.cli.core.commands.client_factory import UA_AGENT
+from azure.cli.core.util import get_az_user_agent
 from azure.cli.core.profiles import ResourceType
 
 from .tunnel import TunnelServer
@@ -358,7 +358,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     headers = authorization
     headers['Content-Type'] = 'application/octet-stream'
     headers['Cache-Control'] = 'no-cache'
-    headers['User-Agent'] = UA_AGENT
+    headers['User-Agent'] = get_az_user_agent()
 
     import requests
     import os
@@ -827,7 +827,7 @@ def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     headers = {
         'Content-Type': 'application/octet-stream',
         'Cache-Control': 'no-cache',
-        'User-Agent': UA_AGENT
+        'User-Agent': get_az_user_agent()
     }
 
     import requests
