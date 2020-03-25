@@ -15,6 +15,7 @@ jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
   timeoutInMinutes: 9999
+  condition: contains($(USER_TARGET), $(Target))
   strategy:
     maxParallel: 20
     matrix:
@@ -24,10 +25,10 @@ jobs:
         Target: acs
       advisor:
         Target: advisor
-      ams:
-        Target: ams
-      apim:
-        Target: apim
+      # ams:
+      #   Target: ams
+      # apim:
+      #   Target: apim
       # appconfig:
       #   Target: appconfig
       # appservice:
