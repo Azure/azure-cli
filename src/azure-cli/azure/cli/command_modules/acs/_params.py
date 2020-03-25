@@ -62,6 +62,7 @@ regions_in_prod = [
 ]
 
 storage_profile_types = ["StorageAccount", "ManagedDisks"]
+nodepool_mode_type = ["System", "User"]
 
 
 def load_arguments(self, _):
@@ -291,6 +292,7 @@ def load_arguments(self, _):
             c.argument('node_taints', type=str, validator=validate_taints)
             c.argument('tags', tags_type)
             c.argument('labels', nargs='*', validator=validate_nodepool_labels)
+            c.argument('mode', get_enum_type(nodepool_mode_type))
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
@@ -301,6 +303,7 @@ def load_arguments(self, _):
         c.argument('disable_cluster_autoscaler', options_list=["--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('tags', tags_type)
+        c.argument('mode', get_enum_type(nodepool_mode_type))
 
     with self.argument_context('aks upgrade-connector') as c:
         c.argument('aci_resource_group')

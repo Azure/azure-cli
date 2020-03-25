@@ -54,18 +54,18 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceStorageProfileTypes
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterIdentity
-from azure.mgmt.containerservice.v2019_11_01.models import AgentPool
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterIdentity
+from azure.mgmt.containerservice.v2020_03_01.models import AgentPool
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -1713,7 +1713,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         vnet_subnet_id=vnet_subnet_id,
         availability_zones=zones,
         max_pods=int(max_pods) if max_pods else None,
-        type=vm_set_type
+        type=vm_set_type,
+        mode="System"
     )
     if node_osdisk_size:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
@@ -2734,6 +2735,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       node_taints=None,
                       tags=None,
                       labels=None,
+                      mode="User",
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2769,7 +2771,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         max_pods=int(max_pods) if max_pods else None,
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
-        node_taints=taints_array
+        node_taints=taints_array,
+        mode=mode
     )
 
     _check_cluster_autoscaler_flag(enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool)
@@ -2810,14 +2813,21 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          update_cluster_autoscaler=False,
                          min_count=None, max_count=None,
                          tags=None,
+                         mode=None,
                          no_wait=False):
 
-    update_flags = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
-    if update_flags != 1:
-        if update_flags != 0 or tags is None:
-            raise CLIError('Please specify "--enable-cluster-autoscaler" or '
-                           '"--disable-cluster-autoscaler" or '
-                           '"--update-cluster-autoscaler"')
+    update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
+
+    if update_autoscaler > 1:
+        raise CLIError('Please specify one of "--enable-cluster-autoscaler" or '
+                       '"--disable-cluster-autoscaler" or '
+                       '"--update-cluster-autoscaler"')
+
+    if (update_autoscaler == 0 and not tags and not mode):
+        raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
+                       '"--disable-cluster-autoscaler" or '
+                       '"--update-cluster-autoscaler" or '
+                       '"--tags" or "--mode"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     node_count = instance.count
@@ -2852,6 +2862,9 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         instance.max_count = None
 
     instance.tags = tags
+
+    if mode is not None:
+        instance.mode = mode
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
