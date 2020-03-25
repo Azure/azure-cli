@@ -190,6 +190,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         public_ip_sku = None
         if _is_v2_sku(sku):
             public_ip_sku = 'Standard'
+            public_ip_address_allocation = 'Static'
         master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
@@ -231,7 +232,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
                                custom_error_pages=None, max_capacity=None):
     if sku is not None:
-        instance.sku.tier = sku.split('_', 1)[0] if _is_v2_sku(sku) else sku
+        instance.sku.tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
 
     try:
         if min_capacity is not None:

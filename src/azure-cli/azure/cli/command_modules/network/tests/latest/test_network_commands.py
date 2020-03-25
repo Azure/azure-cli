@@ -360,9 +360,6 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
     def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
         self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
-        self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait')
-        self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait --capacity 3 --sku standard_small --tags foo=doo')
-        self.cmd('network application-gateway wait -g {rg} -n ag1 --updated')
 
         ag_list = self.cmd('network application-gateway list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -374,14 +371,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('name', 'ag1'),
             self.check('resourceGroup', resource_group),
-            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            self.check("frontendIpConfigurations[0].subnet.contains(id, 'default')", True)
+            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
         ])
-        self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
-        self.cmd('network application-gateway stop --resource-group {rg} -n ag1')
-        self.cmd('network application-gateway start --resource-group {rg} -n ag1')
-        self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
-        self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
