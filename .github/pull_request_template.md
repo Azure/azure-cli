@@ -1,16 +1,14 @@
+**Description of PR (Mandatory)**  
+(Why this PR? What is changed? What is the effect? etc. A high-quality description can accelerate the review process)
 
+**Testing Guide**  
+(Example commands with explanations)
 
 **History Notes:**  
 (Fill in the following template if multiple notes are needed, otherwise PR title will be used for history note.)
 
 [Component Name 1] (BREAKING CHANGE:) (az command:) make some customer-facing change.  
 [Component Name 2] (BREAKING CHANGE:) (az command:) make some customer-facing change.
-
-**Description of PR (Mandatory)**  
-(Why this PR? What is changed? What is the effect? etc. A high-quality description can accelerate the review process)
-
-**Testing Guide**  
-(Example commands with explanations)
 
 ---
 
