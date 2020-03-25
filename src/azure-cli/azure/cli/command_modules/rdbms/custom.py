@@ -319,14 +319,16 @@ def _server_update_custom_func(instance,
                                     ssl_enforcement=ssl_enforcement,
                                     tags=tags)
 
-    if instance.identity is None and assign_identity:
+    if assign_identity:
         if server_module_path.find('postgres'):
             from azure.mgmt.rdbms import postgresql
-            instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
+            if instance.identity is None:
+                instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
             params.identity = instance.identity
         elif server_module_path.find('mysql'):
             from azure.mgmt.rdbms import mysql
-            instance.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
+            if instance.identity is None:
+                instance.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
             params.identity = instance.identity
 
     return params
