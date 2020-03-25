@@ -1086,19 +1086,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies how much metadata to include in the response payload.')
         c.argument('marker', validator=validate_marker, nargs='+')
 
-    for item in ['create', 'list']:
+    for item in ['create', 'show', 'delete']:
         with self.argument_context('storage fs {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['--name', '-n'],
                     help="File system name.", required=True)
 
-    with self.argument_context('storage fs directory create') as c:
-        c.extra('file_system_name',
-                help="File system name.", required=True)
-        c.extra('directory_name', options_list=['--name', '-n'],
-                help="The name of directory.", required=True)
+    for item in ['create', 'show', 'delete']:
+        with self.argument_context('storage fs directory {}'.format(item)) as c:
+            c.extra('file_system_name',
+                    help="File system name.", required=True)
+            c.extra('directory_name', options_list=['--name', '-n'],
+                    help="The name of directory.", required=True)
+    with self.argument_context('storage fs directory list') as c:
+        c.extra('file_system_name', help="File system name.", required=True)
+        c.argument('recursive', arg_type=get_three_state_flag(), default=True,
+                   help='Look into sub-directories recursively when set to true. ')
+    for item in ['create', 'show', 'delete']:
+        with self.argument_context('storage fs file {}'.format(item)) as c:
+            c.extra('file_system_name', options_list=['-f', '--file-system'],
+                    help="File system name.", required=True)
 
-    with self.argument_context('storage fs file create') as c:
-        c.extra('file_system_name',
-                help="File system name.", required=True)
-        c.extra('file_path',
-                help="The file path.", required=True)

@@ -14,7 +14,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_private_link, cf_private_endpoint,
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
                                                                cf_adls_file_system, cf_adls_directory,
-                                                               cf_adls_file)
+                                                               cf_adls_file, cf_adls_service)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -631,6 +631,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                           transform=transform_entity_result)
         g.storage_custom_command('insert', 'insert_table_entity')
 
+    adls_service_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.filedatalake._data_lake_service_client#DataLakeServiceClient.{}',
+        client_factory=cf_adls_service,
+        resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
+    )
+
     adls_fs_sdk = CliCommandType(
         operations_tmpl='azure.multiapi.storagev2.filedatalake._file_system_client#FileSystemClient.{}',
         client_factory=cf_adls_file_system,
@@ -652,13 +658,33 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
     )
 
-    with self.command_group('storage fs', adls_fs_sdk, custom_command_type=custom_adls_sdk) as g:
+    with self.command_group('storage fs', adls_fs_sdk, custom_command_type=custom_adls_sdk, is_preview=True) as g:
         from ._transformers import transform_storage_list_output
         g.storage_command('create', 'create_file_system')
-        g.storage_command('list', 'get_paths', transform=transform_storage_list_output)
+        g.storage_command('list', 'list_file_systems', command_type=adls_service_sdk,
+                          transform=transform_storage_list_output)
+        g.storage_command('show', 'get_file_system_properties')
+        g.storage_command('delete', 'delete_file_system')
 
     with self.command_group('storage fs directory', adls_directory_sdk, custom_command_type=custom_adls_sdk) as g:
+        from ._transformers import transform_storage_list_output
         g.storage_command('create', 'create_directory')
+        g.storage_command('show', 'get_directory_properties')
+        g.storage_command('delete', 'delete_directory')
+        g.storage_command('move', 'rename_directory')
+        g.storage_command('list', 'get_paths', command_type=adls_fs_sdk, transform=transform_storage_list_output)
 
     with self.command_group('storage fs file', adls_file_sdk, custom_command_type=custom_adls_sdk) as g:
-        g.storage_command('create', 'create_file')
+        from ._transformers import transform_storage_list_output
+        g.storage_command('create', 'create_file', command_type=adls_fs_sdk)
+        g.storage_command('delete', 'delete_file', command_type=adls_fs_sdk)
+        g.storage_command('append', 'append_data')
+        g.storage_command('download', 'download_file')
+        g.storage_command('upload', 'upload_data')
+        g.storage_command('move', 'rename_file')
+        g.storage_command('list', 'get_paths', command_type=adls_fs_sdk, transform=transform_storage_list_output)
+
+    with self.command_group('storage fs access', adls_file_sdk, custom_command_type=custom_adls_sdk) as g:
+        g.storage_command('set', 'set_access_control')
+        g.storage_command('show', 'get_access_control')
+
