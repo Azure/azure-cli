@@ -10,7 +10,7 @@
 (Why this PR? What is changed? What is the effect? etc. A high-quality description can accelerate the review process)
 
 **Testing Guide**  
-(Example commands with explanation)
+(Example commands with explanations)
 
 ---
 
