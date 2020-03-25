@@ -103,6 +103,19 @@ class HDInsightClusterTests(ScenarioTest):
             HDInsightClusterTests._with_explicit_ssh_creds()
         )
 
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_cluster_with_minimal_tls_version(self, storage_account_info):
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._with_minimal_tls_version('1.2')
+        )
+
+        self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
+            self.check('properties.minSupportedTlsVersion', '1.2'),
+            self.check('properties.clusterState', 'Running')
+        ])
+
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
@@ -348,7 +361,7 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _optional_data_disk_arguments():
         return '--workernode-data-disk-storage-account-type {} --workernode-data-disk-size {}'\
-               .format('Standard_LRS', '1023')
+            .format('Standard_LRS', '1023')
 
     @staticmethod
     def _rserver_arguments():
@@ -365,3 +378,7 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _with_explicit_ssh_creds():
         return '--ssh-user {} --ssh-password {}'.format('sshuser', 'Password1!')
+
+    @staticmethod
+    def _with_minimal_tls_version(tls_version):
+        return '--minimal-tls-version {}'.format(tls_version)

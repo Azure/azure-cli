@@ -570,6 +570,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.extendedProperties.diskExclusionProperties.isInclusionList', True),
         ])
 
+        self.cmd('backup protection update-for-vm -g {rg} -v {vault} -c {vm} -i {vm} --exclude-all-data-disks', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
         self.cmd('backup protection update-for-vm -g {rg} -v {vault} -c {vm} -i {vm} --disk-list-setting exclude --diskslist 1', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "ConfigureBackup"),
