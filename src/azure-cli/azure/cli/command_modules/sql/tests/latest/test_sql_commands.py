@@ -3195,12 +3195,9 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_db_long_term_retention(
             self, resource_group, resource_group_location):
-
-        print("FUNCTION")
 
         resource_prefix = 'MIDBLongTermRetention'
 
