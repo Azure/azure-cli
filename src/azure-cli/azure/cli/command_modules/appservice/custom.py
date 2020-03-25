@@ -140,17 +140,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:  # windows webapp without runtime specified
         site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                       value=node_default_version))
-
-    # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
-    name_validation = client.check_name_availability(name, 'Site')
-    if not name_validation.name_available:
-        existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
-                                                        name, 'list_application_settings')
-        site_config.app_settings = []
-        site_config.app_settings += [NameValuePair(name=k, value=v)
-                                     for k, v
-                                     in existing_app_settings.properties.items()]
-
     if site_config.app_settings:
         for setting in site_config.app_settings:
             logger.info('Will set appsetting %s', setting)
@@ -160,6 +149,20 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if language is not None and language.lower() == 'dotnetcore':
         site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
                                                       value='https://{}.scm.azurewebsites.net/detectors'.format(name)))
+
+    # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
+    name_validation = client.check_name_availability(name, 'Site')
+    if not name_validation.name_available:
+        existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
+                                                        name, 'list_application_settings')
+        # To fetch the newly added appsetting names
+        names = []
+        for item in site_config.app_settings:
+            names = item.name
+        for k, v in existing_app_settings.properties.items():
+            # add only if the existing appsetting name is not present in newly added appsettings
+            if k not in names:
+                site_config.app_settings.append(NameValuePair(name=k, value=v))
 
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
