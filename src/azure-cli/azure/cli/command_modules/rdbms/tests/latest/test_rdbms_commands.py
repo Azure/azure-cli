@@ -686,7 +686,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         resource_prefix = 'ossrdbmsbyok'
 
         # add identity to server
-        server_resp = self.cmd('{} server update -g {} --name {} --assign_identity'
+        server_resp = self.cmd('{} server update -g {} --name {} --assign-identity'
                                .format(database_engine, resource_group, server)).get_output_in_json()
         server_identity = server_resp['identity']['principalId']
 

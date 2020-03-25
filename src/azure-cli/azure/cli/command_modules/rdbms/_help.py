@@ -689,24 +689,24 @@ type: command
 short-summary: List the private link resources supported for a MySQL server.
 """
 
-helps['mysql server encryption key'] = """
+helps['mysql server key'] = """
 type: group
-short-summary: Manage a server's encryption keys.
+short-summary: Manage a server's keys.
 """
 
-helps['mysql server encryption key create'] = """
+helps['mysql server key create'] = """
 type: command
-short-summary: Creates a server encryption key.
+short-summary: Creates a server key.
 """
 
-helps['mysql server encryption key delete'] = """
+helps['mysql server key delete'] = """
 type: command
-short-summary: Deletes a server encryption key.
+short-summary: Deletes a server key.
 """
 
 helps['mysql server key show'] = """
 type: command
-short-summary: Shows a server encryption key.
+short-summary: Shows a server key.
 """
 
 helps['postgres'] = """
@@ -1047,22 +1047,22 @@ type: command
 short-summary: List the private link resources supported for a PostgreSQL server.
 """
 
-helps['postgres server encryption key'] = """
+helps['postgres server key'] = """
 type: group
-short-summary: Manage a server's encryption keys.
+short-summary: Manage a server's keys.
 """
 
-helps['postgres server encryption key create'] = """
+helps['postgres server key create'] = """
 type: command
-short-summary: Creates a server encryption key.
+short-summary: Creates a server key.
 """
 
-helps['postgres server encryption key delete'] = """
+helps['postgres server key delete'] = """
 type: command
-short-summary: Deletes a server encryption key.
+short-summary: Deletes a server key.
 """
 
-helps['postgres server encryption key show'] = """
+helps['postgres server key show'] = """
 type: command
-short-summary: Shows a server encryption key.
+short-summary: Shows a server key.
 """
