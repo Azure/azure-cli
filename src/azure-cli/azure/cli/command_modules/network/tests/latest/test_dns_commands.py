@@ -201,13 +201,13 @@ class DnsScenarioTest(ScenarioTest):
             # test creating the record set at the same time you add records
             self.cmd('network dns record-set {0} {2} -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1} --if-none-match'.format(t, args[t], add_command))
 
-        self.cmd('network dns record-set a add-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11 --if-none-match')
+        self.cmd('network dns record-set a add-record -g {rg} --zone-name {zone} --record-set-name myrsa --ipv4-address 10.0.0.11')
         self.cmd('network dns record-set soa update -g {{rg}} --zone-name {{zone}} {0}'.format(args['soa']))
 
         long_value = '0123456789' * 50
         self.cmd('network dns record-set txt add-record -g {{rg}} -z {{zone}} -n longtxt -v {0}'.format(long_value))
 
-        typed_record_sets = 2 * len(record_types) + 1
+        typed_record_sets = len(record_types) + 1
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets + typed_record_sets))
         self.cmd('network dns record-set a show -n myrsa -g {rg} --zone-name {zone}',
@@ -218,7 +218,7 @@ class DnsScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', base_record_sets + typed_record_sets))
 
         self.cmd('network dns record-set txt list -g {rg} -z {zone}',
-                 checks=self.check('length(@)', 3))
+                 checks=self.check('length(@)', 2))
 
         for t in record_types:
             self.cmd('network dns record-set {0} remove-record -g {{rg}} --zone-name {{zone}} --record-set-name myrs{0} {1} --if-none-match'.format(t, args[t]))
