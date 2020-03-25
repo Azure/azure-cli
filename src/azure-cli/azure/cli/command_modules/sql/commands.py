@@ -574,7 +574,10 @@ def load_command_table(self, _):
                             managed_backup_short_term_retention_policies_operations,
                             client_factory=get_sql_managed_backup_short_term_retention_policies_operations) as g:
 
-        g.custom_command('set', 'update_short_term_retention_mi', supports_no_wait=True)
+        g.custom_command(
+            'set',
+            'update_short_term_retention_mi',
+            supports_no_wait=True)
         g.custom_command('show', 'get_short_term_retention_mi')
 
     managed_database_long_term_retention_policies_operations = CliCommandType(
@@ -596,11 +599,16 @@ def load_command_table(self, _):
                             managed_database_long_term_retention_backups_operations,
                             client_factory=get_sql_managed_database_long_term_retention_backups_operations) as g:
         g.show_command('show', 'get')
-        g.custom_command('list-by-database', 'list_by_database_long_term_retention_mi_backup')
-        g.custom_command('list-by-instance', 'list_by_instance_long_term_retention_mi_backup')
-        g.custom_command('list-by-location', 'list_by_location_long_term_retention_mi_backup')
+        g.custom_command(
+            'list-by-database',
+            'list_by_database_long_term_retention_mi_backup')
+        g.custom_command(
+            'list-by-instance',
+            'list_by_instance_long_term_retention_mi_backup')
+        g.custom_command(
+            'list-by-location',
+            'list_by_location_long_term_retention_mi_backup')
         g.command('delete', 'delete')
-
     ###############################################
     #                sql virtual cluster         #
     ###############################################

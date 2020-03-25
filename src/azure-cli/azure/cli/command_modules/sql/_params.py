@@ -1484,24 +1484,29 @@ def load_arguments(self, _):
                 'target_resource_group_name'
             ])
 
-        c.argument('backup_id',
-                   help='The resource id of the long term retention backup to be restored.')
+        c.argument(
+            'long_term_retention_backup_resource_id',
+            options_list=['--backup-id'],
+            help='The resource id of the long term retention backup to be restored.')
 
-        c.argument('target_managed_database_name',
-                   options_list=['--dest-name'],
-                   required=True,
-                   help='Name of the managed database that will be created as the restore destination.')
+        c.argument(
+            'target_managed_database_name',
+            options_list=['--dest-name'],
+            required=True,
+            help='Name of the managed database that will be created as the restore destination.')
 
-        c.argument('target_managed_instance_name',
-                   options_list=['--dest-mi'],
-                   help='Name of the managed instance to restore managed database to. '
-                   'This can be same managed instance, or another managed instance on same subscription. '
-                   'When not specified it defaults to source managed instance.')
+        c.argument(
+            'target_managed_instance_name',
+            options_list=['--dest-mi'],
+            help='Name of the managed instance to restore managed database to. '
+            'This can be same managed instance, or another managed instance on same subscription. '
+            'When not specified it defaults to source managed instance.')
 
-        c.argument('target_resource_group_name',
-                   options_list=['--dest-resource-group'],
-                   help='Name of the resource group of the managed instance to restore managed database to. '
-                   'When not specified it defaults to source resource group.')
+        c.argument(
+            'target_resource_group_name',
+            options_list=['--dest-resource-group'],
+            help='Name of the resource group of the managed instance to restore managed database to. '
+            'When not specified it defaults to source resource group.')
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
@@ -1510,22 +1515,25 @@ def load_arguments(self, _):
                 'retention_days'
             ])
 
-        c.argument('deleted_time',
-                   options_list=['--deleted-time'],
-                   help='If specified, updates retention days for a deleted database, instead of an existing database.'
-                   'Must match the deleted time of a deleted database on the source Managed Instance.')
+        c.argument(
+            'deleted_time',
+            options_list=['--deleted-time'],
+            help='If specified, updates retention days for a deleted database, instead of an existing database.'
+            'Must match the deleted time of a deleted database on the source Managed Instance.')
 
-        c.argument('retention_days',
-                   options_list=['--retention-days'],
-                   required=True,
-                   help='New backup short term retention policy in days.'
-                   'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
+        c.argument(
+            'retention_days',
+            options_list=['--retention-days'],
+            required=True,
+            help='New backup short term retention policy in days.'
+            'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
 
     with self.argument_context('sql midb short-term-retention-policy show') as c:
-        c.argument('deleted_time',
-                   options_list=['--deleted-time'],
-                   help='If specified, shows retention days for a deleted database, instead of an existing database.'
-                   'Must match the deleted time of a deleted database on the source Managed Instance.')
+        c.argument(
+            'deleted_time',
+            options_list=['--deleted-time'],
+            help='If specified, shows retention days for a deleted database, instead of an existing database.'
+            'Must match the deleted time of a deleted database on the source Managed Instance.')
 
     with self.argument_context('sql midb long-term-retention-policy set') as c:
         create_args_for_complex_type(
@@ -1556,11 +1564,27 @@ def load_arguments(self, _):
 
     with self.argument_context('sql midb long-term-retention-backup') as c:
         c.argument('location_name',
+                   required=True,
                    arg_type=get_location_type(self.cli_ctx))
 
         c.argument('resource_group_name',
                    required=False,
                    help='If specified, the resource group that the managed instance/database resource belongs to.')
+
+    with self.argument_context('sql midb long-term-retention-backup show') as c:
+        c.argument('backup_name',
+                   options_list=['--backup-name', '-b'],
+                   required=True,
+                   help='The long term retention backup name.')
+
+    with self.argument_context('sql midb long-term-retention-backup list-by-database') as c:
+        c.argument('database_state',
+                   required=False,
+                   help='\'All\', \'Live\', or \'Deleted\'')
+
+        c.argument('only_latest_per_database',
+                   required=False,
+                   help='If true, will only return the latest backup for each database')
 
     ###############################################
     #                sql virtual cluster          #
