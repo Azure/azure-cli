@@ -2840,7 +2840,6 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
 
     ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
                                           publisher=publisher,
-                                          type=extension_name,
                                           type1=extension_name,
                                           protected_settings=protected_settings,
                                           type_handler_version=version,
