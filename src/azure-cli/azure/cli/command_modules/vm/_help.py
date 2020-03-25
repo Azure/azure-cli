@@ -1976,11 +1976,13 @@ examples:
 helps['vm user update'] = """
 type: command
 short-summary: Update a user account.
+long-summary: >
+    This command uses VMAccessForLinux 1.5 for Linux operating system and VMAccessAgent 2.4 for Window operating system.
 parameters:
   - name: --ssh-key-value
     short-summary: SSH public key file value or public key file path. This command appends the new public key text to the ~/.ssh/authorized_keys file for the admin user on the VM. This does not replace or remove any existing SSH keys.
 examples:
-  - name: Update a Windows user account.
+  - name: Update a Windows user account. If username does not exist, a new user will be created.
     text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
   - name: Update a Linux user account. ("$(< filename)" syntax is not supported on Command Prompt or PowerShell.)
     text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
