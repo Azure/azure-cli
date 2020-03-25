@@ -2827,7 +2827,7 @@ def list_by_location_long_term_retention_mi_backup(
         only_latest_per_database=None,
         database_state=None):
     '''
-    Lists the long term retentionb backups within a specified region.
+    Lists the long term retention backups within a specified region.
     '''
 
     if resource_group_name:

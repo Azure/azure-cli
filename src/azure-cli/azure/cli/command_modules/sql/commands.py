@@ -609,6 +609,7 @@ def load_command_table(self, _):
             'list-by-location',
             'list_by_location_long_term_retention_mi_backup')
         g.command('delete', 'delete')
+
     ###############################################
     #                sql virtual cluster         #
     ###############################################

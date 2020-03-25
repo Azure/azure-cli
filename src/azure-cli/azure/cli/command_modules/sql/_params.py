@@ -1586,6 +1586,24 @@ def load_arguments(self, _):
                    required=False,
                    help='If true, will only return the latest backup for each database')
 
+    with self.argument_context('sql midb long-term-retention-backup list-by-instance') as c:
+        c.argument('database_state',
+                   required=False,
+                   help='\'All\', \'Live\', or \'Deleted\'')
+
+        c.argument('only_latest_per_database',
+                   required=False,
+                   help='If true, will only return the latest backup for each database')
+
+    with self.argument_context('sql midb long-term-retention-backup list-by-location') as c:
+        c.argument('database_state',
+                   required=False,
+                   help='\'All\', \'Live\', or \'Deleted\'')
+
+        c.argument('only_latest_per_database',
+                   required=False,
+                   help='If true, will only return the latest backup for each database')
+
     ###############################################
     #                sql virtual cluster          #
     ###############################################

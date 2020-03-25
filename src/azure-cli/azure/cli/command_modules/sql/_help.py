@@ -672,7 +672,7 @@ type: command
 short-summary: Update long term retention settings for a managed database.
 examples:
   - name: Set long term retention for a managed database.
-    text: az sql midb long-term-retention-policy set -g mygroup --mi myinstance -n mymanageddb --weekly-retention "P1W" --monthly-retntion "P6M" --yearly-retention "P1Y" --week-of-year 26
+    text: az sql midb long-term-retention-policy set -g mygroup --mi myinstance -n mymanageddb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26
 """
 
 helps['sql midb long-term-retention-policy show'] = """
