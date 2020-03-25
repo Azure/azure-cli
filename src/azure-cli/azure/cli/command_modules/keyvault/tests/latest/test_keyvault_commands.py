@@ -1248,6 +1248,7 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
             'kv3': self.create_random_name('cli-test-kv-nr-', 24),
             'kv4': self.create_random_name('cli-test-kv-nr-', 24),
             'kv5': self.create_random_name('cli-test-kv-nr-', 24),
+            'kv6': self.create_random_name('cli-test-kv-nr-', 24),
             'vnet': self.create_random_name('cli-test-vnet-', 24),
             'vnet2': self.create_random_name('cli-test-vnet-', 24),
             'vnet3': self.create_random_name('cli-test-vnet-', 24),
@@ -1316,7 +1317,21 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
                      self.check('properties.networkAcls.virtualNetworkRules[1].id', '{subnetId3}')
                  ])
 
-        self.cmd('keyvault create -n {kv5} -l {loc} -g {rg} --network-acls "{network_acls_json_filename}" '
+        self.cmd('keyvault create -n {kv5} -l {loc} -g {rg} --network-acls "@{network_acls_json_filename}" '
+                 '--network-acls-ips {ip3} {ip4} '
+                 '--network-acls-vnets {subnetId2} {vnet3}/{subnet3}', checks=[
+                     self.check('length(properties.networkAcls.ipRules)', 4),
+                     self.check('properties.networkAcls.ipRules[0].value', '{ip}'),
+                     self.check('properties.networkAcls.ipRules[1].value', '{ip2}'),
+                     self.check('properties.networkAcls.ipRules[2].value', '{ip3}'),
+                     self.check('properties.networkAcls.ipRules[3].value', '{ip4}'),
+                     self.check('length(properties.networkAcls.virtualNetworkRules)', 3),
+                     self.check('properties.networkAcls.virtualNetworkRules[0].id', '{subnetId}'),
+                     self.check('properties.networkAcls.virtualNetworkRules[1].id', '{subnetId2}'),
+                     self.check('properties.networkAcls.virtualNetworkRules[2].id', '{subnetId3}')
+                 ])
+
+        self.cmd('keyvault create -n {kv6} -l {loc} -g {rg} --network-acls "{network_acls_json_filename}" '
                  '--network-acls-ips {ip3} {ip4} '
                  '--network-acls-vnets {subnetId2} {vnet3}/{subnet3}', checks=[
                      self.check('length(properties.networkAcls.ipRules)', 4),

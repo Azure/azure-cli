@@ -264,35 +264,10 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
                                    parameters=params)
 
 
-def _get_network_acls_json_dict(json_string_or_filename):
-    if not json_string_or_filename:
-        return {}
+def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
+    if network_acls_json is None:
+        network_acls_json = {}
 
-    logger.info('json_string_or_filename: %s', json_string_or_filename)
-
-    network_acls_json = None
-    try:
-        network_acls_json = json.loads(json_string_or_filename)
-    except:  # pylint: disable=bare-except
-        pass  # it should be a JSON filename
-
-    if not network_acls_json:
-        if not os.path.exists(json_string_or_filename):
-            raise CLIError('--network-acls is neither a valid JSON string nor a valid filename')
-
-        try:
-            with open(json_string_or_filename) as f:
-                logger.info('network_acls_filename: %s', json_string_or_filename)
-                network_acls_json = json.load(f)
-        except:  # pylint: disable=bare-except
-            raise CLIError('{} is not a valid JSON file'.format(json_string_or_filename))
-
-    logger.info('network_acls_json: %s', network_acls_json)
-    return network_acls_json
-
-
-def _parse_network_acls(cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets):
-    network_acls_json = _get_network_acls_json_dict(network_acls)
     rule_names = ['ip', 'vnet']
     for rn in rule_names:
         if rn not in network_acls_json:

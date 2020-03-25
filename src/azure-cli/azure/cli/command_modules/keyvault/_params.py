@@ -9,7 +9,7 @@ from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_file_or_dict
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list, resource_group_name_type, tags_type, file_type, get_three_state_flag,
     get_enum_type)
@@ -91,9 +91,9 @@ def load_arguments(self, _):
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
-        c.argument('network_acls', help='Network ACLs. It accepts a JSON filename or a JSON string. '
-                                        'JSON format: {\\"ip\\":[<ip1>, <ip2>...],'
-                                        '\\"vnet\\":[<vnet_name_1>/<subnet_name_1>,<subnet_id2>...]}')
+        c.argument('network_acls', type=validate_file_or_dict,
+                   help='Network ACLs. It accepts a JSON filename or a JSON string. JSON format: '
+                        '{\\"ip\\":[<ip1>, <ip2>...],\\"vnet\\":[<vnet_name_1>/<subnet_name_1>,<subnet_id2>...]}')
         c.argument('network_acls_ips', nargs='*', help='Network ACLs IP rules. Space-separated list of IP addresses.')
         c.argument('network_acls_vnets', nargs='*', help='Network ACLS VNet rules. Space-separated list of '
                                                          'Vnet/subnet pairs or subnet resource ids.')
