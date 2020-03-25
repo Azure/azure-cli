@@ -629,7 +629,7 @@ examples:
     text: az sql midb show -g mygroup --mi myinstance -n mymanageddb
 """
 
-helps['sql midb ltr '] = """
+helps['sql midb ltr'] = """
 type: group
 short-summary: Managed SQL Managed Instance databases long term retention.
 """
@@ -726,7 +726,7 @@ examples:
   - name: List long term retention backups for a location (list only the latest LTR backups, which belong to live databases).
     text: az sql midb long-term-retention-backup list-by-location -l southeastasia --database-state Live --only-latest-per-database True
   - name: List long term retention backups for a location (with resource group argument).
-    text: az sql midb long-term-retention-backup list-by-instance -l southeastasia -g mygroup
+    text: az sql midb long-term-retention-backup list-by-location -l southeastasia -g mygroup
 """
 
 helps['sql midb long-term-retention-backup delete'] = """
