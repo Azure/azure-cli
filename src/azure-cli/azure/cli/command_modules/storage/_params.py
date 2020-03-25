@@ -1086,9 +1086,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies how much metadata to include in the response payload.')
         c.argument('marker', validator=validate_marker, nargs='+')
 
-    with self.argument_context('storage fs create') as c:
-        c.extra('file_system_name', options_list=['--name', '-n'],
-                help="File system name.", required=True)
+    for item in ['create', 'list']:
+        with self.argument_context('storage fs {}'.format(item)) as c:
+            c.extra('file_system_name', options_list=['--name', '-n'],
+                    help="File system name.", required=True)
 
     with self.argument_context('storage fs directory create') as c:
         c.extra('file_system_name',
