@@ -15,7 +15,7 @@ jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
   timeoutInMinutes: 9999
-  condition: contains($(USER_TARGET), $(Target))
+  condition: contains(variables[USER_TARGET], variables[Target])
   strategy:
     maxParallel: 20
     matrix:
