@@ -360,6 +360,19 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
 
+        # skip key vault reference while exporting
+        self.kwargs.update({
+            'key': "key_vault_reference",
+            'secret_identifier': "https://testkeyvault.vault.azure.net/secrets/mysecret"
+        })
+        self.cmd(
+            'appconfig kv set-keyvault -n {config_store_name} --key {key} --secret-identifier {secret_identifier} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --skip-keyvault -y')
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
         # Feature flags test
         imported_file_path = os.path.join(TEST_DIR, 'import_features.json')
         exported_file_path = os.path.join(TEST_DIR, 'export_features.json')

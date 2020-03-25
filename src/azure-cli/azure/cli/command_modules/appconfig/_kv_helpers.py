@@ -222,7 +222,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
             exported_features = __export_features(features, naming_convention)
             exported_keyvalues.update(exported_features)
 
-        with open(file_path, 'w') as fp:
+        with open(file_path, 'w', encoding='utf-8') as fp:
             if format_ == 'json':
                 json.dump(exported_keyvalues, fp, indent=2, ensure_ascii=False)
             elif format_ == 'yaml':
