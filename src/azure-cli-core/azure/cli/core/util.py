@@ -805,6 +805,11 @@ def get_az_user_agent():
 
     agents = ["AZURECLI/{}".format(core_version)]
 
+    _ENV_AZ_INSTALLER = 'AZ_INSTALLER'
+    import os
+    if _ENV_AZ_INSTALLER in os.environ:
+        agents.append('({})'.format(os.environ[_ENV_AZ_INSTALLER]))
+
     # msrest already has this
     # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
     # if ENV_ADDITIONAL_USER_AGENT in os.environ:

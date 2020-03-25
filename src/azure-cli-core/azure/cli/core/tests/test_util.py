@@ -213,6 +213,10 @@ class TestUtils(unittest.TestCase):
 
     @mock.patch('azure.cli.core.__version__', '7.8.9')
     def test_get_az_user_agent(self):
+        with mock.patch.dict('os.environ', {'AZ_INSTALLER': 'PIP'}):
+            actual = get_az_user_agent()
+            self.assertEqual(actual, 'AZURECLI/7.8.9 (PIP)')
+
         actual = get_az_user_agent()
         self.assertEqual(actual, 'AZURECLI/7.8.9')
 
