@@ -684,6 +684,8 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
     def _test_data_encryption(self, resource_group, server, database_engine):
         resource_prefix = 'ossrdbmsbyok'
+        vault_name = self.create_random_name(resource_prefix, 24)
+        key_name = self.create_random_name(resource_prefix, 32)
 
         # add identity to server
         server_resp = self.cmd('{} server update -g {} --name {} --assign-identity'
@@ -691,20 +693,18 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
-        vault_name = self.create_random_name(resource_prefix, 24)
         self.cmd('keyvault create -g {} -n {}  --location eastus --enable-soft-delete true --enable-purge-protection true'
                  .format(resource_group, vault_name))
+
+        # create key
+        key_resp = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                            .format(key_name, vault_name)).get_output_in_json()
 
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
                  .format(resource_group, vault_name, server_identity))
 
-        # create key
-        key_name = self.create_random_name(resource_prefix, 32)
-        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
-                            .format(key_name, vault_name)).get_output_in_json()
-        kid = key_resp['key']['kid']
-
         # add server key
+        kid = key_resp['key']['kid']
         server_key_resp = self.cmd('{} server key create -g {} --name {} --kid {}'
                                    .format(database_engine, resource_group, server, kid),
                                    checks=[JMESPathCheck('uri', kid)])
