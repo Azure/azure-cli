@@ -3195,10 +3195,12 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
 
 
 class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
+
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
-    @record_only()
     def test_sql_managed_db_long_term_retention(
             self, resource_group, resource_group_location):
+
+        print("FUNCTION")
 
         resource_prefix = 'MIDBLongTermRetention'
 
@@ -3229,16 +3231,11 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # Create and prepare VNet and subnet for new virtual cluster
         self.cmd('network route-table create -g {rg} -n {route_table_name}')
-        self.cmd(
-            'network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
-        self.cmd(
-            'network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
-        self.cmd(
-            'network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
-        self.cmd(
-            'network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
-        subnet = self.cmd(
-            'network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_internet} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {rg} --route-table-name {route_table_name} -n {route_name_vnetlocal} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {rg} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
 
         self.kwargs.update({
             'subnet_id': subnet['id']
@@ -3273,23 +3270,13 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
                      self.check('status', 'Online')])
 
         # test update long term retention on live database
-        print(
-            'sql midb long-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --weekly-retention {weekly_retention} --monthly-retention {monthly_retention} --yearly-retention {yearly_retention} --week-of-year {week_of_year}')
         self.cmd(
             'sql midb long-term-retention-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --weekly-retention {weekly_retention} --monthly-retention {monthly_retention} --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
             checks=[
-                self.check(
-                    'resourceGroup',
-                    '{rg}'),
-                self.check(
-                    'weeklyRetention',
-                    '{weekly_retention}'),
-                self.check(
-                    'monthlyRetention',
-                    '{monthly_retention}'),
-                self.check(
-                    'yearlyRetention',
-                    '{yearly_retention}')])
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('monthlyRetention', '{monthly_retention}'),
+                self.check('yearlyRetention', '{yearly_retention}')])
 
         # test get long term retention policy on live database
         self.cmd(
@@ -3306,51 +3293,32 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         # test list long term retention backups for location
         # with resource group
         self.cmd(
-            'sql midb long-term-retention-backup list-by-location -l {loc} -g {rg}',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('location', '{loc}')])
+            'sql midb long-term-retention-backup list-by-location -l {loc} -g {rg}')
         # without resource group
         self.cmd(
-            'sql midb long-term-retention-backup list-by-location -l {loc}',
-            checks=[
-                self.check('location', '{loc}')])
+            'sql midb long-term-retention-backup list-by-location -l {loc}')
 
         # test list long term retention backups for instance
+        # should assert 1 result
         # with resource group
         self.cmd(
-            'sql midb long-term-retention-backup list-by-instance -l {loc} --mi {managed_instance_name} -g {rg}',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('location', '{loc}'),
-                self.check('managedInstance', '{managed_instance_name}')])
+            'sql midb long-term-retention-backup list-by-instance -l {loc} --mi {managed_instance_name} -g {rg}')
 
         # without resource group
         self.cmd(
-            'sql midb long-term-retention-backup list-by-instance -l {loc} --mi {managed_instance_name}',
-            checks=[
-                self.check('location', '{loc}'),
-                self.check('managedInstance', '{managed_instance_name}')])
+            'sql midb long-term-retention-backup list-by-instance -l {loc} --mi {managed_instance_name}')
 
         # test list long term retention backups for database
+        # should assert 1 result
         # with resource group
         self.cmd(
-            'sql midb long-term-retention-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name} -g {rg}',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('location', '{loc}'),
-                self.check('managedInstance', '{managed_instance_name}'),
-                self.check('database', '{database_name}')])
+            'sql midb long-term-retention-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name} -g {rg}')
 
         # without resource group
         self.cmd(
-            'sql midb long-term-retention-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name}',
-            checks=[
-                self.check('location', '{loc}'),
-                self.check('managedInstance', '{managed_instance_name}'),
-                self.check('database', '{database_name}')])
+            'sql midb long-term-retention-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name}')
 
-        # test show long term retention backup
+        # setup for test show long term retention backup
         backup = self.cmd(
             'sql midb long-term-retention-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name} --only-latest-per-database True').get_output_in_json()
 
@@ -3359,13 +3327,15 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
             'backup_id': backup['id']
         })
 
+        # test show long term retention backup
         self.cmd(
-            'sql midb long-term-retention-backup show -l {loc} --mi {managed_instance_name} -n {database_name} --backup-name {backup_name}',
+            'sql midb long-term-retention-backup show -l {loc} --mi {managed_instance_name} -n {database_name} --backup-name \'{backup_name}\'',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('location', '{loc}'),
                 self.check('managedInstance', '{managed_instance_name}'),
-                self.check('database', '{database_name}')])
+                self.check('database', '{database_name}'),
+                self.check('name', '{backup_name}')])
 
         # test restore managed database from LTR backup
         self.kwargs.update({
@@ -3373,18 +3343,18 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         })
 
         self.cmd(
-            'sql midb ltr restore --backup-id {backup_id} --dest-name {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg}',
+            'sql midb ltr restore --backup-id \'{backup_id}\' --dest-name {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('managedInstance', '{managed_instance_name}'),
-                self.check('database', '{database_name}')])
+                self.check('name', '{dest_database_name}')])
 
         # test delete long term retention backup
         self.cmd(
-            'sql midb long-term-retention-backup delete -l {loc} -g {rg} --mi {managed_database_name} -n {database_name} --backup-name {backup_name}')
-        self.cmd('sql midb long-term-retention-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name}',
-                 checks=[
-                     self.check(self, None)])
+            'sql midb long-term-retention-backup delete -l {loc} -g {rg} --mi {managed_database_name} -n {database_name} --backup-name \'{backup_name}\'')
+        # assert no backpus
+        self.cmd(
+            'sql midb long-term-retention-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name}')
 
 
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
