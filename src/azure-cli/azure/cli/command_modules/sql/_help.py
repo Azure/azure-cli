@@ -644,7 +644,7 @@ examples:
 
 helps['sql midb short-term-retention-policy'] = """
 type: group
-short-summary: Manage SQL Managed Instance database short term retention policy.
+short-summary: Manage SQL Managed Instance database backup short term retention policy.
 """
 
 helps['sql midb short-term-retention-policy set'] = """

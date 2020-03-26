@@ -3202,7 +3202,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         self.kwargs.update({
             'rg': 'clitest4vtazvlqbo',
             'loc': 'westus',
-            'managed_instance_name': 'cli-ltr',
+            'managed_instance_name': 'ayang',
             'database_name': 'test-db-1',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
