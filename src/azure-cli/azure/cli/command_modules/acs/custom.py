@@ -1758,8 +1758,14 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         load_balancer_outbound_ports,
         load_balancer_idle_timeout)
 
-    if attach_acr and not enable_managed_identity:
-        _ensure_aks_acr(cmd.cli_ctx,
+    if attach_acr:
+        if enable_managed_identity:
+            if no_wait:
+                raise CLIError('When --attach-acr and --enable-managed-identity are both specified, '
+                               '--no-wait is not allowed, please wait until the whole operation succeeds.')
+            # Attach acr operation will be handled after the cluster is created
+        else:
+            _ensure_aks_acr(cmd.cli_ctx,
                         client_id=service_principal_profile.client_id,
                         acr_name_or_id=attach_acr,
                         subscription_id=subscription_id)
@@ -1884,6 +1890,22 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                         name=name
                     )
                     _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
+            elif enable_managed_identity and attach_acr:
+                # adding a wait here since we rely on the result for role assignment
+                result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
+                    resource_group_name=resource_group_name,
+                    resource_name=name,
+                    parameters=mc))
+                if result.identity_profile is None or result.identity_profile["kubeletidentity"] is None:
+                    logger.warning('Your cluster is successfully created, but we failed to attach acr to it, '
+                                   'you can manually grant permission to the identity named <ClUSTER_NAME>-agentpool '
+                                   'in MC_ resource group to give it permission to pull from ACR.')
+                else:
+                    kubelet_identity_client_id = result.identity_profile["kubeletidentity"].client_id
+                    _ensure_aks_acr(cmd.cli_ctx,
+                                    client_id=kubelet_identity_client_id,
+                                    acr_name_or_id=attach_acr,
+                                    subscription_id=subscription_id)
             else:
                 result = sdk_no_wait(no_wait,
                                      client.create_or_update,
@@ -2120,7 +2142,16 @@ def aks_update(cmd, client, resource_group_name, name,
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    client_id = instance.service_principal_profile.client_id
+    client_id = ""
+    if instance.identity is not None and instance.identity.type == "SystemAssigned":
+        if instance.identity_profile is None or instance.identity_profile["kubeletidentity"] is None:
+            raise CLIError('Unexpected error getting kubelet\'s identity for the cluster. '
+                           'Please do not set --attach-acr or --detach-acr. '
+                           'You can manually grant or revoke permission to the identity named '
+                           '<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR.')
+        client_id = instance.identity_profile["kubeletidentity"].client_id
+    else:
+        client_id = instance.service_principal_profile.client_id
     if not client_id:
         raise CLIError('Cannot get the AKS cluster\'s service principal.')
 
