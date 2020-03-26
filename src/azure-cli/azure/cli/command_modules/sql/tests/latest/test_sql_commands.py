@@ -3276,7 +3276,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'cli-restore-dest'
+            'dest_database_name': 'cli-dest'
         })
 
         self.cmd(
