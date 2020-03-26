@@ -35,8 +35,6 @@ class TestLocalContext(unittest.TestCase):
         self.assertTrue(self.local_context.is_on())
         self.local_context.set([ALL], 'resource_group_name', 'test_rg')
         self.assertEqual('test_rg', self.local_context.get('vm create', 'resource_group_name'))
-        with self.assertRaises(CLIError):
-            self.local_context.turn_on()
         self.assertEqual(self.working_dir, self.local_context.current_turn_on_dir())
 
 

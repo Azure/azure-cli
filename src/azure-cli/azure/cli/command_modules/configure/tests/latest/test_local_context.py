@@ -17,8 +17,6 @@ class LocalContextTest(ScenarioTest):
         working_dir = tempfile.mkdtemp()
         os.chdir(working_dir)
         self.cmd('local-context on')
-        with self.assertRaises(CLIError):
-            self.cmd('local-context on')
         self.cmd('local-context off --yes')
         os.chdir(original_working_dir)
 
