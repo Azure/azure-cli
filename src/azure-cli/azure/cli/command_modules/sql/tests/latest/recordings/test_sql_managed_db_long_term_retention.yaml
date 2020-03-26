@@ -1,125 +1,60 @@
 interactions:
 - request:
-    body: null
+    body: '{"properties": {"weeklyRetention": "P1W", "monthlyRetention": "P1M", "yearlyRetention":
+      "P2M", "weekOfYear": 12}}'
     headers:
       Accept:
-      - '*/*'
-      Accept-Charset:
-      - utf-8
+      - application/json
       Accept-Encoding:
       - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.23.0
-      return-client-request-id:
-      - 'true'
-      x-client-CPU:
-      - x64
-      x-client-OS:
-      - win32
-      x-client-SKU:
-      - Python
-      x-client-Ver:
-      - 1.2.2
-    method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
-  response:
-    body:
-      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
-    headers:
-      access-control-allow-methods:
-      - GET, OPTIONS
-      access-control-allow-origin:
-      - '*'
-      cache-control:
-      - private, max-age=86400
-      content-length:
-      - '131'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 24 Mar 2020 10:21:57 GMT
-      p3p:
-      - CP="DSP CUR OTPi IND OTRi ONL FIN"
-      set-cookie:
-      - fpc=AhPWqvAXF_5Ik978RKVWWj0; expires=Thu, 23-Apr-2020 10:21:57 GMT; path=/;
-        secure; HttpOnly; SameSite=None
-      - esctx=AQABAAAAAAAm-06blBE1TpVMil8KPQ41JrhX1g8paZo3CIyWCerAZfKS7FwungIAfE3KxkfabpMLdBDpICjB9p6RXa_4s8yu7Zo8orfYRPqBmLsyyjMZycwdMB3dtbmJrBQO0_WaVnzyX5LVqmz_zsqcnF2_XrifwRN06uYS4-11ELmruUz5-oHVO1l8ugu0Bo76lEyPCDcgAA;
-        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
-      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
-      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ests-server:
-      - 2.1.10244.21 - SAN ProdSlices
-    status:
-      code: 200
-      message: OK
-- request:
-    body: grant_type=client_credentials&client_id=6af90d67-c2b6-4a20-b068-fb64a342136c&resource=https%3A%2F%2Fmanagement.core.windows.net%2F&client_secret=7%5DuaW%3D%3AOQ%3Ar2lyVRB81%3A3hMB6bG-%5DM%5Dl
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Charset:
-      - utf-8
-      Accept-Encoding:
-      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-policy set
       Connection:
       - keep-alive
       Content-Length:
-      - '191'
+      - '113'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --mi -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
       User-Agent:
-      - python-requests/2.23.0
-      content-type:
-      - application/x-www-form-urlencoded
-      return-client-request-id:
-      - 'true'
-      x-client-CPU:
-      - x64
-      x-client-OS:
-      - win32
-      x-client-SKU:
-      - Python
-      x-client-Ver:
-      - 1.2.2
-    method: POST
-    uri: https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/oauth2/token
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr/databases/test-db-1/backupLongTermRetentionPolicies/default?api-version=2018-06-01-preview
   response:
     body:
-      string: '{"token_type":"Bearer","expires_in":"3599","ext_expires_in":"3599","expires_on":"1585048917","not_before":"1585045017","resource":"https://management.core.windows.net/","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imp4eHJRenI0cTg2YkQxdnVZbGFVd0FJN2JUYyIsImtpZCI6Imp4eHJRenI0cTg2YkQxdnVZbGFVd0FJN2JUYyJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvZjQzNTY1OGItYThjMy00NDYwLWFkZjItODQ2MTdjYWVmMzk2LyIsImlhdCI6MTU4NTA0NTAxNywibmJmIjoxNTg1MDQ1MDE3LCJleHAiOjE1ODUwNDg5MTcsImFpbyI6IkUySmdZRkJKemJQTnpwanN0SGh1bmVIYlMrdUZBUT09IiwiYXBwaWQiOiI2YWY5MGQ2Ny1jMmI2LTRhMjAtYjA2OC1mYjY0YTM0MjEzNmMiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvZjQzNTY1OGItYThjMy00NDYwLWFkZjItODQ2MTdjYWVmMzk2LyIsIm9pZCI6ImIyYTFlYmI1LTUxM2YtNDgxZi1iYjk3LWM1ZDU2OGQxMTkzOCIsInN1YiI6ImIyYTFlYmI1LTUxM2YtNDgxZi1iYjk3LWM1ZDU2OGQxMTkzOCIsInRpZCI6ImY0MzU2NThiLWE4YzMtNDQ2MC1hZGYyLTg0NjE3Y2FlZjM5NiIsInV0aSI6IjJ4NFJ1c1JicFVXQlZFeFFpNTBNQUEiLCJ2ZXIiOiIxLjAifQ.jOfErH4pUxaqhAbIhTZbzF14y43htVMHc6Khe0mRQIMFR00fwlZiRzWOET8QdQBy1xuYcIThOFQoGbibYFJEHJTJxZC2OgwLcVcMJHDhVSiJ9BwzRh4lpLNqybKUT22FWdpqO1rU16t14NhgVwMU8KoFP5euXeWloXJJslAD37iFbfmHXAXtlzQ6DNx8s2sZIti38rhQ2kOrErL-egUWj43jdUBxN40ZfauxquXwC98_YKsX_t-aT1PHSMFy8yJgbWNDPBWVM_bXxSay30DXOrqOXs7l6ITYY1pc9agJwgv0FcvEF1ma7ol5CB8dUlYp9mXWf_QU8rfdUzPMyTcH6A"}'
+      string: '{"operation":"UpsertDatabaseBackupArchivalPolicyV2","startTime":"2020-03-26T21:40:37.797Z"}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/managedInstanceLongTermRetentionPolicyAzureAsyncOperation/8945b3a0-54cf-4bdb-8a14-e0b0aba22ae5?api-version=2018-06-01-preview
       cache-control:
-      - no-cache, no-store
+      - no-cache
       content-length:
-      - '1365'
+      - '91'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 24 Mar 2020 10:21:56 GMT
+      - Thu, 26 Mar 2020 21:40:36 GMT
       expires:
       - '-1'
-      p3p:
-      - CP="DSP CUR OTPi IND OTRi ONL FIN"
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/managedInstanceLongTermRetentionPolicyOperationResults/8945b3a0-54cf-4bdb-8a14-e0b0aba22ae5?api-version=2018-06-01-preview
       pragma:
       - no-cache
-      set-cookie:
-      - fpc=AhwYKBMrNBJJvVjJQNbOgH8OmtngAQAAAEXWC9YOAAAA; expires=Thu, 23-Apr-2020
-        10:21:57 GMT; path=/; secure; HttpOnly; SameSite=None
-      - stsservicecookie=estsppe; path=/; SameSite=None; secure; HttpOnly
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-clitelem:
-      - 1,0,0,,
-      x-ms-ests-server:
-      - 2.1.10333.0 - CHY PPE
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
     status:
-      code: 200
-      message: OK
+      code: 202
+      message: Accepted
 - request:
     body: null
     headers:
@@ -128,36 +63,38 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network route-table create
+      - sql midb long-term-retention-policy set
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n
+      - -g --mi -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
-      accept-language:
-      - en-US
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/managedInstanceLongTermRetentionPolicyAzureAsyncOperation/8945b3a0-54cf-4bdb-8a14-e0b0aba22ae5?api-version=2018-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001","name":"clitest000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-03-24T10:21:53Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"name":"8945b3a0-54cf-4bdb-8a14-e0b0aba22ae5","status":"Succeeded","startTime":"2020-03-26T21:40:37.797Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '312'
+      - '107'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 24 Mar 2020 10:21:57 GMT
+      - Thu, 26 Mar 2020 21:40:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
       vary:
       - Accept-Encoding
       x-content-type-options:
@@ -169,178 +106,1024 @@ interactions:
     body: null
     headers:
       Accept:
-      - '*/*'
-      Accept-Charset:
-      - utf-8
+      - application/json
       Accept-Encoding:
       - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-policy set
       Connection:
       - keep-alive
+      ParameterSetName:
+      - -g --mi -n --weekly-retention --monthly-retention --yearly-retention --week-of-year
       User-Agent:
-      - python-requests/2.23.0
-      return-client-request-id:
-      - 'true'
-      x-client-CPU:
-      - x64
-      x-client-OS:
-      - win32
-      x-client-SKU:
-      - Python
-      x-client-Ver:
-      - 1.2.2
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2Ff435658b-a8c3-4460-adf2-84617caef396%2Foauth2%2Fauthorize&api-version=1.0
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr/databases/test-db-1/backupLongTermRetentionPolicies/default?api-version=2018-06-01-preview
   response:
     body:
-      string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/.well-known/openid-configuration"}'
+      string: '{"properties":{"weeklyRetention":"P1W","monthlyRetention":"P1M","yearlyRetention":"P2M","weekOfYear":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr/databases/test-db-1/backupLongTermRetentionPolicies/default","name":"default","type":"Microsoft.Sql/managedInstances/databases/backupLongTermRetentionPolicy"}'
     headers:
-      access-control-allow-methods:
-      - GET, OPTIONS
-      access-control-allow-origin:
-      - '*'
       cache-control:
-      - private, max-age=86400
+      - no-cache
       content-length:
-      - '131'
+      - '401'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 24 Mar 2020 10:21:58 GMT
-      p3p:
-      - CP="DSP CUR OTPi IND OTRi ONL FIN"
-      set-cookie:
-      - fpc=AvpuLZ7Y0eFGmjLQ-oq8w_A; expires=Thu, 23-Apr-2020 10:21:58 GMT; path=/;
-        secure; HttpOnly; SameSite=None
-      - esctx=AQABAAAAAAAm-06blBE1TpVMil8KPQ41T7rSIfcNetfGrFUsuaetP_9gulQkFSXXtg4-fwQtlQFDV5SgGEetr5zR1amSJU-48w34ISwNeueDLSB2G-vBizk6tQ_TMQpqxATcOyNOjOkkcxBh5usq3i_XtCcz4k1UkBlr3z8h647rQNZ-wiBzVqiMUvgiopIjzOOazv_d9ssgAA;
-        domain=.login.windows.net; path=/; secure; HttpOnly; SameSite=None
-      - x-ms-gateway-slice=corp; path=/; SameSite=None; secure; HttpOnly
-      - stsservicecookie=estscorp; path=/; SameSite=None; secure; HttpOnly
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ests-server:
-      - 2.1.10244.21 - SAN ProdSlices
-    status:
-      code: 200
-      message: OK
-- request:
-    body: grant_type=client_credentials&client_id=6af90d67-c2b6-4a20-b068-fb64a342136c&resource=https%3A%2F%2Fmanagement.core.windows.net%2F&client_secret=7%5DuaW%3D%3AOQ%3Ar2lyVRB81%3A3hMB6bG-%5DM%5Dl
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Charset:
-      - utf-8
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '191'
-      User-Agent:
-      - python-requests/2.23.0
-      content-type:
-      - application/x-www-form-urlencoded
-      return-client-request-id:
-      - 'true'
-      x-client-CPU:
-      - x64
-      x-client-OS:
-      - win32
-      x-client-SKU:
-      - Python
-      x-client-Ver:
-      - 1.2.2
-    method: POST
-    uri: https://login.windows-ppe.net/f435658b-a8c3-4460-adf2-84617caef396/oauth2/token
-  response:
-    body:
-      string: '{"token_type":"Bearer","expires_in":"3599","ext_expires_in":"3599","expires_on":"1585048918","not_before":"1585045018","resource":"https://management.core.windows.net/","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Imp4eHJRenI0cTg2YkQxdnVZbGFVd0FJN2JUYyIsImtpZCI6Imp4eHJRenI0cTg2YkQxdnVZbGFVd0FJN2JUYyJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvZjQzNTY1OGItYThjMy00NDYwLWFkZjItODQ2MTdjYWVmMzk2LyIsImlhdCI6MTU4NTA0NTAxOCwibmJmIjoxNTg1MDQ1MDE4LCJleHAiOjE1ODUwNDg5MTgsImFpbyI6IkUySmdZQ2lVTCtIUVBYUTBhUVhYMWNrYnF1WXVBUUE9IiwiYXBwaWQiOiI2YWY5MGQ2Ny1jMmI2LTRhMjAtYjA2OC1mYjY0YTM0MjEzNmMiLCJhcHBpZGFjciI6IjEiLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvZjQzNTY1OGItYThjMy00NDYwLWFkZjItODQ2MTdjYWVmMzk2LyIsIm9pZCI6ImIyYTFlYmI1LTUxM2YtNDgxZi1iYjk3LWM1ZDU2OGQxMTkzOCIsInN1YiI6ImIyYTFlYmI1LTUxM2YtNDgxZi1iYjk3LWM1ZDU2OGQxMTkzOCIsInRpZCI6ImY0MzU2NThiLWE4YzMtNDQ2MC1hZGYyLTg0NjE3Y2FlZjM5NiIsInV0aSI6ImJ1dUlPeXhncmsyM0t0b2JONnNNQUEiLCJ2ZXIiOiIxLjAifQ.EN5peMECtla0WDh7bk5W5sQaZMOCyd-xmJiF1My68pennlbhCnttKhM9Tk1Pnn8JhqUaPYTmpJ-LWO40CugLKnp49-PWROh7c4_mWcS7T1X0rSxWxsGS7eXJVjJsqz053Au29mhzXMCCgeHTGcDL8ZT2qZzwOO4_cQCMHc9x0bB22zr2xc1VVkhcrFH8tp2uyiJuD4Qreyd7WNti3WFLG_Zc1g1H00XOR_gEmxEM3h-5T-hS054HUajBqPF6mAo4k8Yj2OMVvjZAdCC_qQfqF3Civ1znMlc0khS6EbG5dZSLL2WlBzpGL6K9Ch7yZGROcAJAQV33RIl5nmfpLn_P2g"}'
-    headers:
-      cache-control:
-      - no-cache, no-store
-      content-length:
-      - '1365'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 24 Mar 2020 10:21:58 GMT
+      - Thu, 26 Mar 2020 21:40:52 GMT
       expires:
       - '-1'
-      p3p:
-      - CP="DSP CUR OTPi IND OTRi ONL FIN"
       pragma:
       - no-cache
-      set-cookie:
-      - fpc=AjVrL0tJfixPtWMDW4-X7NwOmtngAQAAAEbWC9YOAAAA; expires=Thu, 23-Apr-2020
-        10:21:59 GMT; path=/; secure; HttpOnly; SameSite=None
-      - stsservicecookie=estsppe; path=/; SameSite=None; secure; HttpOnly
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-clitelem:
-      - 1,0,0,,
-      x-ms-ests-server:
-      - 2.1.10333.0 - CHY PPE
     status:
       code: 200
       message: OK
 - request:
-    body: '{"location": "westus"}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - network route-table create
+      - sql midb long-term-retention-policy show
       Connection:
       - keep-alive
-      Content-Length:
-      - '22'
-      Content-Type:
-      - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n
+      - -g --mi -n
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-network/9.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
-    method: PUT
-    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Network/routeTables/vcCliTestRouteTable?api-version=2019-11-01
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr/databases/test-db-1/backupLongTermRetentionPolicies/default?api-version=2018-06-01-preview
   response:
     body:
-      string: '{"error":{"code":"NoRegisteredProviderFound","message":"No registered
-        resource provider found for location ''westus'' and API version ''2019-11-01''
-        for type ''routeTables''. The supported api-versions are ''2014-12-01-preview,
-        2015-05-01-preview, 2015-06-15, 2016-03-30, 2016-06-01, 2016-07-01, 2016-08-01,
-        2016-09-01, 2016-10-01, 2016-11-01, 2016-12-01, 2017-03-01, 2017-04-01, 2017-06-01,
-        2017-08-01, 2017-09-01, 2017-10-01, 2017-11-01, 2018-01-01, 2018-02-01, 2018-03-01,
-        2018-04-01, 2018-05-01, 2018-06-01, 2018-07-01, 2018-08-01, 2018-10-01, 2018-11-01,
-        2018-12-01, 2019-02-01''. The supported locations are ''westeurope, centralus,
-        westus, eastus, northcentralus, southcentralus, eastus2, northeurope''."}}'
+      string: '{"properties":{"weeklyRetention":"P1W","monthlyRetention":"P1M","yearlyRetention":"P2M","weekOfYear":12},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr/databases/test-db-1/backupLongTermRetentionPolicies/default","name":"default","type":"Microsoft.Sql/managedInstances/databases/backupLongTermRetentionPolicy"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '703'
+      - '401'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 24 Mar 2020 10:21:59 GMT
+      - Thu, 26 Mar 2020 21:40:53 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup list-by-location
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstanceBackups?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"managedInstanceName":"cli-ltr","managedInstanceCreateTime":"2020-03-25T18:23:46.447Z","databaseName":"test-db-1","backupTime":"2020-03-26T18:38:38Z","backupExpirationTime":"2020-04-02T18:38:38Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","name":"d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '727'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup list-by-location
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstanceBackups?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"managedInstanceName":"cli-ltr","managedInstanceCreateTime":"2020-03-25T18:23:46.447Z","databaseName":"test-db-1","backupTime":"2020-03-26T18:38:38Z","backupExpirationTime":"2020-04-02T18:38:38Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","name":"d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '727'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup list-by-instance
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --mi -g
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionManagedInstanceBackups?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"managedInstanceName":"cli-ltr","managedInstanceCreateTime":"2020-03-25T18:23:46.447Z","databaseName":"test-db-1","backupTime":"2020-03-26T18:38:38Z","backupExpirationTime":"2020-04-02T18:38:38Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","name":"d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '727'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup list-by-instance
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --mi
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionManagedInstanceBackups?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"managedInstanceName":"cli-ltr","managedInstanceCreateTime":"2020-03-25T18:23:46.447Z","databaseName":"test-db-1","backupTime":"2020-03-26T18:38:38Z","backupExpirationTime":"2020-04-02T18:38:38Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","name":"d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '727'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup list-by-database
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --mi -n -g
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"managedInstanceName":"cli-ltr","managedInstanceCreateTime":"2020-03-25T18:23:46.447Z","databaseName":"test-db-1","backupTime":"2020-03-26T18:38:38Z","backupExpirationTime":"2020-04-02T18:38:38Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","name":"d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '727'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup list-by-database
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --mi -n
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"managedInstanceName":"cli-ltr","managedInstanceCreateTime":"2020-03-25T18:23:46.447Z","databaseName":"test-db-1","backupTime":"2020-03-26T18:38:38Z","backupExpirationTime":"2020-04-02T18:38:38Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","name":"d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '727'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup list-by-database
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --mi -n --only-latest-per-database
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups?onlyLatestPerDatabase=true&api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"managedInstanceName":"cli-ltr","managedInstanceCreateTime":"2020-03-25T18:23:46.447Z","databaseName":"test-db-1","backupTime":"2020-03-26T18:38:38Z","backupExpirationTime":"2020-04-02T18:38:38Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","name":"d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '727'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --mi -n --backup-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422%3B132297215180000000?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"managedInstanceName":"cli-ltr","managedInstanceCreateTime":"2020-03-25T18:23:46.447Z","databaseName":"test-db-1","backupTime":"2020-03-26T18:38:38Z","backupExpirationTime":"2020-04-02T18:38:38Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","name":"d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000","type":"Microsoft.Sql/locations/longTermRetentionManagedInstances/longTermRetentionDatabases/longTermRetentionManagedInstanceBackups"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '715'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb ltr restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-name --dest-mi --dest-resource-group
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"identity":{"principalId":"1cb932bf-850a-4f49-8ff1-75dec7ab388a","type":"SystemAssigned","tenantId":"0c1edf5d-e5c5-4aca-ab69-ef194134f44b"},"sku":{"name":"GP_Gen5","tier":"GeneralPurpose","family":"Gen5","capacity":8},"properties":{"fullyQualifiedDomainName":"cli-ltr.4a50e5aa3565.database.windows.net","administratorLogin":"cloudSA","subnetId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitestxj6awmetud/providers/Microsoft.Network/virtualNetworks/vnet-cli-ltr/subnets/ManagedInstance","state":"Ready","licenseType":"LicenseIncluded","vCores":8,"storageSizeInGB":256,"collation":"SQL_Latin1_General_CP1_CI_AS","dnsZone":"4a50e5aa3565","publicDataEndpointEnabled":false,"proxyOverride":"Proxy","timezoneId":"UTC"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr","name":"cli-ltr","type":"Microsoft.Sql/managedInstances"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '951'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"createMode": "RestoreLongTermRetentionBackup",
+      "longTermRetentionBackupResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422;132297215180000000"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb ltr restore
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '425'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --backup-id --dest-name --dest-mi --dest-resource-group
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr/databases/cli-restore-dest?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"operation":"CreateManagedRestoreFromLtrBackupRequest","startTime":"2020-03-26T21:40:59.217Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/managedDatabaseAzureAsyncOperation/44f74e18-7496-4f73-ac2b-eeae3b068db3?api-version=2019-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '95'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:40:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/managedDatabaseOperationResults/44f74e18-7496-4f73-ac2b-eeae3b068db3?api-version=2019-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
     status:
-      code: 400
-      message: Bad Request
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb ltr restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-name --dest-mi --dest-resource-group
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/managedDatabaseAzureAsyncOperation/44f74e18-7496-4f73-ac2b-eeae3b068db3?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"name":"44f74e18-7496-4f73-ac2b-eeae3b068db3","status":"InProgress","startTime":"2020-03-26T21:40:59.217Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:41:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb ltr restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-name --dest-mi --dest-resource-group
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/managedDatabaseAzureAsyncOperation/44f74e18-7496-4f73-ac2b-eeae3b068db3?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"name":"44f74e18-7496-4f73-ac2b-eeae3b068db3","status":"InProgress","startTime":"2020-03-26T21:40:59.217Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:41:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb ltr restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-name --dest-mi --dest-resource-group
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/managedDatabaseAzureAsyncOperation/44f74e18-7496-4f73-ac2b-eeae3b068db3?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"name":"44f74e18-7496-4f73-ac2b-eeae3b068db3","status":"InProgress","startTime":"2020-03-26T21:40:59.217Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:41:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb ltr restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-name --dest-mi --dest-resource-group
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/managedDatabaseAzureAsyncOperation/44f74e18-7496-4f73-ac2b-eeae3b068db3?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"name":"44f74e18-7496-4f73-ac2b-eeae3b068db3","status":"InProgress","startTime":"2020-03-26T21:40:59.217Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:41:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb ltr restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-name --dest-mi --dest-resource-group
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/managedDatabaseAzureAsyncOperation/44f74e18-7496-4f73-ac2b-eeae3b068db3?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"name":"44f74e18-7496-4f73-ac2b-eeae3b068db3","status":"Succeeded","startTime":"2020-03-26T21:40:59.217Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:42:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb ltr restore
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-id --dest-name --dest-mi --dest-resource-group
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr/databases/cli-restore-dest?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"properties":{"collation":"SQL_Latin1_General_CP1_CI_AS","status":"Online","creationDate":"2020-03-26T21:40:59.543Z","defaultSecondaryLocation":"eastus"},"location":"westus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest4vtazvlqbo/providers/Microsoft.Sql/managedInstances/cli-ltr/databases/cli-restore-dest","name":"cli-restore-dest","type":"Microsoft.Sql/managedInstances/databases"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '417'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:42:14 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -l --mi -n --backup-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups/d6474865-3e44-488e-9e38-7e23d1559422%3B132297215180000000?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"operation":"DeleteLTRBackup","startTime":"2020-03-26T21:42:15.973Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstanceBackupAzureAsyncOperation/becdd262-7caf-4672-9b3c-784b3d970e25?api-version=2018-06-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '70'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:42:15 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstanceBackupOperationResults/becdd262-7caf-4672-9b3c-784b3d970e25?api-version=2018-06-01-preview
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup delete
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --mi -n --backup-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstanceBackupAzureAsyncOperation/becdd262-7caf-4672-9b3c-784b3d970e25?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"name":"becdd262-7caf-4672-9b3c-784b3d970e25","status":"Succeeded","startTime":"2020-03-26T21:42:15.973Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:42:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - sql midb long-term-retention-backup list-by-database
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l --mi -n
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.14393-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-sql/0.17.0 Azure-SDK-For-Python AZURECLI/2.2.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Sql/locations/westus/longTermRetentionManagedInstances/cli-ltr/longTermRetentionDatabases/test-db-1/longTermRetentionManagedInstanceBackups?api-version=2018-06-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 26 Mar 2020 21:42:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
 version: 1
