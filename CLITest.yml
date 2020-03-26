@@ -183,8 +183,6 @@ jobs:
         architecture: 'x64'
     - bash: |
         pwd
-        ls
-        ls scripts/ci
         commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
         pip install sendgrid
-        python /home/vsts/work/1/s/scripts/ci/sendemail.py ${SENDGRID_KEY} $(Build.BuildId) $commit_id 
+        python /home/vsts/work/1/s/scripts/ci/sendemail.py $(SENDGRID_KEY) $(Build.BuildId) $commit_id 
