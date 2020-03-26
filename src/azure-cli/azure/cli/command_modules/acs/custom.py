@@ -1735,9 +1735,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     principal_obj = None
     if not(enable_managed_identity and not service_principal and not client_secret):
         principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
-                                                    service_principal=service_principal, client_secret=client_secret,
-                                                    subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                                    location=location, name=name)
+                                                      service_principal=service_principal, client_secret=client_secret,
+                                                      subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
+                                                      location=location, name=name)
         service_principal_profile = ManagedClusterServicePrincipalProfile(
             client_id=principal_obj.get("service_principal"),
             secret=principal_obj.get("client_secret"),
@@ -1766,9 +1766,9 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             # Attach acr operation will be handled after the cluster is created
         else:
             _ensure_aks_acr(cmd.cli_ctx,
-                        client_id=service_principal_profile.client_id,
-                        acr_name_or_id=attach_acr,
-                        subscription_id=subscription_id)
+                            client_id=service_principal_profile.client_id,
+                            acr_name_or_id=attach_acr,
+                            subscription_id=subscription_id)
 
     outbound_type = _set_outbound_type(outbound_type, vnet_subnet_id, load_balancer_sku, load_balancer_profile)
 
@@ -3421,4 +3421,3 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
-
