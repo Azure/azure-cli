@@ -1872,12 +1872,21 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            if monitoring:
+            needPullForResult = monitoring or (enable_managed_identity and attach_acr)
+            if needPullForResult:
                 # adding a wait here since we rely on the result for role assignment
                 result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
                     resource_group_name=resource_group_name,
                     resource_name=name,
                     parameters=mc))
+            else:
+                result = sdk_no_wait(no_wait,
+                                     client.create_or_update,
+                                     resource_group_name=resource_group_name,
+                                     resource_name=name,
+                                     parameters=mc,
+                                     custom_headers=custom_headers)
+            if monitoring:
                 cloud_name = cmd.cli_ctx.cloud.name
                 # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
                 # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
@@ -1890,12 +1899,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                         name=name
                     )
                     _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
-            elif enable_managed_identity and attach_acr:
-                # adding a wait here since we rely on the result for role assignment
-                result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
-                    resource_group_name=resource_group_name,
-                    resource_name=name,
-                    parameters=mc))
+            if enable_managed_identity and attach_acr:
                 if result.identity_profile is None or result.identity_profile["kubeletidentity"] is None:
                     logger.warning('Your cluster is successfully created, but we failed to attach acr to it, '
                                    'you can manually grant permission to the identity named <ClUSTER_NAME>-agentpool '
@@ -1906,13 +1910,6 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                                     client_id=kubelet_identity_client_id,
                                     acr_name_or_id=attach_acr,
                                     subscription_id=subscription_id)
-            else:
-                result = sdk_no_wait(no_wait,
-                                     client.create_or_update,
-                                     resource_group_name=resource_group_name,
-                                     resource_name=name,
-                                     parameters=mc,
-                                     custom_headers=custom_headers)
             return result
         except CloudError as ex:
             retry_exception = ex
