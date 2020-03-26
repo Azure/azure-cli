@@ -179,9 +179,9 @@ def load_command_table(self, _):
 
     compute_disk_encryption_set_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
-        client_factory=cf_disk_encryption_set,
-        operation_group='disk_encryption_sets'
+        client_factory=cf_disk_encryption_set
     )
+
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
         exception_handler=monitor_exception_handler)
