@@ -405,7 +405,8 @@ def load_command_table(self, _):
 
     with self.command_group('mysql server key',
                             mysql_key_sdk,
-                            client_factory=cf_mysql_server_keys_operations) as g:
+                            client_factory=cf_mysql_server_keys_operations,
+                            is_preview=True) as g:
         g.custom_command('create', 'server_key_create')
         g.custom_command('delete', 'server_key_delete', confirmation=True)
         g.custom_show_command('show', 'server_key_get')
@@ -413,7 +414,8 @@ def load_command_table(self, _):
 
     with self.command_group('postgres server key',
                             postgres_key_sdk,
-                            client_factory=cf_postgres_server_keys_operations) as g:
+                            client_factory=cf_postgres_server_keys_operations,
+                            is_preview=True) as g:
         g.custom_command('create', 'server_key_create')
         g.custom_command('delete', 'server_key_delete', confirmation=True)
         g.custom_show_command('show', 'server_key_get')

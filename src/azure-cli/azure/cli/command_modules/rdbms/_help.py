@@ -691,22 +691,22 @@ short-summary: List the private link resources supported for a MySQL server.
 
 helps['mysql server key'] = """
 type: group
-short-summary: Manage a server's keys.
+short-summary: Manage MySQL server keys.
 """
 
 helps['mysql server key create'] = """
 type: command
-short-summary: Creates a server key.
+short-summary: Create server key.
 """
 
 helps['mysql server key delete'] = """
 type: command
-short-summary: Deletes a server key.
+short-summary: Delete server key.
 """
 
 helps['mysql server key show'] = """
 type: command
-short-summary: Shows a server key.
+short-summary: Show server key.
 """
 
 helps['postgres'] = """
@@ -1049,20 +1049,20 @@ short-summary: List the private link resources supported for a PostgreSQL server
 
 helps['postgres server key'] = """
 type: group
-short-summary: Manage a server's keys.
+short-summary: Manage PostgreSQL server keys.
 """
 
 helps['postgres server key create'] = """
 type: command
-short-summary: Creates a server key.
+short-summary: Create server key.
 """
 
 helps['postgres server key delete'] = """
 type: command
-short-summary: Deletes a server key.
+short-summary: Delete server key.
 """
 
 helps['postgres server key show'] = """
 type: command
-short-summary: Shows a server key.
+short-summary: Show server key.
 """
