@@ -8,7 +8,7 @@ from ._utils import get_resource_group_name_by_registry_name
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, registry_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):
-    PrivateLinkServiceConnectionState = cmd.get_models('Status')
+    PrivateLinkServiceConnectionState = cmd.get_models('ConnectionStatus')
 
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, registry_name=registry_name,
                                              private_endpoint_connection_name=private_endpoint_connection_name)
@@ -21,7 +21,8 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
     return client.create_or_update(resource_group_name=resource_group_name,
                                    registry_name=registry_name,
                                    private_endpoint_connection_name=private_endpoint_connection_name,
-                                   private_endpoint_connection=private_endpoint_connection)
+                                   private_endpoint=private_endpoint_connection.private_endpoint,
+                                   private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
 
 
 def approve(cmd, client, registry_name, private_endpoint_connection_name,
