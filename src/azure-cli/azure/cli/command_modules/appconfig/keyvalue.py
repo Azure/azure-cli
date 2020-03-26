@@ -256,11 +256,11 @@ def export_secret(cmd,
                   prefix="",
                   path=None,
                   format_=None):
-    # fetch key values from user's configstore
+    format_ = format_.lower() if format_ else None
     src_kvs = __read_kv_from_config_store(
         cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
 
-    kv_references = [keyvaule for keyvaule in src_kvs if keyvaule.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
+    kv_references = [keyvalue for keyvalue in src_kvs if keyvalue.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
     keyvault_client = __get_keyvault_client(cmd.cli_ctx)
     secrets = {}
 
@@ -282,7 +282,7 @@ def export_secret(cmd,
             logger.error("Cannot fetch secret: %s. Exception: %s", secret_id, str(exception))
 
     if path:
-        with open(path, 'w') as fp:
+        with open(path, 'w', encoding='utf-8') as fp:
             if format_ == 'json':
                 json.dump(secrets, fp, indent=2, ensure_ascii=False)
             elif format_ == 'yaml':
