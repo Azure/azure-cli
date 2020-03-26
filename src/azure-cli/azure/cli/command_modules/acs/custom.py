@@ -1872,8 +1872,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            needPullForResult = monitoring or (enable_managed_identity and attach_acr)
-            if needPullForResult:
+            need_pull_for_result = monitoring or (enable_managed_identity and attach_acr)
+            if need_pull_for_result:
                 # adding a wait here since we rely on the result for role assignment
                 result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
                     resource_group_name=resource_group_name,
