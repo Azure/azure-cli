@@ -36,6 +36,8 @@ class AzCLILocalContext(object):
                 break   # load only one local context
             # Stop if already in root drive
             if current_dir == os.path.dirname(current_dir):
+                if self._local_context_file is None:
+                    logger.debug('local context is not turned on in %s and all its parent directories', current_dir)
                 break
             current_dir = os.path.dirname(current_dir)
 
@@ -76,7 +78,7 @@ class AzCLILocalContext(object):
                 raise CLIError('fail to turn on local context in {}.'.format(current_dir))
             logger.warning('local context in %s is turned on.', current_dir)
         else:
-            raise CLIError('local context is already turned on in {}'.format(current_dir))
+            logger.warning('local context is already turned on in %s', current_dir)
 
     def turn_off(self):
         if self.is_on():
