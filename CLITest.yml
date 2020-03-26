@@ -146,8 +146,11 @@ jobs:
         addToPath: true
         architecture: 'x64'
     - bash: |
-        echo $(USER_TARGET)
-        echo $(variables.Target)
+        if [[ $(USER_TARGET) =~ $(Target) ]]; then
+          echo Match!
+        else
+          exit
+        fi
         cd ..
         pwd
         ls
