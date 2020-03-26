@@ -1,8 +1,3 @@
-parameters:
-- name: myString
-  type: string
-  default: a string
-
 trigger:
   branches:
     exclude:
@@ -20,7 +15,7 @@ jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
   timeoutInMinutes: 9999
-  #condition: contains($(USER_TARGET), $(Target))
+  condition: contains(variables.USER_TARGET, variables.Target)
   strategy:
     maxParallel: 20
     matrix:
@@ -143,8 +138,7 @@ jobs:
       # vm:
       #   Target: vm
   pool:
-    vmImage: 'Ubuntu-16.04'
-- ${{ if contains(parameters.myString, 'x86') }}:
+    vmImage: 'Ubuntu-16.04'  
   steps:
     - task: UsePythonVersion@0
       inputs:
