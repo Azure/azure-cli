@@ -1729,14 +1729,17 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             public_keys=[ContainerServiceSshPublicKey(key_data=ssh_key_value)])
         linux_profile = ContainerServiceLinuxProfile(admin_username=admin_username, ssh=ssh_config)
 
-    principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
-                                                  service_principal=service_principal, client_secret=client_secret,
-                                                  subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                                  location=location, name=name)
-    service_principal_profile = ManagedClusterServicePrincipalProfile(
-        client_id=principal_obj.get("service_principal"),
-        secret=principal_obj.get("client_secret"),
-        key_vault_secret_ref=None)
+    # Skip create service principal profile for the cluster if the cluster
+    # enables managed identity and customer doesn't explicitly provide a service principal.
+    if not(enable_managed_identity and not service_principal and not client_secret):
+        principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
+                                                    service_principal=service_principal, client_secret=client_secret,
+                                                    subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
+                                                    location=location, name=name)
+        service_principal_profile = ManagedClusterServicePrincipalProfile(
+            client_id=principal_obj.get("service_principal"),
+            secret=principal_obj.get("client_secret"),
+            key_vault_secret_ref=None)
 
     if (vnet_subnet_id and not skip_subnet_role_assignment and
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
@@ -1753,7 +1756,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         load_balancer_outbound_ports,
         load_balancer_idle_timeout)
 
-    if attach_acr:
+    if attach_acr and not enable_managed_identity:
         _ensure_aks_acr(cmd.cli_ctx,
                         client_id=service_principal_profile.client_id,
                         acr_name_or_id=attach_acr,
