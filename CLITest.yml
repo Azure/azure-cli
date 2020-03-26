@@ -181,6 +181,8 @@ jobs:
         addToPath: true
         architecture: 'x64'
     - bash: |
+        pwd
+        ls
         commit_id=`git ls-remote git@github.com:Azure/azure-cli.git HEAD`
         pip install sendgrid
         python scripts/ci/sendemail.py ${SENDGRID_KEY} $(Build.BuildId) $commit_id 
