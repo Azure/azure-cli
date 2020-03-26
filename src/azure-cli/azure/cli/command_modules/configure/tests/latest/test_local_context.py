@@ -8,7 +8,6 @@ import unittest
 import tempfile
 
 from azure.cli.testsdk import ScenarioTest
-from knack.util import CLIError
 
 
 class LocalContextTest(ScenarioTest):

@@ -3,12 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import os
-import shutil
 import tempfile
 import unittest
 
 from azure.cli.testsdk import ScenarioTest
-from knack.util import CLIError
 
 
 class TestConfigure(unittest.TestCase):

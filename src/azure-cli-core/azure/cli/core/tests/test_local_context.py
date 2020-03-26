@@ -8,7 +8,6 @@ import unittest
 import shutil
 import tempfile
 
-from knack.util import CLIError
 from azure.cli.core.local_context import AzCLILocalContext, ALL
 
 
