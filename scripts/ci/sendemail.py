@@ -9,6 +9,7 @@ from sendgrid.helpers.mail import Mail
 
 
 def main():
+    print(sys.argv)
     message = Mail(
         from_email='azclibot@microsoft.com',
         to_emails='fey@microsoft.com; iamyfy@163.com',
