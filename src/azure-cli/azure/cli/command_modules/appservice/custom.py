@@ -43,7 +43,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait
-from azure.cli.core.commands.client_factory import UA_AGENT
+from azure.cli.core.util import get_az_user_agent
 from azure.cli.core.profiles import ResourceType
 
 from .tunnel import TunnelServer
@@ -358,7 +358,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     headers = authorization
     headers['Content-Type'] = 'application/octet-stream'
     headers['Cache-Control'] = 'no-cache'
-    headers['User-Agent'] = UA_AGENT
+    headers['User-Agent'] = get_az_user_agent()
 
     import requests
     import os
@@ -827,7 +827,7 @@ def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     headers = {
         'Content-Type': 'application/octet-stream',
         'Cache-Control': 'no-cache',
-        'User-Agent': UA_AGENT
+        'User-Agent': get_az_user_agent()
     }
 
     import requests
@@ -2485,9 +2485,17 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError('Must specify --runtime to use --runtime-version')
         allowed_versions = FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version][runtime]
         if runtime_version not in allowed_versions:
+            if runtime == 'dotnet':
+                raise CLIError('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined '
+                               'by --functions-version. Dotnet version {} is not supported by Functions version {}.'
+                               .format(runtime_version, functions_version))
             raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
-                           '--functions_version {}. Supported versions are: {}'
+                           '--functions-version {}. Supported versions are: {}.'
                            .format(runtime_version, runtime, functions_version, ', '.join(allowed_versions)))
+        if runtime == 'dotnet':
+            logger.warning('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined by '
+                           '--functions-version. Dotnet version will be %s for this function app.',
+                           FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime])
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -2516,6 +2524,9 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             site_config.linux_fx_version = _get_linux_fx_functionapp(functions_version, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
+        if runtime == "java":
+            site_config.java_version = _get_java_version_functionapp(functions_version, runtime_version)
+
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
                                                   value=_get_extension_version_functionapp(functions_version)))
@@ -2595,6 +2606,14 @@ def _get_website_node_version_functionapp(functions_version, runtime, runtime_ve
     if runtime_version is not None:
         return '~{}'.format(runtime_version)
     return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
+
+
+def _get_java_version_functionapp(functions_version, runtime_version):
+    if runtime_version is None:
+        runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version]['java']
+    if runtime_version == '8':
+        return '1.8'
+    return runtime_version
 
 
 def try_create_application_insights(cmd, functionapp):

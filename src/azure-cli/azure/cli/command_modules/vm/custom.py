@@ -53,7 +53,7 @@ extension_mappings = {
         'publisher': 'Microsoft.OSTCExtensions'
     },
     _WINDOWS_ACCESS_EXT: {
-        'version': '2.0',
+        'version': '2.4',
         'publisher': 'Microsoft.Compute'
     },
     _LINUX_DIAG_EXT: {
@@ -2840,7 +2840,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
 
     ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
                                           publisher=publisher,
-                                          type=extension_name,
+                                          type1=extension_name,
                                           protected_settings=protected_settings,
                                           type_handler_version=version,
                                           settings=settings,

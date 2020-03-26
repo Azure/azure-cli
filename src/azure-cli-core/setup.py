@@ -43,7 +43,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
@@ -55,7 +54,7 @@ DEPENDENCIES = [
     'argcomplete~=1.8',
     'azure-cli-telemetry',
     'colorama>=0.3.9',
-    'humanfriendly~=4.7',
+    'humanfriendly>=4.7,<9.0',
     'jmespath',
     'knack==0.7.0rc1',
     'msrest>=0.4.4',
@@ -67,7 +66,7 @@ DEPENDENCIES = [
     'requests~=2.20',
     'six~=1.12',
     'wheel==0.30.0',
-    'azure-mgmt-resource~=8.0.1',
+    'azure-mgmt-resource==8.0.1',
 ]
 
 TESTS_REQUIRE = [
