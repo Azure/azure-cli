@@ -7,17 +7,107 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 
 class TestMonitorPrivateLinkScope(ScenarioTest):
-    @ResourceGroupPreparer(location='centralus')
-    def test_monitor_private_link_scope_scenario(self, resource_group):
+    def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
+                 replay_processors=None, recording_patches=None, replay_patches=None):
+        super(TestMonitorPrivateLinkScope, self).__init__(method_name)
+        self.cmd('extension add -n application-insights')
+
+
+    @ResourceGroupPreparer(location='westcentralus')
+    def test_monitor_private_link_scope_scenario(self, resource_group, resource_group_location):
         self.kwargs.update({
             'rg': resource_group,
             'scope': 'clitestscopename',
+            'assigned_app': 'assigned_app',
+            'assigned_ws': 'assigned_ws',
             'workspace': self.create_random_name('clitest', 20),
             'app': self.create_random_name('clitest', 20),
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
             'pe_connection': self.create_random_name('cli-pec-', 24),
+            'loc': resource_group_location
         })
 
-        self.cmd('monitor private-link-scope create -n {scope} -g {rg} -l global')
+        try:
+            self.cmd('monitor private-link-scope create -n {scope} -g {rg} -l global')
+        except:
+            pass
+
+        try:
+            self.cmd('monitor private-link-scope update -n {scope} -g {rg} --tags tag1=d1')
+        except:
+            pass
+        self.cmd('monitor private-link-scope show -n {scope} -g {rg}', checks=[
+            self.check('tags.tag1', 'd1')
+        ])
+        self.cmd('monitor private-link-scope list -g {rg}')
+        self.cmd('monitor private-link-scope list')
+
+        app_id = self.cmd('monitor app-insights component create -a {app} -g {rg} -l {loc}').get_output_in_json()['id']
+        workspace_id = self.cmd('monitor log-analytics workspace create -n {workspace} -g {rg} -l {loc}').get_output_in_json()['id']
+        self.kwargs.update({
+            'app_id': app_id,
+            'workspace_id': workspace_id
+        })
+
+        self.cmd('monitor private-link-scope assigned-resource create -g {rg} -n {assigned_app} --linked-resource {app_id} --scope-name {scope}')
+        self.cmd('monitor private-link-scope assigned-resource update -g {rg} -n {assigned_app} --scope-name {scope} --tags tag1=d1')
+        self.cmd('monitor private-link-scope assigned-resource show -g {rg} -n {assigned_app} --scope-name {scope}')
+        self.cmd('monitor private-link-scope assigned-resource list -g {rg} --scope-name {scope}')
+
+        # self.cmd('monitor private-link-scope assigned-resource create -g {rg} -n {assigned_ws} --linked-resource {workspace_id} --scope-name {scope}')
+
+        self.cmd('monitor private-link-scope private-link-resource list --scope-name {scope} -g {rg}')
+
+        self.kwargs['loc'] = 'eastus'
+        # Prepare network
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pr = self.cmd('monitor private-link-scope private-link-resource list --scope-name {scope} -g {rg}').get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+
+        private_link_scope = self.cmd('monitor private-link-scope show -n {scope} -g {rg}').get_output_in_json()
+        self.kwargs['scope_id'] = private_link_scope['id']
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {scope_id} '
+            '--group-ids {group_id}').get_output_in_json()
+        self.assertEqual(private_endpoint['name'], self.kwargs['pe'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], self.kwargs['pe_connection'])
+        self.assertEqual(
+            private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], self.kwargs['group_id'])
+        self.kwargs['pe_id'] = private_endpoint['privateLinkServiceConnections'][0]['id']
+
+        # Show the connection at monitor private-link-scope
+        private_link_scope = self.cmd('monitor private-link-scope show -n {scope} -g {rg}').get_output_in_json()
+        self.assertIn('privateEndpointConnections', private_link_scope)
+        self.assertEqual(len(private_link_scope['privateEndpointConnections']), 1)
+        self.assertEqual(private_link_scope['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+                         'Approved')
+
+        self.kwargs['scope_pec_id'] = private_link_scope['privateEndpointConnections'][0]['id']
+        self.kwargs['scope_pec_name'] = private_link_scope['privateEndpointConnections'][0]['name']
+
+        self.cmd('monitor private-link-scope private-endpoint-connection show --scope-name {scope} -g {rg} --name {scope_pec_name}',
+                 checks=self.check('id', '{scope_pec_id}'))
+
+        self.cmd('monitor private-link-scope private-endpoint-connection approve --scope-name {scope} -g {rg} --name {scope_pec_name}',
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
+
+        self.cmd('monitor private-link-scope private-endpoint-connection reject --scope-name {scope} -g {rg} --name {scope_pec_name}',
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
+
+        # with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+        #    self.cmd(
+        #        'monitor private-link-scope private-endpoint-connection approve --scope-name {scope} -g {rg} --name {scope_pec_name}')
+
+        self.cmd('monitor private-link-scope private-endpoint-connection delete --id {scope_pec_id}')

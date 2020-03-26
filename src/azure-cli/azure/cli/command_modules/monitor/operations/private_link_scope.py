@@ -15,7 +15,7 @@ def delete_private_link_scope(client, resource_group_name, scope_name):
 
 
 def list_private_link_scope(client, resource_group_name=None):
-    if resource_group_name:
+    if not resource_group_name:
         return client.list()
     return client.list_by_resource_group(resource_group_name=resource_group_name)
 
@@ -61,12 +61,14 @@ def create_private_link_scope_resource(client, resource_group_name, scope_name, 
                                    tags=tags)
 
 
-def update_private_link_scope_resource(client, resource_group_name, scope_name, resource_name,
-                                       linked_resource_id=None, tags=None):
+def update_private_link_scope_resource(client, resource_group_name, scope_name, resource_name, tags=None):
+    scoped_resource = client.get(resource_group_name=resource_group_name,
+                                 scope_name=scope_name,
+                                 name=resource_name)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    scope_name=scope_name,
                                    name=resource_name,
-                                   linked_resource_id=linked_resource_id,
+                                   linked_resource_id=scoped_resource.linked_resource_id,
                                    tags=tags)
 # endregion
 
