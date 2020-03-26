@@ -10,7 +10,7 @@ aggregation         : WORD WHITESPACE ;
 
 namespace           : (WORD | '/' | '.')+;
 
-metric              : (WORD | WHITESPACE | '.' | '/' | '_' | '\\' | ':' | '%')+;
+metric              : (WORD | WHITESPACE | '.' | '/' | '_' | '\\' | ':' | '%' | '-')+;
 
 operator            : OPERATOR WHITESPACE ;
 
