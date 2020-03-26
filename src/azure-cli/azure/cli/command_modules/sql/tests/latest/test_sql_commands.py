@@ -733,7 +733,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         resource_group = "DejanDuVnetRG"
         user = admin_login
-        
+
         print('Creating MI...\n')
 
         # Create sql managed_instance
@@ -751,11 +751,11 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.family', family),
                      JMESPathCheck('sku.capacity', v_cores),
                      JMESPathCheck('identity', None)]).get_output_in_json()
-                     
+           
         edition_updated = 'BusinessCritical'
         print('Updating MI...\n')
 
-       # Update sql managed_instance
+        # Update sql managed_instance
         self.cmd('sql mi update -g {} -n {} --edition {} --no-wait'
                  .format(resource_group, managed_instance_name, edition_updated))
 
@@ -771,9 +771,9 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('[0].managedInstanceName', managed_instance_name)
                      ])
                 .get_output_in_json())
-                
+
         print('Canceling operation...\n')
-        
+
         # Cancel operation
         self.cmd('sql mi op cancel -g {} --mi {} -n {}'
                  .format(resource_group, managed_instance_name, ops[1]['name']))
