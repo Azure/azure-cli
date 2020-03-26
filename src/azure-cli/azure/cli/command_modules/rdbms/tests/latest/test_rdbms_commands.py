@@ -272,7 +272,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
-        self._test_data_encryption(resource_group, server, database_engine)
+        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('ossrdbmsbyokmysql', 24))
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
@@ -284,7 +284,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
-        self._test_data_encryption(resource_group, server, database_engine)
+        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('ossrdbmsbyokpostgres', 24))
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
         firewall_rule_1 = 'rule1'
@@ -682,9 +682,8 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server private-endpoint-connection delete --id {}'
                  .format(database_engine, server_pec_id))
 
-    def _test_data_encryption(self, resource_group, server, database_engine):
+    def _test_data_encryption(self, resource_group, server, database_engine, vault_name):
         resource_prefix = 'ossrdbmsbyok'
-        vault_name = self.create_random_name(resource_prefix, 24)
         key_name = self.create_random_name(resource_prefix, 32)
 
         # add identity to server
