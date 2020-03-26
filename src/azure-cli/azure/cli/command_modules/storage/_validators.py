@@ -5,6 +5,11 @@
 
 # pylint: disable=protected-access
 
+import argparse
+
+from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -16,7 +21,6 @@ from azure.cli.command_modules.storage.util import glob_files_locally, guess_con
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
-from knack.log import get_logger
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -65,13 +69,15 @@ def _create_token_credential(cli_ctx):
 
 
 # region PARAMETER VALIDATORS
-def parse_storage_account(namespace):
+def parse_storage_account(cmd, namespace):
     """Parse storage account which can be either account name or account id"""
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
     if namespace.account_name and is_valid_resource_id(namespace.account_name):
         namespace.resource_group_name = parse_resource_id(namespace.account_name)['resource_group']
         namespace.account_name = parse_resource_id(namespace.account_name)['name']
+    elif namespace.account_name and not namespace.resource_group_name:
+        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
 
 
 def process_resource_group(cmd, namespace):
@@ -477,7 +483,6 @@ def validate_entity(namespace):
     missing_keys = '{}PartitionKey'.format(missing_keys) \
         if 'PartitionKey' not in keys else missing_keys
     if missing_keys:
-        import argparse
         raise argparse.ArgumentError(
             None, 'incorrect usage: entity requires: {}'.format(missing_keys))
 
@@ -516,7 +521,6 @@ def validate_marker(namespace):
             del marker[key]
             marker[new_key] = val
     if expected_keys:
-        import argparse
         raise argparse.ArgumentError(
             None, 'incorrect usage: marker requires: {}'.format(' '.join(expected_keys)))
 
@@ -790,7 +794,6 @@ def process_blob_upload_batch_parameters(cmd, namespace):
             namespace.blob_type = 'page'
         elif any(vhd_files):
             # source files contain vhd files but not all of them
-            from knack.util import CLIError
             raise CLIError("""Fail to guess the required blob type. Type of the files to be
             uploaded are not consistent. Default blob type for .vhd files is "page", while
             others are "block". You can solve this problem by either explicitly set the blob
@@ -905,7 +908,6 @@ def process_file_download_namespace(namespace):
 
 
 def process_metric_update_namespace(namespace):
-    import argparse
     namespace.hour = namespace.hour == 'true'
     namespace.minute = namespace.minute == 'true'
     namespace.api = namespace.api == 'true' if namespace.api else None
@@ -937,7 +939,6 @@ def validate_subnet(cmd, namespace):
             child_type_1='subnets',
             child_name_1=subnet)
     else:
-        from knack.util import CLIError
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
 
@@ -1116,7 +1117,6 @@ def validate_azcopy_remove_arguments(cmd, namespace):
 def as_user_validator(namespace):
     if namespace.as_user:
         if namespace.expiry is None:
-            import argparse
             raise argparse.ArgumentError(
                 None, 'incorrect usage: specify --expiry when as-user is enabled')
 
@@ -1124,13 +1124,11 @@ def as_user_validator(namespace):
 
         from datetime import datetime, timedelta
         if expiry > datetime.utcnow() + timedelta(days=7):
-            import argparse
             raise argparse.ArgumentError(
                 None, 'incorrect usage: --expiry should be within 7 days from now')
 
         if ((not hasattr(namespace, 'token_credential') or namespace.token_credential is None) and
                 (not hasattr(namespace, 'auth_mode') or namespace.auth_mode != 'login')):
-            import argparse
             raise argparse.ArgumentError(
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
 
@@ -1157,3 +1155,38 @@ def validator_delete_retention_days(namespace):
         if namespace.delete_retention_days > 365:
             raise ValueError(
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
+
+
+# pylint: disable=too-few-public-methods
+class BlobRangeAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.blob_ranges:
+            namespace.blob_ranges = []
+        if isinstance(values, list):
+            values = ' '.join(values)
+        BlobRange = namespace._cmd.get_models('BlobRestoreRange', resource_type=ResourceType.MGMT_STORAGE)
+        try:
+            start_range, end_range = values.split(' ')
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --blob-range VARIABLE OPERATOR VALUE')
+        namespace.blob_ranges.append(BlobRange(
+            start_range=start_range,
+            end_range=end_range
+        ))
+
+
+def validate_private_endpoint_connection_id(cmd, namespace):
+    if namespace.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(namespace.connection_id)
+        namespace.resource_group_name = result['resource_group']
+        namespace.account_name = result['name']
+        namespace.private_endpoint_connection_name = result['child_name_1']
+
+    if namespace.account_name and not namespace.resource_group_name:
+        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
+
+    if not all([namespace.account_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --account-name NAME]')
+
+    del namespace.connection_id

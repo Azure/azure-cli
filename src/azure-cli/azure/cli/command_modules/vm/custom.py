@@ -45,13 +45,15 @@ _LINUX_ACCESS_EXT = 'VMAccessForLinux'
 _WINDOWS_ACCESS_EXT = 'VMAccessAgent'
 _LINUX_DIAG_EXT = 'LinuxDiagnostic'
 _WINDOWS_DIAG_EXT = 'IaaSDiagnostics'
+_LINUX_OMS_AGENT_EXT = 'OmsAgentForLinux'
+_WINDOWS_OMS_AGENT_EXT = 'MicrosoftMonitoringAgent'
 extension_mappings = {
     _LINUX_ACCESS_EXT: {
         'version': '1.5',
         'publisher': 'Microsoft.OSTCExtensions'
     },
     _WINDOWS_ACCESS_EXT: {
-        'version': '2.0',
+        'version': '2.4',
         'publisher': 'Microsoft.Compute'
     },
     _LINUX_DIAG_EXT: {
@@ -61,6 +63,14 @@ extension_mappings = {
     _WINDOWS_DIAG_EXT: {
         'version': '1.5',
         'publisher': 'Microsoft.Azure.Diagnostics'
+    },
+    _LINUX_OMS_AGENT_EXT: {
+        'version': '1.0',
+        'publisher': 'Microsoft.EnterpriseCloud.Monitoring'
+    },
+    _WINDOWS_OMS_AGENT_EXT: {
+        'version': '1.0',
+        'publisher': 'Microsoft.EnterpriseCloud.Monitoring'
     }
 }
 
@@ -608,9 +618,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment,
                                                                 build_vm_linux_log_analytics_workspace_agent,
-                                                                build_vm_daExtension_resource,
                                                                 build_vm_windows_log_analytics_workspace_agent)
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -660,17 +669,44 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
         nic_dependencies = []
         if vnet_type == 'new':
-            vnet_name = vnet_name or '{}VNET'.format(vm_name)
             subnet = subnet or '{}Subnet'.format(vm_name)
-            nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-            master_template.add_resource(build_vnet_resource(
-                cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
+            vnet_exists = False
+            if vnet_name:
+                from azure.cli.command_modules.vm._vm_utils import check_existence
+                vnet_exists = \
+                    check_existence(cmd.cli_ctx, vnet_name, resource_group_name, 'Microsoft.Network', 'virtualNetworks')
+                if vnet_exists:
+                    from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection
+                    from azure.cli.command_modules.vm._validators import get_network_client
+                    client = get_network_client(cmd.cli_ctx).virtual_networks
+                    vnet = cached_get(cmd, client.get, resource_group_name, vnet_name)
+
+                    Subnet = cmd.get_models('Subnet', resource_type=ResourceType.MGMT_NETWORK)
+                    subnet_obj = Subnet(
+                        name=subnet,
+                        address_prefixes=[subnet_address_prefix],
+                        address_prefix=subnet_address_prefix
+                    )
+                    upsert_to_collection(vnet, 'subnets', subnet_obj, 'name')
+                    try:
+                        cached_put(cmd, client.create_or_update, vnet, resource_group_name, vnet_name).result()
+                    except Exception:
+                        raise CLIError('Subnet({}) does not exist, but failed to create a new subnet with address '
+                                       'prefix {}. It may be caused by name or address prefix conflict. Please specify '
+                                       'an appropriate subnet name with --subnet or a valid address prefix value with '
+                                       '--subnet-address-prefix.'.format(subnet, subnet_address_prefix))
+            if not vnet_exists:
+                vnet_name = vnet_name or '{}VNET'.format(vm_name)
+                nic_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
+                master_template.add_resource(build_vnet_resource(
+                    cmd, vnet_name, location, tags, vnet_address_prefix, subnet, subnet_address_prefix))
 
         if nsg_type == 'new':
-            nsg_rule_type = 'rdp' if os_type.lower() == 'windows' else 'ssh'
+            if nsg_rule is None:
+                nsg_rule = 'RDP' if os_type.lower() == 'windows' else 'SSH'
             nsg = nsg or '{}NSG'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg))
-            master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule_type))
+            master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule))
 
         if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
@@ -768,9 +804,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         master_template.add_secure_parameter('workspaceId', workspace_id)
         if os_type.lower() == 'linux':
             vm_mmaExtension_resource = build_vm_linux_log_analytics_workspace_agent(cmd, vm_name, location)
-            vm_daExtensionName_resource = build_vm_daExtension_resource(cmd, vm_name, location)
             master_template.add_resource(vm_mmaExtension_resource)
-            master_template.add_resource(vm_daExtensionName_resource)
         elif os_type.lower() == 'windows':
             vm_mmaExtension_resource = build_vm_windows_log_analytics_workspace_agent(cmd, vm_name, location)
             master_template.add_resource(vm_mmaExtension_resource)
@@ -811,7 +845,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                          vm.identity.user_assigned_identities))
 
     if workspace is not None:
-        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id)
+        workspace_name = parse_resource_id(workspace_id)['name']
+        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
     return vm
 
@@ -1057,7 +1092,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, license_type=None, no_wait=False, ultra_ssd_enabled=None,
-              priority=None, max_price=None, **kwargs):
+              priority=None, max_price=None, proximity_placement_group=None, workspace=None, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
@@ -1098,78 +1133,22 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         else:
             vm.billing_profile.max_price = max_price
 
+    if proximity_placement_group is not None:
+        vm.proximity_placement_group = {'id': proximity_placement_group}
+
+    if workspace is not None:
+        workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
+        workspace_name = parse_resource_id(workspace_id)['name']
+        _set_log_analytics_workspace_extension(cmd=cmd,
+                                               resource_group_name=resource_group_name,
+                                               vm=vm,
+                                               vm_name=vm_name,
+                                               workspace_name=workspace_name)
+        os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
+        _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
+
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
-
-
-def _prepare_workspace(cmd, resource_group_name, workspace):
-    from msrestazure.tools import is_valid_resource_id
-    from ._client_factory import cf_log_analytics
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.azure_exceptions import CloudError
-
-    workspace_id = None
-    if not is_valid_resource_id(workspace):
-        workspace_name = workspace
-        subscription_id = get_subscription_id(cmd.cli_ctx)
-        log_client = cf_log_analytics(cmd.cli_ctx, subscription_id)
-        workspace_result = None
-        try:
-            workspace_result = log_client.get(resource_group_name, workspace_name)
-        except CloudError:
-            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
-            sku = Sku(name=SkuNameEnum.per_gb2018.value)
-            retention_time = 30  # default value
-            location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-            workspace_instance = Workspace(location=location,
-                                           sku=sku,
-                                           retention_in_days=retention_time)
-            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
-                                                                                             workspace_name,
-                                                                                             workspace_instance))
-        workspace_id = workspace_result.id
-    else:
-        workspace_id = workspace
-    return workspace_id
-
-
-def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_id):
-    from ._client_factory import cf_log_analytics_data_sources
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.mgmt.loganalytics.models import DataSource
-    from msrestazure.tools import parse_resource_id
-    from msrestazure.azure_exceptions import CloudError
-
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    data_sources_client = cf_log_analytics_data_sources(cmd.cli_ctx, subscription_id)
-    workspace_name = parse_resource_id(workspace_id)['name']
-    data_source_name_template = "DataSource_{}_{}"
-
-    default_data_sources = None
-    if os_type.lower() == 'linux':
-        from ._workspace_data_source_settings import default_linux_data_sources
-        default_data_sources = default_linux_data_sources
-    elif os_type.lower() == 'windows':
-        from ._workspace_data_source_settings import default_windows_data_sources
-        default_data_sources = default_windows_data_sources
-
-    if default_data_sources is not None:
-        for data_source_kind, data_source_settings in default_data_sources.items():
-            for data_source_setting in data_source_settings:
-                data_source = DataSource(kind=data_source_kind,
-                                         properties=data_source_setting)
-                data_source_name = data_source_name_template.format(data_source_kind, _gen_guid())
-                try:
-                    data_sources_client.create_or_update(resource_group_name,
-                                                         workspace_name,
-                                                         data_source_name,
-                                                         data_source)
-                except CloudError as ex:
-                    logger.warning("Failed to set data source due to %s. "
-                                   "Skip this step and need manual work later.", ex.message)
-    else:
-        logger.warning("Unsupported OS type. Skip the default settings for log analytics workspace.")
-
 # endregion
 
 
@@ -1241,6 +1220,12 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
                                                   resource_group_name, deployment_name, properties))
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
+
+
+def update_av_set(instance, resource_group_name, proximity_placement_group=None):
+    if proximity_placement_group is not None:
+        instance.proximity_placement_group = {'id': proximity_placement_group}
+    return instance
 
 
 def list_av_sets(cmd, resource_group_name=None):
@@ -1879,7 +1864,9 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
 
 def list_vm_secrets(cmd, resource_group_name, vm_name):
     vm = get_vm(cmd, resource_group_name, vm_name)
-    return vm.os_profile.secrets
+    if vm.os_profile:
+        return vm.os_profile.secrets
+    return []
 
 
 def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=None):
@@ -1919,7 +1906,7 @@ def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd
     DataDisk, DiskCreateOptionTypes, VirtualHardDisk = cmd.get_models(
         'DataDisk', 'DiskCreateOptionTypes', 'VirtualHardDisk')
     if not new and not disk_name:
-        raise CLIError('Pleae provide the name of the existing disk to attach')
+        raise CLIError('Please provide the name of the existing disk to attach')
     create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
 
     vm = get_vm(cmd, resource_group_name, vm_name)
@@ -2139,7 +2126,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 application_security_groups=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
-                os_disk_encryption_set=None, data_disk_encryption_sets=None):
+                os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
+                automatic_repairs_grace_period=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2367,7 +2355,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             ultra_ssd_enabled=ultra_ssd_enabled, proximity_placement_group=proximity_placement_group,
             terminate_notification_time=terminate_notification_time, max_price=max_price,
             scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
-            data_disk_encryption_sets=data_disk_encryption_sets)
+            data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
+            data_disk_mbps=data_disk_mbps, automatic_repairs_grace_period=automatic_repairs_grace_period)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2617,7 +2606,8 @@ def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
                 protect_from_scale_in=None, protect_from_scale_set_actions=None,
                 enable_terminate_notification=None, terminate_notification_time=None, ultra_ssd_enabled=None,
-                scale_in_policy=None, priority=None, max_price=None, **kwargs):
+                scale_in_policy=None, priority=None, max_price=None, proximity_placement_group=None,
+                enable_automatic_repairs=None, automatic_repairs_grace_period=None, **kwargs):
     vmss = kwargs['parameters']
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -2650,6 +2640,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
                                          enable=enable_terminate_notification)
 
+    if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None:
+        AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
+        vmss.automatic_repairs_policy = \
+            AutomaticRepairsPolicy(enabled="true", grace_period=automatic_repairs_grace_period)
+
     if ultra_ssd_enabled is not None:
         if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
             if vmss.additional_capabilities is None:
@@ -2678,6 +2673,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
         else:
             vmss.virtual_machine_profile.billing_profile.max_price = max_price
+
+    if proximity_placement_group is not None:
+        vmss.proximity_placement_group = {'id': proximity_placement_group}
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, name, **kwargs)
@@ -2815,8 +2813,9 @@ def list_vmss_extensions(cmd, resource_group_name, vmss_name):
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     # pylint: disable=no-member
-    return None if not vmss.virtual_machine_profile.extension_profile \
-        else vmss.virtual_machine_profile.extension_profile.extensions
+    if vmss.virtual_machine_profile and vmss.virtual_machine_profile.extension_profile:
+        return vmss.virtual_machine_profile.extension_profile.extensions
+    return None
 
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
@@ -2837,11 +2836,11 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         extensions = extension_profile.extensions
         if extensions:
             extension_profile.extensions = [x for x in extensions if
-                                            x.type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
+                                            x.type1.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
 
     ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
                                           publisher=publisher,
-                                          type=extension_name,
+                                          type1=extension_name,
                                           protected_settings=protected_settings,
                                           type_handler_version=version,
                                           settings=settings,
@@ -2944,7 +2943,7 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
-                         os_snapshot=None, data_snapshots=None, managed_image=None):
+                         os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
@@ -2981,10 +2980,17 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
             source = GalleryArtifactVersionSource(id=managed_image)
         if os_snapshot is not None:
             os_disk_image = GalleryOSDiskImage(source=GalleryArtifactVersionSource(id=os_snapshot))
+        if data_snapshot_luns and not data_snapshots:
+            raise CLIError('usage error: --data-snapshot-luns must be used together with --data-snapshots')
         if data_snapshots:
+            if data_snapshot_luns and len(data_snapshots) != len(data_snapshot_luns):
+                raise CLIError('usage error: Length of --data-snapshots and --data-snapshot-luns should be equal.')
+            if not data_snapshot_luns:
+                data_snapshot_luns = [i for i in range(len(data_snapshots))]
             data_disk_images = []
             for i, s in enumerate(data_snapshots):
-                data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s), lun=i))
+                data_disk_images.append(GalleryDataDiskImage(source=GalleryArtifactVersionSource(id=s),
+                                                             lun=data_snapshot_luns[i]))
         storage_profile = GalleryImageVersionStorageProfile(source=source, os_disk_image=os_disk_image,
                                                             data_disk_images=data_disk_images)
         image_version = ImageVersion(publishing_profile=profile, location=location, tags=(tags or {}),
@@ -3087,6 +3093,78 @@ def get_dedicated_host_instance_view(client, host_group_name, host_name, resourc
 
 
 # region VMMonitor
+def _get_log_analytics_client(cmd):
+    from ._client_factory import cf_log_analytics
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    return cf_log_analytics(cmd.cli_ctx, subscription_id)
+
+
+def _prepare_workspace(cmd, resource_group_name, workspace):
+    from msrestazure.tools import is_valid_resource_id
+
+    from msrestazure.azure_exceptions import CloudError
+
+    workspace_id = None
+    if not is_valid_resource_id(workspace):
+        workspace_name = workspace
+        log_client = _get_log_analytics_client(cmd)
+        workspace_result = None
+        try:
+            workspace_result = log_client.get(resource_group_name, workspace_name)
+        except CloudError:
+            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
+            sku = Sku(name=SkuNameEnum.per_gb2018.value)
+            retention_time = 30  # default value
+            location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+            workspace_instance = Workspace(location=location,
+                                           sku=sku,
+                                           retention_in_days=retention_time)
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
+                                                                                             workspace_name,
+                                                                                             workspace_instance))
+        workspace_id = workspace_result.id
+    else:
+        workspace_id = workspace
+    return workspace_id
+
+
+def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name):
+    from ._client_factory import cf_log_analytics_data_sources
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.mgmt.loganalytics.models import DataSource
+    from msrestazure.azure_exceptions import CloudError
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    data_sources_client = cf_log_analytics_data_sources(cmd.cli_ctx, subscription_id)
+    data_source_name_template = "DataSource_{}_{}"
+
+    default_data_sources = None
+    if os_type.lower() == 'linux':
+        from ._workspace_data_source_settings import default_linux_data_sources
+        default_data_sources = default_linux_data_sources
+    elif os_type.lower() == 'windows':
+        from ._workspace_data_source_settings import default_windows_data_sources
+        default_data_sources = default_windows_data_sources
+
+    if default_data_sources is not None:
+        for data_source_kind, data_source_settings in default_data_sources.items():
+            for data_source_setting in data_source_settings:
+                data_source = DataSource(kind=data_source_kind,
+                                         properties=data_source_setting)
+                data_source_name = data_source_name_template.format(data_source_kind, _gen_guid())
+                try:
+                    data_sources_client.create_or_update(resource_group_name,
+                                                         workspace_name,
+                                                         data_source_name,
+                                                         data_source)
+                except CloudError as ex:
+                    logger.warning("Failed to set data source due to %s. "
+                                   "Skip this step and need manual work later.", ex.message)
+    else:
+        logger.warning("Unsupported OS type. Skip the default settings for log analytics workspace.")
+
+
 def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_query, timespan=None):
     """Executes a query against the Log Analytics workspace linked with a vm."""
     from azure.loganalytics.models import QueryBody
@@ -3094,12 +3172,32 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
     workspace = None
     extension_resources = vm.resources or []
     for resource in extension_resources:
-        if resource.name == "OMSExtension":
+        if resource.name == "MicrosoftMonitoringAgent" or resource.name == "OmsAgentForLinux":
             workspace = resource.settings.get('workspaceId', None)
     if workspace is None:
         raise CLIError('Cannot find the corresponding log analytics workspace. '
                        'Please check the status of log analytics workpsace.')
     return client.query(workspace, QueryBody(query=analytics_query, timespan=timespan))
+
+
+def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_name):
+    is_linux_os = _is_linux_os(vm)
+    vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
+    log_client = _get_log_analytics_client(cmd)
+    customer_id = log_client.get(resource_group_name, workspace_name).customer_id
+    settings = {
+        'workspaceId': customer_id,
+        'stopOnMultipleConnections': 'true'
+    }
+    primary_shared_key = log_client.get_shared_keys(resource_group_name, workspace_name).primary_shared_key
+    protected_settings = {
+        'workspaceKey': primary_shared_key,
+    }
+    return set_extension(cmd, resource_group_name, vm_name, vm_extension_name,
+                         extension_mappings[vm_extension_name]['publisher'],
+                         extension_mappings[vm_extension_name]['version'],
+                         settings,
+                         protected_settings)
 # endregion
 
 

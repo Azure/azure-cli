@@ -18,7 +18,8 @@ from pkg_resources import parse_version
 
 from azure.cli.core.util import CLIError, reload_module
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
-                                      get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
+                                      get_extension, ext_compat_with_cli,
+                                      EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
                                       WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
 from azure.cli.core.telemetry import set_extension_management_detail
 
@@ -34,6 +35,8 @@ OUT_KEY_NAME = 'name'
 OUT_KEY_VERSION = 'version'
 OUT_KEY_TYPE = 'extensionType'
 OUT_KEY_METADATA = 'metadata'
+OUT_KEY_PREVIEW = 'preview'
+OUT_KEY_EXPERIMENTAL = 'experimental'
 
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli.list')
@@ -77,8 +80,6 @@ def _validate_whl_extension(ext_file):
 
 
 def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
-    import colorama
-    colorama.init()  # Required for displaying the spinner correctly on windows issue #9140
     cmd.cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
@@ -155,7 +156,8 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
     dst = os.path.join(extension_path, whl_filename)
     shutil.copyfile(ext_file, dst)
     logger.debug('Saved the whl to %s', dst)
-    colorama.deinit()
+
+    return extension_name
 
 
 def is_valid_sha256sum(a_file, expected_sum):
@@ -193,6 +195,7 @@ def check_version_compatibility(azext_metadata):
             min_max_msg_fmt += 'a min of {}.'.format(min_required)
         elif max_required:
             min_max_msg_fmt += 'a max of {}.'.format(max_required)
+        min_max_msg_fmt += '\nPlease install a compatible extension version or remove it.'
         raise CLIError(min_max_msg_fmt)
 
 
@@ -200,10 +203,7 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                   pip_extra_index_urls=None, pip_proxy=None):
     ext_sha256 = None
     if extension_name:
-        import colorama
-        colorama.init()  # Required for displaying the spinner correctly on windows issue #9140
         cmd.cli_ctx.get_progress_controller().add(message='Searching')
-        colorama.deinit()
         ext = None
         try:
             ext = get_extension(extension_name)
@@ -219,11 +219,14 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
-    _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls,
-                 pip_proxy=pip_proxy)
+    extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256,
+                                  pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
     _augment_telemetry_with_ext_info(extension_name)
     try:
-        if extension_name and get_extension(extension_name).preview:
+        if extension_name and get_extension(extension_name).experimental:
+            logger.warning("The installed extension '%s' is experimental and not covered by customer support. "
+                           "Please use with discretion.", extension_name)
+        elif extension_name and get_extension(extension_name).preview:
             logger.warning("The installed extension '%s' is in preview.", extension_name)
     except ExtensionNotInstalledException:
         pass
@@ -249,7 +252,8 @@ def remove_extension(extension_name):
 
 
 def list_extensions():
-    return [{OUT_KEY_NAME: ext.name, OUT_KEY_VERSION: ext.version, OUT_KEY_TYPE: ext.ext_type}
+    return [{OUT_KEY_NAME: ext.name, OUT_KEY_VERSION: ext.version, OUT_KEY_TYPE: ext.ext_type,
+             OUT_KEY_PREVIEW: ext.preview, OUT_KEY_EXPERIMENTAL: ext.experimental}
             for ext in get_extensions()]
 
 
@@ -323,6 +327,7 @@ def list_available_extensions(index_url=None, show_details=False):
             'version': latest['metadata']['version'],
             'summary': latest['metadata']['summary'],
             'preview': latest['metadata'].get(EXT_METADATA_ISPREVIEW, False),
+            'experimental': latest['metadata'].get(EXT_METADATA_ISEXPERIMENTAL, False),
             'installed': installed
         })
     return results

@@ -222,7 +222,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
             exported_features = __export_features(features, naming_convention)
             exported_keyvalues.update(exported_features)
 
-        with open(file_path, 'w') as fp:
+        with open(file_path, 'w', encoding='utf-8') as fp:
             if format_ == 'json':
                 json.dump(exported_keyvalues, fp, indent=2, ensure_ascii=False)
             elif format_ == 'yaml':
@@ -766,10 +766,11 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
                             if filter_param:
                                 new_val["parameters"] = filter_param
                             feature_flag_value.conditions["client_filters"][idx] = new_val
-
-                    else:
-                        feature_flag_value.enabled = v
-                        feature_flag_value.conditions = default_conditions
+                elif isinstance(v, bool):
+                    feature_flag_value.enabled = v
+                    feature_flag_value.conditions = default_conditions
+                else:
+                    raise ValueError("The type of '{}' should be either boolean or dictionary.".format(v))
 
                 set_kv = KeyValue(key=key,
                                   value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),

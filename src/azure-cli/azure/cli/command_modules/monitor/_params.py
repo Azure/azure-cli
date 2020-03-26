@@ -263,11 +263,11 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
 
     with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
-        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='2.1.0'), help='OData filters. Will ignore other filter arguments.')
+        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='3.0.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
         c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')
-        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='2.1.0')])
+        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='3.0.0')])
         c.argument('caller')
         c.argument('status')
     # endregion
@@ -342,4 +342,15 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
+    # endregion
+
+    # region monitor clone
+    with self.argument_context('monitor clone') as c:
+        c.argument('source_resource', help="Resource ID of the source resource.")
+        c.argument('target_resource', help="Resource ID of the target resource.")
+        c.argument('always_clone', action='store_true',
+                   help="If this argument is applied, "
+                        "all monitor settings would be cloned instead of expanding its scope.")
+        c.argument('monitor_types', options_list=['--types', '-t'], arg_type=get_enum_type(['metricsAlert']),
+                   nargs='+', help='List of types of monitor settings which would be cloned.', default=['metricsAlert'])
     # endregion

@@ -69,6 +69,8 @@ def load_arguments(self, _):
         c.argument('esp', arg_group='Cluster', action='store_true',
                    help='Specify to create cluster with Enterprise Security Package. If omitted, '
                         'creating cluster with Enterprise Security Package will not not allowed.')
+        c.argument('minimal_tls_version', arg_type=get_enum_type(['1.0', '1.1', '1.2']),
+                   arg_group='Cluster', help='The minimal supported TLS version.')
 
         # HTTP
         c.argument('http_username', options_list=['--http-user', '-u'], arg_group='HTTP',

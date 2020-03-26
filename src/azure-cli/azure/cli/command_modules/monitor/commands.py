@@ -12,7 +12,7 @@ def load_command_table(self, _):
     from ._client_factory import (
         cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts, cf_log_analytics_workspace)
+        cf_metric_alerts, cf_log_analytics_workspace, cf_diagnostics_category)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace
@@ -83,7 +83,7 @@ def load_command_table(self, _):
 
     diagnostics_categories_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations#DiagnosticSettingsCategoryOperations.{}',
-        client_factory=cf_diagnostics,
+        client_factory=cf_diagnostics_category,
         operation_group='diagnostic_settings_category',
         exception_handler=monitor_exception_handler)
 
@@ -132,6 +132,12 @@ def load_command_table(self, _):
     log_analytics_workspace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace#{}',
         client_factory=cf_log_analytics_workspace,
+        exception_handler=monitor_exception_handler
+    )
+
+    monitor_general_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.general_operations#{}',
+        client_factory=cf_metric_alerts,
         exception_handler=monitor_exception_handler
     )
 
@@ -232,7 +238,7 @@ def load_command_table(self, _):
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace')
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.custom_command('list', 'list_log_analytics_workspace')
         g.command('get-schema', 'get_schema')
@@ -244,3 +250,6 @@ def load_command_table(self, _):
         g.command('list', 'list_intelligence_packs')
         g.command('enable', 'enable_intelligence_pack')
         g.command('disable', 'disable_intelligence_pack')
+
+    with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom, is_preview=True) as g:
+        g.custom_command('clone', 'clone_existed_settings')

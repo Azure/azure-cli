@@ -455,6 +455,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('storage blob exists --account-name {sa} -c {container} -n {blob}',
                  checks=self.check("exists", True))
 
+        # Trigger Restore As unmanaged disks
+        trigger_restore_job2_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --restore-as-unmanaged-disks --storage-account {sa}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job2'] = trigger_restore_job2_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job2}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job2}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
     @record_only()
     @ResourceGroupPreparer()
     @VaultPreparer()
@@ -568,6 +585,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.protectionStatus', 'Healthy'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.extendedProperties.diskExclusionProperties.isInclusionList', True),
+        ])
+
+        self.cmd('backup protection update-for-vm -g {rg} -v {vault} -c {vm} -i {vm} --exclude-all-data-disks', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
         ])
 
         self.cmd('backup protection update-for-vm -g {rg} -v {vault} -c {vm} -i {vm} --disk-list-setting exclude --diskslist 1', checks=[

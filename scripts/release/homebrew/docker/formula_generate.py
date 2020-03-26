@@ -22,7 +22,7 @@ HOMEBREW_FORMULAR_LATEST="https://raw.githubusercontent.com/Homebrew/homebrew-co
 
 
 def main():
-    print('Generate formular for Azure CLI homebrew release.')
+    print('Generate formula for Azure CLI homebrew release.')
 
     parser = argparse.ArgumentParser(prog='formula_generator.py')
     parser.set_defaults(func=generate_formula)
@@ -131,6 +131,8 @@ def update_formula() -> str:
     packs_to_remove = set()
     lines = text.split('\n')
     node_index_dict = OrderedDict()
+    line_idx_to_remove = set()
+    upgrade = False
     for idx, line in enumerate(lines):
         if line.strip().startswith("resource"):
             m = re.search(r'resource "(.*)" do', line)
@@ -138,18 +140,25 @@ def update_formula() -> str:
                 pack = m.group(1)
                 node_index_dict[pack] = idx
         elif pack is not None:
-            if line.strip().startswith("url"):
+            if line.startswith("    url"):
                 #update the url of package
                 if pack in nodes.keys():
-                    lines[idx] = re.sub('url ".*"', 'url "{}"'.format(nodes[pack]['url']), line, 1)
+                    url_match = re.search(r'url "(.*)"', line)
+                    if url_match is not None and nodes[pack]['url'] != url_match.group(1):
+                        lines[idx] = re.sub('url ".*"', 'url "{}"'.format(nodes[pack]['url']), line, 1)
+                        upgrade = True
                 else:
                     packs_to_remove.add(pack)
-            elif line.strip().startswith("sha256"):
+            elif line.startswith("    sha256"):
                 #update the sha256 of package
                 if pack in nodes.keys():
                     lines[idx] = re.sub('sha256 ".*"', 'sha256 "{}"'.format(nodes[pack]['checksum']), line, 1)
                     del nodes[pack]
+            elif line.startswith("  end"):
                 pack = None
+                upgrade = False
+            elif upgrade:  # In case of upgrading, remove any patch following url and sha256 but before end
+                line_idx_to_remove.add(idx)
         elif line.strip().startswith('def install'):
             if nodes:
                 # add new dependency packages
@@ -159,6 +168,7 @@ def update_formula() -> str:
                     line_idx = list(node_index_dict.items())[i][1]
                     resource = RESOURCE_TEMPLATE.render(resource=node)
                     lines[line_idx] = resource + '\n\n' + lines[line_idx]
+    lines = [line for idx, line in enumerate(lines) if idx not in line_idx_to_remove]
     new_text = "\n".join(lines)
 
     # remove dependency packages that are no longer needed

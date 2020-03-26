@@ -5,6 +5,9 @@
 
 # pylint: disable=line-too-long
 import argparse
+import os.path
+import platform
+
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
@@ -31,7 +34,8 @@ from ._validators import (
     validate_secret_arg,
     validate_set,
     validate_set_secret,
-    validate_retention_days
+    validate_retention_days,
+    validate_registry_name
 )
 from .scope_map import ScopeMapActions
 
@@ -42,11 +46,15 @@ image_by_tag_or_digest_type = CLIArgumentType(
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
-    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, TokenStatus = self.get_models(
-        'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus', 'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType', 'TokenStatus')
+    SkuName, PasswordName, DefaultAction, PolicyStatus, WebhookAction, WebhookStatus, TaskStatus, \
+        BaseImageTriggerType, RunStatus, SourceRegistryLoginMode, UpdateTriggerPayloadType, TokenStatus = self.get_models(
+            'SkuName', 'PasswordName', 'DefaultAction', 'PolicyStatus', 'WebhookAction', 'WebhookStatus',
+            'TaskStatus', 'BaseImageTriggerType', 'RunStatus', 'SourceRegistryLoginMode', 'UpdateTriggerPayloadType',
+            'TokenStatus')
+
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
-        c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
+        c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
         c.argument('tenant_suffix', options_list=['--suffix'], help="The tenant suffix in registry login server. You may specify '--suffix tenant' if your registry login server is in the format 'registry-tenant.azurecr.io'. Applicable if you\'re accessing the registry from a different subscription or you have permission to access images but not the permission to manage the registry resource.")
         c.argument('sku', help='The SKU of the container registry', arg_type=get_enum_type(SkuName))
         c.argument('admin_enabled', help='Indicates whether the admin user is enabled', arg_type=get_three_state_flag())
@@ -72,9 +80,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
             c.argument('default_action', arg_type=get_enum_type(DefaultAction),
                        help='Default action to apply when no rule matches. Only applicable to Premium SKU.')
 
+    with self.argument_context('acr create', arg_group="Customer managed key", is_preview=True) as c:
+        c.argument('identity', help="Use assigned managed identity resource id or name if in the same resource group")
+        c.argument('key_encryption_key', help="key vault key uri")
+
     with self.argument_context('acr import') as c:
-        c.argument('source_image', options_list=['--source'], help="The source identifier will be either a source image name or a fully qualified source.")
-        c.argument('source_registry', options_list=['--registry', '-r'], help='The source container registry can be name, login server or resource ID of the source registry.')
+        c.argument('source_image', options_list=['--source'], help="Source image name or fully qualified source containing the registry login server. If `--registry` is used, `--source` will always be interpreted as a source image, even if it contains the login server.")
+        c.argument('source_registry', options_list=['--registry', '-r'], help='The source Azure container registry. This can be name, login server or resource ID of the source registry.')
         c.argument('source_registry_username', options_list=['--username', '-u'], help='The username of source container registry')
         c.argument('source_registry_password', options_list=['--password', '-p'], help='The password of source container registry')
         c.argument('target_tags', options_list=['--image', '-t'], help="The name and tag of the image using the format: '-t repo/image:tag'. Multiple tags are supported by passing -t multiple times.", action='append')
@@ -93,6 +105,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
+        c.argument('expose_token', options_list=['--expose-token', '-t'], help='Expose access token instead of automatically logging in through Docker CLI', action='store_true')
 
     with self.argument_context('acr repository') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
@@ -110,14 +123,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
 
     with self.argument_context('acr create') as c:
-        c.argument('registry_name', completer=None)
+        c.argument('registry_name', completer=None, validator=None)
         c.argument('deployment_name', validator=None)
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('workspace', is_preview=True,
                    help='Name or ID of the Log Analytics workspace to send registry diagnostic logs to. All events will be enabled. You can use "az monitor log-analytics workspace create" to create one. Extra billing may apply.')
 
     with self.argument_context('acr check-name') as c:
-        c.argument('registry_name', completer=None)
+        c.argument('registry_name', completer=None, validator=None)
 
     with self.argument_context('acr webhook') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -257,6 +270,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.positional('chart_package', help="The helm chart package.", completer=FilesCompleter())
         c.argument('force', help='Overwrite the existing chart package.', action='store_true')
 
+    with self.argument_context('acr helm install-cli') as c:
+        c.argument('client_version', help='The target Helm CLI version. (Attention: Currently, Helm 3 does not work with "az acr helm" commands) ')
+        c.argument('install_location', help='Path at which to install Helm CLI (Existing one at the same path will be overwritten)', default=_get_helm_default_install_location())
+        c.argument('yes', help='Agree to the license of Helm, and do not prompt for confirmation.')
+
     with self.argument_context('acr network-rule') as c:
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.')
@@ -306,3 +324,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr token credential delete') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
         c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)
+
+    with self.argument_context('acr private-endpoint-connection') as c:
+        # to match private_endpoint_connection_command_guideline.md guidelines
+        c.argument('registry_name', options_list=['--registry-name', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], help='The name of the private endpoint connection')
+
+        c.argument('approval_description', options_list=['--description'], help='Approval description. For example, the reason for approval.')
+        c.argument('rejection_description', options_list=['--description'], help='Rejection description. For example, the reason for rejection.')
+
+    with self.argument_context('acr identity') as c:
+        c.argument('identities', nargs='+', help="Space-separated identities. Use '[system]' to refer to the system assigned identity")
+
+    with self.argument_context('acr encryption') as c:
+        c.argument('key_encryption_key', help="key vault key uri")
+        c.argument('identity', help="client id of managed identity, resource name or id of user assigned identity. Use '[system]' to refer to the system assigned identity")
+
+
+def _get_helm_default_install_location():
+    exe_name = 'helm'
+    system = platform.system()
+    if system == 'Windows':
+        home_dir = os.environ.get('USERPROFILE')
+        if not home_dir:
+            return None
+        install_location = os.path.join(home_dir, r'.azure-{0}\{0}.exe'.format(exe_name))
+    elif system in ('Linux', 'Darwin'):
+        install_location = '/usr/local/bin/{}'.format(exe_name)
+    else:
+        install_location = None
+    return install_location

@@ -54,6 +54,8 @@ class AzCliCommandParser(CLICommandParser):
 
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
         self.command_source = kwargs.pop('_command_source', None)
+        self.subparser_map = {}
+        self.specified_arguments = []
         super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
 
     def load_command_table(self, command_loader):
@@ -89,6 +91,7 @@ class AzCliCommandParser(CLICommandParser):
                                                   formatter_class=fc,
                                                   cli_help=self.cli_help,
                                                   _command_source=metadata.command_source)
+            self.subparser_map[command_name] = command_parser
             command_parser.cli_ctx = self.cli_ctx
             command_validator = metadata.validator
             argument_validators = []
@@ -119,6 +122,7 @@ class AzCliCommandParser(CLICommandParser):
                 param.completer = arg.completer
                 param.deprecate_info = arg.deprecate_info
                 param.preview_info = arg.preview_info
+                param.experimental_info = arg.experimental_info
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,
@@ -160,6 +164,12 @@ class AzCliCommandParser(CLICommandParser):
         argcomplete.autocomplete = AzCompletionFinder()
         argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
                                  default_completer=lambda _: ())
+
+    def _get_values(self, action, arg_strings):
+        value = super(AzCliCommandParser, self)._get_values(action, arg_strings)
+        if action.dest and isinstance(action.dest, str) and not action.dest.startswith('_'):
+            self.specified_arguments.append(action.dest)
+        return value
 
     def _check_value(self, action, value):
         # Override to customize the error message when a argument is not among the available choices

@@ -56,7 +56,9 @@ from .custom import (
     ComputeModelType,
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
-    FailoverPolicyType
+    FailoverPolicyType,
+    SqlServerMinimalTlsVersionType,
+    SqlManagedInstanceMinimalTlsVersionType
 )
 
 from ._validators import (
@@ -239,7 +241,7 @@ read_replicas_param_type = CLIArgumentType(
     help='The number of readonly replicas to provision for the database. '
     'Only settable for Hyperscale edition.')
 
-db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, BC_Gen5_2, GP_Gen5_S_8.'
+db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_Gen5_S_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
 
@@ -506,7 +508,7 @@ def load_arguments(self, _):
         c.argument('tier',
                    arg_type=tier_param_type,
                    help='The edition component of the sku. Allowed values include: Basic, Standard, '
-                   'Premium, GeneralPurpose, BusinessCritical.')
+                   'Premium, GeneralPurpose, BusinessCritical, Hyperscale.')
 
         c.argument('capacity',
                    arg_type=capacity_param_type,
@@ -1039,6 +1041,17 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this server'
                    'for use with key management services like Azure KeyVault.')
 
+        c.argument('minimal_tls_version',
+                   arg_type=get_enum_type(SqlServerMinimalTlsVersionType),
+                   help='The minimal TLS version enforced by the sql server for inbound connections.')
+
+        c.argument('enable_public_network',
+                   options_list=['--enable-public-network', '-e'],
+                   arg_type=get_three_state_flag(),
+                   help='Set whether public network access to server is allowed or not. When false,'
+                   'only connections made through Private Links can reach this server.',
+                   is_preview=True)
+
     with self.argument_context('sql server create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1048,7 +1061,8 @@ def load_arguments(self, _):
             c, 'parameters', Server, [
                 'administrator_login',
                 'administrator_login_password',
-                'location'
+                'location',
+                'minimal_tls_version'
             ])
 
         c.argument('administrator_login',
@@ -1086,7 +1100,7 @@ def load_arguments(self, _):
     with self.argument_context('sql server ad-admin create') as c:
         # Create args that will be used to build up the ServerAzureADAdministrator object
         create_args_for_complex_type(
-            c, 'properties', ServerAzureADAdministrator, [
+            c, 'parameters', ServerAzureADAdministrator, [
                 'login',
                 'sid',
             ])
@@ -1217,7 +1231,8 @@ def load_arguments(self, _):
 
         c.argument('tier',
                    arg_type=tier_param_type,
-                   help='The edition component of the sku. Allowed values: GeneralPurpose, BusinessCritical.')
+                   help='The edition component of the sku. Allowed values include: '
+                   'GeneralPurpose, BusinessCritical.')
 
         c.argument('family',
                    arg_type=family_param_type,
@@ -1236,7 +1251,7 @@ def load_arguments(self, _):
 
         c.argument('vcores',
                    arg_type=capacity_param_type,
-                   help='The capacity of the managed instance in vcores.')
+                   help='The capacity of the managed instance in integer number of vcores.')
 
         c.argument('collation',
                    help='The collation of the managed instance.')
@@ -1244,6 +1259,11 @@ def load_arguments(self, _):
         c.argument('proxy_override',
                    arg_type=get_enum_type(ServerConnectionType),
                    help='The connection type used for connecting to the instance.')
+
+        c.argument('minimal_tls_version',
+                   arg_type=get_enum_type(SqlManagedInstanceMinimalTlsVersionType),
+                   help='The minimal TLS version enforced by the managed instance for inbound connections.',
+                   is_preview=True)
 
         c.argument('public_data_endpoint_enabled',
                    arg_type=get_three_state_flag(),
@@ -1263,6 +1283,7 @@ def load_arguments(self, _):
                 'administrator_login',
                 'administrator_login_password',
                 'license_type',
+                'minimal_tls_version',
                 'virtual_network_subnet_id',
                 'vcores',
                 'storage_size_in_gb',
@@ -1321,6 +1342,16 @@ def load_arguments(self, _):
                    help='Generate and assign an Azure Active Directory Identity for this managed instance '
                    'for use with key management services like Azure KeyVault. '
                    'If identity is already assigned - do nothing.')
+
+        # Create args that will be used to build up the Managed Instance's Sku object
+        create_args_for_complex_type(
+            c, 'sku', Sku, [
+                'family',
+                'name',
+                'tier',
+            ])
+
+        c.ignore('name')  # Hide sku name
 
     #####
     #           sql managed instance key
@@ -1408,10 +1439,16 @@ def load_arguments(self, _):
     with self.argument_context('sql midb restore') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
+                'deleted_time',
                 'target_managed_database_name',
                 'target_managed_instance_name',
                 'restore_point_in_time'
             ])
+
+        c.argument('deleted_time',
+                   options_list=['--deleted-time'],
+                   help='If specified, restore from a deleted database instead of from an existing database.'
+                   ' Must match the deleted time of a deleted database on the source Managed Instance.')
 
         c.argument('target_managed_database_name',
                    options_list=['--dest-name'],
@@ -1439,8 +1476,29 @@ def load_arguments(self, _):
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. ' + time_format_help)
 
-    with self.argument_context('sql midb list') as c:
-        c.argument('managed_instance_name', id_part=None)
+    with self.argument_context('sql midb short-term-retention-policy set') as c:
+        create_args_for_complex_type(
+            c, 'parameters', ManagedDatabase, [
+                'deleted_time',
+                'retention_days'
+            ])
+
+        c.argument('deleted_time',
+                   options_list=['--deleted-time'],
+                   help='If specified, updates retention days for a deleted database, instead of an existing database.'
+                   'Must match the deleted time of a deleted database on the source Managed Instance.')
+
+        c.argument('retention_days',
+                   options_list=['--retention-days'],
+                   required=True,
+                   help='New backup short term retention policy in days.'
+                   'Valid policy for live database is 7-35 days, valid policy for dropped databases is 0-35 days.')
+
+    with self.argument_context('sql midb short-term-retention-policy show') as c:
+        c.argument('deleted_time',
+                   options_list=['--deleted-time'],
+                   help='If specified, shows retention days for a deleted database, instead of an existing database.'
+                   'Must match the deleted time of a deleted database on the source Managed Instance.')
 
     ###############################################
     #                sql virtual cluster          #
