@@ -12,6 +12,7 @@ from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_P
 from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
 from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.local_context import LocalContextAttribute, STORE, USE, ALL
 
 from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
@@ -238,7 +239,12 @@ resource_group_name_type = CLIArgumentType(
     completer=get_resource_group_completion_list,
     id_part='resource_group',
     help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
-    configured_default='group')
+    configured_default='group',
+    local_context_attribute=LocalContextAttribute(
+        name='resource_group_name',
+        actions=[STORE, USE],
+        scopes=[ALL]
+    ))
 
 name_type = CLIArgumentType(options_list=['--name', '-n'], help='the primary resource name')
 
