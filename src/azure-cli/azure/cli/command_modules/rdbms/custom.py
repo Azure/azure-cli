@@ -19,7 +19,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
-                   minimal_tls_version=None, public_network_access=None, assign_identity=False):
+                   assign_identity=False, public_network_access=None):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
@@ -36,7 +36,6 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
-                minimal_tls_version=minimal_tls_version,
                 public_network_access=public_network_access,
                 storage_profile=mysql.models.StorageProfile(
                     backup_retention_days=backup_retention,
@@ -56,7 +55,6 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
-                minimal_tls_version=minimal_tls_version,
                 public_network_access=public_network_access,
                 storage_profile=postgresql.models.StorageProfile(
                     backup_retention_days=backup_retention,
@@ -76,7 +74,6 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
-                minimal_tls_version=minimal_tls_version,
                 public_network_access=public_network_access,
                 storage_profile=mariadb.models.StorageProfile(
                     backup_retention_days=backup_retention,
@@ -295,9 +292,8 @@ def _server_update_custom_func(instance,
                                ssl_enforcement=None,
                                tags=None,
                                auto_grow=None,
-                               minimal_tls_version=None,
-                               public_network_access=None,
-                               assign_identity=False):
+                               assign_identity=False,
+                               public_network_access=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
@@ -326,7 +322,6 @@ def _server_update_custom_func(instance,
                                     version=None,
                                     ssl_enforcement=ssl_enforcement,
                                     tags=tags,
-                                    minimal_tls_version=minimal_tls_version,
                                     public_network_access=public_network_access)
 
     if assign_identity:
