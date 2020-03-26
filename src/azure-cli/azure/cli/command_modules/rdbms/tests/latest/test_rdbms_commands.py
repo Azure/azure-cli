@@ -111,23 +111,23 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
-                    '--admin-user {} --admin-password {} '
-                    '--sku-name {} --tags key=1 --geo-redundant-backup {} '
-                    '--backup-retention {}'
-                    .format(database_engine, resource_group_1, servers[0], loc,
-                    admin_login, admin_passwords[0], skuname,
-                    geoRedundantBackup, backupRetention),
-                    checks=[
-                        JMESPathCheck('name', servers[0]),
-                        JMESPathCheck('resourceGroup', resource_group_1),
-                        JMESPathCheck('administratorLogin', admin_login),
-                        JMESPathCheck('sslEnforcement', 'Enabled'),
-                        JMESPathCheck('tags.key', '1'),
-                        JMESPathCheck('sku.capacity', old_cu),
-                        JMESPathCheck('sku.tier', edition),
-                        JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
-                        JMESPathCheck('publicNetworkAccess', default_public_network_access),
-                        JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
+                 '--admin-user {} --admin-password {} '
+                 '--sku-name {} --tags key=1 --geo-redundant-backup {} '
+                 '--backup-retention {}'
+                 .format(database_engine, resource_group_1, servers[0], loc,
+                         admin_login, admin_passwords[0], skuname,
+                         geoRedundantBackup, backupRetention),
+                 checks=[
+                     JMESPathCheck('name', servers[0]),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('sslEnforcement', 'Enabled'),
+                     JMESPathCheck('tags.key', '1'),
+                     JMESPathCheck('sku.capacity', old_cu),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                     JMESPathCheck('publicNetworkAccess', default_public_network_access),
+                     JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
 
         # test show server
         result = self.cmd('{} server show -g {} --name {}'
@@ -212,7 +212,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags.key', '3'),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
-
 
         # test georestore server
         with self.assertRaises(CLIError) as exception:
