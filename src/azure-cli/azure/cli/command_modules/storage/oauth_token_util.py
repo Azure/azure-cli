@@ -18,14 +18,17 @@ class TokenUpdater(object):
         # the timer needs to be protected, as later on it is possible that one thread is setting a new timer and
         # another thread is trying to cancel the timer
         self.lock = threading.Lock()
-        self.timer_callback()
+        self.get_token()
 
-    def timer_callback(self):
+    def get_token(self, scope="https://storage.azure.com"):
         # call to get a new token and set a timer
         from azure.cli.core._profile import Profile
         from datetime import datetime
-        # should give back token that is valid for at least 5 mins
-        token = Profile(cli_ctx=self.cli_ctx).get_raw_token(resource="https://storage.azure.com")[0][2]
+        # should give back token that is valid for at least 5 mins\
+        try:
+            token = Profile(cli_ctx=self.cli_ctx).get_raw_token(resource=scope)[0][2]
+        except Exception:
+            token = Profile(cli_ctx=self.cli_ctx).get_raw_token(resource="https://storage.azure.com")[0][2]
         try:
             self.token_credential.token = token['accessToken']
             seconds_left = (datetime.strptime(token['expiresOn'], "%Y-%m-%d %H:%M:%S.%f") - datetime.now()).seconds
@@ -37,9 +40,11 @@ class TokenUpdater(object):
             raise Exception("Acquired a token expiring in less than 4 minutes")
 
         with self.lock:
-            self.timer = threading.Timer(seconds_left - 240, self.timer_callback)
+            self.timer = threading.Timer(seconds_left - 240, self.get_token)
             self.timer.daemon = True
             self.timer.start()
+
+        return self.token_credential
 
     def cancel(self):
         # the timer needs to be canceled once the command has finished executing
