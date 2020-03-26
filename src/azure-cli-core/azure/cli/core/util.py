@@ -816,3 +816,15 @@ def get_az_user_agent():
     #     agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
 
     return ' '.join(agents)
+
+
+def user_confirmation(message, yes=False):
+    if yes:
+        return
+    from knack.prompting import prompt_y_n, NoTTYException
+    try:
+        if not prompt_y_n(message):
+            raise CLIError('Operation cancelled.')
+    except NoTTYException:
+        raise CLIError(
+            'Unable to prompt for confirmation as no tty available. Use --yes.')
