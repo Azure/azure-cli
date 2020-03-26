@@ -20,7 +20,7 @@ class NoExtensionCandidatesError(Exception):
 def _is_not_platform_specific(item):
     parsed_filename = WHEEL_INFO_RE(item['filename'])
     p = parsed_filename.groupdict()
-    if p.get('pyver') == 'py2.py3' and p.get('abi') == 'none' and p.get('plat') == 'any':
+    if p.get('abi') == 'none' and p.get('plat') == 'any':
         return True
     logger.debug("Skipping '%s' as not universal wheel."
                  "We do not currently support platform specific extension detection. "

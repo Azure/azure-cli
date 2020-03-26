@@ -130,6 +130,10 @@ def list_network_watchers(cmd, resource_group_name=None):
 
 # region ApplicationGateways
 # pylint: disable=too-many-locals
+def _is_v2_sku(sku):
+    return 'v2' in sku
+
+
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
@@ -154,7 +158,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     tags = tags or {}
-    sku_tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
+    sku_tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
     http_listener_protocol = 'https' if (cert_data or key_vault_secret_id) else 'http'
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     virtual_network_name = virtual_network_name or '{}Vnet'.format(application_gateway_name)
@@ -183,10 +187,14 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     if public_ip_address_type == 'new':
         ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+        public_ip_sku = None
+        if _is_v2_sku(sku):
+            public_ip_sku = 'Standard'
+            public_ip_address_allocation = 'Static'
         master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
-                                                              None, None, None))
+                                                              None, public_ip_sku, None))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
@@ -224,7 +232,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
                                custom_error_pages=None, max_capacity=None):
     if sku is not None:
-        instance.sku.tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
+        instance.sku.tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
 
     try:
         if min_capacity is not None:
@@ -334,7 +342,7 @@ def update_ag_frontend_port(instance, parent, item_name, port=None):
 
 def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,
                             frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
-                            firewall_policy=None, no_wait=False):
+                            firewall_policy=None, no_wait=False, host_names=None):
     ApplicationGatewayHttpListener, SubResource = cmd.get_models('ApplicationGatewayHttpListener', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -347,7 +355,9 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         host_name=host_name,
         require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
-        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None)
+        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None,
+        host_names=host_names
+    )
 
     if cmd.supported_api_version(min_api='2019-09-01'):
         new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
@@ -358,7 +368,7 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
 
 
 def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
-                            host_name=None, ssl_cert=None, firewall_policy=None):
+                            host_name=None, ssl_cert=None, firewall_policy=None, host_names=None):
     SubResource = cmd.get_models('SubResource')
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(id=frontend_ip)
@@ -377,6 +387,9 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
     if cmd.supported_api_version(min_api='2019-09-01'):
         if firewall_policy is not None:
             instance.firewall_policy = SubResource(id=firewall_policy)
+
+    if host_names is not None:
+        instance.host_names = host_names or None
 
     instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
     return parent
@@ -5207,7 +5220,7 @@ def _prep_cert_create(cmd, gateway_name, resource_group_name):
 
 def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, public_ip_address,
                         virtual_network, location=None, tags=None,
-                        no_wait=False, gateway_type=None, sku=None, vpn_type=None,
+                        no_wait=False, gateway_type=None, sku=None, vpn_type=None, vpn_gateway_generation=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
                         gateway_default_site=None, custom_routes=None):
@@ -5220,9 +5233,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
     subnet = virtual_network + '/subnets/GatewaySubnet'
     active_active = len(public_ip_address) == 2
     vnet_gateway = VirtualNetworkGateway(
-        gateway_type=gateway_type, vpn_type=vpn_type, location=location, tags=tags,
-        sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active,
-        ip_configurations=[],
+        gateway_type=gateway_type, vpn_type=vpn_type, vpn_gateway_generation=vpn_gateway_generation, location=location,
+        tags=tags, sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active, ip_configurations=[],
         gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
     for i, public_ip in enumerate(public_ip_address):
         ip_configuration = VirtualNetworkGatewayIPConfiguration(

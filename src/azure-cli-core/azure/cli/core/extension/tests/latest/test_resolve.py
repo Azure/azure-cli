@@ -46,11 +46,11 @@ class TestResolveFromIndex(unittest.TestCase):
         with IndexPatch(index_data):
             self.assertEqual(resolve_from_index(name)[0], index_data[name][0]['downloadUrl'])
 
-    def test_filter_platform_wrong_pyver(self):
+    def test_ext_py3_resolved(self):
         name = 'myext'
-        # Should raise as not py2.py3
-        with IndexPatch({'myext': [mock_ext('myext-0.0.1-py3-none-any.whl', '0.0.1')]}), self.assertRaises(NoExtensionCandidatesError):
-            resolve_from_index(name)
+        index_data = {'myext': [mock_ext('myext-0.0.1-py3-none-any.whl', '0.0.1')]}
+        with IndexPatch(index_data):
+            self.assertEqual(resolve_from_index(name)[0], index_data[name][0]['downloadUrl'])
 
     def test_filter_platform_wrong_abi(self):
         name = 'myext'
@@ -64,18 +64,12 @@ class TestResolveFromIndex(unittest.TestCase):
         with IndexPatch({'myext': [mock_ext('myext-0.0.1-py2.py3-none-x86_64.whl', '0.0.1')]}), self.assertRaises(NoExtensionCandidatesError):
             resolve_from_index(name)
 
-    def test_filter_platform_wrong_pyver(self):
-        name = 'myext'
-        # Should raise as not py2.py3
-        with IndexPatch({'myext': [mock_ext('myext-0.0.1-py3-none-any.whl', '0.0.1')]}), self.assertRaises(NoExtensionCandidatesError):
-            resolve_from_index(name)
-
     def test_filter_platform(self):
         name = 'myext'
         index_data = {'myext': [mock_ext('myext-0.0.1-py2.py3-none-any.whl', '0.0.1'), mock_ext('myext-0.0.2-py3-none-any.whl', '0.0.2')]}
         with IndexPatch(index_data):
-            # Should choose the first one as it's not a platform specific whl.
-            self.assertEqual(resolve_from_index(name)[0], index_data[name][0]['downloadUrl'])
+            # Should choose the second one as py version is not considered platform specific.
+            self.assertEqual(resolve_from_index(name)[0], index_data[name][1]['downloadUrl'])
 
 
 class TestResolveFilters(unittest.TestCase):
@@ -83,7 +77,7 @@ class TestResolveFilters(unittest.TestCase):
     def test_platform_specific(self):
         self.assertTrue(_is_not_platform_specific(mock_ext('myext-0.0.1-py2.py3-none-any.whl')))
 
-        self.assertFalse(_is_not_platform_specific(mock_ext('myext-0.0.1-py2-none-any.whl')))
+        self.assertTrue(_is_not_platform_specific(mock_ext('myext-0.0.1-py2-none-any.whl')))
         self.assertFalse(_is_not_platform_specific(mock_ext('myext-0.0.1-py3-cp33d-any.whl')))
         self.assertFalse(_is_not_platform_specific(mock_ext('myext-0.0.1-py3-none-x86_64.whl')))
         self.assertFalse(_is_not_platform_specific(mock_ext('myext-1.1.26.0-py2-none-linux_armv7l.whl')))

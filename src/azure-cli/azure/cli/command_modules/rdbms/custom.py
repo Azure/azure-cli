@@ -19,7 +19,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
-                   minimal_tls_version=None, public_network_access=None):
+                   minimal_tls_version=None, public_network_access=None, assign_identity=False):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
@@ -45,6 +45,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                     storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
+        if assign_identity:
+            parameters.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforPostgreSQL':
         from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
@@ -63,6 +65,8 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                     storage_autogrow=auto_grow)),
             location=location,
             tags=tags)
+        if assign_identity:
+            parameters.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
     elif provider == 'Microsoft.DBforMariaDB':
         from azure.mgmt.rdbms import mariadb
         parameters = mariadb.models.ServerForCreate(
@@ -292,7 +296,8 @@ def _server_update_custom_func(instance,
                                tags=None,
                                auto_grow=None,
                                minimal_tls_version=None,
-                               public_network_access=None):
+                               public_network_access=None,
+                               assign_identity=False):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
@@ -323,6 +328,18 @@ def _server_update_custom_func(instance,
                                     tags=tags,
                                     minimal_tls_version=minimal_tls_version,
                                     public_network_access=public_network_access)
+
+    if assign_identity:
+        if server_module_path.find('postgres'):
+            from azure.mgmt.rdbms import postgresql
+            if instance.identity is None:
+                instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
+            params.identity = instance.identity
+        elif server_module_path.find('mysql'):
+            from azure.mgmt.rdbms import mysql
+            if instance.identity is None:
+                instance.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
+            params.identity = instance.identity
 
     return params
 
@@ -470,4 +487,63 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, server_
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
         description=description)
+
+
+def server_key_create(client, resource_group_name, server_name, kid):
+
+    """Create Server Key."""
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name,
+        uri=kid
+    )
+
+
+def server_key_get(client, resource_group_name, server_name, kid):
+
+    """Get Server Key."""
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+def server_key_delete(cmd, client, resource_group_name, server_name, kid):
+
+    """Drop Server Key."""
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.delete(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+def _get_server_key_name_from_uri(uri):
+    '''
+    Gets the key's name to use as a server key.
+
+    The SQL server key API requires that the server key has a specific name
+    based on the vault, key and key version.
+    '''
+    import re
+
+    match = re.match(r'^https(.)+\.vault(.)+\/keys\/[^\/]+\/[0-9a-zA-Z]+$', uri)
+
+    if match is None:
+        raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
+                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+    vault = uri.split('.')[0].split('/')[-1]
+    key = uri.split('/')[-2]
+    version = uri.split('/')[-1]
+    return '{}_{}_{}'.format(vault, key, version)
+
 # endregion
