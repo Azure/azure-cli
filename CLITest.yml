@@ -15,7 +15,7 @@ jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
   timeoutInMinutes: 9999
-  condition: contains(variables.USER_TARGETd, variables.Target)
+  #condition: contains(variables.USER_TARGET, variables.Target)
   strategy:
     maxParallel: 20
     matrix:
@@ -146,7 +146,7 @@ jobs:
         addToPath: true
         architecture: 'x64'
     - bash: |
-        if [[ $(USER_TARGET) =~ $(Target) ]]; then
+        if [[ "$(USER_TARGET)" =~ "$(Target)" ]]; then
           echo Match!
         else
           exit
