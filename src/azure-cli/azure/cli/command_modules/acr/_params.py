@@ -34,7 +34,8 @@ from ._validators import (
     validate_secret_arg,
     validate_set,
     validate_set_secret,
-    validate_retention_days
+    validate_retention_days,
+    validate_registry_name
 )
 from .scope_map import ScopeMapActions
 
@@ -53,7 +54,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr') as c:
         c.argument('tags', arg_type=tags_type)
-        c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
+        c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr', validator=validate_registry_name)
         c.argument('tenant_suffix', options_list=['--suffix'], help="The tenant suffix in registry login server. You may specify '--suffix tenant' if your registry login server is in the format 'registry-tenant.azurecr.io'. Applicable if you\'re accessing the registry from a different subscription or you have permission to access images but not the permission to manage the registry resource.")
         c.argument('sku', help='The SKU of the container registry', arg_type=get_enum_type(SkuName))
         c.argument('admin_enabled', help='Indicates whether the admin user is enabled', arg_type=get_three_state_flag())
@@ -104,7 +105,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr login') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
-        c.argument('expose_token', options_list=['--expose-token', '-t'], help='Expose access token instead of automatically logging in through Docker CLI', action='store_true', is_preview=True)
+        c.argument('expose_token', options_list=['--expose-token', '-t'], help='Expose access token instead of automatically logging in through Docker CLI', action='store_true')
 
     with self.argument_context('acr repository') as c:
         c.argument('resource_group_name', deprecate_info=c.deprecate(hide=True))
@@ -122,14 +123,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('image', options_list=['--image', '-t'], help="The name of the image. May include a tag in the format 'name:tag'.")
 
     with self.argument_context('acr create') as c:
-        c.argument('registry_name', completer=None)
+        c.argument('registry_name', completer=None, validator=None)
         c.argument('deployment_name', validator=None)
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('workspace', is_preview=True,
                    help='Name or ID of the Log Analytics workspace to send registry diagnostic logs to. All events will be enabled. You can use "az monitor log-analytics workspace create" to create one. Extra billing may apply.')
 
     with self.argument_context('acr check-name') as c:
-        c.argument('registry_name', completer=None)
+        c.argument('registry_name', completer=None, validator=None)
 
     with self.argument_context('acr webhook') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])

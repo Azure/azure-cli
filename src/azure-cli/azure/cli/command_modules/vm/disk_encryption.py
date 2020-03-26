@@ -432,7 +432,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
 
     ext = VirtualMachineScaleSetExtension(name=extension['name'],
                                           publisher=extension['publisher'],
-                                          type=extension['name'],
+                                          type1=extension['name'],
                                           type_handler_version=extension['version'],
                                           settings=public_config,
                                           auto_upgrade_minor_version=True,
@@ -469,7 +469,7 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
 
     ext = VirtualMachineScaleSetExtension(name=extension['name'],
                                           publisher=extension['publisher'],
-                                          type=extension['name'],
+                                          type1=extension['name'],
                                           type_handler_version=extension['version'],
                                           settings=public_config,
                                           auto_upgrade_minor_version=True,
