@@ -436,7 +436,7 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
 # pylint: disable=too-many-locals
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
                   target_resource_group=None, restore_to_staging_storage_account=None, restore_only_osdisk=None,
-                  diskslist=None):
+                  diskslist=None, restore_as_unmanaged_disks=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
     _validate_item(item)
@@ -464,8 +464,26 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     _storage_account_id = _get_storage_account_id(cmd.cli_ctx, sa_name, sa_rg)
     _source_resource_id = item.properties.source_resource_id
     target_rg_id = None
-    if recovery_point.properties.is_managed_virtual_machine and target_resource_group is not None:
-        target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + target_resource_group
+
+    if restore_as_unmanaged_disks and target_resource_group is not None:
+        raise CLIError(
+            """
+            Both restore_as_unmanaged_disks and target_resource_group can't be spceified.
+            Please give Only one parameter and retry.
+            """)
+
+    if recovery_point.properties.is_managed_virtual_machine:
+        if target_resource_group is not None:
+            target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + target_resource_group
+        if not restore_as_unmanaged_disks:
+            logger.warning(
+                """
+                The disks of the managed VM will be restored as unmanaged since targetRG parameter is not provided.
+                This will NOT leverage the instant restore functionality.
+                Hence it can be significantly slow based on given storage account.
+                To leverage instant restore, provide the target RG parameter.
+                Otherwise, provide the intent next time by passing the --restore-as-unmanaged-disks parameter
+                """)
 
     _validate_restore_disk_parameters(restore_only_osdisk, diskslist)
     restore_disk_lun_list = None
