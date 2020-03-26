@@ -25,12 +25,12 @@ jobs:
         Target: acs
       advisor:
         Target: advisor
-      # ams:
-      #   Target: ams
-      # apim:
-      #   Target: apim
-      # appconfig:
-      #   Target: appconfig
+      ams:
+        Target: ams
+      apim:
+        Target: apim
+      appconfig:
+        Target: appconfig
       # appservice:
       #   Target: appservice
       # backup:
@@ -146,7 +146,7 @@ jobs:
         addToPath: true
         architecture: 'x64'
     - bash: |
-        if [[ "$(USER_TARGET)" =~ "$(Target)" ]]; then
+        if [[ "$(USER_TARGET)" =~ "$(Target)" || $(USER_TARGET) == "" ]]; then
           echo "Match!"
         else
           echo "Not match!"
@@ -184,6 +184,6 @@ jobs:
     - bash: |
         pwd
         ls
-        commit_id=`git ls-remote git@github.com:Azure/azure-cli.git HEAD`
+        commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
         pip install sendgrid
-        python scripts/ci/sendemail.py ${SENDGRID_KEY} $(Build.BuildId) $commit_id 
+        python /home/vsts/work/1/s/scripts/ci/sendemail.py ${SENDGRID_KEY} $(Build.BuildId) $commit_id 
