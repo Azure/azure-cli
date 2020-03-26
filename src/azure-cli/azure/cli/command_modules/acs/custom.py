@@ -1731,6 +1731,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     # Skip create service principal profile for the cluster if the cluster
     # enables managed identity and customer doesn't explicitly provide a service principal.
+    service_principal_profile = None
+    principal_obj = None
     if not(enable_managed_identity and not service_principal and not client_secret):
         principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
                                                     service_principal=service_principal, client_secret=client_secret,
@@ -1851,8 +1853,13 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         identity=identity
     )
 
-    # Add AAD session key to header
-    custom_headers = {'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")}
+    # Add AAD session key to header.
+    # If principal_obj is None, we will not add this header, this can happen
+    # when the cluster enables managed identity. In this case, the header is useless
+    # and that's OK to not add this header
+    custom_headers = None
+    if principal_obj:
+        custom_headers = {'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")}
 
     # Due to SPN replication latency, we do a few retries here
     max_retry = 30
@@ -3386,3 +3393,4 @@ def openshift_monitor_disable(cmd, client, resource_group_name, name, no_wait=Fa
     monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=False, workspace_resource_id=None)  # pylint: disable=line-too-long
     instance.monitor_profile = monitor_profile
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+

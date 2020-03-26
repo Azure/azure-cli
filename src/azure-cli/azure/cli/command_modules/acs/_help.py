@@ -174,7 +174,7 @@ examples:
 
 helps['aks create'] = """
 type: command
-short-summary: Create a new managed Kubernetes cluster.
+short-summary: Create a new managed Kubernetes cluster. Test
 parameters:
   - name: --generate-ssh-keys
     type: string
