@@ -2855,6 +2855,17 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, vmss_name, vmss)
+
+
+def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name, service_name, action=None,
+                                    no_wait=False):
+    # currently service_name has only one available value "AutomaticRepairs". And SDK does not accept service_name,
+    # instead SDK assign it to "AutomaticRepairs" in its own logic. As there may be more service name to be supported,
+    # we define service_name as a required parameter here to avoid introducing a breaking change in the future.
+    client = _compute_client_factory(cmd.cli_ctx)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.set_orchestration_service_state,
+                       resource_group_name, vm_scale_set_name, action)
+
 # endregion
 
 

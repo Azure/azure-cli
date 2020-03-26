@@ -2521,6 +2521,14 @@ examples:
     text: az vmss wait --updated --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup
 """
 
+helps['vmss set-orchestration-service-state'] = """
+type: command
+short-summary: Change ServiceState property for a given service within a VMSS.
+examples:
+  - name: Change ServiceState property for AutomaticRepairs
+    text: az vmss set-orchestration-service-state --service-name AutomaticRepairs --action Resume --name MyScaleSet --resource-group MyResourceGroup
+"""
+
 helps['vm monitor'] = """
 type: group
 short-summary: Manage monitor aspect for a vm.

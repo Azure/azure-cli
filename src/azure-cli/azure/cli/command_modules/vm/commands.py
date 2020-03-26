@@ -179,7 +179,8 @@ def load_command_table(self, _):
 
     compute_disk_encryption_set_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
-        client_factory=cf_disk_encryption_set
+        client_factory=cf_disk_encryption_set,
+        operation_group='disk_encryption_sets'
     )
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
@@ -400,6 +401,7 @@ def load_command_table(self, _):
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.command('get-os-upgrade-history', 'get_os_upgrade_history', min_api='2018-10-01')
+        g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
     with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')

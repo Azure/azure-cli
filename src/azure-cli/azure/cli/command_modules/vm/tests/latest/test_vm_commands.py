@@ -4351,5 +4351,32 @@ class VMCreateNSGRule(ScenarioTest):
         ])
 
 
+class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_set_orchestration_service_state_')
+    def test_vmss_set_orchestration_service_state(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'lb': 'lb1',
+            'probe': 'probe',
+            'lbrule': 'lbrule',
+            'service_name': 'AutomaticRepairs'
+        })
+
+        # Prepare health probe
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
+        self.cmd(
+            'network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30',
+            checks=[
+                self.check('vmss.automaticRepairsPolicy.enabled', True),
+                self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M')
+            ])
+        self.cmd('vmss set-orchestration-service-state -g {rg} -n {vmss} --service-name {service_name} --action Resume')
+        self.cmd('vmss set-orchestration-service-state -g {rg} -n {vmss} --service-name {service_name} --action Suspend')
+
+
 if __name__ == '__main__':
     unittest.main()
