@@ -751,7 +751,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.family', family),
                      JMESPathCheck('sku.capacity', v_cores),
                      JMESPathCheck('identity', None)]).get_output_in_json()
-           
+
         edition_updated = 'BusinessCritical'
         print('Updating MI...\n')
 
