@@ -490,7 +490,7 @@ def load_command_table(self, _):
     ###############################################
     #                sql managed instance         #
     ###############################################
-    
+
     managed_instance_operations_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceOperations.{}',
         client_factory=get_sql_managed_instance_operations_operations)
