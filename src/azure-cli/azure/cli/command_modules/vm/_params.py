@@ -40,7 +40,7 @@ def load_arguments(self, _):
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
     HyperVGenerationTypes, HyperVGeneration = self.get_models('HyperVGenerationTypes', 'HyperVGeneration')
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
-    OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction')
+    OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -598,7 +598,7 @@ def load_arguments(self, _):
         c.argument('virtual_machine_scale_set_name', arg_type=vmss_name_type, options_list=['--vmss-name'], id_part=None)
 
     with self.argument_context('vmss set-orchestration-service-state') as c:
-        c.argument('service_name', arg_type=get_enum_type(OrchestrationServiceNames), help='The name of the service.')
+        c.argument('service_name', arg_type=get_enum_type(OrchestrationServiceNames), help='The name of the orchestration service.')
         c.argument('action', arg_type=get_enum_type(OrchestrationServiceStateAction), help='The action to be performed.')
     # endregion
 

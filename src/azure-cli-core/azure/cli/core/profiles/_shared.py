@@ -129,7 +129,8 @@ AZURE_API_PROFILES = {
             'resource_skus': '2019-04-01',
             'disks': '2019-07-01',
             'snapshots': '2019-07-01',
-            'galleries': '2019-07-01'
+            'galleries': '2019-07-01',
+            'virtual_machine_scale_sets': '2019-12-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',

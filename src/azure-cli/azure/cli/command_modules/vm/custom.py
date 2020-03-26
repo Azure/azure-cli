@@ -2857,8 +2857,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
                        resource_group_name, vmss_name, vmss)
 
 
-def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name, service_name, action=None,
-                                    no_wait=False):
+def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name, service_name, action, no_wait=False):
     # currently service_name has only one available value "AutomaticRepairs". And SDK does not accept service_name,
     # instead SDK assign it to "AutomaticRepairs" in its own logic. As there may be more service name to be supported,
     # we define service_name as a required parameter here to avoid introducing a breaking change in the future.

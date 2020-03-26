@@ -4376,6 +4376,10 @@ class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
             ])
         self.cmd('vmss set-orchestration-service-state -g {rg} -n {vmss} --service-name {service_name} --action Resume')
         self.cmd('vmss set-orchestration-service-state -g {rg} -n {vmss} --service-name {service_name} --action Suspend')
+        self.cmd('vmss get-instance-view -g {rg} -n {vmss}', checks=[
+            self.check('orchestrationServices[0].serviceName', self.kwargs['service_name']),
+            self.check('orchestrationServices[0].serviceState', 'Suspended')
+        ])
 
 
 if __name__ == '__main__':
