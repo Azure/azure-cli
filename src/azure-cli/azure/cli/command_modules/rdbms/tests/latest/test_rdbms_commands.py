@@ -32,11 +32,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-<<<<<<< HEAD
                  name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus',
-=======
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westus',
->>>>>>> 34f9033b96e6ea31f82626a9f2b152c1a061300e
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -390,11 +386,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
         vnet_firewall_rule_1 = 'vnet_rule1'
         vnet_firewall_rule_2 = 'vnet_rule2'
-<<<<<<< HEAD
         location = 'eastus'
-=======
-        location = 'westus'
->>>>>>> 34f9033b96e6ea31f82626a9f2b152c1a061300e
         vnet_name = 'clitestvnet'
         ignore_missing_endpoint = 'true'
         address_prefix = '10.0.0.0/16'

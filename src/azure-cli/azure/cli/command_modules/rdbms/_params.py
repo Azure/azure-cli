@@ -94,12 +94,9 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('tags', tags_type)
 
             if scope == 'mariadb server':
-<<<<<<< HEAD
                 c.ignore('minimal_tls_version')
                 c.ignore('public_network_access')
-=======
                 c.ignore('assign_identity')
->>>>>>> 34f9033b96e6ea31f82626a9f2b152c1a061300e
 
     for scope in ['mariadb server-logs', 'mysql server-logs', 'postgres server-logs']:
         with self.argument_context(scope) as c:
