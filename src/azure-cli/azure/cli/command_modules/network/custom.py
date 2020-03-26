@@ -5220,7 +5220,7 @@ def _prep_cert_create(cmd, gateway_name, resource_group_name):
 
 def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, public_ip_address,
                         virtual_network, location=None, tags=None,
-                        no_wait=False, gateway_type=None, sku=None, vpn_type=None,
+                        no_wait=False, gateway_type=None, sku=None, vpn_type=None, vpn_gateway_generation=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
                         gateway_default_site=None, custom_routes=None):
@@ -5233,9 +5233,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
     subnet = virtual_network + '/subnets/GatewaySubnet'
     active_active = len(public_ip_address) == 2
     vnet_gateway = VirtualNetworkGateway(
-        gateway_type=gateway_type, vpn_type=vpn_type, location=location, tags=tags,
-        sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active,
-        ip_configurations=[],
+        gateway_type=gateway_type, vpn_type=vpn_type, vpn_gateway_generation=vpn_gateway_generation, location=location,
+        tags=tags, sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active, ip_configurations=[],
         gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
     for i, public_ip in enumerate(public_ip_address):
         ip_configuration = VirtualNetworkGatewayIPConfiguration(
