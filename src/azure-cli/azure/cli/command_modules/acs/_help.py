@@ -260,6 +260,10 @@ parameters:
     type: int
     short-summary: Load balancer idle timeout in minutes.
     long-summary: Desired idle timeout for load balancer outbound flows, default is 30 minutes. Please specify a value in the range of [4, 120].
+  - name: --outbound-type
+    type: string
+    short-summary: How outbound traffic will be configured for a cluster.
+    long-summary: Select between loadBalancer and userDefinedRouting. If not set, defaults to type loadBalancer. Requires --vnet-subnet-id to be provided with a preconfigured route table and --load-balancer-sku to be Standard.
   - name: --enable-cluster-autoscaler
     type: bool
     short-summary: Enable cluster autoscaler, default value is false.
@@ -359,6 +363,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --api-server-authorized-ip-ranges 193.168.1.0/24,194.168.1.0/24,195.168.1.0
   - name: Create a kubernetes cluster which enables managed identity.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
+  - name: Create a kubernetes cluster with userDefinedRouting, standard load balancer SKU and a custom subnet preconfigured with a route table
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --outbound-type userDefinedRouting --load-balancer-sku standard --vnet-subnet-id customUserSubnetVnetID
 """
 
 helps['aks update'] = """
@@ -625,6 +631,9 @@ parameters:
   - name: --labels
     type: string
     short-summary: The node labels for the node pool. You can't change the node labels through CLI after the node pool is created. See https://aka.ms/node-labels for syntax of labels.
+  - name: --mode
+    type: string
+    short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
 """
 
 helps['aks nodepool delete'] = """
@@ -670,6 +679,9 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --mode
+    type: string
+    short-summary: The mode for a node pool which defines a node pool's primary function. If set as "System", AKS prefers system pods scheduling to node pools with mode `System`. Learn more at https://aka.ms/aks/nodepool/mode.
 examples:
   - name: Enable cluster-autoscaler within node count range [1,5]
     text: az aks nodepool update --enable-cluster-autoscaler --min-count 1 --max-count 5 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
