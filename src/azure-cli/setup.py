@@ -43,7 +43,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
@@ -86,12 +85,12 @@ DEPENDENCIES = [
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
     'azure-mgmt-eventhub~=3.0.0',
-    'azure-mgmt-hdinsight~=1.3.0',
+    'azure-mgmt-hdinsight~=1.4.0',
     'azure-mgmt-imagebuilder~=0.2.1',
     'azure-mgmt-iotcentral~=3.0.0',
     'azure-mgmt-iothub~=0.8.2',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
-    'azure-mgmt-keyvault~=2.1',
+    'azure-mgmt-keyvault~=2.2.0',
     'azure-mgmt-kusto~=0.3.0',
     'azure-mgmt-loganalytics~=0.2',
     'azure-mgmt-managedservices~=1.0',
@@ -102,7 +101,7 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=0.7.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.7.0',
-    'azure-mgmt-network~=9.0.0',
+    'azure-mgmt-network~=10.0.0',
     'azure-mgmt-policyinsights~=0.4.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=2.0.0',
@@ -112,7 +111,7 @@ DEPENDENCIES = [
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource~=8.0.1',
+    'azure-mgmt-resource==8.0.1',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',
     'azure-mgmt-servicebus~=0.6.0',
@@ -130,8 +129,8 @@ DEPENDENCIES = [
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'jsmin~=2.2.2',
-    'knack~=0.6,>=0.6.3',
-    'mock~=2.0',
+    'knack==0.7.0rc1',
+    'mock~=4.0',
     'paramiko>=2.0.8,<3.0.0',
     'pygments~=2.4',
     'pyOpenSSL>=17.1.0',
@@ -153,9 +152,6 @@ with open('README.rst', 'r', encoding='utf-8') as f:
     README = f.read()
 with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
-
-if sys.version_info < (3, 4):
-    raise ImportError("azure-cli requires Python 3.4 or later.")
 
 setup(
     name='azure-cli',

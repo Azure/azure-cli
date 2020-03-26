@@ -268,6 +268,14 @@ class TestExtensionCommands(unittest.TestCase):
                     'name': 'test_sample_extension1',
                     'summary': 'my summary',
                     'version': '0.1.0'
+                }}],
+            'test_sample_extension2': [{
+                'metadata': {
+                    'name': 'test_sample_extension2',
+                    'summary': 'my summary',
+                    'version': '0.1.0',
+                    'azext.isPreview': True,
+                    'azext.isExperimental': True
                 }}]
         }
         with mock.patch('azure.cli.core.extension.operations.get_index_extensions', return_value=sample_index_extensions):
@@ -278,6 +286,16 @@ class TestExtensionCommands(unittest.TestCase):
             self.assertEqual(res[0]['summary'], 'my summary')
             self.assertEqual(res[0]['version'], '0.1.0')
             self.assertEqual(res[0]['preview'], False)
+            self.assertEqual(res[0]['experimental'], False)
+        with mock.patch('azure.cli.core.extension.operations.get_index_extensions', return_value=sample_index_extensions):
+            res = list_available_extensions()
+            self.assertIsInstance(res, list)
+            self.assertEqual(len(res), len(sample_index_extensions))
+            self.assertEqual(res[1]['name'], 'test_sample_extension2')
+            self.assertEqual(res[1]['summary'], 'my summary')
+            self.assertEqual(res[1]['version'], '0.1.0')
+            self.assertEqual(res[1]['preview'], True)
+            self.assertEqual(res[1]['experimental'], True)
 
     def test_list_available_extensions_incompatible_cli_version(self):
         sample_index_extensions = {
