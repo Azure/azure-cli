@@ -272,7 +272,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
-        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('ossrdbmsbyokmysql', 24))
+        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
@@ -284,7 +284,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
-        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('ossrdbmsbyokpostgres', 24))
+        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('pgsql', 24))
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
         firewall_rule_1 = 'rule1'
