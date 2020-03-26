@@ -305,14 +305,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
                                                              disk_version)
                 image_reference = response.id
-            elif len(terms) == 1:  # name
-                subscription_id = get_subscription_id(cmd.cli_ctx)
-                image_reference = resource_id(
-                    subscription=subscription_id, resource_group=resource_group_name,
-                    namespace='Microsoft.Compute', type='images', name=image_reference
-                )
             else:  # error
-                raise CLIError('usage error: urn should be in the format of publisher:offer:sku:version.')
+                raise CLIError('usage error: --image-reference should be ID or URN (publisher:offer:sku:version).')
         # image_reference is an ID now
         image_reference = {'id': image_reference}
         if image_reference_lun is not None:

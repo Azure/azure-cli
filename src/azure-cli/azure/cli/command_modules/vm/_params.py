@@ -137,7 +137,7 @@ def load_arguments(self, _):
         c.argument('max_shares', type=int, help='The maximum number of VMs that can attach to the disk at the same time. Value greater than one indicates a disk that can be mounted on multiple VMs at the same time')
         c.argument('disk_iops_read_only', type=int, help='The total number of IOPS that will be allowed across all VMs mounting the shared disk as ReadOnly. One operation can transfer between 4k and 256k bytes')
         c.argument('disk_mbps_read_only', type=int, help='The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10')
-        c.argument('image_reference', help='ID, name or URN (publisher:offer:sku:version) of the image from which to create a disk')
+        c.argument('image_reference', help='ID or URN (publisher:offer:sku:version) of the image from which to create a disk')
         c.argument('image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
         c.argument('gallery_image_reference', help='ID of the shared galley image version from which to create a disk')
         c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')

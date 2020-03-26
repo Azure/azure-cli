@@ -757,19 +757,6 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('creationData.imageReference.id', '{image}')
         ])
 
-        """
-        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --generate-ssh-key --nsg-rule NONE')
-        self.cmd('vm run-command invoke -g {rg} -n {vm} --command-id RunShellScript --scripts "echo \'sudo waagent -deprovision+user --force\' | at -M now + 1 minutes"')
-        time.sleep(70)
-        self.cmd('vm deallocate -g {rg} -n {vm}')
-        self.cmd('vm generalize -g {rg} -n {vm}')
-        image_id = self.cmd('image create -g {rg} -n {image2} --source {vm}').get_output_in_json()['id']
-        # image_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/diskEncryptionSets/image2'.format(subs_id, resource_group)
-        self.cmd('disk create -g {rg} -n {disk4} --image-reference {image2}', checks=[
-            self.check('creationData.imageReference.id', image_id)
-        ])
-        """
-
         self.cmd('sig create -g {rg} --gallery-name {g1}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {g1} --gallery-image-definition image --os-type linux -p publisher1 -f offer1 -s sku1')
         self.cmd('disk create -g {rg} -n disk --size-gb 10')
