@@ -689,6 +689,26 @@ type: command
 short-summary: List the private link resources supported for a MySQL server.
 """
 
+helps['mysql server key'] = """
+type: group
+short-summary: Manage MySQL server keys.
+"""
+
+helps['mysql server key create'] = """
+type: command
+short-summary: Create server key.
+"""
+
+helps['mysql server key delete'] = """
+type: command
+short-summary: Delete server key.
+"""
+
+helps['mysql server key show'] = """
+type: command
+short-summary: Show server key.
+"""
+
 helps['postgres'] = """
 type: group
 short-summary: Manage Azure Database for PostgreSQL servers.
@@ -1025,4 +1045,24 @@ short-summary: Manage PostgreSQL server private link resources.
 helps['postgres server private-link-resource list'] = """
 type: command
 short-summary: List the private link resources supported for a PostgreSQL server.
+"""
+
+helps['postgres server key'] = """
+type: group
+short-summary: Manage PostgreSQL server keys.
+"""
+
+helps['postgres server key create'] = """
+type: command
+short-summary: Create server key.
+"""
+
+helps['postgres server key delete'] = """
+type: command
+short-summary: Delete server key.
+"""
+
+helps['postgres server key show'] = """
+type: command
+short-summary: Show server key.
 """

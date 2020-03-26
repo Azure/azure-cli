@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import time
 
 from datetime import datetime
 from time import sleep
@@ -31,7 +32,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus2euap',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -100,11 +101,11 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'eastus'
+        loc = 'westus'
 
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
-        geoloc = 'eastus'
+        geoloc = 'westus'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
@@ -271,6 +272,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
+        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
@@ -282,6 +284,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
         self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
+        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('pgsql', 24))
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
         firewall_rule_1 = 'rule1'
@@ -369,7 +372,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
         vnet_firewall_rule_1 = 'vnet_rule1'
         vnet_firewall_rule_2 = 'vnet_rule2'
-        location = 'eastus2euap'
+        location = 'westus'
         vnet_name = 'clitestvnet'
         ignore_missing_endpoint = 'true'
         address_prefix = '10.0.0.0/16'
@@ -516,7 +519,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['properties']['groupId'], group_id)
 
     def _test_private_endpoint_connection(self, resource_group, server, database_engine):
-        loc = 'eastus2euap'
+        loc = 'westus'
         vnet = self.create_random_name('cli-vnet-', 24)
         subnet = self.create_random_name('cli-subnet-', 24)
         pe_name_auto = self.create_random_name('cli-pe-', 24)
@@ -679,6 +682,58 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server private-endpoint-connection delete --id {}'
                  .format(database_engine, server_pec_id))
 
+    def _test_data_encryption(self, resource_group, server, database_engine, vault_name):
+        resource_prefix = 'ossrdbmsbyok'
+        key_name = self.create_random_name(resource_prefix, 32)
+
+        # add identity to server
+        server_resp = self.cmd('{} server update -g {} --name {} --assign-identity'
+                               .format(database_engine, resource_group, server)).get_output_in_json()
+        server_identity = server_resp['identity']['principalId']
+
+        # create vault and acl server identity
+        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true --enable-purge-protection true'
+                 .format(resource_group, vault_name))
+
+        # create key
+        key_resp = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                            .format(key_name, vault_name)).get_output_in_json()
+
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, vault_name, server_identity))
+
+        # add server key
+        kid = key_resp['key']['kid']
+        server_key_resp = self.cmd('{} server key create -g {} --name {} --kid {}'
+                                   .format(database_engine, resource_group, server, kid),
+                                   checks=[JMESPathCheck('uri', kid)])
+
+        server_key_name = server_key_resp.get_output_in_json()['name']
+
+        # validate show key
+        self.cmd('{} server key show -g {} --name {} --kid {}'
+                 .format(database_engine, resource_group, server, kid),
+                 checks=[
+                     JMESPathCheck('uri', kid),
+                     JMESPathCheck('name', server_key_name)])
+
+        # validate list key (should return 1 items)
+        self.cmd('{} server key list -g {} --name {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # delete server key
+        self.cmd('{} server key delete -g {} --name {} --kid {} --yes'
+                 .format(database_engine, resource_group, server, kid))
+
+        # wait for key to be deleted
+        time.sleep(10)
+
+        # validate deleted server key via list (should return no item)
+        self.cmd('{} server key list -g {} -s {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 0)])
+
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
@@ -692,7 +747,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                     self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
 
         # create a server
-        result = self.cmd('{} server create -g {} --name {} -l eastus '
+        result = self.cmd('{} server create -g {} --name {} -l westus '
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name GP_Gen5_2'
                           .format(database_engine, resource_group, server),
@@ -705,7 +760,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                               JMESPathCheck('masterServerId', '')]).get_output_in_json()
 
         # test replica create
-        self.cmd('{} server replica create -g {} -n {} -l eastus --sku-name GP_Gen5_4 '
+        self.cmd('{} server replica create -g {} -n {} -l westus --sku-name GP_Gen5_4 '
                  '--source-server {}'
                  .format(database_engine, resource_group, replicas[0], result['id']),
                  checks=[
@@ -796,7 +851,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                     self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
 
         # create a server
-        result = self.cmd('{} server create -g {} --name {} -l eastus '
+        result = self.cmd('{} server create -g {} --name {} -l westus '
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name {}'
                           .format(database_engine, resource_group, server, skuName),
@@ -821,7 +876,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
             sleep(120)
 
         # test replica create
-        self.cmd('{} server replica create -g {} -n {} -l eastus --sku-name {} '
+        self.cmd('{} server replica create -g {} -n {} -l westus --sku-name {} '
                  '--source-server {}'
                  .format(database_engine, resource_group, replicas[0], testSkuName, result['id']),
                  checks=[
