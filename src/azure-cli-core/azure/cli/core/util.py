@@ -29,6 +29,11 @@ try:
 except ImportError:
     from inspect import getargspec as get_arg_spec
 
+try:
+    from inspect import getfullargspec as get_arg_spec
+except ImportError:
+    from inspect import getargspec as get_arg_spec
+
 logger = get_logger(__name__)
 
 CLI_PACKAGE_NAME = 'azure-cli'
