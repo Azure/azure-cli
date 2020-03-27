@@ -21,6 +21,11 @@ from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 from azure.common import AzureException
 
+try:
+    from inspect import getfullargspec as get_arg_spec
+except ImportError:
+    from inspect import getargspec as get_arg_spec
+
 logger = get_logger(__name__)
 
 CLI_PACKAGE_NAME = 'azure-cli'
@@ -364,6 +369,14 @@ def get_arg_list(op):
     except AttributeError:
         sig = inspect.getargspec(op)  # pylint: disable=deprecated-method
         return sig.args
+
+
+def is_track2(client_class):
+    """ IS this client a autorestv3/track2 one?.
+    Could be refined later if necessary.
+    """
+    args = get_arg_spec(client_class.__init__).args
+    return "credential" in args
 
 
 DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
