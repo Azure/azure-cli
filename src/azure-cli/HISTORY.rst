@@ -3,8 +3,13 @@
 Release History
 ===============
 
-2.2.0
+2.3.0
 ++++++
+
+**IoT Central**
+
+* az iotcentral: Deprecated
+* Added az iot central command module
 
 **ACR**
 

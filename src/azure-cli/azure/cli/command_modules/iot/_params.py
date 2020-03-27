@@ -281,7 +281,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='User role of the access key for the given IoT Plug and Play repository.')
 
     with self.argument_context('iot central app') as c:
-        c.argument('app_name', app_name_type, options_list=['--name', '-n'], id_part='display_name')
+        c.argument('app_name', app_name_type, options_list=['--name', '-n'])
 
     with self.argument_context('iot central app create') as c:
         c.argument('app_name', completer=None)
