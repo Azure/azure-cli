@@ -1069,24 +1069,24 @@ def list_applications(cmd, resource_group_name=None):
     return list(applications)
 
 
-def list_deployments_at_subscription_scope(cmd):
+def list_deployments_at_subscription_scope(cmd, filter_string=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.list_at_subscription_scope()
+    return rcf.deployments.list_at_subscription_scope(filter=filter_string)
 
 
-def list_deployments_at_resource_group(cmd, resource_group_name):
+def list_deployments_at_resource_group(cmd, resource_group_name, filter_string=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.list_by_resource_group(resource_group_name)
+    return rcf.deployments.list_by_resource_group(resource_group_name, filter=filter_string)
 
 
-def list_deployments_at_management_group(cmd, management_group_id):
+def list_deployments_at_management_group(cmd, management_group_id, filter_string=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.list_at_management_group_scope(management_group_id)
+    return rcf.deployments.list_at_management_group_scope(management_group_id, filter=filter_string)
 
 
-def list_deployments_at_tenant_scope(cmd):
+def list_deployments_at_tenant_scope(cmd, filter_string=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.list_at_tenant_scope()
+    return rcf.deployments.list_at_tenant_scope(filter=filter_string)
 
 
 def get_deployment_at_subscription_scope(cmd, deployment_name):
