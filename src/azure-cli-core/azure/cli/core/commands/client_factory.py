@@ -10,6 +10,7 @@ import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
+from azure.cli.core.util import is_track2
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -110,6 +111,38 @@ def configure_common_settings(cli_ctx, client):
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 
+def configure_common_settings_track2(cli_ctx):
+    client_kwargs = {}
+
+    client_kwargs.update(_debug.change_ssl_cert_verification_track2())
+
+    client_kwargs['logging_enable'] = True
+    client_kwargs['user_agent'] = UA_AGENT
+    try:
+        client_kwargs['user_agent'] += os.environ[ENV_ADDITIONAL_USER_AGENT]
+    except KeyError:
+        pass
+
+    try:
+        command_ext_name = cli_ctx.data['command_extension_name']
+        if command_ext_name:
+            client_kwargs['user_agent'] += "CliExtension/{}".format(command_ext_name)
+    except KeyError:
+        pass
+
+    headers = dict(cli_ctx.data['headers'])
+    command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
+    headers['CommandName'] = "{}{}".format(cli_ctx.data['command'], command_name_suffix)
+    if cli_ctx.data.get('safe_params'):
+        headers['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+    client_kwargs['headers'] = headers
+
+    if 'x-ms-client-request-id' in cli_ctx.data['headers']:
+        client_kwargs['request_id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+
+    return client_kwargs
+
+
 def _get_mgmt_service_client(cli_ctx,
                              client_type,
                              subscription_bound=True,
@@ -139,12 +172,15 @@ def _get_mgmt_service_client(cli_ctx,
     if kwargs:
         client_kwargs.update(kwargs)
 
+    if is_track2(client_type):
+        client_kwargs.update(configure_common_settings_track2(cli_ctx))
+
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)
     else:
         client = client_type(cred, **client_kwargs)
 
-    if hasattr(client, 'config'):
+    if not is_track2(client):
         configure_common_settings(cli_ctx, client)
 
     return client, subscription_id
