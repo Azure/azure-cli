@@ -21,6 +21,7 @@ from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
+from .local_context import AzCLILocalContext, STORE
 
 logger = get_logger(__name__)
 
@@ -56,7 +57,9 @@ class AzCli(CLI):
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
-
+        self.local_context = AzCLILocalContext(
+            dir_name=os.path.basename(self.config.config_dir), file_name='local_context'
+        )
         register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
@@ -104,6 +107,33 @@ class AzCli(CLI):
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
         return handle_exception(ex)
+
+    def save_local_context(self, parsed_args, argument_definitions, specified_arguments):
+        """ Local Context Attribute arguments
+
+        Save argument value to local context if it is defined as STORE and user specify a value for it.
+
+        :param parsed_args: Parsed args which return by AzCliCommandParser parse_args
+        :type parsed_args: Namespace
+        :param argument_definitions: All available argument definitions
+        :type argument_definitions: dict
+        :param specified_arguments: Arguments which user specify in this command
+        :type specified_arguments: list
+        """
+
+        for argument_name in specified_arguments:
+            # make sure STORE is defined
+            if argument_name not in argument_definitions:
+                continue
+            argtype = argument_definitions[argument_name].type
+            lca = argtype.settings.get('local_context_attribute', None)
+            if not lca or not lca.actions or STORE not in lca.actions:
+                continue
+            # get the specified value
+            value = getattr(parsed_args, argument_name)
+            # save when name and scopes have value
+            if lca.name and lca.scopes:
+                self.local_context.set(lca.scopes, lca.name, value)
 
 
 class MainCommandsLoader(CLICommandsLoader):

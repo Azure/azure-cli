@@ -18,3 +18,7 @@ def load_command_table(self, _):
         g.command('show', 'show_cache_contents')
         g.command('delete', 'delete_cache_contents')
         g.command('purge', 'purge_cache_contents')
+
+    with self.command_group('local-context', configure_custom, is_experimental=True) as g:
+        g.command('on', 'turn_local_context_on')
+        g.command('off', 'turn_local_context_off')

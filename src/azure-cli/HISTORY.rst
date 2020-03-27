@@ -3,13 +3,18 @@
 Release History
 ===============
 
-2.3.0
+2.4.0
 ++++++
 
 **IoT Central**
 
 * az iotcentral: Deprecated
-* Added az iot central command module
+* Added 'az iot central' command module
+
+**RDBMS**
+
+* Bump the azure-mgmt-rdbms SDK version to 2.2.0
+* Add --public-network-access to control whether a server supports public access or not
 
 **ACR**
 

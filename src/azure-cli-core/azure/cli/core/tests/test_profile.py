@@ -1952,8 +1952,10 @@ class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-me
 
 class TenantStub(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, tenant_id):
+    def __init__(self, tenant_id, display_name="DISPLAY_NAME"):
         self.tenant_id = tenant_id
+        self.display_name = display_name
+        self.additional_properties = {'displayName': display_name}
 
 
 class MSRestAzureAuthStub:
