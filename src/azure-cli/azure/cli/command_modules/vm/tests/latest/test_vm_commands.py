@@ -1641,20 +1641,6 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}',
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_reference_vmss_')
-    def test_vm_reference_vmss(self, resource_group):
-        self.kwargs.update({
-            'vm': 'vm1',
-            'vmss': 'vmss1'
-        })
-
-        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM --platform-fault-domain-count 2')
-        self.cmd('vm create -g {rg} -n {vm} --image ubuntults --vmss {vmss}')
-        vmss_id = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
-        self.cmd('vm show -g {rg} -n {vm}', checks=[
-            self.check('virtualMachineScaleSet.id', vmss_id)
-        ])
-
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_provision_vm_agent_')
     def test_vm_create_provision_vm_agent(self, resource_group):
         self.kwargs.update({
@@ -3930,23 +3916,6 @@ class VMImageTermsTest(ScenarioTest):
         ])
 
 
-class VMSSOrchestrationModeTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_orchestration_mode_', location='eastus')
-    def test_vmss_orchestration_mode(self, resource_group):
-        self.kwargs.update({
-            'vmss': 'vmss1',
-            'vmss2': 'vmss2'
-        })
-
-        self.cmd('vmss create -g {rg} -n {vmss} --orchestration-mode VM --zones 3 --platform-fault-domain-count 5')
-        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('name', '{vmss}')
-        ])
-        with self.assertRaises(CLIError):
-            self.cmd('vmss create -g {rg} -n {vmss2} --orchestration-mode VM --admin-username user --admin-password 123456')
-
-
 class DiskEncryptionSetTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='westcentralus')
@@ -4011,24 +3980,30 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         time.sleep(15)
 
+        self.kwargs.update({
+            'des1_pattern': '.*/{}$'.format(self.kwargs['des1']),
+            'des2_pattern': '.*/{}$'.format(self.kwargs['des2']),
+            'des3_pattern': '.*/{}$'.format(self.kwargs['des3'])
+        })
+
         self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des1} --size-gb 10', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des1_id}', False),
+            self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des1_pattern']),
             self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
         ])
         self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk} --os-type linux')
 
         self.cmd('vm create -g {rg} -n {vm2} --image centos --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-sets {des2} {des3}')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des1_id}', False),
-            self.check('storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', '{des2_id}', False),
-            self.check('storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', '{des3_id}', False)
+            self.check_pattern('storageProfile.osDisk.managedDisk.diskEncryptionSet.id', self.kwargs['des1_pattern']),
+            self.check_pattern('storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', self.kwargs['des2_pattern']),
+            self.check_pattern('storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', self.kwargs['des3_pattern'])
         ])
 
         self.cmd('vmss create -g {rg} -n {vmss} --image centos --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-sets {des2} {des3}')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des1_id}', False),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', '{des2_id}', False),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', '{des3_id}', False)
+            self.check_pattern('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', self.kwargs['des1_pattern']),
+            self.check_pattern('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', self.kwargs['des2_pattern']),
+            self.check_pattern('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', self.kwargs['des3_pattern'])
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
@@ -4097,9 +4072,13 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         time.sleep(15)
 
+        self.kwargs.update({
+            'des1_pattern': '.*/{}$'.format(self.kwargs['des1'])
+        })
+
         self.cmd('disk create -g {rg} -n {disk} --size-gb 10')
         self.cmd('disk update -g {rg} -n {disk} --disk-encryption-set {des1} --encryption-type EncryptionAtRestWithCustomerKey', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des1_id}', False),
+            self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des1_pattern']),
             self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
         ])
 
@@ -4151,15 +4130,20 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         time.sleep(15)
 
+        self.kwargs.update({
+            'des1_pattern': '.*/{}$'.format(self.kwargs['des1']),
+            'des2_pattern': '.*/{}$'.format(self.kwargs['des2'])
+        })
+
         self.cmd('snapshot create -g {rg} -n {snapshot1} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des1} --size-gb 10', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des1_id}', False),
+            self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des1_pattern']),
             self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
         ])
 
         self.cmd('snapshot create -g {rg} -n {snapshot2} --size-gb 10')
 
         self.cmd('snapshot update -g {rg} -n {snapshot2} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des2}', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des2_id}', False)
+            self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des2_pattern'])
         ])
 
 
@@ -4348,6 +4332,37 @@ class VMCreateNSGRule(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm} --image centos --nsg-rule NONE')
         self.cmd('network nsg show -g {rg} -n {vm}NSG', checks=[
             self.check('securityRules', '[]')
+        ])
+
+
+class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_set_orchestration_service_state_')
+    def test_vmss_set_orchestration_service_state(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'lb': 'lb1',
+            'probe': 'probe',
+            'lbrule': 'lbrule',
+            'service_name': 'AutomaticRepairs'
+        })
+
+        # Prepare health probe
+        self.cmd('network lb create -g {rg} -n {lb}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol Tcp --port 80')
+        self.cmd(
+            'network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image UbuntuLTS --load-balancer {lb} --health-probe {probe} --automatic-repairs-grace-period 30',
+            checks=[
+                self.check('vmss.automaticRepairsPolicy.enabled', True),
+                self.check('vmss.automaticRepairsPolicy.gracePeriod', 'PT30M')
+            ])
+        self.cmd('vmss set-orchestration-service-state -g {rg} -n {vmss} --service-name {service_name} --action Resume')
+        self.cmd('vmss set-orchestration-service-state -g {rg} -n {vmss} --service-name {service_name} --action Suspend')
+        self.cmd('vmss get-instance-view -g {rg} -n {vmss}', checks=[
+            self.check('orchestrationServices[0].serviceName', self.kwargs['service_name']),
+            self.check('orchestrationServices[0].serviceState', 'Suspended')
         ])
 
 
