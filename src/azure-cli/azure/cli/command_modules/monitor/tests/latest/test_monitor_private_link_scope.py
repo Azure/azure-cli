@@ -44,19 +44,19 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         self.cmd('monitor private-link-scope list -g {rg}')
         self.cmd('monitor private-link-scope list')
 
-        app_id = self.cmd('monitor app-insights component create -a {app} -g {rg} -l {loc}').get_output_in_json()['id']
+        # app_id = self.cmd('monitor app-insights component create -a {app} -g {rg} -l westcentralus').get_output_in_json()['id']
         workspace_id = self.cmd('monitor log-analytics workspace create -n {workspace} -g {rg} -l {loc}').get_output_in_json()['id']
         self.kwargs.update({
-            'app_id': app_id,
+            # 'app_id': app_id,
             'workspace_id': workspace_id
         })
 
-        self.cmd('monitor private-link-scope assigned-resource create -g {rg} -n {assigned_app} --linked-resource {app_id} --scope-name {scope}')
-        self.cmd('monitor private-link-scope assigned-resource update -g {rg} -n {assigned_app} --scope-name {scope} --tags tag1=d1')
-        self.cmd('monitor private-link-scope assigned-resource show -g {rg} -n {assigned_app} --scope-name {scope}')
-        self.cmd('monitor private-link-scope assigned-resource list -g {rg} --scope-name {scope}')
+        # self.cmd('monitor private-link-scope assigned-resource create -g {rg} -n {assigned_app} --linked-resource {app_id} --scope-name {scope}')
+        # self.cmd('monitor private-link-scope assigned-resource update -g {rg} -n {assigned_app} --scope-name {scope} --tags tag1=d1')
+        # self.cmd('monitor private-link-scope assigned-resource show -g {rg} -n {assigned_app} --scope-name {scope}')
+        # self.cmd('monitor private-link-scope assigned-resource list -g {rg} --scope-name {scope}')
 
-        # self.cmd('monitor private-link-scope assigned-resource create -g {rg} -n {assigned_ws} --linked-resource {workspace_id} --scope-name {scope}')
+        self.cmd('monitor private-link-scope assigned-resource create -g {rg} -n {assigned_ws} --linked-resource {workspace_id} --scope-name {scope}')
 
         self.cmd('monitor private-link-scope private-link-resource list --scope-name {scope} -g {rg}')
 
@@ -87,6 +87,7 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         self.kwargs['pe_id'] = private_endpoint['privateLinkServiceConnections'][0]['id']
 
         # Show the connection at monitor private-link-scope
+
         private_link_scope = self.cmd('monitor private-link-scope show -n {scope} -g {rg}').get_output_in_json()
         self.assertIn('privateEndpointConnections', private_link_scope)
         self.assertEqual(len(private_link_scope['privateEndpointConnections']), 1)
