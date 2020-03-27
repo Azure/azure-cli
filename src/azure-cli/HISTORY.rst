@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**RDBMS**
+
+* Bump the azure-mgmt-rdbms SDK version to 2.2.0
+* Add --public-network-access to control whether a server supports public access or not
+
 2.2.0
 ++++++
 
