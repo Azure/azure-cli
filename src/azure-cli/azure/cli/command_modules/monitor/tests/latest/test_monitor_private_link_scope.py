@@ -13,7 +13,7 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         self.cmd('extension add -n application-insights')
 
 
-    @ResourceGroupPreparer(location='westcentralus')
+    @ResourceGroupPreparer(location='eastus2euap')
     def test_monitor_private_link_scope_scenario(self, resource_group, resource_group_location):
         self.kwargs.update({
             'rg': resource_group,
@@ -60,7 +60,6 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
 
         self.cmd('monitor private-link-scope private-link-resource list --scope-name {scope} -g {rg}')
 
-        self.kwargs['loc'] = 'eastus'
         # Prepare network
         self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))
