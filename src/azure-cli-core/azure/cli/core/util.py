@@ -21,6 +21,11 @@ from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
+try:
+    from inspect import getfullargspec as get_arg_spec
+except ImportError:
+    from inspect import getargspec as get_arg_spec
+
 logger = get_logger(__name__)
 
 CLI_PACKAGE_NAME = 'azure-cli'
