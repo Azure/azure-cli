@@ -14,16 +14,13 @@ import ssl
 import six
 import re
 
-from azure.core.exceptions import AzureError, HttpResponseError
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+
+from azure.common import AzureException
+from azure.core.exceptions import AzureError, HttpResponseError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
-from azure.common import AzureException
-
-try:
-    from inspect import getfullargspec as get_arg_spec
-except ImportError:
-    from inspect import getargspec as get_arg_spec
+from inspect import getfullargspec as get_arg_spec
 
 logger = get_logger(__name__)
 
