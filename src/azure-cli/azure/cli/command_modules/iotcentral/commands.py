@@ -19,7 +19,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.iotcentral.custom#{}')
 
     with self.command_group('iotcentral', iotcentral_sdk, client_factory=iotcentral_service_factory,
-                            deprecate_info=self.deprecate(redirect='iot central', hide=False, expiration='3.0.0')):
+                            deprecate_info=self.deprecate(redirect='iot central', hide=True)):
         pass
 
     with self.command_group('iotcentral app', iotcentral_sdk, client_factory=iotcentral_service_factory) as g:
