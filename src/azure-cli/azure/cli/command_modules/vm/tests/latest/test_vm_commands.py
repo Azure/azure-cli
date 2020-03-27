@@ -3980,29 +3980,34 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         time.sleep(15)
 
+        self.kwargs.update({
+            'des1_pattern': '.*/{}$'.format(self.kwargs['des1']),
+            'des2_pattern': '.*/{}$'.format(self.kwargs['des2']),
+            'des3_pattern': '.*/{}$'.format(self.kwargs['des3'])
+        })
+
         self.cmd('disk create -g {rg} -n {disk} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des1} --size-gb 10', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des1_id}', False),
+            self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des1_pattern']),
             self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
         ])
         self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk} --os-type linux')
 
         self.cmd('vm create -g {rg} -n {vm2} --image centos --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-sets {des2} {des3}')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des1_id}', False),
-            self.check('storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', '{des2_id}', False),
-            self.check('storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', '{des3_id}', False)
+            self.check_pattern('storageProfile.osDisk.managedDisk.diskEncryptionSet.id', self.kwargs['des1_pattern']),
+            self.check_pattern('storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', self.kwargs['des2_pattern']),
+            self.check_pattern('storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', self.kwargs['des3_pattern'])
         ])
 
         self.cmd('vmss create -g {rg} -n {vmss} --image centos --os-disk-encryption-set {des1} --data-disk-sizes-gb 10 10 --data-disk-encryption-sets {des2} {des3}')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des1_id}', False),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', '{des2_id}', False),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', '{des3_id}', False)
+            self.check_pattern('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', self.kwargs['des1_pattern']),
+            self.check_pattern('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.diskEncryptionSet.id', self.kwargs['des2_pattern']),
+            self.check_pattern('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.diskEncryptionSet.id', self.kwargs['des3_pattern'])
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
     @AllowLargeResponse(size_kb=99999)
-    @unittest.skip('Key rotation in disk encryption set is not supported in this version of service')
     def test_disk_encryption_set_update(self, resource_group):
 
         self.kwargs.update({
@@ -4066,9 +4071,13 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         time.sleep(15)
 
+        self.kwargs.update({
+            'des1_pattern': '.*/{}$'.format(self.kwargs['des1'])
+        })
+
         self.cmd('disk create -g {rg} -n {disk} --size-gb 10')
         self.cmd('disk update -g {rg} -n {disk} --disk-encryption-set {des1} --encryption-type EncryptionAtRestWithCustomerKey', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des1_id}', False),
+            self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des1_pattern']),
             self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
         ])
 
@@ -4120,15 +4129,20 @@ class DiskEncryptionSetTest(ScenarioTest):
 
         time.sleep(15)
 
+        self.kwargs.update({
+            'des1_pattern': '.*/{}$'.format(self.kwargs['des1']),
+            'des2_pattern': '.*/{}$'.format(self.kwargs['des2'])
+        })
+
         self.cmd('snapshot create -g {rg} -n {snapshot1} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des1} --size-gb 10', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des1_id}', False),
+            self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des1_pattern']),
             self.check('encryption.type', 'EncryptionAtRestWithCustomerKey')
         ])
 
         self.cmd('snapshot create -g {rg} -n {snapshot2} --size-gb 10')
 
         self.cmd('snapshot update -g {rg} -n {snapshot2} --encryption-type EncryptionAtRestWithCustomerKey --disk-encryption-set {des2}', checks=[
-            self.check('encryption.diskEncryptionSetId', '{des2_id}', False)
+            self.check_pattern('encryption.diskEncryptionSetId', self.kwargs['des2_pattern'])
         ])
 
 
