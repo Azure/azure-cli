@@ -66,6 +66,7 @@ from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonPr
 from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterIdentity
 from azure.mgmt.containerservice.v2020_03_01.models import AgentPool
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterSKU
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -1659,6 +1660,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                enable_cluster_autoscaler=False,
                network_plugin=None,
                network_policy=None,
+               uptime_sla=False,
                pod_cidr=None,
                service_cidr=None,
                dns_service_ip=None,
@@ -1847,6 +1849,12 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         api_server_access_profile=api_server_access_profile,
         identity=identity
     )
+
+    if uptime_sla:
+        mc.sku = ManagedClusterSKU(
+            name="Basic",
+            tier="Paid"
+        )
 
     # Add AAD session key to header
     custom_headers = {'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")}
