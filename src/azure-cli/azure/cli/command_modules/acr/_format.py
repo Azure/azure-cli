@@ -350,7 +350,7 @@ def _get_value(item, *args):
     try:
         for arg in args:
             item = item[arg]
-        return str(item) if item else ' '
+        return str(item) if item or item == 0 else ' '
     except (KeyError, TypeError, IndexError):
         return ' '
 
