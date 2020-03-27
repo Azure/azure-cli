@@ -7,6 +7,7 @@
 
 import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
+from azure.cli.command_modules.storage._validators import _query_account_key
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, sdk_no_wait
 from knack.log import get_logger
 
@@ -129,7 +130,6 @@ def list_storage_accounts(cmd, resource_group_name=None):
 def show_storage_account_connection_string(cmd, resource_group_name, account_name, protocol='https', blob_endpoint=None,
                                            file_endpoint=None, queue_endpoint=None, table_endpoint=None, sas_token=None,
                                            key_name='primary'):
-
     endpoint_suffix = cmd.cli_ctx.cloud.suffixes.storage_endpoint
     connection_string = 'DefaultEndpointsProtocol={};EndpointSuffix={}'.format(protocol, endpoint_suffix)
     if account_name is not None:

@@ -120,7 +120,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr~=0.3.0',
     'azure-mgmt-sql~=0.17.0',
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
-    'azure-mgmt-storage~=8.0.0',
+    # 'azure-mgmt-storage~=8.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.44.0',
     'azure-multiapi-storage~=0.2.4',
@@ -147,7 +147,8 @@ DEPENDENCIES = [
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
     'jsondiff==1.2.0',
-    'azure-mgmt-core==1.0.0b1'
+    'azure-mgmt-core==1.0.0b1',
+    'azure-mgmt-storage @ https://azurecoreintegration.blob.core.windows.net/python-sdk/track2/azure_mgmt_storage-8.0.0-py2.py3-none-any.whl'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

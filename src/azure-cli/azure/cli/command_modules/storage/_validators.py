@@ -7,6 +7,7 @@
 
 import argparse
 
+from azure.cli.core.util import is_track2
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -36,13 +37,16 @@ def _query_account_key(cli_ctx, account_name):
     t_storage_account_keys = get_sdk(
         cli_ctx, ResourceType.MGMT_STORAGE, 'models.storage_account_keys#StorageAccountKeys')
 
-    if hasattr(scf, 'config'):
-        scf.config.enable_http_logger = False
     logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     if t_storage_account_keys:
-        return scf.storage_accounts.list_keys(rg, account_name).key1
+        if is_track2(scf):
+            return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).key1
+        return scf.storage_accounts.list_keys(rg, account_name, enable_http_logger=False).key1
+
     # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
-    return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+    if is_track2(scf):
+        return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).keys[0].value
+    return scf.storage_accounts.list_keys(rg, account_name, enable_http_logger=False).keys[0].value  # pylint: disable=no-member
 
 
 def _query_account_rg(cli_ctx, account_name):
