@@ -1950,6 +1950,8 @@ short-summary: Manage user accounts for a VM.
 helps['vm user delete'] = """
 type: command
 short-summary: Delete a user account from a VM.
+long-summary: >
+    Also deletes the user home directory on Linux VMs.
 examples:
   - name: Delete a user account.
     text: az vm user delete -u username -n MyVm -g MyResourceGroup

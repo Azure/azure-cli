@@ -58,7 +58,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                     commit_trigger_enabled=True,
                     pull_request_trigger_enabled=False,
                     schedule=None,
-                    branch=None,
                     no_push=False,
                     no_cache=False,
                     arg=None,
@@ -121,9 +120,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                                                         pull_request_trigger_enabled)
     # if source_trigger_events contains any event types we assume they are enabled
     if source_trigger_events:
-        if not branch:
-            branch = _get_branch_name(context_path)
-            branch = 'master' if not branch else branch
+        branch = _get_branch_name(context_path)
 
         SourceTrigger, SourceProperties, AuthInfo, TriggerStatus = cmd.get_models(
             'SourceTrigger', 'SourceProperties', 'AuthInfo', 'TriggerStatus')
@@ -132,7 +129,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
                 source_repository=SourceProperties(
                     source_control_type=source_control_type,
                     repository_url=context_path,
-                    branch=branch,
+                    branch=branch if branch else 'master',
                     source_control_auth_properties=AuthInfo(
                         token=git_access_token,
                         token_type=DEFAULT_TOKEN_TYPE,
@@ -311,7 +308,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                     commit_trigger_enabled=None,
                     pull_request_trigger_enabled=None,
                     git_access_token=None,
-                    branch=None,
                     image_names=None,
                     no_push=None,
                     no_cache=None,
@@ -330,9 +326,16 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    task = client.get(resource_group_name, registry_name, task_name)
+    task = client.get_details(resource_group_name, registry_name, task_name)
     step = task.step
+    branch = None
+    if context_path is None:
+        context_path = step.context_path
+    else:
+        branch = _get_branch_name(context_path)
 
+    if git_access_token is None:
+        git_access_token = step.context_access_token
     arguments = _get_all_override_arguments(arg, secret_arg)
     set_values = _get_all_override_arguments(set_value, set_secret)
 
@@ -358,9 +361,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
             target=target
         )
     elif step:
-        DockerBuildStep, FileTaskStep = cmd.get_models(
-            'DockerBuildStep', 'FileTaskStep')
-        if isinstance(step, DockerBuildStep):
+        if hasattr(step, 'docker_file_path'):
             step = DockerBuildStepUpdateParameters(
                 image_names=image_names,
                 is_push_enabled=not no_push,
@@ -372,7 +373,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 target=target
             )
 
-        elif isinstance(step, FileTaskStep):
+        elif hasattr(step, 'task_file_path'):
             step = FileTaskStepUpdateParameters(
                 task_file_path=file,
                 values_file_path=values,
@@ -395,23 +396,20 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
         TriggerStatus = cmd.get_models('TriggerStatus')
 
         source_triggers = task.trigger.source_triggers
-        base_image_trigger = task.trigger.base_image_trigger
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
-            branch = _get_branch_name(context_path) if not branch else branch
-
-            SourceTriggerUpdateParameters, SourceUpdateParameters, AuthInfoUpdateParameters = cmd.get_models(
-                'SourceTriggerUpdateParameters', 'SourceUpdateParameters', 'AuthInfoUpdateParameters')
-
             source_trigger_events = _get_trigger_event_list_patch(cmd,
                                                                   source_triggers,
                                                                   commit_trigger_enabled,
                                                                   pull_request_trigger_enabled)
+
+            SourceTriggerUpdateParameters, SourceUpdateParameters, AuthInfoUpdateParameters = cmd.get_models(
+                'SourceTriggerUpdateParameters', 'SourceUpdateParameters', 'AuthInfoUpdateParameters')
             source_trigger_update_params = [
                 SourceTriggerUpdateParameters(
                     source_repository=SourceUpdateParameters(
                         source_control_type=source_control_type,
                         repository_url=context_path,
-                        branch=branch,
+                        branch=branch if branch else source_triggers[0].source_repository.branch,
                         source_control_auth_properties=AuthInfoUpdateParameters(
                             token=git_access_token,
                             token_type=DEFAULT_TOKEN_TYPE
@@ -423,6 +421,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals
                 )
             ]
 
+        base_image_trigger = task.trigger.base_image_trigger
         if base_image_trigger_enabled or base_image_trigger is not None:
             BaseImageTriggerUpdateParameters = cmd.get_models(
                 'BaseImageTriggerUpdateParameters')
