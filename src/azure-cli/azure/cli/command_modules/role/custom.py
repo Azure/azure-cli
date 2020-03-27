@@ -1388,7 +1388,7 @@ def create_service_principal_for_rbac(
     }
     if cert_file:
         logger.warning(
-            "Please copy %s to a safe place. When run 'az login' provide the file path to the --password argument",
+            "Please copy %s to a safe place. When you run 'az login', provide the file path in the --password argument",
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
     return result
