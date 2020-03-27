@@ -4008,6 +4008,7 @@ class DiskEncryptionSetTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
     @AllowLargeResponse(size_kb=99999)
+    @unittest.skip('Key rotation in disk encryption set is not supported in this version of service')
     def test_disk_encryption_set_update(self, resource_group):
 
         self.kwargs.update({
