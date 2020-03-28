@@ -221,7 +221,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
         if current_time < earliest_restore_time:
             sleep((datetime.strptime(earliest_restore_time, date_format)-datetime.strptime(current_time, date_format)).total_seconds())
 
-<<<<<<< HEAD
         self.cmd('{} server restore -g {} --name {} '
                  '--source-server {} '
                  '--restore-point-in-time {}'
@@ -233,8 +232,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-=======
->>>>>>> 4dfb0f809cd6dea50fe4b352393328d6956cb990
         # test georestore server
         with self.assertRaises(CLIError) as exception:
             self.cmd('{} server georestore -g {} --name {} --source-server {} -l {} '
