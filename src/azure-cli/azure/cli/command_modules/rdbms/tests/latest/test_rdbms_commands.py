@@ -216,20 +216,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        # test restore to a new server, make sure wait at least 5 min after server created.
-        from time import sleep
-        sleep(300)
-        self.cmd('{} server restore -g {} --name {} '
-                 '--source-server {} '
-                 '--restore-point-in-time {}'
-                 .format(database_engine, resource_group_2, servers[1], result['id'],
-                         datetime.utcnow().replace(tzinfo=tzutc()).isoformat()),
-                 checks=[
-                     JMESPathCheck('name', servers[1]),
-                     JMESPathCheck('resourceGroup', resource_group_2),
-                     JMESPathCheck('sku.tier', edition),
-                     JMESPathCheck('administratorLogin', admin_login)])
-
         # test georestore server
         with self.assertRaises(CLIError) as exception:
             self.cmd('{} server georestore -g {} --name {} --source-server {} -l {} '
