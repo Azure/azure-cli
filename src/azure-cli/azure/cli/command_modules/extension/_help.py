@@ -24,6 +24,8 @@ examples:
     text: az extension add --source ~/anextension-0.0.1-py2.py3-none-any.whl
   - name: Add extension from local disk and use pip proxy for dependencies
     text: az extension add --source ~/anextension-0.0.1-py2.py3-none-any.whl --pip-proxy https://user:pass@proxy.server:8080
+  - name: Add extension to system directory
+    text: az extension add --name anextension --system
 """
 
 helps['extension list'] = """

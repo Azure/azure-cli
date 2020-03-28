@@ -141,7 +141,7 @@ def _update_latest_from_pypi(versions):
 
 
 def get_az_version_string():
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
 
     output = six.StringIO()
     versions = {}
@@ -191,6 +191,9 @@ def get_az_version_string():
         _print()
     _print("Python location '{}'".format(sys.executable))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
+    import os
+    if os.path.isdir(EXTENSIONS_SYS_DIR):
+        _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))
     if DEV_EXTENSION_SOURCES:
         _print("Development extension sources:")
         for source in DEV_EXTENSION_SOURCES:
