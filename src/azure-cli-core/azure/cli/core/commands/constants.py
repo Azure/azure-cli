@@ -8,7 +8,8 @@ from knack.parser import ARGPARSE_SUPPORTED_KWARGS
 
 
 CLI_COMMON_KWARGS = ['min_api', 'max_api', 'resource_type', 'operation_group',
-                     'custom_command_type', 'command_type', 'is_preview', 'preview_info']
+                     'custom_command_type', 'command_type', 'is_preview', 'preview_info',
+                     'is_experimental', 'experimental_info', 'local_context_attribute']
 
 CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler',
                       'client_factory', 'operations_tmpl', 'no_wait_param', 'supports_no_wait', 'validator',
@@ -31,5 +32,6 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 
 BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
 
-SURVEY_PROMPT = Fore.YELLOW + Style.BRIGHT + 'Please let us know how we are doing: ' + Fore.BLUE \
-    + 'https://aka.ms/clihats' + Style.RESET_ALL
+SURVEY_PROMPT = 'Please let us know how we are doing: https://aka.ms/clihats'
+SURVEY_PROMPT_COLOR = Fore.YELLOW + Style.BRIGHT + 'Please let us know how we are doing: ' + Fore.BLUE + \
+    'https://aka.ms/clihats' + Style.RESET_ALL

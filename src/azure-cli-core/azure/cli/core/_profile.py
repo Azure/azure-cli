@@ -214,9 +214,12 @@ class Profile(object):
                     username, password, tenant, self._ad_resource_uri)
 
         if not allow_no_subscriptions and not subscriptions:
-            raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
-                           "'--allow-no-subscriptions' to have tenant level access".format(
-                               username))
+            if username:
+                msg = "No subscriptions found for {}.".format(username)
+            else:
+                # Don't show username if bare 'az login' is used
+                msg = "No subscriptions found."
+            raise CLIError(msg)
 
         if is_service_principal:
             self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
@@ -867,11 +870,17 @@ class SubscriptionFinder(object):
         from msrest.authentication import BasicTokenAuthentication
 
         all_subscriptions = []
+        empty_tenants = []
+        mfa_tenants = []
         token_credential = BasicTokenAuthentication({'access_token': access_token})
         client = self._arm_client_factory(token_credential)
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
+            if not hasattr(t, 'display_name'):  # Available since 2018-06-01
+                t.display_name = ""
+            if hasattr(t, 'additional_properties'):  # remove this line once SDK is fixed
+                t.display_name = t.additional_properties['displayName']
             temp_context = self._create_auth_context(tenant_id)
             try:
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
@@ -879,11 +888,19 @@ class SubscriptionFinder(object):
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
                 # with other tenants.
-                logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                msg = (getattr(ex, 'error_response', None) or {}).get('error_description') or ''
+                if 'AADSTS50076' in msg:
+                    # The tenant requires MFA and can't be accessed with home tenant's refresh token
+                    mfa_tenants.append(t)
+                else:
+                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,
                 temp_credentials[_ACCESS_TOKEN])
+
+            if not subscriptions:
+                empty_tenants.append(t)
 
             # When a subscription can be listed by multiple tenants, only the first appearance is retained
             for sub_to_add in subscriptions:
@@ -892,7 +909,7 @@ class SubscriptionFinder(object):
                     if sub_to_add.subscription_id == sub_to_compare.subscription_id:
                         logger.warning("Subscription %s '%s' can be accessed from tenants %s(default) and %s. "
                                        "To select a specific tenant when accessing this subscription, "
-                                       "please include --tenant in 'az login'.",
+                                       "use 'az login --tenant TENANT_ID'.",
                                        sub_to_add.subscription_id, sub_to_add.display_name,
                                        sub_to_compare.tenant_id, sub_to_add.tenant_id)
                         add_sub = False
@@ -900,6 +917,19 @@ class SubscriptionFinder(object):
                 if add_sub:
                     all_subscriptions.append(sub_to_add)
 
+        # Show warning for empty tenants
+        if empty_tenants:
+            logger.warning("The following tenants don't contain accessible subscriptions. "
+                           "Use 'az login --allow-no-subscriptions' to have tenant level access.")
+            for t in empty_tenants:
+                logger.warning("%s '%s'", t.tenant_id, t.display_name)
+
+        # Show warning for MFA tenants
+        if mfa_tenants:
+            logger.warning("The following tenants require Multi-Factor Authentication (MFA). "
+                           "Use 'az login --tenant TENANT_ID' to explicitly login to a tenant.")
+            for t in mfa_tenants:
+                logger.warning("%s '%s'", t.tenant_id, t.display_name)
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):

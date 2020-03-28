@@ -239,10 +239,14 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         import os
         # Upload a single file
-        self.cmd('storage copy -s "{}" -d "{}"'.format(
-            os.path.join(test_dir, 'readme'), first_container_url))
+        content_type = "application/json"
+        self.cmd('storage copy -s "{}" -d "{}" --content-type {}'.format(
+            os.path.join(test_dir, 'readme'), first_container_url, content_type))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
+        self.cmd('storage blob show -n {} -c {} --account-name {}'
+                 .format('readme', first_container, first_account),
+                 checks=[JMESPathCheck('properties.contentSettings.contentType', content_type)])
 
         # Upload entire directory
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(

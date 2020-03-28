@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**RDBMS**
+
+* Bump the azure-mgmt-rdbms SDK version to 2.2.0
+* Add --public-network-access to control whether a server supports public access or not
+
 2.2.0
 ++++++
 
@@ -285,6 +290,7 @@ Release History
 
 **IoT Central**
 
+* Update error details, update default application template and prompt message.
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
 **Key Vault**
@@ -668,7 +674,8 @@ Release History
 * Add new command `az reservations reservation-order calculate` to calculate the price for a reservation
 * Add new command `az reservations reservation-order purchase` to purchase a new reservation
 
-**Rest**
+**REST**
+
 * `az rest` is now GA
 
 **SQL**
@@ -976,6 +983,7 @@ Release History
 
 **HDInsight**
 
+* `az hdinsight create`: Support customers specify minimal supported tls version by using parameter `--minimal-tls-version`. The allowed value is 1.0,1.1,1.2.
 * `az hdinsight resize`: Make parameter `--workernode-count/-c` required
 * GA release
 

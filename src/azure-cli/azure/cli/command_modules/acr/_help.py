@@ -248,16 +248,19 @@ helps['acr import'] = """
 type: command
 short-summary: Imports an image to an Azure Container Registry from another Container Registry. Import removes the need to docker pull, docker tag, docker push.
 examples:
-  - name: Import an image to the target registry and inherits sourcerepository:sourcetag from the source registry.
+  - name: Import an image from 'sourceregistry' to 'MyRegistry'. The image inherits its source repository and tag names.
     text: >
         az acr import -n MyRegistry --source sourceregistry.azurecr.io/sourcerepository:sourcetag
-  - name: Import an image from a registry in a different subscription.
+  - name: Import an image from a public repository on Docker Hub. The image uses the specified repository and tag names.
+    text: >
+        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
+  - name: Import an image from a private repository using its username and password. This also applies to registries outside Azure.
+    text: >
+        az acr import -n MyRegistry --source myprivateregistry.azurecr.io/hello-world:latest -u username -p password
+  - name: Import an image from an Azure container registry in a different subscription.
     text: |
         az acr import -n MyRegistry --source sourcerepository:sourcetag -t targetrepository:targettag \\
             -r /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry
-  - name: Import an image from a public repository in Docker Hub
-    text: >
-        az acr import -n MyRegistry --source docker.io/library/hello-world:latest -t targetrepository:targettag
 """
 
 helps['acr list'] = """

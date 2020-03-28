@@ -19,3 +19,6 @@ def load_arguments(self, _):
     with self.argument_context('cache') as c:
         c.argument('resource_type', options_list=['--resource-type', '-t'], help='The resource type.')
         c.argument('item_name', options_list=['--name', '-n'], help='The resource name.')
+
+    with self.argument_context('local-context off') as c:
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')

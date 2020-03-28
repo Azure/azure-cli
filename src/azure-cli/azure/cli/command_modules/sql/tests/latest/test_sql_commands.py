@@ -727,37 +727,43 @@ class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
                      checks=[JMESPathCheck('connectionType', type)])
 
 
-class AzureActiveDirectoryAdministratorScenarioTest(LiveScenarioTest):
-    #  convert to ScenarioTest and re-record when ISSUE #6011 is fixed
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
     def test_aad_admin(self, resource_group, server):
-        sn = server
-        oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
-        oid2 = 'e4d43337-d52c-4a0c-b581-09055e0359a0'
-        user = 'DSEngAll'
-        user2 = 'TestUser'
 
-        self.cmd('sql server ad-admin create -s {} -g {} -i {} -u {}'
-                 .format(sn, resource_group, oid, user),
-                 checks=[JMESPathCheck('login', user),
-                         JMESPathCheck('sid', oid)])
+        self.kwargs.update({
+            'rg': resource_group,
+            'sn': server,
+            'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
+            'oid2': 'e4d43337-d52c-4a0c-b581-09055e0359a0',
+            'user': 'DSEngAll',
+            'user2': 'TestUser'
+        })
 
-        self.cmd('sql server ad-admin list -s {} -g {}'
-                 .format(sn, resource_group),
-                 checks=[JMESPathCheck('[0].login', user)])
+        print('Arguments are updated with login and sid data')
 
-        self.cmd('sql server ad-admin update -s {} -g {} -u {} -i {}'
-                 .format(sn, resource_group, user2, oid2),
-                 checks=[JMESPathCheck('login', user2),
-                         JMESPathCheck('sid', oid2)])
+        self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid} -u {user}',
+                 checks=[
+                     self.check('login', '{user}'),
+                     self.check('sid', '{oid}')])
 
-        self.cmd('sql server ad-admin delete -s {} -g {}'
-                 .format(sn, resource_group))
+        self.cmd('sql server ad-admin list -s {sn} -g {rg}',
+                 checks=[
+                     self.check('[0].login', '{user}'),
+                     self.check('[0].sid', '{oid}')])
 
-        self.cmd('sql server ad-admin list -s {} -g {}'
-                 .format(sn, resource_group),
-                 checks=[JMESPathCheck('login', None)])
+        self.cmd('sql server ad-admin update -s {sn} -g {rg} -u {user2} -i {oid2}',
+                 checks=[
+                     self.check('login', '{user2}'),
+                     self.check('sid', '{oid2}')])
+
+        self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
+
+        self.cmd('sql server ad-admin list -s {sn} -g {rg}',
+                 checks=[
+                     self.check('[0].login', None),
+                     self.check('[0].sid', None)])
 
 
 class SqlServerDbCopyScenarioTest(ScenarioTest):
