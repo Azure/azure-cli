@@ -212,6 +212,25 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags.key', '3'),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
+        
+        # Before we do restore we will have to check whether the current time is less than earliest restore time
+        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
+        earliest_restore_time = result['earliestRestoreDate']
+        date_format = '%Y-%m-%dT%H:%M:%S.%f+00:00'
+
+        if current_time < earliest_restore_time:
+            sleep((datetime.strptime(earliest_restore_time, date_format)-datetime.strptime(current_time, date_format)).total_seconds())
+
+        self.cmd('{} server restore -g {} --name {} '
+                 '--source-server {} '
+                 '--restore-point-in-time {}'
+                 .format(database_engine, resource_group_2, servers[1], result['id'],
+                         earliest_restore_time),
+                 checks=[
+                     JMESPathCheck('name', servers[1]),
+                     JMESPathCheck('resourceGroup', resource_group_2),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('administratorLogin', admin_login)])
 
         # test georestore server
         with self.assertRaises(CLIError) as exception:
