@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from time import sleep
 from dateutil.tz import tzutc   # pylint: disable=import-error
-
+from azure_devtools.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
@@ -72,16 +72,19 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class ServerMgmtScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_mariadb_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mariadb', resource_group_1, resource_group_2)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_mysql_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mysql', resource_group_1, resource_group_2)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_postgres_server_mgmt(self, resource_group_1, resource_group_2):
@@ -210,6 +213,20 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('sslEnforcement', 'Enabled'),
                      JMESPathCheck('tags.key', '3'),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('administratorLogin', admin_login)])
+
+        # test restore to a new server, make sure wait at least 5 min after server created.
+        from time import sleep
+        sleep(300)
+        self.cmd('{} server restore -g {} --name {} '
+                 '--source-server {} '
+                 '--restore-point-in-time {}'
+                 .format(database_engine, resource_group_2, servers[1], result['id'],
+                         datetime.utcnow().replace(tzinfo=tzutc()).isoformat()),
+                 checks=[
+                     JMESPathCheck('name', servers[1]),
+                     JMESPathCheck('resourceGroup', resource_group_2),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
 
@@ -548,7 +565,6 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         approval_description = 'You are approved!'
         rejection_description = 'You are rejected!'
-        api_version = '2018-06-01' if database_engine == 'mariadb' else '2017-12-01'
         expectedError = 'Private Endpoint Connection Status is not Pending'
 
         # Testing Auto-Approval workflow
@@ -564,8 +580,8 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
         # Get Private Endpoint Connection Name and Id
-        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
-                          .format(server_id, api_version, server)).get_output_in_json()
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
         self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Approved')
@@ -605,8 +621,8 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
         # Get Private Endpoint Connection Name and Id
-        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
-                          .format(server_id, api_version, server)).get_output_in_json()
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
         self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Pending')
@@ -650,8 +666,8 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
         # Get Private Endpoint Connection Name and Id
-        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
-                          .format(server_id, api_version, server)).get_output_in_json()
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
         self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Pending')
