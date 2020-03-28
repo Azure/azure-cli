@@ -96,12 +96,12 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if not name_validation.name_available:
         existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
                                                         name, 'list_application_settings')
-        settings=[]
+        settings = []
         for k, v in existing_app_settings.properties.items():
             settings.append(NameValuePair(name=k, value=v))
         site_config = SiteConfig(app_settings=settings)
     else:
-        site_config = SiteConfig(app_settings=[])        
+        site_config = SiteConfig(app_settings=[])
     if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name.upper() not in ['F1', 'FREE', 'SHARED', 'D1',
                                                                                         'B1', 'B2', 'B3', 'BASIC']:
         site_config.always_on = True
@@ -127,7 +127,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
             if name_validation.name_available:
                 site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
-                                                          value="false"))
+                                                              value="false"))
         elif multicontainer_config_type and multicontainer_config_file:
             encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
@@ -148,11 +148,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         if not match['displayName'].startswith('node'):
             if name_validation.name_available:
                 site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
-                                                          value=node_default_version))
+                                                              value=node_default_version))
     else:  # windows webapp without runtime specified
         if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
-                                                      value=node_default_version))
+                                                          value=node_default_version))
 
     if site_config.app_settings:
         for setting in site_config.app_settings:
@@ -164,7 +164,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if language is not None and language.lower() == 'dotnetcore':
         if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
-                                                      value='https://{}.scm.azurewebsites.net/detectors'.format(name)))
+                                                          value='https://{}.scm.azurewebsites.net/detectors'
+                                                          .format(name)))
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
