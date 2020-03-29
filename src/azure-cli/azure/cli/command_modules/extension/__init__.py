@@ -66,8 +66,8 @@ class ExtensionCommandsLoader(AzCommandsLoader):
             c.ignore('_subscription')  # hide global subscription param
             c.argument('system', action='store_true', help='Use a system directory for the extension. Default path is azure-cli-extensions folder under the CLI running python environment lib path, configurable by environment variable AZURE_EXTENSION_SYS_DIR.')
 
-
         with self.argument_context('extension add') as c:
+            c.argument('extension_name', completer=extension_name_from_index_completion_list)
             c.argument('source', options_list=['--source', '-s'], help='Filepath or URL to an extension', completer=FilesCompleter())
             c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation.')
 

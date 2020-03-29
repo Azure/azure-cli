@@ -140,6 +140,7 @@ def _update_latest_from_pypi(versions):
     return versions, success
 
 
+# pylint: disable=too-many-statements
 def get_az_version_string():
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
 

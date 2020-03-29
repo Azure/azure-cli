@@ -8,7 +8,6 @@ import os
 import traceback
 import json
 import re
-import sys
 import pkginfo
 
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
@@ -312,7 +311,7 @@ def get_extension_path(ext_name):
 
 def build_extension_path(ext_name, system=None):
     # This will simply form the path for a WHEEL extension.
-    return os.path.join(EXTENSIONS_SYS_DIR,ext_name) if system else os.path.join(EXTENSIONS_DIR, ext_name)
+    return os.path.join(EXTENSIONS_SYS_DIR, ext_name) if system else os.path.join(EXTENSIONS_DIR, ext_name)
 
 
 def get_extensions(ext_type=None):
