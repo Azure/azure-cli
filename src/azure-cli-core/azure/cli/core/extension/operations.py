@@ -339,7 +339,7 @@ def reload_extension(extension_name, extension_module=None):
 
 def add_extension_to_path(extension_name, ext_dir=None):
     ext_dir = ext_dir or get_extension(extension_name).path
-    sys.path.append(ext_dir)
+    sys.path.insert(0, ext_dir)
 
 
 def get_lsb_release():

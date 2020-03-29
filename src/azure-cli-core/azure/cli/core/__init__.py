@@ -228,7 +228,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         continue
                     ext_name = ext.name
                     ext_dir = ext.path or get_extension_path(ext_name)
-                    sys.path.append(ext_dir)
+                    sys.path.insert(0, ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
                         # Add to the map. This needs to happen before we load commands as registering a command
