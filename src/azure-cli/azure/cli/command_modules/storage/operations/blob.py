@@ -25,7 +25,7 @@ from knack.util import CLIError
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
                      default_encryption_scope=None, deny_encryption_scope_override=None, **kwargs):
-    if default_encryption_scope is not None or deny_encryption_scope_override is not None:
+    if default_encryption_scope is not None and deny_encryption_scope_override is not None:
         from .._client_factory import storage_client_factory
         client = storage_client_factory(cmd.cli_ctx).blob_containers
         BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
