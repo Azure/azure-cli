@@ -1535,7 +1535,8 @@ def load_arguments(self, _):
             help='If specified, shows retention days for a deleted database, instead of an existing database.'
             'Must match the deleted time of a deleted database on the source Managed Instance.')
 
-    with self.argument_context('sql midb long-term-retention-policy set') as c:
+    # LTR
+    with self.argument_context('sql midb ltr-policy set') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
                 'weekly_retention',
@@ -1562,7 +1563,7 @@ def load_arguments(self, _):
         c.argument('week_of_year',
                    help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
 
-    with self.argument_context('sql midb long-term-retention-backup') as c:
+    with self.argument_context('sql midb ltr-backup') as c:
         c.argument('location_name',
                    required=True,
                    arg_type=get_location_type(self.cli_ctx))
@@ -1571,36 +1572,38 @@ def load_arguments(self, _):
                    required=False,
                    help='If specified, the resource group that the managed instance/database resource belongs to.')
 
-    with self.argument_context('sql midb long-term-retention-backup show') as c:
+    with self.argument_context('sql midb ltr-backup show') as c:
         c.argument('backup_name',
                    options_list=['--backup-name', '-b'],
-                   required=True,
                    help='The long term retention backup name.')
 
-    with self.argument_context('sql midb long-term-retention-backup list-by-database') as c:
+    with self.argument_context('sql midb ltr-backup list-by-database') as c:
         c.argument('database_state',
                    required=False,
                    help='\'All\', \'Live\', or \'Deleted\'')
 
         c.argument('only_latest_per_database',
+                   options_list=['--only-latest-per-database', '--latest'],
                    required=False,
                    help='If true, will only return the latest backup for each database')
 
-    with self.argument_context('sql midb long-term-retention-backup list-by-instance') as c:
+    with self.argument_context('sql midb ltr-backup list-by-instance') as c:
         c.argument('database_state',
                    required=False,
                    help='\'All\', \'Live\', or \'Deleted\'')
 
         c.argument('only_latest_per_database',
+                   options_list=['--only-latest-per-database', '--latest'],
                    required=False,
                    help='If true, will only return the latest backup for each database')
 
-    with self.argument_context('sql midb long-term-retention-backup list-by-location') as c:
+    with self.argument_context('sql midb ltr-backup list-by-location') as c:
         c.argument('database_state',
                    required=False,
                    help='\'All\', \'Live\', or \'Deleted\'')
 
         c.argument('only_latest_per_database',
+                   options_list=['--only-latest-per-database', '--latest'],
                    required=False,
                    help='If true, will only return the latest backup for each database')
 

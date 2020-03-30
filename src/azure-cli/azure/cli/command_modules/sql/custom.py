@@ -2739,7 +2739,7 @@ def update_long_term_retention_mi(
     Updates long term retention for managed database
     '''
     if not (weekly_retention or monthly_retention or yearly_retention):
-        raise CLIError('Please specify retention setting(s).')
+        raise CLIError('Please specify retention setting(s).  See \'--help\' for more details.')
 
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')

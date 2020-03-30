@@ -584,7 +584,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceLongTermRetentionPoliciesOperations.{}',
         client_factory=get_sql_managed_database_long_term_retention_policies_operations)
 
-    with self.command_group('sql midb long-term-retention-policy',
+    with self.command_group('sql midb ltr-policy',
                             managed_database_long_term_retention_policies_operations,
                             client_factory=get_sql_managed_database_long_term_retention_policies_operations) as g:
 
@@ -595,7 +595,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionManagedInstanceBackupsOperations.{}',
         client_factory=get_sql_managed_database_long_term_retention_backups_operations)
 
-    with self.command_group('sql midb long-term-retention-backup',
+    with self.command_group('sql midb ltr-backup',
                             managed_database_long_term_retention_backups_operations,
                             client_factory=get_sql_managed_database_long_term_retention_backups_operations) as g:
         g.show_command('show', 'get')
