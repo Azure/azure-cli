@@ -125,8 +125,10 @@ Release History
 
 **RDBMS**
 
-* Add server data encryption key management  commands for PostgreSQL and MySQL
+* Add server data encryption key management commands for PostgreSQL and MySQL
 * Added support for minimal tls version and deny public access
+* Bump the azure-mgmt-rdbms SDK version to 2.2.0
+* Add --public-network-access to control whether a server supports public access or not
 
 **Rest**
 
@@ -140,11 +142,7 @@ Release History
 
 * az storage blob generate-sas: Fix #11643 to support encoding blob url
 * az storage copy: Add parameter --content-type to fix#6466
-* az storage account blob-service-properties update: Add --enable-versioning to support versioning for storage account
-
-**Storage] az storage account management-policy create: Add [Required**
-
-* flag for policy
+* az storage account blob-service-properties update: Add --enable-versioning to support versioning for storage account * az storage account management-policy create: Add required flag for policy
 
 2.2.0
 ++++++
