@@ -148,7 +148,7 @@ class WheelExtension(Extension):
                 ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
                 metadata.update(vars(ext_whl_metadata))
             except ValueError:
-                logger.warning("extension '{}' doesn't contain valid metadata for Python Package".format(self.name))
+                logger.warning('extension % contains invalid metadata for Python Package', self.name)
 
         return metadata
 
@@ -213,7 +213,7 @@ class DevExtension(Extension):
                 ext_whl_metadata = pkginfo.Develop(egg_metadata_path)
                 metadata.update(vars(ext_whl_metadata))
             except ValueError:
-                logger.warning("extension '{}' doesn't contain valid metadata for Python Package".format(self.name))
+                logger.warning('extension % contains invalid metadata for Python Package', self.name)
 
         return metadata
 
