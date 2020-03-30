@@ -70,3 +70,12 @@ az storage account encryption-scope update \
     -g MyResourceGoup \
     --state Enabled
 ```
+
+#### Set default encryption scope when creating storage container
+```
+az storage container create -n testcontainer \
+    --account-name mystorageaccount \
+    -g MyResourceGroup \
+    --default-encryption-scope myencryption \
+    --deny-encryption-scope-override false
+```
