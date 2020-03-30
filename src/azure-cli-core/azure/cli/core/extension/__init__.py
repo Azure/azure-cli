@@ -7,9 +7,11 @@ import os
 import traceback
 import json
 import re
+import sys
+import pkginfo
 
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
-
+from distutils.sysconfig import get_python_lib
 from knack.config import CLIConfig
 from knack.log import get_logger
 
@@ -19,6 +21,7 @@ _DEV_EXTENSION_SOURCES = az_config.get('extension', 'dev_sources', None)
 EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR else os.path.join(GLOBAL_CONFIG_DIR,
                                                                                           'cliextensions')
 DEV_EXTENSION_SOURCES = _DEV_EXTENSION_SOURCES.split(',') if _DEV_EXTENSION_SOURCES else []
+EXTENSIONS_SYS_DIR = os.path.join(get_python_lib(), 'azure-cli-extensions') if sys.platform.startswith('linux') else ""
 
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
@@ -34,7 +37,7 @@ EXT_METADATA_ISEXPERIMENTAL = 'azext.isExperimental'
 WHEEL_INFO_RE = re.compile(
     r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
     ((-(?P<build>\d.*?))?-(?P<pyver>.+?)-(?P<abi>.+?)-(?P<plat>.+?)
-    \.whl|\.dist-info)$""",
+    \.whl|\.dist-info|\.egg-info)$""",
     re.VERBOSE).match
 
 logger = get_logger(__name__)
@@ -151,8 +154,13 @@ class WheelExtension(Extension):
                 if os.path.isfile(whl_metadata_filepath):
                     with open(whl_metadata_filepath) as f:
                         metadata.update(json.loads(f.read()))
+                elif os.path.isfile(os.path.join(dist_info_dirname, 'PKG-INFO')):
+                    metadata.update(pkginfo.Develop(dist_info_dirname).__dict__)
 
         return metadata
+
+    def __eq__(self, other):
+        return other.name == self.name
 
     @staticmethod
     def get_azext_metadata(ext_dir):
@@ -177,6 +185,14 @@ class WheelExtension(Extension):
                 pattern = os.path.join(ext_path, '*.*-info')
                 if os.path.isdir(ext_path) and glob(pattern):
                     exts.append(WheelExtension(ext_name, ext_path))
+        if os.path.isdir(EXTENSIONS_SYS_DIR):
+            for ext_name in os.listdir(EXTENSIONS_SYS_DIR):
+                ext_path = os.path.join(EXTENSIONS_SYS_DIR, ext_name)
+                pattern = os.path.join(ext_path, '*.*-info')
+                if os.path.isdir(ext_path) and glob(pattern):
+                    ext = WheelExtension(ext_name, ext_path)
+                    if ext not in exts:
+                        exts.append(ext)
         return exts
 
 

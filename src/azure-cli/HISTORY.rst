@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**RDBMS**
+
+* Bump the azure-mgmt-rdbms SDK version to 2.2.0
+* Add --public-network-access to control whether a server supports public access or not
+
 2.2.0
 ++++++
 
@@ -295,6 +300,10 @@ Release History
 **Misc**
 
 * Fix #6371: Support filename and environment variable completion in Bash
+
+**NetAppFiles**
+
+* Modified volume create to allow data protection volumes and added cmdlets for replication operations, approve, pause, resume and remove.
 
 **Network**
 

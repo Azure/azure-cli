@@ -32,7 +32,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westus',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -101,11 +101,13 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'westus'
+        loc = 'eastus'
+        default_public_network_access = 'Enabled'
+        public_network_access = 'Disabled'
 
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
-        geoloc = 'westus'
+        geoloc = 'eastus'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
@@ -124,6 +126,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.capacity', old_cu),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                     JMESPathCheck('publicNetworkAccess', default_public_network_access),
                      JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
 
         # test show server
@@ -137,6 +140,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                               JMESPathCheck('tags.key', '1'),
                               JMESPathCheck('sku.capacity', old_cu),
                               JMESPathCheck('sku.tier', edition),
+                              JMESPathCheck('publicNetworkAccess', default_public_network_access),
                               JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
                               JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)]).get_output_in_json()  # pylint: disable=line-too-long
 
@@ -151,6 +155,13 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('tags.key', '2'),
                      JMESPathCheck('administratorLogin', admin_login)])
+
+        self.cmd('{} server update -g {} --name {} --public-network-access {}'
+                 .format(database_engine, resource_group_1, servers[0], public_network_access),
+                 checks=[
+                     JMESPathCheck('name', servers[0]),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('publicNetworkAccess', public_network_access)])
 
         self.cmd('{} server update -g {} --name {} --sku-name {}'
                  .format(database_engine, resource_group_1, servers[0], newskuname),
@@ -199,17 +210,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('sslEnforcement', 'Enabled'),
                      JMESPathCheck('tags.key', '3'),
-                     JMESPathCheck('sku.tier', edition),
-                     JMESPathCheck('administratorLogin', admin_login)])
-
-        self.cmd('{} server restore -g {} --name {} '
-                 '--source-server {} '
-                 '--restore-point-in-time {}'
-                 .format(database_engine, resource_group_2, servers[1], result['id'],
-                         datetime.utcnow().replace(tzinfo=tzutc()).isoformat()),
-                 checks=[
-                     JMESPathCheck('name', servers[1]),
-                     JMESPathCheck('resourceGroup', resource_group_2),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
 
@@ -372,7 +372,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
         vnet_firewall_rule_1 = 'vnet_rule1'
         vnet_firewall_rule_2 = 'vnet_rule2'
-        location = 'westus'
+        location = 'eastus'
         vnet_name = 'clitestvnet'
         ignore_missing_endpoint = 'true'
         address_prefix = '10.0.0.0/16'
