@@ -75,11 +75,19 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         # Update to encryption scope state to Disabled
-        self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} --disabled", checks=[
+        self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} --state Disabled", checks=[
             JMESPathCheck("name", self.kwargs["encryption"]),
             JMESPathCheck("resourceGroup", self.kwargs["rg"]),
             JMESPathCheck("state", "Disabled")
         ])
+
+        # Update to encryption scope state to Enabled
+        self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} --state Enabled",
+                 checks=[
+                     JMESPathCheck("name", self.kwargs["encryption"]),
+                     JMESPathCheck("resourceGroup", self.kwargs["rg"]),
+                     JMESPathCheck("state", "Enabled")
+                 ])
 
         self.kwargs['con'] = 'con1'
         with self.assertRaisesRegex(CLIError, "usage error: You need to specify both --default-encryption-scope"):
