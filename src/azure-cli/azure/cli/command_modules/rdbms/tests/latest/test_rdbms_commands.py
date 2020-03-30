@@ -568,10 +568,10 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # Get Private Endpoint Connection Name and Id
         result = self.cmd('{} server show -g {} -n {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
-        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
-        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Approved')
-        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        server_pec_id = result['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
@@ -609,10 +609,10 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # Get Private Endpoint Connection Name and Id
         result = self.cmd('{} server show -g {} -n {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
-        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
-        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Pending')
-        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        server_pec_id = result['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
@@ -654,10 +654,10 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # Get Private Endpoint Connection Name and Id
         result = self.cmd('{} server show -g {} -n {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
-        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
-        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Pending')
-        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        server_pec_id = result['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
