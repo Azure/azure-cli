@@ -66,8 +66,9 @@ DEPENDENCIES = [
     'pyyaml~=5.2',
     'requests~=2.20',
     'six~=1.12',
-    'wheel==0.30.0',
+    'wheel>=0.30.0',
     'azure-mgmt-resource==8.0.1',
+    'pkginfo>=1.5.0.1',
 ]
 
 TESTS_REQUIRE = [
