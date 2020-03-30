@@ -51,7 +51,7 @@ Release History
 
 **Compute**
 
-* vm create: Add NONE option of --nsg-rule
+* az vm create: Add NONE option of --nsg-rule
 * az vmss create/update: remove vmss automatic repairs preview tag
 * az vm update: Support --workspace
 * Fix a bug in VirtualMachineScaleSetExtension initialization code
