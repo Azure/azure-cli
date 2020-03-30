@@ -135,6 +135,12 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler
     )
 
+    monitor_general_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.general_operations#{}',
+        client_factory=cf_metric_alerts,
+        exception_handler=monitor_exception_handler
+    )
+
     with self.command_group('monitor action-group', action_group_sdk, custom_command_type=action_group_custom) as g:
         g.show_command('show', 'get', table_transformer=action_group_list_table)
         g.command('create', 'create_or_update', table_transformer=action_group_list_table)
@@ -244,3 +250,6 @@ def load_command_table(self, _):
         g.command('list', 'list_intelligence_packs')
         g.command('enable', 'enable_intelligence_pack')
         g.command('disable', 'disable_intelligence_pack')
+
+    with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom, is_preview=True) as g:
+        g.custom_command('clone', 'clone_existed_settings')

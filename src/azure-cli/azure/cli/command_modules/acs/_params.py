@@ -22,6 +22,7 @@ from ._validators import (
     validate_nodepool_name, validate_vm_set_type, validate_load_balancer_sku, validate_load_balancer_outbound_ips,
     validate_load_balancer_outbound_ip_prefixes, validate_taints, validate_ip_ranges, validate_acr, validate_nodepool_tags,
     validate_load_balancer_outbound_ports, validate_load_balancer_idle_timeout, validate_vnet_subnet_id, validate_nodepool_labels)
+from ._consts import CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
@@ -62,6 +63,7 @@ regions_in_prod = [
 ]
 
 storage_profile_types = ["StorageAccount", "ManagedDisks"]
+nodepool_mode_type = ["System", "User"]
 
 
 def load_arguments(self, _):
@@ -178,6 +180,8 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ip_prefixes', type=str, validator=validate_load_balancer_outbound_ip_prefixes)
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
+        c.argument('outbound_type', arg_type=get_enum_type([CONST_OUTBOUND_TYPE_LOAD_BALANCER,
+                                                            CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING]))
         c.argument('enable_cluster_autoscaler', action='store_true')
         c.argument('min_count', type=int, validator=validate_nodes_count)
         c.argument('max_count', type=int, validator=validate_nodes_count)
@@ -291,6 +295,7 @@ def load_arguments(self, _):
             c.argument('node_taints', type=str, validator=validate_taints)
             c.argument('tags', tags_type)
             c.argument('labels', nargs='*', validator=validate_nodepool_labels)
+            c.argument('mode', get_enum_type(nodepool_mode_type))
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
@@ -301,6 +306,7 @@ def load_arguments(self, _):
         c.argument('disable_cluster_autoscaler', options_list=["--disable-cluster-autoscaler", "-d"], action='store_true')
         c.argument('update_cluster_autoscaler', options_list=["--update-cluster-autoscaler", "-u"], action='store_true')
         c.argument('tags', tags_type)
+        c.argument('mode', get_enum_type(nodepool_mode_type))
 
     with self.argument_context('aks upgrade-connector') as c:
         c.argument('aci_resource_group')

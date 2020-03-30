@@ -224,9 +224,7 @@ def map_keyvalue_to_featureflag(keyvalue, show_conditions=True):
             FeatureFlag object
     '''
     feature_name = keyvalue.key[len(FeatureFlagConstants.FEATURE_FLAG_PREFIX):]
-
     feature_flag_value = map_keyvalue_to_featureflagvalue(keyvalue)
-
     state = FeatureState.OFF
     if feature_flag_value.enabled:
         state = FeatureState.ON
@@ -310,11 +308,11 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
 
     except ValueError as exception:
         error_msg = "Invalid value. Unable to decode the following JSON value: \n" +\
-                    "{0}\nFull exception: \n{1}".format(keyvalue.value, str(exception))
+                    "key:{0} value:{1}\nFull exception: \n{2}".format(keyvalue.key, keyvalue.value, str(exception))
         raise ValueError(error_msg)
 
     except:
-        logger.debug("Exception while parsing value:\n%s\n", keyvalue.value)
+        logger.error("Exception while parsing key:%s value:%s.", keyvalue.key, keyvalue.value)
         raise
 
     return feature_flag_value

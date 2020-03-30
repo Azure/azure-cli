@@ -40,6 +40,7 @@ def load_arguments(self, _):
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
     HyperVGenerationTypes, HyperVGeneration = self.get_models('HyperVGenerationTypes', 'HyperVGeneration')
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
+    OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
 
     # REUSABLE ARGUMENT DEFINITIONS
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
@@ -134,6 +135,13 @@ def load_arguments(self, _):
         c.argument('disk_mbps_read_write', type=int, min_api='2018-06-01', help="The bandwidth allowed for this disk. Only settable for UltraSSD disks. MBps means millions of bytes per second with ISO notation of powers of 10")
         c.argument('upload_size_bytes', type=int, min_api='2019-03-01',
                    help='The size (in bytes) of the contents of the upload including the VHD footer. Min value: 20972032. Max value: 35183298347520')
+        c.argument('max_shares', type=int, help='The maximum number of VMs that can attach to the disk at the same time. Value greater than one indicates a disk that can be mounted on multiple VMs at the same time')
+        c.argument('disk_iops_read_only', type=int, help='The total number of IOPS that will be allowed across all VMs mounting the shared disk as ReadOnly. One operation can transfer between 4k and 256k bytes')
+        c.argument('disk_mbps_read_only', type=int, help='The total throughput (MBps) that will be allowed across all VMs mounting the shared disk as ReadOnly. MBps means millions of bytes per second - MB here uses the ISO notation, of powers of 10')
+        c.argument('image_reference', help='ID or URN (publisher:offer:sku:version) of the image from which to create a disk')
+        c.argument('image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
+        c.argument('gallery_image_reference', help='ID of the shared galley image version from which to create a disk')
+        c.argument('gallery_image_reference_lun', type=int, help='If the disk is created from an image\'s data disk, this is an index that indicates which of the data disks in the image to use. For OS disks, this field is null')
     # endregion
 
     # region Snapshots
@@ -595,6 +603,10 @@ def load_arguments(self, _):
 
     with self.argument_context('vmss nic list') as c:
         c.argument('virtual_machine_scale_set_name', arg_type=vmss_name_type, options_list=['--vmss-name'], id_part=None)
+
+    with self.argument_context('vmss set-orchestration-service-state') as c:
+        c.argument('service_name', arg_type=get_enum_type(OrchestrationServiceNames), help='The name of the orchestration service.')
+        c.argument('action', arg_type=get_enum_type(OrchestrationServiceStateAction), help='The action to be performed.')
     # endregion
 
     # region VM & VMSS Shared

@@ -568,6 +568,8 @@ def load_arguments(self, _):
                        options_list=['--record-set-name', '-n'],
                        help='The name of the record set relative to the zone. '
                             'Creates a new record set if one does not exist.')
+            c.argument('if_none_match', help='Create the record set only if it does not already exist.',
+                       action='store_true')
 
         with self.argument_context('network dns record-set {} remove-record'.format(item)) as c:
             c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone.')
@@ -576,9 +578,13 @@ def load_arguments(self, _):
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
         c.argument('ttl', help='Record set TTL (time-to-live)')
+        c.argument('if_none_match', help='Create the record set only if it does not already exist.',
+                   action='store_true')
 
     with self.argument_context('network dns record-set soa') as c:
         c.argument('relative_record_set_name', ignore_type, default='@')
+        c.argument('if_none_match', help='Create the record set only if it does not already exist.',
+                   action='store_true')
 
     with self.argument_context('network dns record-set a') as c:
         c.argument('ipv4_address', options_list=['--ipv4-address', '-a'], help='IPv4 address in string notation.')
@@ -1647,6 +1653,7 @@ def load_arguments(self, _):
     with self.argument_context('network vnet-gateway create') as c:
         vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
         c.argument('virtual_network', options_list='--vnet', help=vnet_help)
+        c.argument('vpn_gateway_generation', arg_type=get_enum_type(['Generation1', 'Generation2']), min_api='2019-07-01', help='The generation for the virtual network gateway. vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
 
     with self.argument_context('network vnet-gateway update') as c:
         c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', arg_type=get_enum_type(['true', 'false']))

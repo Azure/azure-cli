@@ -57,7 +57,7 @@ def serializedATN():
         buf.write(u"I\u00bf\3\2\2\2K\u00c8\3\2\2\2M\u00d0\3\2\2\2OP\7\60")
         buf.write(u"\2\2P\4\3\2\2\2QR\7\61\2\2R\6\3\2\2\2ST\7a\2\2T\b\3\2")
         buf.write(u"\2\2UV\7^\2\2V\n\3\2\2\2WX\7<\2\2X\f\3\2\2\2YZ\7\'\2")
-        buf.write(u"\2Z\16\3\2\2\2[\\\7.\2\2\\\20\3\2\2\2]^\7/\2\2^\22\3")
+        buf.write(u"\2Z\16\3\2\2\2[\\\7/\2\2\\\20\3\2\2\2]^\7.\2\2^\22\3")
         buf.write(u"\2\2\2_`\7,\2\2`\24\3\2\2\2ab\7\u0080\2\2b\26\3\2\2\2")
         buf.write(u"cd\t\2\2\2d\30\3\2\2\2ef\t\3\2\2f\32\3\2\2\2gh\t\4\2")
         buf.write(u"\2h\34\3\2\2\2ij\t\5\2\2j\36\3\2\2\2kl\t\6\2\2l \3\2")
@@ -140,7 +140,7 @@ class MetricAlertConditionLexer(Lexer):
     modeNames = [ u"DEFAULT_MODE" ]
 
     literalNames = [ u"<INVALID>",
-            u"'.'", u"'/'", u"'_'", u"'\\'", u"':'", u"'%'", u"','", u"'-'", 
+            u"'.'", u"'/'", u"'_'", u"'\\'", u"':'", u"'%'", u"'-'", u"','", 
             u"'*'", u"'~'" ]
 
     symbolicNames = [ u"<INVALID>",

@@ -44,7 +44,19 @@ examples:
         az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
   - name: Create a disk in an availability zone in the region of "East US 2"
     text: >
-        az disk create -n MyDisk -g MyResourceGroup --size-gb 10 --location eastus2 --zone 1
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --location eastus2 --zone 1
+  - name: Create a disk from image.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --image-reference Canonical:UbuntuServer:18.04-LTS:18.04.202002180
+  - name: Create a disk from gallery image.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference $id
+  - name: Create a disk with total number of IOPS and total throughput (MBps) limitation.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30
+  - name: Create a disk and specify maximum number of VMs that can attach to the disk at the same time.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 256 --max-shares 2 -l centraluseuap
 """
 
 helps['disk delete'] = """
@@ -1950,6 +1962,8 @@ short-summary: Manage user accounts for a VM.
 helps['vm user delete'] = """
 type: command
 short-summary: Delete a user account from a VM.
+long-summary: >
+    Also deletes the user home directory on Linux VMs.
 examples:
   - name: Delete a user account.
     text: az vm user delete -u username -n MyVm -g MyResourceGroup
@@ -1976,11 +1990,13 @@ examples:
 helps['vm user update'] = """
 type: command
 short-summary: Update a user account.
+long-summary: >
+    This command uses VMAccessForLinux 1.5 for Linux operating system and VMAccessAgent 2.4 for Window operating system.
 parameters:
   - name: --ssh-key-value
     short-summary: SSH public key file value or public key file path. This command appends the new public key text to the ~/.ssh/authorized_keys file for the admin user on the VM. This does not replace or remove any existing SSH keys.
 examples:
-  - name: Update a Windows user account.
+  - name: Update a Windows user account. If username does not exist, a new user will be created.
     text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
   - name: Update a Linux user account. ("$(< filename)" syntax is not supported on Command Prompt or PowerShell.)
     text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
@@ -2517,6 +2533,14 @@ examples:
     text: az vmss wait --updated --name MyScaleSet --resource-group MyResourceGroup
   - name: Place the CLI in a waiting state until the VMSS instance has been updated.
     text: az vmss wait --updated --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup
+"""
+
+helps['vmss set-orchestration-service-state'] = """
+type: command
+short-summary: Change ServiceState property for a given service within a VMSS.
+examples:
+  - name: Change ServiceState property for AutomaticRepairs
+    text: az vmss set-orchestration-service-state --service-name AutomaticRepairs --action Resume --name MyScaleSet --resource-group MyResourceGroup
 """
 
 helps['vm monitor'] = """
