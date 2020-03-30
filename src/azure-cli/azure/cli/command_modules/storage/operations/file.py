@@ -13,6 +13,7 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
                                                     create_short_lived_container_sas, create_short_lived_share_sas,
                                                     guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
+from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 
 
@@ -324,9 +325,8 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
 
 
 def _file_share_exists(client, resource_group_name, account_name, share_name):
-    from msrestazure.azure_exceptions import CloudError
     try:
         file_share = client.get(resource_group_name, account_name, share_name)
         return file_share is not None
-    except CloudError:
+    except HttpResponseError:
         return False

@@ -789,7 +789,6 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
     def test_storage_account_private_endpoint(self, storage_account):
-        from msrestazure.azure_exceptions import CloudError
         self.kwargs.update({
             'sa': storage_account,
             'loc': 'eastus',
@@ -842,7 +841,7 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
         self.cmd('storage account private-endpoint-connection reject --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
-        with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+        with self.assertRaisesRegexp(CLIError, 'You cannot approve the connection request after rejection.'):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')

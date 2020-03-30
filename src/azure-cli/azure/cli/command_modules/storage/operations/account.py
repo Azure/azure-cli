@@ -7,9 +7,10 @@
 
 import os
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
-from azure.cli.command_modules.storage._validators import _query_account_key
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, sdk_no_wait
+from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -40,7 +41,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
     if encryption_services:
-        params.encryption = Encryption(services=encryption_services)
+        params.encryption = Encryption(key_source="Microsoft.Storage", services=encryption_services)
     if access_tier:
         params.access_tier = AccessTier(access_tier)
     if assign_identity:
@@ -98,7 +99,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if encryption_key_type_for_table is not None or encryption_key_type_for_queue is not None:
         EncryptionServices = cmd.get_models('EncryptionServices')
         EncryptionService = cmd.get_models('EncryptionService')
-        params.encryption = Encryption()
+        params.encryption = Encryption(key_source="Microsoft.Storage")
         params.encryption.services = EncryptionServices()
         if encryption_key_type_for_table is not None:
             table_encryption_service = EncryptionService(enabled=True, key_type=encryption_key_type_for_table)
@@ -200,7 +201,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     encryption = instance.encryption
     if not encryption and any((encryption_services, encryption_key_source, encryption_key_vault_properties)):
-        encryption = Encryption()
+        encryption = Encryption(key_source="Microsoft.Storage")
     if encryption_services:
         encryption.services = encryption_services
     if encryption_key_source:
@@ -369,8 +370,8 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, account_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):
 
-    PrivateEndpointServiceConnectionStatus, ErrorResponseException = \
-        cmd.get_models('PrivateEndpointServiceConnectionStatus', 'ErrorResponseException')
+    PrivateEndpointServiceConnectionStatus = \
+        cmd.get_models('PrivateEndpointServiceConnectionStatus')
 
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, account_name=account_name,
                                              private_endpoint_connection_name=private_endpoint_connection_name)
@@ -385,11 +386,10 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
                           account_name=account_name,
                           private_endpoint_connection_name=private_endpoint_connection_name,
                           properties=private_endpoint_connection)
-    except ErrorResponseException as ex:
+    except HttpResponseError as ex:
         if ex.response.status_code == 400:
-            from msrestazure.azure_exceptions import CloudError
             if new_status == "Approved" and old_status == "Rejected":
-                raise CloudError(ex.response, "You cannot approve the connection request after rejection. "
+                raise CLIError(ex.response, "You cannot approve the connection request after rejection. "
                                  "Please create a new connection for approval.")
         raise ex
 

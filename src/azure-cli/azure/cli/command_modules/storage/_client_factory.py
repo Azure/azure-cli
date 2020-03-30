@@ -7,7 +7,6 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
-from azure.cli.core.util import is_track2
 
 MISSING_CREDENTIALS_ERROR_MESSAGE = """
 Missing credentials to access storage service. The following variations are accepted:
@@ -144,8 +143,6 @@ def cf_sa_for_keys(cli_ctx, _):
     logger = get_logger(__name__)
     logger.debug('Disable HTTP logging to avoid having storage keys in debug logs')
     client = storage_client_factory(cli_ctx)
-    if not is_track2(client):
-        client.config.enable_http_logger = False
     return client.storage_accounts
 
 

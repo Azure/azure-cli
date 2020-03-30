@@ -403,7 +403,7 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
         return _get_operation()
 
 
-def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
+def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameters', **kwargs):
 
     def _put_operation():
         result = None
@@ -411,7 +411,8 @@ def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
             extended_args = args + (parameters,)
             result = operation(*extended_args)
         elif kwargs is not None:
-            result = operation(parameters=parameters, **kwargs)
+            kwargs[setter_arg_name] = parameters
+            result = operation(**kwargs)
         return result
 
     # early out if the command does not use the cache
