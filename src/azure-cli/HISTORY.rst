@@ -58,7 +58,7 @@ Release History
 * Upgrade VMAccessAgent version to 2.4
 * az vmss set-orchestration-service-state: support vmss set orchestration service state
 * Upgrade disk API version to 2019-11-01
-* disk create: add --disk-iops-read-only, --disk-mbps-read-only, --max-shares, --image-reference, --image-reference-lun, --gallery-image-reference, --gallery-image-reference-lun
+* az disk create: add --disk-iops-read-only, --disk-mbps-read-only, --max-shares, --image-reference, --image-reference-lun, --gallery-image-reference, --gallery-image-reference-lun
 
 **Cosmos DB**
 
