@@ -3,10 +3,146 @@
 Release History
 ===============
 
+2.3.0
+++++++
+
+**ACR**
+
+* 'az acr task update': null pointer exception
+* `az acr import`: Modify help and error message to clarify the usage of --source and --registry
+* Add a validator for argument 'registry_name'
+* `az acr login`:Remove the preview flag on '--expose-token'
+* [BREAKING CHANGE] 'az acr task create/update' Branch parameter is removed
+* 'az acr task update' Customer now can update context, git-token, and or triggers individually
+* 'az acr agentpool': new feature
+
+**AKS**
+
+* Fix apiServerAccessProfile when updating --api-server-authorized-ip-ranges
+* aks update: Override outbound IPs with input values when update
+* Do not create SPN for MSI clusters and support attach acr to MSI clusters
+
+**AMS**
+
+* Fix #12469: adding Fairplay content-key-policy fails due to problems with 'ask' parameter
+
+**AppConfig**
+
+* Add --skip-keyvault for kv export
+
+**AppService**
+
+* Fix #12509: Remove the tag to az webapp up by default
+* az functionapp create: Updated --runtime-version help menu and added warning when user specifies --runtime-version for dotnet
+* az functionapp create: Updated the way javaVersion was being set for Windows function apps
+
+**ARM**
+
+* az deployment create/validate: Use --handle-extended-json-format by default
+* az lock create: Add examples of creating subresource in the help documentation
+* az deployment {group/mg/sub/tenant} list: Support provisioningState filtering
+* az deployment: Fix the parse bug for comment under the last argument
+
+**Backup**
+
+* Added multiple files restore capabilities
+* Added support for Backing up OS Disks only
+* Added restore-as-unmanaged-disk parameter to specify unmanaged restore
+
+**Compute**
+
+* az vm create: Add NONE option of --nsg-rule
+* az vmss create/update: remove vmss automatic repairs preview tag
+* az vm update: Support --workspace
+* Fix a bug in VirtualMachineScaleSetExtension initialization code
+* Upgrade VMAccessAgent version to 2.4
+* az vmss set-orchestration-service-state: support vmss set orchestration service state
+* Upgrade disk API version to 2019-11-01
+* az disk create: add --disk-iops-read-only, --disk-mbps-read-only, --max-shares, --image-reference, --image-reference-lun, --gallery-image-reference, --gallery-image-reference-lun
+
+**Cosmos DB**
+
+* Fix missing --type option for deprecation redirections
+
+**Docker**
+
+* Update to Alpine 3.11 and Python 3.6.10
+
+**Extension**
+
+* Allow to load extensions in the system path via packages
+
+**HDInsight**
+
+* (az hdinsight create:) Support customers specify minimal supported tls version by using parameter `--minimal-tls-version`. The allowed value is 1.0,1.1,1.2
+
+**IoT**
+
+* Add codeowner
+* az iot hub create : Change default sku to S1 from F1
+* iot hub: Support IotHub in the profile of 2019-03-01-hybrid
+
+**IoTCentral**
+
+* Update error details, update default application template and prompt message
+
+**KeyVault**
+
+* Support certificate backup/restore
+* keyvault create/update: Support --retention-days
+* No longer display managed keys/secrets while listing
+* az keyvault create: support `--network-acls`, `--network-acls-ips` and `--network-acls-vnets` for specifying network rules while creating vault
+
+**Lock**
+
+* az lock delete fix bug: az lock delete does not work on Microsoft.DocumentDB
+
+**Monitor**
+
+* az monitor clone: support clone metric rules from one resource to another
+* Fix IcM179210086: unable to create custom metric alert for their Application Insights metric
+
+**NetAppFiles**
+
+* az volume create: Allow data protection volumes adding replication operations: approve, suspend, resume, status, remove
+
+**Network**
+
+* az network application-gateway waf-policy managed-rule rule-set add: support Microsoft_BotManagerRuleSet
+* network watcher flow-log show: fix wrong deprecating info
+* support host names in application gateway listener
+* az network nat gateway: support create empty resource without public ip or public ip prefix
+* Support vpn gateway generation
+* Support `--if-none-match` in `az network dns record-set {} add-record`
+
+**Packaging**
+
+* Drop support for python 3.5
+
+**Profile**
+
+* az login: Show warning for MFA error
+
 **RDBMS**
 
+* Add server data encryption key management commands for PostgreSQL and MySQL
+* Added support for minimal tls version and deny public access
 * Bump the azure-mgmt-rdbms SDK version to 2.2.0
 * Add --public-network-access to control whether a server supports public access or not
+
+**Rest**
+
+* az rest: Use configured ARM's resource ID
+
+**REST**
+
+* az rest: Dump request and response with `--verbose`
+
+**Storage**
+
+* az storage blob generate-sas: Fix #11643 to support encoding blob url
+* az storage copy: Add parameter --content-type to fix#6466
+* az storage account blob-service-properties update: Add --enable-versioning to support versioning for storage account * az storage account management-policy create: Add required flag for policy
 
 2.2.0
 ++++++
@@ -300,6 +436,10 @@ Release History
 **Misc**
 
 * Fix #6371: Support filename and environment variable completion in Bash
+
+**NetAppFiles**
+
+* Modified volume create to allow data protection volumes and added cmdlets for replication operations, approve, pause, resume and remove.
 
 **Network**
 

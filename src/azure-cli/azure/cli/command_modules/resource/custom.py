@@ -256,6 +256,9 @@ def _urlretrieve(url):
 def _remove_comments_from_json(template):
     from jsmin import jsmin
 
+    # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
+    # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
+    template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
     minified = jsmin(template)
     # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
     result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)

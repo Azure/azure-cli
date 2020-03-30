@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.3.0
+++++++
+* az cloud show: add application insights endpoint for public cloud
+* Enable local context for global resource group
+* PREVIEW: Add experimental tag to extension packages, command groups, commands and arguments
+* PREVIEW: Allow disabling color by setting `AZURE_CORE_NO_COLOR` environment variable to `True` or `[core] no_color=True` config
+* PREVIEW: Add `--only-show-errors` global argument to mute all warning, info and debug output. It can also be enabled by setting `AZURE_CORE_ONLY_SHOW_ERRORS` environment variable to `True` or `[core] only_show_errors=True` config
+
 2.2.0
 ++++++
 * az cloud show: add application insights endpoint for China/US cloud
