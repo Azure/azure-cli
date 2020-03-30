@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.3.0
+++++++
+* az cloud show: add application insights endpoint for public cloud
+* Add experimental tag for extensions
+* enable local context for global resource group
+
 2.2.0
 ++++++
 * az cloud show: add application insights endpoint for China/US cloud
