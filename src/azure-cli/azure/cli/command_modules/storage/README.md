@@ -59,5 +59,14 @@ az storage account encryption-scope update \
     -n myencryption \
     --account-name mystorageaccount \
     -g MyResourceGoup \
-    --disabled
+    --state Disabled
+```
+
+#### Enable specified encryption scope in a storage account.
+```
+az storage account encryption-scope update \
+    -n myencryption \
+    --account-name mystorageaccount \
+    -g MyResourceGoup \
+    --state Enabled
 ```
