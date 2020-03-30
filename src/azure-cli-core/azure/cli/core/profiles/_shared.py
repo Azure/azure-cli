@@ -51,6 +51,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
+    MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -74,7 +75,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
     MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
-    MGMT_IOT = ('azure.mgmt.iothub', None)
     MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', None)
     MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
     MGMT_MAPS = ('azure.mgmt.maps', None)
@@ -176,7 +176,8 @@ AZURE_API_PROFILES = {
             'tenant_activity_logs': '2015-04-01',
             'vm_insights': '2018-11-27-preview'
         }),
-        ResourceType.MGMT_APPSERVICE: '2019-08-01'
+        ResourceType.MGMT_APPSERVICE: '2019-08-01',
+        ResourceType.MGMT_IOTHUB: '2019-07-01-preview'
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
@@ -205,7 +206,8 @@ AZURE_API_PROFILES = {
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2017-04-01'
+        ResourceType.MGMT_EVENTHUB: '2017-04-01',
+        ResourceType.MGMT_IOTHUB: '2019-03-22'
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
