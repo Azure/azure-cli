@@ -32,7 +32,7 @@ Release History
 
 **AppService**
 
-* fix #12509: Remove the tag to az webapp up by default
+* Fix #12509: Remove the tag to az webapp up by default
 * az functionapp create: Updated --runtime-version help menu and added warning when user specifies --runtime-version for dotnet
 * az functionapp create: Updated the way javaVersion was being set for Windows function apps
 
@@ -57,7 +57,7 @@ Release History
 * Fix a bug in VirtualMachineScaleSetExtension initialization code
 * Upgrade VMAccessAgent version to 2.4
 * az vmss set-orchestration-service-state: support vmss set orchestration service state
-* upgrade disk API version to 2019-11-01
+* Upgrade disk API version to 2019-11-01
 * disk create: add --disk-iops-read-only, --disk-mbps-read-only, --max-shares, --image-reference, --image-reference-lun, --gallery-image-reference, --gallery-image-reference-lun
 
 **Cosmos DB**
@@ -93,9 +93,9 @@ Release History
 * No longer display managed keys/secrets while listing
 * az keyvault create: support `--network-acls`, `--network-acls-ips` and `--network-acls-vnets` for specifying network rules while creating vault
 
-**lock**
+**Lock**
 
-* Az lock delete fix bug: az lock delete does not work on Microsoft.DocumentDB
+* az lock delete fix bug: az lock delete does not work on Microsoft.DocumentDB
 
 **Monitor**
 
@@ -113,11 +113,11 @@ Release History
 * support host names in application gateway listener
 * az network nat gateway: support create empty resource without public ip or public ip prefix
 * Support vpn gateway generation
-* support `--if-none-match` in `az network dns record-set {} add-record`
+* Support `--if-none-match` in `az network dns record-set {} add-record`
 
 **Packaging**
 
-* drop support for python 3.5
+* Drop support for python 3.5
 
 **Profile**
 
@@ -134,11 +134,11 @@ Release History
 
 **REST**
 
-* az rest: Dump request and response
+* az rest: Dump request and response with `--verbose`
 
 **Storage**
 
-* az storage blob generate-sas: Fix#11643 to support encoding blob url
+* az storage blob generate-sas: Fix #11643 to support encoding blob url
 * az storage copy: Add parameter --content-type to fix#6466
 * az storage account blob-service-properties update: Add --enable-versioning to support versioning for storage account
 
