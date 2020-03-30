@@ -89,6 +89,3 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption} -d False",
                  checks=[JMESPathCheck("created", True)])
-
-
-

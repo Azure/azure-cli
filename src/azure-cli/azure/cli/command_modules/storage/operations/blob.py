@@ -25,7 +25,7 @@ from knack.util import CLIError
 def create_container(cmd, container_name, resource_group_name=None, account_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
                      default_encryption_scope=None, deny_encryption_scope_override=None, **kwargs):
-    if default_encryption_scope is not None and deny_encryption_scope_override is not None:
+    if default_encryption_scope is not None or deny_encryption_scope_override is not None:
         from .._client_factory import storage_client_factory
         client = storage_client_factory(cmd.cli_ctx).blob_containers
         BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
@@ -34,12 +34,12 @@ def create_container(cmd, container_name, resource_group_name=None, account_name
         container = client.create(resource_group_name=resource_group_name, account_name=account_name,
                                   container_name=container_name, blob_container=blob_container)
         return container is not None
-    else:
-        from .._client_factory import blob_data_service_factory
-        kwargs['account_name'] = account_name
-        client = blob_data_service_factory(cmd.cli_ctx, kwargs)
-        return client.create_container(container_name, metadata=metadata, public_access=public_access,
-                                       fail_on_exist=fail_on_exist, timeout=timeout)
+
+    from .._client_factory import blob_data_service_factory
+    kwargs['account_name'] = account_name
+    client = blob_data_service_factory(cmd.cli_ctx, kwargs)
+    return client.create_container(container_name, metadata=metadata, public_access=public_access,
+                                   fail_on_exist=fail_on_exist, timeout=timeout)
 
 
 def delete_container(client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
