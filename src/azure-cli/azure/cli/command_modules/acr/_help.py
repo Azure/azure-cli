@@ -113,7 +113,7 @@ examples:
 
 helps['acr create'] = """
 type: command
-short-summary: Creates an Azure Container Registry.
+short-summary: Create an Azure Container Registry.
 examples:
   - name: Create a managed container registry with the Standard SKU.
     text: >
@@ -597,7 +597,7 @@ examples:
 
 helps['acr task create'] = """
 type: command
-short-summary: Creates a series of steps for building, testing and OS & Framework patching containers. Tasks support triggers from git commits and base image updates.
+short-summary: Create a series of steps for building, testing and OS & Framework patching containers. Tasks support triggers from git commits and base image updates.
 examples:
   - name: Create a task without the source location.
     text: >
@@ -1039,6 +1039,63 @@ examples:
     text: >
         az acr token update -n MyToken -r MyRegistry --scope-map MyNewScopeMap
 """
+
+helps['acr agentpool'] = """
+type: group
+short-summary: Manage private Tasks agent pools with Azure Container Registries.
+"""
+
+helps['acr agentpool create'] = """
+type: command
+short-summary: Create an agent pool for an Azure Container Registry.
+examples:
+  - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry'.
+    text: >
+        az acr agentpool create -n MyAgentName -r MyRegistry
+  - name: Create the agent pool 'MyAgentName' with 2 agent count.
+    text: >
+        az acr agentpool create -n MyAgentName -r MyRegistry --count 2
+  - name: Create the agent pool 'MyAgentName' associated with the registry 'MyRegistry' in VNET subnet.
+    text: >
+        az acr agentpool create -n MyAgentName -r MyRegistry --subnet-id /subscriptions/<SubscriptionId>/resourceGroups/<ResourceGroupName>/providers/Microsoft.ClassicNetwork/virtualNetworks/<myNetwork>/subnets/<subNet>
+"""
+
+helps['acr agentpool update'] = """
+type: command
+short-summary: Update an agent pool for an Azure Container Registry.
+examples:
+  - name: Update the agent pool 'MyAgentName' count to 5
+    text: >
+        az acr agentpool update -n MyAgentName -r MyRegistry --count 5
+"""
+
+helps['acr agentpool delete'] = """
+type: command
+short-summary: Delete an agent pool.
+examples:
+  - name: Delete the agent pool 'MyAgentName'.
+    text: >
+        az acr agentpool delete -n MyAgentName -r MyRegistry
+"""
+
+helps['acr agentpool list'] = """
+type: command
+short-summary: List the agent pools for an Azure Container Registry.
+examples:
+  - name: List agent pools and show the result in a table.
+    text: >
+        az acr agentpool list -r MyRegistry -o table
+"""
+
+helps['acr agentpool show'] = """
+type: command
+short-summary: Get the properties of a specified agent pool for an Azure Container Registry.
+examples:
+  - name: Get the properties of an agent pool, displaying the results in a table.
+    text: >
+        az acr agentpool show -n MyAgentName -r MyRegistry -o table
+"""
+
 
 helps['acr update'] = """
 type: command
