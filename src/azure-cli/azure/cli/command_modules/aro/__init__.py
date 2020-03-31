@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
-from azure.cli.command_modules.aro._client_factory import cf_aro
 from azure.cli.command_modules.aro._params import load_arguments
 from azure.cli.command_modules.aro.commands import load_command_table
 from azure.cli.core import AzCommandsLoader

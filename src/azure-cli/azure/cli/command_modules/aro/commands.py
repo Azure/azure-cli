@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.aro._client_factory import cf_aro
 from azure.cli.command_modules.aro._format import aro_show_table_format

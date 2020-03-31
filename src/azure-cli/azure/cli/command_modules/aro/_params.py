@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 from azure.cli.command_modules.aro._validators import validate_cidr
 from azure.cli.command_modules.aro._validators import validate_client_id
 from azure.cli.command_modules.aro._validators import validate_client_secret
