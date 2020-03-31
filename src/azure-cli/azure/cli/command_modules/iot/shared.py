@@ -62,3 +62,11 @@ class RenewKeyType(Enum):
     Primary = 'primary'
     Secondary = 'secondary'
     Swap = 'swap'
+
+# pylint: disable=too-few-public-methods
+class AuthenticationType(Enum):
+    """
+    Type of the Authentication for the routing endpoint.
+    """
+    KeyBased = 'keybased'
+    IdentityBased = 'identitybased'

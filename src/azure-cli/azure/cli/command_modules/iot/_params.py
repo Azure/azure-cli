@@ -20,6 +20,7 @@ from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType,
                                                   EncodingFormat,
                                                   RenewKeyType,
+                                                  AuthenticationType,
                                                   UserRole)
 from .custom import KeyType, SimpleAccessRights
 from ._validators import (validate_policy_permissions,
@@ -206,7 +207,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    options_list=['--endpoint-type', '--type', '-t'], help='Type of the Routing Endpoint.')
         c.argument('encoding', options_list=['--encoding'], arg_type=get_enum_type(EncodingFormat),
                    help='Encoding format for the container. The default is AVRO. '
-                        'Note that this field is applicable only for blob container endpoints.')
+                        'Note that this field is applicable only for blob container endpoints.'),
+        c.argument('endpoint_uri', options_list=['--endpoint-uri'],
+                   help='The uri of the endpoint resource.')
+        c.argument('entity_path', options_list=['--entity-path'],
+                   help='The entity path of the endpoint resource.')
+        c.argument('authentication_type', options_list=['--auth-type'], arg_type=get_enum_type(AuthenticationType),
+                   help='Authentication type for the endpoint. The default is keyBased.')
 
     with self.argument_context('iot hub routing-endpoint create') as c:
         c.argument('batch_frequency', options_list=['--batch-frequency', '-b'], type=int,

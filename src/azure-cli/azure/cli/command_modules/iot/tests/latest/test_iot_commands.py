@@ -275,6 +275,50 @@ class IoTHubTest(ScenarioTest):
         assert len(endpoint['serviceBusTopics']) == 0
         assert len(endpoint['eventHubs']) == 1
 
+        # TODO - ensure hub is created with managed identity, and add an MSI-enabled storage endpoint and event hub endpoint.
+        event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
+        storage_identity_endpoint_name = 'IdentityStorage'
+        storage_identity_container_name = 'IdentityContainer'
+        key_based_auth = 'keyBased'
+        identity_based_auth = 'identityBased'
+        storage_identity_endpoint_uri = 'https://IdentityStorage.windows.core.net'
+        eventhub_endpoint_uri = 'eh://test'
+        entity_path = 'entity'
+
+        # Test 'az iot hub routing-endpoint create' with Identity-based storage endpoint (no connection string)
+        endpoint = self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} '
+                            '--container-name {6} --encoding {7} -b {8} -w {9} --auth-type {10} --endpoint-uri {11}'
+                            .format(hub, rg, storage_identity_endpoint_name, storage_endpoint_type, rg, subscription_id,
+                                    storage_identity_container_name, storage_encoding_format, storage_batch_frequency, 
+                                    storage_chunk_size, identity_based_auth, storage_identity_endpoint_uri)).get_output_in_json()
+
+        assert len(endpoint['storageContainers']) == 2
+        assert endpoint["storageContainers"][1]["containerName"] == storage_identity_container_name
+        assert endpoint["storageContainers"][1]["name"] == storage_identity_endpoint_name
+        assert endpoint["storageContainers"][1]["batchFrequencyInSeconds"] == storage_batch_frequency
+        assert endpoint["storageContainers"][1]["maxChunkSizeInBytes"] == 1048576 * storage_chunk_size
+        assert endpoint["storageContainers"][1]["fileNameFormat"] == storage_file_name_format
+        assert endpoint["storageContainers"][1]["authenticationType"] == identity_based_auth
+        assert endpoint["storageContainers"][1]["endpointUri"] == storage_identity_endpoint_uri
+        assert endpoint["storageContainers"][1]["connectionString"] is None
+        assert len(endpoint['serviceBusQueues']) == 0
+        assert len(endpoint['serviceBusTopics']) == 0
+        assert len(endpoint['eventHubs']) == 1
+
+        # Test 'az iot hub routing-endpoint create' with Identity-based event hub endpoint
+        self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} --auth-type {6} --endpoint-uri {7} --entity-path {8}'
+                 .format(hub, rg, endpoint_name, endpoint_type, rg, subscription_id, identity_based_auth, eventhub_endpoint_uri, entity_path),
+                 checks=[self.check('length(eventHubs[*])', 2),
+                         self.check('eventHubs[2].resourceGroup', rg),
+                         self.check('eventHubs[2].name', event_hub_identity_endpoint_name),
+                         self.check('eventHubs[2].authenticationType', identity_based_auth),
+                         self.check('eventHubs[2].connectionString', None),
+                         self.check('eventHubs[2].endpointUri', eventhub_endpoint_uri),
+                         self.check('eventHubs[2].entityPath', entity_path),
+                         self.check('length(serviceBusQueues[*])', 0),
+                         self.check('length(serviceBusTopics[*])', 0),
+                         self.check('length(storageContainers[*])', 2)])
+
         # Test 'az iot hub route create'
         route_name = 'route1'
         source_type = 'DeviceMessages'
