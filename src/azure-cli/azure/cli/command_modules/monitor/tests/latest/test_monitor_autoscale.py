@@ -99,7 +99,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         # verify order is stable
         list_1 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
         with self.assertRaisesRegexp(CLIError, 'Profile name is invalid. Please check the existence of the profile.'):
-            self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name falseprofile').get_output_in_json()
+            self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name falseprofile')
 
         list_2 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
         self.assertTrue(len(list_1) == 3 and len(list_2) == 3)
