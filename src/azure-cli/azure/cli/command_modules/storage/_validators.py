@@ -163,9 +163,13 @@ def validate_client_parameters(cmd, namespace):
 
 def validate_encryption_key(cmd, namespace):
     encryption_key_source = cmd.get_models('EncryptionScopeSource', resource_type=ResourceType.MGMT_STORAGE)
-    if namespace.encryption_key_source == encryption_key_source.microsoft_key_vault and \
-            not namespace.encryption_key_uri:
-        raise CLIError("usage error: Please specify --encryption-key-uri when using Microsoft.Keyvault as key source.")
+    if namespace.key_source == encryption_key_source.microsoft_key_vault and \
+            not namespace.key_uri:
+        raise CLIError("usage error: Please specify --key-uri when using {} as key source."
+                       .format(encryption_key_source.microsoft_key_vault))
+    if namespace.key_source != encryption_key_source.microsoft_key_vault and namespace.key_uri:
+        raise CLIError("usage error: Specify `--key-source={}` and --key-uri to configure key vault properties."
+                       .format(encryption_key_source.microsoft_key_vault))
 
 
 def process_blob_source_uri(cmd, namespace):
