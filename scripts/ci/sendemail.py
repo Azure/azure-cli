@@ -27,10 +27,15 @@ def main():
 
 
 def get_content():
+    """
+    Write content of email
+    :return:
+    """
     build_id = sys.argv[2]
-    commit_id = sys.argv[3]
+    repo = sys.argv[3]
+    branch = sys.argv[4]
     link = 'https://dev.azure.com/azure-sdk/public/_build/results?buildId={}&view=ms.vss-test-web.build-test-results-tab'.format(build_id)
-    content = 'Hi Azure CLI team,<br>Test results of Azure CLI dev branch.<br>Commit ID: {}<br>{}'.format(commit_id, link)
+    content = 'Hi Azure CLI team,<br>Test results of Azure CLI.<br>Repository: {}<br>Branch: {}<br>{}'.format(repo, branch, link)
     return content
 
 
