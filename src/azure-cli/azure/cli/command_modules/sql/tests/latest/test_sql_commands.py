@@ -3202,8 +3202,8 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         self.kwargs.update({
             'rg': 'clitest4vtazvlqbo',
             'loc': 'westus',
-            'managed_instance_name': 'ayang',
-            'database_name': 'test-db-1',
+            'managed_instance_name': 'ayang-ltr',
+            'database_name': 'ayang-ltr-db',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
@@ -3231,34 +3231,32 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         # test list long term retention backups for location
         # with resource group
         self.cmd(
-            'sql midb ltr-backup list-by-location -l {loc} -g {rg}')
+            'sql midb ltr-backup list -l {loc} -g {rg}')
         # without resource group
         self.cmd(
-            'sql midb ltr-backup list-by-location -l {loc}')
+            'sql midb ltr-backup list -l {loc}')
 
         # test list long term retention backups for instance
-        # should assert 1 result
         # with resource group
         self.cmd(
-            'sql midb ltr-backup list-by-instance -l {loc} --mi {managed_instance_name} -g {rg}')
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -g {rg}')
 
         # without resource group
         self.cmd(
-            'sql midb ltr-backup list-by-instance -l {loc} --mi {managed_instance_name}')
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name}')
 
         # test list long term retention backups for database
-        # should assert 1 result
         # with resource group
         self.cmd(
-            'sql midb ltr-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name} -g {rg}')
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -n {database_name} -g {rg}')
 
         # without resource group
         self.cmd(
-            'sql midb ltr-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name}')
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -n {database_name}')
 
         # setup for test show long term retention backup
         backup = self.cmd(
-            'sql midb ltr-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name} --latest True').get_output_in_json()
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -n {database_name} --latest True').get_output_in_json()
 
         self.kwargs.update({
             'backup_name': backup[0]['name'],
@@ -3280,7 +3278,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         })
 
         self.cmd(
-            'sql midb ltr restore --backup-id \'{backup_id}\' --dest-name {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg}',
+            'sql midb restore --mode LTR --backup-id \'{backup_id}\' --dest-name {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('name', '{dest_database_name}')])
@@ -3290,7 +3288,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
             'sql midb ltr-backup delete -l {loc} --mi {managed_instance_name} -n {database_name} --backup-name \'{backup_name}\'')
         # assert no backpus
         self.cmd(
-            'sql midb ltr-backup list-by-database -l {loc} --mi {managed_instance_name} -n {database_name}')
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -n {database_name}')
 
 
 class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
@@ -3381,7 +3379,7 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
         })
 
         # test restore deleted database
-        self.cmd('sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
+        self.cmd('sql midb restore --mode PITR -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('name', '{restored_database_name}'),
@@ -3444,7 +3442,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         time.sleep(300)  # Sleeping 5 minutes should be enough for the restore to be possible (Skipped under playback mode)
 
         # test sql db restore command
-        db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
+        db1 = self.cmd('sql midb restore --mode PITR -g {} --mi {} -n {} --dest-name {} --time {}'
                        .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored, datetime.utcnow().isoformat()),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group_1),
