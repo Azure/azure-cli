@@ -713,17 +713,10 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
-    @record_only()
     def test_sql_mi_operation_mgmt(self):
         managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
-
-        is_playback = os.path.exists(self.recording_file)
-        if is_playback:
-            subnet = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
-        else:
-            subnet = '/subscriptions/a8c9a924-06c0-4bde-9788-e7b1370969e1/resourceGroups/AndyPG/providers/Microsoft.Network/virtualNetworks/prepare-cl-nimilj/subnets/default'
 
         license_type = 'LicenseIncluded'
         loc = 'eastus2euap'
@@ -734,12 +727,47 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         resource_group = "DejanDuVnetRG"
         user = admin_login
 
+        self.kwargs.update({
+            'loc': loc,
+            'resource_group': resource_group,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name_default': 'default',
+            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '128',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy"
+        })
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
+        self.cmd('network route-table show -g {resource_group} -n {route_table_name}')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {resource_group} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        print('Creating subnet...\n')
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
         print('Creating MI...\n')
 
         # Create sql managed_instance
         self.cmd('sql mi create -g {} -n {} -l {} '
                  '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
-                 .format(resource_group, managed_instance_name, loc, user, admin_password, subnet, license_type, v_cores, storage_size_in_gb, edition, family),
+                 .format(resource_group, managed_instance_name, loc, user, admin_password, subnet['id'], license_type, v_cores, storage_size_in_gb, edition, family),
                  checks=[
                      JMESPathCheck('name', managed_instance_name),
                      JMESPathCheck('resourceGroup', resource_group),
@@ -753,6 +781,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('identity', None)]).get_output_in_json()
 
         edition_updated = 'BusinessCritical'
+
         print('Updating MI...\n')
 
         # Update sql managed_instance
