@@ -338,6 +338,10 @@ def autoscale_rule_create(cmd, client, autoscale_name, resource_group_name, cond
 
 def autoscale_rule_list(cmd, client, autoscale_name, resource_group_name, profile_name=DEFAULT_PROFILE_NAME):
     autoscale_settings = client.get(resource_group_name, autoscale_name)
+    profile_names = [x.name for x in autoscale_settings.profiles]
+    if not profile_name in profile_names:
+        from knack.util import CLIError
+        raise CLIError('Profile name is invalid. Please check the existence of the profile.')
     profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
     index = 0
     # we artificially add indices to the rules so the user can target them with the remove command
