@@ -75,3 +75,17 @@ def get_container_access_type(cli_ctx, name):
     if name == 'container':
         return get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'PublicAccess', mod='blob.models').Container
     raise KeyError
+
+
+def get_fs_access_type_names():
+    return 'off', 'file', 'filesystem'
+
+
+def get_fs_access_type(cli_ctx, name):
+    if name == 'off':
+        return None
+    if name == 'file':
+        return get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE, 'PublicAccess', mod='_models').File
+    if name == 'filesystem':
+        return get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE, 'PublicAccess', mod='_models').FileSystem
+    raise KeyError

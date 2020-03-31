@@ -16,7 +16,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
-                          validator_delete_retention_days, validate_delete_retention_days)
+                          validator_delete_retention_days, validate_delete_retention_days,
+                          validate_fs_public_access)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -1090,6 +1091,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         with self.argument_context('storage fs {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['--name', '-n'],
                     help="File system name.", required=True)
+
+    with self.argument_context('storage fs create') as c:
+        from .sdkutil import get_fs_access_type_names
+
+        c.argument('public_access', arg_type=get_enum_type(get_fs_access_type_names()), validator=validate_fs_public_access,
+                   help="Specify whether data in the file system may be accessed publicly and the level of access.")
 
     for item in ['create', 'show', 'delete']:
         with self.argument_context('storage fs directory {}'.format(item)) as c:

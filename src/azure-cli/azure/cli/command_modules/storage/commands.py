@@ -658,7 +658,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
     )
 
-    with self.command_group('storage fs', adls_fs_sdk, custom_command_type=custom_adls_sdk, is_preview=True) as g:
+    with self.command_group('storage fs', adls_fs_sdk, custom_command_type=custom_adls_sdk, is_preview=True,
+                            min_api='2018-11-09') as g:
         from ._transformers import transform_storage_list_output
         g.storage_command_oauth('create', 'create_file_system')
         g.storage_command('list', 'list_file_systems', command_type=adls_service_sdk,

@@ -1386,6 +1386,23 @@ examples:
     crafted: true
 """
 
+helps['storage fs'] = """
+type: group
+short-summary: Manage file systems for Azure Data Lake Storage Gen2 account.
+"""
+
+helps['storage fs create'] = """
+type: command
+short-summary: Create file system for Azure Data Lake Storage Gen2 account.
+examples:
+  - name: Create file system for Azure Data Lake Storage Gen2 account.
+    text: |
+        az storage fs create -n fsname --account-name mystorageaccount --account-key 0000-0000
+  - name: Create file system for Azure Data Lake Storage Gen2 account and enable public access.
+    text: |
+        az storage fs create -n fsname --public-access --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage logging'] = """
 type: group
 short-summary: Manage storage service logging information.
