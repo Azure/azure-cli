@@ -694,7 +694,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
-        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true --enable-purge-protection true'
+        self.cmd('keyvault create -g {} -n {} --location eastus --enable-soft-delete true --enable-purge-protection true'
                  .format(resource_group, vault_name))
 
         # create key
@@ -742,32 +742,32 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         user = 'DSEngAll'
         user2 = 'TestUser'
 
-        self.cmd('{} server ad-admin create -s {} -g {} -i {} -u {}'
+        self.cmd('{} server ad-admin create --name {} -g {} -i {} -u {}'
                  .format(database_engine, server, resource_group, oid, user),
                  checks=[
-                     JMESPathCheck('login', user),
-                     JMESPathCheck('sid', oid)])
+                     self.check('login', user),
+                     self.check('sid', oid)])
 
-        self.cmd('{} server ad-admin list -s {} -g {}'
+        self.cmd('{} server ad-admin list --name {} -g {}'
                  .format(database_engine, server, resource_group),
                  checks=[
-                     JMESPathCheck('login', user),
-                     JMESPathCheck('sid', oid)])
+                     self.check('[0].login', user),
+                     self.check('[0].sid', oid)])
 
-        self.cmd('{} server ad-admin create -s {} -g {} -i {} -u {}'
+        self.cmd('{} server ad-admin create --name {} -g {} -i {} -u {}'
                  .format(database_engine, server, resource_group, oid2, user2),
                  checks=[
-                     JMESPathCheck('login', user2),
-                     JMESPathCheck('sid', oid2)])
+                     self.check('login', user2),
+                     self.check('sid', oid2)])
 
-        self.cmd('{} server ad-admin delete -s {} -g {}'
+        self.cmd('{} server ad-admin delete --name {} -g {}'
                  .format(database_engine, server, resource_group))
 
-        self.cmd('{} server ad-admin list -s {} -g {}'
+        self.cmd('{} server ad-admin list --name {} -g {}'
                  .format(database_engine, server, resource_group),
                  checks=[
-                     JMESPathCheck('[0].login', None),
-                     JMESPathCheck('[0].sid', None)])
+                     self.check('[0].login', None),
+                     self.check('[0].sid', None)])
 
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
