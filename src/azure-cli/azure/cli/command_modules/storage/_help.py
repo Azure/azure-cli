@@ -125,6 +125,9 @@ examples:
   - name: Update an encryption scope key source to Micosoft.Storage.
     text: |
         az storage account encryption-scope update --name myencryption -s Microsoft.Storage --account-name mystorageaccount -g MyResourceGroup
+  - name: Create an encryption scope within storage account based on Micosoft.KeyVault key source.
+    text: |
+        az storage account encryption-scope update --name myencryption -s Microsoft.KeyVault -u "https://vaultname.vault.azure.net/keys/keyname/1f7fa7edc99f4cdf82b5b5f32f2a50a7" --account-name mystorageaccount -g MyResourceGroup
   - name: Disable an encryption scope within storage account.
     text: |
         az storage account encryption-scope update --name myencryption --state Disabled --account-name mystorageaccount -g MyResourceGroup

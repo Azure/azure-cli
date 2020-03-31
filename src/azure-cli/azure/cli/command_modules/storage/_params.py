@@ -284,10 +284,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE) as c:
             from ._validators import validate_encryption_key
             t_encryption_key_source = self.get_models('EncryptionScopeSource', resource_type=ResourceType.MGMT_STORAGE)
-            c.argument('encryption_key_source', options_list=['-s', '--encryption-key-source'],
+            c.argument('key_source', options_list=['-s', '--key-source'],
                        arg_type=get_enum_type(t_encryption_key_source, default="Microsoft.Storage"),
                        help='The provider for the encryption scope.', validator=validate_encryption_key)
-            c.argument('encryption_key_uri', options_list=['-u', '--encryption-key-uri'],
+            c.argument('key_uri', options_list=['-u', '--key-uri'],
                        help='The object identifier for a key vault key object. When applied, the encryption scope will '
                        'use the key referenced by the identifier to enable customer-managed key support on this '
                        'encryption scope.')

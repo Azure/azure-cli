@@ -22,8 +22,12 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         })
 
         # Create with Microsoft.KeyVault key source without key uri
-        with self.assertRaisesRegex(CLIError, "usage error: Please specify --encryption-key-uri when using Microsoft.Keyvault"):
+        with self.assertRaisesRegex(CLIError, "usage error: Please specify --key-uri when using"):
             self.cmd("storage account encryption-scope create --account-name {sa} -g {rg} -n {encryption} -s Microsoft.KeyVault")
+
+        # Create encryption scope only with key uri
+        with self.assertRaisesRegex(CLIError, "usage error: Specify `--key-source="):
+            self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} -u keyuri")
 
         # Create with default Microsoft.Storage key source
         self.cmd("storage account encryption-scope create --account-name {sa} -g {rg} -n {encryption}", checks=[
@@ -48,7 +52,7 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         # Update from Microsoft.Storage key source to Microsoft.KeyVault without key uri
-        with self.assertRaisesRegex(CLIError, "usage error: Please specify --encryption-key-uri when using Microsoft.Keyvault"):
+        with self.assertRaisesRegex(CLIError, "usage error: Please specify --key-uri when using"):
             self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} -s Microsoft.KeyVault")
 
         # Update from Microsoft.Storage key source to Microsoft.KeyVault and key uri
@@ -66,6 +70,10 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         keyvault = self.cmd("keyvault key create --vault-name {vault} -n {key}").get_output_in_json()
         self.kwargs["key_uri"] = keyvault['key']['kid']
 
+        # Update encryption scope only with key uri
+        with self.assertRaisesRegex(CLIError, "usage error: Specify `--key-source="):
+            self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} -u {key_uri}")
+
         self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} -s Microsoft.KeyVault -u {key_uri}", checks=[
             JMESPathCheck("name", self.kwargs["encryption"]),
             JMESPathCheck("resourceGroup", self.kwargs["rg"]),
@@ -75,11 +83,12 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         # Update to encryption scope state to Disabled
-        self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} --state Disabled", checks=[
-            JMESPathCheck("name", self.kwargs["encryption"]),
-            JMESPathCheck("resourceGroup", self.kwargs["rg"]),
-            JMESPathCheck("state", "Disabled")
-        ])
+        self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} --state Disabled",
+                 checks=[
+                     JMESPathCheck("name", self.kwargs["encryption"]),
+                     JMESPathCheck("resourceGroup", self.kwargs["rg"]),
+                     JMESPathCheck("state", "Disabled")
+                 ])
 
         # Update to encryption scope state to Enabled
         self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} --state Enabled",

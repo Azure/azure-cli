@@ -466,30 +466,30 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
 
 
 def create_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
-                            encryption_key_source=None, encryption_key_uri=None):
+                            key_source=None, key_uri=None):
     EncryptionScope = cmd.get_models('EncryptionScope')
 
-    if encryption_key_source:
-        encryption_scope = EncryptionScope(source=encryption_key_source)
+    if key_source:
+        encryption_scope = EncryptionScope(source=key_source)
 
-    if encryption_key_uri:
+    if key_uri:
         EncryptionScopeKeyVaultProperties = cmd.get_models('EncryptionScopeKeyVaultProperties')
-        encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=encryption_key_uri)
+        encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=key_uri)
 
     return client.put(resource_group_name=resource_group_name, account_name=account_name,
                       encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
 
 
 def update_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
-                            encryption_key_source=None, encryption_key_uri=None, state=None):
+                            key_source=None, key_uri=None, state=None):
     EncryptionScope, EncryptionScopeState = cmd.get_models('EncryptionScope', 'EncryptionScopeState')
 
-    if encryption_key_source:
-        encryption_scope = EncryptionScope(source=encryption_key_source)
+    if key_source:
+        encryption_scope = EncryptionScope(source=key_source)
 
-    if encryption_key_uri:
+    if key_uri:
         EncryptionScopeKeyVaultProperties = cmd.get_models('EncryptionScopeKeyVaultProperties')
-        encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=encryption_key_uri)
+        encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=key_uri)
 
     if state is not None:
         encryption_scope.state = EncryptionScopeState(state)
