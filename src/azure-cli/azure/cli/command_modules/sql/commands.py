@@ -600,14 +600,8 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_database_long_term_retention_backups_operations) as g:
         g.show_command('show', 'get')
         g.custom_command(
-            'list-by-database',
-            'list_by_database_long_term_retention_mi_backup')
-        g.custom_command(
-            'list-by-instance',
-            'list_by_instance_long_term_retention_mi_backup')
-        g.custom_command(
-            'list-by-location',
-            'list_by_location_long_term_retention_mi_backup')
+            'list',
+            'list_long_term_retention_mi_backups')
         g.command('delete', 'delete')
 
     ###############################################

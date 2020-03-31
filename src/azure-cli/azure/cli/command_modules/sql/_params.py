@@ -1442,13 +1442,27 @@ def load_arguments(self, _):
                 'deleted_time',
                 'target_managed_database_name',
                 'target_managed_instance_name',
-                'restore_point_in_time'
+                'restore_point_in_time',
+                'long_term_retention_backup_resource_id',
+                'restore_mode'
             ])
 
-        c.argument('deleted_time',
-                   options_list=['--deleted-time'],
-                   help='If specified, restore from a deleted database instead of from an existing database.'
-                   ' Must match the deleted time of a deleted database on the source Managed Instance.')
+        c.argument(
+            'restore_mode',
+            options_list=['--restore-mode', '--mode'],
+            required=True,
+            help='Restore mode. '
+            '\'PITR\' (point in time restore) or \'LTR\' (restore long term retention backup)')
+
+        c.argument('database-name',
+                   help='The name of the Azure SQL Managed Database. Required for PITR.')
+
+        c.argument('managed_instance_name',
+                   help='Name of the Azure SQL managed instance. Required for PITR.')
+
+        c.argument('resource_group_name',
+                   help='Name of resource group. You can configure the default group '
+                   'using `az configure --defaults group=<name>`. Required for PITR.')
 
         c.argument('target_managed_database_name',
                    options_list=['--dest-name'],
@@ -1459,54 +1473,39 @@ def load_arguments(self, _):
                    options_list=['--dest-mi'],
                    help='Name of the managed instance to restore managed database to. '
                    'This can be same managed instance, or another managed instance on same subscription. '
-                   'When not specified it defaults to source managed instance.')
+                   'When not specified for PITR it defaults to source managed instance. '
+                   'Required for LTR.')
 
         c.argument('target_resource_group_name',
                    options_list=['--dest-resource-group'],
                    help='Name of the resource group of the managed instance to restore managed database to. '
-                   'When not specified it defaults to source resource group.')
+                   'When not specified for PITR it defaults to source resource group. '
+                   'Required for LTR.')
 
         restore_point_arg_group = 'Restore Point'
 
         c.argument('restore_point_in_time',
                    options_list=['--time', '-t'],
                    arg_group=restore_point_arg_group,
-                   required=True,
                    help='The point in time of the source database that will be restored to create the'
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. ' + time_format_help)
 
-    with self.argument_context('sql midb ltr restore') as c:
-        create_args_for_complex_type(
-            c, 'parameters', ManagedDatabase, [
-                'target_managed_database_name',
-                'target_managed_instance_name',
-                'target_resource_group_name'
-            ])
+        c.argument('deleted_time',
+                   options_list=['--deleted-time'],
+                   arg_group=restore_point_arg_group,
+                   help='If specified, restore from a deleted database instead of from an existing database.'
+                   ' Must match the deleted time of a deleted database on the source Managed Instance.')
 
-        c.argument(
-            'long_term_retention_backup_resource_id',
-            options_list=['--backup-id'],
-            help='The resource id of the long term retention backup to be restored.')
+        restore_ltr_backup_arg_group = 'Restore LTR Backup'
 
-        c.argument(
-            'target_managed_database_name',
-            options_list=['--dest-name'],
-            required=True,
-            help='Name of the managed database that will be created as the restore destination.')
+        c.argument('long_term_retention_backup_resource_id',
+                   options_list=['--backup-id'],
+                   arg_group=restore_ltr_backup_arg_group,
+                   required=False,
+                   help='The resource id of the long term retention backup to be restored. '
+                   'Use az sql midb ltr-backup show or az sql midb ltr-backup list for backup id.')
 
-        c.argument(
-            'target_managed_instance_name',
-            options_list=['--dest-mi'],
-            help='Name of the managed instance to restore managed database to. '
-            'This can be same managed instance, or another managed instance on same subscription. '
-            'When not specified it defaults to source managed instance.')
-
-        c.argument(
-            'target_resource_group_name',
-            options_list=['--dest-resource-group'],
-            help='Name of the resource group of the managed instance to restore managed database to. '
-            'When not specified it defaults to source resource group.')
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
@@ -1535,7 +1534,6 @@ def load_arguments(self, _):
             help='If specified, shows retention days for a deleted database, instead of an existing database.'
             'Must match the deleted time of a deleted database on the source Managed Instance.')
 
-    # LTR
     with self.argument_context('sql midb ltr-policy set') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
@@ -1569,35 +1567,19 @@ def load_arguments(self, _):
                    arg_type=get_location_type(self.cli_ctx))
 
         c.argument('resource_group_name',
-                   required=False,
-                   help='If specified, the resource group that the managed instance/database resource belongs to.')
+                   required=False)
 
-    with self.argument_context('sql midb ltr-backup show') as c:
-        c.argument('backup_name',
-                   options_list=['--backup-name', '-b'],
-                   help='The long term retention backup name.')
+    with self.argument_context('sql midb ltr-backup list') as c:
+        c.argument('managed_instance_name',
+                   options_list=['--managed-instance', '--mi'],
+                   help='Name of the Azure SQL managed instance. '
+                   'If specified, retrieves all requested backups under this managed instance.')
 
-    with self.argument_context('sql midb ltr-backup list-by-database') as c:
-        c.argument('database_state',
-                   required=False,
-                   help='\'All\', \'Live\', or \'Deleted\'')
+        c.argument('database_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the Azure SQL Managed Database. '
+                   'If specified (along with instance name), retrieves all requested backups under this database.')
 
-        c.argument('only_latest_per_database',
-                   options_list=['--only-latest-per-database', '--latest'],
-                   required=False,
-                   help='If true, will only return the latest backup for each database')
-
-    with self.argument_context('sql midb ltr-backup list-by-instance') as c:
-        c.argument('database_state',
-                   required=False,
-                   help='\'All\', \'Live\', or \'Deleted\'')
-
-        c.argument('only_latest_per_database',
-                   options_list=['--only-latest-per-database', '--latest'],
-                   required=False,
-                   help='If true, will only return the latest backup for each database')
-
-    with self.argument_context('sql midb ltr-backup list-by-location') as c:
         c.argument('database_state',
                    required=False,
                    help='\'All\', \'Live\', or \'Deleted\'')

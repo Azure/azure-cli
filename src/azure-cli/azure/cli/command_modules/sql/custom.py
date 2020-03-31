@@ -2580,78 +2580,84 @@ def managed_db_create(
 def managed_db_restore(
         cmd,
         client,
-        database_name,
-        managed_instance_name,
-        resource_group_name,
+        restore_mode,
         target_managed_database_name,
         target_managed_instance_name=None,
         target_resource_group_name=None,
+        database_name=None,
+        managed_instance_name=None,
+        resource_group_name=None,
         deleted_time=None,
+        long_term_retention_backup_resource_id=None,
         **kwargs):
     '''
-    Restores an existing managed DB (i.e. create with 'PointInTimeRestore' create mode.)
+    Restores a managed database.
 
     Custom function makes create mode more convenient.
     '''
 
-    if not target_managed_instance_name:
-        target_managed_instance_name = managed_instance_name
+    if restore_mode == 'PITR':
+        if not resource_group_name or not managed_instance_name or not database_name:
+            raise CLIError('Please specify source resource(s). '
+                           'Resource group, instance, and database are all required for point in time restore.')
 
-    if not target_resource_group_name:
-        target_resource_group_name = resource_group_name
+        if not target_managed_instance_name:
+            target_managed_instance_name = managed_instance_name
 
-    kwargs['location'] = _get_managed_instance_location(
-        cmd.cli_ctx,
-        managed_instance_name=managed_instance_name,
-        resource_group_name=resource_group_name)
+        if not target_resource_group_name:
+            target_resource_group_name = resource_group_name
 
-    kwargs['create_mode'] = CreateMode.point_in_time_restore.value
-
-    if deleted_time:
-        kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+        kwargs['location'] = _get_managed_instance_location(
             cmd.cli_ctx,
-            resource_group_name,
-            managed_instance_name,
-            database_name,
-            deleted_time)
-    else:
-        kwargs['source_database_id'] = _get_managed_db_resource_id(
+            managed_instance_name=managed_instance_name,
+            resource_group_name=resource_group_name)
+
+        kwargs['create_mode'] = CreateMode.point_in_time_restore.value
+
+        if deleted_time:
+            kwargs['restorable_dropped_database_id'] = _get_managed_dropped_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name,
+                deleted_time)
+        else:
+            kwargs['source_database_id'] = _get_managed_db_resource_id(
+                cmd.cli_ctx,
+                resource_group_name,
+                managed_instance_name,
+                database_name)
+
+        return client.create_or_update(
+            database_name=target_managed_database_name,
+            managed_instance_name=target_managed_instance_name,
+            resource_group_name=target_resource_group_name,
+            parameters=kwargs)
+
+    if restore_mode == 'LTR':
+        if not target_resource_group_name or not target_managed_instance_name or not target_managed_database_name:
+            raise CLIError('Please specify target resource(s). '
+                           'Target resource group, target instance, and target database '
+                           'are all required for restore LTR backup.')
+
+        if not long_term_retention_backup_resource_id:
+            raise CLIError('Please specify a long term retention backup.')
+
+        kwargs['location'] = _get_managed_instance_location(
             cmd.cli_ctx,
-            resource_group_name,
-            managed_instance_name,
-            database_name)
+            managed_instance_name=target_managed_instance_name,
+            resource_group_name=target_resource_group_name)
 
-    return client.create_or_update(
-        database_name=target_managed_database_name,
-        managed_instance_name=target_managed_instance_name,
-        resource_group_name=target_resource_group_name,
-        parameters=kwargs)
+        kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
+        kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
 
+        return client.create_or_update(
+            database_name=target_managed_database_name,
+            managed_instance_name=target_managed_instance_name,
+            resource_group_name=target_resource_group_name,
+            parameters=kwargs)
 
-def managed_db_restore_ltr_backup(
-        cmd,
-        client,
-        long_term_retention_backup_resource_id,
-        target_managed_database_name,
-        target_managed_instance_name,
-        target_resource_group_name,
-        **kwargs):
-    '''
-    Restores a managed database from a long term retention backup.
-    '''
-    kwargs['location'] = _get_managed_instance_location(
-        cmd.cli_ctx,
-        managed_instance_name=target_managed_instance_name,
-        resource_group_name=target_resource_group_name)
-
-    kwargs['create_mode'] = CreateMode.restore_long_term_retention_backup.value
-    kwargs['long_term_retention_backup_resource_id'] = long_term_retention_backup_resource_id
-
-    return client.create_or_update(
-        database_name=target_managed_database_name,
-        managed_instance_name=target_managed_instance_name,
-        resource_group_name=target_resource_group_name,
-        parameters=kwargs)
+    raise CLIError('Please specify valid restore mode.')
 
 
 def update_short_term_retention_mi(
@@ -2761,7 +2767,7 @@ def update_long_term_retention_mi(
     return policy
 
 
-def list_by_database_long_term_retention_mi_backup(
+def list_by_database_long_term_retention_mi_backups(
         client,
         location_name,
         managed_instance_name,
@@ -2792,7 +2798,7 @@ def list_by_database_long_term_retention_mi_backup(
     return backups
 
 
-def list_by_instance_long_term_retention_mi_backup(
+def list_by_instance_long_term_retention_mi_backups(
         client,
         location_name,
         managed_instance_name,
@@ -2820,7 +2826,7 @@ def list_by_instance_long_term_retention_mi_backup(
     return backups
 
 
-def list_by_location_long_term_retention_mi_backup(
+def list_by_location_long_term_retention_mi_backups(
         client,
         location_name,
         resource_group_name=None,
@@ -2841,6 +2847,47 @@ def list_by_location_long_term_retention_mi_backup(
             location_name=location_name,
             only_latest_per_database=only_latest_per_database,
             database_state=database_state)
+
+    return backups
+
+
+def list_long_term_retention_mi_backups(
+        client,
+        location_name,
+        managed_instance_name=None,
+        database_name=None,
+        resource_group_name=None,
+        only_latest_per_database=None,
+        database_state=None):
+    '''
+    List the long term retention backups for a specified location, instance, or database.
+    '''
+
+    if managed_instance_name:
+        if database_name:
+            backups = list_by_database_long_term_retention_mi_backups(
+                client,
+                location_name,
+                managed_instance_name,
+                database_name,
+                resource_group_name,
+                only_latest_per_database,
+                database_state)
+        else:
+            backups = list_by_instance_long_term_retention_mi_backups(
+                client,
+                location_name,
+                managed_instance_name,
+                resource_group_name,
+                only_latest_per_database,
+                database_state)
+    else:
+        backups = list_by_location_long_term_retention_mi_backups(
+            client,
+            location_name,
+            resource_group_name,
+            only_latest_per_database,
+            database_state)
 
     return backups
 

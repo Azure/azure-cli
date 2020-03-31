@@ -614,11 +614,13 @@ type: command
 short-summary: Restore a managed database.
 examples:
   - name: Restore a live managed database using Point in time restore
-    text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22"
+    text: az sql midb restore --mode PITR -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22"
   - name: Restore a dropped managed database using Point in time restore
-    text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
+    text: az sql midb restore --mode PITR -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --deleted-time "2018-05-20T05:34:22"
   - name: Restore a live managed database from another instance using Point in time restore
-    text: az sql midb restore -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --dest-mi targetmi --dest-resource-group targetrg
+    text: az sql midb restore --mode PITR -g mygroup --mi myinstance -n mymanageddb --dest-name targetmidb --time "2018-05-20T05:34:22" --dest-mi targetmi --dest-resource-group targetrg
+  - name: Restore a managed database using a LTR backup.
+    text: az sql midb restore --mode LTR --dest-name targetmidb --dest-mi myinstance --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql midb show'] = """
@@ -701,28 +703,16 @@ examples:
     text: az sql midb ltr-backup show -l southeastasia --mi myinstance -n mymanageddb --backup-name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
-helps['sql midb ltr-backup list-by-database'] = """
+helps['sql midb ltr-backup list'] = """
 type: command
-short-summary: Get all long term retention backups for a managed database.
+short-summary: List the long term retention backups for a location, instance or database.
 examples:
   - name: List long term retention backups for a managed database.
     text: az sql midb ltr-backup list-by-database -l southeastasia --mi myinstance -n mymanageddb
-"""
-
-helps['sql midb ltr-backup list-by-instance'] = """
-type: command
-short-summary: Get all long term retention backups for a managed instance.
-examples:
   - name: List long term retention backups for a managed instance (list only the latest LTR backups, which belong to live databases).
     text: az sql midb ltr-backup list-by-instance -l southeastasia --mi myinstance --database-state Live --only-latest-per-database True
   - name: List long term retention backups for a managed instance (with resource group argument).
     text: az sql midb ltr-backup list-by-instance -l southeastasia -g mygroup --mi myinstance
-"""
-
-helps['sql midb ltr-backup list-by-location'] = """
-type: command
-short-summary: Get all long term retention backups for location.
-examples:
   - name: List long term retention backups for a location (list only the latest LTR backups, which belong to live databases).
     text: az sql midb ltr-backup list-by-location -l southeastasia --database-state Live --only-latest-per-database True
   - name: List long term retention backups for a location (with resource group argument).
