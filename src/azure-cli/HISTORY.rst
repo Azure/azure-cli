@@ -54,6 +54,11 @@ Release History
 * az deployment {group/mg/sub/tenant} list: Support provisioningState filtering
 * az deployment: Fix the parse bug for comment under the last argument
 
+**ARO**
+
+* Added new command 'aro' for Azure RedHat OpenShift v4
+* Added support create, delete, list, show, update, list-credentials commands
+
 **Backup**
 
 * Added multiple files restore capabilities

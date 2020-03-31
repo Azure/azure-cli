@@ -10,6 +10,7 @@ from azure.cli.command_modules.aro.commands import load_command_table
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 
+import azure.cli.command_modules.aro._help  # pylint: disable=unused-import
 
 class AroCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
