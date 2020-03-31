@@ -29,6 +29,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_private_endpoint_connections_operations,
     cf_mysql_private_link_resources_operations,
     cf_mysql_server_keys_operations,
+    cf_mysql_server_ad_administrators_operations,
     cf_postgres_servers,
     cf_postgres_db,
     cf_postgres_firewall_rules,
@@ -38,7 +39,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_replica,
     cf_postgres_private_endpoint_connections_operations,
     cf_postgres_private_link_resources_operations,
-    cf_postgres_server_keys_operations)
+    cf_postgres_server_keys_operations,
+    cf_postgres_server_ad_administrators_operations)
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
@@ -196,6 +198,18 @@ def load_command_table(self, _):
     postgres_key_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ServerKeysOperations.{}',
         client_factory=cf_postgres_server_keys_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    mysql_adadmin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations#ServerAdministratorsOperations.{}',
+        client_factory=cf_mysql_server_ad_administrators_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    postgres_adadmin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ServerAdministratorsOperations.{}',
+        client_factory=cf_postgres_server_ad_administrators_operations,
         resource_type=ResourceType.MGMT_RDBMS
     )
 
@@ -420,3 +434,21 @@ def load_command_table(self, _):
         g.custom_command('delete', 'server_key_delete', confirmation=True)
         g.custom_show_command('show', 'server_key_get')
         g.command('list', 'list')
+
+    with self.command_group('mysql server ad-admin',
+                            mysql_adadmin_sdk,
+                            client_factory=cf_mysql_server_ad_administrators_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_ad_admin_set')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+        g.command('show', 'get')
+
+    with self.command_group('postgres server ad-admin',
+                            postgres_adadmin_sdk,
+                            client_factory=cf_postgres_server_ad_administrators_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_ad_admin_set')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+        g.command('show', 'get')

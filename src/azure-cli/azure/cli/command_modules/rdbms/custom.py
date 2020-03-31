@@ -536,4 +536,38 @@ def _get_server_key_name_from_uri(uri):
     version = uri.split('/')[-1]
     return '{}_{}_{}'.format(vault, key, version)
 
+
+def server_ad_admin_set(client, resource_group_name, server_name, login=None, sid=None):
+    '''
+    Sets a server's AD admin.
+    '''
+
+    if isinstance(client, MySqlServersOperations):
+        from azure.mgmt.rdbms import mysql
+        parameters = mysql.models.ServerAdministratorResource(
+            login=login,
+            sid=sid,
+            tenant_id=_get_tenant_id())
+    else:
+        from azure.mgmt.rdbms import postgresql
+        parameters = postgresql.models.ServerAdministratorResource(
+            login=login,
+            sid=sid,
+            tenant_id=_get_tenant_id())
+
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        properties=parameters)
+
+
+def _get_tenant_id():
+    '''
+    Gets tenantId from current subscription.
+    '''
+    from azure.cli.core._profile import Profile
+
+    profile = Profile()
+    sub = profile.get_subscription()
+    return sub['tenantId']
 # endregion
