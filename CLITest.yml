@@ -162,7 +162,7 @@ jobs:
         pip install azdev
         azdev setup -c azure-cli
         az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
-        azdev test $(Target) -a "-n 8" $(USER_LIVE)
+        azdev test $(Target) $(USER_LIVE) -a "-n 8" 
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
