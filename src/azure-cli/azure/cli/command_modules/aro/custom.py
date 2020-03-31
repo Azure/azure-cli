@@ -6,8 +6,7 @@
 import random
 import os
 
-import azure.cli.command_modules.aro.vendored_sdks.azure.mgmt.redhatopenshift.v2020_04_30.models as v2020_04_30
-
+import azure.mgmt.redhatopenshift.models as v2020_04_30
 from azure.cli.command_modules.aro._aad import AADManager
 from azure.cli.command_modules.aro._rbac import assign_contributor_to_vnet
 from azure.cli.command_modules.aro._validators import validate_subnets

@@ -52,6 +52,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
+    MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -177,7 +178,8 @@ AZURE_API_PROFILES = {
             'vm_insights': '2018-11-27-preview'
         }),
         ResourceType.MGMT_APPSERVICE: '2019-08-01',
-        ResourceType.MGMT_IOTHUB: '2019-07-01-preview'
+        ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
+        ResourceType.MGMT_ARO: '2020-04-30'
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',

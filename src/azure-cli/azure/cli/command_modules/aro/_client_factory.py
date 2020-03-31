@@ -6,8 +6,8 @@
 import urllib3
 
 from azure.cli.command_modules.aro.custom import rp_mode_development
-from azure.cli.command_modules.aro.vendored_sdks.azure.mgmt.redhatopenshift.v2020_04_30 import AzureRedHatOpenShiftClient #pylint: disable=line-too-long
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.mgmt.redhatopenshift import AzureRedHatOpenShiftClient
 
 
 def cf_aro(cli_ctx, *_):
