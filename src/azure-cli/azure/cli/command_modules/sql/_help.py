@@ -631,19 +631,6 @@ examples:
     text: az sql midb show -g mygroup --mi myinstance -n mymanageddb
 """
 
-helps['sql midb ltr'] = """
-type: group
-short-summary: Managed SQL Managed Instance databases long term retention.
-"""
-
-helps['sql midb ltr restore'] = """
-type: command
-short-summary: Restore a managed database from a long term retention backup.
-examples:
-    - name: Restore a managed database using a LTR backup.
-      text: az sql midb ltr restore --dest-name targetmidb --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
-"""
-
 helps['sql midb short-term-retention-policy'] = """
 type: group
 short-summary: Manage SQL Managed Instance database backup short term retention policy.
