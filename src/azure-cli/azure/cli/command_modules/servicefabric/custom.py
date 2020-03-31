@@ -578,7 +578,7 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
     # get cluster node type durablity
     cluster = client.get(resource_group_name, cluster_name)
     node_type_refs = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
-    if node_type_refs is None:
+    if not node_type_refs:
         raise CLIError("Failed to find the node type in the cluster.")
     node_type_ref = node_type_refs[0]
     curr_node_type_durability = node_type_ref.durability_level
@@ -722,7 +722,6 @@ def update_cluster_reliability_level(cmd,
     if node_types is None:
         raise CLIError("Failed to find the node type in the cluster")
     node_type = node_types[0]
-    compute_client = compute_client_factory(cli_ctx)
     compute_client = compute_client_factory(cli_ctx)
     vmss = _get_cluster_vmss_by_node_type(compute_client, resource_group_name, cluster.cluster_id, node_type.name)
     if instance_target == instance_now:
