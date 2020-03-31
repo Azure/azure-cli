@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.2.0"
+VERSION = "2.3.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -61,7 +61,7 @@ DEPENDENCIES = [
     'azure-graphrbac~=0.60.0',
     'azure-keyvault~=1.1',
     'azure-mgmt-advisor>=2.0.1,<3.0.0',
-    'azure-mgmt-apimanagement>=0.1.0',
+    'azure-mgmt-apimanagement~=0.1.0',
     'azure-mgmt-applicationinsights~=0.1.1',
     'azure-mgmt-appconfiguration~=0.4.0',
     'azure-mgmt-authorization~=0.52.0',
@@ -71,7 +71,7 @@ DEPENDENCIES = [
     'azure-mgmt-botservice~=0.2.0',
     'azure-mgmt-cdn==4.1.0rc1',
     'azure-mgmt-cognitiveservices~=5.0.0',
-    'azure-mgmt-compute~=11.0',
+    'azure-mgmt-compute~=12.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
     'azure-mgmt-containerregistry~=3.0.0rc9',
@@ -88,7 +88,7 @@ DEPENDENCIES = [
     'azure-mgmt-hdinsight~=1.4.0',
     'azure-mgmt-imagebuilder~=0.2.1',
     'azure-mgmt-iotcentral~=3.0.0',
-    'azure-mgmt-iothub~=0.8.2',
+    'azure-mgmt-iothub~=0.11.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
     'azure-mgmt-keyvault~=2.2.0',
     'azure-mgmt-kusto~=0.3.0',
@@ -100,11 +100,11 @@ DEPENDENCIES = [
     'azure-mgmt-media~=1.1,>=1.1.1',
     'azure-mgmt-monitor~=0.7.0',
     'azure-mgmt-msi~=0.2',
-    'azure-mgmt-netapp~=0.7.0',
+    'azure-mgmt-netapp~=0.8.0',
     'azure-mgmt-network~=10.0.0',
     'azure-mgmt-policyinsights~=0.4.0',
     'azure-mgmt-privatedns~=0.1.0',
-    'azure-mgmt-rdbms~=2.1.0',
+    'azure-mgmt-rdbms~=2.2.0',
     'azure-mgmt-recoveryservices~=0.4.0',
     'azure-mgmt-recoveryservicesbackup~=0.6.0',
     'azure-mgmt-redis~=7.0.0rc1',

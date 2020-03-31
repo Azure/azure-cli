@@ -256,6 +256,9 @@ def _urlretrieve(url):
 def _remove_comments_from_json(template):
     from jsmin import jsmin
 
+    # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
+    # It will affect the subsequent multi-line processing logic, so deal with this situation in advance here.
+    template = re.sub(r'(^[\t ]*//[\s\S]*?\n)|(^[\t ]*/\*{1,2}[\s\S]*?\*/)', '', template, flags=re.M)
     minified = jsmin(template)
     # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
     result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)
@@ -1069,24 +1072,24 @@ def list_applications(cmd, resource_group_name=None):
     return list(applications)
 
 
-def list_deployments_at_subscription_scope(cmd):
+def list_deployments_at_subscription_scope(cmd, filter_string=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.list_at_subscription_scope()
+    return rcf.deployments.list_at_subscription_scope(filter=filter_string)
 
 
-def list_deployments_at_resource_group(cmd, resource_group_name):
+def list_deployments_at_resource_group(cmd, resource_group_name, filter_string=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.list_by_resource_group(resource_group_name)
+    return rcf.deployments.list_by_resource_group(resource_group_name, filter=filter_string)
 
 
-def list_deployments_at_management_group(cmd, management_group_id):
+def list_deployments_at_management_group(cmd, management_group_id, filter_string=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.list_at_management_group_scope(management_group_id)
+    return rcf.deployments.list_at_management_group_scope(management_group_id, filter=filter_string)
 
 
-def list_deployments_at_tenant_scope(cmd):
+def list_deployments_at_tenant_scope(cmd, filter_string=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    return rcf.deployments.list_at_tenant_scope()
+    return rcf.deployments.list_at_tenant_scope(filter=filter_string)
 
 
 def get_deployment_at_subscription_scope(cmd, deployment_name):

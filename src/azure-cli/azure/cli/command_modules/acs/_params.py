@@ -187,6 +187,7 @@ def load_arguments(self, _):
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('vm_set_type', type=str, validator=validate_vm_set_type)
         c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
+        c.argument('uptime_sla', action='store_true')
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('disable_rbac', action='store_true')
         c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
