@@ -9,8 +9,8 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-graphrbac/0.60.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-graphrbac/0.60.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
@@ -31,19 +31,19 @@ interactions:
       dataserviceversion:
       - 3.0;
       date:
-      - Tue, 10 Mar 2020 13:45:32 GMT
+      - Wed, 01 Apr 2020 06:44:36 GMT
       duration:
-      - '2429776'
+      - '2481888'
       expires:
       - '-1'
       ocp-aad-diagnostics-server-name:
-      - xsDuxg+DnSkPNi77Rg8RaRUuQ9cvtYMMdi27ynpDZuA=
+      - U3IC+sCFhBjLwIKsstDT61MAKpvqb3TpiKBkoYGjBrs=
       ocp-aad-session-key:
-      - dPOHX6TDs1C7Ucjs2Pgk0-Iy6ctdoiKpt5E5XZv9oO2c6rVq3YosEbtflcFZAvuq9vakfW1kTKeIqe6tx3qiQI1kSZyiiBk26x4VUmKhOUJ8K4CqygZBzbU5Zky4kOhO.QhXfd7sLtk6PtfRt5peO9OyuX3nhj6H8Jaf-pteWWY8
+      - sL0-iZi0J9rfU78wYOOi9JI2fR1u8YyN66iNEvvkFJZKoGErgD25wymrBJYebh0icq4OJUKEu0zZfi832oU0MVvjjxzXmv42Z-XjAE5RIOvckX4Jf-H-rqylBcPsdNtV.62CqKMeSjxUHz_Z-doLrOY8Mciybb_k6Vi4ArgAGl34
       pragma:
       - no-cache
       request-id:
-      - 2c0972f4-459f-49a9-984a-d0fd8df7208a
+      - 8c7db3a0-18fe-43a8-8eda-2a63c4629906
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       x-aspnet-version:
@@ -65,7 +65,9 @@ interactions:
       "managecontacts", "getissuers", "listissuers", "setissuers", "deleteissuers",
       "manageissuers", "recover"], "storage": ["get", "list", "delete", "set", "update",
       "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}], "enableSoftDelete":
-      false}}'
+      false, "softDeleteRetentionInDays": 90, "enableRbacAuthorization": false, "networkAcls":
+      {"bypass": "AzureServices", "defaultAction": "Allow", "ipRules": [], "virtualNetworkRules":
+      []}}}'
     headers:
       Accept:
       - application/json
@@ -76,30 +78,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '772'
+      - '951'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -l --sku --enable-soft-delete
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-keyvault/2.1.1
-        Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-keyvault/2.2.0 Azure-SDK-For-Python AZURECLI/2.3.0
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002","name":"cli-test-kv-ct-co-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"vaultUri":"https://cli-test-kv-ct-co-000002.vault.azure.net","provisioningState":"RegisteringDns"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002","name":"cli-test-kv-ct-co-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"softDeleteRetentionInDays":90,"enableRbacAuthorization":false,"vaultUri":"https://cli-test-kv-ct-co-000002.vault.azure.net","provisioningState":"RegisteringDns"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1130'
+      - '1193'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:45:39 GMT
+      - Wed, 01 Apr 2020 06:44:43 GMT
       expires:
       - '-1'
       pragma:
@@ -117,9 +119,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.0.271
+      - 1.1.0.276
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1196'
       x-powered-by:
       - ASP.NET
     status:
@@ -139,22 +141,22 @@ interactions:
       ParameterSetName:
       - -g -n -l --sku --enable-soft-delete
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-keyvault/2.1.1
-        Azure-SDK-For-Python AZURECLI/2.2.0
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-keyvault/2.2.0 Azure-SDK-For-Python AZURECLI/2.3.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002?api-version=2019-09-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002","name":"cli-test-kv-ct-co-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"vaultUri":"https://cli-test-kv-ct-co-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_contacts000001/providers/Microsoft.KeyVault/vaults/cli-test-kv-ct-co-000002","name":"cli-test-kv-ct-co-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"9ac02ab3-5061-4ec6-a3d8-2cdaa5f29efa","permissions":{"keys":["get","create","delete","list","update","import","backup","restore","recover"],"secrets":["get","list","set","delete","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"enableSoftDelete":false,"softDeleteRetentionInDays":90,"enableRbacAuthorization":false,"vaultUri":"https://cli-test-kv-ct-co-000002.vault.azure.net/","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1126'
+      - '1189'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:10 GMT
+      - Wed, 01 Apr 2020 06:45:15 GMT
       expires:
       - '-1'
       pragma:
@@ -172,7 +174,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 1.1.0.271
+      - 1.1.0.276
       x-powered-by:
       - ASP.NET
     status:
@@ -192,8 +194,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
@@ -210,7 +212,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:12 GMT
+      - Wed, 01 Apr 2020 06:45:18 GMT
       expires:
       - '-1'
       pragma:
@@ -227,11 +229,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:
@@ -251,8 +253,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
@@ -268,7 +270,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:15 GMT
+      - Wed, 01 Apr 2020 06:45:25 GMT
       expires:
       - '-1'
       pragma:
@@ -282,11 +284,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:
@@ -307,8 +309,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: PUT
@@ -325,7 +327,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:19 GMT
+      - Wed, 01 Apr 2020 06:45:28 GMT
       expires:
       - '-1'
       pragma:
@@ -339,11 +341,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:
@@ -361,8 +363,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
@@ -379,7 +381,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:20 GMT
+      - Wed, 01 Apr 2020 06:45:31 GMT
       expires:
       - '-1'
       pragma:
@@ -393,11 +395,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:
@@ -418,8 +420,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: PUT
@@ -436,7 +438,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:21 GMT
+      - Wed, 01 Apr 2020 06:45:33 GMT
       expires:
       - '-1'
       pragma:
@@ -450,11 +452,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:
@@ -472,8 +474,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
@@ -490,7 +492,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:24 GMT
+      - Wed, 01 Apr 2020 06:45:35 GMT
       expires:
       - '-1'
       pragma:
@@ -504,11 +506,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:
@@ -526,8 +528,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
@@ -544,7 +546,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:26 GMT
+      - Wed, 01 Apr 2020 06:45:40 GMT
       expires:
       - '-1'
       pragma:
@@ -558,11 +560,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:
@@ -580,8 +582,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
@@ -598,7 +600,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:27 GMT
+      - Wed, 01 Apr 2020 06:45:42 GMT
       expires:
       - '-1'
       pragma:
@@ -612,11 +614,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:
@@ -636,8 +638,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: PUT
@@ -653,7 +655,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:28 GMT
+      - Wed, 01 Apr 2020 06:45:44 GMT
       expires:
       - '-1'
       pragma:
@@ -667,11 +669,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:
@@ -689,8 +691,8 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       User-Agent:
-      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-keyvault/7.0
-        Azure-SDK-For-Python
+      - python/3.7.6 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-keyvault/7.0 Azure-SDK-For-Python
       accept-language:
       - en-US
     method: GET
@@ -706,7 +708,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 10 Mar 2020 13:46:31 GMT
+      - Wed, 01 Apr 2020 06:45:47 GMT
       expires:
       - '-1'
       pragma:
@@ -720,11 +722,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-network-info:
-      - addr=167.220.255.4;act_addr_fam=InterNetwork;
+      - addr=167.220.255.68;act_addr_fam=InterNetwork;
       x-ms-keyvault-region:
       - westus
       x-ms-keyvault-service-version:
-      - 1.1.0.897
+      - 1.1.0.898
       x-powered-by:
       - ASP.NET
     status:

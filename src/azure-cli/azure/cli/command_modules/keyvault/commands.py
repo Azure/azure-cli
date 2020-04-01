@@ -18,7 +18,7 @@ from ._transformers import (
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
-    process_vault_and_hsm_name, validate_private_endpoint_connection_id)
+    validate_private_endpoint_connection_id)
 
 
 def transform_assignment_list(result):
@@ -119,14 +119,14 @@ def load_command_table(self, _):
 
     # Data Plane Commands
     with self.command_group('keyvault key', kv_data_sdk) as g:
-        g.keyvault_command('list', 'get_keys', validator=process_vault_and_hsm_name,
+        g.keyvault_command('list', 'get_keys',
                            transform=multi_transformers(
                                filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))
-        g.keyvault_command('list-versions', 'get_key_versions', validator=process_vault_and_hsm_name,
+        g.keyvault_command('list-versions', 'get_key_versions',
                            transform=extract_subresource_name(id_parameter='kid'))
-        g.keyvault_command('list-deleted', 'get_deleted_keys', validator=process_vault_and_hsm_name,
+        g.keyvault_command('list-deleted', 'get_deleted_keys',
                            transform=extract_subresource_name(id_parameter='kid'))
-        g.keyvault_custom('create', 'create_key', validator=process_vault_and_hsm_name,
+        g.keyvault_custom('create', 'create_key',
                           doc_string_source=data_doc_string.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key')
         g.keyvault_command('show', 'get_key')
