@@ -58,8 +58,6 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
         client_sp = aad.create_service_principal(client_id)
 
     rp_client_id = FP_CLIENT_ID
-    if rp_mode_development():
-        rp_client_id = os.environ['AZURE_FP_CLIENT_ID']
 
     rp_client_sp = aad.get_service_principal(rp_client_id)
 

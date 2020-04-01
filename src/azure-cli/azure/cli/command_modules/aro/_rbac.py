@@ -14,7 +14,6 @@ from msrestazure.tools import resource_id
 
 
 CONTRIBUTOR = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
-DEVELOPMENT_CONTRIBUTOR = 'f3fe7bc1-0ef9-4681-a68c-c1fa285d6128'
 
 
 def assign_contributor_to_vnet(cli_ctx, vnet, object_id):
@@ -28,7 +27,7 @@ def assign_contributor_to_vnet(cli_ctx, vnet, object_id):
         subscription=get_subscription_id(cli_ctx),
         namespace='Microsoft.Authorization',
         type='roleDefinitions',
-        name=DEVELOPMENT_CONTRIBUTOR if rp_mode_development() else CONTRIBUTOR,
+        name=CONTRIBUTOR,
     )
 
     for assignment in list(client.role_assignments.list_for_scope(vnet)):
