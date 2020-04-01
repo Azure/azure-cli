@@ -3,16 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
+
+from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
-from azure.cli.core.util import get_az_user_agent
+from azure.cli.core.util import is_track2
 
 from knack.log import get_logger
 from knack.util import CLIError
 
 logger = get_logger(__name__)
+UA_AGENT = "AZURECLI/{}".format(core_version)
+ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
 def resolve_client_arg_name(operation, kwargs):
@@ -78,7 +83,11 @@ def configure_common_settings(cli_ctx, client):
 
     client.config.enable_http_logger = True
 
-    client.config.add_user_agent(get_az_user_agent())
+    client.config.add_user_agent(UA_AGENT)
+    try:
+        client.config.add_user_agent(os.environ[ENV_ADDITIONAL_USER_AGENT])
+    except KeyError:
+        pass
 
     try:
         command_ext_name = cli_ctx.data['command_extension_name']
@@ -100,6 +109,38 @@ def configure_common_settings(cli_ctx, client):
         client._client.add_header('ParameterSetName',
                                   ' '.join(cli_ctx.data['safe_params']))
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
+
+
+def configure_common_settings_track2(cli_ctx):
+    client_kwargs = {}
+
+    client_kwargs.update(_debug.change_ssl_cert_verification_track2())
+
+    client_kwargs['logging_enable'] = True
+    client_kwargs['user_agent'] = UA_AGENT
+    try:
+        client_kwargs['user_agent'] += os.environ[ENV_ADDITIONAL_USER_AGENT]
+    except KeyError:
+        pass
+
+    try:
+        command_ext_name = cli_ctx.data['command_extension_name']
+        if command_ext_name:
+            client_kwargs['user_agent'] += "CliExtension/{}".format(command_ext_name)
+    except KeyError:
+        pass
+
+    headers = dict(cli_ctx.data['headers'])
+    command_name_suffix = ';completer-request' if cli_ctx.data['completer_active'] else ''
+    headers['CommandName'] = "{}{}".format(cli_ctx.data['command'], command_name_suffix)
+    if cli_ctx.data.get('safe_params'):
+        headers['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+    client_kwargs['headers'] = headers
+
+    if 'x-ms-client-request-id' in cli_ctx.data['headers']:
+        client_kwargs['request_id'] = cli_ctx.data['headers']['x-ms-client-request-id']
+
+    return client_kwargs
 
 
 def _get_mgmt_service_client(cli_ctx,
@@ -131,12 +172,15 @@ def _get_mgmt_service_client(cli_ctx,
     if kwargs:
         client_kwargs.update(kwargs)
 
+    if is_track2(client_type):
+        client_kwargs.update(configure_common_settings_track2(cli_ctx))
+
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)
     else:
         client = client_type(cred, **client_kwargs)
 
-    if hasattr(client, 'config'):
+    if not is_track2(client):
         configure_common_settings(cli_ctx, client)
 
     return client, subscription_id
@@ -178,7 +222,12 @@ def get_subscription_id(cli_ctx):
 def _get_add_headers_callback(cli_ctx):
 
     def _add_headers(request):
-        agents = [request.headers['User-Agent'], get_az_user_agent()]
+        agents = [request.headers['User-Agent'], UA_AGENT]
+        try:
+            agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
+        except KeyError:
+            pass
+
         request.headers['User-Agent'] = ' '.join(agents)
 
         try:

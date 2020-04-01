@@ -421,15 +421,20 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
         return _get_operation()
 
 
-def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
-
+def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameters', **kwargs):
+    """
+    setter_arg_name: The name of the argument in the setter which corresponds to the object being updated.
+    In track2, unknown kwargs will raise, so we should not pass 'parameters" for operation when the name of the argument
+    in the setter which corresponds to the object being updated is not 'parameters'.
+    """
     def _put_operation():
         result = None
         if args:
             extended_args = args + (parameters,)
             result = operation(*extended_args)
         elif kwargs is not None:
-            result = operation(parameters=parameters, **kwargs)
+            kwargs[setter_arg_name] = parameters
+            result = operation(**kwargs)
         return result
 
     # early out if the command does not use the cache
@@ -1067,7 +1072,8 @@ def _is_paged(obj):
             and not isinstance(obj, list) \
             and not isinstance(obj, dict):
         from msrest.paging import Paged
-        return isinstance(obj, Paged)
+        from azure.core.paging import ItemPaged as AzureCorePaged
+        return isinstance(obj, (AzureCorePaged, Paged))
     return False
 
 

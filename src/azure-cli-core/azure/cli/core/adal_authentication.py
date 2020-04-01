@@ -8,7 +8,6 @@ import adal
 import time
 
 from msrest.authentication import Authentication
-
 from azure.cli.core.util import in_cloud_console
 from azure.core.credentials import AccessToken
 
@@ -21,11 +20,6 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         self._token_retriever = token_retriever
         self._external_tenant_token_retriever = external_tenant_token_retriever
 
-    # This method is exposed for Azure Core.
-    def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
-        _, token, full_token, _ = self._get_token()
-
-        return AccessToken(token, int(full_token['expiresIn'] + time.time()))
 
     def _get_token(self):
         external_tenant_tokens = None
@@ -64,38 +58,17 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
 
         return scheme, token, full_token, external_tenant_tokens
 
+    # This method is exposed for Azure Core.
+    def get_token(self, *scopes, **kwargs):  # pylint:disable=unused-argument
+        _, token, full_token, _ = self._get_token()
+
+        return AccessToken(token, int(full_token['expiresIn'] + time.time()))
+
+    # This method is exposed for msrest.
     def signed_session(self, session=None):  # pylint: disable=arguments-differ
         session = session or super(AdalAuthentication, self).signed_session()
-        try:
-            scheme, token, _, external_tenant_tokens = self._get_token()
-        except CLIError as err:
-            if in_cloud_console():
-                AdalAuthentication._log_hostname()
-            raise err
-        except adal.AdalError as err:
-            # pylint: disable=no-member
-            if in_cloud_console():
-                AdalAuthentication._log_hostname()
 
-            err = (getattr(err, 'error_response', None) or {}).get('error_description') or ''
-            if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
-                raise CLIError("Credentials have expired due to inactivity. {}".format(
-                    "Please run 'az login'" if not in_cloud_console() else ''))
-            if 'AADSTS50079' in err:
-                raise CLIError("Configuration of your account was changed. {}".format(
-                    "Please run 'az login'" if not in_cloud_console() else ''))
-            if 'AADSTS50173' in err:
-                raise CLIError("The credential data used by CLI has been expired because you might have changed or "
-                               "reset the password. {}".format(
-                                   "Please clear browser's cookies and run 'az login'"
-                                   if not in_cloud_console() else ''))
-
-            raise CLIError(err)
-        except requests.exceptions.SSLError as err:
-            from .util import SSLERROR_TEMPLATE
-            raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
-        except requests.exceptions.ConnectionError as err:
-            raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
+        scheme, token, _, external_tenant_tokens = self._get_token()
 
         header = "{} {}".format(scheme, token)
         session.headers['Authorization'] = header
