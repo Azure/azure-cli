@@ -130,4 +130,13 @@ def transform_url(result):
     result = re.sub('/', '//', result, count=1)
     return encode_url_path(result)
 
-# endregion
+
+def transform_fs_access_output(result):
+    """ Transform to convert SDK output into a form that is more readily
+    usable by the CLI and tools such as jpterm. """
+
+    new_result = {}
+    useful_keys = ['acl', 'group', 'owner', 'permissions']
+    for key in useful_keys:
+        new_result[key] = result[key]
+    return new_result
