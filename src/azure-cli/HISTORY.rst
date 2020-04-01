@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.3.1
+++++++
+
+**ACR**
+
+* Fix wrong version of azure-mgmt-containerregistry for Linux
+
 2.3.0
 ++++++
 
