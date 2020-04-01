@@ -165,7 +165,7 @@ examples:
         az keyvault download --vault-name MyKeyVault -n MyKey -e PEM -f mykey.pem
   - name: Save the key with DER encoding
     text: |
-        az keyvault download --vault-name MyKeyVault -n MyKey -e DER -f mykey.der 
+        az keyvault download --vault-name MyKeyVault -n MyKey -e DER -f mykey.der
 """
 
 helps['keyvault list'] = """
