@@ -1396,6 +1396,60 @@ type: group
 short-summary: Manage file system access and permissions for Azure Data Lake Storage Gen2 account.
 """
 
+helps['storage fs access set'] = """
+type: command
+short-summary: Set the access control properties of a path(directory or file) in Azure Data Lake Storage Gen2 account.
+parameters:
+    - name: --acl
+      short-summary: Invalid in conjunction with acl. POSIX access control rights on files and directories in the format "[scope:][type]:[id]:[permissions]". e.g. "user::rwx,group::r--,other::---,mask::rwx".
+      long-summary: >
+        The value is a comma-separated list of access control entries. Each access control entry (ACE) consists of a scope,
+        a type, a user or group identifier, and permissions in the format "[scope:][type]:[id]:[permissions]".
+        The scope must be "default" to indicate the ACE belongs to the default ACL for a directory; 
+        otherwise scope is implicit and the ACE belongs to the access ACL. There are four ACE types: 
+        "user" grants rights to the owner or a named user, "group" grants rights to the owning group 
+        or a named group, "mask" restricts rights granted to named users and the members of groups, 
+        and "other" grants rights to all users not found in any of the other entries. 
+        The user or group identifier is omitted for entries of type "mask" and "other". 
+        The user or group identifier is also omitted for the owner and owning group. 
+        For example, the following ACL grants read, write, and execute rights to the file owner and 
+        john.doe@contoso, the read right to the owning group, and nothing to everyone else: 
+        "user::rwx,user:john.doe@contoso:rwx,group::r--,other::---,mask::rwx".
+        For more information, please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control.
+    - name: --permissions
+      short-summary: >
+        Invalid in conjunction with acl. POSIX access permissions for the file owner, the file owning group, and others.
+        Each class may be granted read(r), write(w), or execute(x) permission. Both symbolic (rwxrw-rw-) and 4-digit octal
+        notation (e.g. 0766) are supported.'
+    - name: --owner
+      short-summary: >
+        The owning user of the file or directory. The user Azure Active Directory object ID or user principal name to
+        set as the owner. For more information, please refer to 
+        https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
+    - name: --group
+      short-summary: >
+        The owning group of the file or directory. The group Azure Active Directory object ID or user principal name to
+        set as the owning group. For more information, please refer to 
+        https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
+examples:
+    - name: Set the access control list of a path.
+      text: az storage fs access set -a "user::rwx,group::r--,other::---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
+    - name: Set permissions of a path.
+      text: az storage fs access set --permissions "rwxrwx---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
+    - name: Set owner of a path.
+      text: az storage fs access set --owner example@microsoft.com -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
+    - name: Set owning group of a path.
+      text: az storage fs access set --group 68390a19-a897-236b-b453-488abf67b4dc -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage fs access show'] = """
+type: group
+short-summary: Show the access control properties of a path (directory or file) in Azure Data Lake Storage Gen2 account.
+examples:
+    - name: Show the access control properties of a path.
+      text: az storage fs access show -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage fs create'] = """
 type: command
 short-summary: Create file system for Azure Data Lake Storage Gen2 account.

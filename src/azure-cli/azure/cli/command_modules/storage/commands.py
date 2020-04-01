@@ -685,7 +685,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('move', 'rename_file')
         g.storage_command('list', 'get_paths', command_type=adls_fs_sdk, transform=transform_storage_list_output)
 
-    with self.command_group('storage fs access', adls_file_sdk, custom_command_type=custom_adls_sdk) as g:
+    with self.command_group('storage fs access', adls_directory_sdk, custom_command_type=custom_adls_sdk) as g:
         g.storage_command('set', 'set_access_control')
         g.storage_command('show', 'get_access_control')
 

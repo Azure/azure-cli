@@ -1111,5 +1111,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     for item in ['create', 'show', 'delete']:
         with self.argument_context('storage fs file {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['-f', '--file-system'],
-                    help="File system name.", required=True)
+                    help='File system name.', required=True)
 
+    for item in ['set', 'show']:
+        with self.argument_context('storage fs access {}'.format(item)) as c:
+            from ._validators import validate_access_control
+            c.extra('file_system_name', options_list=['-f', '--file-system'],
+                    help='File system name.', required=True)
+            c.extra('path', options_list=['-p', '--path'],
+                    help='The path to a file or directory in the specified file system.', required=True)
+            c.argument('permissions', validator=validate_access_control)
