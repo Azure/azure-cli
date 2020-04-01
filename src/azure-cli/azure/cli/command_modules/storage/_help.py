@@ -1391,6 +1391,11 @@ type: group
 short-summary: Manage file systems for Azure Data Lake Storage Gen2 account.
 """
 
+helps['storage fs access'] = """
+type: group
+short-summary: Manage file system access and permissions for Azure Data Lake Storage Gen2 account.
+"""
+
 helps['storage fs create'] = """
 type: command
 short-summary: Create file system for Azure Data Lake Storage Gen2 account.
