@@ -710,13 +710,14 @@ def create_key(cmd, client, key_name, vault_base_url=None,
 
 
 def backup_key(client, file_path, vault_base_url=None,
-               key_name=None, identifier=None):  # pylint: disable=unused-argument
+               key_name=None, hsm_base_url=None, identifier=None):
     backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
-def restore_key(client, vault_base_url, file_path):
+def restore_key(client, file_path, vault_base_url=None,
+                hsm_base_url=None):  # pylint: disable=unused-argument
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
     return client.restore_key(vault_base_url, data)

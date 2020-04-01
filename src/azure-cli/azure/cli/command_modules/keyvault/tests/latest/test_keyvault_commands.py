@@ -648,15 +648,32 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
         self.kwargs['hsm_version1'] = self.kwargs['hsm_kid1'].rsplit('/', 1)[1]
 
         # delete/recover
-        # TODO: activate this part when service side is fixed
-        """
         deleted_key = self.cmd('keyvault key delete --id {hsm_kid1}',
                                checks=self.check('key.kid', '{hsm_kid1}')).get_output_in_json()
         self.kwargs['hsm_recovery_id'] = deleted_key['recoveryId']
         self.cmd('keyvault key list-deleted --hsm-name {hsm}', checks=self.check('length(@)', 1))
         self.cmd('keyvault key recover --id {hsm_recovery_id}',
-                  checks=self.check('key.kid', '{hsm_kid1}'))
-        """
+                 checks=self.check('key.kid', '{hsm_kid1}'))
+
+        # backup and then delete key
+        key_file = 'backup-hsm.key'
+        self.kwargs['key_file'] = key_file
+        self.cmd('keyvault key backup --hsm-name {hsm} -n {key} --file {key_file}')
+        self.cmd('keyvault key delete --hsm-name {hsm} -n {key}')
+        self.cmd('keyvault key purge --hsm-name {hsm} -n {key}')
+        self.cmd('keyvault key list --hsm-name {hsm}', checks=self.is_empty())
+        self.cmd('keyvault key list --hsm-name {hsm} --maxresults 10', checks=self.is_empty())
+
+        # restore key from backup
+        self.cmd('keyvault key restore --hsm-name {hsm} --file {key_file}')
+        self.cmd('keyvault key list --hsm-name {hsm}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].name', '{key}')
+                 ])
+
+        if os.path.isfile(key_file):
+            os.remove(key_file)
 
         # list keys
         self.cmd('keyvault key list --hsm-name {hsm}',
@@ -839,7 +856,7 @@ class KeyVaultSecretSoftDeleteScenarioTest(ScenarioTest):
     def test_keyvault_secret_soft_delete(self, resource_group):
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-se-sd-', 24),
-            'loc': 'westus',
+            'loc': 'eastus',
             'sec': 'secret1'
         })
         _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
