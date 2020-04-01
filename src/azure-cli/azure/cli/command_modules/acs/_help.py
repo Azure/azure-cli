@@ -1019,7 +1019,6 @@ short-summary: Commands to manage existing Openshift cluster.
 parameters:
   - name: --refresh-cluster
     type: boolean
-    short-summary: Trigger nodes rotation in order to pick up change in DNS settings.
 examples:
   - name: Trigger nodes rotation.
     text: az openshift update -g MyResourceGroup -n MyManagedCluster --refresh-cluster
