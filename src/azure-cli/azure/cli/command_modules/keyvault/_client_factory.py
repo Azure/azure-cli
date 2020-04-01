@@ -23,11 +23,11 @@ def keyvault_client_private_link_resources_factory(cli_ctx, _):
 
 
 def keyvault_data_plane_factory(cli_ctx, _):
-    from azure.keyvault.keys import KeyClient
+    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.profiles import ResourceType, get_api_version
     from azure.cli.core.util import should_disable_connection_verify
 
-    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_KEYS))
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
         import adal
@@ -44,7 +44,7 @@ def keyvault_data_plane_factory(cli_ctx, _):
                     "Credentials have expired due to inactivity. Please run 'az login'")
             raise CLIError(err)
 
-    client = KeyClient(KeyVaultAuthentication(get_token), api_version=version)
+    client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
 
     # HACK, work around the fact that KeyVault library does't take confiuration object on constructor
     # which could be used to turn off the verifiaction. Remove this once we migrate to new data plane library
@@ -58,3 +58,37 @@ def keyvault_data_plane_factory(cli_ctx, _):
         logger.info('Could not find the configuration object to turn off the verification if needed')
 
     return client
+
+
+def keyvault_data_plane_track2_key_factory(cli_ctx, _):
+    from azure.identity import DefaultAzureCredential
+    from azure.keyvault.keys import KeyClient
+
+    vault_url = cli_ctx.vault_base_url
+    credential = DefaultAzureCredential()
+    client = KeyClient(vault_url=vault_url, credential=credential)
+
+    return client
+
+
+def keyvault_data_plane_track2_secret_factory(cli_ctx, _):
+    from azure.identity import DefaultAzureCredential
+    from azure.keyvault.secrets import SecretClient
+
+    vault_url = cli_ctx.vault_base_url
+    credential = DefaultAzureCredential()
+    client = SecretClient(vault_url=vault_url, credential=credential)
+
+    return client
+
+
+def keyvault_data_plane_track2_certificate_factory(cli_ctx, _):
+    from azure.identity import DefaultAzureCredential
+    from azure.keyvault.certificates import CertificateClient
+
+    vault_url = cli_ctx.vault_base_url
+    credential = DefaultAzureCredential()
+    client = CertificateClient(vault_url=vault_url, credential=credential)
+
+    return client
+

@@ -49,9 +49,9 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
-    DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyVaultKeysClient')
-    DATA_KEYVAULT_SECRETS = ('azure.keyvault.secrets', 'KeyVaultSecretsClient')
-    DATA_KEYVAULT_CERTIFICATES = ('azure.keyvault.certificates', 'KeyVaultCertificatesClient')
+    DATA_KEYVAULT_KEYS = ('azure.keyvault.keys', 'KeyClient')
+    DATA_KEYVAULT_SECRETS = ('azure.keyvault.secrets', 'SecretClient')
+    DATA_KEYVAULT_CERTIFICATES = ('azure.keyvault.certificates', 'CertificateClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
@@ -150,6 +150,9 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-12-01-preview',
         ResourceType.DATA_KEYVAULT: '7.0',
+        ResourceType.DATA_KEYVAULT_KEYS: '7.1',
+        ResourceType.DATA_KEYVAULT_SECRETS: '7.1',
+        ResourceType.DATA_KEYVAULT_CERTIFICATES: '7.1',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2017-04-01',
