@@ -748,6 +748,12 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('login', user),
                      self.check('sid', oid)])
 
+        self.cmd('{} server ad-admin show --name {} -g {}'
+                 .format(database_engine, server, resource_group),
+                 checks=[
+                     self.check('login', user),
+                     self.check('sid', oid)])
+
         self.cmd('{} server ad-admin list --name {} -g {}'
                  .format(database_engine, server, resource_group),
                  checks=[
@@ -760,7 +766,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('login', user2),
                      self.check('sid', oid2)])
 
-        self.cmd('{} server ad-admin delete --name {} -g {}'
+        self.cmd('{} server ad-admin delete --name {} -g {} --yes'
                  .format(database_engine, server, resource_group))
 
         self.cmd('{} server ad-admin list --name {} -g {}'

@@ -711,27 +711,27 @@ short-summary: Show server key.
 
 helps['mysql server ad-admin'] = """
 type: group
-short-summary: Manage a mysql server's Active Directory administrator.
+short-summary: Manage a MySQL server's Active Directory administrator.
 """
 
 helps['mysql server ad-admin create'] = """
 type: command
-short-summary: Creates a new mysql server Active Directory administrator.
+short-summary: Create an Active Directory administrator for MySQL server.
 """
 
 helps['mysql server ad-admin delete'] = """
 type: command
-short-summary: Deletes an existing mysql server Active Directory Administrator.
+short-summary: Delete an Active Directory Administrator for MySQL server.
 """
 
 helps['mysql server ad-admin list'] = """
 type: command
-short-summary: Returns a list of mysql server Active Directory Administrators.
+short-summary: List all Active Directory Administrators for MySQL server.
 """
 
 helps['mysql server ad-admin show'] = """
 type: command
-short-summary: Returns a mysql server Active Directory Administrators.
+short-summary: Get Active Directory Administrator information for a MySQL server.
 """
 
 helps['postgres'] = """
@@ -1099,20 +1099,20 @@ short-summary: Manage a postgres server's Active Directory administrator.
 
 helps['postgres server ad-admin create'] = """
 type: command
-short-summary: Creates a new postgres server Active Directory administrator.
+short-summary: Create an Active Directory Administrator for PostgreSQL server.
 """
 
 helps['postgres server ad-admin delete'] = """
 type: command
-short-summary: Deletes an existing postgres server Active Directory Administrator.
+short-summary: Delete an Active Directory Administrator for PostgreSQL server.
 """
 
 helps['postgres server ad-admin list'] = """
 type: command
-short-summary: Returns a list of postgres server Active Directory Administrators.
+short-summary: List all Active Directory Administrators for PostgreSQL server.
 """
 
 helps['postgres server ad-admin show'] = """
 type: command
-short-summary: Returns a postgres server Active Directory Administrators.
+short-summary: Get Active Directory Administrator information for a PostgreSQL server.
 """

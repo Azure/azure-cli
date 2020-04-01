@@ -439,16 +439,16 @@ def load_command_table(self, _):
                             mysql_adadmin_sdk,
                             client_factory=cf_mysql_server_ad_administrators_operations,
                             is_preview=True) as g:
-        g.custom_command('create', 'server_ad_admin_set')
+        g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
 
     with self.command_group('postgres server ad-admin',
                             postgres_adadmin_sdk,
                             client_factory=cf_postgres_server_ad_administrators_operations,
                             is_preview=True) as g:
-        g.custom_command('create', 'server_ad_admin_set')
+        g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
         g.command('list', 'list')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
