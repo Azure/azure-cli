@@ -695,15 +695,15 @@ type: command
 short-summary: List the long term retention backups for a location, instance or database.
 examples:
   - name: List long term retention backups for a managed database.
-    text: az sql midb ltr-backup list-by-database -l southeastasia --mi myinstance -n mymanageddb
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance -n mymanageddb
   - name: List long term retention backups for a managed instance (list only the latest LTR backups, which belong to live databases).
-    text: az sql midb ltr-backup list-by-instance -l southeastasia --mi myinstance --database-state Live --only-latest-per-database True
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance --database-state Live --only-latest-per-database True
   - name: List long term retention backups for a managed instance (with resource group argument).
-    text: az sql midb ltr-backup list-by-instance -l southeastasia -g mygroup --mi myinstance
+    text: az sql midb ltr-backup list -l southeastasia -g mygroup --mi myinstance
   - name: List long term retention backups for a location (list only the latest LTR backups, which belong to live databases).
-    text: az sql midb ltr-backup list-by-location -l southeastasia --database-state Live --only-latest-per-database True
+    text: az sql midb ltr-backup list -l southeastasia --database-state Live --only-latest-per-database True
   - name: List long term retention backups for a location (with resource group argument).
-    text: az sql midb ltr-backup list-by-location -l southeastasia -g mygroup
+    text: az sql midb ltr-backup list -l southeastasia -g mygroup
 """
 
 helps['sql midb ltr-backup delete'] = """
