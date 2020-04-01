@@ -24,10 +24,18 @@ from ._validators import (
 def load_command_table(self, _):
     mgmt_api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_KEYVAULT))
     mgmt_api_version = mgmt_api_version.replace('-', '_')
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT))
-    data_api_version = data_api_version.replace('.', '_')
-    data_api_version = data_api_version.replace('-', '_')
-    data_doc_string = 'azure.keyvault.v' + data_api_version + '.key_vault_client#KeyVaultClient.{}'
+    keys_data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS))
+    keys_data_api_version = keys_data_api_version.replace('.', '_').replace('-', '_')
+    keys_data_doc_string = 'azure.keyvault.keys.v' + keys_data_api_version + '.key_vault_client#KeyVaultClient.{}'
+
+    secrets_data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECRETS))
+    secrets_data_api_version = secrets_data_api_version.replace('.', '_').replace('-', '_')
+    secrets_data_doc_string = 'azure.keyvault.secrets.v' + secrets_data_api_version + '.key_vault_client#KeyVaultClient.{}'
+
+    certificates_data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES))
+    certificates_data_api_version = certificates_data_api_version.replace('.', '_').replace('-', '_')
+    certificates_data_doc_string = 'azure.keyvault.certificates.v' + certificates_data_api_version + '.key_vault_client#KeyVaultClient.{}'
+
     # region Command Types
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -52,10 +60,10 @@ def load_command_table(self, _):
         resource_type=ResourceType.MGMT_KEYVAULT
     )
 
-    kv_data_sdk = CliCommandType(
+    kv_keys_data_sdk = CliCommandType(
         operations_tmpl='azure.keyvault.key_vault_client#KeyVaultClient.{}',
         client_factory=keyvault_data_plane_factory,
-        resource_type=ResourceType.DATA_KEYVAULT
+        resource_type=ResourceType.DATA_KEYVAULT_KEYS
     )
     # endregion
 
