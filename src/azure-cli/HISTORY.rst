@@ -6,6 +6,10 @@ Release History
 2.3.1
 ++++++
 
+**ACR**
+
+* Fix wrong version of azure-mgmt-containerregistry for Linux
+
 **Profile**
 
 * az login: Fix login failure with cloud profiles other than `latest`
