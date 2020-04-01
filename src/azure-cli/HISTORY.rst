@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.3.1
+++++++
+
+**Profile**
+
+* az login: Fix login failure with cloud profiles other than `latest`
+
 2.3.0
 ++++++
 
