@@ -1506,7 +1506,6 @@ def load_arguments(self, _):
                    help='The resource id of the long term retention backup to be restored. '
                    'Use az sql midb ltr-backup show or az sql midb ltr-backup list for backup id.')
 
-
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
             c, 'parameters', ManagedDatabase, [
