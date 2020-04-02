@@ -60,13 +60,20 @@ def keyvault_data_plane_factory(cli_ctx, _):
     return client
 
 
-def keyvault_data_plane_track2_key_factory(cli_ctx, _):
-    from azure.identity import DefaultAzureCredential
+def keyvault_data_plane_track2_key_factory(cli_ctx, kargs):
     from azure.keyvault.keys import KeyClient
+    from azure.cli.core.profiles import ResourceType, get_api_version
+    from azure.cli.core._profile import Profile
 
-    vault_url = cli_ctx.vault_base_url
-    credential = DefaultAzureCredential()
-    client = KeyClient(vault_url=vault_url, credential=credential)
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_KEYS))
+
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials(resource='https://vault.azure.net')
+    client = KeyClient(
+        vault_url=kargs['vault_base_url'],
+        credential=credential,
+        api_version=version
+    )
 
     return client
 

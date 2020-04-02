@@ -97,6 +97,14 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 command_args[client_arg_name] = client
             if 'cmd' not in op_args:
                 command_args.pop('cmd')
+
+            # Remove 'vault_base_url' from kwargs since these clients already have this argument specified
+            class_name = op.__qualname__.split('.')[0]
+            if class_name in ['KeyClient', 'SecretClient', 'CertificateClient']:
+                command_args.pop('vault_base_url')
+                if 'identifier' in command_args:
+                    command_args.pop('identifier')
+
             try:
                 result = op(**command_args)
                 # apply results transform if specified

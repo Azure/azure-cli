@@ -15,7 +15,7 @@ from ._client_factory import (
 
 from ._transformers import (
     extract_subresource_name, filter_out_managed_resources,
-    multi_transformers)
+    multi_transformers, transform_single_key)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -29,7 +29,7 @@ def load_command_table(self, _):
 
     data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT))
     data_api_version = data_api_version.replace('.', '_').replace('-', '_')
-    data_doc_string = 'azure.keyvault.v' + data_api_version + '._client#KeyVaultClient.{}'
+    data_doc_string = 'azure.keyvault.v' + data_api_version + '#KeyVaultClient.{}'
 
     keys_data_doc_string = 'azure.keyvault.keys._client#KeyClient.{}'
     secrets_data_doc_string = 'azure.keyvault.secrets._client#SecretClient.{}'
@@ -134,14 +134,14 @@ def load_command_table(self, _):
 
     # Data Plane Commands
     with self.command_group('keyvault key', kv_keys_data_sdk) as g:
-        g.keyvault_command('list', 'get_keys',
+        g.keyvault_command('list', 'list_properties_of_keys',
                            transform=multi_transformers(
                                filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))
         g.keyvault_command('list-versions', 'get_key_versions', transform=extract_subresource_name(id_parameter='kid'))
         g.keyvault_command('list-deleted', 'get_deleted_keys', transform=extract_subresource_name(id_parameter='kid'))
         g.keyvault_custom('create', 'create_key', doc_string_source=keys_data_doc_string.format('create_key'))
         g.keyvault_command('set-attributes', 'update_key')
-        g.keyvault_command('show', 'get_key')
+        g.keyvault_command('show', 'get_key', transform=transform_single_key)
         g.keyvault_command('show-deleted', 'get_deleted_key')
         g.keyvault_command('delete', 'delete_key')
         g.keyvault_command('purge', 'purge_deleted_key')
