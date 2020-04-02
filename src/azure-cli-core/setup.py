@@ -58,7 +58,7 @@ DEPENDENCIES = [
     'jmespath',
     'knack==0.7.0rc1',
     'msrest>=0.4.4',
-    'msrestazure>=0.6.2',
+    'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo',
     'PyJWT',
