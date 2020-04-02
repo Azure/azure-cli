@@ -23,8 +23,23 @@ jobs:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
         title=$(curl https://api.github.com/repos/Azure/azure-cli/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix; then
+          echo "Hotfix PR should target release branch."
+          exit 1
+        fi
         [[ $title =~ ^(\[.*\]|\{.*\}).* ]] && exit 0
         echo "Pull Request title should follow https://aka.ms/submitAzPR"
+        exit 1
+
+- job: NoSquashAndMergeFromReleaseToDev
+  displayName: "Block Squash and Merge from release to dev"
+  condition: and(succeeded(), eq(variables['System.PullRequest.TargetBranch'], 'dev'), eq(variables['System.PullRequest.SourceBranch'], 'release'))
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+    - bash: |
+        echo "Block Squash and Merge from release to dev. Please merge locally and push to remote."
         exit 1
 
 - job: RejectPullRequestToMasterBranch
