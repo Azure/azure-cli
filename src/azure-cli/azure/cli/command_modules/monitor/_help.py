@@ -1103,6 +1103,60 @@ examples:
     text: az monitor log-analytics workspace linked-service wait -n cluster -g MyResourceGroup --workspace-name MyWorkspace --created
 """
 
+helps['monitor log-analytics workspace linked-storage'] = """
+type: group
+short-summary: Manage linked storage for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace linked-storage create'] = """
+type: command
+short-summary: Create linked storages for log analytics workspace.
+examples:
+  - name: Create a linked storage for a log analytics workspace
+    text: az monitor log-analytics workspace linked-storage create --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts SA1 SA2
+"""
+
+helps['monitor log-analytics workspace linked-storage delete'] = """
+type: command
+short-summary: Delete all linked storages with specific data source type for log analytics workspace.
+examples:
+  - name: Delete all linked storages with a specific type for a log analytics workspace
+    text: az monitor log-analytics workspace linked-storage delete --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace
+"""
+
+helps['monitor log-analytics workspace linked-storage add'] = """
+type: command
+short-summary: Add linked storages for log analytics workspace.
+examples:
+  - name: Add a linked storage for a log analytics workspace
+    text: az monitor log-analytics workspace linked-storage add --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts SA1 SA2
+"""
+
+helps['monitor log-analytics workspace linked-storage remove'] = """
+type: command
+short-summary: Remove all linked storages with specific data source type for log analytics workspace
+examples:
+  - name: Remove a linked storage for a log analytics workspace
+    text: az monitor log-analytics workspace linked-storage remove --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts SA1 SA2.
+"""
+
+helps['monitor log-analytics workspace linked-storage list'] = """
+type: command
+short-summary: List all linked storages for a log analytics workspace.
+examples:
+  - name: List all linked storages for a log analytics workspace
+    text: az monitor log-analytics workspace linked-storage list -g MyResourceGroup --workspace-name MyWorkspace
+
+"""
+
+helps['monitor log-analytics workspace linked-storage show'] = """
+type: command
+short-summary: List all linked storages with specific data source type for a log analytics workspace.
+examples:
+  - name: Show all linked storages with a specific type for a log analytics workspace
+    text: az monitor log-analytics workspace linked-storage show --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace
+"""
+
 helps['monitor log-profiles'] = """
 type: group
 short-summary: Manage log profiles.
