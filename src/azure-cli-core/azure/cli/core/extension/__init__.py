@@ -316,8 +316,6 @@ def build_extension_path(ext_name, system=None):
 
 def get_extensions(ext_type=None):
     logger.debug("Extensions directory: '%s'", EXTENSIONS_DIR)
-    if os.path.isdir(EXTENSIONS_SYS_DIR):
-        logger.debug("Extensions system directory: '%s'", EXTENSIONS_SYS_DIR)
     extensions = []
     if not ext_type:
         ext_type = EXTENSION_TYPES
