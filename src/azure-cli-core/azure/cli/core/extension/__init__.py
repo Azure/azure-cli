@@ -307,7 +307,7 @@ def get_extension_path(ext_name):
 
 
 def get_extensions(ext_type=None):
-    logger.debug("Extensions directory: '%s'", EXTENSIONS_DIR)
+    # logger.debug("Extensions directory: '%s'", EXTENSIONS_DIR)
     extensions = []
     if not ext_type:
         ext_type = EXTENSION_TYPES
