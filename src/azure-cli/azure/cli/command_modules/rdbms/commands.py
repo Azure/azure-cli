@@ -442,7 +442,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
         g.command('list', 'list')
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
 
     with self.command_group('postgres server ad-admin',
                             postgres_adadmin_sdk,
@@ -451,4 +451,4 @@ def load_command_table(self, _):
         g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
         g.command('list', 'list')
         g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        g.show_command('show', 'get')
