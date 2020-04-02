@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import base64
 
 from collections.abc import Iterable
 
@@ -35,3 +36,21 @@ def extract_subresource_name(id_parameter='id'):
             return [_extract_subresource_name_from_single_output(item, id_parameter) for item in output]
         return _extract_subresource_name_from_single_output(output, id_parameter)
     return _extract_subresource_name
+
+
+def transform_single_key(key):
+    if isinstance(key, dict):
+        return key
+
+    def encode_bytes(b):
+        if isinstance(b, (bytes, bytearray)):
+            return base64.b64encode(b).decode('utf-8')
+
+    result = {}
+    for item in ['key', 'properties']:
+        result.update({
+            k: encode_bytes(v)
+            for k, v in getattr(key, item).__dict__.items()
+            if not callable(v) and not k.startswith('_')
+        })
+    return result

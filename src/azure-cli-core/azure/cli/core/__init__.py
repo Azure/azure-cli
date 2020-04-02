@@ -563,11 +563,25 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
+        # azure.keyvault.key_vault_client#KeyVaultClient.{} -> azure.keyvault
+        # azure.keyvault.keys._client#KeyClient.{} -> azure.keyvault.keys
+        # azure.mgmt.keyvault.operations#VaultsOperations.{} -> azure.mgmt.keyvault
+        operation_prefix = '.'.join(operation.split('#')[0].split('.')[:-1])
+
+        track2_sdks = [
+            'azure.keyvault.keys',
+            'azure.keyvault.secrets',
+            'azure.keyvault.certificates'
+        ]
+
         for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if operation.startswith(rt.import_prefix + '.'):
-                operation = operation.replace(rt.import_prefix,
-                                              get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
-                                                                     operation_group=operation_group))
+            if operation_prefix == rt.import_prefix:
+                if operation_prefix not in track2_sdks:
+                    operation = operation.replace(rt.import_prefix,
+                                                  get_versioned_sdk_path(
+                                                      self.cli_ctx.cloud.profile, rt,
+                                                      operation_group=operation_group))
+                    break
 
         try:
             mod_to_import, attr_path = operation.split('#')
