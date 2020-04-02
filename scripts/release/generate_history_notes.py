@@ -100,8 +100,9 @@ def construct_core_history(component: str):
 
 
 def get_commits():
+    last_release = 'azure-cli-{}'.format(os.getenv('PRE_VERSION')) if os.getenv('PRE_VERSION') else 'upstream/release'
     out = subprocess.Popen([
-        'git', 'log', 'upstream/release...upstream/dev',
+        'git', 'log', '{}..upstream/dev'.format(last_release),
         '--pretty=format:"%H %s"'
     ],
                            stdout=subprocess.PIPE,
@@ -183,6 +184,10 @@ def parse_message(message: str, pr_num: str = None) -> (str, str):
                       '[BREAKING CHANGE]',
                       note,
                       flags=re.IGNORECASE)
+        note = re.sub(r"^'(az .*?)':", r"`\1`:", note)
+        note = re.sub(r"^(az .*?):", r"`\1`:", note)
+        if not note.startswith('az') and not ':' in note:
+            note = note[0].capitalize() + note[1:]
         if note.endswith('.'):
             note = note[:-1]
         return component, note
