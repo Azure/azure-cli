@@ -36,7 +36,7 @@ from azure.cli.command_modules.resource._validators import _parse_lock_id
 
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
-from knack.util import CLIError
+from knack.util import CLIError, todict
 
 from ._validators import MSI_LOCAL_ID
 
@@ -333,7 +333,7 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
     validation_result = deployment_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=properties)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
@@ -414,7 +414,7 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
     validation_result = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
@@ -467,7 +467,7 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
     validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
@@ -518,7 +518,7 @@ def _deploy_arm_template_at_management_group(cli_ctx,
     validation_result = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
@@ -564,7 +564,7 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
     validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
