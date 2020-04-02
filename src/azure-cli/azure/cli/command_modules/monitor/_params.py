@@ -345,6 +345,11 @@ def load_arguments(self, _):
         c.argument('workspace_name', options_list='--workspace-name')
     # endregion
 
+    # region Log Analytics Cluster
+    with self.argument_context('monitor log-analytics cluster') as c:
+        c.argument('cluster_name', options_list=['--cluster-name', '-n'], help="Name of the Log Analytics Workspace.")
+    # endregion
+
     # region monitor clone
     with self.argument_context('monitor clone') as c:
         c.argument('source_resource', help="Resource ID of the source resource.")

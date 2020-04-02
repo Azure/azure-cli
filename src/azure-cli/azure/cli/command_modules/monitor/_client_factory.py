@@ -64,9 +64,9 @@ def cf_metric_alerts(cli_ctx, _):
 
 
 def _log_analytics_client_factory(cli_ctx, **kwargs):
-    from azure.mgmt.loganalytics import LogAnalyticsManagementClient
+    from azure.mgmt.loganalytics import OperationalInsightsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, LogAnalyticsManagementClient, **kwargs)
+    return get_mgmt_service_client(cli_ctx, OperationalInsightsManagementClient, **kwargs)
 
 
 def cf_private_link_resources(cli_ctx, _):
@@ -91,3 +91,7 @@ def cf_private_endpoint_connections(cli_ctx, _):
 
 def cf_log_analytics_workspace(cli_ctx, _):
     return _log_analytics_client_factory(cli_ctx).workspaces
+
+
+def cf_log_analytics_cluster(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).clusters

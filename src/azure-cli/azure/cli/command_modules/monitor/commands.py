@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+from azure.cli.command_modules.monitor._client_factory import cf_log_analytics_cluster
 from azure.cli.core.commands import CliCommandType
 
 
@@ -171,6 +171,18 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler
     )
 
+    log_analytics_cluster_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#ClustersOperations.{}',
+        client_factory=cf_log_analytics_cluster,
+        exception_handler=monitor_exception_handler
+    )
+
+    log_analytics_cluster_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_cluster#{}',
+        client_factory=cf_log_analytics_cluster,
+        exception_handler=monitor_exception_handler
+    )
+
     monitor_general_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.general_operations#{}',
         client_factory=cf_metric_alerts,
@@ -286,6 +298,14 @@ def load_command_table(self, _):
         g.command('list', 'list_intelligence_packs')
         g.command('enable', 'enable_intelligence_pack')
         g.command('disable', 'disable_intelligence_pack')
+
+    with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom, is_preview=True) as g:
+        g.custom_command('create', 'create_log_analytics_cluster')
+        g.generic_update_command('update', custom_func_name='update_log_analytics_cluster')
+        # g.custom_command('update', 'update_log_analytics_cluster')
+        g.show_command('show', 'get')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_log_analytics_clusters')
 
     with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom, is_preview=True) as g:
         g.custom_command('clone', 'clone_existed_settings')
