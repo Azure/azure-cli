@@ -388,7 +388,9 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_notification_ttl=1,
                    fileupload_storage_connectionstring=None,
                    fileupload_storage_container_name=None,
-                   fileupload_sas_ttl=1):
+                   fileupload_sas_ttl=1,
+                   fileupload_storage_authentication_type=None,
+                   fileupload_storage_container_uri=None):
     from datetime import timedelta
     cli_ctx = cmd.cli_ctx
     if enable_fileupload_notifications:
@@ -398,6 +400,10 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         raise CLIError('Please mention storage container name.')
     if fileupload_storage_container_name and not fileupload_storage_connectionstring:
         raise CLIError('Please mention storage connection string.')
+    if AuthenticationType.KeyBased.value == fileupload_storage_authentication_type.lower() and not fileupload_storage_connectionstring:
+        raise CLIError('Key-based authentication requires a connection string.')
+    elif AuthenticationType.IdentityBased.lower() == fileupload_storage_authentication_type.lower() and not fileupload_storage_container_uri:
+        raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
     _check_name_availability(client.iot_hub_resource, hub_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     sku = IotHubSkuInfo(name=sku, capacity=unit)
@@ -418,7 +424,9 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     storage_endpoint_dic['$default'] = StorageEndpointProperties(
         sas_ttl_as_iso8601=timedelta(hours=fileupload_sas_ttl),
         connection_string=fileupload_storage_connectionstring if fileupload_storage_connectionstring else '',
-        container_name=fileupload_storage_container_name if fileupload_storage_container_name else '')
+        container_name=fileupload_storage_container_name if fileupload_storage_container_name else '',
+        authentication_type=fileupload_storage_authentication_type if fileupload_storage_authentication_type else None,
+        container_uri=fileupload_storage_container_uri if fileupload_storage_container_uri else '')
 
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
                                   messaging_endpoints=msg_endpoint_dic,

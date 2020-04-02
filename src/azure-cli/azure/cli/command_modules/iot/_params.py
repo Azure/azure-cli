@@ -161,6 +161,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('fileupload_storage_connectionstring',
                    options_list=['--fileupload-storage-connectionstring', '--fcs'],
                    help='The connection string for the Azure Storage account to which files are uploaded.')
+        c.argument('fileupload_storage_authentication_type',
+                   options_list=['--fileupload-storage-auth-type', '--fsa'],
+                   help='The authentication type for the Azure Storage account to which files are uploaded.'
+                        'Possible values are ''keyBased'' and ''identityBased''')
+        c.argument('fileupload_storage_container_uri',
+                   options_list=['--fileupload-storage-container-uri', '--fcu'],
+                   help='The container URI for the Azure Storage account to which files are uploaded.')
         c.argument('fileupload_storage_container_name',
                    options_list=['--fileupload-storage-container-name', '--fc'],
                    help='The name of the root container where you upload files. The container need not exist but'
