@@ -17,7 +17,7 @@ def load_command_table(self, _):
         cf_log_analytics_workspace_intelligence_packs, cf_log_analytics_cluster,
         cf_log_analytics_workspace_linked_service, cf_diagnostics_category,
         cf_private_link_resources, cf_private_link_scoped_resources,
-        cf_private_link_scopes, cf_private_endpoint_connections)
+        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id,\
@@ -229,6 +229,18 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler
     )
 
+    log_analytics_linked_storage_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#LinkedStorageAccountsOperations.{}',
+        client_factory=cf_log_analytics_linked_storage,
+        exception_handler=monitor_exception_handler
+    )
+
+    log_analytics_linked_storage_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_linked_storage_account#{}',
+        client_factory=cf_log_analytics_linked_storage,
+        exception_handler=monitor_exception_handler
+    )
+
     monitor_general_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.general_operations#{}',
         client_factory=cf_metric_alerts,
@@ -360,6 +372,14 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.custom_command('list', 'list_log_analytics_clusters')
         g.wait_command('wait')
+
+    with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom, is_preview=True) as g:
+        g.command('create', 'create_or_update')
+        g.custom_command('add', 'add_log_analytics_workspace_linked_storage_accounts')
+        g.custom_command('remove', 'remove_log_analytics_workspace_linked_storage_accounts')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_workspace')
 
     with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom, is_preview=True) as g:
         g.custom_command('clone', 'clone_existed_settings')
