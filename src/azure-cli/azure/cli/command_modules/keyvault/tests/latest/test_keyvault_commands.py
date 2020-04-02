@@ -719,6 +719,31 @@ class KeyVaultHSMKeyScenarioTest(ScenarioTest):
             self.check('attributes.enabled', True)
         ])
 
+        # import PEM
+        self.kwargs.update({
+            'key_enc_file': os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'),
+            'key_enc_password': 'password',
+            'key_plain_file': os.path.join(TEST_DIR, 'mydomain.test.pem')
+        })
+        self.cmd('keyvault key import --hsm-name {hsm} -n import-key-plain --pem-file "{key_plain_file}" -p hsm',
+                 checks=self.check('key.kty', 'RSA-HSM'))
+        self.cmd('keyvault key import --hsm-name {hsm} -n import-key-encrypted --pem-file "{key_enc_file}" '
+                 '--pem-password {key_enc_password} -p hsm', checks=self.check('key.kty', 'RSA-HSM'))
+
+        # import ec PEM
+        self.kwargs.update({
+            'key_enc_file': os.path.join(TEST_DIR, 'ec521pw.pem'),
+            'key_enc_password': 'pass1234',
+            'key_plain_file': os.path.join(TEST_DIR, 'ec256.pem')
+        })
+        self.cmd('keyvault key import --hsm-name {hsm} -n import-eckey-plain --pem-file "{key_plain_file}" '
+                 '-p hsm', checks=[self.check('key.kty', 'EC-HSM'), self.check('key.crv', 'P-256')])
+        """ Enable this when service is ready
+        self.cmd('keyvault key import --hsm-name {hsm} -n import-eckey-encrypted --pem-file "{key_enc_file}" '
+                 '--pem-password {key_enc_password}',
+                 checks=[self.check('key.kty', 'EC-HSM'), self.check('key.crv', 'P-521')])
+        """
+
         # create ec keys
         self.cmd('keyvault key create --hsm-name {hsm} -n eckey1 --kty EC-HSM',
                  checks=self.check('key.kty', 'EC-HSM'))

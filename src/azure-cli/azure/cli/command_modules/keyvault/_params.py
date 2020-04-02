@@ -238,11 +238,12 @@ def load_arguments(self, _):
         'show': hsm_base_url_desc2,
         'show-deleted': hsm_base_url_desc2,
         'backup': hsm_base_url_desc2,
-        'restore': hsm_base_url_desc2
+        'restore': hsm_base_url_desc2,
+        'import': hsm_base_url_desc2
     }
 
     # custom funtions
-    for item in ['backup', 'create', 'download', 'restore']:
+    for item in ['backup', 'create', 'download', 'import', 'restore']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
             c.argument('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
                        validator=process_vault_and_hsm_name, help=hsm_base_url_descriptions[item])
