@@ -186,8 +186,8 @@ def _augment_telemetry_with_ext_info(extension_name, ext=None):
 
 def check_version_compatibility(azext_metadata):
     is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension %s compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
-                 "max_required=%s", azext_metadata.get('name'), is_compatible, cli_core_version, min_required, max_required)
+    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
         min_max_msg_fmt = "The '{}' extension is not compatible with this version of the CLI.\n" \
                           "You have CLI core version {} and this extension " \
@@ -224,9 +224,9 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
     extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
-    ext = get_extension(extension_name)
-    _augment_telemetry_with_ext_info(extension_name, ext)
     try:
+        ext = get_extension(extension_name)
+        _augment_telemetry_with_ext_info(extension_name, ext)
         if extension_name and ext.experimental:
             logger.warning("The installed extension '%s' is experimental and not covered by customer support. "
                            "Please use with discretion.", extension_name)
