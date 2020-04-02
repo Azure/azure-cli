@@ -435,6 +435,7 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
         elif kwargs is not None:
             kwargs[setter_arg_name] = parameters
             result = operation(**kwargs)
+            del kwargs[setter_arg_name]
         return result
 
     # early out if the command does not use the cache
