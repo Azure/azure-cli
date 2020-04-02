@@ -226,7 +226,9 @@ An example of non-customer-facing change PR title:
 
 ### Format PR Description
 
-If you would like to write multiple history notes for one PR or overwrite the message in the PR title as a history note, please write the notes under `History Notes` section in the PR description, following the same format described above. The PR template already contains the history note template, just change it if needed. In this case, the PR title could be a summary of all the changes in this PR and will not be put into `HISTORY.rst`. The PR title still needs to start with `[Component Name]`. You can delete the `History Notes` section if not needed.
+Please follow the instruction in the PR template to provide a description of the PR and the testing guide if possible. 
+
+If you would like to write multiple history notes for one PR or overwrite the message in the PR title as a history note, please write the notes under `History Notes` section in the PR description, following the same format described above. The PR template already contains the history note template, just change it if needed. In this case, the PR title could be a summary of all the changes in this PR and will not be put into `HISTORY.rst` in our pipeline. The PR title still needs to start with `[Component Name]`. You can delete the `History Notes` section if not needed.
 
 ### Submit Hotfix
 In the case of hotfix, you should create a hotfix branch based on release branch and submit a PR to merge hotfix into release. In this PR, the second part of the PR title should be `Hotfix`. If you have customer-facing changes, you need to modify `HISTORY.rst` to add history notes. The auto generated history notes for the next release will ignore the PR that contains `Hotfix`. You also need to submit a PR to merge the release branch back into dev branch before next release. Do **NOT** squash and merge this PR. After the PR gets approved by code owners, you should fast forward dev to release on your local machine and then push dev to upstream repository. 
