@@ -140,7 +140,6 @@ DEPENDENCIES = [
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
     'jsondiff==1.2.0',
-    'azure-mgmt-core==1.0.0b1'
 ]
 
 TESTS_REQUIRE = [
