@@ -136,7 +136,8 @@ def load_command_table(self, _):
     with self.command_group('keyvault key', kv_keys_data_sdk) as g:
         g.keyvault_command('list', 'list_properties_of_keys',
                            transform=multi_transformers(
-                               filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))
+                               filter_out_managed_resources,
+                               extract_subresource_name(id_parameter='kid')))
         g.keyvault_command('list-versions', 'get_key_versions', transform=extract_subresource_name(id_parameter='kid'))
         g.keyvault_command('list-deleted', 'get_deleted_keys', transform=extract_subresource_name(id_parameter='kid'))
         g.keyvault_custom('create', 'create_key', doc_string_source=keys_data_doc_string.format('create_key'))

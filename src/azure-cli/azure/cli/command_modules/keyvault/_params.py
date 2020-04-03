@@ -188,6 +188,10 @@ def load_arguments(self, _):
                         id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
                 c.extra('vault_base_url', help='Name of the key vault. Required if --id is not specified.')
 
+        for cmd in ['list']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                c.extra('vault_base_url', help='Name of the key vault.', required=True)
+
     # endregion
 
     # region keys
@@ -231,7 +235,9 @@ def load_arguments(self, _):
 
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
+            c.extra('maxresults', options_list=['--maxresults'], type=int,
+                    help='Maximum number of results to return in a page. If not specified the service '
+                         'will return up to 25 results.')
     # endregion
 
     # region KeyVault Secret

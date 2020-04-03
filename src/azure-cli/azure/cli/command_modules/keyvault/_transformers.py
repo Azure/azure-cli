@@ -46,11 +46,24 @@ def transform_single_key(key):
         if isinstance(b, (bytes, bytearray)):
             return base64.b64encode(b).decode('utf-8')
 
-    result = {}
-    for item in ['key', 'properties']:
-        result.update({
+    result = {
+        'attributes': {
+            'created': key.properties.created_on,
+            'enabled': key.properties.enabled,
+            'expires': key.properties.expires_on,
+            'notBefore': key.properties.not_before,
+            'recoveryLevel': key.properties.recovery_level,
+            'updated': key.properties.updated_on
+        },
+        'key': {
             k: encode_bytes(v)
-            for k, v in getattr(key, item).__dict__.items()
+            for k, v in key.key.__dict__.items()
             if not callable(v) and not k.startswith('_')
-        })
+        },
+        'managed': key.properties.managed,
+        'tags': key.properties.tags
+    }
+    result['key']['keyOps'] = key.key_operations
+    result['key']['kid'] = key.id
+
     return result
