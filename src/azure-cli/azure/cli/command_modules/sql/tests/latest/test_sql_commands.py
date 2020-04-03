@@ -3278,10 +3278,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         })
 
         self.cmd(
-            'sql midb restore --mode LTR --backup-id \'{backup_id}\' --dest-name {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg}',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('name', '{dest_database_name}')])
+            'sql midb ltr restore --backup-id \'{backup_id}\' --dest-name {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg} --no-wait')
 
         # test delete long term retention backup
         self.cmd(
