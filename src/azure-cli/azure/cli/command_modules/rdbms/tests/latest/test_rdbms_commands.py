@@ -763,7 +763,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server ad-admin create --name {} -g {} -i {} -u {} --no-wait'
                  .format(database_engine, server, resource_group, oid2, user2))
 
-        self.cmd('{} server ad-admin wait --name {} -g {} --exists'
+        self.cmd('{} server ad-admin wait --name {} -g {} --created'
                  .format(database_engine, server, resource_group))
 
         self.cmd('{} server ad-admin delete --name {} -g {} --yes'
