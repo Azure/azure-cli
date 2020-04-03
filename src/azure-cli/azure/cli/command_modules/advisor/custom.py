@@ -132,7 +132,7 @@ def _parse_recommendation_uri(recommendation_uri):
 def _generate_recommendations(client):
     from msrestazure.azure_exceptions import CloudError
 
-    response = sdk_no_wait(True, client.generate)
+    response = client.generate(raw=True)
     location = response.headers['Location']
     operation_id = _parse_operation_id(location)
 
