@@ -734,6 +734,11 @@ type: command
 short-summary: Get Active Directory Administrator information for a MySQL server.
 """
 
+helps['mysql server ad-admin wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the MySQL server Active Directory Administrator is met.
+"""
+
 helps['postgres'] = """
 type: group
 short-summary: Manage Azure Database for PostgreSQL servers.
@@ -1115,4 +1120,9 @@ short-summary: List all Active Directory Administrators for PostgreSQL server.
 helps['postgres server ad-admin show'] = """
 type: command
 short-summary: Get Active Directory Administrator information for a PostgreSQL server.
+"""
+
+helps['postgres server ad-admin wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the PostgreSQL server Active Directory Administrator is met.
 """
