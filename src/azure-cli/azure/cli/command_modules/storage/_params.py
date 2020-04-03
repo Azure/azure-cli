@@ -1104,14 +1104,42 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     help="File system name.", required=True)
             c.extra('directory_name', options_list=['--name', '-n'],
                     help="The name of directory.", required=True)
-    with self.argument_context('storage fs directory list') as c:
-        c.extra('file_system_name', help="File system name.", required=True)
+
+    with self.argument_context('storage fs file list') as c:
+        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
         c.argument('recursive', arg_type=get_three_state_flag(), default=True,
-                   help='Look into sub-directories recursively when set to true. ')
-    for item in ['create', 'show', 'delete']:
+                   help='Look into sub-directories recursively when set to true.')
+        c.argument('exclude_dir', action='store_true',
+                   help='List only files in the given file system.')
+
+    for item in ['create', 'show', 'delete', 'exists', 'upload', 'append', 'download', 'show']:
         with self.argument_context('storage fs file {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['-f', '--file-system'],
                     help='File system name.', required=True)
+            c.extra('path', options_list=['-p', '--path'], help="The file path in a file system.",
+                    required=True)
+
+    with self.argument_context('storage fs file download') as c:
+        c.argument('destination_path', options_list=['--destination', '-d'], type=file_type,
+                   help='The local file where the file or folder will be downloaded to. The source filename will be '
+                        'used if not specified.')
+        c.argument('overwrite', arg_type=get_three_state_flag(), help="Overwrite an existing file when specified.")
+
+    with self.argument_context('storage fs file move') as c:
+        c.extra('file_system_name', options_list=['-f', '--file-system'],
+                help='File system name.', required=True)
+        c.extra('path', options_list=['-p', '--path'],  required=True,
+                help="The original file path users want to move in a file system.")
+        c.argument('new_name', options_list=['--new-path'],
+                   help='The new path the users want to move to. The value must have the following format: '
+                   '"{filesystem}/{directory}/{subdirectory}/{file}".')
+
+    with self.argument_context('storage fs file upload') as c:
+        c.argument('local_path', options_list=['--source', '-s'],
+                   help='Path of the local file to upload as the file content.')
+        c.argument('overwrite', action='store_true', help="Overwrite an existing file when specified.")
+
+
 
     for item in ['set', 'show']:
         with self.argument_context('storage fs access {}'.format(item)) as c:

@@ -1462,6 +1462,63 @@ examples:
         az storage fs create -n fsname --public-access --account-name mystorageaccount --account-key 0000-0000
 """
 
+helps['storage fs file delete'] = """
+type: command
+short-summary: Delete a file in ADLS Gen2 file system.
+examples:
+  - name: Delete a file in ADLS Gen2 file system.
+    text: |
+        az storage fs file delete -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage fs file download'] = """
+type: command
+short-summary: Download a file from the specified path in ADLS Gen2 file system.
+examples:
+  - name: Download a file in ADLS Gen2 file system to current path.
+    text: |
+        az storage fs file download -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
+  - name: Download a file in ADLS Gen2 file system to a specified directory.
+    text: |
+        az storage fs file download -p dir/a.txt -d test/ -f fsname --account-name mystorageaccount --account-key 0000-0000
+  - name: Download a file in ADLS Gen2 file system to a specified file path.
+    text: |
+        az storage fs file download -p dir/a.txt -d test/b.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage fs file list'] = """
+type: command
+short-summary: List files and directories in ADLS Gen2 file system.
+examples:
+  - name:  List files and directories in ADLS Gen2 file system.
+    text: |
+        az storage fs file list -f fsname --account-name mystorageaccount --account-key 0000-0000
+  - name:  List files in ADLS Gen2 file system.
+    text: |
+        az storage fs file list --exclude-dir -f fsname --account-name mystorageaccount --account-key 0000-0000
+  - name:  List files and directories in a specified path.
+    text: |
+        az storage fs file list --path dir -f fsname --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage fs file move'] = """
+type: command
+short-summary: Move a file in ADLS Gen2 Account.
+examples:
+  - name:  Move a file in ADLS Gen2 Account.
+    text: |
+        az storage fs file move --new-path new-fs/new-dir/b.txt -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage fs file show'] = """
+type: command
+short-summary: Show properties of file in ADLS Gen2 file system.
+examples:
+  - name:  Show properties of file in ADLS Gen2 file system.
+    text: |
+        az storage fs file show -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage logging'] = """
 type: group
 short-summary: Manage storage service logging information.
