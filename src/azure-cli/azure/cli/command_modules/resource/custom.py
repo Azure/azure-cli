@@ -54,29 +54,36 @@ def _build_resource_id(**kwargs):
         return None
 
 
-def _process_parameters(template_param_defs, parameter_lists):
+def _process_parameters(template_param_defs, parameter_lists):  # pylint: disable=too-many-statements
 
     def _try_parse_json_object(value):
         try:
-            parsed = shell_safe_json_parse(value)
+            parsed = _remove_comments_from_json(value, False)
             return parsed.get('parameters', parsed)
         except Exception:  # pylint: disable=broad-except
             return None
 
-    def _try_load_file_object(value):
+    def _try_load_file_object(file_path):
         try:
-            is_file = os.path.isfile(value)
+            is_file = os.path.isfile(file_path)
         except ValueError:
-            is_file = False
+            return None
         if is_file is True:
-            parsed = get_file_json(value, throw_on_empty=False)
-            return parsed.get('parameters', parsed)
+            try:
+                content = read_file_content(file_path)
+                if not content:
+                    return None
+                parsed = _remove_comments_from_json(content, False)
+                return parsed.get('parameters', parsed)
+            except Exception as ex:
+                raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
         return None
 
-    def _try_load_uri(value):
-        if "://" in value:
+    def _try_load_uri(uri):
+        if "://" in uri:
             try:
-                parsed = shell_safe_json_parse(_urlretrieve(value).decode('utf-8'))
+                value = _urlretrieve(uri).decode('utf-8')
+                parsed = _remove_comments_from_json(value, False)
                 return parsed.get('parameters', parsed)
             except Exception:  # pylint: disable=broad-except
                 pass
@@ -253,7 +260,7 @@ def _urlretrieve(url):
     return req.read()
 
 
-def _remove_comments_from_json(template):
+def _remove_comments_from_json(template, preserve_order=True):
     from jsmin import jsmin
 
     # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
@@ -262,7 +269,7 @@ def _remove_comments_from_json(template):
     minified = jsmin(template)
     # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
     result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)
-    return shell_safe_json_parse(result, preserve_order=True)
+    return shell_safe_json_parse(result, preserve_order)
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
