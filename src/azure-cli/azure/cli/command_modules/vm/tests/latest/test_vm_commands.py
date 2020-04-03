@@ -3522,7 +3522,7 @@ class VMGalleryImage(ScenarioTest):
         self.kwargs.update({
             'vm': 'vm1',
             'vm2': 'vmFromImage',
-            'gallery': 'gallery1',
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
             'image': 'image1',
             'version': '1.1.2',
             'captured': 'managedImage1',
@@ -3559,9 +3559,12 @@ class VMGalleryImage(ScenarioTest):
                  checks=[
                      self.check('publishingProfile.replicaCount', 2),
                      self.check('length(publishingProfile.targetRegions)', 2),
-                     self.check('publishingProfile.targetRegions',
-                                [dict(name="West US 2", regionalReplicaCount=1, storageAccountType='Standard_LRS'),
-                                 dict(name="East US 2", regionalReplicaCount=2, storageAccountType='Standard_LRS')])
+                     self.check('publishingProfile.targetRegions[0].name', 'West US 2'),
+                     self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
+                     self.check('publishingProfile.targetRegions[0].storageAccountType', 'Standard_LRS'),
+                     self.check('publishingProfile.targetRegions[1].name', 'East US 2'),
+                     self.check('publishingProfile.targetRegions[1].regionalReplicaCount', 2),
+                     self.check('publishingProfile.targetRegions[1].storageAccountType', 'Standard_LRS')
                  ])
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys --nsg-rule NONE', checks=self.check('powerState', 'VM running'))
@@ -3574,7 +3577,7 @@ class VMGalleryImage(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_gallery_specialized_', location='eastus2')
     def test_gallery_specialized(self, resource_group):
         self.kwargs.update({
-            'gallery': 'gallery1',
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
             'image': 'image1'
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery}', checks=self.check('name', '{gallery}'))
