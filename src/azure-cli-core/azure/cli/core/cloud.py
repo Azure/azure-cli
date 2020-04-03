@@ -449,7 +449,8 @@ def set_cloud_subscription(cli_ctx, cloud_name, subscription):
 
 def _set_active_subscription(cli_ctx, cloud_name):
     from azure.cli.core._profile import (Profile, _ENVIRONMENT_NAME, _SUBSCRIPTION_ID,
-                                         _STATE, _SUBSCRIPTION_NAME)
+                                         _STATE, _SUBSCRIPTION_NAME, _AZURE_SUBSCRIPTION_ID, load_env_var_subscription,
+                                         _AZ_LOGIN_MESSAGE)
     profile = Profile(cli_ctx=cli_ctx)
     subscription_to_use = get_cloud_subscription(cloud_name) or \
                           next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa
@@ -465,9 +466,12 @@ def _set_active_subscription(cli_ctx, cloud_name):
             logger.warning(e)
             logger.warning("Unable to automatically switch the active subscription. "
                            "Use 'az account set'.")
+    elif load_env_var_subscription():
+        logger.warning("Use subscription %s configured by environment variable %s. "
+                       "Use 'az login' to override.", load_env_var_subscription()[_SUBSCRIPTION_ID],
+                       _AZURE_SUBSCRIPTION_ID)
     else:
-        logger.warning("Use 'az login' to log in to this cloud.")
-        logger.warning("Use 'az account set' to set the active subscription.")
+        logger.warning(_AZ_LOGIN_MESSAGE)
 
 
 def switch_active_cloud(cli_ctx, cloud_name):
