@@ -661,26 +661,27 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             'filesystem', cf_adls_file_system), is_preview=True, min_api='2018-11-09') as g:
         from ._transformers import transform_storage_list_output
         g.storage_command_oauth('create', 'create_file_system')
-        g.storage_command('list', 'list_file_systems', command_type=adls_service_sdk,
-                          transform=transform_storage_list_output)
-        g.storage_command('show', 'get_file_system_properties')
-        g.storage_command('delete', 'delete_file_system')
+        g.storage_command_oauth('list', 'list_file_systems', command_type=adls_service_sdk,
+                                transform=transform_storage_list_output)
+        g.storage_command_oauth('show', 'get_file_system_properties', exception_handler=show_exception_handler)
+        g.storage_command_oauth('delete', 'delete_file_system', confirmation=True)
 
     with self.command_group('storage fs directory', adls_directory_sdk,
-                            custom_command_type=get_custom_sdk('fs_directory', cf_adls_file_system)) as g:
+                            custom_command_type=get_custom_sdk('fs_directory', cf_adls_directory)) as g:
         from ._transformers import transform_storage_list_output
-        g.storage_command('create', 'create_directory')
-        g.storage_command('show', 'get_directory_properties')
-        g.storage_command('delete', 'delete_directory')
-        g.storage_command('move', 'rename_directory')
-        g.storage_command('list', 'get_paths', command_type=adls_fs_sdk, transform=transform_storage_list_output)
+        g.storage_command_oauth('create', 'create_directory')
+        g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
+        g.storage_command_oauth('show', 'get_directory_properties', exception_handler=show_exception_handler)
+        g.storage_command_oauth('delete', 'delete_directory', confirmation=True)
+        g.storage_command_oauth('move', 'rename_directory')
+        g.storage_custom_command_oauth('list', 'list_fs_directories', client_factory=cf_adls_file_system,
+                                       transform=transform_storage_list_output)
 
     with self.command_group('storage fs file', adls_file_sdk,
                             custom_command_type=get_custom_sdk('fs_file', cf_adls_file)) as g:
         from ._transformers import transform_storage_list_output, create_boolean_result_output_transformer
         g.storage_custom_command_oauth('upload', 'upload_file')
-        g.storage_custom_command_oauth('exists', 'exists',
-                                       transform=create_boolean_result_output_transformer('exists'))
+        g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_custom_command_oauth('append', 'append_file')
         g.storage_custom_command_oauth('download', 'download_file')
         g.storage_command_oauth('show', 'get_file_properties', exception_handler=show_exception_handler)
@@ -689,7 +690,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        transform=transform_storage_list_output)
         g.storage_command('move', 'rename_file')
         g.storage_command('delete', 'delete_file', confirmation=True)
-
 
     with self.command_group('storage fs access', adls_directory_sdk, custom_command_type=custom_adls_sdk) as g:
         from ._transformers import transform_fs_access_output

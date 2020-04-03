@@ -1094,16 +1094,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage fs create') as c:
         from .sdkutil import get_fs_access_type_names
-
         c.argument('public_access', arg_type=get_enum_type(get_fs_access_type_names()), validator=validate_fs_public_access,
                    help="Specify whether data in the file system may be accessed publicly and the level of access.")
 
-    for item in ['create', 'show', 'delete']:
+    for item in ['create', 'show', 'delete', 'exists', 'move']:
         with self.argument_context('storage fs directory {}'.format(item)) as c:
-            c.extra('file_system_name',
-                    help="File system name.", required=True)
-            c.extra('directory_name', options_list=['--name', '-n'],
+            c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+            c.extra('directory_path', options_list=['--name', '-n'],
                     help="The name of directory.", required=True)
+
+    with self.argument_context('storage fs directory list') as c:
+        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+        c.argument('recursive', arg_type=get_three_state_flag(), default=True,
+                   help='Look into sub-directories recursively when set to true.')
+        c.argument('path', help="Filter the results to return only paths under the specified path.")
+        c.argument('num_results', type=int, help='Specify the maximum number of results to return.')
+
+    with self.argument_context('storage fs directory move') as c:
+        c.argument('new_name', options_list=['--new-directory', '-d'],
+                   help='The new directory name the users want to move to. The value must have the following format: '
+                        '"{filesystem}/{directory}/{subdirectory}".')
 
     with self.argument_context('storage fs file list') as c:
         c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
@@ -1111,6 +1121,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Look into sub-directories recursively when set to true.')
         c.argument('exclude_dir', action='store_true',
                    help='List only files in the given file system.')
+        c.argument('path', help='Filter the results to return only paths under the specified path.')
+        c.argument('num_results', type=int, help='Specify the maximum number of results to return.')
 
     for item in ['create', 'show', 'delete', 'exists', 'upload', 'append', 'download', 'show']:
         with self.argument_context('storage fs file {}'.format(item)) as c:

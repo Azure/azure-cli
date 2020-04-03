@@ -288,7 +288,7 @@ def cf_adls_file_system(cli_ctx, kwargs):
 
 
 def cf_adls_directory(cli_ctx, kwargs):
-    return cf_adls_file_system(cli_ctx, kwargs).get_directory_client(directory=kwargs.pop('path'))
+    return cf_adls_file_system(cli_ctx, kwargs).get_directory_client(directory=kwargs.pop('directory_path'))
     """
     t_adls_directory = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
                                '_data_lake_directory_client#DataLakeDirectoryClient')
