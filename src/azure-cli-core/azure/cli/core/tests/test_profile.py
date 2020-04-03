@@ -143,7 +143,7 @@ class TestProfile(unittest.TestCase):
                                      'Q8U2g9kXHrbYFeY2gJxF_hnfLvNKxUKUBnftmyYxZwKi0GDS0BvdJnJnsqSRSpxUx__Ra9QJkG1IaDzj'
                                      'ZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw')
 
-        cls.env_var_credential={
+        cls.env_var_credential = {
             _AZURE_CLIENT_ID: "clientid-0000-0000-0000-000000000000",
             _AZURE_CLIENT_SECRET: "clientsecret-0000-0000-0000-000000000000",
             _AZURE_TENANT_ID: "tenantid-0000-0000-0000-000000000000",

@@ -163,6 +163,7 @@ def load_env_var_subscription():
             }
         }
         return env_var_subscription
+    return None
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes
@@ -1053,7 +1054,7 @@ class CredsCache(object):
         # If not logged in, use service principal credential configured by environment variables
         if not self._service_principal_creds and load_env_var_subscription():
             logger.info("Using service principal credential configured by environment variables")
-            self._service_principal_creds=[{
+            self._service_principal_creds = [{
                 _SERVICE_PRINCIPAL_ID: os.environ[_AZURE_CLIENT_ID],
                 _SERVICE_PRINCIPAL_TENANT: os.environ[_AZURE_TENANT_ID],
                 _ACCESS_TOKEN: os.environ[_AZURE_CLIENT_SECRET]
