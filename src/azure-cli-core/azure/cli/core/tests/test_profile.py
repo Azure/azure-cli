@@ -18,7 +18,9 @@ from azure.mgmt.resource.subscriptions.models import \
     (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
-                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY)
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY,
+                                     _AZURE_CLIENT_ID, _AZURE_CLIENT_SECRET,
+                                     _AZURE_TENANT_ID, _AZURE_SUBSCRIPTION_ID)
 from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
@@ -140,6 +142,13 @@ class TestProfile(unittest.TestCase):
                                      'e-lOym1sH5iOcxfIjXF0Tp2y0f3zM7qCq8Cp1ZxEwz6xYIgByoxjErNXrOME5Ld1WizcsaWxTXpwxJn_'
                                      'Q8U2g9kXHrbYFeY2gJxF_hnfLvNKxUKUBnftmyYxZwKi0GDS0BvdJnJnsqSRSpxUx__Ra9QJkG1IaDzj'
                                      'ZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw')
+
+        cls.env_var_credential={
+            _AZURE_CLIENT_ID: "clientid-0000-0000-0000-000000000000",
+            _AZURE_CLIENT_SECRET: "clientsecret-0000-0000-0000-000000000000",
+            _AZURE_TENANT_ID: "tenantid-0000-0000-0000-000000000000",
+            _AZURE_SUBSCRIPTION_ID: "subscriptionid-0000-0000-0000-000000000000"
+        }
 
     def test_normalize(self):
         cli = DummyCli()
@@ -280,6 +289,11 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
+        # Test no subscription
+        self.assertRaisesRegex(CLIError, "Please run 'az login' to setup account.",
+                               profile.get_subscription, "random_id")
+
+        # Test get subscription from subscription cache
         consolidated = profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
@@ -292,7 +306,37 @@ class TestProfile(unittest.TestCase):
         sub_id = self.id1.split('/')[-1]
         self.assertEqual(sub_id, profile.get_subscription()['id'])
         self.assertEqual(sub_id, profile.get_subscription(subscription=sub_id)['id'])
-        self.assertRaises(CLIError, profile.get_subscription, "random_id")
+
+        # Exception: Specified subscription doesn't exist
+        self.assertRaisesRegex(CLIError, "Subscription 'random_id' not found.", profile.get_subscription, "random_id")
+
+        # Exception: No default subscription
+        profile._storage['subscriptions'][0]["isDefault"] = False
+        self.assertRaisesRegex(CLIError, "No subscription found.", profile.get_subscription)
+
+        # Exception: Multiple subscriptions with the same name
+        profile._storage['subscriptions'].append(profile._storage['subscriptions'][0].copy())
+        profile._storage['subscriptions'][1]["id"] = "anotherId"
+        self.assertRaisesRegex(CLIError, "Multiple subscriptions with the name 'foo account' found.", profile.get_subscription, self.subscription1_raw.display_name)
+
+        profile.logout_all()
+
+        # Test get subscription from environment variable
+        with mock.patch.dict(os.environ, self.env_var_credential):
+            expected_sub = {
+                'id': self.env_var_credential[_AZURE_SUBSCRIPTION_ID],
+                'name': 'Environment Variable Subscription',
+                'tenantId': self.env_var_credential[_AZURE_TENANT_ID],
+                'isDefault': True,
+                'state': 'Enabled',
+                'user': {'name': self.env_var_credential[_AZURE_CLIENT_ID], 'type': 'servicePrincipal'}
+            }
+            # Return default subscription
+            self.assertDictEqual(profile.get_subscription(), expected_sub)
+            # Explicitly get a subscription
+            self.assertDictEqual(profile.get_subscription(self.env_var_credential[_AZURE_SUBSCRIPTION_ID]), expected_sub)
+            # Required subscription doesn't match AZURE_SUBSCRIPTION_ID
+            self.assertRaisesRegex(CLIError, "Subscription 'random_id' not found.", profile.get_subscription, "random_id")
 
     def test_get_auth_info_fail_on_user_account(self):
         cli = DummyCli()
@@ -1695,6 +1739,12 @@ class TestProfile(unittest.TestCase):
         # verify the warning log
         self.assertRaises(ValueError, creds_cache.retrieve_token_for_service_principal,
                           'myapp', 'resource1', 'mytenant2', False)
+
+        # Get service principal credential from env var
+        with mock.patch.dict(os.environ, self.env_var_credential):
+            creds_cache._service_principal_creds = []
+            self.assertRaises(ValueError, creds_cache.retrieve_token_for_service_principal,
+                              self.env_var_credential[_AZURE_CLIENT_ID], 'resource1', self.env_var_credential[_AZURE_TENANT_ID], False)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)

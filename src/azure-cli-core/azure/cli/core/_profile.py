@@ -76,7 +76,14 @@ _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 _ASSIGNED_IDENTITY_INFO = 'assignedIdentityInfo'
 
-_AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account."
+# Authentication via environment variables
+_AZURE_CLIENT_ID = 'AZURE_CLIENT_ID'
+_AZURE_CLIENT_SECRET = 'AZURE_CLIENT_SECRET'
+_AZURE_TENANT_ID = 'AZURE_TENANT_ID'
+_AZURE_SUBSCRIPTION_ID = 'AZURE_SUBSCRIPTION_ID'
+
+_AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account. You may also set AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, " \
+                    "AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID environment variables for service principal login."
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
@@ -137,6 +144,11 @@ def get_credential_types(cli_ctx):
 
 def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
+
+
+def _env_var_auth_configured():
+    return all(key in os.environ for key in [_AZURE_SUBSCRIPTION_ID, _AZURE_TENANT_ID,
+                                             _AZURE_CLIENT_ID, _AZURE_CLIENT_SECRET])
 
 
 # pylint: disable=too-many-lines,too-many-instance-attributes
@@ -486,6 +498,21 @@ class Profile(object):
         active_cloud = self.cli_ctx.cloud
         cached_subscriptions = [sub for sub in subscriptions
                                 if all_clouds or sub[_ENVIRONMENT_NAME] == active_cloud.name]
+
+        # If not logged in, use subscription configured by environment variables
+        if not cached_subscriptions and _env_var_auth_configured():
+            logger.debug("Using subscription configured by environment variables")
+            cached_subscriptions = [{
+                _SUBSCRIPTION_ID: os.environ[_AZURE_SUBSCRIPTION_ID],
+                _SUBSCRIPTION_NAME: "Environment Variable Subscription",
+                _TENANT_ID: os.environ[_AZURE_TENANT_ID],
+                _IS_DEFAULT_SUBSCRIPTION: True,
+                _STATE: 'Enabled',
+                _USER: {
+                    _USER_NAME: os.environ[_AZURE_CLIENT_ID],
+                    _USER_TYPE: _SERVICE_PRINCIPAL
+                }
+            }]
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(cached_subscriptions)
 
@@ -1010,6 +1037,16 @@ class CredsCache(object):
 
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
+
+        # If not logged in, use service principal credential configured by environment variables
+        if not self._service_principal_creds and _env_var_auth_configured():
+            logger.debug("Using service principal credential configured by environment variables")
+            self._service_principal_creds=[{
+                _SERVICE_PRINCIPAL_ID: os.environ[_AZURE_CLIENT_ID],
+                _SERVICE_PRINCIPAL_TENANT: os.environ[_AZURE_TENANT_ID],
+                _ACCESS_TOKEN: os.environ[_AZURE_CLIENT_SECRET]
+            }]
+
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
             raise CLIError("Could not retrieve credential from local cache for service principal {}. "
