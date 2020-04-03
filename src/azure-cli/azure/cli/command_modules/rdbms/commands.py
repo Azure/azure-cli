@@ -443,6 +443,8 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
+        g.custom_wait_command('wait', 'server_ad_admin_get')
+        g.wait_command('wait')
 
     with self.command_group('postgres server ad-admin',
                             postgres_adadmin_sdk,
@@ -452,3 +454,4 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.command('delete', 'delete', confirmation=True)
         g.show_command('show', 'get')
+        g.wait_command('wait')

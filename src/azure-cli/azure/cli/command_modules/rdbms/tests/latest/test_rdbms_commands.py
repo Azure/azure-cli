@@ -760,11 +760,11 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
                      self.check('[0].login', user),
                      self.check('[0].sid', oid)])
 
-        self.cmd('{} server ad-admin create --name {} -g {} -i {} -u {}'
-                 .format(database_engine, server, resource_group, oid2, user2),
-                 checks=[
-                     self.check('login', user2),
-                     self.check('sid', oid2)])
+        self.cmd('{} server ad-admin create --name {} -g {} -i {} -u {} --no-wait'
+                 .format(database_engine, server, resource_group, oid2, user2))
+
+        self.cmd('{} server ad-admin wait --name {} -g {} --exists'
+                 .format(database_engine, server, resource_group))
 
         self.cmd('{} server ad-admin delete --name {} -g {} --yes'
                  .format(database_engine, server, resource_group))
