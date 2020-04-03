@@ -20,7 +20,7 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
     AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem
 
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
 

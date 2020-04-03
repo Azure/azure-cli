@@ -14,7 +14,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, \
     AzureFileShareBackupRequest, AzureFileshareProtectedItem, AzureFileShareRestoreRequest, \
     TargetAFSRestoreInfo, ProtectionState, ProtectionContainerResource, AzureStorageContainer
 
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
     resources_cf

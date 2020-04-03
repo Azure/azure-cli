@@ -17,7 +17,7 @@ from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
 from azure.mgmt.recoveryservicesbackup.models import OperationStatusValues, JobStatus
 
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import (
     job_details_cf, protection_container_refresh_operation_results_cf,
     backup_operation_statuses_cf, protection_container_operation_results_cf)

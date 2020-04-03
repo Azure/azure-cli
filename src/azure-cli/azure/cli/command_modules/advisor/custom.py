@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import uuid
-from azure.cli.core.util import sdk_no_wait
 
 
 def list_recommendations(client, ids=None, resource_group_name=None,
