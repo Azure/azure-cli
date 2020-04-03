@@ -20,6 +20,6 @@ def aro_show_table_format(result):
         ResourceGroup=parts['resource_group'],
         Location=result['location'],
         ProvisioningState=result['provisioningState'],
-        WorkerCount=result['workerProfiles'][0]['count'],
+        WorkerCount=sum(wp['count'] for wp in result['workerProfiles']),
         URL=result['consoleProfile']['url'],
     )
