@@ -2849,9 +2849,6 @@ def list_long_term_retention_mi_backups(
                 managed_instance_name,
                 resource_group_name,
                 only_latest_per_database,
-                database_name,
-                resource_group_name,
-                only_latest_per_database,
                 database_state)
     else:
         backups = _list_by_location_long_term_retention_mi_backups(

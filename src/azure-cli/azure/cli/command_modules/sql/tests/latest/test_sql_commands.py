@@ -3203,7 +3203,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
             'rg': 'clitest4vtazvlqbo',
             'loc': 'westus',
             'managed_instance_name': 'ayang-ltr',
-            'database_name': 'ayang-ltr-db',
+            'database_name': 'ayang-ltr-db-2',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
@@ -3278,7 +3278,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         })
 
         self.cmd(
-            'sql midb ltr restore --backup-id \'{backup_id}\' --dest-name {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg} --no-wait')
+            'sql midb ltr restore --backup-id \'{backup_id}\' --dest-name {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg}')
 
         # test delete long term retention backup
         self.cmd(
