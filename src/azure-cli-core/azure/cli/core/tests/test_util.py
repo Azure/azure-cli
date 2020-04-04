@@ -15,7 +15,7 @@ import json
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
-     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent)
+     should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, is_guid, assert_guid)
 from azure.cli.core.mock import DummyCli
 
 
@@ -340,6 +340,18 @@ class TestUtils(unittest.TestCase):
             get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
             request = send_mock.call_args.args[1]
             self.assertEqual(request.headers['User-Agent'], get_az_user_agent() + ' env-ua ARG-UA')
+
+    def test_guid(self):
+        self.assertTrue(is_guid("00000000-1bf0-4dda-aec3-cb9272f09590"))
+        self.assertFalse(is_guid(""))
+        self.assertFalse(is_guid(None))
+        self.assertFalse(is_guid("foo"))
+
+        from knack.util import CLIError
+        assert_guid("00000000-1bf0-4dda-aec3-cb9272f09590")
+        assert_guid("00000000-1bf0-4dda-aec3-cb9272f09590", "myname")
+        self.assertRaisesRegex(CLIError, "myname must be a GUID.", assert_guid, "foo", "myname")
+        self.assertRaisesRegex(CLIError, "foo is not a GUID.", assert_guid, "foo")
 
 
 class TestBase64ToHex(unittest.TestCase):

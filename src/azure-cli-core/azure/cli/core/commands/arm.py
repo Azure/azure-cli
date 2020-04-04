@@ -354,7 +354,8 @@ def register_global_subscription_argument(cli_ctx):
                         sub_id = sub['id']
                         break
                 if not sub_id:
-                    logger.warning("Subscription '%s' not recognized.", value)
+                    # User may be using env var auth
+                    logger.debug("Subscription '%s' not found in local cache.", value)
                     sub_id = value
                 namespace._subscription = sub_id  # pylint: disable=protected-access
 

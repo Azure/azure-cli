@@ -20,7 +20,8 @@ from azure.mgmt.resource.subscriptions.models import \
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
                                      ServicePrincipalAuth, _AUTH_CTX_FACTORY,
                                      _AZURE_CLIENT_ID, _AZURE_CLIENT_SECRET,
-                                     _AZURE_TENANT_ID, _AZURE_SUBSCRIPTION_ID)
+                                     _AZURE_TENANT_ID, _AZURE_SUBSCRIPTION_ID,
+                                     load_env_var_subscription)
 from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
@@ -144,10 +145,10 @@ class TestProfile(unittest.TestCase):
                                      'ZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw')
 
         cls.env_var_credential = {
-            _AZURE_CLIENT_ID: "clientid-0000-0000-0000-000000000000",
-            _AZURE_CLIENT_SECRET: "clientsecret-0000-0000-0000-000000000000",
-            _AZURE_TENANT_ID: "tenantid-0000-0000-0000-000000000000",
-            _AZURE_SUBSCRIPTION_ID: "subscriptionid-0000-0000-0000-000000000000"
+            _AZURE_CLIENT_ID: "10000000-0000-0000-0000-000000000000",
+            _AZURE_CLIENT_SECRET: "clientsecret",
+            _AZURE_TENANT_ID: "20000000-0000-0000-0000-000000000000",
+            _AZURE_SUBSCRIPTION_ID: "30000000-0000-0000-0000-000000000000"
         }
 
     def test_normalize(self):
@@ -284,6 +285,28 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(storage_mock['subscriptions'][1]['name'], self.subscription1.display_name)
         self.assertTrue(storage_mock['subscriptions'][1]['isDefault'])
 
+    def test_load_env_var_subscription(self):
+        env_var_credential = self.env_var_credential.copy()
+        with mock.patch.dict(os.environ, env_var_credential):
+            expected_sub = {
+                'id': env_var_credential[_AZURE_SUBSCRIPTION_ID],
+                'name': 'Environment Variable Subscription',
+                'tenantId': env_var_credential[_AZURE_TENANT_ID],
+                'user': {'name': env_var_credential[_AZURE_CLIENT_ID], 'type': 'servicePrincipal'}
+            }
+            self.assertDictEqual(load_env_var_subscription(), expected_sub)
+
+        # Test subscription id is not defined
+        del env_var_credential[_AZURE_SUBSCRIPTION_ID]
+        with mock.patch.dict(os.environ, env_var_credential):
+            expected_sub = {
+                'id': None,
+                'name': 'Environment Variable Subscription',
+                'tenantId': env_var_credential[_AZURE_TENANT_ID],
+                'user': {'name': env_var_credential[_AZURE_CLIENT_ID], 'type': 'servicePrincipal'}
+            }
+            self.assertDictEqual(load_env_var_subscription(), expected_sub)
+
     def test_get_subscription(self):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
@@ -327,16 +350,15 @@ class TestProfile(unittest.TestCase):
                 'id': self.env_var_credential[_AZURE_SUBSCRIPTION_ID],
                 'name': 'Environment Variable Subscription',
                 'tenantId': self.env_var_credential[_AZURE_TENANT_ID],
-                'isDefault': True,
-                'state': 'Enabled',
                 'user': {'name': self.env_var_credential[_AZURE_CLIENT_ID], 'type': 'servicePrincipal'}
             }
             # Return default subscription
             self.assertDictEqual(profile.get_subscription(), expected_sub)
             # Explicitly get a subscription
             self.assertDictEqual(profile.get_subscription(self.env_var_credential[_AZURE_SUBSCRIPTION_ID]), expected_sub)
-            # Required subscription doesn't match AZURE_SUBSCRIPTION_ID
-            self.assertRaisesRegex(CLIError, "Subscription 'random_id' not found.", profile.get_subscription, "random_id")
+            # Subscription is overridden
+            expected_sub['id'] = "40000000-0000-0000-0000-000000000000"
+            self.assertDictEqual(profile.get_subscription("40000000-0000-0000-0000-000000000000"), expected_sub)
 
     def test_get_auth_info_fail_on_user_account(self):
         cli = DummyCli()

@@ -19,7 +19,7 @@ from six.moves import BaseHTTPServer
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
-    is_windows, is_wsl
+    is_windows, is_wsl, assert_guid
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
 
 from knack.log import get_logger
@@ -85,14 +85,14 @@ _AZURE_SUBSCRIPTION_ID = 'AZURE_SUBSCRIPTION_ID'
 
 _AZ_LOGIN_MESSAGE = "Please run 'az login' to setup account, then use 'az account set' to set the active " \
                     "subscription. You may also set AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, AZURE_TENANT_ID " \
-                    "and AZURE_SUBSCRIPTION_ID environment variables for service principal login."
+                    "and AZURE_SUBSCRIPTION_ID (optional) environment variables for service principal login."
 
 
 def load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
     profile = Profile(cli_ctx=cli_ctx)
     if refresh:
         profile.refresh_accounts()
-    subscriptions = profile.load_subscriptions(all_clouds)
+    subscriptions = profile.load_cached_subscriptions(all_clouds)
     return subscriptions
 
 
@@ -148,20 +148,47 @@ def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
 
 
+def env_var_auth_configured():
+    all_provided = all(key in os.environ for key in [_AZURE_CLIENT_ID, _AZURE_CLIENT_SECRET, _AZURE_TENANT_ID])
+    if all_provided:
+        assert_guid(os.environ[_AZURE_CLIENT_ID], _AZURE_CLIENT_ID)
+        assert_guid(os.environ[_AZURE_TENANT_ID], _AZURE_TENANT_ID)
+        return True
+
+    any_provided = any(key in os.environ for key in [_AZURE_CLIENT_ID, _AZURE_CLIENT_SECRET, _AZURE_TENANT_ID])
+    if any_provided:
+        raise CLIError("To authenticate using environment variables, "
+                       "all of {}, {}, {} must be specified."
+                       .format(_AZURE_CLIENT_ID, _AZURE_CLIENT_SECRET, _AZURE_TENANT_ID))
+    return False
+
+
+def load_env_var_credential():
+    if env_var_auth_configured():
+        credential = {
+            _SERVICE_PRINCIPAL_ID: os.environ[_AZURE_CLIENT_ID],
+            _SERVICE_PRINCIPAL_TENANT: os.environ[_AZURE_TENANT_ID],
+            _ACCESS_TOKEN: os.environ[_AZURE_CLIENT_SECRET]
+        }
+        return credential
+    return None
+
+
 def load_env_var_subscription():
-    if all(key in os.environ for key in [_AZURE_SUBSCRIPTION_ID, _AZURE_TENANT_ID,
-                                         _AZURE_CLIENT_ID, _AZURE_CLIENT_SECRET]):
+    if env_var_auth_configured():
         env_var_subscription = {
-            _SUBSCRIPTION_ID: os.environ[_AZURE_SUBSCRIPTION_ID],
+            _SUBSCRIPTION_ID: None,
             _SUBSCRIPTION_NAME: _ENVIRONMENT_VARIABLE_ACCOUNT_NAME,
             _TENANT_ID: os.environ[_AZURE_TENANT_ID],
-            _IS_DEFAULT_SUBSCRIPTION: True,
-            _STATE: 'Enabled',
             _USER: {
                 _USER_NAME: os.environ[_AZURE_CLIENT_ID],
                 _USER_TYPE: _SERVICE_PRINCIPAL
             }
         }
+        if _AZURE_SUBSCRIPTION_ID in os.environ:
+            subscription_id = os.environ[_AZURE_SUBSCRIPTION_ID]
+            assert_guid(subscription_id, _AZURE_SUBSCRIPTION_ID)
+            env_var_subscription[_SUBSCRIPTION_ID] = subscription_id
         return env_var_subscription
     return None
 
@@ -516,19 +543,6 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(cached_subscriptions)
 
-    def load_subscriptions(self, all_clouds=False):
-        """Load subscription from cache or env vars."""
-        cached_subscriptions = self.load_cached_subscriptions(all_clouds)
-
-        # If not logged in, use subscription configured by environment variables
-        if not cached_subscriptions:
-            env_var_subscription = load_env_var_subscription()
-            if env_var_subscription:
-                logger.info("Using subscription configured by environment variables")
-                return [env_var_subscription]
-
-        return cached_subscriptions
-
     def get_current_account_user(self):
         try:
             active_account = self.get_subscription()
@@ -537,24 +551,40 @@ class Profile(object):
 
         return active_account[_USER_ENTITY][_USER_NAME]
 
-    def get_subscription(self, subscription=None):  # take id or name
-        subscriptions = self.load_subscriptions()
-        if not subscriptions:
-            raise CLIError(_AZ_LOGIN_MESSAGE)
+    def get_subscription(self, subscription=None, allow_no_subscription=False):  # take id or name
+        # Search the cached subscriptions
+        subscriptions = self.load_cached_subscriptions()
+        if subscriptions:
+            result = [x for x in subscriptions if (
+                not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
+                subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
+                    _SUBSCRIPTION_NAME].lower()])]
+            if not result and subscription:
+                raise CLIError("Subscription '{}' not found. "
+                               "Check the spelling and casing and try again.".format(subscription))
+            if not result and not subscription:
+                raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
+            if len(result) > 1:
+                raise CLIError("Multiple subscriptions with the name '{}' found. "
+                               "Specify the subscription ID.".format(subscription))
+            return result[0]
 
-        result = [x for x in subscriptions if (
-            not subscription and x.get(_IS_DEFAULT_SUBSCRIPTION) or
-            subscription and subscription.lower() in [x[_SUBSCRIPTION_ID].lower(), x[
-                _SUBSCRIPTION_NAME].lower()])]
-        if not result and subscription:
-            raise CLIError("Subscription '{}' not found. "
-                           "Check the spelling and casing and try again.".format(subscription))
-        if not result and not subscription:
-            raise CLIError("No subscription found. Run 'az account set' to select a subscription.")
-        if len(result) > 1:
-            raise CLIError("Multiple subscriptions with the name '{}' found. "
-                           "Specify the subscription ID.".format(subscription))
-        return result[0]
+        # Use env var auth
+        if env_var_auth_configured():
+            logger.warning("[Preview] Using subscription configured in environment variables.")
+            env_sub = load_env_var_subscription()
+            if subscription:
+                # If provided, subscription must be a GUID
+                assert_guid(subscription, _AZURE_SUBSCRIPTION_ID)
+                # Allow the env var subscription to be overridden
+                env_sub[_SUBSCRIPTION_ID] = subscription
+
+            if not env_sub[_SUBSCRIPTION_ID] and not allow_no_subscription:
+                raise CLIError("Subscription is undefined. "
+                               "Please specify the subscription ID with either {} or --subscription."
+                               .format(_AZURE_SUBSCRIPTION_ID))
+            return env_sub
+        raise CLIError(_AZ_LOGIN_MESSAGE)
 
     def get_subscription_id(self, subscription=None):  # take id or name
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
@@ -651,7 +681,7 @@ class Profile(object):
     def get_raw_token(self, resource=None, subscription=None, tenant=None):
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
-        account = self.get_subscription(subscription)
+        account = self.get_subscription(subscription, allow_no_subscription=True)
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -682,7 +712,7 @@ class Profile(object):
                                                                                resource,
                                                                                tenant_dest)
         return (creds,
-                None if tenant else str(account[_SUBSCRIPTION_ID]),
+                None if tenant else account[_SUBSCRIPTION_ID],
                 str(tenant if tenant else account[_TENANT_ID]))
 
     def refresh_accounts(self, subscription_finder=None):
@@ -1052,13 +1082,9 @@ class CredsCache(object):
         self.load_adal_token_cache()
 
         # If not logged in, use service principal credential configured by environment variables
-        if not self._service_principal_creds and load_env_var_subscription():
-            logger.info("Using service principal credential configured by environment variables")
-            self._service_principal_creds = [{
-                _SERVICE_PRINCIPAL_ID: os.environ[_AZURE_CLIENT_ID],
-                _SERVICE_PRINCIPAL_TENANT: os.environ[_AZURE_TENANT_ID],
-                _ACCESS_TOKEN: os.environ[_AZURE_CLIENT_SECRET]
-            }]
+        if not self._service_principal_creds and env_var_auth_configured():
+            logger.warning("[Preview] Using service principal credential configured in environment variables.")
+            self._service_principal_creds = [load_env_var_credential()]
 
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
         if not matched:
