@@ -1459,13 +1459,12 @@ def load_arguments(self, _):
                    options_list=['--dest-mi'],
                    help='Name of the managed instance to restore managed database to. '
                    'This can be same managed instance, or another managed instance on same subscription. '
-                   'When not specified it defaults to source managed instance. ')
+                   'When not specified it defaults to source managed instance.')
 
         c.argument('target_resource_group_name',
                    options_list=['--dest-resource-group'],
                    help='Name of the resource group of the managed instance to restore managed database to. '
-                   'When not specified it defaults to source resource group. '
-                   'Required for LTR.')
+                   'When not specified it defaults to source resource group.')
 
         restore_point_arg_group = 'Restore Point'
 
@@ -1476,12 +1475,6 @@ def load_arguments(self, _):
                    help='The point in time of the source database that will be restored to create the'
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. ' + time_format_help)
-
-        c.argument('deleted_time',
-                   options_list=['--deleted-time'],
-                   arg_group=restore_point_arg_group,
-                   help='If specified, restore from a deleted database instead of from an existing database.'
-                   ' Must match the deleted time of a deleted database on the source Managed Instance.')
 
     with self.argument_context('sql midb short-term-retention-policy set') as c:
         create_args_for_complex_type(
