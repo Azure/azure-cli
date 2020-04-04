@@ -704,6 +704,14 @@ examples:
     text: az sql midb ltr-backup list -l southeastasia -g mygroup
 """
 
+helps['sql midb ltr-backup delete'] = """
+type: command
+short-summary: Delete a long term retention backup.
+examples:
+  - name: Delete long term retention backup for a managed database.
+    text: az sql midb ltr-backup delete -l southeastasia --mi myinstance -n mymanageddb --backup-name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
 helps['sql midb ltr'] = """
 type: group
 short-summary: Managed SQL Managed Instance database long term retention.
@@ -714,15 +722,7 @@ type: command
 short-summary: Restore a long term retention backup to a new database.
 examples:
   - name: Restore a managed database using LTR backup.
-    text: az sql midb restore --dest-name targetmidb --dest-mi myinstance --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
-"""
-
-helps['sql midb ltr-backup delete'] = """
-type: command
-short-summary: Delete a long term retention backup.
-examples:
-  - name: Delete long term retention backup for a managed database.
-    text: az sql midb ltr-backup delete -l southeastasia --mi myinstance -n mymanageddb --backup-name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql midb ltr restore --dest-name targetmidb --dest-mi myinstance --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql server'] = """
