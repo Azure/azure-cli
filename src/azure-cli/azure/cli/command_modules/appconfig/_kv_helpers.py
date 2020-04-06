@@ -259,7 +259,14 @@ def __read_kv_from_config_store(cmd, name=None, connection_string=None, key=None
     return key_values
 
 
-def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name=None, connection_string=None, label=None, preserve_labels=False):
+def __write_kv_and_features_to_config_store(cmd,
+                                            key_values,
+                                            features=None,
+                                            name=None,
+                                            connection_string=None,
+                                            label=None,
+                                            preserve_labels=False,
+                                            content_type=None):
     if not key_values and not features:
         return
     try:
@@ -270,13 +277,13 @@ def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name
         if features:
             key_values.extend(__convert_featureflag_list_to_keyvalue_list(features))
 
-        if not preserve_labels:
-            for kv in key_values:
+        for kv in key_values:
+            if not preserve_labels:
                 kv.label = label
-                azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
-        else:
-            for kv in key_values:
-                azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+            if content_type:
+                kv.content_type = content_type
+
+            azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
 
     except Exception as exception:
         raise CLIError(str(exception))
@@ -822,6 +829,19 @@ def __compact_key_values(key_values):
             else:
                 compacted.update({key: value})
     return compacted
+
+
+def __get_keyvault_client(cli_ctx):
+
+    from azure.cli.core._profile import Profile
+    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+    from azure.cli.core.profiles import ResourceType, get_api_version
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
+
+    def _get_token(server, resource, scope):  # pylint: disable=unused-argument
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+
+    return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
 
 
 class Undef(object):  # pylint: disable=too-few-public-methods

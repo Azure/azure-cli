@@ -25,7 +25,8 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
                           __write_kv_and_features_to_file, __read_kv_from_config_store,
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
                           __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
-                          __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
+                          __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview,
+                          __get_keyvault_client)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -39,6 +40,7 @@ def import_config(cmd,
                   prefix="",  # prefix to add
                   yes=False,
                   skip_features=False,
+                  content_type=None,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -127,8 +129,13 @@ def import_config(cmd,
     src_kvs.extend(src_features)
 
     # import into configstore
-    __write_kv_and_features_to_config_store(
-        cmd, key_values=src_kvs, name=name, connection_string=connection_string, label=label, preserve_labels=preserve_labels)
+    __write_kv_and_features_to_config_store(cmd,
+                                            key_values=src_kvs,
+                                            name=name,
+                                            connection_string=connection_string,
+                                            label=label,
+                                            preserve_labels=preserve_labels,
+                                            content_type=content_type)
 
 
 def export_config(cmd,
@@ -146,6 +153,7 @@ def export_config(cmd,
                   format_=None,
                   separator=None,
                   naming_convention='pascal',
+                  resolve_keyvault=False,
                   # to-config-store parameters
                   dest_name=None,
                   dest_connection_string=None,
@@ -503,7 +511,8 @@ def list_key(cmd,
              datetime=None,
              connection_string=None,
              top=None,
-             all_=False):
+             all_=False,
+             resolve_keyvault=False):
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
