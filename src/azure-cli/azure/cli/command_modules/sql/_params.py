@@ -1582,7 +1582,6 @@ def load_arguments(self, _):
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')
 
-
     ###############################################
     #                sql virtual cluster          #
     ###############################################

@@ -2860,19 +2860,23 @@ def list_long_term_retention_mi_backups(
 
     return backups
 
+
 def restore_long_term_retention_backup(
-    cmd,
-    client,
-    long_term_retention_backup_resource_id,
-    target_managed_database_name,
-    target_managed_instance_name,
-    target_resource_group_name,
-    **kwargs):
+        cmd,
+        client,
+        long_term_retention_backup_resource_id,
+        target_managed_database_name,
+        target_managed_instance_name,
+        target_resource_group_name,
+        **kwargs):
+    '''
+    Restores an existing managed DB (i.e. create with 'RestoreLongTermRetentionBackup' create mode.)
+    '''
 
     if not target_resource_group_name or not target_managed_instance_name or not target_managed_database_name:
         raise CLIError('Please specify target resource(s). '
-                        'Target resource group, target instance, and target database '
-                        'are all required for restore LTR backup.')
+                       'Target resource group, target instance, and target database '
+                       'are all required for restore LTR backup.')
 
     if not long_term_retention_backup_resource_id:
         raise CLIError('Please specify a long term retention backup.')
