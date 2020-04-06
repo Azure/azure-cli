@@ -25,6 +25,8 @@ from ._util import (
     get_sql_capabilities_operations,
     get_sql_databases_operations,
     get_sql_database_blob_auditing_policies_operations,
+    get_sql_database_long_term_retention_backups_operations,
+    get_sql_database_long_term_retention_policies_operations,
     get_sql_database_sensitivity_labels_operations,
     get_sql_database_operations_operations,
     get_sql_database_threat_detection_policies_operations,
@@ -244,6 +246,18 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.generic_update_command('update',
                                  custom_func_name='db_audit_policy_update')
+
+    database_long_term_retention_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#BackupLongTermRetentionPoliciesOperations.{}',
+        client_factory=get_sql_database_long_term_retention_policies_operations)
+
+    with self.command_group('sql db ltr-policy',
+                            database_long_term_retention_policies_operations,
+                            client_factory=get_sql_database_long_term_retention_policies_operations) as g:
+
+        g.custom_command('set', 'update_long_term_retention')
+        g.show_command('show', 'get')
+
 
     database_sensitivity_labels_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',
