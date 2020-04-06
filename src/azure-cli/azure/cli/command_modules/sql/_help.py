@@ -720,6 +720,11 @@ examples:
     text: az sql midb ltr-backup restore --dest-name targetmidb --dest-mi myinstance --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
+helps['sql midb ltr-backup wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
+"""
+
 helps['sql server'] = """
 type: group
 short-summary: Manage SQL servers.
