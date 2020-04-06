@@ -400,9 +400,10 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         raise CLIError('Please mention storage container name.')
     if fileupload_storage_container_name and not fileupload_storage_connectionstring:
         raise CLIError('Please mention storage connection string.')
-    if AuthenticationType.KeyBased.value == fileupload_storage_authentication_type.lower() and not fileupload_storage_connectionstring:
+    identityBased_fileUpload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
+    if not identityBased_fileUpload and not fileupload_storage_connectionstring and fileupload_storage_container_name:
         raise CLIError('Key-based authentication requires a connection string.')
-    elif AuthenticationType.IdentityBased.lower() == fileupload_storage_authentication_type.lower() and not fileupload_storage_container_uri:
+    elif identityBased_fileUpload and not fileupload_storage_container_uri:
         raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
     _check_name_availability(client.iot_hub_resource, hub_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
@@ -480,7 +481,9 @@ def update_iot_hub_custom(instance,
                           fileupload_notification_ttl=None,
                           fileupload_storage_connectionstring=None,
                           fileupload_storage_container_name=None,
-                          fileupload_sas_ttl=None):
+                          fileupload_sas_ttl=None,
+                          fileupload_storage_authentication_type=None,
+                          fileupload_storage_container_uri=None):
     from datetime import timedelta
     if sku is not None:
         instance.sku.name = sku
@@ -507,7 +510,13 @@ def update_iot_hub_custom(instance,
     if fileupload_notification_ttl is not None:
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
-    if fileupload_storage_connectionstring is not None and fileupload_storage_container_name is not None:
+
+    identityBased_fileUpload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
+    if identityBased_fileUpload:
+        instance.properties.storage_endpoints['$default'].authentication_type = AuthenticationType.IdentityBased
+        instance.properties.storage_endpoints['$default'].connection_string = None
+        instance.properties.storage_endpoints['$default'].container_uri = fileupload_storage_container_uri
+    elif fileupload_storage_connectionstring is not None and fileupload_storage_container_name is not None:
         instance.properties.storage_endpoints['$default'].connection_string = fileupload_storage_connectionstring
         instance.properties.storage_endpoints['$default'].container_name = fileupload_storage_container_name
     elif fileupload_storage_connectionstring is not None:
