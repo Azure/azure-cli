@@ -712,12 +712,7 @@ examples:
     text: az sql midb ltr-backup delete -l southeastasia --mi myinstance -n mymanageddb --backup-name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
-helps['sql midb ltr'] = """
-type: group
-short-summary: Managed SQL Managed Instance database long term retention.
-"""
-
-helps['sql midb ltr restore'] = """
+helps['sql midb ltr-backup restore'] = """
 type: command
 short-summary: Restore a long term retention backup to a new database.
 examples:

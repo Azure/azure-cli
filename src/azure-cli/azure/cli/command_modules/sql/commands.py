@@ -599,13 +599,14 @@ def load_command_table(self, _):
             'list_long_term_retention_mi_backups')
         g.command('delete', 'delete')
 
-    with self.command_group('sql midb ltr',
+    with self.command_group('sql midb ltr-backup',
                             managed_databases_operations,
                             client_factory=get_sql_managed_databases_operations) as g:
         g.custom_command(
             'restore',
             'restore_long_term_retention_backup',
             supports_no_wait=True)
+        g.wait_command('wait')
 
     ###############################################
     #                sql virtual cluster         #

@@ -1533,10 +1533,8 @@ def load_arguments(self, _):
     with self.argument_context('sql midb ltr-backup') as c:
         c.argument('location_name',
                    required=True,
-                   arg_type=get_location_type(self.cli_ctx))
-
-        c.argument('resource_group_name',
-                   required=False)
+                   arg_type=get_location_type(self.cli_ctx),
+                   help='The location of the desired backups.')
 
     with self.argument_context('sql midb ltr-backup list') as c:
         c.argument('managed_instance_name',
@@ -1551,14 +1549,17 @@ def load_arguments(self, _):
 
         c.argument('database_state',
                    required=False,
-                   help='\'All\', \'Live\', or \'Deleted\'')
+                   options_list=['--database-state', '--state'],
+                   help='\'All\', \'Live\', or \'Deleted\'. '
+                   'Will fetch backups only from databases of specified state. '
+                   'If no state provied, defaults to \'All\'.')
 
         c.argument('only_latest_per_database',
                    options_list=['--only-latest-per-database', '--latest'],
                    required=False,
                    help='If true, will only return the latest backup for each database')
 
-    with self.argument_context('sql midb ltr restore') as c:
+    with self.argument_context('sql midb ltr-backup restore') as c:
         c.argument('target_managed_database_name',
                    options_list=['--dest-name'],
                    required=True,
