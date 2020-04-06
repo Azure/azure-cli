@@ -3376,7 +3376,7 @@ class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
         })
 
         # test restore deleted database
-        self.cmd('sql midb restore --mode PITR -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
+        self.cmd('sql midb restore -g {rg} --mi {managed_instance_name} -n {database_name} --dest-name {restored_database_name} --deleted-time {deleted_time} --time {deleted_time}',
                  checks=[
                      self.check('resourceGroup', '{rg}'),
                      self.check('name', '{restored_database_name}'),
@@ -3439,7 +3439,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         time.sleep(300)  # Sleeping 5 minutes should be enough for the restore to be possible (Skipped under playback mode)
 
         # test sql db restore command
-        db1 = self.cmd('sql midb restore --mode PITR -g {} --mi {} -n {} --dest-name {} --time {}'
+        db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
                        .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored, datetime.utcnow().isoformat()),
                        checks=[
                            JMESPathCheck('resourceGroup', resource_group_1),
