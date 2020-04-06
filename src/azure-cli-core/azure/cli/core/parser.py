@@ -186,7 +186,7 @@ class AzCliCommandParser(CLICommandParser):
 
         arguments.append(command)
 
-        if self.cli_ctx.data:
+        if self.cli_ctx and self.cli_ctx.data:
             for field in fields:
                 arguments.append(self.cli_ctx.data[field])
         else:
