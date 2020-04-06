@@ -173,7 +173,7 @@ class AzCliCommandParser(CLICommandParser):
     @classmethod
     def _make_failure_recovery_recommendations(cls, *args, **kwargs):
         if telemetry.is_telemetry_enabled():
-            cls.recommendation_provider(telemetry._get_core_version(), *args, **kwargs) # pylint: disable=protected-access
+            cls.recommendation_provider(telemetry._get_core_version(), *args, **kwargs)  # pylint: disable=protected-access
 
     def _get_failure_recovery_arguments(self):
         arguments = []
