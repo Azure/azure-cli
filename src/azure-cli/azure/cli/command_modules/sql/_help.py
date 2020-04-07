@@ -219,7 +219,7 @@ examples:
 
 helps['sql db ltr-backup wait'] = """
 type: command
-short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
+short-summary: Place the CLI in a waiting state until a condition of the database is met.
 """
 
 helps['sql db op'] = """
