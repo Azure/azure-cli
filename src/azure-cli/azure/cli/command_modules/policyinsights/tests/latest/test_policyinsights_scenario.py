@@ -17,8 +17,8 @@ class PolicyInsightsTests(ScenarioTest):
         apply_clause = '--apply "groupby((policyAssignmentId, resourceId), aggregate($count as numRecords))"'
         select_clause = '--select "policyAssignmentId, resourceId, numRecords"'
         order_by_clause = '--order-by "numRecords desc"'
-        from_clause = '--from "2020-01-01T00:00:00Z"'
-        to_clause = '--to "2020-01-10T22:30:00Z"'
+        from_clause = '--from "2020-04-01T00:00:00Z"'
+        to_clause = '--to "2020-04-07T01:30:00Z"'
         scopes = [
             '-m "azgovtest5"',
             '',
@@ -76,6 +76,14 @@ class PolicyInsightsTests(ScenarioTest):
         ), checks=[
             self.check('length([?complianceState==`NonCompliant`].policyEvaluationDetails)', 2)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_triggerscan')
+    def test_policy_insights_triggerscan(self):
+        # trigger a subscription scan and do not wait for it to complete
+        self.cmd('policy state trigger-scan --no-wait')
+
+        # trigger a resource group scan and wait for it to complete
+        self.cmd('policy state trigger-scan -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_remediation')
     @StorageAccountPreparer(name_prefix='cliremediation')
