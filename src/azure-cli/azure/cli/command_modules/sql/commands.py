@@ -604,7 +604,7 @@ def load_command_table(self, _):
                             client_factory=get_sql_managed_databases_operations) as g:
         g.custom_command(
             'restore',
-            'restore_long_term_retention_backup_mi',
+            'restore_long_term_retention_mi_backup',
             supports_no_wait=True)
         g.wait_command('wait')
 

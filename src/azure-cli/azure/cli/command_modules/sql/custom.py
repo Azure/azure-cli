@@ -2861,7 +2861,7 @@ def list_long_term_retention_mi_backups(
     return backups
 
 
-def restore_long_term_retention_backup_mi(
+def restore_long_term_retention_mi_backup(
         cmd,
         client,
         long_term_retention_backup_resource_id,
