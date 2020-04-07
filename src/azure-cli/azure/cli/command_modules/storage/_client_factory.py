@@ -313,7 +313,9 @@ def cf_adls_directory(cli_ctx, kwargs):
 
 
 def cf_adls_file(cli_ctx, kwargs):
-    return cf_adls_file_system(cli_ctx, kwargs).get_file_client(file_path=kwargs.pop('path', None))
+
+    return cf_adls_service(cli_ctx, kwargs).get_file_client(file_system=kwargs.pop('file_system_name', None),
+                                                            file_path=kwargs.pop('path', None))
     """
     t_adls_file = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
                           '_data_lake_file_client#DataLakeFileClient')

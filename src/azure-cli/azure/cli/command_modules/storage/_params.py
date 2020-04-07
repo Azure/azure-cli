@@ -1138,6 +1138,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('overwrite', arg_type=get_three_state_flag(), help="Overwrite an existing file when specified.")
 
     with self.argument_context('storage fs file move') as c:
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_content_settings_argument(t_file_content_settings, update=False)
         c.extra('file_system_name', options_list=['-f', '--file-system'],
                 help='File system name.', required=True)
         c.extra('path', options_list=['-p', '--path'],  required=True,
