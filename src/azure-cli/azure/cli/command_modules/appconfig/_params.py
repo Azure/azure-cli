@@ -22,7 +22,8 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
                           validate_key, validate_feature,
-                          validate_identity)
+                          validate_identity,
+                          validate_resolve_keyvault)
 
 
 def load_arguments(self, _):
@@ -135,7 +136,7 @@ def load_arguments(self, _):
         # bypass cli allowed values limition
         c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('naming_convention', arg_type=get_enum_type(['pascal', 'camel', 'underscore', 'hyphen']), help='Naming convention to be used for "Feature Management" section of file. Example: pascal = FeatureManagement, camel = featureManagement, underscore = feature_management, hyphen = feature-management.')
-        c.argument('resolve_keyvault', help="Resolve the content of key vault reference.")
+        c.argument('resolve_keyvault', validator=validate_resolve_keyvault, help="Resolve the content of key vault reference.")
 
     with self.argument_context('appconfig kv export', arg_group='AppConfig') as c:
         c.argument('dest_name', help='The name of the destination App Configuration.')

@@ -25,8 +25,7 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
                           __write_kv_and_features_to_file, __read_kv_from_config_store,
                           __write_kv_and_features_to_config_store, __discard_features_from_retrieved_kv, __read_kv_from_app_service,
                           __write_kv_to_app_service, __serialize_kv_list_to_comparable_json_object, __serialize_features_from_kv_list_to_comparable_json_object,
-                          __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview,
-                          __get_keyvault_client)
+                          __serialize_feature_list_to_comparable_json_object, __print_features_preview, __print_preview, __print_restore_preview)
 from .feature import list_feature
 
 logger = get_logger(__name__)
@@ -178,8 +177,13 @@ def export_config(cmd,
             dest_label = label
 
     # fetch key values from user's configstore
-    src_kvs = __read_kv_from_config_store(
-        cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
+    src_kvs = __read_kv_from_config_store(cmd,
+                                          name=name,
+                                          connection_string=connection_string,
+                                          key=key,
+                                          label=label,
+                                          prefix_to_remove=prefix,
+                                          resolve_keyvault=resolve_keyvault)
 
     if skip_keyvault:
         src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
@@ -513,38 +517,16 @@ def list_key(cmd,
              top=None,
              all_=False,
              resolve_keyvault=False):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
-
-    query_option = QueryKeyValueCollectionOptions(key_filter=key,
-                                                  label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label,
-                                                  query_datetime=datetime,
-                                                  fields=fields)
-    try:
-        keyvalue_iterable = azconfig_client.get_keyvalues(query_option)
-        retrieved_kvs = []
-        count = 0
-
-        if all_:
-            top = float('inf')
-        elif top is None:
-            top = 100
-
-        for kv in keyvalue_iterable:
-            if fields:
-                partial_kv = {}
-                for field in fields:
-                    partial_kv[field.name.lower()] = kv.__dict__[
-                        field.name.lower()]
-                retrieved_kvs.append(partial_kv)
-            else:
-                retrieved_kvs.append(kv)
-            count += 1
-            if count >= top:
-                return retrieved_kvs
-        return retrieved_kvs
-    except Exception as exception:
-        raise CLIError(str(exception))
+    return  __read_kv_from_config_store(cmd,
+                                        name=name,
+                                        connection_string=connection_string,
+                                        key=key if key else QueryKeyValueCollectionOptions.any_key,
+                                        label=label if label else QueryKeyValueCollectionOptions.any_label,
+                                        datetime=datetime,
+                                        fields=fields,
+                                        top=top,
+                                        all_=all_,
+                                        resolve_keyvault=resolve_keyvault)
 
 
 def restore_key(cmd,
