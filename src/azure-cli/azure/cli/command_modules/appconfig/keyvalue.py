@@ -517,16 +517,17 @@ def list_key(cmd,
              top=None,
              all_=False,
              resolve_keyvault=False):
-    return  __read_kv_from_config_store(cmd,
-                                        name=name,
-                                        connection_string=connection_string,
-                                        key=key if key else QueryKeyValueCollectionOptions.any_key,
-                                        label=label if label else QueryKeyValueCollectionOptions.any_label,
-                                        datetime=datetime,
-                                        fields=fields,
-                                        top=top,
-                                        all_=all_,
-                                        resolve_keyvault=resolve_keyvault)
+    keyvalues = __read_kv_from_config_store(cmd,
+                                            name=name,
+                                            connection_string=connection_string,
+                                            key=key if key else QueryKeyValueCollectionOptions.any_key,
+                                            label=label if label else QueryKeyValueCollectionOptions.any_label,
+                                            datetime=datetime,
+                                            fields=fields,
+                                            top=top,
+                                            all_=all_,
+                                            resolve_keyvault=resolve_keyvault)
+    return keyvalues
 
 
 def restore_key(cmd,

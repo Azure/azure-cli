@@ -192,6 +192,7 @@ def validate_key(namespace):
     else:
         raise CLIError("Key cannot be empty.")
 
+
 def validate_resolve_keyvault(namespace):
     if namespace.resolve_keyvault:
         identifier = getattr(namespace, 'destination', None)

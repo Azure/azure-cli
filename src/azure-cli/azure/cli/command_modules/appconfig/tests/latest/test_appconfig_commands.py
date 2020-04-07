@@ -357,7 +357,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         self.cmd('appconfig kv list -n {config_store_name} --resolve-keyvault',
                  checks=[self.check('[0].key', secret_name),
                          self.check('[0].value', secret_value)])
-        
+
         exported_file_path = 'export_keyvault.json'
         self.kwargs.update({
             'import_source': 'file',
@@ -368,7 +368,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         self.cmd('appconfig kv export -n {config_store_name} -d file --path {exported_file_path} --format json --resolve-keyvault -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
-        
+
         assert len(exported_kvs) == 1
         assert exported_kvs[secret_name] == secret_value
 
