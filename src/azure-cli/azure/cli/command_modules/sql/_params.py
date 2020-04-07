@@ -1567,15 +1567,13 @@ def load_arguments(self, _):
 
         c.argument('target_managed_instance_name',
                    options_list=['--dest-mi'],
-                   help='Name of the managed instance to restore managed database to. '
-                   'This can be same managed instance, or another managed instance on same subscription. '
-                   'When not specified it defaults to source managed instance. ')
+                   required=True,
+                   help='Name of the managed instance to restore managed database to.')
 
         c.argument('target_resource_group_name',
                    options_list=['--dest-resource-group'],
-                   help='Name of the resource group of the managed instance to restore managed database to. '
-                   'When not specified it defaults to source resource group. '
-                   'Required for LTR.')
+                   required=True,
+                   help='Name of the resource group of the managed instance to restore managed database to.')
 
         c.argument('long_term_retention_backup_resource_id',
                    options_list=['--backup-id'],
