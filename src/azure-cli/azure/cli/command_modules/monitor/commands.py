@@ -314,7 +314,8 @@ def load_command_table(self, _):
 
     with self.command_group('monitor private-link-scope private-link-resource', private_link_resources_sdk, custom_command_type=private_link_scope_custom) as g:
         g.custom_show_command('show', 'show_private_link_resource', client_factory=cf_private_link_resources)
-        g.custom_command('list', 'list_private_link_resource', client_factory=cf_private_link_resources)
+        from azure.cli.core.commands.transform import gen_dict_to_list_transform
+        g.custom_command('list', 'list_private_link_resource', client_factory=cf_private_link_resources, transform=gen_dict_to_list_transform(key="value"))
 
     with self.command_group('monitor private-link-scope private-endpoint-connection', private_endpoint_connections_sdk, custom_command_type=private_link_scope_custom) as g:
         g.custom_show_command('show', 'show_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
