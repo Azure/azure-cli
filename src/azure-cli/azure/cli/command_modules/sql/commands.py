@@ -258,6 +258,26 @@ def load_command_table(self, _):
         g.custom_command('set', 'update_long_term_retention')
         g.show_command('show', 'get')
 
+    database_long_term_retention_backups_operations = CliCommandType(
+        operations_tmp='azure.mgmt.sql.operations#LongTermRetentionBackupsOperations.{}',
+        client_factory=get_sql_database_long_term_retention_backups_operations)
+
+    with self.command_group('sql db ltr-backup',
+                            database_long_term_retention_backups_operations,
+                            client_factory=get_sql_database_long_term_retention_backups_operations) as g:
+
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_long_term_retention_backups')
+        g.command('delete', 'delete')
+
+    with self.command_group('sql db ltr-backup',
+                            database_operations,
+                            client_factory=get_sql_databases_operations) as g:
+        g.custom_command(
+            'restore',
+            'restore_long_term_retention_backup',
+            supports_no_wait=True)
+        g.wait_command('wait')
 
     database_sensitivity_labels_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',
