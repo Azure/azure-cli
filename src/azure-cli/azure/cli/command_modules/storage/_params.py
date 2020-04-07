@@ -1147,6 +1147,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    '"{filesystem}/{directory}/{subdirectory}/{file}".')
 
     with self.argument_context('storage fs file upload') as c:
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_content_settings_argument(t_file_content_settings, update=False)
         c.argument('local_path', options_list=['--source', '-s'],
                    help='Path of the local file to upload as the file content.')
         c.argument('overwrite', action='store_true', help="Overwrite an existing file when specified.")

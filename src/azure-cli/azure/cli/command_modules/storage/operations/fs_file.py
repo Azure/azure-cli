@@ -72,7 +72,12 @@ def list_fs_files(client, path=None, recursive=True, num_results=None, upn=None,
 def upload_file(cmd, client, local_path, overwrite=False, metadata=None):
     if not exists(cmd, client):
         client.create_file()
+    """
+    local_file = open(local_path, 'r')
+    data = local_file.read()
+    """
     count = os.path.getsize(local_path)
     with open(local_path, 'rb') as stream:
         data = stream.read(count)
-    return client.upload_data(data, length=count, overwrite=overwrite, metadata=metadata)
+
+    return client.upload_data(data=data, length=count, overwrite=overwrite, metadata=metadata)
