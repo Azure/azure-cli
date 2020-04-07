@@ -38,7 +38,7 @@ az storage account encryption-scope show \
 
 #### List all encryption scopes in a storage account.
 ```
-az storage account encryption-scope show \
+az storage account encryption-scope list \
     --account-name mystorageaccount \
     -g MyResourceGroup
 ```
