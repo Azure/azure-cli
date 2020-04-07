@@ -80,8 +80,6 @@ def _validate_whl_extension(ext_file):
 
 
 def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
-    import colorama
-    colorama.init()  # Required for displaying the spinner correctly on windows issue #9140
     cmd.cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
@@ -158,7 +156,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
     dst = os.path.join(extension_path, whl_filename)
     shutil.copyfile(ext_file, dst)
     logger.debug('Saved the whl to %s', dst)
-    colorama.deinit()
+
     return extension_name
 
 
@@ -205,10 +203,7 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                   pip_extra_index_urls=None, pip_proxy=None):
     ext_sha256 = None
     if extension_name:
-        import colorama
-        colorama.init()  # Required for displaying the spinner correctly on windows issue #9140
         cmd.cli_ctx.get_progress_controller().add(message='Searching')
-        colorama.deinit()
         ext = None
         try:
             ext = get_extension(extension_name)

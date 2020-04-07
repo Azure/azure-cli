@@ -55,6 +55,12 @@ def configuration_value_validator(ns):
         ns.source = 'system-default'
 
 
+def tls_validator(ns):
+    if ns.minimal_tls_version:
+        if ns.ssl_enforcement is not None and ns.ssl_enforcement != 'Enabled':
+            raise CLIError('Cannot specify TLS version when ssl_enforcement is explicitly Disabled')
+
+
 def password_validator(ns):
     if not ns.administrator_login_password:
         try:

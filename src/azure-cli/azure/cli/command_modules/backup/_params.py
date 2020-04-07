@@ -203,10 +203,12 @@ def load_arguments(self, _):
     with self.argument_context('backup protection enable-for-vm') as c:
         c.argument('diskslist', diskslist_type)
         c.argument('disk_list_setting', arg_type=get_enum_type(['include', 'exclude']), options_list=['--disk-list-setting'], help=disk_list_setting_help)
+        c.argument('exclude_all_data_disks', arg_type=get_three_state_flag(), help='Option to specify to backup OS disk only.')
 
     with self.argument_context('backup protection update-for-vm') as c:
         c.argument('diskslist', diskslist_type)
         c.argument('disk_list_setting', arg_type=get_enum_type(['include', 'exclude', 'resetexclusionsettings']), options_list=['--disk-list-setting'], help=disk_list_setting_help)
+        c.argument('exclude_all_data_disks', arg_type=get_three_state_flag(), help='Option to specify to backup OS disk only.')
 
     with self.argument_context('backup protection enable-for-azurefileshare') as c:
         c.argument('azure_file_share', options_list=['--azure-file-share'], help='Name of the Azure FileShare.')
@@ -244,6 +246,7 @@ def load_arguments(self, _):
         c.argument('target_resource_group', options_list=['--target-resource-group', '-t'], help='Use this to specify the target resource group in which the restored disks will be saved')
         c.argument('diskslist', diskslist_type)
         c.argument('restore_only_osdisk', arg_type=get_three_state_flag(), help='Use this flag to restore only OS disks of a backed up VM.')
+        c.argument('restore_as_unmanaged_disks', arg_type=get_three_state_flag(), help='Use this flag to specify to restore as unmanaged disks')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

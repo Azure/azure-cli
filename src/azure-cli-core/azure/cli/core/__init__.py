@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.2.0"
+__version__ = "2.3.1"
 
 import os
 import sys
@@ -18,8 +18,10 @@ from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.introspection import extract_args_from_signature, extract_full_summary_from_signature
 from knack.log import get_logger
 from knack.preview import PreviewItem
+from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
+from .local_context import AzCLILocalContext, STORE
 
 logger = get_logger(__name__)
 
@@ -55,7 +57,9 @@ class AzCli(CLI):
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
-
+        self.local_context = AzCLILocalContext(
+            dir_name=os.path.basename(self.config.config_dir), file_name='local_context'
+        )
         register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
@@ -85,8 +89,8 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string
-        from azure.cli.core.commands.constants import SURVEY_PROMPT
-        import colorama
+        from azure.cli.core.commands.constants import SURVEY_PROMPT, SURVEY_PROMPT_COLOR
+
         ver_string, updates_available = get_az_version_string()
         print(ver_string)
         if updates_available == -1:
@@ -98,13 +102,38 @@ class AzCli(CLI):
         else:
             print('Your CLI is up-to-date.')
 
-        colorama.init()  # This could be removed when knack fix is released
-        print('\n' + SURVEY_PROMPT)
-        colorama.deinit()  # This could be removed when knack fix is released
+        print('\n' + (SURVEY_PROMPT_COLOR if self.enable_color else SURVEY_PROMPT))
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
         return handle_exception(ex)
+
+    def save_local_context(self, parsed_args, argument_definitions, specified_arguments):
+        """ Local Context Attribute arguments
+
+        Save argument value to local context if it is defined as STORE and user specify a value for it.
+
+        :param parsed_args: Parsed args which return by AzCliCommandParser parse_args
+        :type parsed_args: Namespace
+        :param argument_definitions: All available argument definitions
+        :type argument_definitions: dict
+        :param specified_arguments: Arguments which user specify in this command
+        :type specified_arguments: list
+        """
+
+        for argument_name in specified_arguments:
+            # make sure STORE is defined
+            if argument_name not in argument_definitions:
+                continue
+            argtype = argument_definitions[argument_name].type
+            lca = argtype.settings.get('local_context_attribute', None)
+            if not lca or not lca.actions or STORE not in lca.actions:
+                continue
+            # get the specified value
+            value = getattr(parsed_args, argument_name)
+            # save when name and scopes have value
+            if lca.name and lca.scopes:
+                self.local_context.set(lca.scopes, lca.name, value)
 
 
 class MainCommandsLoader(CLICommandsLoader):
@@ -162,7 +191,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     # Changing this error message requires updating CI script that checks for failed
                     # module loading.
                     import azure.cli.core.telemetry as telemetry
-                    logger.error("Error loading command module '%s'", mod)
+                    logger.error("Error loading command module '%s': %s", mod, ex)
                     telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
                                             summary='Error loading module: {}'.format(mod))
                     logger.debug(traceback.format_exc())
@@ -199,6 +228,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         continue
                     ext_name = ext.name
                     ext_dir = ext.path or get_extension_path(ext_name)
+                    logger.debug("Extensions directory: '%s'", ext_dir)
                     sys.path.append(ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
@@ -450,6 +480,13 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
             kwargs['deprecate_info'].target = group_name
         if kwargs.get('is_preview', False):
             kwargs['preview_info'] = PreviewItem(
+                cli_ctx=self.cli_ctx,
+                target=group_name,
+                object_type='command group'
+            )
+        if kwargs.get('is_experimental', False):
+            kwargs['experimental_info'] = ExperimentalItem(
+                cli_ctx=self.cli_ctx,
                 target=group_name,
                 object_type='command group'
             )
@@ -528,7 +565,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
         for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if operation.startswith(rt.import_prefix):
+            if operation.startswith(rt.import_prefix + '.'):
                 operation = operation.replace(rt.import_prefix,
                                               get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
                                                                      operation_group=operation_group))

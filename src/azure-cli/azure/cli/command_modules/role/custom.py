@@ -1388,7 +1388,7 @@ def create_service_principal_for_rbac(
     }
     if cert_file:
         logger.warning(
-            "Please copy %s to a safe place. When run 'az login' provide the file path to the --password argument",
+            "Please copy %s to a safe place. When you run 'az login', provide the file path in the --password argument",
             cert_file)
         result['fileWithCertAndPrivateKey'] = cert_file
     return result
@@ -1661,7 +1661,9 @@ def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
 
         # 2+ matches should never happen, so we only check 'no match' here
         if not result:
-            raise CLIError("No matches in graph database for '{}'".format(assignee))
+            raise CLIError("Cannot find user or service principal in graph database for '{assignee}'. "
+                           "If the assignee is an appId, make sure the corresponding service principal is created "
+                           "with 'az ad sp create --id {assignee}'.".format(assignee=assignee))
 
         return result[0].object_id
     except (CloudError, GraphErrorException):

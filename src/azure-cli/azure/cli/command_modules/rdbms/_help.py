@@ -94,9 +94,15 @@ type: command
 short-summary: Create a server.
 examples:
   - name: Create a MariaDB server in North Europe with sku GP_Gen5_2 (General Purpose, Gen 5 hardware, 2 vCores).
-    text: az mariadb server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name GP_Gen5_2
+    text: |
+        az mariadb server create -l northeurope -g testgroup -n testsvr -u username -p password \\
+            --sku-name GP_Gen5_2
   - name: Create a MariaDB server with all paramaters set.
-    text: az mariadb server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name B_Gen5_1 --ssl-enforcement Disabled \\ --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 --tags "key=value" --version {server-version}
+    text: |
+        az mariadb server create -l northeurope -g testgroup -n testsvr -u username -p password \\
+            --sku-name B_Gen5_1 --ssl-enforcement Disabled --public-network-access Disabled \\
+            --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 \\
+            --tags "key=value" --version 10.2
 """
 
 helps['mariadb server delete'] = """
@@ -431,9 +437,15 @@ type: command
 short-summary: Create a server.
 examples:
   - name: Create a MySQL server in North Europe with sku GP_Gen5_2 (General Purpose, Gen 5 hardware, 2 vCores).
-    text: az mysql server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name GP_Gen5_2
+    text: |
+        az mysql server create -l northeurope -g testgroup -n testsvr -u username -p password \\
+            --sku-name GP_Gen5_2
   - name: Create a MySQL server with all paramaters set.
-    text: az mysql server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name B_Gen5_1 --ssl-enforcement Disabled \\ --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 --tags "key=value" --version {server-version}
+    text: |
+        az mysql server create -l northeurope -g testgroup -n testsvr -u username -p password \\
+            --sku-name B_Gen5_1 --ssl-enforcement Disabled --public-network-access Disabled \\
+            --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 \\
+            --tags "key=value" --version 5.7
 """
 
 helps['mysql server delete'] = """
@@ -689,6 +701,26 @@ type: command
 short-summary: List the private link resources supported for a MySQL server.
 """
 
+helps['mysql server key'] = """
+type: group
+short-summary: Manage MySQL server keys.
+"""
+
+helps['mysql server key create'] = """
+type: command
+short-summary: Create server key.
+"""
+
+helps['mysql server key delete'] = """
+type: command
+short-summary: Delete server key.
+"""
+
+helps['mysql server key show'] = """
+type: command
+short-summary: Show server key.
+"""
+
 helps['postgres'] = """
 type: group
 short-summary: Manage Azure Database for PostgreSQL servers.
@@ -776,9 +808,15 @@ type: command
 short-summary: Create a server.
 examples:
   - name: Create a PostgreSQL server in North Europe with sku GP_Gen5_2 (General Purpose, Gen 5 hardware, 2 vCores).
-    text: az postgres server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name GP_Gen5_2
+    text: |
+        az postgres server create -l northeurope -g testgroup -n testsvr -u username -p password \\
+            --sku-name GP_Gen5_2
   - name: Create a PostgreSQL server with all paramaters set.
-    text: az postgres server create -l northeurope -g testgroup -n testsvr -u username -p password \\ --sku-name B_Gen5_1 --ssl-enforcement Disabled \\ --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 --tags "key=value" --version {server-version}
+    text: |
+        az postgres server create -l northeurope -g testgroup -n testsvr -u username -p password \\
+            --sku-name B_Gen5_1 --ssl-enforcement Enabled --public-network-access Disabled \\
+            --backup-retention 10 --geo-redundant-backup Enabled --storage-size 51200 \\
+            --tags "key=value" --version 11.0
 """
 
 helps['postgres server delete'] = """
@@ -1025,4 +1063,24 @@ short-summary: Manage PostgreSQL server private link resources.
 helps['postgres server private-link-resource list'] = """
 type: command
 short-summary: List the private link resources supported for a PostgreSQL server.
+"""
+
+helps['postgres server key'] = """
+type: group
+short-summary: Manage PostgreSQL server keys.
+"""
+
+helps['postgres server key create'] = """
+type: command
+short-summary: Create server key.
+"""
+
+helps['postgres server key delete'] = """
+type: command
+short-summary: Delete server key.
+"""
+
+helps['postgres server key show'] = """
+type: command
+short-summary: Show server key.
 """

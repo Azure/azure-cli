@@ -224,6 +224,7 @@ def register_ids_argument(cli_ctx):
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
                 'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
+                'is_experimental': id_arg.settings.get('is_experimental', None) if id_arg else None,
                 'nargs': '+',
                 'arg_group': group_name
             }
