@@ -1094,8 +1094,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage fs create') as c:
         from .sdkutil import get_fs_access_type_names
-        c.argument('public_access', arg_type=get_enum_type(get_fs_access_type_names()), validator=validate_fs_public_access,
+        c.argument('public_access', arg_type=get_enum_type(get_fs_access_type_names()),
+                   validator=validate_fs_public_access,
                    help="Specify whether data in the file system may be accessed publicly and the level of access.")
+
+    with self.argument_context('storage fs list') as c:
+        c.argument('include_metadata', arg_type=get_three_state_flag(),
+                   help='Specify that file system metadata be returned in the response. The default value is "False".')
+        c.argument('name_starts_with', options_list=['--prefix'],
+                   help='Filter the results to return only file systems whose names begin with the specified prefix.')
 
     for item in ['create', 'show', 'delete', 'exists', 'move']:
         with self.argument_context('storage fs directory {}'.format(item)) as c:
@@ -1130,6 +1137,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     help='File system name.', required=True)
             c.extra('path', options_list=['-p', '--path'], help="The file path in a file system.",
                     required=True)
+            c.argument('content', help='Content to be appended to file.')
 
     with self.argument_context('storage fs file download') as c:
         c.argument('destination_path', options_list=['--destination', '-d'], type=file_type,

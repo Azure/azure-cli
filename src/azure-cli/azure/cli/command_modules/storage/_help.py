@@ -1388,7 +1388,7 @@ examples:
 
 helps['storage fs'] = """
 type: group
-short-summary: Manage file systems for Azure Data Lake Storage Gen2 account.
+short-summary: Manage file systems in Azure Data Lake Storage Gen2 account.
 """
 
 helps['storage fs access'] = """
@@ -1450,6 +1450,93 @@ examples:
       text: az storage fs access show -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
 """
 
+helps['storage fs delete'] = """
+type: command
+short-summary: Delete a file system in ADLS Gen2 account.
+examples:
+    - name: Delete a a file system in ADLS Gen2 account.
+      text: az storage fs delete -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs list'] = """
+type: command
+short-summary: List file systems in ADLS Gen2 account.
+examples:
+    - name: List file systems in ADLS Gen2 account.
+      text: az storage fs list --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs show'] = """
+type: command
+short-summary: Show properties of file system in ADLS Gen2 account.
+examples:
+    - name: Show properties of file system in ADLS Gen2 account.
+      text: az storage fs show -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory'] = """
+type: group
+short-summary: Manage directories in Azure Data Lake Storage Gen2 account.
+"""
+
+helps['storage fs directory delete'] = """
+type: command
+short-summary: Delete a directory in ADLS Gen2 file system.
+examples:
+    - name: Delete a directory in ADLS Gen2 file system.
+      text: az storage fs directory delete -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory exists'] = """
+type: command
+short-summary: Check for the existence of a directory in ADLS Gen2 file system.
+examples:
+    - name: Check for the existence of a directory in ADLS Gen2 file system.
+      text: az storage fs directory exists -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory list'] = """
+type: command
+short-summary: List directories in ADLS Gen2 file system.
+examples:
+    - name: List directories in ADLS Gen2 file system.
+      text: az storage fs directory list -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: List directories in "dir/" for ADLS Gen2 file system.
+      text: az storage fs directory list --path dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory move'] = """
+type: command
+short-summary: Move a directory in ADLS Gen2 file system.
+examples:
+    - name: Move a directory a directory in ADLS Gen2 file system.
+      text: az storage fs directory move --new-directory newfs/dir -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory show'] = """
+type: command
+short-summary: Show properties of a directory in ADLS Gen2 file system.
+examples:
+    - name: Show properties of a directory in ADLS Gen2 file system.
+      text: az storage fs directory show -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: Show properties of a subdirectory in ADLS Gen2 file system.
+      text: az storage fs directory show -n dir/subdir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file'] = """
+type: group
+short-summary: Manage files in Azure Data Lake Storage Gen2 account.
+"""
+
+helps['storage fs file append'] = """
+type: command
+short-summary: Append content to a file in ADLS Gen2 file system.
+examples:
+  - name: Append content to a file in ADLS Gen2 file system.
+    text: |
+        az storage fs file append --content "test content test" -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage fs create'] = """
 type: command
 short-summary: Create file system for Azure Data Lake Storage Gen2 account.
@@ -1486,6 +1573,15 @@ examples:
         az storage fs file download -p dir/a.txt -d test/b.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
 """
 
+helps['storage fs file exists'] = """
+type: command
+short-summary: Check for the existence of a file in ADLS Gen2 file system.
+examples:
+  - name: Check for the existence of a file in ADLS Gen2 file system.
+    text: |
+        az storage fs file exists -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage fs file list'] = """
 type: command
 short-summary: List files and directories in ADLS Gen2 file system.
@@ -1517,6 +1613,15 @@ examples:
   - name:  Show properties of file in ADLS Gen2 file system.
     text: |
         az storage fs file show -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage fs file upload'] = """
+type: command
+short-summary: Upload a file to a file path in ADLS Gen2 file system.
+examples:
+  - name:  Upload a file from local path to a file path in ADLS Gen2 file system.
+    text: |
+        az storage fs file upload --source a.txt -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
 """
 
 helps['storage logging'] = """
