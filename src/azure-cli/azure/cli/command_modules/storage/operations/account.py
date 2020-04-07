@@ -483,9 +483,10 @@ def create_encryption_scope(cmd, client, resource_group_name, account_name, encr
 def update_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
                             key_source=None, key_uri=None, state=None):
     EncryptionScope, EncryptionScopeState = cmd.get_models('EncryptionScope', 'EncryptionScopeState')
+    encryption_scope = EncryptionScope()
 
     if key_source:
-        encryption_scope = EncryptionScope(source=key_source)
+        encryption_scope.source = key_source
 
     if key_uri:
         EncryptionScopeKeyVaultProperties = cmd.get_models('EncryptionScopeKeyVaultProperties')

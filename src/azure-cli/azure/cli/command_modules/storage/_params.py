@@ -294,6 +294,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account encryption-scope update') as c:
         t_state = self.get_models("EncryptionScopeState", resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('key_source', options_list=['-s', '--key-source'],
+                   arg_type=get_enum_type(t_encryption_key_source),
+                   help='The provider for the encryption scope.', validator=validate_encryption_key)
         c.argument('state', arg_type=get_enum_type(t_state),
                    help='Change the state the encryption scope. When disabled, '
                    'all blob read/write operations using this encryption scope will fail.')

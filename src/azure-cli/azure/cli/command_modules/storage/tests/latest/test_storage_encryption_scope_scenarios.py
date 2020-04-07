@@ -74,6 +74,7 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaisesRegex(CLIError, "usage error: Specify `--key-source="):
             self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} -u {key_uri}")
 
+        # Update encryption scope with key vault properties
         self.cmd("storage account encryption-scope update --account-name {sa} -g {rg} -n {encryption} -s Microsoft.KeyVault -u {key_uri}", checks=[
             JMESPathCheck("name", self.kwargs["encryption"]),
             JMESPathCheck("resourceGroup", self.kwargs["rg"]),
@@ -87,6 +88,8 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
                  checks=[
                      JMESPathCheck("name", self.kwargs["encryption"]),
                      JMESPathCheck("resourceGroup", self.kwargs["rg"]),
+                     JMESPathCheck("source", "Microsoft.Keyvault"),
+                     JMESPathCheck("keyVaultProperties.keyUri", self.kwargs["key_uri"]),
                      JMESPathCheck("state", "Disabled")
                  ])
 
@@ -95,6 +98,8 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
                  checks=[
                      JMESPathCheck("name", self.kwargs["encryption"]),
                      JMESPathCheck("resourceGroup", self.kwargs["rg"]),
+                     JMESPathCheck("source", "Microsoft.Keyvault"),
+                     JMESPathCheck("keyVaultProperties.keyUri", self.kwargs["key_uri"]),
                      JMESPathCheck("state", "Enabled")
                  ])
 
