@@ -63,7 +63,6 @@ DEPENDENCIES = [
     'pkginfo',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml~=5.2',
     'requests~=2.20',
     'six~=1.12',
     'wheel==0.30.0',
