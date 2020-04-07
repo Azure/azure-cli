@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.3.0"
+__version__ = "2.3.1"
 
 import os
 import sys
@@ -228,6 +228,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         continue
                     ext_name = ext.name
                     ext_dir = ext.path or get_extension_path(ext_name)
+                    logger.debug("Extensions directory: '%s'", ext_dir)
                     sys.path.append(ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
