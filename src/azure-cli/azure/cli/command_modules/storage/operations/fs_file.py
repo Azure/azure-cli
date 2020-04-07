@@ -69,7 +69,7 @@ def list_fs_files(client, path=None, recursive=True, num_results=None, upn=None,
     return generator
 
 
-def upload_file(cmd, client, local_path, overwrite=False, metadata=None):
+def upload_file(cmd, client, local_path, overwrite=False, metadata=None, unmask=None, permissions=None):
     if not exists(cmd, client):
         client.create_file()
     """
@@ -80,4 +80,5 @@ def upload_file(cmd, client, local_path, overwrite=False, metadata=None):
     with open(local_path, 'rb') as stream:
         data = stream.read(count)
 
-    return client.upload_data(data=data, length=count, overwrite=overwrite, metadata=metadata)
+    return client.upload_data(data=data, length=count, overwrite=overwrite, metadata=metadata, umaskoverwrite=unmask,
+                              permissions=permissions)

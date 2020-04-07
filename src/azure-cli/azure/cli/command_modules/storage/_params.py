@@ -1157,6 +1157,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The new path the users want to move to. The value must have the following format: '
                    '"{filesystem}/{directory}/{subdirectory}/{file}".')
 
+    unmask_type = CLIArgumentType(
+        help='When creating a file or directory and the parent folder does not have a default ACL, the umask restricts '
+             'the permissions of the file or directory to be created. The resulting permission is given by p & ^u, '
+             'where p is the permission and u is the umask.')
+    permissions_type = CLIArgumentType(
+        help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be granted '
+             'read, write, or execute permission. The sticky bit is also supported. Both symbolic (rwxrw-rw-) and '
+             '4-digit octal notation (e.g. 0766) are supported.')
     with self.argument_context('storage fs file upload') as c:
         t_file_content_settings = self.get_sdk('_models#ContentSettings',
                                                resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
@@ -1164,6 +1172,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('local_path', options_list=['--source', '-s'],
                    help='Path of the local file to upload as the file content.')
         c.argument('overwrite', action='store_true', help="Overwrite an existing file when specified.")
+        c.argument('permissions', permissions_type)
+        c.argument('unmask', unmask_type)
 
 
 
