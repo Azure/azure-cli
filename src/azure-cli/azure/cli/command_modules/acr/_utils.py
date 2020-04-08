@@ -8,6 +8,7 @@ import tempfile
 
 from knack.util import CLIError
 from knack.log import get_logger
+
 from knack.prompting import prompt_y_n, NoTTYException
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
@@ -313,8 +314,7 @@ def get_custom_registry_credentials(cmd,
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',
             'SecretObject',
-            'SecretObjectType'
-        )
+            'SecretObjectType')
 
         if not is_remove:
             if is_identity_credential:

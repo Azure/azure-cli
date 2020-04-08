@@ -16,6 +16,7 @@ def storage_copy(cmd, source=None,
                  recursive=None,
                  blob_type=None,
                  preserve_s2s_access_tier=None,
+                 content_type=None,
                  source_account_name=None,
                  source_container=None,
                  source_blob=None,
@@ -103,6 +104,8 @@ def storage_copy(cmd, source=None,
         flags.append('--include-path=' + include_path)
     if exclude_pattern is not None:
         flags.append('--exclude-path=' + exclude_path)
+    if content_type is not None:
+        flags.append('--content-type=' + content_type)
     azcopy.copy(full_source, full_destination, flags=flags)
 
 

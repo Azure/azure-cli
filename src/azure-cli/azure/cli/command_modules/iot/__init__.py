@@ -37,7 +37,7 @@ class IoTCommandsLoader(AzCommandsLoader):
         cli_ctx.register_event(EVENT_INVOKER_POST_PARSE_ARGS, handler)
         super(IoTCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                 custom_command_type=iot_custom,
-                                                resource_type=ResourceType.MGMT_IOT)
+                                                resource_type=ResourceType.MGMT_IOTHUB)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.iot.commands import load_command_table

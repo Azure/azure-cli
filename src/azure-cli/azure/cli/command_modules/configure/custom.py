@@ -26,6 +26,7 @@ from azure.cli.command_modules.configure._consts import (OUTPUT_LIST, LOGIN_METH
                                                          MSG_PROMPT_TELEMETRY,
                                                          MSG_PROMPT_FILE_LOGGING,
                                                          MSG_PROMPT_CACHE_TTL,
+                                                         WARNING_CLOUD_FORBID_TELEMETRY,
                                                          DEFAULT_CACHE_TTL)
 from azure.cli.command_modules.configure._utils import get_default_from_config
 
@@ -96,7 +97,7 @@ def _config_env_public_azure(cli_ctx, _):
                 logger.error(err)
 
 
-def _handle_global_configuration(config):
+def _handle_global_configuration(config, cloud_forbid_telemetry):
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(config.config_path))
     # set up the config parsers
@@ -118,7 +119,10 @@ def _handle_global_configuration(config):
             answers['output_type_prompt'] = output_index
             answers['output_type_options'] = str(OUTPUT_LIST)
             enable_file_logging = prompt_y_n(MSG_PROMPT_FILE_LOGGING, default='n')
-            allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
+            if cloud_forbid_telemetry:
+                allow_telemetry = False
+            else:
+                allow_telemetry = prompt_y_n(MSG_PROMPT_TELEMETRY, default='y')
             answers['telemetry_prompt'] = allow_telemetry
             cache_ttl = None
             while not cache_ttl:
@@ -140,6 +144,7 @@ def _handle_global_configuration(config):
 
 # pylint: disable=inconsistent-return-statements
 def handle_configure(cmd, defaults=None, list_defaults=None, scope=None):
+    from azure.cli.core.cloud import cloud_forbid_telemetry, get_active_cloud_name
     if defaults:
         defaults_section = cmd.cli_ctx.config.defaults_section_name
         with ConfiguredDefaultSetter(cmd.cli_ctx.config, scope.lower() == 'local'):
@@ -157,8 +162,11 @@ def handle_configure(cmd, defaults=None, list_defaults=None, scope=None):
     # if nothing supplied, we go interactively
     try:
         print(MSG_INTRO)
-        _handle_global_configuration(cmd.cli_ctx.config)
+        cloud_forbid_telemetry = cloud_forbid_telemetry(cmd.cli_ctx)
+        _handle_global_configuration(cmd.cli_ctx.config, cloud_forbid_telemetry)
         print(MSG_CLOSING)
+        if cloud_forbid_telemetry:
+            logger.warning(WARNING_CLOUD_FORBID_TELEMETRY, get_active_cloud_name(cmd.cli_ctx))
         # TODO: log_telemetry('configure', **answers)
     except NoTTYException:
         raise CLIError('This command is interactive and no tty available.')
@@ -239,3 +247,18 @@ def purge_cache_contents():
         shutil.rmtree(directory)
     except (OSError, IOError) as ex:
         logger.debug(ex)
+
+
+def turn_local_context_on(cmd):
+    cmd.cli_ctx.local_context.turn_on()
+
+
+def turn_local_context_off(cmd, yes=False):
+    if cmd.cli_ctx.local_context.is_on():
+        from azure.cli.core.util import user_confirmation
+        dir_path = cmd.cli_ctx.local_context.current_turn_on_dir()
+        user_confirmation('Local context in {} will be removed and can\'t be recovered. Are you sure you want to '
+                          'continue this operation ?'.format(dir_path), yes)
+        cmd.cli_ctx.local_context.turn_off()
+    else:
+        raise CLIError('local context is not turned on in {} and all its parent directories'.format(os.getcwd()))

@@ -130,6 +130,10 @@ def list_network_watchers(cmd, resource_group_name=None):
 
 # region ApplicationGateways
 # pylint: disable=too-many-locals
+def _is_v2_sku(sku):
+    return 'v2' in sku
+
+
 def create_application_gateway(cmd, application_gateway_name, resource_group_name, location=None,
                                tags=None, no_wait=False, capacity=2,
                                cert_data=None, cert_password=None, key_vault_secret_id=None,
@@ -154,7 +158,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
 
     tags = tags or {}
-    sku_tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
+    sku_tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
     http_listener_protocol = 'https' if (cert_data or key_vault_secret_id) else 'http'
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     virtual_network_name = virtual_network_name or '{}Vnet'.format(application_gateway_name)
@@ -183,10 +187,14 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     if public_ip_address_type == 'new':
         ag_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
+        public_ip_sku = None
+        if _is_v2_sku(sku):
+            public_ip_sku = 'Standard'
+            public_ip_address_allocation = 'Static'
         master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location,
                                                               tags,
                                                               public_ip_address_allocation,
-                                                              None, None, None))
+                                                              None, public_ip_sku, None))
         public_ip_id = '{}/publicIPAddresses/{}'.format(network_id_template,
                                                         public_ip_address)
 
@@ -224,7 +232,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 def update_application_gateway(cmd, instance, sku=None, capacity=None, tags=None, enable_http2=None, min_capacity=None,
                                custom_error_pages=None, max_capacity=None):
     if sku is not None:
-        instance.sku.tier = sku.split('_', 1)[0] if 'v2' not in sku else sku
+        instance.sku.tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
 
     try:
         if min_capacity is not None:
@@ -334,7 +342,7 @@ def update_ag_frontend_port(instance, parent, item_name, port=None):
 
 def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, item_name,
                             frontend_port, frontend_ip=None, host_name=None, ssl_cert=None,
-                            firewall_policy=None, no_wait=False):
+                            firewall_policy=None, no_wait=False, host_names=None):
     ApplicationGatewayHttpListener, SubResource = cmd.get_models('ApplicationGatewayHttpListener', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
@@ -347,7 +355,9 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         host_name=host_name,
         require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
-        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None)
+        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None,
+        host_names=host_names
+    )
 
     if cmd.supported_api_version(min_api='2019-09-01'):
         new_listener.firewall_policy = SubResource(id=firewall_policy) if firewall_policy else None
@@ -358,7 +368,7 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
 
 
 def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
-                            host_name=None, ssl_cert=None, firewall_policy=None):
+                            host_name=None, ssl_cert=None, firewall_policy=None, host_names=None):
     SubResource = cmd.get_models('SubResource')
     if frontend_ip is not None:
         instance.frontend_ip_configuration = SubResource(id=frontend_ip)
@@ -377,6 +387,9 @@ def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, 
     if cmd.supported_api_version(min_api='2019-09-01'):
         if firewall_policy is not None:
             instance.firewall_policy = SubResource(id=firewall_policy)
+
+    if host_names is not None:
+        instance.host_names = host_names or None
 
     instance.require_server_name_indication = instance.host_name and instance.protocol.lower() == 'https'
     return parent
@@ -1233,7 +1246,8 @@ def remove_waf_custom_rule_match_cond(cmd, client, resource_group_name, policy_n
 
 # region ApplicationGatewayWAFPolicy ManagedRule ManagedRuleSet
 def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
-                             rule_set_type, rule_set_version, rule_group_name, rules):
+                             rule_set_type, rule_set_version,
+                             rule_group_name=None, rules=None):
     """
     Add managed rule set to the WAF policy managed rules.
     Visit: https://docs.microsoft.com/en-us/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
@@ -1243,11 +1257,15 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
 
     waf_policy = client.get(resource_group_name, policy_name)
 
-    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules]
-    rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name, rules=managed_rule_overrides)
+    managed_rule_overrides = [ManagedRuleOverride(rule_id=r) for r in rules] if rules is not None else []
+
+    rule_group_override = None
+    if rule_group_name is not None:
+        rule_group_override = ManagedRuleGroupOverride(rule_group_name=rule_group_name,
+                                                       rules=managed_rule_overrides)
     new_managed_rule_set = ManagedRuleSet(rule_set_type=rule_set_type,
                                           rule_set_version=rule_set_version,
-                                          rule_group_overrides=[rule_group_override])
+                                          rule_group_overrides=[rule_group_override] if rule_group_override is not None else [])  # pylint: disable=line-too-long
 
     for rule_set in waf_policy.managed_rules.managed_rule_sets:
         if rule_set.rule_set_type == rule_set_type:
@@ -1256,7 +1274,8 @@ def add_waf_managed_rule_set(cmd, client, resource_group_name, policy_name,
                     rule_override.rules.extend(managed_rule_overrides)
                     break
             else:
-                rule_set.rule_group_overrides.append(rule_group_override)
+                if rule_group_override is not None:
+                    rule_set.rule_group_overrides.append(rule_group_override)
             break
     else:
         waf_policy.managed_rules.managed_rule_sets.append(new_managed_rule_set)
@@ -1761,69 +1780,69 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
 
 def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
-                        ttl=None):
+                        ttl=None, if_none_match=None):
     AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
-                     ttl=None):
+                     ttl=None, if_none_match=None):
     ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name, 'arecords',
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag,
-                       ttl=None):
+                       ttl=None, if_none_match=None):
     CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
-def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=None):
+def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=None, if_none_match=None):
     CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False, ttl=ttl)
+                            is_list=False, ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
-                      ttl=None):
+                      ttl=None, if_none_match=None):
     MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
-                      subscription_id=None, ttl=None):
+                      subscription_id=None, ttl=None, if_none_match=None):
     NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            subscription_id=subscription_id, ttl=ttl)
+                            subscription_id=subscription_id, ttl=ttl, if_none_match=if_none_match)
 
 
-def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=None):
+def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=None, if_none_match=None):
     PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
 def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
                           serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
-                          minimum_ttl=None):
+                          minimum_ttl=None, if_none_match=None):
     record_set_name = '@'
     record_type = 'soa'
 
@@ -1840,18 +1859,19 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
     record.minimum_ttl = minimum_ttl or record.minimum_ttl
 
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False)
+                            is_list=False, if_none_match=if_none_match)
 
 
 def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
-                       port, target):
+                       port, target, if_none_match=None):
     SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
     record_type = 'srv'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            if_none_match=if_none_match)
 
 
-def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value):
+def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value, if_none_match=None):
     TxtRecord = cmd.get_models('TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = TxtRecord(value=value)
     record_type = 'txt'
@@ -1865,7 +1885,8 @@ def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, val
     final_str = ''.join(record.value)
     final_len = len(final_str)
     assert original_len == final_len
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            if_none_match=if_none_match)
 
 
 def remove_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
@@ -1963,14 +1984,12 @@ def _add_record(record_set, record, record_type, is_list=False):
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                     is_list=True, subscription_id=None, ttl=None):
+                     is_list=True, subscription_id=None, ttl=None, if_none_match=None):
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
-        logger.warning("The record set doesn't exist and is automatically created. "
-                       "In the future, an extra argument will be supported to confirm this auto creation.")
         RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
         record_set = RecordSet()
 
@@ -1979,7 +1998,8 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
     _add_record(record_set, record, record_type, is_list)
 
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
-                                record_type, record_set)
+                                record_type, record_set,
+                                if_none_match='*' if if_none_match else None)
 
 
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -4381,8 +4401,138 @@ def set_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, nsg, storage_acc
     return client.set_flow_log_configuration(watcher_rg, watcher_name, config)
 
 
-def show_nsg_flow_logging(client, watcher_rg, watcher_name, nsg, resource_group_name=None):
-    return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
+# combination of resource_group_name and nsg is for old output
+# combination of location and flow_log_name is for new output
+def show_nsg_flow_logging(cmd, client, watcher_rg, watcher_name, location=None, resource_group_name=None, nsg=None,
+                          flow_log_name=None):
+    # deprecated approach to show flow log
+    if nsg is not None:
+        return client.get_flow_log_status(watcher_rg, watcher_name, nsg)
+
+    # new approach to show flow log
+    from ._client_factory import cf_flow_logs
+    client = cf_flow_logs(cmd.cli_ctx, None)
+    return client.get(watcher_rg, watcher_name, flow_log_name)
+
+
+def create_nw_flow_log(cmd,
+                       client,
+                       location,
+                       watcher_rg,
+                       watcher_name,
+                       flow_log_name,
+                       nsg,
+                       storage_account=None,
+                       resource_group_name=None,
+                       enabled=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    FlowLog = cmd.get_models('FlowLog')
+    flow_log = FlowLog(location=location,
+                       target_resource_id=nsg,
+                       storage_id=storage_account,
+                       enabled=enabled,
+                       tags=tags)
+
+    if retention > 0:
+        RetentionPolicyParameters = cmd.get_models('RetentionPolicyParameters')
+        retention_policy = RetentionPolicyParameters(days=retention, enabled=(retention > 0))
+        flow_log.retention_policy = retention_policy
+
+    if log_format is not None or log_version is not None:
+        FlowLogFormatParameters = cmd.get_models('FlowLogFormatParameters')
+        format_config = FlowLogFormatParameters(type=log_format, version=log_version)
+        flow_log.format = format_config
+
+    if traffic_analytics_workspace is not None:
+        TrafficAnalyticsProperties, TrafficAnalyticsConfigurationProperties = \
+            cmd.get_models('TrafficAnalyticsProperties', 'TrafficAnalyticsConfigurationProperties')
+
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        traffic_analytics_config = TrafficAnalyticsConfigurationProperties(
+            enabled=traffic_analytics_enabled,
+            workspace_id=workspace.properties['customerId'],
+            workspace_region=workspace.location,
+            workspace_resource_id=workspace.id,
+            traffic_analytics_interval=traffic_analytics_interval
+        )
+        traffic_analytics = TrafficAnalyticsProperties(
+            network_watcher_flow_analytics_configuration=traffic_analytics_config
+        )
+
+        flow_log.flow_analytics_configuration = traffic_analytics
+
+    return client.create_or_update(watcher_rg, watcher_name, flow_log_name, flow_log)
+
+
+def update_nw_flow_log_getter(client, watcher_rg, watcher_name, flow_log_name):
+    return client.get(watcher_rg, watcher_name, flow_log_name)
+
+
+def update_nw_flow_log_setter(client, watcher_rg, watcher_name, flow_log_name, parameters):
+    return client.create_or_update(watcher_rg, watcher_name, flow_log_name, parameters)
+
+
+def update_nw_flow_log(cmd,
+                       instance,
+                       location,
+                       resource_group_name=None,    # dummy parameter to let it appear in command
+                       enabled=None,
+                       nsg=None,
+                       storage_account=None,
+                       retention=0,
+                       log_format=None,
+                       log_version=None,
+                       traffic_analytics_workspace=None,
+                       traffic_analytics_interval=60,
+                       traffic_analytics_enabled=None,
+                       tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('enabled', enabled)
+        c.set_param('tags', tags)
+        c.set_param('storage_id', storage_account)
+        c.set_param('target_resource_id', nsg)
+
+    with cmd.update_context(instance.retention_policy) as c:
+        c.set_param('days', retention)
+        c.set_param('enabled', retention > 0)
+
+    with cmd.update_context(instance.format) as c:
+        c.set_param('type', log_format)
+        c.set_param('version', log_version)
+
+    if traffic_analytics_workspace is not None:
+        from azure.cli.core.commands.arm import get_arm_resource_by_id
+        workspace = get_arm_resource_by_id(cmd.cli_ctx, traffic_analytics_workspace)
+        if not workspace:
+            raise CLIError('Name or ID of workspace is invalid')
+
+        with cmd.update_context(
+                instance.flow_analytics_configuration.network_watcher_flow_analytics_configuration) as c:
+            c.set_param('enabled', traffic_analytics_enabled)
+            c.set_param('workspace_id', workspace.properties['customerId'])
+            c.set_param('workspace_region', workspace.location)
+            c.set_param('workspace_resource_id', workspace.id)
+            c.set_param('traffic_analytics_interval', traffic_analytics_interval)
+
+    return instance
+
+
+def list_nw_flow_log(client, watcher_rg, watcher_name, location):
+    return client.list(watcher_rg, watcher_name)
+
+
+def delete_nw_flow_log(client, watcher_rg, watcher_name, location, flow_log_name):
+    return client.delete(watcher_rg, watcher_name, flow_log_name)
 
 
 def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, storage_account,
@@ -4980,6 +5130,17 @@ def update_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
     return ncf.virtual_network_peerings.create_or_update(
         resource_group_name, virtual_network_name, virtual_network_peering_name, peering)
 
+
+def list_available_ips(cmd, resource_group_name, virtual_network_name):
+    client = network_client_factory(cmd.cli_ctx).virtual_networks
+    vnet = client.get(resource_group_name=resource_group_name,
+                      virtual_network_name=virtual_network_name)
+    start_ip = vnet.address_space.address_prefixes[0].split('/')[0]
+    available_ips = client.check_ip_address_availability(resource_group_name=resource_group_name,
+                                                         virtual_network_name=virtual_network_name,
+                                                         ip_address=start_ip)
+    return available_ips.available_ip_addresses
+
 # endregion
 
 
@@ -5060,7 +5221,7 @@ def _prep_cert_create(cmd, gateway_name, resource_group_name):
 
 def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, public_ip_address,
                         virtual_network, location=None, tags=None,
-                        no_wait=False, gateway_type=None, sku=None, vpn_type=None,
+                        no_wait=False, gateway_type=None, sku=None, vpn_type=None, vpn_gateway_generation=None,
                         asn=None, bgp_peering_address=None, peer_weight=None,
                         address_prefixes=None, radius_server=None, radius_secret=None, client_protocol=None,
                         gateway_default_site=None, custom_routes=None):
@@ -5073,9 +5234,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
     subnet = virtual_network + '/subnets/GatewaySubnet'
     active_active = len(public_ip_address) == 2
     vnet_gateway = VirtualNetworkGateway(
-        gateway_type=gateway_type, vpn_type=vpn_type, location=location, tags=tags,
-        sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active,
-        ip_configurations=[],
+        gateway_type=gateway_type, vpn_type=vpn_type, vpn_gateway_generation=vpn_gateway_generation, location=location,
+        tags=tags, sku=VirtualNetworkGatewaySku(name=sku, tier=sku), active_active=active_active, ip_configurations=[],
         gateway_default_site=SubResource(id=gateway_default_site) if gateway_default_site else None)
     for i, public_ip in enumerate(public_ip_address):
         ip_configuration = VirtualNetworkGatewayIPConfiguration(

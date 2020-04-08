@@ -303,7 +303,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     self.cmd('role assignment delete --assignee {upn} --scope "" --role reader')
 
                 # test role assignment on empty scope
-                with self.assertRaisesRegexp(CLIError, "No matches in graph database for 'fake'"):
+                with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
                     self.cmd('role assignment create --assignee fake --role contributor')
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')

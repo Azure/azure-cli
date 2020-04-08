@@ -360,6 +360,19 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs
 
+        # skip key vault reference while exporting
+        self.kwargs.update({
+            'key': "key_vault_reference",
+            'secret_identifier': "https://testkeyvault.vault.azure.net/secrets/mysecret"
+        })
+        self.cmd(
+            'appconfig kv set-keyvault -n {config_store_name} --key {key} --secret-identifier {secret_identifier} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --skip-keyvault -y')
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
         # Feature flags test
         imported_file_path = os.path.join(TEST_DIR, 'import_features.json')
         exported_file_path = os.path.join(TEST_DIR, 'export_features.json')
@@ -1336,18 +1349,6 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
 
-        self.kwargs.update({
-            'key': FeatureFlagConstants.FEATURE_FLAG_PREFIX
-        })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
-
-        self.kwargs.update({
-            'key': FeatureFlagConstants.FEATURE_FLAG_PREFIX.upper() + 'test'
-        })
-        with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot start with the reserved prefix for feature flags."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} -y')
-
         # validate key for KeyVault ref
         self.kwargs.update({
             'key': "%KeyVault",
@@ -1355,27 +1356,6 @@ class AppConfigKeyValidationScenarioTest(ScenarioTest):
         })
         with self.assertRaisesRegexp(CLIError, "Key is invalid. Key cannot be a '.' or '..', or contain the '%' character."):
             self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y')
-
-        # validate content type
-        self.kwargs.update({
-            'key': "Color",
-            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
-        })
-        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
-
-        self.kwargs.update({
-            'key': "Color",
-            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE.upper()
-        })
-        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for feature flags."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
-
-        self.kwargs.update({
-            'content_type': KeyVaultConstants.KEYVAULT_CONTENT_TYPE
-        })
-        with self.assertRaisesRegexp(CLIError, "Content type is invalid. It's a reserved content type for KeyVault references."):
-            self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} -y')
 
         # validate feature name
         self.kwargs.update({

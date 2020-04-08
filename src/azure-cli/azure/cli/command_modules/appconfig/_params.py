@@ -21,7 +21,7 @@ from ._validators import (validate_appservice_name_or_id,
                           validate_import_depth, validate_query_fields,
                           validate_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
-                          validate_key, validate_content_type, validate_feature,
+                          validate_key, validate_feature,
                           validate_identity)
 
 
@@ -124,7 +124,8 @@ def load_arguments(self, _):
         c.argument('key', help='If no key specified, return all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix. Key filtering not applicable for feature flags. By default, all feature flags with specified label will be exported.')
         c.argument('destination', options_list=['--destination', '-d'], arg_type=get_enum_type(['file', 'appconfig', 'appservice']), validator=validate_export, help="The destination of exporting. Note that exporting feature flags to appservice is not supported.")
         c.argument('yes', help="Do not prompt for preview.")
-        c.argument('skip_features', help="Export only key values and exclude all feature flags. By default, all features with the specified label will be exported to file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
+        c.argument('skip_features', help="Export items excluding all feature flags. By default, all features with the specified label will be exported to file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
+        c.argument('skip_keyvault', help="Export items excluding all key vault references. By default, all key vault references with the specified label will be exported.", arg_type=get_three_state_flag())
 
     with self.argument_context('appconfig kv export', arg_group='File') as c:
         c.argument('path', help='Local configuration file path. Required for file arguments.')
@@ -147,7 +148,7 @@ def load_arguments(self, _):
         c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
-        c.argument('content_type', validator=validate_content_type, help='Content type of the keyvalue to be set.')
+        c.argument('content_type', help='Content type of the keyvalue to be set.')
         c.argument('value', help='Value of the keyvalue to be set.')
 
     with self.argument_context('appconfig kv set-keyvault') as c:

@@ -2,11 +2,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import time
 
 from datetime import datetime
+from time import sleep
 from dateutil.tz import tzutc   # pylint: disable=import-error
 
+from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
+from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError   # pylint: disable=unused-import
 from azure.cli.testsdk import (
@@ -97,11 +101,13 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'koreasouth'
+        loc = 'eastus'
+        default_public_network_access = 'Enabled'
+        public_network_access = 'Disabled'
 
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
-        geoloc = 'koreasouth'
+        geoloc = 'eastus'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
@@ -120,6 +126,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.capacity', old_cu),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                     JMESPathCheck('publicNetworkAccess', default_public_network_access),
                      JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
 
         # test show server
@@ -133,6 +140,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                               JMESPathCheck('tags.key', '1'),
                               JMESPathCheck('sku.capacity', old_cu),
                               JMESPathCheck('sku.tier', edition),
+                              JMESPathCheck('publicNetworkAccess', default_public_network_access),
                               JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
                               JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)]).get_output_in_json()  # pylint: disable=line-too-long
 
@@ -147,6 +155,13 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('tags.key', '2'),
                      JMESPathCheck('administratorLogin', admin_login)])
+
+        self.cmd('{} server update -g {} --name {} --public-network-access {}'
+                 .format(database_engine, resource_group_1, servers[0], public_network_access),
+                 checks=[
+                     JMESPathCheck('name', servers[0]),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('publicNetworkAccess', public_network_access)])
 
         self.cmd('{} server update -g {} --name {} --sku-name {}'
                  .format(database_engine, resource_group_1, servers[0], newskuname),
@@ -198,21 +213,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        # test restore to a new server, make sure wait at least 5 min after server created.
-        from time import sleep
-        sleep(300)
-
-        self.cmd('{} server restore -g {} --name {} '
-                 '--source-server {} '
-                 '--restore-point-in-time {}'
-                 .format(database_engine, resource_group_2, servers[1], result['id'],
-                         datetime.utcnow().replace(tzinfo=tzutc()).isoformat()),
-                 checks=[
-                     JMESPathCheck('name', servers[1]),
-                     JMESPathCheck('resourceGroup', resource_group_2),
-                     JMESPathCheck('sku.tier', edition),
-                     JMESPathCheck('administratorLogin', admin_login)])
-
         # test georestore server
         with self.assertRaises(CLIError) as exception:
             self.cmd('{} server georestore -g {} --name {} --source-server {} -l {} '
@@ -259,6 +259,8 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
+        self._test_private_link_resource(resource_group, server, database_engine, 'mariadbServer')
+        self._test_private_endpoint_connection(resource_group, server, database_engine)
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mysql')
@@ -268,6 +270,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
+        self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
+        self._test_private_endpoint_connection(resource_group, server, database_engine)
+        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
@@ -277,6 +282,9 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
         self._test_log_file_mgmt(resource_group, server, database_engine)
+        self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
+        self._test_private_endpoint_connection(resource_group, server, database_engine)
+        self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('pgsql', 24))
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
         firewall_rule_1 = 'rule1'
@@ -505,6 +513,227 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         self.assertIsNotNone(result[0]['name'])
 
+    def _test_private_link_resource(self, resource_group, server, database_engine, group_id):
+        result = self.cmd('{} server private-link-resource list -g {} -s {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(result[0]['properties']['groupId'], group_id)
+
+    def _test_private_endpoint_connection(self, resource_group, server, database_engine):
+        loc = 'westus'
+        vnet = self.create_random_name('cli-vnet-', 24)
+        subnet = self.create_random_name('cli-subnet-', 24)
+        pe_name_auto = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_approve = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_reject = self.create_random_name('cli-pe-', 24)
+        pe_connection_name_auto = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_approve = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_reject = self.create_random_name('cli-pec-', 24)
+
+        # Prepare network and disable network policies
+        self.cmd('network vnet create -n {} -g {} -l {} --subnet-name {}'
+                 .format(vnet, resource_group, loc, subnet),
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {} --vnet-name {} -g {} '
+                 '--disable-private-endpoint-network-policies true'
+                 .format(subnet, vnet, resource_group),
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Get Server Id and Group Id
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        server_id = result['id']
+        result = self.cmd('{} server private-link-resource list -g {} -s {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        group_id = result[0]['properties']['groupId']
+
+        approval_description = 'You are approved!'
+        rejection_description = 'You are rejected!'
+        api_version = '2018-06-01' if database_engine == 'mariadb' else '2017-12-01'
+        expectedError = 'Private Endpoint Connection Status is not Pending'
+
+        # Testing Auto-Approval workflow
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-ids {}'
+                                    .format(resource_group, pe_name_auto, vnet, subnet, loc, pe_connection_name_auto, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_auto)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], pe_connection_name_auto)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
+                          .format(server_id, api_version, server)).get_output_in_json()
+        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
+        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+                         'Approved')
+        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('provisioningState', 'Ready')
+                 ])
+
+        with self.assertRaisesRegexp(CloudError, expectedError):
+            self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server, resource_group, server_pec_name, approval_description))
+
+        with self.assertRaisesRegexp(CloudError, expectedError):
+            self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server, resource_group, server_pec_name, rejection_description))
+
+        self.cmd('{} server private-endpoint-connection delete --id {}'
+                 .format(database_engine, server_pec_id))
+
+        # Testing Manual-Approval workflow [Approval]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-ids {} --manual-request'
+                                    .format(resource_group, pe_name_manual_approve, vnet, subnet, loc, pe_connection_name_manual_approve, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_approve)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_approve)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
+                          .format(server_id, api_version, server)).get_output_in_json()
+        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
+        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+                         'Pending')
+        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('provisioningState', 'Ready')
+                 ])
+
+        self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                 .format(database_engine, server, resource_group, server_pec_name, approval_description),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', approval_description),
+                     self.check('provisioningState', 'Ready')
+                 ])
+
+        with self.assertRaisesRegexp(CloudError, expectedError):
+            self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server, resource_group, server_pec_name, rejection_description))
+
+        self.cmd('{} server private-endpoint-connection delete --id {}'
+                 .format(database_engine, server_pec_id))
+
+        # Testing Manual-Approval workflow [Rejection]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-ids {} --manual-request true'
+                                    .format(resource_group, pe_name_manual_reject, vnet, subnet, loc, pe_connection_name_manual_reject, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_reject)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_reject)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
+                          .format(server_id, api_version, server)).get_output_in_json()
+        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
+        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+                         'Pending')
+        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('{} server private-endpoint-connection show --server-name {} -g {} --name {}'
+                 .format(database_engine, server, resource_group, server_pec_name),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('provisioningState', 'Ready')
+                 ])
+
+        self.cmd('{} server private-endpoint-connection reject --server-name {} -g {} --name {} --description "{}"'
+                 .format(database_engine, server, resource_group, server_pec_name, rejection_description),
+                 checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', rejection_description),
+                     self.check('provisioningState', 'Ready')
+                 ])
+
+        with self.assertRaisesRegexp(CloudError, expectedError):
+            self.cmd('{} server private-endpoint-connection approve --server-name {} -g {} --name {} --description "{}"'
+                     .format(database_engine, server, resource_group, server_pec_name, approval_description))
+
+        self.cmd('{} server private-endpoint-connection delete --id {}'
+                 .format(database_engine, server_pec_id))
+
+    def _test_data_encryption(self, resource_group, server, database_engine, vault_name):
+        resource_prefix = 'ossrdbmsbyok'
+        key_name = self.create_random_name(resource_prefix, 32)
+
+        # add identity to server
+        server_resp = self.cmd('{} server update -g {} --name {} --assign-identity'
+                               .format(database_engine, resource_group, server)).get_output_in_json()
+        server_identity = server_resp['identity']['principalId']
+
+        # create vault and acl server identity
+        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true --enable-purge-protection true'
+                 .format(resource_group, vault_name))
+
+        # create key
+        key_resp = self.cmd('keyvault key create --name {} -p software --vault-name {}'
+                            .format(key_name, vault_name)).get_output_in_json()
+
+        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
+                 .format(resource_group, vault_name, server_identity))
+
+        # add server key
+        kid = key_resp['key']['kid']
+        server_key_resp = self.cmd('{} server key create -g {} --name {} --kid {}'
+                                   .format(database_engine, resource_group, server, kid),
+                                   checks=[JMESPathCheck('uri', kid)])
+
+        server_key_name = server_key_resp.get_output_in_json()['name']
+
+        # validate show key
+        self.cmd('{} server key show -g {} --name {} --kid {}'
+                 .format(database_engine, resource_group, server, kid),
+                 checks=[
+                     JMESPathCheck('uri', kid),
+                     JMESPathCheck('name', server_key_name)])
+
+        # validate list key (should return 1 items)
+        self.cmd('{} server key list -g {} --name {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # delete server key
+        self.cmd('{} server key delete -g {} --name {} --kid {} --yes'
+                 .format(database_engine, resource_group, server, kid))
+
+        # wait for key to be deleted
+        time.sleep(10)
+
+        # validate deleted server key via list (should return no item)
+        self.cmd('{} server key list -g {} -s {}'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 0)])
+
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
@@ -518,7 +747,7 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                     self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
 
         # create a server
-        result = self.cmd('{} server create -g {} --name {} -l brazilsouth '
+        result = self.cmd('{} server create -g {} --name {} -l westus '
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name GP_Gen5_2'
                           .format(database_engine, resource_group, server),
@@ -530,10 +759,8 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
                               JMESPathCheck('replicationRole', 'None'),
                               JMESPathCheck('masterServerId', '')]).get_output_in_json()
 
-        from time import sleep
-        sleep(300)
         # test replica create
-        self.cmd('{} server replica create -g {} -n {} -l brazilsouth --sku-name GP_Gen5_4 '
+        self.cmd('{} server replica create -g {} -n {} -l westus --sku-name GP_Gen5_4 '
                  '--source-server {}'
                  .format(database_engine, resource_group, replicas[0], result['id']),
                  checks=[
@@ -591,7 +818,6 @@ class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-publ
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, server), checks=NoneCheck())
 
-        sleep(300)
         # test show server with replication info, replica was auto stopped after master server deleted
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, replicas[1]),
@@ -620,11 +846,12 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
     def _test_replica_mgmt(self, resource_group, skuName, testSkuName, isBasicTier):
         database_engine = 'postgres'
         server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        server = self.create_random_name(SERVER_NAME_PREFIX, 32)
         replicas = [self.create_random_name('azuredbclirep1', SERVER_NAME_MAX_LENGTH),
                     self.create_random_name('azuredbclirep2', SERVER_NAME_MAX_LENGTH)]
 
         # create a server
-        result = self.cmd('{} server create -g {} --name {} -l brazilsouth '
+        result = self.cmd('{} server create -g {} --name {} -l westus '
                           '--admin-user cloudsa --admin-password SecretPassword123 '
                           '--sku-name {}'
                           .format(database_engine, resource_group, server, skuName),
@@ -636,8 +863,6 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
                               JMESPathCheck('replicationRole', 'None'),
                               JMESPathCheck('masterServerId', '')]).get_output_in_json()
 
-        from time import sleep
-        sleep(300)
         if isBasicTier is False:
             # enable replication support for  GP/MO servers
             self.cmd('{} server configuration set -g {} -s {} -n azure.replication_support --value REPLICA'
@@ -651,7 +876,7 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
             sleep(120)
 
         # test replica create
-        self.cmd('{} server replica create -g {} -n {} -l brazilsouth --sku-name {} '
+        self.cmd('{} server replica create -g {} -n {} -l westus --sku-name {} '
                  '--source-server {}'
                  .format(database_engine, resource_group, replicas[0], testSkuName, result['id']),
                  checks=[
@@ -678,7 +903,6 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
         # test replica delete
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]), checks=NoneCheck())
-        sleep(300)
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} server show -g {} --name {}'
@@ -703,7 +927,6 @@ class ReplicationPostgreSqlMgmtScenarioTest(ScenarioTest):  # pylint: disable=to
         self.cmd('{} server delete -g {} --name {} --yes'
                  .format(database_engine, resource_group, server), checks=NoneCheck())
 
-        sleep(300)
         # test show server with replication info, replica was auto stopped after master server deleted
         self.cmd('{} server show -g {} --name {}'
                  .format(database_engine, resource_group, replicas[1]),

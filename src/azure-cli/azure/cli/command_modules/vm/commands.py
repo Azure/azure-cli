@@ -181,6 +181,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
         client_factory=cf_disk_encryption_set
     )
+
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
         exception_handler=monitor_exception_handler)
@@ -216,7 +217,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='update_image')
 
-    with self.command_group('image template', image_builder_image_templates_sdk, custom_command_type=image_builder_custom, is_preview=True) as g:
+    with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom, is_preview=True) as g:
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
         g.custom_command('list', 'list_image_templates')
         g.command('show', 'get')
@@ -226,12 +227,12 @@ def load_command_table(self, _):
         g.command('run', 'run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
 
-    with self.command_group('image template customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+    with self.command_group('image builder customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)
         g.custom_command('remove', 'remove_template_customizer', supports_local_cache=True)
         g.custom_command('clear', 'clear_template_customizer', supports_local_cache=True)
 
-    with self.command_group('image template output', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
+    with self.command_group('image builder output', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_output', supports_local_cache=True, validator=process_img_tmpl_output_add_namespace)
         g.custom_command('remove', 'remove_template_output', supports_local_cache=True)
         g.custom_command('clear', 'clear_template_output', supports_local_cache=True)
@@ -322,7 +323,7 @@ def load_command_table(self, _):
         g.command('list-skus', 'list_skus')
         g.custom_command('list', 'list_vm_images')
         g.custom_command('accept-terms', 'accept_market_ordering_terms',
-                         deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='2.2.0'))
+                         deprecate_info=g.deprecate(redirect='az vm image terms accept', expiration='3.0.0'))
         g.custom_show_command('show', 'show_vm_image')
 
     with self.command_group('vm image terms', compute_vm_image_term_sdk, validator=None) as g:
@@ -400,6 +401,7 @@ def load_command_table(self, _):
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.command('get-os-upgrade-history', 'get_os_upgrade_history', min_api='2018-10-01')
+        g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
     with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')
@@ -464,7 +466,7 @@ def load_command_table(self, _):
         g.wait_command('wait')
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
-        g.command('show', 'get')
+        g.show_command('show', 'get')
         g.custom_command('create', 'create_proximity_placement_group')
         g.custom_command('list', 'list_proximity_placement_groups')
         g.generic_update_command('update')

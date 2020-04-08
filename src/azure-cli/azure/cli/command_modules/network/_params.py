@@ -226,6 +226,7 @@ def load_arguments(self, _):
         c.argument('ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
         c.ignore('protocol')
         c.argument('host_name', help='Host name to use for multisite gateways.')
+        c.argument('host_names', nargs='+', is_preview=True, help='List of host names that allows special wildcard characters as well.', min_api='2019-11-01')
         c.argument('firewall_policy', min_api='2019-09-01', help='Name or ID of a Firewall Policy resource.')
 
     with self.argument_context('network application-gateway http-listener create') as c:
@@ -469,10 +470,14 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway waf-policy managed-rule rule-set',
                                min_api='2019-09-01') as c:
-        c.argument('rule_set_type', options_list='--type', help='The type of the web application firewall rule set.')
+        c.argument('rule_set_type', options_list='--type',
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
+                   help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   help='The version of the web application firewall rule set type.')
+                   arg_type=get_enum_type(['0.1', '2.2.9', '3.0', '3.1']),
+                   help='The version of the web application firewall rule set type. '
+                        '0.1 is used for Microsoft_BotManagerRuleSet')
         c.argument('rule_group_name',
                    options_list='--group-name',
                    help='The name of the web application firewall rule set group.')
@@ -563,6 +568,8 @@ def load_arguments(self, _):
                        options_list=['--record-set-name', '-n'],
                        help='The name of the record set relative to the zone. '
                             'Creates a new record set if one does not exist.')
+            c.argument('if_none_match', help='Create the record set only if it does not already exist.',
+                       action='store_true')
 
         with self.argument_context('network dns record-set {} remove-record'.format(item)) as c:
             c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone.')
@@ -571,9 +578,13 @@ def load_arguments(self, _):
     with self.argument_context('network dns record-set cname set-record') as c:
         c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
         c.argument('ttl', help='Record set TTL (time-to-live)')
+        c.argument('if_none_match', help='Create the record set only if it does not already exist.',
+                   action='store_true')
 
     with self.argument_context('network dns record-set soa') as c:
         c.argument('relative_record_set_name', ignore_type, default='@')
+        c.argument('if_none_match', help='Create the record set only if it does not already exist.',
+                   action='store_true')
 
     with self.argument_context('network dns record-set a') as c:
         c.argument('ipv4_address', options_list=['--ipv4-address', '-a'], help='IPv4 address in string notation.')
@@ -755,7 +766,7 @@ def load_arguments(self, _):
         c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.', id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
-        c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az keyvault(storage/etc) private-endpoint show" to obtain the list of group ids.')
+        c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az keyvault(storage/etc) private-link-resource list" to obtain the list of group ids.')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
         c.argument('manual_request', help='Use manual request to establish the connection', arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
@@ -1348,8 +1359,23 @@ def load_arguments(self, _):
         c.argument('filters', type=get_json_object)
 
     with self.argument_context('network watcher flow-log') as c:
+        c.argument('location', get_location_type(self.cli_ctx),
+                   help='Location to identify the exclusive Network Watcher under a region. '
+                        'Only one Network Watcher can be existed per subscription and region.')
+        c.argument('flow_log_name', name_arg_type, help='The name of the flow logger', min_api='2019-11-01')
         c.argument('nsg', help='Name or ID of the network security group.')
-        c.argument('enabled', arg_type=get_three_state_flag())
+        c.argument('enabled', arg_type=get_three_state_flag(), help='Enable logging', default='true')
+        c.argument('retention', type=int, help='Number of days to retain logs')
+        c.argument('storage_account', help='Name or ID of the storage account in which to save the flow logs. '
+                                           'Must be in the same region of flow log.')
+
+    # temporary solution for compatible with old show command's parameter
+    # after old show command's parameter is deprecated and removed,
+    # this argument group "network watcher flow-log show" should be removed
+    with self.argument_context('network watcher flow-log show') as c:
+        c.argument('nsg',
+                   deprecate_info=c.deprecate(redirect='--location and --name combination', hide=False),
+                   help='Name or ID of the network security group.')
 
     with self.argument_context('network watcher flow-log', arg_group='Format', min_api='2018-10-01') as c:
         c.argument('log_format', options_list='--format', help='File type of the flow log.', arg_type=get_enum_type(FlowLogFormatType))
@@ -1357,7 +1383,9 @@ def load_arguments(self, _):
 
     with self.argument_context('network watcher flow-log', arg_group='Traffic Analytics', min_api='2018-10-01') as c:
         c.argument('traffic_analytics_interval', type=int, options_list='--interval', help='Interval in minutes at which to conduct flow analytics. Temporarily allowed values are 10 and 60.', min_api='2018-12-01')
-        c.argument('traffic_analytics_workspace', options_list='--workspace', help='Name or ID of a Log Analytics workspace.')
+        c.argument('traffic_analytics_workspace',
+                   options_list='--workspace',
+                   help='Name or ID of a Log Analytics workspace. Must be in the same region of flow log')
         c.argument('traffic_analytics_enabled', options_list='--traffic-analytics', arg_type=get_three_state_flag(), help='Enable traffic analytics. Defaults to true if `--workspace` is provided.')
 
     for item in ['list', 'stop', 'delete', 'show', 'show-status']:
@@ -1625,6 +1653,7 @@ def load_arguments(self, _):
     with self.argument_context('network vnet-gateway create') as c:
         vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
         c.argument('virtual_network', options_list='--vnet', help=vnet_help)
+        c.argument('vpn_gateway_generation', arg_type=get_enum_type(['Generation1', 'Generation2']), min_api='2019-07-01', help='The generation for the virtual network gateway. vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
 
     with self.argument_context('network vnet-gateway update') as c:
         c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', arg_type=get_enum_type(['true', 'false']))

@@ -3,20 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-
-from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
+from azure.cli.core.util import get_az_user_agent
 
 from knack.log import get_logger
 from knack.util import CLIError
 
 logger = get_logger(__name__)
-UA_AGENT = "AZURECLI/{}".format(core_version)
-ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
 def resolve_client_arg_name(operation, kwargs):
@@ -44,7 +40,7 @@ def resolve_client_arg_name(operation, kwargs):
 
 
 def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=None, api_version=None,
-                            aux_subscriptions=None, **kwargs):
+                            aux_subscriptions=None, aux_tenants=None, **kwargs):
     """
      :params subscription_id: the current account's subscription
      :param aux_subscriptions: mainly for cross tenant scenarios, say vnet peering.
@@ -66,6 +62,7 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
     client, _ = _get_mgmt_service_client(cli_ctx, client_type, subscription_id=subscription_id,
                                          api_version=api_version, sdk_profile=sdk_profile,
                                          aux_subscriptions=aux_subscriptions,
+                                         aux_tenants=aux_tenants,
                                          **kwargs)
     return client
 
@@ -81,11 +78,7 @@ def configure_common_settings(cli_ctx, client):
 
     client.config.enable_http_logger = True
 
-    client.config.add_user_agent(UA_AGENT)
-    try:
-        client.config.add_user_agent(os.environ[ENV_ADDITIONAL_USER_AGENT])
-    except KeyError:
-        pass
+    client.config.add_user_agent(get_az_user_agent())
 
     try:
         command_ext_name = cli_ctx.data['command_extension_name']
@@ -118,13 +111,15 @@ def _get_mgmt_service_client(cli_ctx,
                              resource=None,
                              sdk_profile=None,
                              aux_subscriptions=None,
+                             aux_tenants=None,
                              **kwargs):
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
     profile = Profile(cli_ctx=cli_ctx)
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource,
-                                                             aux_subscriptions=aux_subscriptions)
+                                                             aux_subscriptions=aux_subscriptions,
+                                                             aux_tenants=aux_tenants)
 
     client_kwargs = {}
     if base_url_bound:
@@ -182,12 +177,7 @@ def get_subscription_id(cli_ctx):
 def _get_add_headers_callback(cli_ctx):
 
     def _add_headers(request):
-        agents = [request.headers['User-Agent'], UA_AGENT]
-        try:
-            agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
-        except KeyError:
-            pass
-
+        agents = [request.headers['User-Agent'], get_az_user_agent()]
         request.headers['User-Agent'] = ' '.join(agents)
 
         try:

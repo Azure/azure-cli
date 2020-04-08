@@ -54,17 +54,18 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
 
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceNetworkProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceLinuxProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshConfiguration
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceSshPublicKey
-from azure.mgmt.containerservice.v2019_11_01.models import ContainerServiceStorageProfileTypes
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedCluster
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAADProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAddonProfile
-from azure.mgmt.containerservice.v2019_11_01.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_11_01.models import AgentPool
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceNetworkProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceLinuxProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceSshConfiguration
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceSshPublicKey
+from azure.mgmt.containerservice.v2020_03_01.models import ContainerServiceStorageProfileTypes
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedCluster
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAADProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAddonProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterIdentity
+from azure.mgmt.containerservice.v2020_03_01.models import AgentPool
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -84,7 +85,7 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 
-from ._helpers import _populate_api_server_access_profile, _set_vm_set_type
+from ._helpers import _populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type
 
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
@@ -532,8 +533,8 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     # always create application with 5 years expiration
     start_date = datetime.datetime.utcnow()
     end_date = start_date + relativedelta(years=5)
-    result = create_application(rbac_client.applications, name, url, [url], password=client_secret,
-                                start_date=start_date, end_date=end_date)
+    result, aad_session_key = create_application(rbac_client.applications, name, url, [url], password=client_secret,
+                                                 start_date=start_date, end_date=end_date)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
         hook.add(message='Creating service principal', value=0.1 * x, total_val=1.0)
@@ -545,10 +546,10 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
             logger.info(ex)
             time.sleep(2 + 2 * x)
     else:
-        return False
+        return False, aad_session_key
     hook.add(message='Finished service principal creation', value=1.0, total_val=1.0)
     logger.info('Finished service principal creation')
-    return service_principal
+    return service_principal, aad_session_key
 
 
 def _add_role_assignment(cli_ctx, role, service_principal_msi_id, is_service_principal=True, delay=2, scope=None):
@@ -1312,7 +1313,8 @@ def create_application(client, display_name, homepage, identifier_uris,
                                                    password_credentials=password_creds,
                                                    required_resource_access=required_resource_accesses)
     try:
-        return client.create(app_create_param)
+        result = client.create(app_create_param, raw=True)
+        return result.output, result.response.headers["ocp-aad-session-key"]
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -1550,18 +1552,18 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False,
         protocol = 'http'
 
     proxy_url = 'http://{0}:{1}/'.format(listen_address, listen_port)
-    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy'.format(proxy_url,
-                                                                                                       protocol)
+    dashboardURL = '{0}/api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(proxy_url,
+                                                                                                        protocol)
     # launch kubectl port-forward locally to access the remote dashboard
     if in_cloud_console():
         # TODO: better error handling here.
         response = requests.post('http://localhost:8888/openport/{0}'.format(listen_port))
         result = json.loads(response.text)
-        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy'.format(result['url'],
-                                                                                                          protocol)
+        dashboardURL = '{0}api/v1/namespaces/kube-system/services/{1}:kubernetes-dashboard:/proxy/'.format(
+            result['url'], protocol)
         term_id = os.environ.get('ACC_TERM_ID')
         if term_id:
-            response = requests.post('http://localhost:8888/openLink/{}'.format(term_id),
+            response = requests.post('http://localhost:8888/openLink/{0}'.format(term_id),
                                      json={"url": dashboardURL})
         logger.warning('To view the console, please open %s in a new tab', dashboardURL)
     else:
@@ -1647,6 +1649,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                node_count=3,
                nodepool_name="nodepool1",
                nodepool_tags=None,
+               nodepool_labels=None,
                service_principal=None, client_secret=None,
                no_ssh_key=False,
                disable_rbac=None,
@@ -1666,6 +1669,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                load_balancer_outbound_ip_prefixes=None,
                load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
+               outbound_type=None,
                enable_addons=None,
                workspace_resource_id=None,
                vnet_subnet_id=None,
@@ -1680,6 +1684,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                zones=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
+               enable_private_cluster=False,
+               enable_managed_identity=False,
                attach_acr=None,
                no_wait=False):
     _validate_ssh_key(no_ssh_key, ssh_key_value)
@@ -1700,6 +1706,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     agent_pool_profile = ManagedClusterAgentPoolProfile(
         name=_trim_nodepoolname(nodepool_name),  # Must be 12 chars or less before ACS RP adds to it
         tags=nodepool_tags,
+        node_labels=nodepool_labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type="Linux",
@@ -1707,7 +1714,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         vnet_subnet_id=vnet_subnet_id,
         availability_zones=zones,
         max_pods=int(max_pods) if max_pods else None,
-        type=vm_set_type
+        type=vm_set_type,
+        mode="System"
     )
     if node_osdisk_size:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
@@ -1721,14 +1729,19 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             public_keys=[ContainerServiceSshPublicKey(key_data=ssh_key_value)])
         linux_profile = ContainerServiceLinuxProfile(admin_username=admin_username, ssh=ssh_config)
 
-    principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
-                                                  service_principal=service_principal, client_secret=client_secret,
-                                                  subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                                  location=location, name=name)
-    service_principal_profile = ManagedClusterServicePrincipalProfile(
-        client_id=principal_obj.get("service_principal"),
-        secret=principal_obj.get("client_secret"),
-        key_vault_secret_ref=None)
+    # Skip create service principal profile for the cluster if the cluster
+    # enables managed identity and customer doesn't explicitly provide a service principal.
+    service_principal_profile = None
+    principal_obj = None
+    if not(enable_managed_identity and not service_principal and not client_secret):
+        principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
+                                                      service_principal=service_principal, client_secret=client_secret,
+                                                      subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
+                                                      location=location, name=name)
+        service_principal_profile = ManagedClusterServicePrincipalProfile(
+            client_id=principal_obj.get("service_principal"),
+            secret=principal_obj.get("client_secret"),
+            key_vault_secret_ref=None)
 
     if (vnet_subnet_id and not skip_subnet_role_assignment and
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
@@ -1746,13 +1759,22 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         load_balancer_idle_timeout)
 
     if attach_acr:
-        _ensure_aks_acr(cmd.cli_ctx,
-                        client_id=service_principal_profile.client_id,
-                        acr_name_or_id=attach_acr,
-                        subscription_id=subscription_id)
+        if enable_managed_identity:
+            if no_wait:
+                raise CLIError('When --attach-acr and --enable-managed-identity are both specified, '
+                               '--no-wait is not allowed, please wait until the whole operation succeeds.')
+            # Attach acr operation will be handled after the cluster is created
+        else:
+            _ensure_aks_acr(cmd.cli_ctx,
+                            client_id=service_principal_profile.client_id,
+                            acr_name_or_id=attach_acr,
+                            subscription_id=subscription_id)
+
+    outbound_type = _set_outbound_type(outbound_type, vnet_subnet_id, load_balancer_sku, load_balancer_profile)
 
     network_profile = None
-    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip, docker_bridge_address, network_policy]):
+    if any([network_plugin, pod_cidr, service_cidr, dns_service_ip,
+            docker_bridge_address, network_policy]):
         if not network_plugin:
             raise CLIError('Please explicitly specify the network plugin type')
         if pod_cidr and network_plugin == "azure":
@@ -1766,6 +1788,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             network_policy=network_policy,
             load_balancer_sku=load_balancer_sku.lower(),
             load_balancer_profile=load_balancer_profile,
+            outbound_type=outbound_type
         )
     else:
         if load_balancer_sku.lower() == "standard" or load_balancer_profile:
@@ -1773,6 +1796,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 network_plugin="kubenet",
                 load_balancer_sku=load_balancer_sku.lower(),
                 load_balancer_profile=load_balancer_profile,
+                outbound_type=outbound_type,
             )
 
     addon_profiles = _handle_addons_args(
@@ -1802,13 +1826,23 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         )
 
     api_server_access_profile = None
-    if api_server_authorized_ip_ranges:
-        api_server_access_profile = _populate_api_server_access_profile(api_server_authorized_ip_ranges)
+    if enable_private_cluster and load_balancer_sku.lower() != "standard":
+        raise CLIError("Please use standard load balancer for private cluster")
+    if api_server_authorized_ip_ranges or enable_private_cluster:
+        api_server_access_profile = _populate_api_server_access_profile(
+            api_server_authorized_ip_ranges,
+            enable_private_cluster=enable_private_cluster
+        )
 
     # Check that both --disable-rbac and --enable-rbac weren't provided
     if all([disable_rbac, enable_rbac]):
         raise CLIError('specify either "--disable-rbac" or "--enable-rbac", not both.')
 
+    identity = None
+    if enable_managed_identity:
+        identity = ManagedClusterIdentity(
+            type="SystemAssigned"
+        )
     mc = ManagedCluster(
         location=location,
         tags=tags,
@@ -1821,20 +1855,38 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         network_profile=network_profile,
         addon_profiles=addon_profiles,
         aad_profile=aad_profile,
-        api_server_access_profile=api_server_access_profile
+        api_server_access_profile=api_server_access_profile,
+        identity=identity
     )
+
+    # Add AAD session key to header.
+    # If principal_obj is None, we will not add this header, this can happen
+    # when the cluster enables managed identity. In this case, the header is useless
+    # and that's OK to not add this header
+    custom_headers = None
+    if principal_obj:
+        custom_headers = {'Ocp-Aad-Session-Key': principal_obj.get("aad_session_key")}
 
     # Due to SPN replication latency, we do a few retries here
     max_retry = 30
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            if monitoring:
+            need_pull_for_result = monitoring or (enable_managed_identity and attach_acr)
+            if need_pull_for_result:
                 # adding a wait here since we rely on the result for role assignment
                 result = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
                     resource_group_name=resource_group_name,
                     resource_name=name,
                     parameters=mc))
+            else:
+                result = sdk_no_wait(no_wait,
+                                     client.create_or_update,
+                                     resource_group_name=resource_group_name,
+                                     resource_name=name,
+                                     parameters=mc,
+                                     custom_headers=custom_headers)
+            if monitoring:
                 cloud_name = cmd.cli_ctx.cloud.name
                 # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
                 # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
@@ -1847,11 +1899,17 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                         name=name
                     )
                     _add_monitoring_role_assignment(result, cluster_resource_id, cmd)
-            else:
-                result = sdk_no_wait(no_wait,
-                                     client.create_or_update,
-                                     resource_group_name=resource_group_name,
-                                     resource_name=name, parameters=mc)
+            if enable_managed_identity and attach_acr:
+                if result.identity_profile is None or result.identity_profile["kubeletidentity"] is None:
+                    logger.warning('Your cluster is successfully created, but we failed to attach acr to it, '
+                                   'you can manually grant permission to the identity named <ClUSTER_NAME>-agentpool '
+                                   'in MC_ resource group to give it permission to pull from ACR.')
+                else:
+                    kubelet_identity_client_id = result.identity_profile["kubeletidentity"].client_id
+                    _ensure_aks_acr(cmd.cli_ctx,
+                                    client_id=kubelet_identity_client_id,
+                                    acr_name_or_id=attach_acr,
+                                    subscription_id=subscription_id)
             return result
         except CloudError as ex:
             retry_exception = ex
@@ -2081,7 +2139,16 @@ def aks_update(cmd, client, resource_group_name, name,
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    client_id = instance.service_principal_profile.client_id
+    client_id = ""
+    if instance.identity is not None and instance.identity.type == "SystemAssigned":
+        if instance.identity_profile is None or instance.identity_profile["kubeletidentity"] is None:
+            raise CLIError('Unexpected error getting kubelet\'s identity for the cluster. '
+                           'Please do not set --attach-acr or --detach-acr. '
+                           'You can manually grant or revoke permission to the identity named '
+                           '<ClUSTER_NAME>-agentpool in MC_ resource group to access ACR.')
+        client_id = instance.identity_profile["kubeletidentity"].client_id
+    else:
+        client_id = instance.service_principal_profile.client_id
     if not client_id:
         raise CLIError('Cannot get the AKS cluster\'s service principal.')
 
@@ -2110,7 +2177,7 @@ def aks_update(cmd, client, resource_group_name, name,
     # empty string is valid as it disables ip whitelisting
     if api_server_authorized_ip_ranges is not None:
         instance.api_server_access_profile = \
-            _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance)
+            _populate_api_server_access_profile(api_server_authorized_ip_ranges, instance=instance)
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
@@ -2711,6 +2778,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                       enable_cluster_autoscaler=False,
                       node_taints=None,
                       tags=None,
+                      labels=None,
+                      mode="User",
                       no_wait=False):
     instances = client.list(resource_group_name, cluster_name)
     for agentpool_profile in instances:
@@ -2736,6 +2805,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
     agent_pool = AgentPool(
         name=nodepool_name,
         tags=tags,
+        node_labels=labels,
         count=int(node_count),
         vm_size=node_vm_size,
         os_type=os_type,
@@ -2745,7 +2815,8 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         max_pods=int(max_pods) if max_pods else None,
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
-        node_taints=taints_array
+        node_taints=taints_array,
+        mode=mode
     )
 
     _check_cluster_autoscaler_flag(enable_cluster_autoscaler, min_count, max_count, node_count, agent_pool)
@@ -2786,14 +2857,21 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                          update_cluster_autoscaler=False,
                          min_count=None, max_count=None,
                          tags=None,
+                         mode=None,
                          no_wait=False):
 
-    update_flags = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
-    if update_flags != 1:
-        if update_flags != 0 or tags is None:
-            raise CLIError('Please specify "--enable-cluster-autoscaler" or '
-                           '"--disable-cluster-autoscaler" or '
-                           '"--update-cluster-autoscaler"')
+    update_autoscaler = enable_cluster_autoscaler + disable_cluster_autoscaler + update_cluster_autoscaler
+
+    if update_autoscaler > 1:
+        raise CLIError('Please specify one of "--enable-cluster-autoscaler" or '
+                       '"--disable-cluster-autoscaler" or '
+                       '"--update-cluster-autoscaler"')
+
+    if (update_autoscaler == 0 and not tags and not mode):
+        raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
+                       '"--disable-cluster-autoscaler" or '
+                       '"--update-cluster-autoscaler" or '
+                       '"--tags" or "--mode"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     node_count = instance.count
@@ -2828,6 +2906,9 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
         instance.max_count = None
 
     instance.tags = tags
+
+    if mode is not None:
+        instance.mode = mode
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
@@ -2878,6 +2959,7 @@ def _ensure_aks_service_principal(cli_ctx,
                                   dns_name_prefix=None,
                                   location=None,
                                   name=None):
+    aad_session_key = None
     # TODO: This really needs to be unit tested.
     rbac_client = get_graph_rbac_management_client(cli_ctx)
     if not service_principal:
@@ -2887,7 +2969,7 @@ def _ensure_aks_service_principal(cli_ctx,
         salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
         url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        service_principal, aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
             raise CLIError('Could not create a service principal with the right permissions. '
                            'Are you an Owner on this project?')
@@ -2900,6 +2982,7 @@ def _ensure_aks_service_principal(cli_ctx,
     return {
         'client_secret': client_secret,
         'service_principal': service_principal,
+        'aad_session_key': aad_session_key,
     }
 
 
@@ -2944,12 +3027,12 @@ def _ensure_osa_aad(cli_ctx,
                                required_resource_accesses=[required_osa_aad_access])
             logger.info('Updated AAD: %s', aad_client_app_id)
         else:
-            result = create_application(client=rbac_client.applications,
-                                        display_name=name,
-                                        identifier_uris=[app_id_name],
-                                        homepage=app_id_name,
-                                        password=aad_client_app_secret,
-                                        required_resource_accesses=[required_osa_aad_access])
+            result, _aad_session_key = create_application(client=rbac_client.applications,
+                                                          display_name=name,
+                                                          identifier_uris=[app_id_name],
+                                                          homepage=app_id_name,
+                                                          password=aad_client_app_secret,
+                                                          required_resource_accesses=[required_osa_aad_access])
             aad_client_app_id = result.app_id
             logger.info('Created an AAD: %s', aad_client_app_id)
         # Get the TenantID
@@ -2980,7 +3063,7 @@ def _ensure_service_principal(cli_ctx,
         salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
         url = 'https://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
 
-        service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+        service_principal, _aad_session_key = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
         if not service_principal:
             raise CLIError('Could not create a service principal with the right permissions. '
                            'Are you an Owner on this project?')
