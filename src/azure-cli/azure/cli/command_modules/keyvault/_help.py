@@ -171,6 +171,18 @@ examples:
         az keyvault key list --vault-name MyKeyVault
 """
 
+helps['keyvault key download'] = """
+type: command
+short-summary: Download a key from a KeyVault.
+examples:
+  - name: Save the key with PEM encoding
+    text: |
+        az keyvault key download --vault-name MyKeyVault -n MyKey -e PEM -f mykey.pem
+  - name: Save the key with DER encoding
+    text: |
+        az keyvault key download --vault-name MyKeyVault -n MyKey -e DER -f mykey.der
+"""
+
 helps['keyvault list'] = """
 type: command
 short-summary: List key vaults.

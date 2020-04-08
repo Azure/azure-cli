@@ -20,7 +20,6 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
         self._token_retriever = token_retriever
         self._external_tenant_token_retriever = external_tenant_token_retriever
 
-
     def _get_token(self):
         external_tenant_tokens = None
         try:

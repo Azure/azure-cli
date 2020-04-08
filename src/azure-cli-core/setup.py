@@ -58,16 +58,16 @@ DEPENDENCIES = [
     'jmespath',
     'knack==0.7.0rc1',
     'msrest>=0.4.4',
-    'msrestazure>=0.6.2',
+    'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
     'pkginfo',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml~=5.2',
     'requests~=2.20',
     'six~=1.12',
     'wheel==0.30.0',
     'azure-mgmt-resource==8.0.1',
+    'azure-mgmt-core @ https://azurecorepoc.blob.core.windows.net/sdks/azure_mgmt_core-1.0.0b2-py2.py3-none-any.whl'
 ]
 
 TESTS_REQUIRE = [
