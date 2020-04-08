@@ -1305,7 +1305,7 @@ parameters:
   - name: --services
     short-summary: 'The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.'
 examples:
-  - name: Turn off logging for a storage account. 
+  - name: Turn off logging for a storage account.
     text: |
         az storage logging off --account-name MyAccount
 """
