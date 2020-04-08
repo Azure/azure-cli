@@ -1513,23 +1513,23 @@ def load_arguments(self, _):
             ])
 
         c.argument('weekly_retention',
-                   help='The Weekly Retention.'
+                   help='Retention for the weekly backup. '
                    'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
                    'There is a minimum of 7 days and a maximum of 10 years.')
 
         c.argument('monthly_retention',
-                   help='The Monthly Retention.'
+                   help='Retention for the monthly backup. '
                    'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
                    'There is a minimum of 7 days and a maximum of 10 years.')
 
         c.argument('yearly_retention',
-                   help='The Yearly Retention.'
+                   help='Retention for the yearly backup. '
                    'If just a number is passed instead of an ISO 8601 string, days will be assumed as the units.'
                    'There is a minimum of 7 days and a maximum of 10 years.')
 
         c.argument('week_of_year',
-                   help='The Week of Year, 1 to 52, to save for the Yearly Retention.')
-
+                   help='The Week of Year, 1 to 52, in which to take the yearly backup.')
+        
     with self.argument_context('sql midb ltr-backup') as c:
         c.argument('location_name',
                    required=True,
