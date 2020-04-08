@@ -100,18 +100,19 @@ class KeyVaultCommandGroup(AzCommandGroup):
 
             class_name = op.__qualname__.split('.')[0]
             if class_name in ['KeyClient', 'SecretClient', 'CertificateClient']:
-                abadoned_args = ['vault_base_url', 'identifier', 'maxresults']
-                for abadoned_arg in abadoned_args:
-                    if abadoned_arg in command_args:
-                        command_args.pop(abadoned_arg)
+                abandoned_args = ['vault_base_url', 'identifier', 'no_wait']
+                for abandoned_arg in abandoned_args:
+                    if abandoned_arg in command_args:
+                        command_args.pop(abandoned_arg)
+
+                if 'maxresults' in command_args:
+                    command_args['max_page_size'] = command_args.pop('maxresults')
+
+                if 'expires' in command_args:
+                    command_args['expires_on'] = command_args.pop('expires')
 
             try:
                 result = op(**command_args)
-                # apply results transform if specified
-                transform_result = merged_kwargs.get('transform', None)
-                if transform_result:
-                    return _encode_hex(transform_result(result))
-
                 # otherwise handle based on return type of results
                 if isinstance(result, poller_classes()):
                     return _encode_hex(
