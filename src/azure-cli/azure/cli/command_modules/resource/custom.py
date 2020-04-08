@@ -22,10 +22,11 @@ from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
-from azure.mgmt.resource.resources.models import GenericResource
+from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
 
@@ -38,10 +39,11 @@ from knack.log import get_logger
 from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
 from knack.util import CLIError
 
-from ._validators import MSI_LOCAL_ID
-
 from msrest.serialization import Serializer
 from msrest.pipeline import SansIOHTTPPolicy
+
+from ._validators import MSI_LOCAL_ID
+from ._formatters import format_what_if_operation_result
 
 logger = get_logger(__name__)
 
@@ -349,7 +351,7 @@ class JsonCTemplate(object):
 
 class JSONSerializer(Serializer):
     def body(self, data, data_type, **kwargs):
-        if data_type == 'Deployment':
+        if data_type in ('Deployment', 'DeploymentWhatIf'):
             # Be sure to pass a DeploymentProperties
             template = data.properties.template
             if template:
@@ -580,6 +582,42 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
                        deployment_name, deployment_properties, deployment_location)
 
 
+def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
+                                                  template_file=None, template_uri=None, parameters=None,
+                                                  deployment_name=None, mode=DeploymentMode.incremental,
+                                                  handle_extended_json_format=False,
+                                                  aux_subscriptions=None, aux_tenants=None,
+                                                  result_format=None, no_pretty_print=None):
+    what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri,
+                                                                parameters, mode, result_format)
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions, aux_tenants)
+    what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties)
+
+    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print)
+
+
+def what_if_deploy_arm_template_at_subscription_scope(cmd,
+                                                      template_file=None, template_uri=None, parameters=None,
+                                                      deployment_name=None, deployment_location=None,
+                                                      handle_extended_json_format=False,
+                                                      result_format=None, no_pretty_print=None):
+    what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
+                                                                DeploymentMode.incremental, result_format)
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx)
+    what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location)
+
+    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print)
+
+
+def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
+    what_if_result = LongRunningOperation(cli_ctx)(what_if_poller)
+
+    if no_pretty_print:
+        return what_if_result
+
+    return print(format_what_if_operation_result(what_if_result))
+
+
 def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, template_uri=None, parameters=None,
                                               mode=None, rollback_on_error=None, no_prompt=False):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
@@ -613,6 +651,19 @@ def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, templ
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
     return properties
+
+
+def _prepare_deployment_what_if_properties(cli_ctx, template_file, template_uri, parameters, mode, result_format):
+    DeploymentWhatIfProperties, DeploymentWhatIfSettings = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
+                                                                   'DeploymentWhatIfProperties', 'DeploymentWhatIfSettings',
+                                                                   mod='models')
+
+    deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx, template_file, template_uri, parameters, mode)
+    deployment_what_if_properties = DeploymentWhatIfProperties(template=deployment_properties.template, template_link=deployment_properties.template_link,
+                                                               parameters=deployment_properties.parameters, mode=deployment_properties.mode,
+                                                               what_if_settings=DeploymentWhatIfSettings(result_format=result_format))
+
+    return deployment_what_if_properties
 
 
 def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenants=None):

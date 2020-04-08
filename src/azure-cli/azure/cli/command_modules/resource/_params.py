@@ -8,7 +8,7 @@
 def load_arguments(self, _):
     from argcomplete.completers import FilesCompleter
 
-    from azure.mgmt.resource.resources.models import DeploymentMode
+    from azure.mgmt.resource.resources.models import DeploymentMode, WhatIfResultFormat
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
 
@@ -54,6 +54,8 @@ def load_arguments(self, _):
                                        'To get more information, please visit https://docs.microsoft.com/en-us/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
+
+    deployment_what_if_result_format_type = get_enum_type(WhatIfResultFormat, default=WhatIfResultFormat.full_resource_payloads)
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -259,6 +261,14 @@ def load_arguments(self, _):
     with self.argument_context('deployment sub list') as c:
         c.argument('filter_string', arg_type=filter_type)
 
+    with self.argument_context('deployment sub what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type,
+                   help='FullResourcePayloads or ResourceIdOnly.')
+        c.argument('no_pretty_print', action='store_true',
+                   help="Disable pretty-print for What-If results. When set, the output format type will be used.")
+
+
     with self.argument_context('deployment group') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, completer=get_resource_group_completion_list, required=True)
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
@@ -275,6 +285,19 @@ def load_arguments(self, _):
         c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
                    help='Auxiliary tenants which will be used during deployment across tenants.')
         c.argument('no_prompt', arg_type=no_prompt)
+
+    with self.argument_context('deployment group what-if') as c:
+        c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
+                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
+                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
+        c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
+                   help='Auxiliary tenants which will be used during deployment across tenants.')
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type,
+                   help='FullResourcePayloads or ResourceIdOnly.')
+        c.argument('no_pretty_print', action='store_true',
+                   help="Disable pretty-print for What-If results. When set, the output format type will be used.")
+        c.ignore("rollback_on_error")
 
     with self.argument_context('deployment group validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
