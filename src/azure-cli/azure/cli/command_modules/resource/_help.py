@@ -299,6 +299,76 @@ examples:
     crafted: true
 """
 
+helps['deployment-scripts'] = """
+type: group
+short-summary: Manage deployment scripts at subscription or resource group scope.
+"""
+
+helps['deployment-scripts list'] = """
+type: command
+short-summary: Lists all deployment scripts.
+parameters:
+  - name: --subscription
+    short-summary: Subscription identifier used to retrieve all deployment scripts.
+    long-summary: >
+        If not provided, the command uses the user's logged-in default subscription.
+examples:
+  - name: Retrieve all deployment scripts found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts list
+  - name: Retrieve all deployment scripts found in a resource group
+    text: |
+        az deployment-scripts list --resource-group contoso-rg
+"""
+
+helps['deployment-scripts show'] = """
+type: command
+short-summary: Retrieves a deployment script.
+parameters:
+  - name: --subscription
+    short-summary: Subscription identifier used to retrieve a deployment scripts.
+    long-summary: >
+        If not provided, the command uses the user's logged-in default subscription.
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Retrieve a deployment script found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts show --resource-group contoso-rg --name contosoBashScript  
+"""
+
+helps['deployment-scripts logs'] = """
+type: command
+short-summary: Shows deployment script logs.
+parameters:
+  - name: --subscription
+    short-summary: Subscription identifier used to retrieve deployment script logs.
+    long-summary: >
+        If not provided, the command uses the user's logged-in default subscription.
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Retrieve deployment script logs found in the user's logged-in default subscription, max limit is 4MB.
+    text: >
+        az deployment-scripts logs --resource-group contoso-rg --name contosoBashScript  
+"""
+
+helps['deployment-scripts delete'] = """
+type: command
+short-summary: Deletes a deployment script.
+parameters:
+  - name: --subscription
+    short-summary: Subscription identifier used to delete a deployment script.
+    long-summary: >
+        If not provided, the command uses the user's logged-in default subscription.
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Delete a deployment script found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts delete --resource-group contoso-rg --name contosoBashScript
+"""
+
 helps['feature'] = """
 type: group
 short-summary: Manage resource provider features.

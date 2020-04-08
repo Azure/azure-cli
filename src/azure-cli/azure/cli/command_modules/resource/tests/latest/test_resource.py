@@ -670,6 +670,24 @@ class DeploymentThruUriTest(ScenarioTest):
                  checks=self.is_empty())
 
 
+class DeploymentScriptsTest(ScenarioTest):
+    def test_list_all_deployment_scripts(self):
+        self.cmd('deployment-scripts list', checks=self.is_not_empty())
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    def test_show_deployment_script(resource_group):
+        pass
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    def test_show_deployment_script_logs(resource_group):
+        pass
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    def test_delete_deployment_script(resource_group):
+        pass
+
+
+
 class ResourceMoveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_resource_move_dest', parameter_name='resource_group_dest', key='rg2')
     @ResourceGroupPreparer(name_prefix='cli_test_resource_move_source', key='rg1')
