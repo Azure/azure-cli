@@ -58,6 +58,7 @@ _property_change_type_to_weight = {
 def format_what_if_operation_result(what_if_operation_result):
     builder = ColoredStringBuilder()
     _format_preview_notice(builder)
+    _format_change_type_legend(builder, what_if_operation_result.changes)
     _format_resource_changes(builder, what_if_operation_result.changes)
     _format_resource_changes_stats(builder, what_if_operation_result.changes)
     return builder.build()
@@ -69,6 +70,40 @@ def _format_preview_notice(builder):
 You can help us improve the accuracy of the result by opening an issue here: https://aka.ms/WhatIfIssues."""
     )
     builder.append_line()
+
+
+def _format_change_type_legend(builder, resource_changes):
+    if not resource_changes:
+        return
+
+    def populate_change_type_set(property_changes):
+        if not property_changes:
+            return
+
+        for property_change in property_changes:
+            property_change_type = property_change.property_change_type
+            change_type_set.add(
+                ChangeType.modify if property_change_type == PropertyChangeType.array else property_change_type
+            )
+            populate_change_type_set(property_change.children)
+
+    change_type_set = set()
+
+    for resource_change in resource_changes:
+        change_type_set.add(resource_change.change_type)
+        populate_change_type_set(resource_change.delta)
+
+    change_types = sorted(change_type_set, key=lambda x: _change_type_to_weight[x])
+
+    builder.append("Resource and property changes are indicated with ")
+    builder.append_line("this symbol:" if len(change_types) == 1 else "these symbols:")
+
+    for change_type in change_types:
+        change_type_symbol = _change_type_to_symbol[change_type]
+        change_type_color = _change_type_to_color[change_type]
+        _format_indent(builder)
+        builder.append(change_type_symbol, change_type_color).append(Symbol.WHITE_SPACE)
+        builder.append_line(change_type.value.title())
 
 
 def _format_resource_changes_stats(builder, resource_changes):
@@ -102,7 +137,6 @@ def _format_change_type_count(change_type, count):
         return f"{count} no change"
 
     raise ValueError(f"Invalid ChangeType: {change_type}")
-
 
 
 def _format_resource_changes(builder, resource_changes):

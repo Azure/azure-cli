@@ -100,6 +100,50 @@ class TestFormatJson(unittest.TestCase):
 
 
 class TestFormatWhatIfOperationResult(unittest.TestCase):
+    def test_change_type_legend(self):
+        changes = [
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo1",
+                change_type=ChangeType.modify,
+            ),
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p2/bar",
+                change_type=ChangeType.create,
+            ),
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg2/providers/p1/foo2",
+                change_type=ChangeType.modify,
+            ),
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000002/providers/p3/foobar1",
+                change_type=ChangeType.ignore,
+            ),
+            WhatIfChange(
+                resource_id="/subscriptions/00000000-0000-0000-0000-000000000002/resourceGroups/rg3",
+                change_type=ChangeType.modify,
+                delta=[
+                    WhatIfPropertyChange(
+                        path="path.to.array.change",
+                        property_change_type=PropertyChangeType.array,
+                        children=[
+                            WhatIfPropertyChange(
+                                path="1", property_change_type=PropertyChangeType.delete, before=12345
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ]
+
+        expected = f"""Resource and property changes are indicated with these symbols:
+  {Color.ORANGE}-{Color.RESET} Delete
+  {Color.GREEN}+{Color.RESET} Create
+  {Color.PURPLE}~{Color.RESET} Modify
+  {Color.GRAY}*{Color.RESET} Ignore
+"""
+
+        self.assertIn(expected, format_what_if_operation_result(WhatIfOperationResult(changes=changes)))
+
     def test_resource_changes_stats(self):
         changes = [
             WhatIfChange(
@@ -128,8 +172,6 @@ class TestFormatWhatIfOperationResult(unittest.TestCase):
         result = format_what_if_operation_result(WhatIfOperationResult(changes=changes))
 
         self.assertTrue(result.endswith(expected))
-        
-
 
     def test_group_resources_changes_by_sorted_scope(self):
         changes = [
