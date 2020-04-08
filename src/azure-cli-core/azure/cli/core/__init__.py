@@ -96,9 +96,24 @@ class AzCli(CLI):
         if updates_available == -1:
             logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
         elif updates_available:
-            logger.warning('You have %i updates available. Consider updating your CLI installation. '
-                           'Instructions can be found at https://docs.microsoft.com/en-us/cli/azure/install-azure-cli',
-                           updates_available)
+            warning_msg = 'You have %i updates available. Consider updating your CLI installation'
+            from azure.cli.core._environment import _ENV_AZ_INSTALLER
+            installer = os.getenv(_ENV_AZ_INSTALLER)
+            if installer == 'RPM':
+                warning_msg += ' with \'sudo yum update azure-cli\''
+            elif installer == 'DEB':
+                warning_msg += ' with \'sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli\''
+            elif installer == 'HOMEBREW':
+                warning_msg += ' with \'brew update && brew upgrade azure-cli\''
+            elif installer == 'PIP':
+                warning_msg += ' with \'pip install --upgrade azure-cli\''
+            elif installer == 'DOCKER':
+                warning_msg += ' with \'docker pull mcr.microsoft.com/azure-cli\''
+            elif installer == 'MSI':
+                warning_msg += " with the latest MSI https://aka.ms/installazurecliwindows"
+            else:
+                warning_msg += '. Instructions can be found at https://docs.microsoft.com/en-us/cli/azure/install-azure-cli' # pylint: disable=line-too-long
+            logger.warning(warning_msg, updates_available)
         else:
             print('Your CLI is up-to-date.')
 
