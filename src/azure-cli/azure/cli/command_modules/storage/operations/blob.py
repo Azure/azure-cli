@@ -6,7 +6,7 @@
 from __future__ import print_function
 
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
@@ -414,6 +414,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
+        from datetime import timezone
         delete_blobs = []
         if_modified_since_utc = if_modified_since.replace(tzinfo=timezone.utc) if if_modified_since else None
         if_unmodified_since_utc = if_unmodified_since.replace(tzinfo=timezone.utc) if if_unmodified_since else None
