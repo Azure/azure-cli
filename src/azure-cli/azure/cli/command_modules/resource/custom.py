@@ -1132,6 +1132,26 @@ def delete_deployment_at_tenant_scope(cmd, deployment_name):
     return rcf.deployments.delete_at_tenant_scope(deployment_name)
 
 
+def cancel_deployment_at_subscription_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.cancel_at_subscription_scope(deployment_name)
+
+
+def cancel_deployment_at_resource_group(cmd, resource_group_name, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.cancel(resource_group_name, deployment_name)
+
+
+def cancel_deployment_at_management_group(cmd, management_group_id, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.cancel_at_management_group_scope(management_group_id, deployment_name)
+
+
+def cancel_deployment_at_tenant_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.cancel_at_tenant_scope(deployment_name)
+
+
 # pylint: disable=unused-argument
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
