@@ -16,7 +16,12 @@ def multi_transformers(*transformers):
 
 
 def filter_out_managed_resources(output):
-    return [_ for _ in output if not getattr(_, 'managed')] if output else output
+    new_output = []
+    for item in output:
+        managed = item.get('managed') if isinstance(item, dict) else getattr(item, 'managed')
+        if not managed:
+            new_output.append(item)
+    return new_output
 
 
 def _extract_subresource_name_from_single_output(output, id_parameter):
@@ -38,9 +43,9 @@ def extract_subresource_name(id_parameter='id'):
     return _extract_subresource_name
 
 
-def transform_single_key(key):
-    if isinstance(key, dict):
-        return key
+def transform_key_bundle(key_bundle):
+    if isinstance(key_bundle, dict):
+        return key_bundle
 
     def encode_bytes(b):
         if isinstance(b, (bytes, bytearray)):
@@ -48,22 +53,79 @@ def transform_single_key(key):
 
     result = {
         'attributes': {
-            'created': key.properties.created_on,
-            'enabled': key.properties.enabled,
-            'expires': key.properties.expires_on,
-            'notBefore': key.properties.not_before,
-            'recoveryLevel': key.properties.recovery_level,
-            'updated': key.properties.updated_on
+            'created': key_bundle.properties.created_on,
+            'enabled': key_bundle.properties.enabled,
+            'expires': key_bundle.properties.expires_on,
+            'notBefore': key_bundle.properties.not_before,
+            'recoveryLevel': key_bundle.properties.recovery_level,
+            'updated': key_bundle.properties.updated_on
         },
         'key': {
             k: encode_bytes(v)
-            for k, v in key.key.__dict__.items()
+            for k, v in key_bundle.key.__dict__.items()
             if not callable(v) and not k.startswith('_')
         },
-        'managed': key.properties.managed,
-        'tags': key.properties.tags
+        'managed': key_bundle.properties.managed,
+        'tags': key_bundle.properties.tags,
+        'name': key_bundle.properties.name
     }
-    result['key']['keyOps'] = key.key_operations
-    result['key']['kid'] = key.id
+    result['key']['keyOps'] = key_bundle.key_operations
+    result['key']['kid'] = key_bundle.id
 
     return result
+
+
+def transform_deleted_key(deleted_key):
+    if isinstance(deleted_key, dict):
+        return deleted_key
+
+    result = {
+        'attributes': {
+            'created': deleted_key.properties.created_on,
+            'enabled': deleted_key.properties.enabled,
+            'expires': deleted_key.properties.expires_on,
+            'notBefore': deleted_key.properties.not_before,
+            'recoveryLevel': deleted_key.properties.recovery_level,
+            'updated': deleted_key.properties.updated_on
+        },
+        'kid': deleted_key.properties.id,
+        'managed': deleted_key.properties.managed,
+        'tags': deleted_key.properties.tags,
+        'name': deleted_key.properties.name,
+        'deletedDate': deleted_key.deleted_date,
+        'recoveryId': deleted_key.recovery_id,
+        'scheduledPurgeDate': deleted_key.scheduled_purge_date
+    }
+
+    return result
+
+
+def transform_key_property(key_property):
+    if isinstance(key_property, dict):
+        return key_property
+
+    result = {
+        'attributes': {
+            'created': key_property.created_on,
+            'enabled': key_property.enabled,
+            'expires': key_property.expires_on,
+            'notBefore': key_property.not_before,
+            'recoveryLevel': key_property.recovery_level,
+            'updated': key_property.updated_on
+        },
+        'kid': key_property.id,
+        'managed': key_property.managed,
+        'tags': key_property.tags,
+        'name': key_property.name
+    }
+
+    return result
+
+
+def transform_key_property_list(deleted=False):
+    def inner(key_property_list):
+        new_list = []
+        for key_property in list(key_property_list):
+            new_list.append(transform_deleted_key(key_property) if deleted else transform_key_property(key_property))
+        return new_list
+    return inner
