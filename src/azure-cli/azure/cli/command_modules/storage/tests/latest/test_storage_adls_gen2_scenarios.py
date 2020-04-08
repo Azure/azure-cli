@@ -15,31 +15,55 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_access_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
+        #TODO: Change to create_file_system() when ready
         filesystem = self.create_container(account_info)
-        self.kwargs = {
-            "fs": filesystem,
-            "dir": self.create_random_name(prefix="dir", length=12),
-            "file": self.create_random_name(prefix="file", length=12)
-        }
-        # Set access control
-        acl = "user::rwx,user:john.doe@contoso:rwx,group::r--,other::---,mask::rwx"
-        self.storage_cmd('storage fs access set -f {} -p / --acl {}', account_info, filesystem, acl)
-        self.storage_cmd('storage fs access show -f {} -p /', account_info, filesystem).assert_with_checks(
-            JMESPathCheck('acl', acl))
 
-        # Set permissions
-        permissions = "rwxrwxrwx"
-        self.storage_cmd('storage fs access set -f {} -p / --permissions {}', account_info, filesystem, permissions)
-        self.storage_cmd('storage fs access show -f {} -p /', account_info, filesystem).assert_with_checks(
-            JMESPathCheck('permissions', permissions))
+        dir = self.create_random_name(prefix="dir", length=12),
+        subdir = self.create_random_name(prefix="subdir", length=12)
+        subpath = '/'.join([dir, subdir])
 
-        # Set owner
-        owner = "john.doe@contoso"
-        self.storage_cmd('storage fs access set -f {} -p / --owner {}', account_info, filesystem, owner)
-        self.storage_cmd('storage fs access show -f {} -p /', account_info, filesystem).assert_with_checks(
-            JMESPathCheck('permissions', permissions))
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, dir, filesystem)
+        # Create Directory
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, dir, filesystem)
+
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, dir, filesystem)
+        self.storage_cmd('storage fs directory show -n {} -f {}', account_info, dir, filesystem)
+
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, subpath, filesystem)
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, subpath, filesystem)
+
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, subpath, filesystem)
+        self.storage_cmd('storage fs directory show -n {} -f {}', account_info, subpath, filesystem)
+
+        new_dir = '/'.join([filesystem, 'newdir'])
+        self.storage_cmd('storage fs directory move -n {} -f {} -d {}', account_info, subpath, filesystem, new_dir)
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, subpath, filesystem)
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, 'newdir', filesystem)
+
+        self.storage_cmd('storage fs directory list -f {}', account_info, filesystem)
+
+        self.storage_cmd('storage fs directory list --path {} -f {}', account_info, dir, filesystem)
+
+        self.storage_cmd('storage fs directory delete -n {} -f {} -y', account_info, dir, filesystem)
+
+        self.storage_cmd('storage fs directory list -f {}', account_info, filesystem)
+
 
         # Set owning group
         group = "john.doe@contoso"
         self.storage_cmd('storage fs access set -f {} -p / --group {}', account_info, filesystem, group) \
             .assert_with_checks(JMESPathCheck('group', group))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_adls_directory_scenarios(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        self.kwargs = {
+            "fs": filesystem,
+            "dir": self.create_random_name(prefix="dir", length=12),
+            "subdir": self.create_random_name(prefix="subdir", length=12)
+        }
+
+        # Create Directory
+        self.storage_cmd('storage fs directory create -n {dir} -f {subdir}', account_info)
