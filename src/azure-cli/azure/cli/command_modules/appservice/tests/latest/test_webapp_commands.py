@@ -1802,6 +1802,24 @@ class FunctionAppOnLinux(ScenarioTest):
                 "[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~12')
         ])
 
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_dotnet_consumption(self, resource_group, storage_account):
+        functionapp = self.create_random_name(
+            prefix='functionapp-linux', length=24)
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --functions-version 3 --runtime dotnet --os-type linux'
+                 .format(resource_group, functionapp, storage_account), checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'dotnet|3.1')
+        ])
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
+            JMESPathCheck(
+                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3')
+        ])
+
 
 class FunctionAppServicePlan(ScenarioTest):
     @ResourceGroupPreparer(location='westus')
