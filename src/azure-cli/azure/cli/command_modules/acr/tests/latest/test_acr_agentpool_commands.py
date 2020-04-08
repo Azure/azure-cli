@@ -14,7 +14,7 @@ class AcrAgentPoolCommandsTests(ScenarioTest):
             'registry_name': self.create_random_name('clireg', 20),
             'agents1_name': 'agents1',
             'agents2_name': 'agents2',
-            'rg_loc': 'westus',
+            'rg_loc': 'eastus2euap',
             'sku': 'Premium',
             'vnet_name': 'vnets2',
             'subnet_name': 'subnets2',
@@ -32,38 +32,36 @@ class AcrAgentPoolCommandsTests(ScenarioTest):
                  checks=[self.check('name', '{agents1_name}'),
                          self.check('count', 1),
                          self.check('tier', 'S1'),
-                         self.check('virtualNetworkSubnetResourceId', 'null'),
+                         self.check('virtualNetworkSubnetResourceId', 'None'),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('os', 'linux'),
+                         self.check('os', 'Linux'),
                          self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', '{rg_loc}')])
+                         self.check('resourceGroup', '{rg}')])
 
         # Create a S2 tier agentpool in a VNET.
         response = self.cmd('network vnet create -n {vnet_name} --subnet-name {subnet_name} -g {rg} -l {rg_loc}',
-                            checks=[self.check('name', '{vnet_name}'),
-                                    self.check('location', '{rg_loc}'),
-                                    self.check('provisioningState', 'Succeeded'),
-                                    self.check('subnets[0].name', '{subnet_name}'),
-                                    self.check('subnets[0].provisioningState', 'Succeeded')]).get_output_in_json()
-
+                            checks=[self.check('newVNet.name', '{vnet_name}'),
+                                    self.check('newVNet.location', '{rg_loc}'),
+                                    self.check('newVNet.provisioningState', 'Succeeded'),
+                                    self.check('newVNet.subnets[0].name', '{subnet_name}'),
+                                    self.check('newVNet.subnets[0].provisioningState', 'Succeeded')]).get_output_in_json()
         self.kwargs.update({
-            'subnet_id': response['subnets[0].id']
+            'subnet_id': response['newVNet']['subnets'][0]['id']
         })
-
         self.cmd('acr agentpool create -n {agents2_name} -r {registry_name} --tier s2 --subnet-id {subnet_id}',
                  checks=[self.check('name', '{agents2_name}'),
                          self.check('count', 1),
                          self.check('tier', 'S2'),
                          self.check('virtualNetworkSubnetResourceId', '{subnet_id}'),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('os', 'linux'),
+                         self.check('os', 'Linux'),
                          self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', '{rg_loc}')])
+                         self.check('resourceGroup', '{rg}')])
 
         # list agentpools
         self.cmd('acr agentpool list -r {registry_name}',
-                 checks=[self.check('[0].name', '{agents1_name}'),
-                         self.check('[1].name', '{agents2_name}')])
+                 checks=[self.check('[0].name', '{agents2_name}'),
+                         self.check('[1].name', '{agents1_name}')])
 
         # show agentpool properties
         self.cmd('acr agentpool show -n {agents1_name} -r {registry_name}',
@@ -74,11 +72,11 @@ class AcrAgentPoolCommandsTests(ScenarioTest):
                  checks=[self.check('name', '{agents1_name}'),
                          self.check('count', 2),
                          self.check('tier', 'S1'),
-                         self.check('virtualNetworkSubnetResourceId', 'null'),
+                         self.check('virtualNetworkSubnetResourceId', 'None'),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('os', 'linux'),
+                         self.check('os', 'Linux'),
                          self.check('location', '{rg_loc}'),
-                         self.check('resourceGroup', '{rg_loc}')])
+                         self.check('resourceGroup', '{rg}')])
 
         # test agentpool delete
         self.cmd('acr agentpool delete -n {agents2_name} -r {registry_name} -y')
