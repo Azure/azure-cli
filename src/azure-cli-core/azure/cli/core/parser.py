@@ -8,6 +8,8 @@ from __future__ import print_function
 import sys
 import difflib
 
+import logging
+
 import argparse
 import argcomplete
 
@@ -15,6 +17,7 @@ import azure.cli.core.telemetry as telemetry
 from azure.cli.core.azlogging import CommandLoggerContext
 from azure.cli.core.extension import get_extension
 from azure.cli.core.commands import ExtensionCommandSource
+from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
 
 from knack.log import get_logger
@@ -53,11 +56,13 @@ class AzCliCommandParser(CLICommandParser):
     """ArgumentParser implementation specialized for the Azure CLI utility."""
 
     @staticmethod
-    def recommendation_provider(version, command, parameters, extension):
-        pass
+    def recommendation_provider(version, command, parameters, extension): # pylint: disable=unused-argument
+        return []
 
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
         self.command_source = kwargs.pop('_command_source', None)
+        self._args = kwargs.pop('_args', None)
+        self._argv = kwargs.pop('_argv', None)
         self.subparser_map = {}
         self.specified_arguments = []
         super(AzCliCommandParser, self).__init__(cli_ctx, cli_help=cli_help, **kwargs)
@@ -94,7 +99,9 @@ class AzCliCommandParser(CLICommandParser):
                                                   help_file=metadata.help,
                                                   formatter_class=fc,
                                                   cli_help=self.cli_help,
-                                                  _command_source=metadata.command_source)
+                                                  _command_source=metadata.command_source,
+                                                  _args=self._args,
+                                                  _argv=self._argv)
             self.subparser_map[command_name] = command_parser
             command_parser.cli_ctx = self.cli_ctx
             command_validator = metadata.validator
@@ -145,7 +152,7 @@ class AzCliCommandParser(CLICommandParser):
         with CommandLoggerContext(logger):
             logger.error('%(prog)s: error: %(message)s', args)
         self.print_usage(sys.stderr)
-        self._make_failure_recovery_recommendations(*self._get_failure_recovery_arguments())
+        self._print_failure_recovery_recommendations()
         self.exit(2)
 
     def format_help(self):
@@ -171,29 +178,64 @@ class AzCliCommandParser(CLICommandParser):
                                  default_completer=lambda _: ())
 
     @classmethod
-    def _make_failure_recovery_recommendations(cls, *args, **kwargs):
+    def _get_failure_recovery_recommendations(cls, *args, **kwargs):
+        from azure.cli.core import __version__ as core_version
+
+        recommendations = []
+
         if telemetry.is_telemetry_enabled():
-            cls.recommendation_provider(telemetry._get_core_version(), *args, **kwargs)  # pylint: disable=protected-access
+            recommendations = cls.recommendation_provider(core_version, *args, **kwargs)
+
+        return recommendations
 
     def _get_failure_recovery_arguments(self, action=None):
+        # Strip the leading "az " and any extraneous whitespace.
         command = self.prog[3:].strip()
-        parameters = self.cli_ctx.data['safe_params'] if self.cli_ctx and self.cli_ctx.data else None
+        parameters = None
         extension = None
 
-        session = telemetry._session  # pylint: disable=protected-access
+        # Extract only parameter names to ensure GPDR compliance
+        def extract_safe_params(parameters):
+            return AzCliCommandInvoker._extract_parameter_names(parameters) # pylint: disable=protected-access
 
-        if not command and session.raw_command:
-            command = session.raw_command
-        if not parameters and session.parameters:
-            try:
-                command = ','.join(session.parameters)
-            except Exception:  # pylint: disable=broad-except
-                pass
+        # Check for extension name attribute
+        def has_extension_name(command_source):
+            is_extension_command_source = isinstance(command_source, ExtensionCommandSource)
+            has_extension_name = False
 
-        if action and action.dest == '_subcommand':
-            for _, context in action.choices.items():
-                if isinstance(context.command_source, ExtensionCommandSource):
-                    extension = context.command_source.extension_name
+            if is_extension_command_source:
+                has_extension_name = hasattr(command_source, 'extension_name')
+
+            return is_extension_command_source and has_extension_name
+
+        # If we have a list of unprocessed arguments...
+        if isinstance(self._args, list):
+            parameters = extract_safe_params(self._args)
+        # If the arguments have been processed into a namespace...
+        elif isinstance(self._args, argparse.Namespace):
+            # Select the parsed command.
+            if hasattr(self._args, 'command'):
+                command = self._args.command
+        # If we have a list of unprocessed arguments in argv instead...
+        if isinstance(self._argv, list):
+            parameters = extract_safe_params(self._argv)
+
+        # If we can retrieve the extension from the current parser's command source...
+        if has_extension_name(self.command_source):
+            extension = self.command_source.extension_name
+        # Otherwise, the command may have not been in a command group. The command source will not be
+        # set in this case.
+        elif action and action.dest == '_subcommand':
+            # Get all parsers in the set of possible actions.
+            parsers = list(action.choices.values())
+            parser = parsers[0] if parsers else None
+            # If the first parser comes from an extension...
+            if parser and has_extension_name(parser.command_source):
+                # We're looking for a subcommand under an extension command group. Set the
+                # extension to reflect this.
+                extension = parser.command_source.extension_name
+        # Otherwise, only set the extension if every subparser comes from an extension. This occurs
+        # when an unrecognized argument is passed to a command from an extension.
         elif isinstance(self.subparser_map, dict):
             for _, context in self.subparser_map.items():
                 if isinstance(context.command_source, ExtensionCommandSource):
@@ -202,13 +244,37 @@ class AzCliCommandParser(CLICommandParser):
                     extension = None
                     break
 
-        return (command, parameters, extension)
+        if logger.isEnabledFor(logging.DEBUG):
+            format_str = '\n\t'.join([
+                "AzCliCommandParser._get_failure_recovery_arguments(command, parameters, extension):",
+                "Command: %s",
+                "Parameters: %s",
+                "Extension: %s"
+            ])
+
+            logger.debug(format_str, command, parameters, extension)
+
+        return command, parameters, extension
+
+    def _print_failure_recovery_recommendations(self, action=None):
+        # Print failure recovery reocmmendations to stderr.
+        failure_recovery_info = self._get_failure_recovery_arguments(action)
+        recovery_recommendations = self._get_failure_recovery_recommendations(*failure_recovery_info)
+
+        if recovery_recommendations:
+            recommendations = '\n'.join(recovery_recommendations)
+            print(recommendations, file=sys.stderr)
 
     def _get_values(self, action, arg_strings):
         value = super(AzCliCommandParser, self)._get_values(action, arg_strings)
         if action.dest and isinstance(action.dest, str) and not action.dest.startswith('_'):
             self.specified_arguments.append(action.dest)
         return value
+
+    def parse_known_args(self, args=None, namespace=None):
+        self._args = args
+        self._args, self._argv = super().parse_known_args(args=args, namespace=namespace)
+        return self._args, self._argv
 
     def _check_value(self, action, value):
         # Override to customize the error message when a argument is not among the available choices
@@ -241,5 +307,5 @@ class AzCliCommandParser(CLICommandParser):
                 suggestion_msg += '\n'.join(['\t' + candidate for candidate in candidates])
                 print(suggestion_msg, file=sys.stderr)
 
-            self._make_failure_recovery_recommendations(*self._get_failure_recovery_arguments(action))
+            self._print_failure_recovery_recommendations(action=action)
             self.exit(2)
