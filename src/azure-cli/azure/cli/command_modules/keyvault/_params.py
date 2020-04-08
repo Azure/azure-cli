@@ -180,7 +180,14 @@ def load_arguments(self, _):
             with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
                 c.argument('include_pending', arg_type=get_three_state_flag())
 
-        for cmd in ['list-versions', 'show']:
+        # Track 2 begin
+        for cmd in ['create']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                c.argument('name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
+                           id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.')
+
+        for cmd in ['delete', 'list-versions', 'set-attributes', 'show']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 c.extra('name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
                         id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
@@ -189,6 +196,8 @@ def load_arguments(self, _):
         for cmd in ['list', 'list-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 c.extra('vault_base_url', help='Name of the key vault.', required=True)
+
+        # Track 2 end
 
     # endregion
 

@@ -14,7 +14,8 @@ from ._client_factory import (
     keyvault_data_plane_track2_certificate_factory)
 
 from ._transformers import (
-    filter_out_managed_resources, multi_transformers, transform_key_bundle, transform_key_property_list)
+    filter_out_managed_resources, multi_transformers, transform_key_bundle, transform_key_property_list,
+    transform_deleted_key)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -134,11 +135,12 @@ def load_command_table(self, _):
                            transform=multi_transformers(transform_key_property_list(), filter_out_managed_resources))
         g.keyvault_command('list-versions', 'list_properties_of_key_versions', transform=transform_key_property_list())
         g.keyvault_command('list-deleted', 'list_deleted_keys', transform=transform_key_property_list(deleted=True))
-        g.keyvault_custom('create', 'create_key', doc_string_source=keys_data_doc_string.format('create_key'))
-        g.keyvault_command('set-attributes', 'update_key')
+        g.keyvault_custom('create', 'create_key', doc_string_source=keys_data_doc_string.format('create_key'),
+                          transform=transform_key_bundle)
+        g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_bundle)
         g.keyvault_command('show', 'get_key', transform=transform_key_bundle)
         g.keyvault_command('show-deleted', 'get_deleted_key')
-        g.keyvault_command('delete', 'delete_key')
+        g.keyvault_command('delete', 'begin_delete_key', supports_no_wait=True, transform=transform_deleted_key)
         g.keyvault_command('purge', 'purge_deleted_key')
         g.keyvault_command('recover', 'recover_deleted_key')
         g.keyvault_custom('backup', 'backup_key', doc_string_source=keys_data_doc_string.format('backup_key'))
