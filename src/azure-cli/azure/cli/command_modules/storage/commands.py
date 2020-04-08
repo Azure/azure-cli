@@ -184,7 +184,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('show', 'get_logging',
                           table_transformer=transform_logging_list_output,
                           exception_handler=show_exception_handler)
-        g.storage_command('off', 'disable_logging')
+        g.storage_command('off', 'disable_logging', is_preview=True)
 
     with self.command_group('storage metrics', get_custom_sdk('metrics', multi_service_properties_factory)) as g:
         from ._transformers import transform_metrics_list_output
