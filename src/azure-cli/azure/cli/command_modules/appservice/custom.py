@@ -58,7 +58,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
 from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
-                         FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT)
+                         FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT,
+                         DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION)
 
 logger = get_logger(__name__)
 
@@ -2593,11 +2594,13 @@ def _get_extension_version_functionapp(functions_version):
 
 
 def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):
-    if runtime == 'dotnet':
-        return runtime.upper()
     if runtime_version is None:
         runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]
-    return '{}|{}'.format(runtime.upper(), runtime_version)
+    if runtime == 'dotnet':
+        runtime_version = DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION[runtime_version]
+    else:
+        runtime = runtime.upper()
+    return '{}|{}'.format(runtime, runtime_version)
 
 
 def _get_website_node_version_functionapp(functions_version, runtime, runtime_version):
