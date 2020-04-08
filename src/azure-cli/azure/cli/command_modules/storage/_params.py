@@ -341,7 +341,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=get_permission_validator(t_account_permissions))
         c.ignore('sas_token')
 
-    for item in ['update', 'off']:
+    for item in ['show', 'off']:
         with self.argument_context('storage logging {}'.format(item)) as c:
             c.extra('services', validator=get_char_options_validator('bqt', 'services'), default='bqt')
 
