@@ -196,7 +196,7 @@ def validate_key(namespace):
 def validate_resolve_keyvault(namespace):
     if namespace.resolve_keyvault:
         identifier = getattr(namespace, 'destination', None)
-        if identifier and identifier != "file" and namespace.resolve_keyvault:
+        if identifier and identifier != "file":
             raise CLIError("--resolve-keyvault is only applicable for exporting to file.")
 
 
