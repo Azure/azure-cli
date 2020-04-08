@@ -56,7 +56,7 @@ class AzCliCommandParser(CLICommandParser):
     """ArgumentParser implementation specialized for the Azure CLI utility."""
 
     @staticmethod
-    def recommendation_provider(version, command, parameters, extension): # pylint: disable=unused-argument
+    def recommendation_provider(version, command, parameters, extension):  # pylint: disable=unused-argument
         return []
 
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
@@ -196,7 +196,7 @@ class AzCliCommandParser(CLICommandParser):
 
         # Extract only parameter names to ensure GPDR compliance
         def extract_safe_params(parameters):
-            return AzCliCommandInvoker._extract_parameter_names(parameters) # pylint: disable=protected-access
+            return AzCliCommandInvoker._extract_parameter_names(parameters)  # pylint: disable=protected-access
 
         # Check for extension name attribute
         def has_extension_name(command_source):
@@ -257,7 +257,7 @@ class AzCliCommandParser(CLICommandParser):
         return command, parameters, extension
 
     def _print_failure_recovery_recommendations(self, action=None):
-        # Print failure recovery reocmmendations to stderr.
+        # Print failure recovery recommendations to stderr.
         failure_recovery_info = self._get_failure_recovery_arguments(action)
         recovery_recommendations = self._get_failure_recovery_recommendations(*failure_recovery_info)
 
