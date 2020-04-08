@@ -157,13 +157,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('server_name', options_list=['--name', '-s'])
             c.argument('kid', options_list=['--kid', '-k'], help='The Azure Key Vault key identifier of the server key. An example key identifier is "https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
 
-    for scope in ['mysql server key', 'postgres server key']:
-        with self.argument_context(scope) as c:
-            c.argument('server_name', options_list=['--name', '-s'])
-            c.argument('kid', options_list=['--kid', '-k'], help='The Azure Key Vault key identifier of the server key. An example key identifier is "https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
-
     for scope in ['mysql server ad-admin', 'postgres server ad-admin']:
         with self.argument_context(scope) as c:
-            c.argument('server_name', options_list=['--name', '-s'])
+            c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Azure AD administrator user or group.')
             c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Azure AD administrator.')

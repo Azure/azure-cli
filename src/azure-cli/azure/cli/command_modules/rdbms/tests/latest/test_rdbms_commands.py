@@ -742,34 +742,34 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         user = 'DSEngAll'
         user2 = 'TestUser'
 
-        self.cmd('{} server ad-admin create --name {} -g {} -i {} -u {}'
+        self.cmd('{} server ad-admin create --server-name {} -g {} -i {} -u {}'
                  .format(database_engine, server, resource_group, oid, user),
                  checks=[
                      self.check('login', user),
                      self.check('sid', oid)])
 
-        self.cmd('{} server ad-admin show --name {} -g {}'
+        self.cmd('{} server ad-admin show --server-name {} -g {}'
                  .format(database_engine, server, resource_group),
                  checks=[
                      self.check('login', user),
                      self.check('sid', oid)])
 
-        self.cmd('{} server ad-admin list --name {} -g {}'
+        self.cmd('{} server ad-admin list --server-name {} -g {}'
                  .format(database_engine, server, resource_group),
                  checks=[
                      self.check('[0].login', user),
                      self.check('[0].sid', oid)])
 
-        self.cmd('{} server ad-admin create --name {} -g {} -i {} -u {} --no-wait'
+        self.cmd('{} server ad-admin create --server-name {} -g {} -i {} -u {} --no-wait'
                  .format(database_engine, server, resource_group, oid2, user2))
 
-        self.cmd('{} server ad-admin wait --name {} -g {} --created'
+        self.cmd('{} server ad-admin wait --server-name {} -g {} --created'
                  .format(database_engine, server, resource_group))
 
-        self.cmd('{} server ad-admin delete --name {} -g {} --yes'
+        self.cmd('{} server ad-admin delete --server-name {} -g {} --yes'
                  .format(database_engine, server, resource_group))
 
-        self.cmd('{} server ad-admin list --name {} -g {}'
+        self.cmd('{} server ad-admin list --server-name {} -g {}'
                  .format(database_engine, server, resource_group),
                  checks=[
                      self.check('[0].login', None),
