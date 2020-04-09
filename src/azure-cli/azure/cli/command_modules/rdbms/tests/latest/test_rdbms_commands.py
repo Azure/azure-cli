@@ -276,6 +276,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
         self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
+        self._test_aad_admin(resource_group, server, database_engine)
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
@@ -288,6 +289,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
         self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('pgsql', 24))
+        self._test_aad_admin(resource_group, server, database_engine)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
         firewall_rule_1 = 'rule1'
@@ -694,7 +696,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
-        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true --enable-purge-protection true'
+        self.cmd('keyvault create -g {} -n {} --location eastus --enable-soft-delete true --enable-purge-protection true'
                  .format(resource_group, vault_name))
 
         # create key
@@ -735,6 +737,45 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server key list -g {} -s {}'
                  .format(database_engine, resource_group, server),
                  checks=[JMESPathCheck('length(@)', 0)])
+
+    def _test_aad_admin(self, resource_group, server, database_engine):
+        oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
+        oid2 = 'e4d43337-d52c-4a0c-b581-09055e0359a0'
+        user = 'DSEngAll'
+        user2 = 'TestUser'
+
+        self.cmd('{} server ad-admin create --server-name {} -g {} -i {} -u {}'
+                 .format(database_engine, server, resource_group, oid, user),
+                 checks=[
+                     self.check('login', user),
+                     self.check('sid', oid)])
+
+        self.cmd('{} server ad-admin show --server-name {} -g {}'
+                 .format(database_engine, server, resource_group),
+                 checks=[
+                     self.check('login', user),
+                     self.check('sid', oid)])
+
+        self.cmd('{} server ad-admin list --server-name {} -g {}'
+                 .format(database_engine, server, resource_group),
+                 checks=[
+                     self.check('[0].login', user),
+                     self.check('[0].sid', oid)])
+
+        self.cmd('{} server ad-admin create --server-name {} -g {} -i {} -u {} --no-wait'
+                 .format(database_engine, server, resource_group, oid2, user2))
+
+        self.cmd('{} server ad-admin wait --server-name {} -g {} --created'
+                 .format(database_engine, server, resource_group))
+
+        self.cmd('{} server ad-admin delete --server-name {} -g {} --yes'
+                 .format(database_engine, server, resource_group))
+
+        self.cmd('{} server ad-admin list --server-name {} -g {}'
+                 .format(database_engine, server, resource_group),
+                 checks=[
+                     self.check('[0].login', None),
+                     self.check('[0].sid', None)])
 
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
