@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 import re
 
 _subscription_pattern = r"^\/?subscriptions\/(?P<subscription_id>[a-f0-9-]+)"

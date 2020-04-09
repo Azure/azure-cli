@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 from ctypes import WinDLL, WinError, get_last_error, byref
 from ctypes.wintypes import HANDLE, LPDWORD, DWORD
 from msvcrt import get_osfhandle
@@ -49,10 +54,10 @@ def _update_conout_mode(mode):
 def enable_vt_mode():
     """Enables virtual terminal mode for Windows 10 console.
 
-    Windows 10 supports VT (virtual terminal) /  ANSI escape sequences since version 1607.
+    Windows 10 supports VT (virtual terminal) / ANSI escape sequences since version 1607.
 
     cmd.exe enables VT mode, but only for itself. It disables VT mode before starting other programs,
-    and also at shutdown (Code taken and modified from: https://bugs.python.org/issue30075).
+    and also at shutdown (See: https://bugs.python.org/issue30075).
     """
     try:
         return _update_conout_mode(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
