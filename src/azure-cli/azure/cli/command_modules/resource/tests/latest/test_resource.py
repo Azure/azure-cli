@@ -512,7 +512,7 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60)
         })
 
-        self.cmd('group deployment create --name cli_test_resource_group_deployment --location WestUS', checks=[
+        self.cmd('group create --name cli_test_resource_group_deployment --location WestUS', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
