@@ -1450,6 +1450,18 @@ examples:
       text: az storage fs access show -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
 """
 
+helps['storage fs create'] = """
+type: command
+short-summary: Create file system for Azure Data Lake Storage Gen2 account.
+examples:
+  - name: Create file system for Azure Data Lake Storage Gen2 account.
+    text: |
+        az storage fs create -n fsname --account-name mystorageaccount --account-key 0000-0000
+  - name: Create file system for Azure Data Lake Storage Gen2 account and enable public access.
+    text: |
+        az storage fs create -n fsname --public-access --account-name mystorageaccount --account-key 0000-0000
+"""
+
 helps['storage fs delete'] = """
 type: command
 short-summary: Delete a file system in ADLS Gen2 account.
@@ -1537,16 +1549,13 @@ examples:
         az storage fs file append --content "test content test" -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
 """
 
-helps['storage fs create'] = """
+helps['storage fs file create'] = """
 type: command
-short-summary: Create file system for Azure Data Lake Storage Gen2 account.
+short-summary: Create a new file in ADLS Gen2 file system.
 examples:
-  - name: Create file system for Azure Data Lake Storage Gen2 account.
+  - name: Create a new file in ADLS Gen2 file system.
     text: |
-        az storage fs create -n fsname --account-name mystorageaccount --account-key 0000-0000
-  - name: Create file system for Azure Data Lake Storage Gen2 account and enable public access.
-    text: |
-        az storage fs create -n fsname --public-access --account-name mystorageaccount --account-key 0000-0000
+        az storage fs file create -p dir/a.txt -f fsname --account-name mystorageaccount --account-key 0000-0000
 """
 
 helps['storage fs file delete'] = """

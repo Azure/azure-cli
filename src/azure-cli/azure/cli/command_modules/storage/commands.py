@@ -680,6 +680,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage fs file', adls_file_sdk,
                             custom_command_type=get_custom_sdk('fs_file', cf_adls_file)) as g:
         from ._transformers import transform_storage_list_output, create_boolean_result_output_transformer
+        g.storage_command_oauth('create', 'create_file')
         g.storage_custom_command_oauth('upload', 'upload_file')
         g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_custom_command_oauth('append', 'append_file')
