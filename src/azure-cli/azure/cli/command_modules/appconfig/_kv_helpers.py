@@ -243,7 +243,7 @@ def __read_kv_from_config_store(cmd,
                                 datetime=None,
                                 fields=None,
                                 top=None,
-                                all_=False,
+                                all_=True,
                                 resolve_keyvault=False,
                                 prefix_to_remove="",
                                 prefix_to_add=""):
