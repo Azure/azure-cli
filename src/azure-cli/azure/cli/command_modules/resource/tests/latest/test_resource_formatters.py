@@ -388,3 +388,32 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
         result = format_what_if_operation_result(WhatIfOperationResult(changes=changes))
 
         self.assertIn(expected, result)
+
+    def test_no_color_mode(self):
+        changes = [
+            WhatIfChange(
+                resource_id="subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
+                change_type=ChangeType.delete,
+                before={
+                    "apiVersion": "2020-04-01",
+                    "numberValue": 1.2,
+                    "booleanValue": True,
+                    "stringValue": "The quick brown fox jumps over the lazy dog.",
+                },
+            ),
+        ]
+
+        expected = f"""
+Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
+
+  - p1/foo [2020-04-01]
+
+      apiVersion:   "2020-04-01"
+      numberValue:  1.2
+      booleanValue: true
+      stringValue:  "The quick brown fox jumps over the lazy dog."
+"""
+
+        result = format_what_if_operation_result(WhatIfOperationResult(changes=changes), False)
+
+        self.assertIn(expected, result)

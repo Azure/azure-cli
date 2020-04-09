@@ -55,8 +55,8 @@ _property_change_type_to_weight = {
 }
 
 
-def format_what_if_operation_result(what_if_operation_result):
-    builder = ColoredStringBuilder()
+def format_what_if_operation_result(what_if_operation_result, enable_color=True):
+    builder = ColoredStringBuilder(enable_color)
     _format_preview_notice(builder)
     _format_change_type_legend(builder, what_if_operation_result.changes)
     _format_resource_changes(builder, what_if_operation_result.changes)
@@ -383,8 +383,8 @@ def _should_consider_property_change_path(property_change):
     return bool(property_change.children)
 
 
-def format_json(value):
-    builder = ColoredStringBuilder()
+def format_json(value, enable_color=True):
+    builder = ColoredStringBuilder(enable_color)
     _format_json(builder, value)
     return builder.build()
 

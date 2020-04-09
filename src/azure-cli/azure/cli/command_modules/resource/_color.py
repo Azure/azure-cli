@@ -15,7 +15,8 @@ class Color(Enum):
 
 
 class ColoredStringBuilder:
-    def __init__(self):
+    def __init__(self, enable_color=True):
+        self._enable_color = enable_color
         self._contents = []
         self._colors = deque()
 
@@ -42,10 +43,16 @@ class ColoredStringBuilder:
         return self.ColorScope(self, color)
 
     def _push_color(self, color):
+        if not self._enable_color:
+            return
+
         self._colors.append(color)
         self._contents.append(str(color))
 
     def _pop_color(self):
+        if not self._enable_color:
+            return
+
         self._colors.pop()
         self._contents.append(str(self._colors[-1] if self._colors else Color.RESET))
 
