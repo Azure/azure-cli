@@ -277,7 +277,7 @@ def load_command_table(self, _):
     with self.command_group('deployment-scripts', resource_deploymentscripts_sdk, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS, is_preview=True) as g:
         g.custom_command('list', 'list_deployment_scripts')
         g.custom_show_command('show', 'get_deployment_script')
-        g.custom_command('logs', 'get_deployment_script_logs')
+        g.custom_command('show-log', 'get_deployment_script_logs')
         g.custom_command('delete', 'delete_deployment_script', supports_no_wait=True)
 
     # az deployment group

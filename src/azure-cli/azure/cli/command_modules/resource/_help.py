@@ -795,7 +795,7 @@ short-summary: Manage deployment scripts at subscription or resource group scope
 
 helps['deployment-scripts list'] = """
 type: command
-short-summary: Lists all deployment scripts.
+short-summary: List all deployment scripts.
 parameters:
   - name: --subscription
     short-summary: Subscription identifier used to retrieve all deployment scripts.
@@ -812,7 +812,7 @@ examples:
 
 helps['deployment-scripts show'] = """
 type: command
-short-summary: Retrieves a deployment script.
+short-summary: Retrieve a deployment script.
 parameters:
   - name: --subscription
     short-summary: Subscription identifier used to retrieve a deployment scripts.
@@ -826,9 +826,9 @@ examples:
         az deployment-scripts show --resource-group contoso-rg --name contosoBashScript
 """
 
-helps['deployment-scripts logs'] = """
+helps['deployment-scripts show-log'] = """
 type: command
-short-summary: Shows deployment script logs.
+short-summary: Show deployment script logs.
 parameters:
   - name: --subscription
     short-summary: Subscription identifier used to retrieve deployment script logs.
@@ -844,7 +844,7 @@ examples:
 
 helps['deployment-scripts delete'] = """
 type: command
-short-summary: Deletes a deployment script.
+short-summary: Delete a deployment script.
 parameters:
   - name: --subscription
     short-summary: Subscription identifier used to delete a deployment script.
