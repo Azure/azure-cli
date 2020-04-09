@@ -2489,6 +2489,55 @@ def list_private_endpoints(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
+
+
+def create_private_endpoint_private_dns_zone_group(cmd, resource_group_name, private_endpoint_name, private_dns_zone_group_name, private_dns_zones):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    PrivateDnsZoneGroup, PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneGroup', 'PrivateDnsZoneConfig')
+    private_dns_zone_group = PrivateDnsZoneGroup(name=private_dns_zone_group_name,
+                                                 private_dns_zone_configs=[PrivateDnsZoneConfig(private_dns_zone_id=id) for id in private_dns_zones])
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zones)
+
+
+def update_private_endpoint_private_dns_zone_group(cmd, resource_group_name, private_endpoint_name, private_dns_zone_group_name, private_dns_zones):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    private_dns_zones_group = client.get(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name)
+    private_dns_zones_group = PrivateDnsZoneGroup(name=private_dns_zone_group_name,
+                                                  private_dns_zone_configs=[PrivateDnsZoneConfig(private_dns_zone_id=id) for id in private_dns_zones])
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zones)
+
+
+def add_private_endpoint_custom_dns_configs(cmd, resource_group_name, private_endpoint_name, fqdn, ip_addresses):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+    CustomDnsConfigPropertiesFormat = cmd.get_models('CustomDnsConfigPropertiesFormat')
+    custom_dns_config = CustomDnsConfigPropertiesFormat(fqdn=fqdn,
+                                                        ip_addresses=ip_addresses)
+    private_endpoint.custom_dns_configs.append(custom_dns_config)
+    return LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, private_endpoint_name, private_endpoint)).custom_dns_configs
+
+
+def remove_private_endpoint_custom_dns_configs(cmd, resource_group_name, private_endpoint_name, index):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    private_endpoint = client.get(resource_group_name, private_endpoint_name)
+    try:
+        private_endpoint.custom_dns_configs.pop(index)
+    except IndexError:
+        raise CLIError('Invalid index. Please input index for 0 to {}'.format(len(private_endpoint.custom_dns_configs)))
+    return LongRunningOperation(cmd.cli_ctx)(client.create_or_update(resource_group_name, private_endpoint_name, private_endpoint)).custom_dns_configs
+
+
+def show_private_endpoint_custom_dns_configs(cmd, resource_group_name, private_endpoint_name):
+    client = network_client_factory(cmd.cli_ctx).private_endpoints
+    return client.get(resource_group_name, private_endpoint_name).custom_dns_configs
 # endregion
 
 

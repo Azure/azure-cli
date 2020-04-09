@@ -771,6 +771,9 @@ def load_arguments(self, _):
         c.argument('manual_request', help='Use manual request to establish the connection', arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
+        c.argument('ip_addresses', nargs='+', help='A list of private ip addresses of the private addresses.')
+        c.argument('fqdn', help='Fqdn that resolves to private endpoint ip address.')
+        c.argument('private_dns_zones', nargs='+', help='List of name or ID of the private dns zones.')
     # endregion
 
     # region PrivateLinkService
