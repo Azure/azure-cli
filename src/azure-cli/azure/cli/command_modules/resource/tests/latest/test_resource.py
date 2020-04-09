@@ -868,6 +868,7 @@ class DeploymentThruUriTest(ScenarioTest):
         self.cmd('group deployment list -g {rg}',
                  checks=self.is_empty())
 
+
 class DeploymentWhatIfAtResourceGroupScopeTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_what_if')
     def test_resource_group_level_what_if(self):

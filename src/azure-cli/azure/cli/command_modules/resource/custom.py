@@ -639,7 +639,7 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
         from colorama import deinit
         deinit()
 
-        # Enable virtual terminal mode for Windows console so it processes color codes. 
+        # Enable virtual terminal mode for Windows console so it processes color codes.
         if platform.system() == "Windows":
             from ._win_vt import enable_vt_mode
             enable_vt_mode()

@@ -72,7 +72,7 @@ class TestFormatJson(unittest.TestCase):
         value = {
             "root": {
                 "foo": 1234,
-                "bar": [True, None, {"nestedString": "value", "nestedArray": [92747, "test",]}, [False],],
+                "bar": [True, None, {"nestedString": "value", "nestedArray": [92747, "test"]}, [False]],
                 "foobar": "foobar",
             }
         }

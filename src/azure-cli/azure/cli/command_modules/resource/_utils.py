@@ -19,14 +19,14 @@ def parse_resource_id(resource_id):
     # Parse subscription_id.
     subscription_match = re.match(_subscription_pattern, remaining, flags=re.IGNORECASE)
     subscription_id = subscription_match.group("subscription_id") if subscription_match else ""
-    remaining = remaining[len(subscription_match.group(0)) if subscription_match else 0 :]
+    remaining = remaining[len(subscription_match.group(0)) if subscription_match else 0:]
 
     # Parse resource_group_name.
     resource_group_match = re.match(_resource_group_pattern, remaining)
     resource_group_name = (
         resource_group_match.group("resource_group_name") if resource_group_match else ""
     )
-    remaining = remaining[len(resource_group_match.group(0)) if resource_group_match else 0 :]
+    remaining = remaining[len(resource_group_match.group(0)) if resource_group_match else 0:]
 
     # Parse relateive_path.
     relative_resource_id_match = re.match(_relative_resource_id_pattern, remaining)
