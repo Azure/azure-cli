@@ -3551,25 +3551,25 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm generalize -g {rg} -n {vm}')
         self.cmd('image create -g {rg} -n {captured} --source {vm}')
-        # self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1',
-        #          checks=[self.check('name', self.kwargs['version']), self.check('publishingProfile.replicaCount', 1)])
-        #
-        # self.cmd('sig image-version list -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
-        #          checks=self.check('length(@)', 1))
-        # self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
-        #          checks=self.check('name', self.kwargs['version']))
-        #
-        # self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=1 {location} --replica-count 2',
-        #          checks=[
-        #              self.check('publishingProfile.replicaCount', 2),
-        #              self.check('length(publishingProfile.targetRegions)', 2),
-        #              self.check('publishingProfile.targetRegions[0].name', 'West US 2'),
-        #              self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
-        #              self.check('publishingProfile.targetRegions[0].storageAccountType', 'Standard_LRS'),
-        #              self.check('publishingProfile.targetRegions[1].name', 'East US 2'),
-        #              self.check('publishingProfile.targetRegions[1].regionalReplicaCount', 2),
-        #              self.check('publishingProfile.targetRegions[1].storageAccountType', 'Standard_LRS')
-        #          ])
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --managed-image {captured} --replica-count 1',
+                 checks=[self.check('name', self.kwargs['version']), self.check('publishingProfile.replicaCount', 1)])
+
+        self.cmd('sig image-version list -g {rg} --gallery-name {gallery} --gallery-image-definition {image}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('sig image-version show -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}',
+                 checks=self.check('name', self.kwargs['version']))
+
+        self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --target-regions {location2}=1 {location} --replica-count 2',
+                 checks=[
+                     self.check('publishingProfile.replicaCount', 2),
+                     self.check('length(publishingProfile.targetRegions)', 2),
+                     self.check('publishingProfile.targetRegions[0].name', 'West US 2'),
+                     self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
+                     self.check('publishingProfile.targetRegions[0].storageAccountType', 'Standard_LRS'),
+                     self.check('publishingProfile.targetRegions[1].name', 'East US 2'),
+                     self.check('publishingProfile.targetRegions[1].regionalReplicaCount', 2),
+                     self.check('publishingProfile.targetRegions[1].storageAccountType', 'Standard_LRS')
+                 ])
 
         # Create disk encryption set
         vault_id = self.cmd('keyvault create -g {rg} -n {vault} --enable-purge-protection true --enable-soft-delete true').get_output_in_json()['id']
@@ -3598,13 +3598,16 @@ class VMGalleryImage(ScenarioTest):
         time.sleep(15)
 
         # Test --target-region-encryption
-        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version2} --target-regions {location2}=1 {location} --target-region-encryption des1,0,des1,1,des1 des1 --managed-image {captured} --replica-count 1', checks=[
-            self.check('publishingProfile.targetRegions[0].name', 'asdf')
+        self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version2} --target-regions {location}=1 --target-region-encryption {des1} --managed-image {captured} --replica-count 1', checks=[
+            self.check('publishingProfile.targetRegions[0].name', 'East US 2'),
+            self.check('publishingProfile.targetRegions[0].regionalReplicaCount', 1),
+            self.check('publishingProfile.targetRegions[0].encryption.osDiskImage.diskEncryptionSetId', '{des1_id}')
         ])
 
         self.cmd('vm create -g {rg} -n {vm2} --image {image_id} --admin-username clitest1 --generate-ssh-keys --nsg-rule NONE', checks=self.check('powerState', 'VM running'))
 
         self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
+        self.cmd('sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version2}')
         time.sleep(60)  # service end latency
         self.cmd('sig image-definition delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
         self.cmd('sig delete -g {rg} --gallery-name {gallery}')
