@@ -391,6 +391,8 @@ parameters:
     short-summary: The location to store the deployment metadata.
   - name: --name -n
     short-summary: The deployment name.
+  - name: --what-if-result-format
+    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -406,6 +408,38 @@ examples:
     text: >
         az deployment sub create --location WestUS --template-file azuredeploy.json  \\
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+"""
+
+
+helps['deployment sub what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at subscription scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --location -l
+    short-summary: The location to store the deployment What-If operation metadata.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --result-format
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at a subscription.
+    text: >
+        az deployment sub what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at a subscription with ResourceIdOnly format.
+    text: >
+        az deployment sub what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at a subscription without pretty-printing the result.
+    text: >
+        az deployment sub what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
 """
 
 helps['deployment sub export'] = """
@@ -508,6 +542,8 @@ parameters:
     short-summary: The deployment name.
   - name: --mode
     short-summary: The deployment mode.
+  - name: --what-if-result-format
+    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
 examples:
   - name: Create a deployment at resource group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -523,6 +559,39 @@ examples:
     text: >
         az deployment group create --resource-group testrg --name rollout01 --template-file azuredeploy.json  \\
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+"""
+
+helps['deployment group what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at resource group scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --resource-group -g
+    short-summary: The resource group to execute deployment What-If operation at.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --mode
+    short-summary: The deployment mode.
+  - name: --result-format
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at a resource group.
+    text: >
+        az deployment group what-if --resource-group testrg --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at a resource group with ResourceIdOnly format.
+    text: >
+        az deployment group what-if --resource-group testrg --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at a resource group without pretty-printing the result.
+    text: >
+        az deployment group what-if --resource-group testrg --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
 """
 
 helps['deployment group export'] = """
