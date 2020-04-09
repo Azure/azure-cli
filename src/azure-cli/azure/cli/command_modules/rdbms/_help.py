@@ -1130,7 +1130,7 @@ type: command
 short-summary: Delete an Active Directory Administrator for PostgreSQL server.
 examples:
   - name: Delete Active Directory Administrator in server testsvr.
-    text: az postgres server ad-admin delete --server-name testsvr -g testgroup
+    text: az postgres server ad-admin delete --server-name testsvr -g testgroup
 """
 
 helps['postgres server ad-admin list'] = """
