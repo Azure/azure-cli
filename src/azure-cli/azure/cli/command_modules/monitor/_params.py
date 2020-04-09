@@ -357,10 +357,11 @@ def load_arguments(self, _):
     # region Private Link Resources
     for item in ['create', 'update', 'show', 'delete', 'list']:
         with self.argument_context('monitor private-link-scope {}'.format(item)) as c:
-            c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
             c.argument('scope_name', options_list=['--name', '-n'], help='Name of the Azure Monitor Private Link Scope.')
+    with self.argument_context('monitor private-link-scope create') as c:
+        c.ignore('location')
 
-    with self.argument_context('monitor private-link-scope assigned-resource') as c:
+    with self.argument_context('monitor private-link-scope scoped-resource') as c:
         c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.')
         c.argument('resource_name', options_list=['--name', '-n'], help='Name of the assigned resource.')
         c.argument('linked_resource_id', options_list=['--linked-resource'], help='Name or ID of the linked resource. It should be one of log analytics workspace or application insights component.')

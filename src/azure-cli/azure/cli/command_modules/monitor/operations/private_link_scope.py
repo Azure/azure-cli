@@ -6,6 +6,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+
 # region Private Link Scope
 def show_private_link_scope(client, resource_group_name, scope_name):
     return client.get(resource_group_name=resource_group_name,
@@ -23,7 +24,7 @@ def list_private_link_scope(client, resource_group_name=None):
     return client.list_by_resource_group(resource_group_name=resource_group_name)
 
 
-def create_private_link_scope(client, resource_group_name, scope_name, location=None, tags=None):
+def create_private_link_scope(client, resource_group_name, scope_name, location='Global', tags=None):
     return client.create_or_update(resource_group_name=resource_group_name,
                                    scope_name=scope_name,
                                    location=location,
@@ -56,23 +57,12 @@ def list_private_link_scope_resource(client, resource_group_name, scope_name):
 
 
 def create_private_link_scope_resource(client, resource_group_name, scope_name, resource_name,
-                                       linked_resource_id, tags=None):
+                                       linked_resource_id):
     return client.create_or_update(resource_group_name=resource_group_name,
                                    scope_name=scope_name,
                                    name=resource_name,
-                                   linked_resource_id=linked_resource_id,
-                                   tags=tags)
+                                   linked_resource_id=linked_resource_id)
 
-
-def update_private_link_scope_resource(client, resource_group_name, scope_name, resource_name, tags=None):
-    scoped_resource = client.get(resource_group_name=resource_group_name,
-                                 scope_name=scope_name,
-                                 name=resource_name)
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   scope_name=scope_name,
-                                   name=resource_name,
-                                   linked_resource_id=scoped_resource.linked_resource_id,
-                                   tags=tags)
 # endregion
 
 
@@ -107,6 +97,7 @@ def list_private_endpoint_connection(client, resource_group_name, scope_name):
                                              scope_name=scope_name)
 
 
+# pylint: disable=line-too-long, unused-argument
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, scope_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, scope_name=scope_name,

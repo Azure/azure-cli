@@ -1210,3 +1210,121 @@ examples:
     text: |
         az monitor clone --source-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm1 --target-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm2
 """
+
+helps['monitor private-link-scope'] = """
+type: group
+short-summary: Manage monitor private link scope resource.
+"""
+
+helps['monitor private-link-scope create'] = """
+type: command
+short-summary: Create a private link scope resource.
+"""
+
+helps['monitor private-link-scope update'] = """
+type: command
+short-summary: Update a monitor private link scope resource.
+"""
+
+helps['monitor private-link-scope list'] = """
+type: command
+short-summary: List all monitor private link scope resource.
+"""
+
+helps['monitor private-link-scope show'] = """
+type: command
+short-summary: Show a monitor private link scope resource.
+"""
+
+helps['monitor private-link-scope delete'] = """
+type: command
+short-summary: Delete a monitor private link scope resource.
+"""
+
+helps['monitor private-link-scope scoped-resource'] = """
+type: group
+short-summary: Manage scoped resource of a private link scope resource.
+"""
+
+helps['monitor private-link-scope scoped-resource create'] = """
+type: command
+short-summary: Create a scoped resource for a private link scope resource.
+"""
+
+helps['monitor private-link-scope scoped-resource list'] = """
+type: command
+short-summary: List all scoped resource of a private link scope resource.
+"""
+
+helps['monitor private-link-scope scoped-resource show'] = """
+type: command
+short-summary: Show a scoped resource of a private link scope resource.
+"""
+
+helps['monitor private-link-scope scoped-resource delete'] = """
+type: command
+short-summary: Delete a scoped resource of a private link scope resource.
+"""
+
+helps['monitor private-link-scope private-link-resource'] = """
+type: group
+short-summary: Manage private link resource of a private link scope resource.
+"""
+
+helps['monitor private-link-scope private-link-resource list'] = """
+type: command
+short-summary: List all private link resources of a private link scope resource.
+"""
+
+helps['monitor private-link-scope private-link-resource show'] = """
+type: command
+short-summary: Show a private link resource of a private link scope resource.
+"""
+
+helps['monitor private-link-scope private-endpoint-connection'] = """
+type: group
+short-summary: Manage private endpoint connection of a private link scope resource.
+"""
+
+helps['monitor private-link-scope private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection of a private link scope resource.
+parameters:
+  - name: --name
+    short-summary: Name of the private endpoint connection.
+    populator-commands:
+      - az monitor private-link-scope show
+example:
+    - name: Approve a private endpoint connection.
+      text: az monitor private-link-scope private-endpoint-connection approve --scope-name MyScope -g MyRG --name PrivateEndpointConnection
+"""
+
+helps['monitor private-link-scope private-endpoint-connection reject'] = """
+type: command
+parameters:
+  - name: --name
+    short-summary: Name of the private endpoint connection.
+    populator-commands:
+      - az monitor private-link-scope show
+short-summary: Reject a private endpoint connection of a private link scope resource.
+"""
+
+helps['monitor private-link-scope private-endpoint-connection show'] = """
+type: command
+parameters:
+  - name: --name
+    short-summary: Name of the private endpoint connection.
+    populator-commands:
+      - az monitor private-link-scope show
+short-summary: Show a private endpoint connection of a private link scope resource.
+"""
+
+helps['monitor private-link-scope private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection of a private link scope resource.
+"""
+
+helps['monitor private-link-scope private-endpoint-connection list'] = """
+type: command
+short-summary: List all private endpoint connections of a private link scope resource.
+"""

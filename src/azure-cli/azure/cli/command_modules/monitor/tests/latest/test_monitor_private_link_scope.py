@@ -12,7 +12,6 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         super(TestMonitorPrivateLinkScope, self).__init__(method_name)
         self.cmd('extension add -n application-insights')
 
-
     @ResourceGroupPreparer(location='eastus2euap')
     def test_monitor_private_link_scope_scenario(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -29,16 +28,23 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
             'loc': resource_group_location
         })
 
+        self.cmd('monitor private-link-scope create -n {scope} -g {rg}', checks=[
+            self.check('name', '{scope}')
+        ])
 
-        self.cmd('monitor private-link-scope create -n {scope} -g {rg} -l global')
-
-        self.cmd('monitor private-link-scope update -n {scope} -g {rg} --tags tag1=d1')
+        self.cmd('monitor private-link-scope update -n {scope} -g {rg} --tags tag1=d1', checks=[
+            self.check('tags.tag1', 'd1')
+        ])
 
         self.cmd('monitor private-link-scope show -n {scope} -g {rg}', checks=[
             self.check('tags.tag1', 'd1')
         ])
-        self.cmd('monitor private-link-scope list -g {rg}')
-        self.cmd('monitor private-link-scope list')
+        self.cmd('monitor private-link-scope list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('monitor private-link-scope list', checks=[
+            self.check('length(@)', 38)
+        ])
 
         app_id = self.cmd('monitor app-insights component create -a {app} -g {rg} -l eastus').get_output_in_json()['id']
         workspace_id = self.cmd('monitor log-analytics workspace create -n {workspace} -g {rg} -l {loc}').get_output_in_json()['id']
@@ -47,13 +53,27 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
             'workspace_id': workspace_id
         })
 
-        self.cmd('monitor private-link-scope assigned-resource create -g {rg} -n {assigned_app} --linked-resource {app_id} --scope-name {scope}')
-        self.cmd('monitor private-link-scope assigned-resource show -g {rg} -n {assigned_app} --scope-name {scope}')
-        self.cmd('monitor private-link-scope assigned-resource list -g {rg} --scope-name {scope}')
+        self.cmd('monitor private-link-scope scoped-resource create -g {rg} -n {assigned_app} --linked-resource {app_id} --scope-name {scope}', checks=[
+            self.check('name', '{assigned_app}')
+        ])
+        self.cmd('monitor private-link-scope scoped-resource show -g {rg} -n {assigned_app} --scope-name {scope}', checks=[
+            self.check('name', '{assigned_app}')
+        ])
+        self.cmd('monitor private-link-scope scoped-resource list -g {rg} --scope-name {scope}', checks=[
+            self.check('length(@)', 1)
+        ])
 
-        self.cmd('monitor private-link-scope assigned-resource create -g {rg} -n {assigned_ws} --linked-resource {workspace_id} --scope-name {scope}')
+        self.cmd('monitor private-link-scope scoped-resource create -g {rg} -n {assigned_ws} --linked-resource {workspace_id} --scope-name {scope}', checks=[
+            self.check('name', '{assigned_ws}')
+        ])
 
-        self.cmd('monitor private-link-scope private-link-resource list --scope-name {scope} -g {rg}')
+        self.cmd('monitor private-link-scope scoped-resource list -g {rg} --scope-name {scope}', checks=[
+            self.check('length(@)', 2)
+        ])
+
+        self.cmd('monitor private-link-scope private-link-resource list --scope-name {scope} -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
 
         # Prepare network
         self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
@@ -99,5 +119,13 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
         self.cmd('monitor private-link-scope private-endpoint-connection delete --id {scope_pec_id}')
-        self.cmd('monitor private-link-scope assigned-resource delete -g {rg} -n {assigned_app} --scope-name {scope}')
+        self.cmd('monitor private-link-scope show --name {scope} -g {rg}', checks=[
+            self.check('privateEndpointConnections', None)
+        ])
+        self.cmd('monitor private-link-scope scoped-resource delete -g {rg} -n {assigned_app} --scope-name {scope}')
+        self.cmd('monitor private-link-scope scoped-resource list -g {rg} --scope-name {scope}', checks=[
+            self.check('length(@)', 1)
+        ])
         self.cmd('monitor private-link-scope delete -n {scope} -g {rg}')
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('monitor private-link-scope show -n {scope} -g {rg}')

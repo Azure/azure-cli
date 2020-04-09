@@ -88,5 +88,6 @@ def cf_private_link_scopes(cli_ctx, _):
 def cf_private_endpoint_connections(cli_ctx, _):
     return cf_monitor(cli_ctx).private_endpoint_connections
 
+
 def cf_log_analytics_workspace(cli_ctx, _):
     return _log_analytics_client_factory(cli_ctx).workspaces
