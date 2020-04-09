@@ -717,26 +717,41 @@ short-summary: Manage a MySQL server's Active Directory administrator.
 helps['mysql server ad-admin create'] = """
 type: command
 short-summary: Create an Active Directory administrator for MySQL server.
+examples:
+  - name: Crate Active Directory Administrator username@domain.com in the server testsvr.
+    text: az mysql server ad-admin create --name testsvr  -g testgroup  --display-name username@domain.com  --object-id 1FCD6583-267B-4484-BF9B-507E4B62DE79
 """
 
 helps['mysql server ad-admin delete'] = """
 type: command
 short-summary: Delete an Active Directory Administrator for MySQL server.
+examples:
+  - name: Delete Active Directory Administrator in the server testsvr.
+    text: az mysql server ad-admin delete --name testsvr  -g testgroup
 """
 
 helps['mysql server ad-admin list'] = """
 type: command
 short-summary: List all Active Directory Administrators for MySQL server.
+examples:
+  - name: List all Active Directory Administrators in the server testsvr.
+    text: az mysql server ad-admin list --name testsvr  -g testgroup
 """
 
 helps['mysql server ad-admin show'] = """
 type: command
 short-summary: Get Active Directory Administrator information for a MySQL server.
+examples:
+  - name: Get Active Directory Administrator in the server testsvr.
+    text: az mysql server ad-admin show --name testsvr  -g testgroup
 """
 
 helps['mysql server ad-admin wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the MySQL server Active Directory Administrator is met.
+examples:
+  - name: Place the CLI in a waiting state until a creation of Active Directory Administrator in server testsvr.
+    text: az mysql server ad-admin wait --name testsvr  -g testgroup --created
 """
 
 helps['postgres'] = """
@@ -1105,24 +1120,39 @@ short-summary: Manage a postgres server's Active Directory administrator.
 helps['postgres server ad-admin create'] = """
 type: command
 short-summary: Create an Active Directory Administrator for PostgreSQL server.
+examples:
+  - name: Crate Active Directory Administrator username@domain.com in server testsvr.
+    text: az postgres server ad-admin create --name testsvr  -g testgroup  --display-name username@domain.com  --object-id 1FCD6583-267B-4484-BF9B-507E4B62DE79
 """
 
 helps['postgres server ad-admin delete'] = """
 type: command
 short-summary: Delete an Active Directory Administrator for PostgreSQL server.
+examples:
+  - name: Delete Active Directory Administrator in server testsvr.
+    text: az postgres server ad-admin delete --name testsvr  -g testgroup
 """
 
 helps['postgres server ad-admin list'] = """
 type: command
 short-summary: List all Active Directory Administrators for PostgreSQL server.
+examples:
+  - name: List all Active Directory Administrators in server testsvr.
+    text: az postgres server ad-admin list --name testsvr  -g testgroup
 """
 
 helps['postgres server ad-admin show'] = """
 type: command
 short-summary: Get Active Directory Administrator information for a PostgreSQL server.
+examples:
+  - name: Get Active Directory Administrator in server testsvr.
+    text: az postgres server ad-admin show --name testsvr  -g testgroup
 """
 
 helps['postgres server ad-admin wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the PostgreSQL server Active Directory Administrator is met.
+examples:
+  - name: Place the CLI in a waiting state until a creation of Active Directory Administrator in server testsvr.
+    text: az postgres server ad-admin wait --name testsvr  -g testgroup --created
 """
