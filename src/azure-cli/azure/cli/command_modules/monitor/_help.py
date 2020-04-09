@@ -1290,7 +1290,7 @@ helps['monitor private-link-scope private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve a private endpoint connection of a private link scope resource.
 parameters:
-  - name: --name
+  - name: --name -n
     short-summary: Name of the private endpoint connection.
     populator-commands:
       - az monitor private-link-scope show
@@ -1302,7 +1302,7 @@ example:
 helps['monitor private-link-scope private-endpoint-connection reject'] = """
 type: command
 parameters:
-  - name: --name
+  - name: --name -n
     short-summary: Name of the private endpoint connection.
     populator-commands:
       - az monitor private-link-scope show
@@ -1312,7 +1312,7 @@ short-summary: Reject a private endpoint connection of a private link scope reso
 helps['monitor private-link-scope private-endpoint-connection show'] = """
 type: command
 parameters:
-  - name: --name
+  - name: --name -n
     short-summary: Name of the private endpoint connection.
     populator-commands:
       - az monitor private-link-scope show
