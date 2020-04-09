@@ -22,10 +22,6 @@ class ColoredStringBuilder:
     def build(self):
         return "".join(self._contents)
 
-    # def clear(self):
-    #     self._contents = []
-    #     self._colors = deque()
-
     def append(self, value, color=None):
         if color:
             self._push_color(color)
