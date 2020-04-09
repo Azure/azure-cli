@@ -244,9 +244,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
-        c.extra('encryption_key_name', help='The name of the KeyVault key', )
-        c.extra('encryption_key_vault', help='The Uri of the KeyVault')
-        c.extra('encryption_key_version', help='The version of the KeyVault key')
+        c.extra('encryption_key_name', help='The name of the KeyVault key.', )
+        c.extra('encryption_key_vault', help='The Uri of the KeyVault.')
+        c.extra('encryption_key_version',
+                help='The version of the KeyVault key. When unspecified, it means key will be automatically rotated. ')
         c.argument('encryption_key_source',
                    arg_type=get_enum_type(['Microsoft.Storage', 'Microsoft.Keyvault']),
                    help='The default encryption service',

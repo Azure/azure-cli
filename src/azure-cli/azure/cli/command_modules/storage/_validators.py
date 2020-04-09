@@ -447,8 +447,8 @@ def validate_encryption_source(cmd, namespace):
     key_version = ns.pop('encryption_key_version', None)
     key_vault_uri = ns.pop('encryption_key_vault', None)
 
-    if namespace.encryption_key_source == 'Microsoft.Keyvault' and not (key_name and key_version and key_vault_uri):
-        raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are required '
+    if namespace.encryption_key_source == 'Microsoft.Keyvault' and not (key_name and key_vault_uri):
+        raise ValueError('--encryption-key-name and --encryption-key-vault are required '
                          'when --encryption-key-source=Microsoft.Keyvault is specified.')
 
     if key_name or key_version or key_vault_uri:
