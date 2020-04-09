@@ -234,6 +234,8 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, is_preview=True)
+        c.argument('what_if_result_format', arg_type=deployment_what_if_result_format_type, is_preview=True)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)

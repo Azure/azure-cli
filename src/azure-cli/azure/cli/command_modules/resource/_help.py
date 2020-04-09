@@ -275,6 +275,8 @@ parameters:
     short-summary: The location to store the deployment metadata.
   - name: --name -n
     short-summary: The deployment name.
+  - name: --what-if-result-format
+    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
