@@ -2,6 +2,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 # region Private Link Scope
 def show_private_link_scope(client, resource_group_name, scope_name):
@@ -111,12 +114,15 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
 
     old_status = private_endpoint_connection.private_link_service_connection_state.status
     new_status = "Approved" if is_approved else "Rejected"
+    if old_status == new_status:
+        logger.warning('The status has been satisfied. Skip this command.')
+        return None
     private_endpoint_connection.private_link_service_connection_state.status = new_status
     private_endpoint_connection.private_link_service_connection_state.description = description
     return client.create_or_update(resource_group_name=resource_group_name,
                                    scope_name=scope_name,
                                    private_endpoint_connection_name=private_endpoint_connection_name,
-                                   parameters=private_endpoint_connection)
+                                   private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
 
 
 def approve_private_endpoint_connection(cmd, client, resource_group_name, scope_name,

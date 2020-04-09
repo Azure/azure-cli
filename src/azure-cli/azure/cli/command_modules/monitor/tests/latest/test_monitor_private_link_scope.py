@@ -29,15 +29,11 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
             'loc': resource_group_location
         })
 
-        try:
-            self.cmd('monitor private-link-scope create -n {scope} -g {rg} -l global')
-        except:
-            pass
 
-        try:
-            self.cmd('monitor private-link-scope update -n {scope} -g {rg} --tags tag1=d1')
-        except:
-            pass
+        self.cmd('monitor private-link-scope create -n {scope} -g {rg} -l global')
+
+        self.cmd('monitor private-link-scope update -n {scope} -g {rg} --tags tag1=d1')
+
         self.cmd('monitor private-link-scope show -n {scope} -g {rg}', checks=[
             self.check('tags.tag1', 'd1')
         ])
@@ -52,7 +48,6 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         })
 
         self.cmd('monitor private-link-scope assigned-resource create -g {rg} -n {assigned_app} --linked-resource {app_id} --scope-name {scope}')
-        self.cmd('monitor private-link-scope assigned-resource update -g {rg} -n {assigned_app} --scope-name {scope} --tags tag1=d1')
         self.cmd('monitor private-link-scope assigned-resource show -g {rg} -n {assigned_app} --scope-name {scope}')
         self.cmd('monitor private-link-scope assigned-resource list -g {rg} --scope-name {scope}')
 
@@ -88,7 +83,7 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
 
         # Show the connection at monitor private-link-scope
 
-        private_endpoint_connections = self.cmd('monitor private-link-scope private-endpoint-connection list --scope-name {scope} -g {rg}').get_output_in_json()
+        private_endpoint_connections = self.cmd('monitor private-link-scope show --name {scope} -g {rg}').get_output_in_json()['privateEndpointConnections']
         self.assertEqual(len(private_endpoint_connections), 1)
         self.assertEqual(private_endpoint_connections[0]['privateLinkServiceConnectionState']['status'], 'Approved')
 
@@ -98,15 +93,10 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         self.cmd('monitor private-link-scope private-endpoint-connection show --scope-name {scope} -g {rg} --name {scope_pec_name}',
                  checks=self.check('id', '{scope_pec_id}'))
 
-        self.cmd('monitor private-link-scope private-endpoint-connection approve --scope-name {scope} -g {rg} --name {scope_pec_name}',
-                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
+        self.cmd('monitor private-link-scope private-endpoint-connection approve --scope-name {scope} -g {rg} --name {scope_pec_name}')
 
         self.cmd('monitor private-link-scope private-endpoint-connection reject --scope-name {scope} -g {rg} --name {scope_pec_name}',
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
-
-        # with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
-        #    self.cmd(
-        #        'monitor private-link-scope private-endpoint-connection approve --scope-name {scope} -g {rg} --name {scope_pec_name}')
 
         self.cmd('monitor private-link-scope private-endpoint-connection delete --id {scope_pec_id}')
         self.cmd('monitor private-link-scope assigned-resource delete -g {rg} -n {assigned_app} --scope-name {scope}')
