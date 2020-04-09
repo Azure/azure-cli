@@ -170,9 +170,6 @@ setup(
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=DEPENDENCIES,
-    extras_require={
-        ":python_version<'3.0'": ['antlr4-python2-runtime']
-    },
     package_data={
         'azure.cli.core': ['auth_landing_pages/*.html'],
         'azure.cli.command_modules.acr': ['*.json'],
