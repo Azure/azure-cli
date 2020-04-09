@@ -11,6 +11,7 @@ from collections import OrderedDict
 import codecs
 import json
 import os
+import platform
 import re
 import ssl
 import sys
@@ -637,6 +638,11 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
         # is using. Unfortuanately, the colors that colorama supports are very limited, which doesn't meet our needs.
         from colorama import deinit
         deinit()
+
+        # Enable virtual terminal mode for Windows console so it processes color codes. 
+        if platform.system() == "Windows":
+            from ._win_vt import enable_vt_mode
+            enable_vt_mode()
 
     try:
         print(format_what_if_operation_result(what_if_result, cli_ctx.enable_color))
