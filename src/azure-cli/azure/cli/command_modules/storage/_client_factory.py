@@ -181,6 +181,7 @@ def cf_private_endpoint(cli_ctx, _):
     return storage_client_factory(cli_ctx).private_endpoint_connections
 
 
+<<<<<<< HEAD
 def cf_mgmt_encryption_scope(cli_ctx, _):
     return storage_client_factory(cli_ctx).encryption_scopes
 
@@ -239,11 +240,12 @@ def resolve_client_parameters(**kwargs):
     return kwargs
 
 
-def get_account_url(account_name, service):
+def get_account_url(cli_ctx, account_name, service):
     from knack.util import CLIError
     if account_name is None:
         raise CLIError("Please provide storage account name or connection string.")
-    return "https://{}.{}.core.windows.net".format(account_name, service)
+    storage_endpoint = cli_ctx.cloud.suffixes.storage_endpoint
+    return "https://{}.{}.{}".format(account_name, service, storage_endpoint)
 
 
 def cf_adls_service(cli_ctx, kwargs):
@@ -253,7 +255,7 @@ def cf_adls_service(cli_ctx, kwargs):
     if connection_string:
         return t_adls_service.from_connection_string(connection_string=connection_string)
 
-    account_url = get_account_url(account_name=kwargs.pop('account_name', None), service='dfs')
+    account_url = get_account_url(cli_ctx, account_name=kwargs.pop('account_name', None), service='dfs')
     credential = kwargs.pop('sas_token', None) \
                  or kwargs.pop('account_key', None) \
                  or kwargs.pop('token_credential', None)
