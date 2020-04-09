@@ -442,8 +442,7 @@ def deploy_arm_template_at_resource_group(cmd,
                                           resource_group_name=None,
                                           template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, mode=None, rollback_on_error=None,
-                                          no_wait=False, handle_extended_json_format=None,
-                                          aux_subscriptions=None, aux_tenants=None,
+                                          no_wait=False, aux_subscriptions=None, aux_tenants=None,
                                           confirm_with_what_if=None, what_if_result_format=None,
                                           no_prompt=False):
     if confirm_with_what_if:
@@ -605,7 +604,6 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
 def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   template_file=None, template_uri=None, parameters=None,
                                                   deployment_name=None, mode=DeploymentMode.incremental,
-                                                  handle_extended_json_format=False,
                                                   aux_subscriptions=None, aux_tenants=None,
                                                   result_format=None, no_pretty_print=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri,
@@ -619,7 +617,6 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
 def what_if_deploy_arm_template_at_subscription_scope(cmd,
                                                       template_file=None, template_uri=None, parameters=None,
                                                       deployment_name=None, deployment_location=None,
-                                                      handle_extended_json_format=False,
                                                       result_format=None, no_pretty_print=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format)
