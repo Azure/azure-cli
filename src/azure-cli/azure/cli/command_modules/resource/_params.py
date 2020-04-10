@@ -235,7 +235,8 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
         c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, is_preview=True)
-        c.argument('what_if_result_format', arg_type=deployment_what_if_result_format_type, is_preview=True)
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type, is_preview=True)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -258,12 +259,13 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
         c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, is_preview=True)
-        c.argument('what_if_result_format', arg_type=deployment_what_if_result_format_type, is_preview=True)
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type, is_preview=True)
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('result_format', options_list=['--result-format', '-r'], arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
 
     with self.argument_context('deployment sub validate') as c:
@@ -292,7 +294,8 @@ def load_arguments(self, _):
                    help='Auxiliary tenants which will be used during deployment across tenants.')
         c.argument('no_prompt', arg_type=no_prompt)
         c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, is_preview=True)
-        c.argument('what_if_result_format', arg_type=deployment_what_if_result_format_type, is_preview=True)
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type, is_preview=True)
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -302,7 +305,7 @@ def load_arguments(self, _):
         c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
                    help='Auxiliary tenants which will be used during deployment across tenants.')
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
+        c.argument('result_format', options_list=['--result-format', '-r'], arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.ignore("rollback_on_error")
 
