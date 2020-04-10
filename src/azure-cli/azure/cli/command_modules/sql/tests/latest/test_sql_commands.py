@@ -3284,8 +3284,8 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql midb ltr-backup delete -l {loc} --mi {managed_instance_name} -d {database_name} -n \'{backup_name}\'')
 
-class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
 
+class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_deleted_db_restore(self, resource_group, resource_group_location):
 
