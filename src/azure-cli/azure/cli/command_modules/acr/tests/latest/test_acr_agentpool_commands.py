@@ -79,7 +79,7 @@ class AcrAgentPoolCommandsTests(ScenarioTest):
                          self.check('resourceGroup', '{rg}')])
 
         # test agentpool delete
-        #self.cmd('acr agentpool delete -n {agents2_name} -r {registry_name} -y')
+        self.cmd('acr agentpool delete -n {agents2_name} -r {registry_name} -y')
 
         # test acr delete
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
