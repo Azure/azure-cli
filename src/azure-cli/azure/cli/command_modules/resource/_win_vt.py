@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ctypes import WinDLL, WinError, get_last_error, byref
+from ctypes import WinDLL, get_last_error, byref
 from ctypes.wintypes import HANDLE, LPDWORD, DWORD
-from msvcrt import get_osfhandle
+from msvcrt import get_osfhandle # pylint: disable=import-error
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -16,7 +16,7 @@ ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
 
 def _check_zero(result, _, args):
     if not result:
-        raise WinError(get_last_error())
+        raise OSError(get_last_error())
     return args
 
 
@@ -61,7 +61,7 @@ def enable_vt_mode():
     """
     try:
         return _update_conout_mode(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
-    except WindowsError as e:
+    except OSError as e:
         if e.winerror == ERROR_INVALID_PARAMETER:
             logger.debug("Unable to enable virtual terminal processing for legacy Windows terminal.")
         else:
