@@ -8,7 +8,16 @@
 
 from azure.cli.core.commands import CliCommandType
 
-from azure.cli.command_modules.cosmosdb._client_factory import cf_db_accounts, cf_sql_resources, cf_mongo_db_resources, cf_cassandra_resources, cf_gremlin_resources, cf_table_resources
+from azure.cli.command_modules.cosmosdb._client_factory import (
+    cf_db_accounts,
+    cf_db_private_endpoint_connections,
+    cf_db_private_link_resources,
+    cf_sql_resources,
+    cf_mongo_db_resources,
+    cf_cassandra_resources,
+    cf_gremlin_resources,
+    cf_table_resources
+)
 
 from azure.cli.command_modules.cosmosdb._format import (
     database_output,
@@ -16,6 +25,10 @@ from azure.cli.command_modules.cosmosdb._format import (
     collection_output,
     list_collection_output,
     list_connection_strings_output
+)
+
+from ._validators import (
+    validate_private_endpoint_connection_id
 )
 
 DATABASE_DEPRECATION_INFO = 'cosmosdb sql database, cosmosdb mongodb database, cosmosdb cassandra keyspace or cosmosdb gremlin database'
@@ -28,6 +41,14 @@ def load_command_table(self, _):
     cosmosdb_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#DatabaseAccountsOperations.{}',
         client_factory=cf_db_accounts)
+
+    cosmosdb_private_endpoint_connections_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#PrivateEndpointConnectionsOperations.{}',
+        client_factory=cf_db_private_endpoint_connections)
+
+    cosmosdb_private_link_resources_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations#PrivateLinkResourcesOperations.{}',
+        client_factory=cf_db_private_link_resources)
 
     cosmosdb_sql_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cosmosdb.operations#SqlResourcesOperations.{}',
@@ -61,6 +82,21 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_cosmosdb_create')
         g.custom_command('update', 'cli_cosmosdb_update')
         g.custom_command('list', 'cli_cosmosdb_list')
+
+    with self.command_group('cosmosdb private-endpoint',
+                            cosmosdb_private_endpoint_connections_sdk,
+                            client_factory=cf_db_private_endpoint_connections) as g:
+        g.custom_command('approve', 'approve_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.custom_command('reject', 'reject_private_endpoint_connection',
+                         validator=validate_private_endpoint_connection_id)
+        g.command('delete', 'delete', validator=validate_private_endpoint_connection_id)
+        g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
+
+    with self.command_group('cosmosdb private-link-resource',
+                            cosmosdb_private_link_resources_sdk,
+                            client_factory=cf_db_private_link_resources) as g:
+        g.show_command('show', 'list_by_database_account')
 
     # SQL api
     with self.command_group('cosmosdb sql', is_preview=True):

@@ -102,6 +102,26 @@ def load_arguments(self, _):
     database_name_type = CLIArgumentType(options_list=['--database-name', '-d'], help='Database name.')
     container_name_type = CLIArgumentType(options_list=['--container-name', '-c'], help='Container name.')
 
+    with self.argument_context('cosmosdb private-endpoint') as c:
+        c.argument('approval_description', help='Comments for the approval.')
+        c.argument('private_endpoint_connection_name', options_list=['--connection-name', '-n'], required=False,
+                   help='The name of the private endpoint connection associated with Azure Cosmos DB. '
+                        'Required if --connection-id is not specified')
+        c.argument('account_name', account_name_type, required=False,
+                   help='Name of the Cosmos DB database account. Required if --connection-id is not specified')
+        c.argument('resource_group_name', required=False,
+                   help='The resource group name of specified Cosmos DB account.')
+        c.argument('rejection_description', help='Comments for the rejection.')
+
+    for item in ['approve', 'reject', 'delete', 'show']:
+        with self.argument_context('cosmosdb private-endpoint {}'.format(item)) as c:
+            c.extra('connection_id', required=False,
+                    help='The ID of the private endpoint connection associated with Azure Cosmos DB. '
+                         'If specified --account-name and --connection-name/-n, this should be omitted.')
+
+    with self.argument_context('cosmosdb private-link-resource') as c:
+        c.argument('account_name', account_name_type, required=True, help="Cosmosdb account name")
+
 # SQL database
     with self.argument_context('cosmosdb sql database') as c:
         c.argument('account_name', account_name_type, id_part=None)

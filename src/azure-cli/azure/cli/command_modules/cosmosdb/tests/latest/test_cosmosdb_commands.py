@@ -301,6 +301,71 @@ class CosmosDBTests(ScenarioTest):
 
         assert len(vnet_rules) == 0
 
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_plr')
+    def test_cosmosdb_private_link_resource(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cli-test-cosmosdb-plr-', 28),
+            'loc': 'centraluseuap'
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+
+        plr = self.cmd('cosmosdb private-link-resource show --account-name {acc} --resource-group {rg}').get_output_in_json()
+        assert plr[0]['groupId'] == "Sql"
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pe')
+    def test_cosmosdb_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cli-test-cosmosdb-pe-', 28),
+            'loc': 'centraluseuap',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        # Prepare cosmos db account and network
+        account = self.cmd('az cosmosdb create -n {acc} -g {rg}').get_output_in_json()
+        self.kwargs['acc_id'] = account['id']
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+                      '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
+                      '--group-ids Sql').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Show the connection at cosmos db side
+        results = self.kwargs['pe_id'].split('/')
+        self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/privateEndpointConnections/{3}'.format(results[2], results[4], self.kwargs['acc'], results[-1])
+        self.cmd('cosmosdb private-endpoint show --connection-id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('cosmosdb private-endpoint show --account-name {acc} --connection-name {pe_name} -g {rg}',
+                 checks=self.check('name', '{pe_name}'))
+        self.cmd('cosmosdb private-endpoint show --account-name {acc} -n {pe_name} -g {rg}',
+                 checks=self.check('name', '{pe_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd('cosmosdb private-endpoint approve --account-name {acc} -g {rg} --connection-name {pe_name} '
+                 '--approval-description "{approval_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}')
+                 ])
+        self.cmd('cosmosdb private-endpoint reject --connection-id {pec_id} '
+                 '--rejection-description "{rejection_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
+                 ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
     def test_cosmosdb_database(self, resource_group):
 

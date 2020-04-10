@@ -486,6 +486,45 @@ type: group
 short-summary: Manage Azure Comsos DB network rules.
 """
 
+
+helps['cosmosdb private-endpoint'] = """
+type: group
+short-summary: Manage Azure Comsos DB private endpoint connections.
+"""
+
+helps['cosmosdb private-endpoint approve'] = """
+type: command
+short-summary: Approve the specified private endpoint connection associated with Azure Comsos DB.
+"""
+
+
+helps['cosmosdb private-endpoint delete'] = """
+type: command
+short-summary: Delete the specified private endpoint connection associated with Azure Comsos DB.
+"""
+
+helps['cosmosdb private-endpoint reject'] = """
+type: command
+short-summary: Reject the specified private endpoint connection associated with Azure Comsos DB.
+"""
+
+
+helps['cosmosdb private-endpoint show'] = """
+type: command
+short-summary: Show details of a private endpoint connection associated with Azure Comsos DB.
+"""
+
+helps['cosmosdb private-link-resource'] = """
+type: group
+short-summary: Manage Azure Comsos DB private link resources.
+"""
+
+helps['cosmosdb private-link-resource show'] = """
+type: command
+short-summary: Show the private link resources supported for Azure Comsos DB.
+"""
+
+
 helps['cosmosdb regenerate-key'] = """
 type: command
 short-summary: Regenerate an access key for a Azure Cosmos DB database account.

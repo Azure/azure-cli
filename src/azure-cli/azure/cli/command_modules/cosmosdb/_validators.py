@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+
 
 def validate_failover_policies(ns):
     """ Extracts multiple space-separated failoverPolicies in regionName=failoverPriority format """
@@ -17,6 +19,19 @@ def validate_failover_policies(ns):
 def validate_ip_range_filter(ns):
     if ns.ip_range_filter:
         ns.ip_range_filter = ",".join(ns.ip_range_filter)
+
+
+def validate_private_endpoint_connection_id(cmd, ns):
+    if ns.connection_id:
+        id_parts = ns.connection_id.split('/')
+        ns.private_endpoint_connection_name = id_parts[-1]
+        ns.account_name = id_parts[-3]
+        ns.resource_group_name = id_parts[-7]
+
+    if not all([ns.account_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
+        raise CLIError(None, 'incorrect usage: [--id ID | --name NAME --account-name NAME]')
+
+    del ns.connection_id
 
 
 def validate_capabilities(ns):
