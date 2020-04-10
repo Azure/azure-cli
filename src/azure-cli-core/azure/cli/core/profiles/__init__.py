@@ -86,7 +86,10 @@ def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):
     :returns: object -- e.g. an SDK module, model, enum, attribute. The number of objects returned
                         depends on len(attr_args).
     """
+    from azure.cli.core.profiles._shared import get_unversioned_sdk as _sdk_get_unversioned_sdk
     from azure.cli.core.profiles._shared import get_versioned_sdk as _sdk_get_versioned_sdk
+    if kwargs.get('no_version'):
+        return _sdk_get_unversioned_sdk(resource_type, *attr_args, **kwargs)
     return _sdk_get_versioned_sdk(cli_ctx.cloud.profile, resource_type, *attr_args, **kwargs)
 
 

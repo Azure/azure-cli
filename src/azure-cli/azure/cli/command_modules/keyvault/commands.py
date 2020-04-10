@@ -142,13 +142,15 @@ def load_command_table(self, _):
                           transform=transform_key_bundle)
         g.keyvault_command('set-attributes', 'update_key_properties', transform=transform_key_bundle)
         g.keyvault_command('show', 'get_key', transform=transform_key_bundle)
-        g.keyvault_command('show-deleted', 'get_deleted_key')
+        g.keyvault_command('show-deleted', 'get_deleted_key', transform=transform_deleted_key)
         g.keyvault_command('delete', 'begin_delete_key', supports_no_wait=True, transform=transform_deleted_key)
         g.keyvault_command('purge', 'purge_deleted_key')
-        g.keyvault_command('recover', 'recover_deleted_key')
+        g.keyvault_command('recover', 'begin_recover_deleted_key', supports_no_wait=True,
+                           transform=transform_key_bundle)
         g.keyvault_custom('backup', 'backup_key', doc_string_source=keys_data_doc_string.format('backup_key'))
-        g.keyvault_custom('restore', 'restore_key', doc_string_source=keys_data_doc_string.format('restore_key'))
-        g.keyvault_custom('import', 'import_key')
+        g.keyvault_custom('restore', 'restore_key', doc_string_source=keys_data_doc_string.format('restore_key_backup'),
+                          transform=transform_key_bundle)
+        g.keyvault_custom('import', 'import_key', transform=transform_key_bundle)
         g.keyvault_custom('download', 'download_key')
 
     with self.command_group('keyvault secret', kv_secrets_data_sdk) as g:
