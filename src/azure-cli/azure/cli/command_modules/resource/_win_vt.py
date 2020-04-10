@@ -5,7 +5,7 @@
 
 from ctypes import WinDLL, get_last_error, byref
 from ctypes.wintypes import HANDLE, LPDWORD, DWORD
-from msvcrt import get_osfhandle # pylint: disable=import-error
+from msvcrt import get_osfhandle  # pylint: disable=import-error
 from knack.log import get_logger
 
 logger = get_logger(__name__)
