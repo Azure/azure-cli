@@ -156,16 +156,6 @@ def load_arguments(self, _):
 
     # region Shared
     for item in ['key', 'secret', 'certificate']:
-        with self.argument_context('keyvault ' + item, arg_group='Id') as c:
-            c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
-            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
-            c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
-
-        for cmd in ['list', 'list-deleted']:
-            with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
-                c.argument('include_pending', arg_type=get_three_state_flag())
-
-        # Track 2 begin
         for cmd in ['backup', 'create', 'download', 'import', 'restore']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 if cmd in ['backup', 'download']:
@@ -177,7 +167,8 @@ def load_arguments(self, _):
                            id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
 
                 is_no_id = cmd in ['create', 'import', 'restore']
-                c.argument('vault_base_url', help='Name of the key vault.{}'.
+                c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                           help='Name of the key vault.{}'.
                            format('' if is_no_id else ' Required if --id is not specified.'))
 
         for cmd in ['delete', 'list-versions', 'purge', 'set-attributes', 'recover', 'show', 'show-deleted']:
@@ -190,14 +181,21 @@ def load_arguments(self, _):
                         validator=validate_vault_id('{}{}'.format('deleted' if is_recovery_id else '', item)))
                 c.extra('name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
                         id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
-                c.extra('vault_base_url', help='Name of the key vault. Required if --id is not specified.')
+                c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                        help='Name of the key vault. Required if --id is not specified.')
+
+                if cmd in ['show']:
+                    c.argument('version', options_list=['--version', '-v'],
+                               help='The {} version. If omitted, uses the latest version.'.format(item), default='',
+                               required=False, completer=get_keyvault_version_completion_list(item))
 
         for cmd in ['list', 'list-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                c.extra('vault_base_url', help='Name of the key vault.', required=True)
+                c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                        help='Name of the key vault.', required=True)
 
-        # Track 2 end
-
+                if item == 'certificate':
+                    c.extra('include_pending', arg_type=get_three_state_flag())
     # endregion
 
     # region keys
