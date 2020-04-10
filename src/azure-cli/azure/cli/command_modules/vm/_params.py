@@ -845,7 +845,8 @@ def load_arguments(self, _):
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
         c.argument('storage_account_type', help="The default storage account type to be used per region. To set regional storage account types, use --target-regions",
                    arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS", "Premium_LRS"]), min_api='2019-03-01')
-        c.argument('target_region_encryption', nargs='+', help='Allows users to provide customer managed keys for encrypting the OS and data disks in the gallery artifact.')
+        c.argument('target_region_encryption', nargs='+',
+                   help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. Format for one region: "<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>". Use "null" as a placeholder.')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")
