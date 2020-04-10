@@ -430,7 +430,7 @@ parameters:
     short-summary: The location to store the deployment What-If operation metadata.
   - name: --name -n
     short-summary: The deployment name.
-  - name: --result-format
+  - name: --result-format -r
     short-summary: The format of What-If results.
 examples:
   - name: Execute a deployment What-If operation at a subscription.
@@ -582,7 +582,7 @@ parameters:
     short-summary: The deployment name.
   - name: --mode
     short-summary: The deployment mode.
-  - name: --result-format
+  - name: --result-format -r
     short-summary: The format of What-If results.
 examples:
   - name: Execute a deployment What-If operation at a resource group.
