@@ -1529,7 +1529,7 @@ def load_arguments(self, _):
 
         c.argument('week_of_year',
                    help='The Week of Year, 1 to 52, in which to take the yearly backup.')
-        
+
     with self.argument_context('sql midb ltr-backup') as c:
         c.argument('location_name',
                    required=True,
