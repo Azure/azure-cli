@@ -67,7 +67,7 @@ DEPENDENCIES = [
     'six~=1.12',
     'wheel==0.30.0',
     'azure-mgmt-resource==8.0.1',
-    'azure-mgmt-core @ https://azurecorepoc.blob.core.windows.net/sdks/azure_mgmt_core-1.0.0b2-py2.py3-none-any.whl'
+    'azure-mgmt-core==1.0.0'
 ]
 
 TESTS_REQUIRE = [
