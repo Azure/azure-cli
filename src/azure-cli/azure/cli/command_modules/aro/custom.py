@@ -61,8 +61,8 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
 
     rp_client_sp = aad.get_service_principal(rp_client_id)
 
-    assign_contributor_to_vnet(cmd.cli_ctx, vnet, client_sp.object_id)
-    assign_contributor_to_vnet(cmd.cli_ctx, vnet, rp_client_sp.object_id)
+    assign_contributor_to_vnet(cmd.cli_ctx, vnet, client_sp.object_id, 'client')
+    assign_contributor_to_vnet(cmd.cli_ctx, vnet, rp_client_sp.object_id, 'rp_client')
 
     oc = v2020_04_30.OpenShiftCluster(
         location=location,
