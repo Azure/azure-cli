@@ -922,7 +922,7 @@ def remove_properties(instance, argument_values):
         list_to_remove_from = _find_property(instance, list_attribute_path)
         try:
             list_to_remove_from.pop(int(list_index))
-        except IndexError:
+        except (IndexError, AttributeError):
             raise CLIError('index {} doesn\'t exist on {}'
                            .format(list_index, list_attribute_path[-1]))
 
