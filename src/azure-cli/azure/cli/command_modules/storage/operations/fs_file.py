@@ -60,6 +60,19 @@ def exists(cmd, client):
         return False
 
 
+def get_file_properties(client):
+    from knack.util import todict
+    from .._transformers import transform_fs_access_output
+
+    prop = client.get_file_properties()
+    from msrest import Serializer
+
+    prop.content_settings.content_md5 = Serializer.serialize_bytearray(prop.content_settings.content_md5)
+    acl = transform_fs_access_output(client.get_access_control())
+    result = dict(prop, **acl)
+    return result
+
+
 def list_fs_files(client, path=None, recursive=True, num_results=None, upn=None, timeout=None, exclude_dir=None):
     generator = client.get_paths(path=path, recursive=recursive, timeout=timeout, max_results=num_results)
 

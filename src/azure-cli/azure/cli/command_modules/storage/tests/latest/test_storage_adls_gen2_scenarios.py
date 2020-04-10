@@ -168,8 +168,12 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         file = self.create_random_name(prefix="file", length=12)
 
         # Create File
-        self.storage_cmd('storage fs file exists -n {} -f {}', account_info, file, filesystem)
+        self.storage_cmd('storage fs file exists -n {} -f {}', account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', False))
         self.storage_cmd('storage fs file create -n {} -f {}', account_info, file, filesystem)
+        self.storage_cmd('storage fs file exists -n {} -f {}', account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+
         self.storage_cmd('storage fs file show -n {} -f {}', account_info, file, filesystem)
         self.storage_cmd('storage fs file append -n {} -f {} --content "testappend"', account_info, file, filesystem)
 

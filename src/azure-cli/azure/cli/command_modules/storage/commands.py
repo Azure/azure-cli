@@ -686,7 +686,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_custom_command_oauth('append', 'append_file')
         g.storage_custom_command_oauth('download', 'download_file')
-        g.storage_command_oauth('show', 'get_file_properties', exception_handler=show_exception_handler)
+        g.storage_custom_command_oauth('show', 'get_file_properties', exception_handler=show_exception_handler)
         g.storage_custom_command_oauth('list', 'list_fs_files',
                                        custom_command_type=get_custom_sdk('fs_file', cf_adls_file_system),
                                        transform=transform_storage_list_output)
