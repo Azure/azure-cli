@@ -1626,7 +1626,8 @@ def process_gallery_image_version_namespace(cmd, namespace):
                         lun = data_disk_images[j * 2]
                         des_id = data_disk_images[j * 2 + 1]
                         des_id = _disk_encryption_set_format(cmd, namespace, des_id)
-                        data_disk_image_encryption_list.append(DataDiskImageEncryption(lun=lun, disk_encryption_set_id=des_id))
+                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
+                            lun=lun, disk_encryption_set_id=des_id))
                     data_disk_images = data_disk_image_encryption_list
                 else:
                     data_disk_images = None
