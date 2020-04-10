@@ -1571,7 +1571,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
         if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
             if len(namespace.target_regions) != len(namespace.target_region_encryption):
                 raise CLIError(
-                    'usage error: Length of --target-region-encryption should be same as number of target regions')
+                    'usage error: Length of --target-region-encryption should be as same as length of target regions')
         regions_info = []
         for i, t in enumerate(namespace.target_regions):
             parts = t.split('=', 2)
