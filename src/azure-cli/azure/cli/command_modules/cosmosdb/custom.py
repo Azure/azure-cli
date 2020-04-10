@@ -992,8 +992,7 @@ def cli_cosmosdb_network_rule_remove(cmd,
 
 
 def _update_private_endpoint_connection_status(client, resource_group_name, account_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None,
-                                               connection_id=None):
+                                               private_endpoint_connection_name, is_approved=True, description=None):
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, account_name=account_name,
                                              private_endpoint_connection_name=private_endpoint_connection_name)
 
@@ -1008,22 +1007,22 @@ def _update_private_endpoint_connection_status(client, resource_group_name, acco
 
 
 def approve_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
-                                        approval_description=None, connection_id=None):
+                                        approval_description=None):
     """Approve a private endpoint connection request for Azure Cosmos DB."""
 
     return _update_private_endpoint_connection_status(
         client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=True,
-        description=approval_description, connection_id=connection_id
+        description=approval_description
     )
 
 
 def reject_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
-                                       rejection_description=None, connection_id=None):
+                                       rejection_description=None):
     """Reject a private endpoint connection request for Azure Cosmos DB."""
 
     return _update_private_endpoint_connection_status(
         client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=False,
-        description=rejection_description, connection_id=connection_id
+        description=rejection_description
     )
 
 
