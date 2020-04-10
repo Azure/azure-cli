@@ -1491,6 +1491,16 @@ type: group
 short-summary: Manage directories in Azure Data Lake Storage Gen2 account.
 """
 
+helps['storage fs directory create'] = """
+type: command
+short-summary: Create a directory in ADLS Gen2 file system.
+examples:
+    - name: Create a directory in ADLS Gen2 file system.
+      text: az storage fs directory create -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: Create a directory in ADLS Gen2 file system through connection string.
+      text: az storage fs directory create -n dir -f myfilesystem --connection-string myconnectionstring
+"""
+
 helps['storage fs directory delete'] = """
 type: command
 short-summary: Delete a directory in ADLS Gen2 file system.

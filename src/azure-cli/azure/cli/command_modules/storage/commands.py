@@ -672,7 +672,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._transformers import transform_storage_list_output
         g.storage_command_oauth('create', 'create_directory')
         g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
-        g.storage_command_oauth('show', 'get_directory_properties', exception_handler=show_exception_handler)
+        g.storage_custom_command_oauth('show', 'get_directory_properties', exception_handler=show_exception_handler)
         g.storage_command_oauth('delete', 'delete_directory', confirmation=True)
         g.storage_command_oauth('move', 'rename_directory')
         g.storage_custom_command_oauth('list', 'list_fs_directories', client_factory=cf_adls_file_system,

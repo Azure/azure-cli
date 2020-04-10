@@ -129,14 +129,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
         help='A boolean flag which indicates whether internet routing storage endpoints are to be published.')
 
-    unmask_type = CLIArgumentType(
+    umask_type = CLIArgumentType(
         help='When creating a file or directory and the parent folder does not have a default ACL, the umask restricts '
              'the permissions of the file or directory to be created. The resulting permission is given by p & ^u, '
-             'where p is the permission and u is the umask.')
+             'where p is the permission and u is the umask. For more information, please refer to '
+             'https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#umask.')
     permissions_type = CLIArgumentType(
         help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
              'granted read, write, or execute permission. The sticky bit is also supported. Both symbolic (rwxrw-rw-) '
-             'and 4-digit octal notation (e.g. 0766) are supported.')
+             'and 4-digit octal notation (e.g. 0766) are supported. For more information, please refer to https://'
+             'docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+
+    timeout_type = CLIArgumentType(
+        help='Request timeout in seconds. Applies to each call to the service.', type=int
+    )
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -1118,8 +1124,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
             c.extra('directory_path', options_list=['--name', '-n'],
                     help="The name of directory.", required=True)
-            c.argument('unmask', unmask_type)
-            c.argument('permissions', permissions_type)
+
+    with self.argument_context('storage fs directory create'.format(item)) as c:
+        c.extra('permissions', permissions_type)
+        c.extra('umask', umask_type)
+        c.extra('timeout', timeout_type)
 
     with self.argument_context('storage fs directory list') as c:
         c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
@@ -1154,8 +1163,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         t_file_content_settings = self.get_sdk('_models#ContentSettings',
                                                resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
         c.register_content_settings_argument(t_file_content_settings, update=False)
-        c.argument('permissions', permissions_type)
-        c.argument('unmask', unmask_type)
+        c.extra('permissions', permissions_type)
+        c.extra('umask', umask_type)
+        c.extra('timeout', timeout_type)
 
     with self.argument_context('storage fs file download') as c:
         c.argument('destination_path', options_list=['--destination', '-d'], type=file_type,
@@ -1175,7 +1185,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The new path the users want to move to. The value must have the following format: '
                    '"{filesystem}/{directory}/{subdirectory}/{file}".')
         c.argument('permissions', permissions_type)
-        c.argument('unmask', unmask_type)
+        c.argument('umask', umask_type)
 
     with self.argument_context('storage fs file upload') as c:
         t_file_content_settings = self.get_sdk('_models#ContentSettings',
@@ -1185,7 +1195,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Path of the local file to upload as the file content.')
         c.argument('overwrite', action='store_true', help="Overwrite an existing file when specified.")
         c.argument('permissions', permissions_type)
-        c.argument('unmask', unmask_type)
+        c.argument('umask', umask_type)
 
     for item in ['set', 'show']:
         with self.argument_context('storage fs access {}'.format(item)) as c:

@@ -106,13 +106,16 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs directory show -n {} -f {}', account_info, directory, filesystem)\
             .assert_with_checks(JMESPathCheck('name', directory)) \
             .assert_with_checks(JMESPathCheck('deleted', False)) \
-            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true'))
+            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true')) \
+            .assert_with_checks(JMESPathCheck('permissions', 'rwxr-x---'))
 
-        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, subdir_path, filesystem)
+        self.storage_cmd('storage fs directory create -n {} -f {} --permissions rwxrwxrwx --umask 0007', account_info,
+                         subdir_path, filesystem)
         self.storage_cmd('storage fs directory show -n {} -f {}', account_info, subdir_path, filesystem) \
             .assert_with_checks(JMESPathCheck('name', subdir_path)) \
             .assert_with_checks(JMESPathCheck('deleted', False)) \
-            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true'))
+            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true')) \
+            .assert_with_checks(JMESPathCheck('permissions', 'rwxrwx---'))
 
         # List Directories
         self.storage_cmd('storage fs directory list -f {}', account_info, filesystem) \
@@ -130,15 +133,29 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('exists', True))
         self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, subdir_path, filesystem) \
             .assert_with_checks(JMESPathCheck('exists', False))
+        self.storage_cmd('storage fs directory show -n {} -f {}', account_info, new_dir, filesystem) \
+            .assert_with_checks(JMESPathCheck('name', new_dir)) \
+            .assert_with_checks(JMESPathCheck('deleted', False)) \
+            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true')) \
+            .assert_with_checks(JMESPathCheck('permissions', 'rwxrwx---'))
 
         self.storage_cmd('storage fs directory list -f {}', account_info, filesystem) \
             .assert_with_checks(JMESPathCheck('length(@)', 2))
         self.storage_cmd('storage fs directory list -f {} --path {}', account_info, filesystem, directory) \
             .assert_with_checks(JMESPathCheck('length(@)', 0))
 
+        new_filesystem = self.create_file_system(account_info)
+        self.storage_cmd('storage fs directory move -n {} -f {} --new-directory {}',
+                         account_info, directory, filesystem, '/'.join([new_filesystem, new_dir]))
+        self.storage_cmd('storage fs directory show -n {} -f {}', account_info, new_dir, new_filesystem) \
+            .assert_with_checks(JMESPathCheck('name', new_dir)) \
+            .assert_with_checks(JMESPathCheck('deleted', False)) \
+            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true')) \
+            .assert_with_checks(JMESPathCheck('permissions', 'rwxr-x---'))
+
         # Delete Directory
-        self.storage_cmd('storage fs directory delete -n {} -f {} -y', account_info, directory, filesystem)
         self.storage_cmd('storage fs directory delete -n {} -f {} -y', account_info, new_dir, filesystem)
+        self.storage_cmd('storage fs directory delete -n {} -f {} -y', account_info, new_dir, new_filesystem)
         self.storage_cmd('storage fs directory list -f {}', account_info, filesystem) \
             .assert_with_checks(JMESPathCheck('length(@)', 0))
 

@@ -416,7 +416,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('az keyvault set-policy -n {vt} --object-id {oid} -g {rg} '
                  '--key-permissions get wrapKey unwrapKey recover')
-        self.cmd('az keyvault update -n {vt} -g {rg} --set properties.enableSoftDelete=true')
+        # self.cmd('az keyvault update -n {vt} -g {rg} --set properties.enableSoftDelete=true')
         self.cmd('az resource update --id {vid} --set properties.enablePurgeProtection=true')
 
         # Enable key auto-rotation

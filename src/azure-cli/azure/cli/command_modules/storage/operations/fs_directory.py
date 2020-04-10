@@ -27,3 +27,12 @@ def list_fs_directories(client, path=None, recursive=True, num_results=None, upn
     generator = client.get_paths(path=path, recursive=recursive, timeout=timeout, max_results=num_results)
 
     return list(f for f in generator if f.is_directory)
+
+
+def get_directory_properties(client):
+    from knack.util import todict
+    from .._transformers import transform_fs_access_output
+    prop = todict(client.get_directory_properties())
+    acl = transform_fs_access_output(client.get_access_control())
+    result = dict(prop, **acl)
+    return result
