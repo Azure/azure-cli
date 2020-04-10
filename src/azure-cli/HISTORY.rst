@@ -74,7 +74,7 @@ Release History
 **Cosmos DB**
 
 * Fix missing --type option for deprecation redirections
-* Support az cosmosdb private-endpoint show/delete/approve/reject
+* Support az cosmosdb private-endpoint-connection show/delete/approve/reject
 * Support az cosmosdb private-link-resource show
 
 **Docker**

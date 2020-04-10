@@ -991,9 +991,9 @@ def cli_cosmosdb_network_rule_remove(cmd,
     return docdb_account
 
 
-def _update_private_endpoint_connection_status(cmd, client, resource_group_name, account_name,
+def _update_private_endpoint_connection_status(client, resource_group_name, account_name,
                                                private_endpoint_connection_name, is_approved=True, description=None,
-                                               connection_id=None):  # pylint: disable=unused-argument
+                                               connection_id=None):
     private_endpoint_connection = client.get(resource_group_name=resource_group_name, account_name=account_name,
                                              private_endpoint_connection_name=private_endpoint_connection_name)
 
@@ -1007,22 +1007,22 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
                                    private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
 
 
-def approve_private_endpoint_connection(cmd, client, resource_group_name, account_name, private_endpoint_connection_name,
+def approve_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
                                         approval_description=None, connection_id=None):
     """Approve a private endpoint connection request for Azure Cosmos DB."""
 
     return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=True,
+        client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=True,
         description=approval_description, connection_id=connection_id
     )
 
 
-def reject_private_endpoint_connection(cmd, client, resource_group_name, account_name, private_endpoint_connection_name,
+def reject_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
                                        rejection_description=None, connection_id=None):
     """Reject a private endpoint connection request for Azure Cosmos DB."""
 
     return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=False,
+        client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=False,
         description=rejection_description, connection_id=connection_id
     )
 

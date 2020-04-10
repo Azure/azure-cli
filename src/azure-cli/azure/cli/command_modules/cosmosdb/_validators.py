@@ -21,7 +21,7 @@ def validate_ip_range_filter(ns):
         ns.ip_range_filter = ",".join(ns.ip_range_filter)
 
 
-def validate_private_endpoint_connection_id(cmd, ns):
+def validate_private_endpoint_connection_id(ns):
     if ns.connection_id:
         id_parts = ns.connection_id.split('/')
         ns.private_endpoint_connection_name = id_parts[-1]

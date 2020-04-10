@@ -83,7 +83,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'cli_cosmosdb_update')
         g.custom_command('list', 'cli_cosmosdb_list')
 
-    with self.command_group('cosmosdb private-endpoint',
+    with self.command_group('cosmosdb private-endpoint-connection',
                             cosmosdb_private_endpoint_connections_sdk,
                             client_factory=cf_db_private_endpoint_connections) as g:
         g.custom_command('approve', 'approve_private_endpoint_connection',

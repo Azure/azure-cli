@@ -343,11 +343,11 @@ class CosmosDBTests(ScenarioTest):
         # Show the connection at cosmos db side
         results = self.kwargs['pe_id'].split('/')
         self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/privateEndpointConnections/{3}'.format(results[2], results[4], self.kwargs['acc'], results[-1])
-        self.cmd('cosmosdb private-endpoint show --connection-id {pec_id}',
+        self.cmd('cosmosdb private-endpoint-connection show --connection-id {pec_id}',
                  checks=self.check('id', '{pec_id}'))
-        self.cmd('cosmosdb private-endpoint show --account-name {acc} --connection-name {pe_name} -g {rg}',
+        self.cmd('cosmosdb private-endpoint-connection show --account-name {acc} --connection-name {pe_name} -g {rg}',
                  checks=self.check('name', '{pe_name}'))
-        self.cmd('cosmosdb private-endpoint show --account-name {acc} -n {pe_name} -g {rg}',
+        self.cmd('cosmosdb private-endpoint-connection show --account-name {acc} -n {pe_name} -g {rg}',
                  checks=self.check('name', '{pe_name}'))
 
         # Test approval/rejection
@@ -355,12 +355,12 @@ class CosmosDBTests(ScenarioTest):
             'approval_desc': 'You are approved!',
             'rejection_desc': 'You are rejected!'
         })
-        self.cmd('cosmosdb private-endpoint approve --account-name {acc} -g {rg} --connection-name {pe_name} '
+        self.cmd('cosmosdb private-endpoint-connection approve --account-name {acc} -g {rg} --connection-name {pe_name} '
                  '--approval-description "{approval_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Approved'),
                      self.check('privateLinkServiceConnectionState.description', '{approval_desc}')
                  ])
-        self.cmd('cosmosdb private-endpoint reject --connection-id {pec_id} '
+        self.cmd('cosmosdb private-endpoint-connection reject --connection-id {pec_id} '
                  '--rejection-description "{rejection_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Rejected'),
                      self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')

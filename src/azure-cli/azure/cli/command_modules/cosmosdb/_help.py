@@ -487,29 +487,29 @@ short-summary: Manage Azure Comsos DB network rules.
 """
 
 
-helps['cosmosdb private-endpoint'] = """
+helps['cosmosdb private-endpoint-connection'] = """
 type: group
 short-summary: Manage Azure Comsos DB private endpoint connections.
 """
 
-helps['cosmosdb private-endpoint approve'] = """
+helps['cosmosdb private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve the specified private endpoint connection associated with Azure Comsos DB.
 """
 
 
-helps['cosmosdb private-endpoint delete'] = """
+helps['cosmosdb private-endpoint-connection delete'] = """
 type: command
 short-summary: Delete the specified private endpoint connection associated with Azure Comsos DB.
 """
 
-helps['cosmosdb private-endpoint reject'] = """
+helps['cosmosdb private-endpoint-connection reject'] = """
 type: command
 short-summary: Reject the specified private endpoint connection associated with Azure Comsos DB.
 """
 
 
-helps['cosmosdb private-endpoint show'] = """
+helps['cosmosdb private-endpoint-connection show'] = """
 type: command
 short-summary: Show details of a private endpoint connection associated with Azure Comsos DB.
 """
