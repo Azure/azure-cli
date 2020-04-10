@@ -44,7 +44,7 @@ def extract_subresource_name(id_parameter='id'):
 
 
 def transform_key_bundle(key_bundle):
-    if isinstance(key_bundle, dict):
+    if key_bundle is None:
         return key_bundle
 
     def encode_bytes(b):
@@ -76,7 +76,7 @@ def transform_key_bundle(key_bundle):
 
 
 def transform_deleted_key(deleted_key):
-    if isinstance(deleted_key, dict):
+    if deleted_key is None:
         return deleted_key
 
     result = {
@@ -101,7 +101,7 @@ def transform_deleted_key(deleted_key):
 
 
 def transform_key_property(key_property):
-    if isinstance(key_property, dict):
+    if key_property is None:
         return key_property
 
     result = {

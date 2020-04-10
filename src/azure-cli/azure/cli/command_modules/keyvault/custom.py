@@ -681,16 +681,16 @@ def create_key(client, vault_base_url, name, protection=None,  # pylint: disable
 
 
 def backup_key(client, file_path, vault_base_url=None,
-               key_name=None, identifier=None):  # pylint: disable=unused-argument
-    backup = client.backup_key(vault_base_url, key_name).value
+               name=None, identifier=None):  # pylint: disable=unused-argument
+    backup = client.backup_key(name)
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
-def restore_key(client, vault_base_url, file_path):
+def restore_key(client, vault_base_url, file_path):  # pylint: disable=unused-argument
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
-    return client.restore_key(vault_base_url, data)
+    return client.restore_key_backup(data)
 
 
 def _int_to_bytes(i):
@@ -734,14 +734,14 @@ def _private_ec_key_to_jwk(ec_key, jwk):
     jwk.d = _int_to_bytes(ec_key.private_numbers().private_value)
 
 
-def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
+def import_key(cmd, client, vault_base_url, name, protection=None, key_ops=None,  # pylint: disable=unused-argument
+               disabled=False, expires=None, not_before=None, tags=None, pem_file=None, pem_password=None,
+               byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
         Supports importing BYOK keys into HSM for premium key vaults. """
-    KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
-    JsonWebKey = cmd.get_models('JsonWebKey', resource_type=ResourceType.DATA_KEYVAULT)
+    JsonWebKey = cmd.get_models('JsonWebKey', no_version=True, mod='_models',
+                                resource_type=ResourceType.DATA_KEYVAULT_KEYS)
 
-    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file:
         logger.info('Reading %s', pem_file)
@@ -749,6 +749,7 @@ def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=N
             pem_data = f.read()
             pem_password = str(pem_password).encode() if pem_password else None
 
+            pkey = None
             try:
                 pkey = load_pem_private_key(pem_data, pem_password, default_backend())
             except (ValueError, TypeError, UnsupportedAlgorithm) as e:
@@ -769,7 +770,17 @@ def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=N
         key_obj.kty = 'RSA-HSM'
         key_obj.t = byok_data
 
-    return client.import_key(vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
+    hardware_protected = protection == 'hsm'
+
+    return client.import_key(
+        name,
+        key_obj,
+        hardware_protected=hardware_protected,
+        enabled=not disabled,
+        not_before=not_before,
+        expires_on=expires,
+        tags=tags
+    )
 
 
 def _bytes_to_int(b):
@@ -849,13 +860,13 @@ def _extract_ec_public_key_from_jwk(jwk_dict):
     return public.public_key(default_backend())
 
 
-def download_key(client, file_path, vault_base_url=None, key_name=None, key_version='',
-                 encoding=None, identifier=None):  # pylint: disable=unused-argument
+def download_key(client, file_path, name=None, key_version='',
+                 encoding=None, vault_base_url=None, identifier=None):  # pylint: disable=unused-argument
     """ Download a key from a KeyVault. """
     if os.path.isfile(file_path) or os.path.isdir(file_path):
         raise CLIError("File or directory named '{}' already exists.".format(file_path))
 
-    key = client.get_key(vault_base_url, key_name, key_version)
+    key = client.get_key(name, key_version)
     json_web_key = _jwk_to_dict(key.key)
     key_type = json_web_key['kty']
     pub_key = ''
@@ -1247,18 +1258,19 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
     PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
                                                             resource_type=ResourceType.MGMT_KEYVAULT)
 
-    private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                                             private_endpoint_connection_name=private_endpoint_connection_name)
+    connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
+                            private_endpoint_connection_name=private_endpoint_connection_name)
 
     new_status = PrivateEndpointServiceConnectionStatus.approved \
         if is_approved else PrivateEndpointServiceConnectionStatus.rejected
-    private_endpoint_connection.private_link_service_connection_state.status = new_status
-    private_endpoint_connection.private_link_service_connection_state.description = description
+    connection.private_link_service_connection_state.status = new_status
+    connection.private_link_service_connection_state.description = description
 
     retval = client.put(resource_group_name=resource_group_name,
                         vault_name=vault_name,
                         private_endpoint_connection_name=private_endpoint_connection_name,
-                        properties=private_endpoint_connection)
+                        private_endpoint=connection.private_endpoint,
+                        private_link_service_connection_state=connection.private_link_service_connection_state)
 
     if no_wait:
         return retval

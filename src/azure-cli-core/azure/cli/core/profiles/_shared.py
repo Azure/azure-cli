@@ -469,7 +469,7 @@ def get_client_class(resource_type):
     return _get_attr(resource_type.import_prefix, '#' + resource_type.client_name)
 
 
-def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
+def get_versioned_sdk_path(api_profile, resource_type, operation_group=None, import_prefix=None):
     """ Patch the unversioned sdk path to include the appropriate API version for the
         resource type in question.
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
@@ -483,14 +483,16 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
         api_version = getattr(api_version, operation_group)
-    return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_').replace('.', '_'))
+
+    if not import_prefix:
+        import_prefix = resource_type.import_prefix
+
+    return '{}.v{}'.format(import_prefix, api_version.replace('-', '_').replace('.', '_'))
 
 
-def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
+def _get_sdk(sdk_path, *attr_args, **kwargs):
     checked = kwargs.get('checked', True)
     sub_mod_prefix = kwargs.get('mod', None)
-    operation_group = kwargs.get('operation_group', None)
-    sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group)
     if not attr_args:
         # No attributes to load. Return the versioned sdk
         return import_module(sdk_path)
@@ -501,3 +503,17 @@ def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
         loaded_obj = _get_attr(sdk_path, mod_attr_path, checked)
         results.append(loaded_obj)
     return results[0] if len(results) == 1 else results
+
+
+def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
+    operation_group = kwargs.get('operation_group', None)
+    import_prefix = kwargs.get('import_prefix')
+    sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group, import_prefix=import_prefix)
+    return _get_sdk(sdk_path, *attr_args, **kwargs)
+
+
+def get_unversioned_sdk(resource_type, *attr_args, **kwargs):
+    sdk_path = kwargs.get('import_prefix')
+    if not sdk_path:
+        sdk_path = resource_type.import_prefix
+    return _get_sdk(sdk_path, *attr_args, **kwargs)

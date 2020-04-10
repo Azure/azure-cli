@@ -159,36 +159,33 @@ def load_arguments(self, _):
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
             c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
 
-        for cmd in ['backup', 'delete', 'download', 'list-versions', 'set-attributes', 'show']:
-            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                try:
-                    c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
-                except ValueError:
-                    pass
-                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
-                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
-                c.argument(item + '_version', required=False)
-
-        for cmd in ['purge', 'recover', 'show-deleted']:
-            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
-                c.extra('identifier', options_list=['--id'], help='The recovery id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id('deleted' + item))
-                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
-                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
-                c.argument(item + '_version', required=False)
-
         for cmd in ['list', 'list-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
                 c.argument('include_pending', arg_type=get_three_state_flag())
 
         # Track 2 begin
-        for cmd in ['create']:
+        for cmd in ['backup', 'create', 'download', 'import', 'restore']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                if cmd in ['backup', 'download']:
+                    c.extra('identifier', options_list=['--id'],
+                            help='Id of the {}. '
+                                 'If specified all other \'Id\' arguments should be omitted.'.format(item),
+                            validator=validate_vault_id(item))
                 c.argument('name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
                            id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
-                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.')
 
-        for cmd in ['delete', 'list-versions', 'set-attributes', 'show']:
+                is_no_id = cmd in ['create', 'import', 'restore']
+                c.argument('vault_base_url', help='Name of the key vault.{}'.
+                           format('' if is_no_id else ' Required if --id is not specified.'))
+
+        for cmd in ['delete', 'list-versions', 'purge', 'set-attributes', 'recover', 'show', 'show-deleted']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                is_recovery_id = cmd in ['purge', 'recover', 'show-deleted']
+                c.extra('identifier', options_list=['--id'],
+                        help='{} of the {}. '
+                             'If specified all other \'Id\' arguments should be omitted.'.
+                        format('The recovery id' if is_recovery_id else 'Id', item),
+                        validator=validate_vault_id('{}{}'.format('deleted' if is_recovery_id else '', item)))
                 c.extra('name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
                         id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
                 c.extra('vault_base_url', help='Name of the key vault. Required if --id is not specified.')

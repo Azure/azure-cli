@@ -344,8 +344,11 @@ class AzCliCommand(CLICommand):
     def get_models(self, *attr_args, **kwargs):
         resource_type = kwargs.get('resource_type', self.command_kwargs.get('resource_type', None))
         operation_group = kwargs.get('operation_group', self.command_kwargs.get('operation_group', None))
-        return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod='models',
-                                   operation_group=operation_group)
+        no_version = kwargs.get('no_version', False)
+        import_prefix = kwargs.get('import_prefix')
+        mod = kwargs.get('mod', 'models')
+        return self.loader.get_sdk(*attr_args, resource_type=resource_type, mod=mod,
+                                   operation_group=operation_group, no_version=no_version, import_prefix=import_prefix)
 
     def update_context(self, obj_inst):
         class UpdateContext(object):
