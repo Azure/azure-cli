@@ -773,6 +773,22 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['deleteRetentionPolicy']['days'], None)
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
+    @StorageAccountPreparer(location="eastus2euap", kind="StorageV2")
+    def test_storage_account_update_versioning(self):
+        result = self.cmd('storage account blob-service-properties update --enable-versioning true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], True)
+
+        result = self.cmd('storage account blob-service-properties update --enable-versioning false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], False)
+
+        result = self.cmd('storage account blob-service-properties update --enable-versioning -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], True)
+
+        result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], True)
+
 
 class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')

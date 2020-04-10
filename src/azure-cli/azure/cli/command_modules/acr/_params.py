@@ -158,6 +158,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('values', help="The task values file path relative to the source context.")
         c.argument('set_value', options_list=['--set'], help="Value in 'name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set)
         c.argument('set_secret', help="Secret value in '--set name[=value]' format. Multiples supported by passing --set multiple times.", action='append', validator=validate_set_secret)
+        c.argument('agent_pool_name', options_list=['--agent-pool'], help='The name of the agent pool.', is_preview=True)
 
     with self.argument_context('acr pack build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -166,6 +167,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('pack_image_tag', options_list=['--pack-image-tag'], help="The tag of the 'pack' runner image ('mcr.microsoft.com/oryx/pack').", is_preview=True)
         c.argument('pull', options_list=['--pull'], help="Pull the latest builder and run images before use.", action='store_true')
         c.positional('source_location', help="The local source code directory path (e.g., './src') or the URL to a git repository (e.g., 'https://github.com/Azure-Samples/acr-build-helloworld-node.git') or a remote tarball (e.g., 'http://server/context.tar.gz').", completer=FilesCompleter())
+        c.argument('agent_pool_name', options_list=['--agent-pool'], help='The name of the agent pool.', is_preview=True)
 
     with self.argument_context('acr build') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -174,6 +176,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('no_wait', help="Do not wait for the build to complete and return immediately after queuing the build.", action='store_true')
         c.argument('arg', options_list=['--build-arg'], help="Build argument in '--build-arg name[=value]' format. Multiples supported by passing --build-arg multiple times.", action='append', validator=validate_arg)
         c.argument('secret_arg', options_list=['--secret-build-arg'], help="Secret build argument in '--secret-build-arg name[=value]' format. Multiples supported by passing '--secret-build-arg name[=value]' multiple times.", action='append', validator=validate_secret_arg)
+        c.argument('agent_pool_name', options_list=['--agent-pool'], help='The name of the agent pool.', is_preview=True)
 
     with self.argument_context('acr task') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -215,6 +218,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
         # MSI parameter
         c.argument('assign_identity', nargs='*', help="Assigns managed identities to the task. Use '[system]' to refer to the system-assigned identity or a resource ID to refer to a user-assigned identity. Please see https://aka.ms/acr/tasks/task-create-managed-identity for more information.")
+
+        # Agent Pool Parameter
+        c.argument('agent_pool_name', options_list=['--agent-pool'], help='The name of the agent pool.', is_preview=True)
 
     with self.argument_context('acr task create') as c:
         c.argument('task_name', completer=None)
@@ -323,6 +329,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr token credential delete') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
         c.argument('password2', options_list=['--password2'], help='Flag indicating if second password should be deleted.', action='store_true', required=False)
+
+    with self.argument_context('acr agentpool') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'])
+        c.argument('agent_pool_name', options_list=['--name', '-n'], help='The name of the agent pool.')
+        c.argument('count', options_list=['--count', '-c'], type=int, help='The count of the agent pool.')
+        c.argument('tier', help='Sets the VM your agent pool will run on. Valid values are: S1(2 vCPUs, 3 MiB RAM), S2(4 vCPUs, 8 MiB RAM) or S3(8 vCPUs, 16 MiB RAM)')
+        c.argument('os_type', options_list=['--os'], help='The os of the agent pool.', deprecate_info=c.deprecate(hide=True))
+        c.argument('subnet_id', options_list=['--subnet-id'], help='The Virtual Network Subnet Resource Id of the agent machine.')
+        c.argument('no_wait', help="Do not wait for the Agent Pool to complete action and return immediately after queuing the request.", action='store_true')
+
+    with self.argument_context('acr agentpool show') as c:
+        c.argument('queue_count', help="Get only the queue count", action='store_true')
 
     with self.argument_context('acr private-endpoint-connection') as c:
         # to match private_endpoint_connection_command_guideline.md guidelines
