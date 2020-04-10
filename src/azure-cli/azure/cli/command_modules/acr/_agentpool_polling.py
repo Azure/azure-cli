@@ -32,7 +32,7 @@ def delete_agentpool_with_polling(cmd,
             cmd=cmd,
             registry_name=registry_name,
             agent_pool_name=agent_pool_name
-        ))
+        )).result()
 
 
 class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
