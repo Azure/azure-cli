@@ -1564,7 +1564,7 @@ def process_remove_identity_namespace(cmd, namespace):
 def process_gallery_image_version_namespace(cmd, namespace):
     TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption = cmd.get_models(
         'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption')
-    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS']]
+    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS' 'Premium_LRS']]
     storage_account_types_str = ", ".join(storage_account_types_list)
 
     if namespace.target_regions:
