@@ -704,14 +704,10 @@ def load_command_table(self, _):
             min_api='2019-04-01'
         )
 
-    with self.command_group('network private-endpoint dns-configs', network_private_endpoint_sdk, min_api='2020-03-01') as g:
-        g.custom_command('add', 'add_private_endpoint_custom_dns_configs')
-        g.custom_command('remove', 'remove_private_endpoint_custom_dns_configs')
-        g.custom_show_command('show', 'show_private_endpoint_custom_dns_configs')
-
     with self.command_group('network private-endpoint dns-zone-group', network_private_endpoint_dns_zone_group_sdk, min_api='2020-03-01') as g:
         g.custom_command('create', 'create_private_endpoint_private_dns_zone_group')
-        g.custom_command('update', 'update_private_endpoint_private_dns_zone_group')
+        g.custom_command('add', 'add_private_endpoint_private_dns_zone')
+        g.custom_command('remove', 'remove_private_endpoint_private_dns_zone')
         g.command('delete', 'delete')
         g.show_command('show')
         g.command('list', 'list')
