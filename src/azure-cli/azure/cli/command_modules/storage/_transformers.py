@@ -140,3 +140,26 @@ def transform_fs_access_output(result):
     for key in useful_keys:
         new_result[key] = result[key]
     return new_result
+
+
+# TODO: Remove it when SDK is right for file system scenarios
+def transform_fs_public_access_output(result):
+    """ Transform to convert SDK output into a form that is more readily
+    usable by the CLI and tools such as jpterm. """
+
+    if result.public_access == 'blob':
+        result.public_access = 'file'
+    if result.public_access == 'container':
+        result.public_access = 'filesystem'
+    return result
+
+
+# TODO: Remove it when SDK is right for file system scenarios
+def transform_fs_list_public_access_output(result):
+    """ Transform to convert SDK output into a form that is more readily
+    usable by the CLI and tools such as jpterm. """
+
+    new_result = list(result)
+    for i, item in enumerate(new_result):
+        new_result[i] = transform_fs_public_access_output(item)
+    return new_result

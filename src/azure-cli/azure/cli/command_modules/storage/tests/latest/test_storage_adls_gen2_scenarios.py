@@ -58,19 +58,34 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_filesystem_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
-        filesystem = self.create_random_name(prefix='filesystem', length=24)
 
-        self.storage_cmd('storage fs create -n {}', account_info, filesystem)
+        filesystem1 = self.create_random_name(prefix='filesystem', length=24)
+        self.storage_cmd('storage fs create -n {} --public-access file', account_info, filesystem1)
 
-        self.storage_cmd('storage fs show -n {}', account_info, filesystem, checks=[
-            JMESPathCheck('length(@)', 2)
-        ])
+        self.storage_cmd('storage fs show -n {}', account_info, filesystem1)\
+            .assert_with_checks(JMESPathCheck('name', filesystem1)) \
+            .assert_with_checks(JMESPathCheck('publicAccess', 'file'))
 
-        self.storage_cmd('storage fs list', account_info, checks=[
-            JMESPathCheck('length(@)', 2)
-        ])
+        filesystem2 = self.create_random_name(prefix='filesystem', length=24)
+        self.storage_cmd('storage fs create -n {} --public-access filesystem', account_info, filesystem2)
 
-        self.storage_cmd('storage fs delete -n {} -y', account_info, filesystem)
+        self.storage_cmd('storage fs show -n {}', account_info, filesystem2) \
+            .assert_with_checks(JMESPathCheck('name', filesystem2)) \
+            .assert_with_checks(JMESPathCheck('publicAccess', 'filesystem'))
+
+        filesystem3 = self.create_random_name(prefix='filesystem', length=24)
+        self.storage_cmd('storage fs create -n {} --public-access off', account_info, filesystem3)
+
+        self.storage_cmd('storage fs show -n {}', account_info, filesystem3) \
+            .assert_with_checks(JMESPathCheck('name', filesystem3)) \
+            .assert_with_checks(JMESPathCheck('publicAccess', None))
+
+        self.storage_cmd('storage fs list', account_info) \
+            .assert_with_checks(JMESPathCheck('length(@)', 3)) 
+
+        self.storage_cmd('storage fs delete -n {} -y', account_info, filesystem1)
+        self.storage_cmd('storage fs delete -n {} -y', account_info, filesystem2)
+        self.storage_cmd('storage fs delete -n {} -y', account_info, filesystem3)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
