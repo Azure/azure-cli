@@ -58,6 +58,8 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
                     logger.error(detail)
             except (AttributeError, TypeError):
                 pass
+            except:  # pylint: disable=bare-except
+                pass
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
             logger.error('validation error: %s', ex)
