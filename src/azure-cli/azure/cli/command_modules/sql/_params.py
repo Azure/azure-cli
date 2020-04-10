@@ -1528,7 +1528,7 @@ def load_arguments(self, _):
                    'There is a minimum of 7 days and a maximum of 10 years.')
 
         c.argument('week_of_year',
-                   help='The Week of Year, 1 to 52, in which to take the yearly backup.')
+                   help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
 
     with self.argument_context('sql midb ltr-backup') as c:
         c.argument('location_name',
