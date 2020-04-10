@@ -12,8 +12,9 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -21,7 +22,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001","name":"cli-test-stdssdk000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2020-03-26T13:09:34Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001","name":"cli-test-stdssdk000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2020-03-27T09:12:09Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:09:39 GMT
+      - Fri, 27 Mar 2020 09:12:15 GMT
       expires:
       - '-1'
       pragma:
@@ -54,7 +55,7 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.23.0
+      - python-requests/2.22.0
     method: GET
     uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
   response:
@@ -109,13 +110,13 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:09:40 GMT
+      - Fri, 27 Mar 2020 09:12:16 GMT
       etag:
       - W/"540044b4084c3c314537f1baa1770f248628b2bc9ba0328f1004c33862e049da"
       expires:
-      - Thu, 26 Mar 2020 13:14:40 GMT
+      - Fri, 27 Mar 2020 09:17:16 GMT
       source-age:
-      - '130'
+      - '250'
       strict-transport-security:
       - max-age=31536000
       vary:
@@ -126,21 +127,21 @@ interactions:
       x-cache:
       - HIT, HIT
       x-cache-hits:
-      - 2, 2
+      - 3, 1
       x-content-type-options:
       - nosniff
       x-fastly-request-id:
-      - 3b42358859d913e9f5f87dabb2437b8d89b377fb
+      - c24a37104e3a6ea6f5c8522e67fb87eed4789b74
       x-frame-options:
       - deny
       x-geo-block-list:
       - ''
       x-github-request-id:
-      - 4BF8:214E:195EAE:1B1B10:5E7CA7E5
+      - 7956:7773:2539CF:27A999:5E7DB317
       x-served-by:
-      - cache-sin18020-SIN
+      - cache-sin18041-SIN
       x-timer:
-      - S1585228180.202315,VS0,VE0
+      - S1585300336.382863,VS0,VE1
       x-xss-protection:
       - 1; mode=block
     status:
@@ -159,8 +160,9 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-network/10.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -177,7 +179,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:09:40 GMT
+      - Fri, 27 Mar 2020 09:12:16 GMT
       expires:
       - '-1'
       pragma:
@@ -201,10 +203,7 @@ interactions:
       [{"name": "vm-storage-sku-testSubnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]}},
       {"type": "Microsoft.Network/networkSecurityGroups", "name": "vm-storage-sku-testNSG",
       "apiVersion": "2015-06-15", "location": "eastus2", "tags": {}, "dependsOn":
-      [], "properties": {"securityRules": [{"name": "default-allow-ssh", "properties":
-      {"protocol": "Tcp", "sourcePortRange": "*", "destinationPortRange": "22", "sourceAddressPrefix":
-      "*", "destinationAddressPrefix": "*", "access": "Allow", "priority": 1000, "direction":
-      "Inbound"}}]}}, {"apiVersion": "2018-01-01", "type": "Microsoft.Network/publicIPAddresses",
+      []}, {"apiVersion": "2018-01-01", "type": "Microsoft.Network/publicIPAddresses",
       "name": "vm-storage-sku-testPublicIP", "location": "eastus2", "tags": {}, "dependsOn":
       [], "properties": {"publicIPAllocationMethod": null}}, {"apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces", "name": "vm-storage-sku-testVMNic",
@@ -236,13 +235,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3716'
+      - '3439'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -250,10 +250,10 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_YHYXdhq80FYlXZtTsm34LeBxawnYQaDo","name":"vm_deploy_YHYXdhq80FYlXZtTsm34LeBxawnYQaDo","type":"Microsoft.Resources/deployments","properties":{"templateHash":"16854806520764527962","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-03-26T13:09:45.7139779Z","duration":"PT3.2897412S","correlationId":"3fcf40ad-d9a3-4ead-89a1-4b1d6e8631ff","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]},{"resourceType":"networkSecurityGroups","locations":["eastus2"]},{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"networkInterfaces","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-storage-sku-testVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-storage-sku-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-storage-sku-testNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-storage-sku-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-storage-sku-testPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-storage-sku-testPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-storage-sku-testVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-storage-sku-testVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-storage-sku-test"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_UxXj1cb0wERz1L5IN9OYVucVm65Lf1hn","name":"vm_deploy_UxXj1cb0wERz1L5IN9OYVucVm65Lf1hn","type":"Microsoft.Resources/deployments","properties":{"templateHash":"14762586880184591444","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-03-27T09:12:22.2570377Z","duration":"PT3.6894234S","correlationId":"262a9f01-dc75-4ce7-bc8b-692375417000","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]},{"resourceType":"networkSecurityGroups","locations":["eastus2"]},{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"networkInterfaces","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-storage-sku-testVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-storage-sku-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-storage-sku-testNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-storage-sku-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-storage-sku-testPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-storage-sku-testPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-storage-sku-testVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-storage-sku-testVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-storage-sku-test"}]}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_YHYXdhq80FYlXZtTsm34LeBxawnYQaDo/operationStatuses/08586163787030534220?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_UxXj1cb0wERz1L5IN9OYVucVm65Lf1hn/operationStatuses/08586163065469100296?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -261,7 +261,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:09:46 GMT
+      - Fri, 27 Mar 2020 09:12:23 GMT
       expires:
       - '-1'
       pragma:
@@ -271,7 +271,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1177'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -288,11 +288,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163787030534220?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163065469100296?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -304,7 +305,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:10:17 GMT
+      - Fri, 27 Mar 2020 09:12:54 GMT
       expires:
       - '-1'
       pragma:
@@ -331,11 +332,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163787030534220?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163065469100296?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Running"}'
@@ -347,7 +349,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:10:49 GMT
+      - Fri, 27 Mar 2020 09:13:25 GMT
       expires:
       - '-1'
       pragma:
@@ -374,183 +376,12 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163787030534220?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 26 Mar 2020 13:11:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163787030534220?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 26 Mar 2020 13:11:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163787030534220?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 26 Mar 2020 13:12:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163787030534220?api-version=2019-07-01
-  response:
-    body:
-      string: '{"status":"Running"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '20'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 26 Mar 2020 13:12:51 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - vm create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163787030534220?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586163065469100296?api-version=2019-07-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -562,7 +393,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:13:21 GMT
+      - Fri, 27 Mar 2020 09:13:55 GMT
       expires:
       - '-1'
       pragma:
@@ -589,14 +420,15 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_YHYXdhq80FYlXZtTsm34LeBxawnYQaDo","name":"vm_deploy_YHYXdhq80FYlXZtTsm34LeBxawnYQaDo","type":"Microsoft.Resources/deployments","properties":{"templateHash":"16854806520764527962","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-03-26T13:13:15.2438994Z","duration":"PT3M32.8196627S","correlationId":"3fcf40ad-d9a3-4ead-89a1-4b1d6e8631ff","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]},{"resourceType":"networkSecurityGroups","locations":["eastus2"]},{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"networkInterfaces","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-storage-sku-testVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-storage-sku-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-storage-sku-testNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-storage-sku-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-storage-sku-testPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-storage-sku-testPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-storage-sku-testVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-storage-sku-testVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-storage-sku-test"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-storage-sku-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-storage-sku-testPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-storage-sku-testVNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Resources/deployments/vm_deploy_UxXj1cb0wERz1L5IN9OYVucVm65Lf1hn","name":"vm_deploy_UxXj1cb0wERz1L5IN9OYVucVm65Lf1hn","type":"Microsoft.Resources/deployments","properties":{"templateHash":"14762586880184591444","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-03-27T09:13:50.9525691Z","duration":"PT1M32.3849548S","correlationId":"262a9f01-dc75-4ce7-bc8b-692375417000","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]},{"resourceType":"networkSecurityGroups","locations":["eastus2"]},{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"networkInterfaces","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-storage-sku-testVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-storage-sku-testVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-storage-sku-testNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-storage-sku-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-storage-sku-testPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-storage-sku-testPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-storage-sku-testVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-storage-sku-testVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-storage-sku-test"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-storage-sku-testNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-storage-sku-testPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/virtualNetworks/vm-storage-sku-testVNET"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -605,7 +437,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:13:21 GMT
+      - Fri, 27 Mar 2020 09:13:56 GMT
       expires:
       - '-1'
       pragma:
@@ -632,8 +464,9 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -643,21 +476,21 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-storage-sku-test\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -671,20 +504,20 @@ interactions:
         \       \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\",\r\n
         \           \"level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n
         \           \"message\": \"Guest Agent is running\",\r\n            \"time\":
-        \"2020-03-26T13:13:22+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
-        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n
+        \"2020-03-27T09:13:57+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\":
+        []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n
         \         \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2020-03-26T13:12:29.5835195+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2020-03-27T09:13:03.5266566+00:00\"\r\n
         \           }\r\n          ]\r\n        },\r\n        {\r\n          \"name\":
-        \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n          \"statuses\":
+        \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n          \"statuses\":
         [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\",\r\n
         \             \"level\": \"Info\",\r\n              \"displayStatus\": \"Provisioning
-        succeeded\",\r\n              \"time\": \"2020-03-26T13:12:29.5835195+00:00\"\r\n
+        succeeded\",\r\n              \"time\": \"2020-03-27T09:13:03.5266566+00:00\"\r\n
         \           }\r\n          ]\r\n        }\r\n      ],\r\n      \"hyperVGeneration\":
         \"V1\",\r\n      \"statuses\": [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning
-        succeeded\",\r\n          \"time\": \"2020-03-26T13:13:10.3347484+00:00\"\r\n
+        succeeded\",\r\n          \"time\": \"2020-03-27T09:13:46.1529509+00:00\"\r\n
         \       },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n
         \         \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\r\n
         \       }\r\n      ]\r\n    }\r\n  }\r\n}"
@@ -696,7 +529,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:13:23 GMT
+      - Fri, 27 Mar 2020 09:13:57 GMT
       expires:
       - '-1'
       pragma:
@@ -713,7 +546,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3989,Microsoft.Compute/LowCostGet30Min;31986
+      - Microsoft.Compute/LowCostGet3Min;3997,Microsoft.Compute/LowCostGet30Min;31997
     status:
       code: 200
       message: OK
@@ -730,8 +563,9 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-network/10.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -740,12 +574,12 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-testVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic\",\r\n
-        \ \"etag\": \"W/\\\"96310da7-f2d0-4520-b80c-0a52e44b555a\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"a6e1cb83-e6a1-40fc-8249-5ae796e65ee9\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"92817682-8abd-4a32-873b-61fbf2c77e3f\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"562aaa81-5284-42f2-808d-d7d1e7b66ad1\",\r\n
         \   \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm-storage-sku-test\",\r\n
         \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic/ipConfigurations/ipconfigvm-storage-sku-test\",\r\n
-        \       \"etag\": \"W/\\\"96310da7-f2d0-4520-b80c-0a52e44b555a\\\"\",\r\n
+        \       \"etag\": \"W/\\\"a6e1cb83-e6a1-40fc-8249-5ae796e65ee9\\\"\",\r\n
         \       \"type\": \"Microsoft.Network/networkInterfaces/ipConfigurations\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\":
@@ -754,8 +588,8 @@ interactions:
         \         },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\":
         \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n      \"dnsServers\":
         [],\r\n      \"appliedDnsServers\": [],\r\n      \"internalDomainNameSuffix\":
-        \"i1n31mhft5su3pki0puhxrqbnc.cx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
-        \"00-0D-3A-E3-C4-19\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
+        \"hbol0imk0lqudd0j2ooh45s5qa.cx.internal.cloudapp.net\"\r\n    },\r\n    \"macAddress\":
+        \"00-0D-3A-7C-A1-B1\",\r\n    \"enableAcceleratedNetworking\": false,\r\n
         \   \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\": {\r\n
         \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkSecurityGroups/vm-storage-sku-testNSG\"\r\n
         \   },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n      \"id\":
@@ -769,9 +603,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:13:23 GMT
+      - Fri, 27 Mar 2020 09:13:58 GMT
       etag:
-      - W/"96310da7-f2d0-4520-b80c-0a52e44b555a"
+      - W/"a6e1cb83-e6a1-40fc-8249-5ae796e65ee9"
       expires:
       - '-1'
       pragma:
@@ -788,7 +622,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - f4b6e1d3-75c0-4a7d-b9d7-ae1d2298149c
+      - 34d69ceb-06f7-469a-98b7-2d86a72008bc
     status:
       code: 200
       message: OK
@@ -805,8 +639,9 @@ interactions:
       - keep-alive
       ParameterSetName:
       - -g -n --admin-username --admin-password --image --storage-sku --data-disk-sizes-gb
+        --nsg-rule
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-network/10.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -815,10 +650,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-testPublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/publicIPAddresses/vm-storage-sku-testPublicIP\",\r\n
-        \ \"etag\": \"W/\\\"427d3ba9-13bc-4426-b1a6-a5847aec7565\\\"\",\r\n  \"location\":
+        \ \"etag\": \"W/\\\"5be2b270-4042-4dc1-a3a8-6f0424f97a81\\\"\",\r\n  \"location\":
         \"eastus2\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":
-        \"Succeeded\",\r\n    \"resourceGuid\": \"3ce7e114-1924-4aad-bc27-9b0143926e24\",\r\n
-        \   \"ipAddress\": \"52.177.186.5\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
+        \"Succeeded\",\r\n    \"resourceGuid\": \"3c770d8d-792f-49a3-adf3-efb853655d0c\",\r\n
+        \   \"ipAddress\": \"52.247.57.175\",\r\n    \"publicIPAddressVersion\": \"IPv4\",\r\n
         \   \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\":
         4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Network/networkInterfaces/vm-storage-sku-testVMNic/ipConfigurations/ipconfigvm-storage-sku-test\"\r\n
         \   }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n
@@ -827,13 +662,13 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '1061'
+      - '1062'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:13:23 GMT
+      - Fri, 27 Mar 2020 09:13:58 GMT
       etag:
-      - W/"427d3ba9-13bc-4426-b1a6-a5847aec7565"
+      - W/"5be2b270-4042-4dc1-a3a8-6f0424f97a81"
       expires:
       - '-1'
       pragma:
@@ -850,7 +685,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 128381d0-0974-40d3-98cf-df63af203ad8
+      - f2ea868c-ea12-49a3-9079-3e3c9a55a122
     status:
       code: 200
       message: OK
@@ -868,7 +703,7 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -878,21 +713,21 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-storage-sku-test\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -909,7 +744,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:13:24 GMT
+      - Fri, 27 Mar 2020 09:13:59 GMT
       expires:
       - '-1'
       pragma:
@@ -926,7 +761,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3988,Microsoft.Compute/LowCostGet30Min;31985
+      - Microsoft.Compute/LowCostGet3Min;3996,Microsoft.Compute/LowCostGet30Min;31996
     status:
       code: 200
       message: OK
@@ -934,12 +769,12 @@ interactions:
     body: 'b''{"location": "eastus2", "tags": {}, "properties": {"hardwareProfile":
       {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"publisher":
       "Debian", "offer": "debian-10", "sku": "10", "version": "latest"}, "osDisk":
-      {"osType": "Linux", "name": "vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4",
+      {"osType": "Linux", "name": "vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5",
       "caching": "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5",
       "storageAccountType": "StandardSSD_LRS"}}, "dataDisks": [{"lun": 0, "name":
-      "vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a", "caching": "None",
-      "createOption": "Empty", "diskSizeGB": 1, "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a",
+      "vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25", "caching": "None",
+      "createOption": "Empty", "diskSizeGB": 1, "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25",
       "storageAccountType": "StandardSSD_LRS"}, "toBeDetached": false}, {"lun": 1,
       "name": "d1", "createOption": "Empty", "diskSizeGB": 1, "managedDisk": {"storageAccountType":
       "Premium_LRS"}}]}, "osProfile": {"computerName": "vm-storage-sku-test", "adminUsername":
@@ -962,7 +797,7 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -972,21 +807,21 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
@@ -1003,7 +838,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/7a2a82e5-a525-440f-ba3f-19b3f561897e?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/60b74d63-1e91-4d89-b492-e3c971a9700c?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1011,7 +846,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:13:29 GMT
+      - Fri, 27 Mar 2020 09:14:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1028,9 +863,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;720,Microsoft.Compute/PutVM30Min;3613
+      - Microsoft.Compute/PutVM3Min;721,Microsoft.Compute/PutVM30Min;3615
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1184'
+      - '1196'
     status:
       code: 200
       message: OK
@@ -1048,24 +883,24 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/7a2a82e5-a525-440f-ba3f-19b3f561897e?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/60b74d63-1e91-4d89-b492-e3c971a9700c?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-03-26T13:13:26.1477369+00:00\",\r\n  \"endTime\":
-        \"2020-03-26T13:13:34.7261173+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"7a2a82e5-a525-440f-ba3f-19b3f561897e\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-03-27T09:14:01.762801+00:00\",\r\n  \"endTime\":
+        \"2020-03-27T09:14:12.4818834+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"60b74d63-1e91-4d89-b492-e3c971a9700c\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '184'
+      - '183'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:13:59 GMT
+      - Fri, 27 Mar 2020 09:14:35 GMT
       expires:
       - '-1'
       pragma:
@@ -1082,7 +917,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14991,Microsoft.Compute/GetOperation30Min;29985
+      - Microsoft.Compute/GetOperation3Min;14996,Microsoft.Compute/GetOperation30Min;29996
     status:
       code: 200
       message: OK
@@ -1100,7 +935,7 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test?api-version=2019-07-01
@@ -1108,26 +943,26 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1\"\r\n
+        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-storage-sku-test\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -1144,7 +979,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:00 GMT
+      - Fri, 27 Mar 2020 09:14:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1161,7 +996,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31983
+      - Microsoft.Compute/LowCostGet3Min;3994,Microsoft.Compute/LowCostGet30Min;31994
     status:
       code: 200
       message: OK
@@ -1179,7 +1014,7 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -1189,26 +1024,26 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1\"\r\n
+        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-storage-sku-test\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -1225,7 +1060,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:01 GMT
+      - Fri, 27 Mar 2020 09:14:37 GMT
       expires:
       - '-1'
       pragma:
@@ -1242,7 +1077,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3989,Microsoft.Compute/LowCostGet30Min;31982
+      - Microsoft.Compute/LowCostGet3Min;3993,Microsoft.Compute/LowCostGet30Min;31993
     status:
       code: 200
       message: OK
@@ -1250,15 +1085,15 @@ interactions:
     body: 'b''{"location": "eastus2", "tags": {}, "properties": {"hardwareProfile":
       {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"publisher":
       "Debian", "offer": "debian-10", "sku": "10", "version": "latest"}, "osDisk":
-      {"osType": "Linux", "name": "vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4",
+      {"osType": "Linux", "name": "vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5",
       "caching": "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5",
       "storageAccountType": "StandardSSD_LRS"}}, "dataDisks": [{"lun": 0, "name":
-      "vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a", "caching": "None",
-      "createOption": "Empty", "diskSizeGB": 1, "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a",
+      "vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25", "caching": "None",
+      "createOption": "Empty", "diskSizeGB": 1, "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25",
       "storageAccountType": "StandardSSD_LRS"}, "toBeDetached": false}, {"lun": 1,
       "name": "d1", "caching": "None", "createOption": "Empty", "diskSizeGB": 1, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1",
       "storageAccountType": "Premium_LRS"}, "toBeDetached": false}, {"lun": 2, "name":
       "d2", "createOption": "Empty", "diskSizeGB": 2, "managedDisk": {"storageAccountType":
       "StandardSSD_LRS"}}]}, "osProfile": {"computerName": "vm-storage-sku-test",
@@ -1282,7 +1117,7 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -1292,26 +1127,26 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1\"\r\n
+        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 2,\r\n          \"name\":
         \"d2\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
@@ -1328,7 +1163,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/1e2b57b3-54f9-45c9-b70e-02c885824001?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/474573d7-2739-4650-ad74-18ef756a9747?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1336,7 +1171,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:04 GMT
+      - Fri, 27 Mar 2020 09:14:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1353,9 +1188,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;719,Microsoft.Compute/PutVM30Min;3611
+      - Microsoft.Compute/PutVM3Min;720,Microsoft.Compute/PutVM30Min;3614
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1183'
+      - '1194'
     status:
       code: 200
       message: OK
@@ -1373,15 +1208,15 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/1e2b57b3-54f9-45c9-b70e-02c885824001?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/474573d7-2739-4650-ad74-18ef756a9747?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-03-26T13:14:03.0863372+00:00\",\r\n  \"endTime\":
-        \"2020-03-26T13:14:11.8521883+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"1e2b57b3-54f9-45c9-b70e-02c885824001\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-03-27T09:14:39.5764591+00:00\",\r\n  \"endTime\":
+        \"2020-03-27T09:14:53.0143731+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"474573d7-2739-4650-ad74-18ef756a9747\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1390,7 +1225,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:34 GMT
+      - Fri, 27 Mar 2020 09:15:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1407,7 +1242,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14993,Microsoft.Compute/GetOperation30Min;29983
+      - Microsoft.Compute/GetOperation3Min;14994,Microsoft.Compute/GetOperation30Min;29994
     status:
       code: 200
       message: OK
@@ -1425,7 +1260,7 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name --new --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test?api-version=2019-07-01
@@ -1433,31 +1268,31 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1\"\r\n
+        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 2,\r\n          \"name\":
         \"d2\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d2\"\r\n
+        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d2\"\r\n
         \         },\r\n          \"diskSizeGB\": 2,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-storage-sku-test\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -1474,7 +1309,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:35 GMT
+      - Fri, 27 Mar 2020 09:15:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1491,7 +1326,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31980
+      - Microsoft.Compute/LowCostGet3Min;3991,Microsoft.Compute/LowCostGet30Min;31991
     status:
       code: 200
       message: OK
@@ -1509,7 +1344,7 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-resource/8.0.1 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -1517,7 +1352,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-stdssdk000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001","name":"cli-test-stdssdk000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2020-03-26T13:09:34Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001","name":"cli-test-stdssdk000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","date":"2020-03-27T09:12:09Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1526,7 +1361,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:35 GMT
+      - Fri, 27 Mar 2020 09:15:16 GMT
       expires:
       - '-1'
       pragma:
@@ -1560,12 +1395,12 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3?api-version=2019-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"d3\",\r\n  \"location\": \"eastus2\",\r\n  \"tags\":
@@ -1575,7 +1410,7 @@ interactions:
         \"Updating\",\r\n    \"isArmResource\": true\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/e27d07ab-932e-43f0-ac7c-7eb69fd9595c?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/7804de4b-1539-4428-b591-9ef26af5882c?api-version=2019-11-01
       cache-control:
       - no-cache
       content-length:
@@ -1583,11 +1418,11 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:41 GMT
+      - Fri, 27 Mar 2020 09:15:21 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/e27d07ab-932e-43f0-ac7c-7eb69fd9595c?monitor=true&api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/7804de4b-1539-4428-b591-9ef26af5882c?monitor=true&api-version=2019-11-01
       pragma:
       - no-cache
       server:
@@ -1598,9 +1433,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/CreateUpdateDisks3Min;997,Microsoft.Compute/CreateUpdateDisks30Min;7997
+      - Microsoft.Compute/CreateUpdateDisks3Min;999,Microsoft.Compute/CreateUpdateDisks30Min;7997
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1176'
+      - '1193'
     status:
       code: 202
       message: Accepted
@@ -1618,14 +1453,14 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/e27d07ab-932e-43f0-ac7c-7eb69fd9595c?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/DiskOperations/7804de4b-1539-4428-b591-9ef26af5882c?api-version=2019-11-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-03-26T13:14:41.4253268+00:00\",\r\n  \"endTime\":
-        \"2020-03-26T13:14:41.5503624+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+      string: "{\r\n  \"startTime\": \"2020-03-27T09:15:21.8564394+00:00\",\r\n  \"endTime\":
+        \"2020-03-27T09:15:22.0283208+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
         \ \"properties\": {\r\n    \"output\": {\r\n  \"name\": \"d3\",\r\n  \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3\",\r\n
         \ \"type\": \"Microsoft.Compute/disks\",\r\n  \"location\": \"eastus2\",\r\n
@@ -1634,10 +1469,10 @@ interactions:
         \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n
         \   },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\":
         25,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"timeCreated\": \"2020-03-26T13:14:41.4253268+00:00\",\r\n
+        \   },\r\n    \"timeCreated\": \"2020-03-27T09:15:21.8564394+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 4294967296,\r\n    \"uniqueId\": \"f6db8d5a-cb9a-4150-afb7-bb4f0be5ef47\"\r\n
-        \ }\r\n}\r\n  },\r\n  \"name\": \"e27d07ab-932e-43f0-ac7c-7eb69fd9595c\"\r\n}"
+        \   \"diskSizeBytes\": 4294967296,\r\n    \"uniqueId\": \"ee623b6d-21b8-48eb-9bd4-f2cd5bff825e\"\r\n
+        \ }\r\n}\r\n  },\r\n  \"name\": \"7804de4b-1539-4428-b591-9ef26af5882c\"\r\n}"
     headers:
       cache-control:
       - no-cache
@@ -1646,7 +1481,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:43 GMT
+      - Fri, 27 Mar 2020 09:15:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1663,7 +1498,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;49981,Microsoft.Compute/GetOperation30Min;399981
+      - Microsoft.Compute/GetOperation3Min;49991,Microsoft.Compute/GetOperation30Min;399987
     status:
       code: 200
       message: OK
@@ -1681,10 +1516,10 @@ interactions:
       ParameterSetName:
       - -g -n --size-gb --sku
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3?api-version=2019-11-01
   response:
     body:
       string: "{\r\n  \"name\": \"d3\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3\",\r\n
@@ -1694,9 +1529,9 @@ interactions:
         \"V1\",\r\n    \"creationData\": {\r\n      \"createOption\": \"Empty\"\r\n
         \   },\r\n    \"diskSizeGB\": 4,\r\n    \"diskIOPSReadWrite\": 120,\r\n    \"diskMBpsReadWrite\":
         25,\r\n    \"encryption\": {\r\n      \"type\": \"EncryptionAtRestWithPlatformKey\"\r\n
-        \   },\r\n    \"timeCreated\": \"2020-03-26T13:14:41.4253268+00:00\",\r\n
+        \   },\r\n    \"timeCreated\": \"2020-03-27T09:15:21.8564394+00:00\",\r\n
         \   \"provisioningState\": \"Succeeded\",\r\n    \"diskState\": \"Unattached\",\r\n
-        \   \"diskSizeBytes\": 4294967296,\r\n    \"uniqueId\": \"f6db8d5a-cb9a-4150-afb7-bb4f0be5ef47\"\r\n
+        \   \"diskSizeBytes\": 4294967296,\r\n    \"uniqueId\": \"ee623b6d-21b8-48eb-9bd4-f2cd5bff825e\"\r\n
         \ }\r\n}"
     headers:
       cache-control:
@@ -1706,7 +1541,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:43 GMT
+      - Fri, 27 Mar 2020 09:15:25 GMT
       expires:
       - '-1'
       pragma:
@@ -1723,7 +1558,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;4981,Microsoft.Compute/LowCostGet30Min;39966
+      - Microsoft.Compute/LowCostGet3Min;4989,Microsoft.Compute/LowCostGet30Min;39983
     status:
       code: 200
       message: OK
@@ -1741,7 +1576,7 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -1751,31 +1586,31 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1\"\r\n
+        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 2,\r\n          \"name\":
         \"d2\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d2\"\r\n
+        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d2\"\r\n
         \         },\r\n          \"diskSizeGB\": 2,\r\n          \"toBeDetached\":
         false\r\n        }\r\n      ]\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\":
         \"vm-storage-sku-test\",\r\n      \"adminUsername\": \"admin123\",\r\n      \"linuxConfiguration\":
@@ -1792,7 +1627,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:44 GMT
+      - Fri, 27 Mar 2020 09:15:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1809,7 +1644,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3989,Microsoft.Compute/LowCostGet30Min;31979
+      - Microsoft.Compute/LowCostGet3Min;3990,Microsoft.Compute/LowCostGet30Min;31990
     status:
       code: 200
       message: OK
@@ -1817,18 +1652,18 @@ interactions:
     body: 'b''{"location": "eastus2", "tags": {}, "properties": {"hardwareProfile":
       {"vmSize": "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"publisher":
       "Debian", "offer": "debian-10", "sku": "10", "version": "latest"}, "osDisk":
-      {"osType": "Linux", "name": "vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4",
+      {"osType": "Linux", "name": "vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5",
       "caching": "ReadWrite", "createOption": "FromImage", "diskSizeGB": 30, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5",
       "storageAccountType": "StandardSSD_LRS"}}, "dataDisks": [{"lun": 0, "name":
-      "vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a", "caching": "None",
-      "createOption": "Empty", "diskSizeGB": 1, "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a",
+      "vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25", "caching": "None",
+      "createOption": "Empty", "diskSizeGB": 1, "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25",
       "storageAccountType": "StandardSSD_LRS"}, "toBeDetached": false}, {"lun": 1,
       "name": "d1", "caching": "None", "createOption": "Empty", "diskSizeGB": 1, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1",
       "storageAccountType": "Premium_LRS"}, "toBeDetached": false}, {"lun": 2, "name":
       "d2", "caching": "None", "createOption": "Empty", "diskSizeGB": 2, "managedDisk":
-      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d2",
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d2",
       "storageAccountType": "StandardSSD_LRS"}, "toBeDetached": false}, {"lun": 3,
       "createOption": "Attach", "managedDisk": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/disks/d3"}}]},
       "osProfile": {"computerName": "vm-storage-sku-test", "adminUsername": "admin123",
@@ -1851,7 +1686,7 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -1861,31 +1696,31 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1\"\r\n
+        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 2,\r\n          \"name\":
         \"d2\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d2\"\r\n
+        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d2\"\r\n
         \         },\r\n          \"diskSizeGB\": 2,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 3,\r\n          \"name\":
         \"d3\",\r\n          \"createOption\": \"Attach\",\r\n          \"caching\":
@@ -1903,7 +1738,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/d5889bfb-8470-4484-89f9-2c351d9ff269?api-version=2019-07-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/1a6bb500-4ee5-4376-b4fe-feddf32767e7?api-version=2019-07-01
       cache-control:
       - no-cache
       content-length:
@@ -1911,7 +1746,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:14:51 GMT
+      - Fri, 27 Mar 2020 09:15:29 GMT
       expires:
       - '-1'
       pragma:
@@ -1928,9 +1763,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/PutVM3Min;719,Microsoft.Compute/PutVM30Min;3610
+      - Microsoft.Compute/PutVM3Min;719,Microsoft.Compute/PutVM30Min;3613
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1164'
+      - '1192'
     status:
       code: 200
       message: OK
@@ -1948,24 +1783,24 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/d5889bfb-8470-4484-89f9-2c351d9ff269?api-version=2019-07-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/1a6bb500-4ee5-4376-b4fe-feddf32767e7?api-version=2019-07-01
   response:
     body:
-      string: "{\r\n  \"startTime\": \"2020-03-26T13:14:46.7905795+00:00\",\r\n  \"endTime\":
-        \"2020-03-26T13:14:54.8376632+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
-        \ \"name\": \"d5889bfb-8470-4484-89f9-2c351d9ff269\"\r\n}"
+      string: "{\r\n  \"startTime\": \"2020-03-27T09:15:28.0941+00:00\",\r\n  \"endTime\":
+        \"2020-03-27T09:15:37.5782332+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"1a6bb500-4ee5-4376-b4fe-feddf32767e7\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '184'
+      - '181'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:15:21 GMT
+      - Fri, 27 Mar 2020 09:16:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1982,7 +1817,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/GetOperation3Min;14990,Microsoft.Compute/GetOperation30Min;29979
+      - Microsoft.Compute/GetOperation3Min;14992,Microsoft.Compute/GetOperation30Min;29992
     status:
       code: 200
       message: OK
@@ -2000,7 +1835,7 @@ interactions:
       ParameterSetName:
       - -g --vm-name --name
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test?api-version=2019-07-01
@@ -2008,31 +1843,31 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1\"\r\n
+        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 2,\r\n          \"name\":
         \"d2\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d2\"\r\n
+        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d2\"\r\n
         \         },\r\n          \"diskSizeGB\": 2,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 3,\r\n          \"name\":
         \"d3\",\r\n          \"createOption\": \"Attach\",\r\n          \"caching\":
@@ -2054,7 +1889,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:15:21 GMT
+      - Fri, 27 Mar 2020 09:16:00 GMT
       expires:
       - '-1'
       pragma:
@@ -2071,7 +1906,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3988,Microsoft.Compute/LowCostGet30Min;31978
+      - Microsoft.Compute/LowCostGet3Min;3988,Microsoft.Compute/LowCostGet30Min;31988
     status:
       code: 200
       message: OK
@@ -2089,7 +1924,7 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
         azure-mgmt-compute/12.0.0 Azure-SDK-For-Python AZURECLI/2.2.0
       accept-language:
       - en-US
@@ -2099,31 +1934,31 @@ interactions:
     body:
       string: "{\r\n  \"name\": \"vm-storage-sku-test\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli-test-stdssdk000001/providers/Microsoft.Compute/virtualMachines/vm-storage-sku-test\",\r\n
         \ \"type\": \"Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"eastus2\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"3aa7a61d-954d-4534-9089-424bdf65c45a\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"vmId\": \"2a63e4cd-541c-4a98-9b22-631b6b83d2f2\",\r\n
         \   \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n
         \   \"storageProfile\": {\r\n      \"imageReference\": {\r\n        \"publisher\":
         \"Debian\",\r\n        \"offer\": \"debian-10\",\r\n        \"sku\": \"10\",\r\n
         \       \"version\": \"latest\",\r\n        \"exactVersion\": \"0.20200210.166\"\r\n
         \     },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n        \"name\":
-        \"vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\",\r\n        \"createOption\":
+        \"vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\",\r\n        \"createOption\":
         \"FromImage\",\r\n        \"caching\": \"ReadWrite\",\r\n        \"managedDisk\":
         {\r\n          \"storageAccountType\": \"StandardSSD_LRS\",\r\n          \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_3607ea300da04df683e4dcd8584f13f4\"\r\n
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_OsDisk_1_58387b64d5ed45dd8f55d2879c095de5\"\r\n
         \       },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\":
-        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\",\r\n
+        [\r\n        {\r\n          \"lun\": 0,\r\n          \"name\": \"vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\",\r\n
         \         \"createOption\": \"Empty\",\r\n          \"caching\": \"None\",\r\n
         \         \"managedDisk\": {\r\n            \"storageAccountType\": \"StandardSSD_LRS\",\r\n
-        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_d1857d422a464c2a824fa378c6043c4a\"\r\n
+        \           \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/vm-storage-sku-test_disk2_9d9cc9694bd843478aabf9b90f6d8f25\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 1,\r\n          \"name\":
         \"d1\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d1\"\r\n
+        \"Premium_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d1\"\r\n
         \         },\r\n          \"diskSizeGB\": 1,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 2,\r\n          \"name\":
         \"d2\",\r\n          \"createOption\": \"Empty\",\r\n          \"caching\":
         \"None\",\r\n          \"managedDisk\": {\r\n            \"storageAccountType\":
-        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDK2EPQHNSUOM7UOFASEYZ2TOYLOHVFFDJKDTDKSAVPJME6KHX6E3E2M4FQRQ3/providers/Microsoft.Compute/disks/d2\"\r\n
+        \"StandardSSD_LRS\",\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/CLI-TEST-STDSSDKMOIKHGAREAOPUZ6C4VF6O64G5VVBTOUFT5RBDIK6YLA2FAIHDULHNMCG7SQ/providers/Microsoft.Compute/disks/d2\"\r\n
         \         },\r\n          \"diskSizeGB\": 2,\r\n          \"toBeDetached\":
         false\r\n        },\r\n        {\r\n          \"lun\": 3,\r\n          \"name\":
         \"d3\",\r\n          \"createOption\": \"Attach\",\r\n          \"caching\":
@@ -2145,7 +1980,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Mar 2020 13:15:22 GMT
+      - Fri, 27 Mar 2020 09:16:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2162,7 +1997,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-resource:
-      - Microsoft.Compute/LowCostGet3Min;3987,Microsoft.Compute/LowCostGet30Min;31977
+      - Microsoft.Compute/LowCostGet3Min;3987,Microsoft.Compute/LowCostGet30Min;31987
     status:
       code: 200
       message: OK

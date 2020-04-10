@@ -304,6 +304,26 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('blob.retentionPolicy.days', 1)
         ])
 
+        self.cmd('storage logging off --connection-string {}'.format(connection_string))
+
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('blob.delete', False),
+            JMESPathCheck('blob.write', False),
+            JMESPathCheck('blob.read', False),
+            JMESPathCheck('blob.retentionPolicy.enabled', False),
+            JMESPathCheck('blob.retentionPolicy.days', None),
+            JMESPathCheck('queue.delete', False),
+            JMESPathCheck('queue.write', False),
+            JMESPathCheck('queue.read', False),
+            JMESPathCheck('queue.retentionPolicy.enabled', False),
+            JMESPathCheck('queue.retentionPolicy.days', None),
+            JMESPathCheck('table.delete', False),
+            JMESPathCheck('table.write', False),
+            JMESPathCheck('table.read', False),
+            JMESPathCheck('table.retentionPolicy.enabled', False),
+            JMESPathCheck('table.retentionPolicy.days', None)
+        ])
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_metrics_operations(self, resource_group, storage_account_info):
@@ -772,6 +792,22 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('{cmd} --enable-delete-retention false -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['deleteRetentionPolicy']['days'], None)
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
+    @StorageAccountPreparer(location="eastus2euap", kind="StorageV2")
+    def test_storage_account_update_versioning(self):
+        result = self.cmd('storage account blob-service-properties update --enable-versioning true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], True)
+
+        result = self.cmd('storage account blob-service-properties update --enable-versioning false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], False)
+
+        result = self.cmd('storage account blob-service-properties update --enable-versioning -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], True)
+
+        result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], True)
 
 
 class StorageAccountPrivateLinkScenarioTest(ScenarioTest):

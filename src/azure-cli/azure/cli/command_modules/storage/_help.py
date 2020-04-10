@@ -53,6 +53,8 @@ examples:
     text: az storage account blob-service-properties update --enable-change-feed true -n MyStorageAccount -g MyResourceGroup
   - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
     text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n MyStorageAccount -g MyResourceGroup
+  - name: Enable versioning for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-versioning -n MyStorageAccount -g MyResourceGroup
 """
 
 helps['storage account create'] = """
@@ -1294,6 +1296,18 @@ examples:
 helps['storage logging'] = """
 type: group
 short-summary: Manage storage service logging information.
+"""
+
+helps['storage logging off'] = """
+type: command
+short-summary: Turn off logging for a storage account.
+parameters:
+  - name: --services
+    short-summary: 'The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.'
+examples:
+  - name: Turn off logging for a storage account.
+    text: |
+        az storage logging off --account-name MyAccount
 """
 
 helps['storage logging show'] = """

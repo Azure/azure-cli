@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.2.0"
+__version__ = "2.3.1"
 
 import os
 import sys
@@ -228,6 +228,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         continue
                     ext_name = ext.name
                     ext_dir = ext.path or get_extension_path(ext_name)
+                    logger.debug("Extensions directory: '%s'", ext_dir)
                     sys.path.append(ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
@@ -564,7 +565,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
         for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
-            if operation.startswith(rt.import_prefix):
+            if operation.startswith(rt.import_prefix + '.'):
                 operation = operation.replace(rt.import_prefix,
                                               get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt,
                                                                      operation_group=operation_group))

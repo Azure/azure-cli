@@ -253,14 +253,17 @@ class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disa
 
 
 # region Disks (Managed)
-def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # pylint: disable=too-many-locals
+def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
                         size_gb=None, sku='Premium_LRS', os_type=None,
                         source=None, for_upload=None, upload_size_bytes=None,  # pylint: disable=unused-argument
                         # below are generated internally from 'source'
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None,
                         disk_iops_read_write=None, disk_mbps_read_write=None, hyper_v_generation=None,
-                        encryption_type=None, disk_encryption_set=None):
+                        encryption_type=None, disk_encryption_set=None, max_shares=None,
+                        disk_iops_read_only=None, disk_mbps_read_only=None,
+                        image_reference=None, image_reference_lun=None,
+                        gallery_image_reference=None, gallery_image_reference_lun=None):
     from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -274,6 +277,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         option = DiskCreateOption.copy
     elif for_upload:
         option = DiskCreateOption.upload
+    elif image_reference or gallery_image_reference:
+        option = DiskCreateOption.from_image
     else:
         option = DiskCreateOption.empty
 
@@ -287,8 +292,33 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
     if upload_size_bytes is not None and for_upload is not True:
         raise CLIError('usage error: --upload-size-bytes should be used together with --for-upload')
 
+    if image_reference is not None:
+        if not is_valid_resource_id(image_reference):
+            # URN or name
+            terms = image_reference.split(':')
+            if len(terms) == 4:  # URN
+                disk_publisher, disk_offer, disk_sku, disk_version = terms[0], terms[1], terms[2], terms[3]
+                if disk_version.lower() == 'latest':
+                    disk_version = _get_latest_image_version(cmd.cli_ctx, location, disk_publisher, disk_offer,
+                                                             disk_sku)
+                client = _compute_client_factory(cmd.cli_ctx)
+                response = client.virtual_machine_images.get(location, disk_publisher, disk_offer, disk_sku,
+                                                             disk_version)
+                image_reference = response.id
+            else:  # error
+                raise CLIError('usage error: --image-reference should be ID or URN (publisher:offer:sku:version).')
+        # image_reference is an ID now
+        image_reference = {'id': image_reference}
+        if image_reference_lun is not None:
+            image_reference['lun'] = image_reference_lun
+
+    if gallery_image_reference is not None:
+        gallery_image_reference = {'id': gallery_image_reference}
+        if gallery_image_reference_lun is not None:
+            gallery_image_reference['lun'] = gallery_image_reference_lun
+
     creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
-                                 image_reference=None,
+                                 image_reference=image_reference, gallery_image_reference=gallery_image_reference,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id,
                                  upload_size_bytes=upload_size_bytes)
@@ -320,6 +350,12 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         disk.disk_iops_read_write = disk_iops_read_write
     if disk_mbps_read_write is not None:
         disk.disk_mbps_read_write = disk_mbps_read_write
+    if max_shares is not None:
+        disk.max_shares = max_shares
+    if disk_iops_read_only is not None:
+        disk.disk_iops_read_only = disk_iops_read_only
+    if disk_mbps_read_only is not None:
+        disk.disk_mbps_read_only = disk_mbps_read_only
 
     client = _compute_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.disks.create_or_update, resource_group_name, disk_name, disk)
@@ -2635,6 +2671,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.license_type = license_type
 
     if enable_terminate_notification is not None or terminate_notification_time is not None:
+        if vmss.virtual_machine_profile.scheduled_events_profile is None:
+            ScheduledEventsProfile = cmd.get_models('ScheduledEventsProfile')
+            vmss.virtual_machine_profile.scheduled_events_profile = ScheduledEventsProfile()
         TerminateNotificationProfile = cmd.get_models('TerminateNotificationProfile')
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,

@@ -324,6 +324,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('restore_days', type=int, arg_group='Restore Policy',
                    min_api='2019-06-01', help="The number of days for the blob can be restored. It should be greater "
                    "than zero and less than Delete Retention Days.")
+        c.argument('enable_versioning', arg_type=get_three_state_flag(), help='Versioning is enabled if set to true.',
+                   min_api='2019-06-01')
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
@@ -339,8 +341,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=get_permission_validator(t_account_permissions))
         c.ignore('sas_token')
 
-    with self.argument_context('storage logging show') as c:
-        c.extra('services', validator=get_char_options_validator('bqt', 'services'), default='bqt')
+    for item in ['show', 'off']:
+        with self.argument_context('storage logging {}'.format(item)) as c:
+            c.extra('services', validator=get_char_options_validator('bqt', 'services'), default='bqt')
 
     with self.argument_context('storage logging update') as c:
         c.extra('services', validator=get_char_options_validator('bqt', 'services'), options_list='--services',

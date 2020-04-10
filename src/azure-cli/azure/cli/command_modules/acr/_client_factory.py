@@ -57,3 +57,7 @@ def cf_acr_tokens(cli_ctx, *_):
 
 def cf_acr_token_credentials(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, VERSION_2019_05_01_PREVIEW).registries
+
+
+def cf_acr_agentpool(cli_ctx, *_):
+    return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).agent_pools
