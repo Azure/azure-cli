@@ -331,18 +331,16 @@ def validate_vault_id(entity_type):
         from azure.keyvault.key_vault_id import KeyVaultIdentifier
 
         pure_entity_type = entity_type.replace('deleted', '')
-        # name = getattr(ns, pure_entity_type + '_name', None)
         name = getattr(ns, 'name', None)
         vault = getattr(ns, 'vault_base_url', None)
         identifier = getattr(ns, 'identifier', None)
 
         if identifier:
             ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
-            # setattr(ns, pure_entity_type + '_name', ident.name)
             setattr(ns, 'name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
-            if hasattr(ns, pure_entity_type + '_version'):
-                setattr(ns, pure_entity_type + '_version', ident.version)
+            if hasattr(ns, 'version'):
+                setattr(ns, 'version', ident.version)
         elif not (name and vault):
             raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME [--version VERSION]')
 
