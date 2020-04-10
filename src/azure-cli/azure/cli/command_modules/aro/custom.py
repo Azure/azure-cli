@@ -134,7 +134,7 @@ def aro_list_credentials(client, resource_group_name, resource_name):
 
 
 def aro_update(client, resource_group_name, resource_name, no_wait=False):
-    oc = v2020_04_30.OpenShiftCluster()
+    oc = v2020_04_30.OpenShiftClusterUpdate()
 
     return sdk_no_wait(no_wait, client.update,
                        resource_group_name=resource_group_name,
