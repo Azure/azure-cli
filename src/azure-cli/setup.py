@@ -50,6 +50,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'antlr4-python3-runtime~=4.7.2',
     'azure-batch~=9.0',
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}.*'.format(VERSION),
