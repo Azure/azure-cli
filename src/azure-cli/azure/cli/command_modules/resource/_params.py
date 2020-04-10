@@ -262,6 +262,7 @@ def load_arguments(self, _):
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
+        c.argument('no_prompt', arg_type=no_prompt)
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
 
@@ -300,6 +301,7 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
         c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
                    help='Auxiliary tenants which will be used during deployment across tenants.')
+        c.argument('no_prompt', arg_type=no_prompt)
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.ignore("rollback_on_error")

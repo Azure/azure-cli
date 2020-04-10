@@ -606,9 +606,9 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   template_file=None, template_uri=None, parameters=None,
                                                   deployment_name=None, mode=DeploymentMode.incremental,
                                                   aux_subscriptions=None, aux_tenants=None,
-                                                  result_format=None, no_pretty_print=None):
+                                                  result_format=None, no_pretty_print=None, no_prompt=False):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri,
-                                                                parameters, mode, result_format)
+                                                                parameters, mode, result_format, no_prompt)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions, aux_tenants)
     what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties)
 
@@ -618,9 +618,9 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
 def what_if_deploy_arm_template_at_subscription_scope(cmd,
                                                       template_file=None, template_uri=None, parameters=None,
                                                       deployment_name=None, deployment_location=None,
-                                                      result_format=None, no_pretty_print=None):
+                                                      result_format=None, no_pretty_print=None, no_prompt=False):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
-                                                                DeploymentMode.incremental, result_format)
+                                                                DeploymentMode.incremental, result_format, no_prompt)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx)
     what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location)
 
@@ -689,12 +689,14 @@ def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, templ
     return properties
 
 
-def _prepare_deployment_what_if_properties(cli_ctx, template_file, template_uri, parameters, mode, result_format):
+def _prepare_deployment_what_if_properties(cli_ctx, template_file, template_uri, parameters,
+                                           mode, result_format, no_prompt):
     DeploymentWhatIfProperties, DeploymentWhatIfSettings = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                    'DeploymentWhatIfProperties', 'DeploymentWhatIfSettings',
                                                                    mod='models')
 
-    deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx, template_file, template_uri, parameters, mode)
+    deployment_properties = _prepare_deployment_properties_unmodified(cli_ctx, template_file=template_file, template_uri=template_uri,
+                                                                      parameters=parameters, mode=mode, no_prompt=no_prompt)
     deployment_what_if_properties = DeploymentWhatIfProperties(template=deployment_properties.template, template_link=deployment_properties.template_link,
                                                                parameters=deployment_properties.parameters, mode=deployment_properties.mode,
                                                                what_if_settings=DeploymentWhatIfSettings(result_format=result_format))
