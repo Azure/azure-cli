@@ -62,7 +62,7 @@ def enable_vt_mode():
     try:
         return _update_conout_mode(ENABLE_VIRTUAL_TERMINAL_PROCESSING)
     except OSError as e:
-        if e.winerror == ERROR_INVALID_PARAMETER:
+        if e.errno == ERROR_INVALID_PARAMETER:
             logger.debug("Unable to enable virtual terminal processing for legacy Windows terminal.")
         else:
-            logger.debug("Unable to enable virtual terminal processing: %s.", e.winerror)
+            logger.debug("Unable to enable virtual terminal processing: %s.", e.errno)
