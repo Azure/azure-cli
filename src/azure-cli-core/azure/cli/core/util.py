@@ -54,8 +54,9 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
         if isinstance(ex, (CLIError, CloudError, AzureException)):
             logger.error(ex.args[0])
             try:
-                logger.error(ex.args[0].error.details[0])
-            except (AttributeError, IndexError):
+                for detail in ex.args[0].error.details:
+                    logger.error(detail)
+            except (AttributeError, TypeError):
                 pass
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
