@@ -82,7 +82,7 @@ class AzCliLogging(CLILogging):
                 get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.",
                                            self.command_log_dir)
 
-            _delete_old_logs(self.command_log_dir)
+                _delete_old_logs(self.command_log_dir)
 
     def _init_command_logfile_handlers(self, command_metadata_logger, args):
 
