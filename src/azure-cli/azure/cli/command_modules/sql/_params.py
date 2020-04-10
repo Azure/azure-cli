@@ -1536,16 +1536,21 @@ def load_arguments(self, _):
                    arg_type=get_location_type(self.cli_ctx),
                    help='The location of the desired backups.')
 
+        c.argument('database_name',
+                   options_list=['--database', '-d'],
+                   help='The name of the Azure SQL Managed Database. '
+                   'If specified (along with instance name), retrieves all requested backups under this database.')
+
+        c.argument('backup_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the LTR backup. '
+                   'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup name.')
+
     with self.argument_context('sql midb ltr-backup list') as c:
         c.argument('managed_instance_name',
                    options_list=['--managed-instance', '--mi'],
                    help='Name of the Azure SQL managed instance. '
                    'If specified, retrieves all requested backups under this managed instance.')
-
-        c.argument('database_name',
-                   options_list=['--name', '-n'],
-                   help='The name of the Azure SQL Managed Database. '
-                   'If specified (along with instance name), retrieves all requested backups under this database.')
 
         c.argument('database_state',
                    required=False,
@@ -1561,7 +1566,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql midb ltr-backup restore') as c:
         c.argument('target_managed_database_name',
-                   options_list=['--dest-name'],
+                   options_list=['--dest-database'],
                    required=True,
                    help='Name of the managed database that will be created as the restore destination.')
 

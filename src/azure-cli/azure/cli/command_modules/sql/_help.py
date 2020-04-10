@@ -685,7 +685,7 @@ type: command
 short-summary: Get a long term retention backup for a managed database.
 examples:
   - name: Show long term retention backup for a managed database.
-    text: az sql midb ltr-backup show -l southeastasia --mi myinstance -n mymanageddb --backup-name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql midb ltr-backup show -l southeastasia --mi myinstance -d mymanageddb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql midb ltr-backup list'] = """
@@ -693,7 +693,7 @@ type: command
 short-summary: List the long term retention backups for a location, instance or database.
 examples:
   - name: List long term retention backups for a managed database.
-    text: az sql midb ltr-backup list -l southeastasia --mi myinstance -n mymanageddb
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance -d mymanageddb
   - name: List long term retention backups for a managed instance (list only the latest LTR backups, which belong to live databases).
     text: az sql midb ltr-backup list -l southeastasia --mi myinstance --database-state Live --only-latest-per-database True
   - name: List long term retention backups for a managed instance (with resource group argument).
@@ -709,7 +709,7 @@ type: command
 short-summary: Delete a long term retention backup.
 examples:
   - name: Delete long term retention backup for a managed database.
-    text: az sql midb ltr-backup delete -l southeastasia --mi myinstance -n mymanageddb --backup-name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql midb ltr-backup delete -l southeastasia --mi myinstance -d mymanageddb --name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql midb ltr-backup restore'] = """
@@ -717,7 +717,7 @@ type: command
 short-summary: Restore a long term retention backup to a new database.
 examples:
   - name: Restore a managed database using LTR backup.
-    text: az sql midb ltr-backup restore --dest-name targetmidb --dest-mi myinstance --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql midb ltr-backup restore --dest-name targetmidb --dest-database myinstance --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql midb ltr-backup wait'] = """
