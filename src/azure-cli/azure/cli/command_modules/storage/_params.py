@@ -1150,6 +1150,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     required=True)
             c.argument('content', help='Content to be appended to file.')
 
+    with self.argument_context('storage fs file create') as c:
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_content_settings_argument(t_file_content_settings, update=False)
+        c.argument('permissions', permissions_type)
+        c.argument('unmask', unmask_type)
+
     with self.argument_context('storage fs file download') as c:
         c.argument('destination_path', options_list=['--destination', '-d'], type=file_type,
                    help='The local file where the file or folder will be downloaded to. The source filename will be '

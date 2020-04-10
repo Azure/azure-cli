@@ -81,7 +81,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('publicAccess', None))
 
         self.storage_cmd('storage fs list', account_info) \
-            .assert_with_checks(JMESPathCheck('length(@)', 3)) 
+            .assert_with_checks(JMESPathCheck('length(@)', 3))
 
         self.storage_cmd('storage fs delete -n {} -y', account_info, filesystem1)
         self.storage_cmd('storage fs delete -n {} -y', account_info, filesystem2)
@@ -92,14 +92,55 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     def test_adls_directory_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         filesystem = self.create_file_system(account_info)
-        self.kwargs = {
-            "fs": filesystem,
-            "dir": self.create_random_name(prefix="dir", length=12),
-            "subdir": self.create_random_name(prefix="subdir", length=12)
-        }
+        directory = self.create_random_name(prefix="dir", length=12)
+        subdir = self.create_random_name(prefix="subdir", length=12)
+
+        subdir_path = '/'.join([directory, subdir])
 
         # Create Directory
-        self.storage_cmd('storage fs directory create -n {dir} -f {subdir}', account_info)
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, directory, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, directory, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+        self.storage_cmd('storage fs directory show -n {} -f {}', account_info, directory, filesystem)\
+            .assert_with_checks(JMESPathCheck('name', directory)) \
+            .assert_with_checks(JMESPathCheck('deleted', False)) \
+            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true'))
+
+        self.storage_cmd('storage fs directory create -n {} -f {}', account_info, subdir_path, filesystem)
+        self.storage_cmd('storage fs directory show -n {} -f {}', account_info, subdir_path, filesystem) \
+            .assert_with_checks(JMESPathCheck('name', subdir_path)) \
+            .assert_with_checks(JMESPathCheck('deleted', False)) \
+            .assert_with_checks(JMESPathCheck('metadata.hdi_isfolder', 'true'))
+
+        # List Directories
+        self.storage_cmd('storage fs directory list -f {}', account_info, filesystem) \
+            .assert_with_checks(JMESPathCheck('length(@)', 2))
+        self.storage_cmd('storage fs directory list -f {} --path {}', account_info, filesystem, directory) \
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # Move Directory
+        new_dir = "new_dir"
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, new_dir, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+        self.storage_cmd('storage fs directory move -n {} -f {} --new-directory {}', account_info, subdir_path,
+                         filesystem, '/'.join([filesystem, new_dir]))
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, new_dir, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', True))
+        self.storage_cmd('storage fs directory exists -n {} -f {}', account_info, subdir_path, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+
+        self.storage_cmd('storage fs directory list -f {}', account_info, filesystem) \
+            .assert_with_checks(JMESPathCheck('length(@)', 2))
+        self.storage_cmd('storage fs directory list -f {} --path {}', account_info, filesystem, directory) \
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
+
+        # Delete Directory
+        self.storage_cmd('storage fs directory delete -n {} -f {} -y', account_info, directory, filesystem)
+        self.storage_cmd('storage fs directory delete -n {} -f {} -y', account_info, new_dir, filesystem)
+        self.storage_cmd('storage fs directory list -f {}', account_info, filesystem) \
+            .assert_with_checks(JMESPathCheck('length(@)', 0))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
