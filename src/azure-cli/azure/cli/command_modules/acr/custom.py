@@ -134,6 +134,7 @@ def acr_update_set(cmd,
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
     if parameters.data_endpoint_enabled is not None:
+        # TODO remove the validation after service side blocking is available
         from ._utils import validate_premium_registry
         _, _ = validate_premium_registry(
             cmd, registry_name, resource_group_name,
