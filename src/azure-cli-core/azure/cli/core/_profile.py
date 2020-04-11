@@ -1203,8 +1203,8 @@ def _get_authorization_code_worker(authority_url, resource, results):
         except socket.error as ex:
             logger.warning("Port '%s' is taken with error '%s'. Trying with the next one", port, ex)
         except UnicodeDecodeError:
-            logger.warning("Please make sure there is no international characters in "
-                           "the computer name or 127.0.0.1 entries in C:\Windows\System32\drivers\etc\hosts file. "
+            logger.warning("Please make sure there is no international (Unicode) character in the computer name "
+                           r"or C:\Windows\System32\drivers\etc\hosts file's 127.0.0.1 entries. "
                            "For more details, please see https://github.com/Azure/azure-cli/issues/12957")
             break
 
