@@ -64,7 +64,7 @@ class AzCliLogging(CLILogging):
 
             # if we have too many files, delete the 5 last / oldest command log files.
             if len(sorted_files) > 25:
-                for file in sorted_files[-5:]:
+                for file in sorted_files[-1:]:
                     try:
                         os.remove(os.path.join(log_dir, file))
                     except OSError:  # FileNotFoundError introduced in Python 3
@@ -176,6 +176,10 @@ class AzCliLogging(CLILogging):
     def end_cmd_metadata_logging(self, exit_code):
         if self.command_metadata_logger:
             self.command_metadata_logger.info("exit code: %s", exit_code)
+
+            for handler in self.command_metadata_logger.handlers[:]:
+                handler.close()
+                self.command_metadata_logger.removeHandler(handler)
 
             # We have finished metadata logging, remove handler and set command_metadata_handler to None.
             # crucial to remove handler as in python logger objects are shared which can affect testing of this logger

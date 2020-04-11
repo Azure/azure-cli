@@ -130,9 +130,15 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             recording_name=recording_name
         )
 
+    def doCleanups(self):
+        self.cli_ctx.logging.end_cmd_metadata_logging(self.cli_ctx.result.exit_code if self.cli_ctx.result else 0)
+
+        return super().doCleanups()
+
     def tearDown(self):
         for processor in self._processors_to_reset:
             processor.reset()
+
         super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
