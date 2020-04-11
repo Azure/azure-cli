@@ -166,12 +166,12 @@ def acr_show_endpoints(cmd,
         for r in replicates:
             info['dataEndpoints'].append({
                 'region': r.location,
-                'endpoint': '*.' + cmd.cli_ctx.cloud.suffixes.storage_endpoint,
+                'endpoint': '*.blob.' + cmd.cli_ctx.cloud.suffixes.storage_endpoint,
             })
         if not replicates:
             info['dataEndpoints'].append({
                 'region': registry.location,
-                'endpoint': '*.' + cmd.cli_ctx.cloud.suffixes.storage_endpoint,
+                'endpoint': '*.blob.' + cmd.cli_ctx.cloud.suffixes.storage_endpoint,
             })
 
     return info

@@ -450,7 +450,7 @@ class AcrCommandsTests(ScenarioTest):
         login_server = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium').get_output_in_json()['loginServer']
         self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
             self.check('length(dataEndpoints)', 1),
-            self.check('dataEndpoints[0].endpoint', '*.core.windows.net'),
+            self.check('dataEndpoints[0].endpoint', '*.blob.core.windows.net'),
             self.check('dataEndpoints[0].region', resource_group_location),
             self.check('loginServer', login_server)
         ])
@@ -468,8 +468,8 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr update --name {registry_name} --resource-group {rg} --data-endpoint-enabled false')
         self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
             self.check('length(dataEndpoints)', 2),
-            self.check('dataEndpoints[0].endpoint', '*.core.windows.net'),
-            self.check('dataEndpoints[1].endpoint', '*.core.windows.net'),
+            self.check('dataEndpoints[0].endpoint', '*.blob.core.windows.net'),
+            self.check('dataEndpoints[1].endpoint', '*.blob.core.windows.net'),
         ])
 
     @ResourceGroupPreparer(location='centraluseuap')
