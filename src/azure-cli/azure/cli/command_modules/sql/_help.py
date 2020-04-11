@@ -156,7 +156,7 @@ type: group
 short-summary: Manage SQL database long term retention policy.
 """
 
-helps['sql dbs ltr-policy set'] = """
+helps['sql db ltr-policy set'] = """
 type: command
 short-summary: Update long term retention settings for a database.
 examples:
@@ -219,7 +219,7 @@ examples:
 
 helps['sql db ltr-backup wait'] = """
 type: command
-short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
+short-summary: Place the CLI in a waiting state until a condition of the database is met.
 """
 
 helps['sql db op'] = """
