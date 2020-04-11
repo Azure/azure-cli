@@ -94,6 +94,7 @@ def acr_update_custom(cmd,
                       sku=None,
                       admin_enabled=None,
                       default_action=None,
+                      data_endpoint_enabled=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -108,6 +109,9 @@ def acr_update_custom(cmd,
     if default_action is not None:
         NetworkRuleSet = cmd.get_models('NetworkRuleSet')
         instance.network_rule_set = NetworkRuleSet(default_action=default_action)
+
+    if data_endpoint_enabled is not None:
+        instance.data_endpoint_enabled = data_endpoint_enabled
 
     return instance
 
@@ -129,9 +133,47 @@ def acr_update_set(cmd,
     if parameters.network_rule_set and registry.sku.name not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
+    if parameters.data_endpoint_enabled is not None:
+        from ._utils import validate_premium_registry
+        _, _ = validate_premium_registry(
+            cmd, registry_name, resource_group_name,
+            'Dadicated data endpoints are only supported for managed registries in Premium SKU')
+
     validate_sku_update(cmd, registry.sku.name, parameters.sku)
 
     return client.update(resource_group_name, registry_name, parameters)
+
+
+def acr_show_endpoints(cmd,
+                       registry_name,
+                       resource_group_name=None):
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
+    info = {
+        'loginServer': registry.login_server,
+        'dataEndpoints': []
+    }
+    if registry.data_endpoint_enabled:
+        for host in registry.data_endpoint_host_names:
+            info['dataEndpoints'].append({
+                'region': host.split('.')[1],
+                'endpoint': host,
+            })
+    else:
+        from ._client_factory import cf_acr_replications
+        replicate_client = cf_acr_replications(cmd.cli_ctx)
+        replicates = list(replicate_client.list(resource_group_name, registry_name))
+        for r in replicates:
+            info['dataEndpoints'].append({
+                'region': r.location,
+                'endpoint': '*.' + cmd.cli_ctx.cloud.suffixes.storage_endpoint,
+            })
+        if not replicates:
+            info['dataEndpoints'].append({
+                'region': registry.location,
+                'endpoint': '*.' + cmd.cli_ctx.cloud.suffixes.storage_endpoint,
+            })
+
+    return info
 
 
 def acr_login(cmd,
