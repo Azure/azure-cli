@@ -753,7 +753,9 @@ def import_key(cmd, client, vault_base_url, key_name, protection=None, key_ops=N
             try:
                 pkey = load_pem_private_key(pem_data, pem_password, default_backend())
             except (ValueError, TypeError, UnsupportedAlgorithm) as e:
-                print(e)
+                if str(e) == 'Could not deserialize key data.':
+                    raise CLIError('Import failed: {} The private key in the PEM file must be encrypted.'.format(e))
+                raise CLIError('Import failed: {}'.format(e))
 
             # populate key into jwk
             if isinstance(pkey, rsa.RSAPrivateKey):
