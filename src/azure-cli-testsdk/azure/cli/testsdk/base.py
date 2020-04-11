@@ -188,6 +188,11 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         self.kwargs = {}
         self.test_resources_count = 0
 
+    def doCleanups(self):
+        self.cli_ctx.logging.end_cmd_metadata_logging(self.cli_ctx.result.exit_code if self.cli_ctx.result else 0)
+
+        return super().doCleanups()
+
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
         return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
