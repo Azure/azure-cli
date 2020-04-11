@@ -711,6 +711,97 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 
+class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
+    @record_only()
+    def test_sql_db_long_term_retention(
+            self):
+
+        self.kwargs.update({
+            'rg': 'myResourceGroup',
+            'loc': 'eastus',
+            'server_name': 'mysqlserver-x',
+            'database_name': 'testLtr',
+            'weekly_retention': 'P1W',
+            'monthly_retention': 'P1M',
+            'yearly_retention': 'P2M',
+            'week_of_year': 12
+        })
+
+        # test update long term retention on live database
+        self.cmd(
+            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name} --weekly-retention {weekly_retention} --monthly-retention {monthly_retention} --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('monthlyRetention', '{monthly_retention}'),
+                self.check('yearlyRetention', '{yearly_retention}')])
+
+        # test get long term retention policy on live database
+        self.cmd(
+            'sql db ltr-policy show -g {rg} -s {server_name} -n {database_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('monthlyRetention', '{monthly_retention}'),
+                self.check('yearlyRetention', '{yearly_retention}')])
+
+        # test list long term retention backups for location
+        # with resource group
+        self.cmd(
+            'sql db ltr-backup list -l {loc} -g {rg}')
+        # without resource group
+        self.cmd(
+            'sql db ltr-backup list -l {loc}')
+
+        # test list long term retention backups for instance
+        # with resource group
+        self.cmd(
+            'sql db ltr-backup list -l {loc} -s {server_name} -g {rg}')
+
+        # without resource group
+        self.cmd(
+            'sql db ltr-backup list -l {loc} -s {server_name}')
+
+        # test list long term retention backups for database
+        # with resource group
+        self.cmd(
+            'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} -g {rg}')
+
+        # without resource group
+        self.cmd(
+            'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name}')
+
+        # setup for test show long term retention backup
+        backup = self.cmd(
+            'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
+
+        self.kwargs.update({
+            'backup_name': backup[0]['name'],
+            'backup_id': backup[0]['id']
+        })
+
+        # test show long term retention backup
+        self.cmd(
+            'sql db ltr-backup show -l {loc} -s {server_name} -d {database_name} -n {backup_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('serverName', '{server_name}'),
+                self.check('databaseName', '{database_name}'),
+                self.check('name', '{backup_name}')])
+
+        # test restore managed database from LTR backup
+        self.kwargs.update({
+            'dest_database_name': 'cli-restore-dest'
+        })
+
+        self.cmd(
+            'sql db ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name} --dest-server {server_name} --dest-resource-group {rg}')
+
+        # test delete long term retention backup
+        self.cmd(
+            'sql db ltr-backup delete -l {loc} -s {server_name} -d {database_name} -n \'{backup_name}\'')
+
+
 class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
     def test_sql_mi_operation_mgmt(self):

@@ -886,15 +886,18 @@ def load_arguments(self, _):
                    arg_type=get_location_type(self.cli_ctx),
                    help='The location of the desired backups.')
 
+        c.argument('backup_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the LTR backup. '
+                   'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup name.')
+
         c.argument('long_term_retention_server_name',
                    options_list=['--server-name', '--server', '-s'],
-                   required=False,
                    help='Name of the Azure SQL Server. '
                    'If specified, retrieves all requested backups under this server.')
 
         c.argument('long_term_retention_database_name',
-                   options_list=['--name', '-n'],
-                   required=False,
+                   options_list=['--database', '-d'],
                    help='Name of the Azure SQL Database. '
                    'If specified (along with server name), retrieves all requested backups under this database.')
 
@@ -912,17 +915,17 @@ def load_arguments(self, _):
                    help='If true, will only return the latest backup for each database')
 
     with self.argument_context('sql db ltr-backup restore') as c:
-        c.argument('target_database_name',
-                   options_list=['--dest-name'],
+        c.argument('database_name',
+                   options_list=['--dest-database'],
                    required=True,
                    help='Name of the database that will be created as the restore destination.')
 
-        c.argument('target_server_name',
+        c.argument('server_name',
                    options_list=['--dest-server'],
                    required=True,
                    help='Name of the server to restore database to.')
 
-        c.argument('target_resource_group_name',
+        c.argument('resource_group_name',
                    options_list=['--dest-resource-group'],
                    required=True,
                    help='Name of the resource group of the server to restore database to.')

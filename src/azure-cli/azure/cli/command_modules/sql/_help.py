@@ -182,7 +182,7 @@ type: command
 short-summary: Get a long term retention backup for a database.
 examples:
   - name: Show long term retention backup for a managed database.
-    text: az sql db ltr-backup show -l southeastasia -s myserver -n mydb --backup-name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql db ltr-backup list'] = """
@@ -190,7 +190,7 @@ type: command
 short-summary: List the long term retention backups for a location, server or database.
 examples:
   - name: List long term retention backups for a database.
-    text: az sql db ltr-backup list -l southeastasia -s myserver -n mydb
+    text: az sql db ltr-backup list -l southeastasia -s myserver -d mydb
   - name: List long term retention backups for a server (list only the latest LTR backups, which belong to live databases).
     text: az sql db ltr-backup list -l southeastasia -s myserver --database-state Live --only-latest-per-database True
   - name: List long term retention backups for a server (with resource group argument).
@@ -206,7 +206,7 @@ type: command
 short-summary: Delete a long term retention backup.
 examples:
   - name: Delete long term retention backup for  database.
-    text: az sql db ltr-backup delete -l southeastasia -s myserver -n mydb --backup-name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup delete -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql db ltr-backup restore'] = """
@@ -214,7 +214,7 @@ type: command
 short-summary: Restore a long term retention backup to a new database.
 examples:
   - name: Restore a database using LTR backup.
-    text: az sql db ltr-backup restore --dest-name targetdb --dest-server myserver --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionServers/myserver/longTermRetentionDatabases/sourcedb/longTermRetentionBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup restore --dest-database targetdb --dest-server myserver --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionServers/myserver/longTermRetentionDatabases/sourcedb/longTermRetentionBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql db ltr-backup wait'] = """
