@@ -784,7 +784,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup show -l {loc} -s {server_name} -d {database_name} -n {backup_name}',
             checks=[
-                self.check('resourceGroup', '{rg}'),
+                self.check('resour ceGroup', '{rg}'),
                 self.check('serverName', '{server_name}'),
                 self.check('databaseName', '{database_name}'),
                 self.check('name', '{backup_name}')])

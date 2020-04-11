@@ -259,7 +259,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
 
     database_long_term_retention_backups_operations = CliCommandType(
-        operations_tmp='azure.mgmt.sql.operations#LongTermRetentionBackupsOperations.{}',
+        operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionBackupsOperations.{}',
         client_factory=get_sql_database_long_term_retention_backups_operations)
 
     with self.command_group('sql db ltr-backup',

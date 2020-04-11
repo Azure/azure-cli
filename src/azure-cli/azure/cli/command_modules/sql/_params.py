@@ -915,17 +915,17 @@ def load_arguments(self, _):
                    help='If true, will only return the latest backup for each database')
 
     with self.argument_context('sql db ltr-backup restore') as c:
-        c.argument('database_name',
+        c.argument('target_database_name',
                    options_list=['--dest-database'],
                    required=True,
                    help='Name of the database that will be created as the restore destination.')
 
-        c.argument('server_name',
+        c.argument('target_server_name',
                    options_list=['--dest-server'],
                    required=True,
                    help='Name of the server to restore database to.')
 
-        c.argument('resource_group_name',
+        c.argument('target_resource_group_name',
                    options_list=['--dest-resource-group'],
                    required=True,
                    help='Name of the resource group of the server to restore database to.')
