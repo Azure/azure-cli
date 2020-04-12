@@ -720,7 +720,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'rg': 'myResourceGroup',
             'loc': 'eastus',
             'server_name': 'mysqlserver-x',
-            'database_name': 'testLtr',
+            'database_name': 'testLtr2',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
@@ -784,14 +784,14 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup show -l {loc} -s {server_name} -d {database_name} -n {backup_name}',
             checks=[
-                self.check('resour ceGroup', '{rg}'),
+                self.check('resourceGroup', '{rg}'),
                 self.check('serverName', '{server_name}'),
                 self.check('databaseName', '{database_name}'),
                 self.check('name', '{backup_name}')])
 
         # test restore managed database from LTR backup
         self.kwargs.update({
-            'dest_database_name': 'cli-restore-dest'
+            'dest_database_name': 'restore-dest'
         })
 
         self.cmd(
