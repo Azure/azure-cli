@@ -10,7 +10,7 @@ import zipfile
 
 import mock
 
-from azure.cli.core.extension import (get_extensions, get_extension_path, extension_exists,
+from azure.cli.core.extension import (get_extensions, build_extension_path, extension_exists,
                                       get_extension, get_extension_names, get_extension_modname, ext_compat_with_cli,
                                       ExtensionNotInstalledException, WheelExtension,
                                       EXTENSIONS_MOD_PREFIX, EXT_METADATA_MINCLICOREVERSION, EXT_METADATA_MAXCLICOREVERSION)
@@ -29,7 +29,7 @@ def _install_test_extension1():  # pylint: disable=no-self-use
     # We extract the extension into place as we aren't testing install here
     zip_file = _get_test_data_file('{}.zip'.format(EXT_NAME))
     zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(get_extension_path(EXT_NAME))
+    zip_ref.extractall(build_extension_path(EXT_NAME))
     zip_ref.close()
 
 
@@ -37,7 +37,7 @@ def _install_test_extension2():  # pylint: disable=no-self-use
     # We extract the extension into place as we aren't testing install here
     zip_file = _get_test_data_file('myfirstcliextension_az_extmetadata.zip')
     zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(get_extension_path(EXT_NAME))
+    zip_ref.extractall(build_extension_path(EXT_NAME))
     zip_ref.close()
 
 
