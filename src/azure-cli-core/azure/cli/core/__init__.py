@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
+
 from __future__ import print_function
 
 __version__ = "2.3.1"
@@ -29,6 +31,15 @@ EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 
+_PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https://docs.microsoft.com/cli/azure/install-azure-cli-yum?view=azure-cli-latest#update"),
+                                 "ZYPPER": ("sudo zypper refresh && sudo zypper update -y azure-cli", "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-zypper?view=azure-cli-latest#update"),
+                                 "DEB": ("sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli", "https://docs.microsoft.com/cli/azure/install-azure-cli-apt?view=azure-cli-latest#update"),
+                                 "HOMEBREW": ("brew update && brew upgrade azure-cli", "https://docs.microsoft.com/cli/azure/install-azure-cli-macos?view=azure-cli-latest#update"),
+                                 "PIP": ("curl -L https://aka.ms/InstallAzureCli | bash", "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?view=azure-cli-latest#install-or-update"),
+                                 "MSI": ("https://aka.ms/installazurecliwindows", "https://docs.microsoft.com/cli/azure/install-azure-cli-windows?view=azure-cli-latest#install-or-update"),
+                                 "DOCKER": ("docker pull mcr.microsoft.com/azure-cli", "https://docs.microsoft.com/en-us/cli/azure/run-azure-cli-docker?view=azure-cli-latest#update-docker-image")}
+
+_GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://docs.microsoft.com/en-us/cli/azure/install-azure-cli'
 
 class AzCli(CLI):
 
@@ -99,20 +110,29 @@ class AzCli(CLI):
             warning_msg = 'You have %i updates available. Consider updating your CLI installation'
             from azure.cli.core._environment import _ENV_AZ_INSTALLER
             installer = os.getenv(_ENV_AZ_INSTALLER)
-            if installer == 'RPM':
-                warning_msg += ' with \'sudo yum update azure-cli\''
-            elif installer == 'DEB':
-                warning_msg += ' with \'sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli\''
-            elif installer == 'HOMEBREW':
-                warning_msg += ' with \'brew update && brew upgrade azure-cli\''
-            elif installer == 'PIP':
-                warning_msg += ' with \'pip install --upgrade azure-cli\''
-            elif installer == 'DOCKER':
-                warning_msg += ' with \'docker pull mcr.microsoft.com/azure-cli\''
-            elif installer == 'MSI':
-                warning_msg += " with the latest MSI https://aka.ms/installazurecliwindows"
+            instruction_msg = ''
+            if installer in _PACKAGE_UPGRADE_INSTRUCTIONS:
+                if installer == 'RPM':
+                    from azure.cli.core.util import get_linux_distro
+                    distname, _ = get_linux_distro()
+                    if not distname:
+                        instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+                    else:
+                        distname = distname.lower().strip()
+                        if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
+                            installer = 'YUM'
+                        elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
+                            installer = 'ZYPPER'
+                        else:
+                            instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+                elif installer == 'PIP':
+                    instruction_msg = " with 'pip install --upgrade azure-cli' or '{}' if you used our script for installing. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1])
+                if instruction_msg:
+                    warning_msg += instruction_msg
+                else:
+                    warning_msg += " with '{}'. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1])
             else:
-                warning_msg += '. Instructions can be found at https://docs.microsoft.com/en-us/cli/azure/install-azure-cli' # pylint: disable=line-too-long
+                warning_msg += '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
             logger.warning(warning_msg, updates_available)
         else:
             print('Your CLI is up-to-date.')
