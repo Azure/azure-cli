@@ -62,7 +62,6 @@ class AzCliCommandParser(CLICommandParser):
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
         self.command_source = kwargs.pop('_command_source', None)
         self._raw_arguments = None
-        self._arguments = None
         self._namespace = None
         self._suggestion_msg = []
         self.subparser_map = {}
@@ -206,14 +205,10 @@ class AzCliCommandParser(CLICommandParser):
             # Select the parsed command.
             if hasattr(self._namespace, 'command'):
                 command = self._namespace.command
-        # If we have a list of unprocessed arguments and parse_known_arguments did not succeed...
-        elif isinstance(self._raw_arguments, list) and self._arguments is None:
+        # Parse parameter names from user input.
+        if isinstance(self._raw_arguments, list):
             raw_arguments = self._raw_arguments
             parameters = extract_safe_params(self._raw_arguments)
-        # If parse_known_args succeeded, extract arguments from self._arguments instead...
-        if isinstance(self._arguments, list):
-            raw_arguments = self._arguments
-            parameters = extract_safe_params(self._arguments)
 
         for parameter in parameters:
             parameter_set.add(parameter)
@@ -283,8 +278,8 @@ class AzCliCommandParser(CLICommandParser):
         # retrieve the raw arugment list in case parsing known arguments fails.
         self._raw_arguments = args
         # if parsing known arguments succeeds, get the command namespace and the argument list
-        self._namespace, self._arguments = super().parse_known_args(args=args, namespace=namespace)
-        return self._namespace, self._arguments
+        self._namespace, self._raw_arguments = super().parse_known_args(args=args, namespace=namespace)
+        return self._namespace, self._raw_arguments
 
     def _check_value(self, action, value):
         # Override to customize the error message when a argument is not among the available choices

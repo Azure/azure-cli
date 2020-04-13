@@ -248,7 +248,60 @@ class TestParser(unittest.TestCase):
             for choice in ['enum_1', 'enum_2']:
                 self.assertIn(choice, choices)
 
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_parser_failure_recovery_recommendations(self):
+        cli = DummyCli()
+        main_loader = MainCommandsLoader(cli)
+        cli.loader = main_loader
 
+        cli.loader.load_command_table(None)
+
+        parser = cli.parser_cls(cli)
+        parser.load_command_table(cli.loader)
+
+        recommendation_provider_parameters = []
+
+        version = cli.get_cli_version()
+        expected_recommendation_provider_parameters = [
+            # version, command, parameters, extension
+            (version, 'test module1', ['--opt'], None),
+            (version, 'test extension1', ['--opt'], None),
+            (version, 'foo_bar', ['--opt'], None),
+            (version, 'test module', ['--opt'], None),
+            (version, 'test extension', ['--opt'], __name__ + '.Ext2CommandsLoader')
+        ]
+
+        def mock_recommendation_provider(*args):
+            recommendation_provider_parameters.append(tuple(args))
+            return []
+
+        AzCliCommandParser.recommendation_provider = mock_recommendation_provider
+
+        faulty_cmd_args = [
+            'test module1 --opt enum_1',
+            'test extension1 --opt enum_1',
+            'test foo_bar --opt enum_3',
+            'test module --opt enum_3',
+            'test extension --opt enum_3'
+        ]
+        
+        for text in faulty_cmd_args:
+            with self.assertRaises(SystemExit):
+                parser.parse_args(text.split())
+
+        for i, parameters in enumerate(recommendation_provider_parameters):
+            version, command, parameters, extension = parameters
+            expected = expected_recommendation_provider_parameters[i]
+            ver, cmd, params, ext = expected
+            self.assertEqual(ver, version)
+            self.assertIn(cmd, command)
+            self.assertEqual(params, parameters)
+            self.assertEqual(ext, extension)
+            
 class VerifyError(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, test, substr=None):
