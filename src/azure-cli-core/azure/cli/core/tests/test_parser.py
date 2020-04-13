@@ -268,11 +268,11 @@ class TestParser(unittest.TestCase):
         version = cli.get_cli_version()
         expected_recommendation_provider_parameters = [
             # version, command, parameters, extension
-            (version, 'test module1', ['--opt'], None),
-            (version, 'test extension1', ['--opt'], None),
-            (version, 'foo_bar', ['--opt'], None),
-            (version, 'test module', ['--opt'], None),
-            (version, 'test extension', ['--opt'], __name__ + '.Ext2CommandsLoader')
+            ExpectedParameters(version, 'test module1', ['--opt'], False),
+            ExpectedParameters(version, 'test extension1', ['--opt'], False),
+            ExpectedParameters(version, 'foo_bar', ['--opt'], False),
+            ExpectedParameters(version, 'test module', ['--opt'], False),
+            ExpectedParameters(version, 'test extension', ['--opt'], True)
         ]
 
         def mock_recommendation_provider(*args):
@@ -288,7 +288,7 @@ class TestParser(unittest.TestCase):
             'test module --opt enum_3',
             'test extension --opt enum_3'
         ]
-        
+
         for text in faulty_cmd_args:
             with self.assertRaises(SystemExit):
                 parser.parse_args(text.split())
@@ -296,11 +296,14 @@ class TestParser(unittest.TestCase):
         for i, parameters in enumerate(recommendation_provider_parameters):
             version, command, parameters, extension = parameters
             expected = expected_recommendation_provider_parameters[i]
-            ver, cmd, params, ext = expected
-            self.assertEqual(ver, version)
-            self.assertIn(cmd, command)
-            self.assertEqual(params, parameters)
-            self.assertEqual(ext, extension)
+            self.assertEqual(expected.version, version)
+            self.assertIn(expected.command, command)
+            self.assertEqual(expected.parameters, parameters)
+
+            if expected.has_extension:
+                self.assertIsNotNone(extension)
+            else:
+                self.assertIsNone(extension)
 
 
 class VerifyError(object):  # pylint: disable=too-few-public-methods
@@ -314,6 +317,9 @@ class VerifyError(object):  # pylint: disable=too-few-public-methods
         if self.substr:
             self.test.assertTrue(message.find(self.substr) >= 0)
         self.called = True
+
+
+ExpectedParameters = namedtuple('ExpectedParameters', ['version', 'command', 'parameters', 'has_extension'])
 
 
 if __name__ == '__main__':
