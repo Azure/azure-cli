@@ -148,7 +148,7 @@ examples:
   - name: List all keys with any labels and query only key, value and tags.
     text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --fields key value tags --datetime "2019-05-01T11:24:12Z"
   - name: List content of key vault reference with key prefix 'KVRef_'.
-    text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --key "KVRef_" --resolve-keyvault
+    text: az appconfig kv list --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx  --key "KVRef_*" --resolve-keyvault
   - name: List key-values with multiple labels.
     text: az appconfig kv list --label test,prod,\\0 -n MyAppConfiguration
 """

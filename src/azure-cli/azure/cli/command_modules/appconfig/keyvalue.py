@@ -394,11 +394,10 @@ def delete_key(cmd,
     user_confirmation(confirmation_message, yes)
 
     try:
-        entries = list_key(cmd,
-                           key=key,
-                           label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
-                           connection_string=connection_string,
-                           all_=True)
+        entries = __read_kv_from_config_store(cmd,
+                                              connection_string=connection_string,
+                                              key=key,
+                                              label=label if label else QueryKeyValueCollectionOptions.empty_label)
     except HTTPException as exception:
         raise CLIError('Deletion operation failed. ' + str(exception))
 

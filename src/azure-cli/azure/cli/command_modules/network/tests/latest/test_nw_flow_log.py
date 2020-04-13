@@ -68,7 +68,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace0422',
+            'workspace': 'workspace328975',
         })
 
         # enable network watcher
@@ -98,11 +98,8 @@ class NWFlowLogScenarioTest(ScenarioTest):
 
         self.cmd('network watcher flow-log delete --location {location} --name {flow_log}')
 
-        with self.assertRaisesRegexp(SystemExit, '2'):
-            self.cmd('network watcher flow-log show '
-                     '--resource-group {watcher_rg} '
-                     '--watcher {watcher_name} '
-                     '--name {flow_log} ')
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('network watcher flow-log show --location {location} --name {flow_log}')
 
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='westus')
     @StorageAccountPreparer(name_prefix='testflowlog', location='westus', kind='StorageV2')
