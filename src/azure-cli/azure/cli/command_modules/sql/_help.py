@@ -160,15 +160,15 @@ helps['sql db ltr-policy set'] = """
 type: command
 short-summary: Update long term retention settings for a database.
 examples:
-  - name: Set long term retention for a managed database.
+  - name: Set long term retention for a database.
     text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26
 """
 
 helps['sql db ltr-policy show'] = """
 type: command
-short-summary: Show the long term retention policy for a managed database.
+short-summary: Show the long term retention policy for a database.
 examples:
-  - name: Show long term retention policy for a managed database.
+  - name: Show long term retention policy for a database.
     text: az sql db ltr-policy show -g mygroup -s myserver -n mydb
 """
 
@@ -181,7 +181,7 @@ helps['sql db ltr-backup show'] = """
 type: command
 short-summary: Get a long term retention backup for a database.
 examples:
-  - name: Show long term retention backup for a managed database.
+  - name: Show long term retention backup for a database.
     text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
@@ -205,7 +205,7 @@ helps['sql db ltr-backup delete'] = """
 type: command
 short-summary: Delete a long term retention backup.
 examples:
-  - name: Delete long term retention backup for  database.
+  - name: Delete long term retention backup for database.
     text: az sql db ltr-backup delete -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
@@ -213,7 +213,7 @@ helps['sql db ltr-backup restore'] = """
 type: command
 short-summary: Restore a long term retention backup to a new database.
 examples:
-  - name: Restore a database using LTR backup.
+  - name: Restore LTR backup.
     text: az sql db ltr-backup restore --dest-database targetdb --dest-server myserver --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionServers/myserver/longTermRetentionDatabases/sourcedb/longTermRetentionBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
