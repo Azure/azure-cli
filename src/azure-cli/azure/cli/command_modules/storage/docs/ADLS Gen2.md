@@ -47,14 +47,14 @@ For more specific examples, use: az find "az storage fs"
 
     **Several Authorization access Methods:**
 
-    1). Using connection string
+    1. Using connection string
 
         - Specify `--connection-string` parameter in your command
             `--connection-string $myconnectionstring`
 
         - Set Environment Variable `AZURE_STORAGE_CONNECTION_STRING`
 
-    2). Using account name and account key
+    2. Using account name and account key
 
         - Specify `--account-name` and `--account-key` parameter in your command
             ```
@@ -64,7 +64,7 @@ For more specific examples, use: az find "az storage fs"
 
         - Set Environment Variable `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_KEY` 
 
-    3). Using account name and sas token
+    3. Using account name and sas token
 
         - Specify `--account-name` and `--sas-token` parameter in your command
             ```
@@ -74,7 +74,7 @@ For more specific examples, use: az find "az storage fs"
 
         - Set Environment Variable `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_SAS_TOKEN` 
 
-    4). Using account name and Azure AD credentials
+    4. Using account name and Azure AD credentials
 
         Azure CLI commands for data operations against Blob storage support the `--auth-mode` parameter, which enables you to specify how to authorize a given operation. Set the `--auth-mode` parameter to login to authorize with Azure AD credentials. For more information, see [Authorize access to blob or queue data with Azure CLI](https://docs.microsoft.com/en-us/azure/storage/common/authorize-data-operations-cli?toc=/azure/storage/blobs/toc.json).
 
