@@ -18,7 +18,7 @@ import logging
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from azure.common import AzureException
-from azure.core.exceptions import AzureError, HttpResponseError
+from azure.core.exceptions import AzureError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 from inspect import getfullargspec as get_arg_spec
