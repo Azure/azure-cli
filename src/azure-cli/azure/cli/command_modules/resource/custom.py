@@ -385,9 +385,8 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
 def deploy_arm_template_at_subscription_scope(cmd,
                                               template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
-                                              no_wait=False, handle_extended_json_format=None,
-                                              confirm_with_what_if=None, what_if_result_format=None,
-                                              no_prompt=False):
+                                              no_wait=False, handle_extended_json_format=None, no_prompt=False,
+                                              confirm_with_what_if=None, what_if_result_format=None):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_subscription_scope(cmd, template_file, template_uri, parameters,
                                                           deployment_name, deployment_location, what_if_result_format)
@@ -443,9 +442,9 @@ def deploy_arm_template_at_resource_group(cmd,
                                           resource_group_name=None,
                                           template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, mode=None, rollback_on_error=None,
-                                          no_wait=False, aux_subscriptions=None, aux_tenants=None,
-                                          confirm_with_what_if=None, what_if_result_format=None,
-                                          no_prompt=False):
+                                          no_wait=False, handle_extended_json_format=None,
+                                          aux_subscriptions=None, aux_tenants=None, no_prompt=False,
+                                          confirm_with_what_if=None, what_if_result_format=None):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name, template_file, template_uri, parameters,
                                                       deployment_name, mode, aux_subscriptions, aux_tenants,
