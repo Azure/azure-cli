@@ -1,6 +1,6 @@
 # Use Azure Pipelines to Run Tests
 
-This tutorial shows how to use Azure Pipelines to test Azure CLI commands. The usage may be changed in the future.
+This tutorial shows how to use Azure Pipelines to run live test of Azure CLI. The usage may be changed in the future.
 
 ## Why you need to run tests
 
@@ -14,7 +14,7 @@ We have created a pipeline to enable running test cases in Azure platform. By us
 
 ## Steps
 
-**Step 1.** Open the [pipeline](https://dev.azure.com/azure-sdk/public/_build?definitionId=1369). In the top right corner, there is a "Run pipeline" button. Click it.
+**Step 1.** Open the [pipeline](https://dev.azure.com/azure-sdk/internal/_build?definitionId=1655). In the top right corner, there is a "Run pipeline" button. Click it.
 
 ![](assets/test_1.PNG)
 
