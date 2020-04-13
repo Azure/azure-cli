@@ -31,15 +31,15 @@ EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 
-_PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https://docs.microsoft.com/cli/azure/install-azure-cli-yum?view=azure-cli-latest#update"),
-                                 "ZYPPER": ("sudo zypper refresh && sudo zypper update -y azure-cli", "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-zypper?view=azure-cli-latest#update"),
-                                 "DEB": ("sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli", "https://docs.microsoft.com/cli/azure/install-azure-cli-apt?view=azure-cli-latest#update"),
-                                 "HOMEBREW": ("brew update && brew upgrade azure-cli", "https://docs.microsoft.com/cli/azure/install-azure-cli-macos?view=azure-cli-latest#update"),
-                                 "PIP": ("curl -L https://aka.ms/InstallAzureCli | bash", "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?view=azure-cli-latest#install-or-update"),
-                                 "MSI": ("https://aka.ms/installazurecliwindows", "https://docs.microsoft.com/cli/azure/install-azure-cli-windows?view=azure-cli-latest#install-or-update"),
-                                 "DOCKER": ("docker pull mcr.microsoft.com/azure-cli", "https://docs.microsoft.com/en-us/cli/azure/run-azure-cli-docker?view=azure-cli-latest#update-docker-image")}
+_PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliYum"),
+                                 "ZYPPER": ("sudo zypper refresh && sudo zypper update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliZypper"),
+                                 "DEB": ("sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli", "https://aka.ms/doc/UpdateAzureCliApt"),
+                                 "HOMEBREW": ("brew update && brew upgrade azure-cli", "https://aka.ms/doc/UpdateAzureCliHomebrew"),
+                                 "PIP": ("curl -L https://aka.ms/InstallAzureCli | bash", "https://aka.ms/doc/UpdateAzureCliLinux"),
+                                 "MSI": ("https://aka.ms/installazurecliwindows", "https://aka.ms/doc/UpdateAzureCliMsi"),
+                                 "DOCKER": ("docker pull mcr.microsoft.com/azure-cli", "https://aka.ms/doc/UpdateAzureCliDocker")}
 
-_GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://docs.microsoft.com/en-us/cli/azure/install-azure-cli'
+_GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://aka.ms/doc/InstallAzureCli'
 
 class AzCli(CLI):
 
