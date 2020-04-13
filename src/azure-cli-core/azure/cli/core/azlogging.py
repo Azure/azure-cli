@@ -64,7 +64,7 @@ class AzCliLogging(CLILogging):
 
             # if we have too many files, delete the 5 last / oldest command log files.
             if len(sorted_files) > 25:
-                for file in sorted_files[-1:]:
+                for file in sorted_files[-5:]:
                     try:
                         os.remove(os.path.join(log_dir, file))
                     except OSError:  # FileNotFoundError introduced in Python 3
