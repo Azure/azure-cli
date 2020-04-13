@@ -43,13 +43,14 @@ def extract_subresource_name(id_parameter='id'):
     return _extract_subresource_name
 
 
+def _encode_bytes(b):
+    if isinstance(b, (bytes, bytearray)):
+        return base64.b64encode(b).decode('utf-8')
+
+
 def transform_key_bundle(key_bundle):
     if key_bundle is None:
         return key_bundle
-
-    def encode_bytes(b):
-        if isinstance(b, (bytes, bytearray)):
-            return base64.b64encode(b).decode('utf-8')
 
     result = {
         'attributes': {
@@ -61,7 +62,7 @@ def transform_key_bundle(key_bundle):
             'updated': key_bundle.properties.updated_on
         },
         'key': {
-            k: encode_bytes(v)
+            k: _encode_bytes(v)
             for k, v in key_bundle.key.__dict__.items()
             if not callable(v) and not k.startswith('_')
         },
@@ -69,8 +70,11 @@ def transform_key_bundle(key_bundle):
         'tags': key_bundle.properties.tags,
         'name': key_bundle.properties.name
     }
+    del result['key']['key_ops']
+    result['key']['crv'] = key_bundle.key.crv
     result['key']['keyOps'] = key_bundle.key_operations
     result['key']['kid'] = key_bundle.id
+    result['key']['kty'] = key_bundle.key_type
 
     return result
 
@@ -88,7 +92,11 @@ def transform_deleted_key(deleted_key):
             'recoveryLevel': deleted_key.properties.recovery_level,
             'updated': deleted_key.properties.updated_on
         },
-        'kid': deleted_key.properties.id,
+        'key': {
+            k: _encode_bytes(v)
+            for k, v in deleted_key.key.__dict__.items()
+            if not callable(v) and not k.startswith('_')
+        },
         'managed': deleted_key.properties.managed,
         'tags': deleted_key.properties.tags,
         'name': deleted_key.properties.name,
@@ -96,6 +104,11 @@ def transform_deleted_key(deleted_key):
         'recoveryId': deleted_key.recovery_id,
         'scheduledPurgeDate': deleted_key.scheduled_purge_date
     }
+    del result['key']['key_ops']
+    result['key']['crv'] = deleted_key.key.crv
+    result['key']['keyOps'] = deleted_key.key_operations
+    result['key']['kid'] = deleted_key.id
+    result['key']['kty'] = deleted_key.key_type
 
     return result
 
