@@ -3,6 +3,11 @@
 Release History
 ===============
 
+**SQL**
+
+* Add new cmdlets for Instance Pools 'sql instance-pool'
+* Support create, delete, show, list and update for Instance Pools.
+
 **AMS**
 
 * az ams is now GA.
