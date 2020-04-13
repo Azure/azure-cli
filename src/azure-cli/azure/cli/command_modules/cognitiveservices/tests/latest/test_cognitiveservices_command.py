@@ -30,7 +30,7 @@ class CognitiveServicesTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # test to show the details of cognitive services account
         self.cmd('az cognitiveservices account show -n {sname} -g {rg}',
@@ -80,7 +80,7 @@ class CognitiveServicesTests(ScenarioTest):
                  checks=[self.check('name', '{name}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         results = self.cmd('az cognitiveservices account list-skus -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(isinstance(results['value'], list))
@@ -123,7 +123,7 @@ class CognitiveServicesTests(ScenarioTest):
                  checks=[self.check('name', '{name}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         results = self.cmd('az cognitiveservices account list-usage -n {name} -g {rg}').get_output_in_json()
         self.assertTrue(isinstance(results, list))
