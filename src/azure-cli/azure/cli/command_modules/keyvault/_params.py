@@ -37,11 +37,19 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
-    (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
-     SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes) = self.get_models(
-         'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
-         'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
-         resource_type=ResourceType.DATA_KEYVAULT)
+    (JsonWebKeyOperation, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
+     SasDefinitionAttributes, StorageAccountAttributes) = self.get_models(
+         'JsonWebKeyOperation', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
+         'SasDefinitionAttributes', 'StorageAccountAttributes',
+         resource_type=ResourceType.DATA_KEYVAULT)  # TODO
+
+    KeyAttributes = self.get_models('KeyAttributes', import_prefix='azure.keyvault.keys._shared._generated',
+                                    resource_type=ResourceType.DATA_KEYVAULT_KEYS)
+    SecretAttributes = self.get_models('SecretAttributes', import_prefix='azure.keyvault.secrets._shared._generated',
+                                       resource_type=ResourceType.DATA_KEYVAULT_SECRETS)
+    CertificateAttributes = self.get_models('CertificateAttributes',
+                                            import_prefix='azure.keyvault.certificates._shared._generated',
+                                            resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
 
     class CLIJsonWebKeyOperation(str, Enum):
         encrypt = "encrypt"
@@ -179,8 +187,8 @@ def load_arguments(self, _):
                              'If specified all other \'Id\' arguments should be omitted.'.
                         format('The recovery id' if is_recovery_id else 'Id', item),
                         validator=validate_vault_id('{}{}'.format('deleted' if is_recovery_id else '', item)))
-                c.extra('name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
-                        id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+                c.argument('name', options_list=['--name', '-n'], help='Name of the {}.'.format(item),
+                           id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
                 c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
                         help='Name of the key vault. Required if --id is not specified.')
 
@@ -190,12 +198,19 @@ def load_arguments(self, _):
                                required=False, completer=get_keyvault_version_completion_list(item))
 
         for cmd in ['list', 'list-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
+                if item == 'certificate':
+                    c.extra('include_pending', arg_type=get_three_state_flag())
+
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
                         help='Name of the key vault.', required=True)
 
-                if item == 'certificate':
-                    c.extra('include_pending', arg_type=get_three_state_flag())
+        for cmd in ['list', 'list-deleted', 'list-versions']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd)) as c:
+                c.extra('maxresults', options_list=['--maxresults'], type=int,
+                        help='Maximum number of results to return in a page. If not specified the service '
+                             'will return up to 25 results.')
     # endregion
 
     # region keys
@@ -236,23 +251,31 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key set-attributes') as c:
         c.attributes_argument('key', KeyAttributes)
-
-    for scope in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault key {}'.format(scope)) as c:
-            c.extra('maxresults', options_list=['--maxresults'], type=int,
-                    help='Maximum number of results to return in a page. If not specified the service '
-                         'will return up to 25 results.')
     # endregion
 
     # region KeyVault Secret
     with self.argument_context('keyvault secret set') as c:
-        c.argument('content_type', options_list=['--description'], help='Description of the secret contents (e.g. password, connection string, etc)')
+        c.extra('content_type', options_list=['--description'],
+                help='Description of the secret contents (e.g. password, connection string, etc)')
+        c.extra('tags', tags_type,
+                help='Space-separated tags: key[=value] [key[=value] ...]. Use \'\' to clear existing tags.')
         c.attributes_argument('secret', SecretAttributes, create=True)
 
+    with self.argument_context('keyvault secret set', arg_group='Id') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the secret.'.format(item),
+                   id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+        c.extra('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None,
+                help='Name of the key vault.', required=True)
+
     with self.argument_context('keyvault secret set', arg_group='Content Source') as c:
-        c.argument('value', options_list=['--value'], help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False)
-        c.extra('file_path', options_list=['--file', '-f'], type=file_type, help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter())
-        c.extra('encoding', arg_type=get_enum_type(secret_encoding_values, default='utf-8'), options_list=['--encoding', '-e'], help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) and used during download to automatically encode the resulting file.')
+        c.argument('value', options_list=['--value'],
+                   help='Plain text secret value. Cannot be used with "--file" or "--encoding"', required=False)
+        c.extra('file_path', options_list=['--file', '-f'], type=file_type,
+                help='Source file for secret. Use in conjunction with "--encoding"', completer=FilesCompleter())
+        c.extra('encoding', arg_type=get_enum_type(secret_encoding_values, default='utf-8'),
+                options_list=['--encoding', '-e'],
+                help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) '
+                     'and used during download to automatically encode the resulting file.')
 
     with self.argument_context('keyvault secret set-attributes') as c:
         c.attributes_argument('secret', SecretAttributes)
@@ -264,11 +287,6 @@ def load_arguments(self, _):
     for scope in ['backup', 'restore']:
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
             c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
-
-    for scope in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault secret {}'.format(scope)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
-
     # endregion
 
     # region KeyVault Storage Account
@@ -389,8 +407,4 @@ def load_arguments(self, _):
         c.argument('admin_last_name')
         c.argument('admin_email')
         c.argument('admin_phone')
-
-    for scope in ['list', 'list-deleted', 'list-versions']:
-        with self.argument_context('keyvault certificate {}'.format(scope)) as c:
-            c.argument('maxresults', options_list=['--maxresults'], type=int)
     # endregion

@@ -15,7 +15,7 @@ from ._client_factory import (
 
 from ._transformers import (
     filter_out_managed_resources, multi_transformers, transform_key_bundle, transform_key_property_list,
-    transform_deleted_key)
+    transform_deleted_key, transform_secret_property_list, transform_secret_property, transform_secret)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace,
@@ -154,11 +154,14 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_key')
 
     with self.command_group('keyvault secret', kv_secrets_data_sdk) as g:
-        g.keyvault_command('list', 'get_secrets',
-                           transform=multi_transformers(filter_out_managed_resources))
-        g.keyvault_command('list-versions', 'get_secret_versions')
-        g.keyvault_command('list-deleted', 'get_deleted_secrets')
-        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace)
+        g.keyvault_command('list', 'list_properties_of_secrets',
+                           transform=multi_transformers(transform_secret_property_list(), filter_out_managed_resources))
+        g.keyvault_command('list-versions', 'list_properties_of_secret_versions',
+                           transform=transform_secret_property_list())
+        g.keyvault_command('list-deleted', 'list_deleted_secrets',
+                           transform=transform_secret_property_list(deleted=True))
+        g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace,
+                           transform=transform_secret)
         g.keyvault_command('set-attributes', 'update_secret')
         g.keyvault_command('show', 'get_secret')
         g.keyvault_command('show-deleted', 'get_deleted_secret')

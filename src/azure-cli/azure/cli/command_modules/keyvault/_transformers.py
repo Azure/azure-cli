@@ -142,3 +142,70 @@ def transform_key_property_list(deleted=False):
             new_list.append(transform_deleted_key(key_property) if deleted else transform_key_property(key_property))
         return new_list
     return inner
+
+
+def transform_deleted_secret(deleted_secret):
+    if deleted_secret is None:
+        return deleted_secret
+
+    result = {
+        'attributes': {
+            'created': deleted_secret.properties.created_on,
+            'enabled': deleted_secret.properties.enabled,
+            'expires': deleted_secret.properties.expires_on,
+            'notBefore': deleted_secret.properties.not_before,
+            'recoveryLevel': deleted_secret.properties.recovery_level,
+            'updated': deleted_secret.properties.updated_on
+        },
+        'contentType': deleted_secret.properties.content_type,
+        'managed': deleted_secret.properties._managed,
+        'tags': deleted_secret.properties.tags,
+        'name': deleted_secret.properties.name,
+        'deletedDate': deleted_secret.deleted_date,
+        'id': deleted_secret.id,
+        'recoveryId': deleted_secret.recovery_id,
+        'scheduledPurgeDate': deleted_secret.scheduled_purge_date
+    }
+
+    return result
+
+
+def transform_secret(secret):
+    if secret is None:
+        return secret
+    result = transform_secret_property(secret.properties)
+    result['value'] = secret.value
+    return result
+
+
+def transform_secret_property(secret_property):
+    if secret_property is None:
+        return secret_property
+
+    result = {
+        'attributes': {
+            'created': secret_property.created_on,
+            'enabled': secret_property.enabled,
+            'expires': secret_property.expires_on,
+            'notBefore': secret_property.not_before,
+            'recoveryLevel': secret_property.recovery_level,
+            'updated': secret_property.updated_on
+        },
+        'contentType': secret_property.content_type,
+        'id': secret_property.id,
+        'managed': secret_property._managed,
+        'tags': secret_property.tags,
+        'name': secret_property.name
+    }
+
+    return result
+
+
+def transform_secret_property_list(deleted=False):
+    def inner(secret_property_list):
+        new_list = []
+        for secret_property in list(secret_property_list):
+            new_list.append(transform_deleted_secret(secret_property)
+                            if deleted else transform_secret_property(secret_property))
+        return new_list
+    return inner

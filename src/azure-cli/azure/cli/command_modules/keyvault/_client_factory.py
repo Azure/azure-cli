@@ -69,33 +69,40 @@ def keyvault_data_plane_track2_key_factory(cli_ctx, kargs):
 
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials(resource='https://vault.azure.net')
-    client = KeyClient(
+    return KeyClient(
         vault_url=kargs['vault_base_url'],
         credential=credential,
         api_version=version
     )
 
-    return client
 
-
-def keyvault_data_plane_track2_secret_factory(cli_ctx, _):
-    from azure.identity import DefaultAzureCredential
+def keyvault_data_plane_track2_secret_factory(cli_ctx, kargs):
     from azure.keyvault.secrets import SecretClient
+    from azure.cli.core.profiles import ResourceType, get_api_version
+    from azure.cli.core._profile import Profile
 
-    vault_url = cli_ctx.vault_base_url
-    credential = DefaultAzureCredential()
-    client = SecretClient(vault_url=vault_url, credential=credential)
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_SECRETS))
 
-    return client
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials(resource='https://vault.azure.net')
+    return SecretClient(
+        vault_url=kargs['vault_base_url'],
+        credential=credential,
+        api_version=version
+    )
 
 
-def keyvault_data_plane_track2_certificate_factory(cli_ctx, _):
-    from azure.identity import DefaultAzureCredential
+def keyvault_data_plane_track2_certificate_factory(cli_ctx, kargs):
     from azure.keyvault.certificates import CertificateClient
+    from azure.cli.core.profiles import ResourceType, get_api_version
+    from azure.cli.core._profile import Profile
 
-    vault_url = cli_ctx.vault_base_url
-    credential = DefaultAzureCredential()
-    client = CertificateClient(vault_url=vault_url, credential=credential)
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES))
 
-    return client
-
+    profile = Profile(cli_ctx=cli_ctx)
+    credential, _, _ = profile.get_login_credentials(resource='https://vault.azure.net')
+    return CertificateClient(
+        vault_url=kargs['vault_base_url'],
+        credential=credential,
+        api_version=version
+    )
