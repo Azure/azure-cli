@@ -301,7 +301,8 @@ class TestParser(unittest.TestCase):
             self.assertIn(cmd, command)
             self.assertEqual(params, parameters)
             self.assertEqual(ext, extension)
-            
+
+
 class VerifyError(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, test, substr=None):
