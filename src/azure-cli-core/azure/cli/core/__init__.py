@@ -41,6 +41,7 @@ _PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https:
 
 _GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://aka.ms/doc/InstallAzureCli'
 
+
 class AzCli(CLI):
 
     def __init__(self, **kwargs):
