@@ -299,9 +299,6 @@ def load_arguments(self, _):
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
-        c.argument('aux_subscriptions', nargs='+', options_list=['--aux-subs'],
-                   help='Auxiliary subscriptions which will be used during deployment across tenants.',
-                   deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
         c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
                    help='Auxiliary tenants which will be used during deployment across tenants.')
         c.argument('no_prompt', arg_type=no_prompt)

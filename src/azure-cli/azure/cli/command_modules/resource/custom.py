@@ -605,11 +605,11 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
 def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   template_file=None, template_uri=None, parameters=None,
                                                   deployment_name=None, mode=DeploymentMode.incremental,
-                                                  aux_subscriptions=None, aux_tenants=None,
-                                                  result_format=None, no_pretty_print=None, no_prompt=False):
+                                                  aux_tenants=None, result_format=None,
+                                                  no_pretty_print=None, no_prompt=False):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri,
                                                                 parameters, mode, result_format, no_prompt)
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions, aux_tenants)
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants)
     what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties)
 
     return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print)
