@@ -3,55 +3,6 @@
 Azure Data Lake Storage Gen2 is a set of capabilities dedicated to big data analytics, built on Azure Blob storage. FOr more information, please refer to
 https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-introduction?toc=/azure/storage/blobs/toc.json.
 
-### Azure CLI Requirement
-- Azure CLI with latest version
-
-### Prepare with ADLS Gen2 account
-- Create a ADLS Gen2 account
-
-` az storage account create -n myadlsaccount -g myresourcegroup --kind StorageV2 --hns`
-
-- Authorize access 
-
-For all the commands inside, please provide `connection string` or a combination of `account name` and `credentials`.
-
-Several Authorization access Methods:
-- Using connection string
-    - Specify `--connection-string` parameter in your command
-    `--connection-string $myconnectionstring`
-
-    - Set Environment Variable `AZURE_STORAGE_CONNECTION_STRING`
-
-- Using account name and account key
-    - Specify `--account-name` and `--account-key` parameter in your command
-    ```
-    --account-name $myadlsaccount \
-    --account-key $myaccountkey
-    ```
-
-    - Set Environment Variable `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_KEY` 
-
-- Using account name and sas token
-    - Specify `--account-name` and `--sas-token` parameter in your command
-    ```
-    --account-name $myadlsaccount \
-    --sas-token $mysastoken
-    ```
-
-    - Set Environment Variable `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_SAS_TOKEN` 
-
-- Using account name and Azure AD credentials
-
-    Azure CLI commands for data operations against Blob storage support the `--auth-mode` parameter, which enables you to specify how to authorize a given operation. Set the `--auth-mode` parameter to login to authorize with Azure AD credentials. For more information, see [Authorize access to blob or queue data with Azure CLI](https://docs.microsoft.com/en-us/azure/storage/common/authorize-data-operations-cli?toc=/azure/storage/blobs/toc.json).
-
-    - Specify `--account-name` and `--auth-mode login` parameter in your command
-    ```
-    --account-name $myadlsaccount \
-    --auth-mode login
-    ```
-
-    - Set Environment Variable `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_AUTH_MODE` 
-
 ### Included Features
 
 #### Overview
@@ -81,6 +32,59 @@ Commands:
 
 For more specific examples, use: az find "az storage fs"
 ```
+
+### Azure CLI Requirement
+- Azure CLI with latest version
+
+### Prepare with ADLS Gen2 account
+- Create a ADLS Gen2 account
+
+    ` az storage account create -n myadlsaccount -g myresourcegroup --kind StorageV2 --hns`
+
+- Authorize access for all commands
+
+    For all the commands inside, please provide `connection string` or a combination of `account name` and `credentials`.
+
+    **Several Authorization access Methods:**
+
+    1). Using connection string
+
+        - Specify `--connection-string` parameter in your command
+            `--connection-string $myconnectionstring`
+
+        - Set Environment Variable `AZURE_STORAGE_CONNECTION_STRING`
+
+    2). Using account name and account key
+
+        - Specify `--account-name` and `--account-key` parameter in your command
+            ```
+            --account-name $myadlsaccount \
+            --account-key $myaccountkey
+            ```
+
+        - Set Environment Variable `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_KEY` 
+
+    3). Using account name and sas token
+
+        - Specify `--account-name` and `--sas-token` parameter in your command
+            ```
+            --account-name $myadlsaccount \
+            --sas-token $mysastoken
+            ```
+
+        - Set Environment Variable `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_SAS_TOKEN` 
+
+    4). Using account name and Azure AD credentials
+
+        Azure CLI commands for data operations against Blob storage support the `--auth-mode` parameter, which enables you to specify how to authorize a given operation. Set the `--auth-mode` parameter to login to authorize with Azure AD credentials. For more information, see [Authorize access to blob or queue data with Azure CLI](https://docs.microsoft.com/en-us/azure/storage/common/authorize-data-operations-cli?toc=/azure/storage/blobs/toc.json).
+
+        - Specify `--account-name` and `--auth-mode login` parameter in your command
+            ```
+            --account-name $myadlsaccount \
+            --auth-mode login
+            ```
+
+        - Set Environment Variable `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_AUTH_MODE` 
 
 #### Manage File Systems in Azure Data Lake Storage Gen2 account
 
