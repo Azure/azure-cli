@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-from test_util import _create_cluster
+from azure.cli.command_modules.servicefabric.tests.latest.test_util import _create_cluster_with_separate_kv
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer
 
@@ -103,7 +103,7 @@ class ServiceFabricApplicationTests(ScenarioTest):
             'service_type': 'CalcServiceType'
         })
 
-        _create_cluster(self, self.kwargs)
+        _create_cluster_with_separate_kv(self, self.kwargs)
         self._app_type_test()
         self._app_type_version_test()
         self._app_service_test()
