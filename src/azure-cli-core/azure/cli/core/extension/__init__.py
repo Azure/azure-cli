@@ -7,9 +7,11 @@ import os
 import traceback
 import json
 import re
+import sys
+import pkginfo
 
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
-
+from distutils.sysconfig import get_python_lib
 from knack.config import CLIConfig
 from knack.log import get_logger
 
@@ -19,6 +21,7 @@ _DEV_EXTENSION_SOURCES = az_config.get('extension', 'dev_sources', None)
 EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR else os.path.join(GLOBAL_CONFIG_DIR,
                                                                                           'cliextensions')
 DEV_EXTENSION_SOURCES = _DEV_EXTENSION_SOURCES.split(',') if _DEV_EXTENSION_SOURCES else []
+EXTENSIONS_SYS_DIR = os.path.join(get_python_lib(), 'azure-cli-extensions') if sys.platform.startswith('linux') else ""
 
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
@@ -29,11 +32,12 @@ AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
 EXT_METADATA_MAXCLICOREVERSION = 'azext.maxCliCoreVersion'
 EXT_METADATA_ISPREVIEW = 'azext.isPreview'
+EXT_METADATA_ISEXPERIMENTAL = 'azext.isExperimental'
 
 WHEEL_INFO_RE = re.compile(
     r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
     ((-(?P<build>\d.*?))?-(?P<pyver>.+?)-(?P<abi>.+?)-(?P<plat>.+?)
-    \.whl|\.dist-info)$""",
+    \.whl|\.dist-info|\.egg-info)$""",
     re.VERBOSE).match
 
 logger = get_logger(__name__)
@@ -57,6 +61,7 @@ class Extension(object):
         self._version = None
         self._metadata = None
         self._preview = None
+        self._experimental = None
 
     @property
     def version(self):
@@ -94,6 +99,19 @@ class Extension(object):
         except Exception:  # pylint: disable=broad-except
             logger.debug("Unable to get extension preview status: %s", traceback.format_exc())
         return self._preview
+
+    @property
+    def experimental(self):
+        """
+        Lazy load experimental status.
+        Returns the experimental status of the extension.
+        """
+        try:
+            if not isinstance(self._experimental, bool):
+                self._experimental = bool(self.metadata.get(EXT_METADATA_ISEXPERIMENTAL))
+        except Exception:  # pylint: disable=broad-except
+            logger.debug("Unable to get extension experimental status: %s", traceback.format_exc())
+        return self._experimental
 
     def get_version(self):
         raise NotImplementedError()
@@ -136,8 +154,13 @@ class WheelExtension(Extension):
                 if os.path.isfile(whl_metadata_filepath):
                     with open(whl_metadata_filepath) as f:
                         metadata.update(json.loads(f.read()))
+                elif os.path.isfile(os.path.join(dist_info_dirname, 'PKG-INFO')):
+                    metadata.update(pkginfo.Develop(dist_info_dirname).__dict__)
 
         return metadata
+
+    def __eq__(self, other):
+        return other.name == self.name
 
     @staticmethod
     def get_azext_metadata(ext_dir):
@@ -162,6 +185,14 @@ class WheelExtension(Extension):
                 pattern = os.path.join(ext_path, '*.*-info')
                 if os.path.isdir(ext_path) and glob(pattern):
                     exts.append(WheelExtension(ext_name, ext_path))
+        if os.path.isdir(EXTENSIONS_SYS_DIR):
+            for ext_name in os.listdir(EXTENSIONS_SYS_DIR):
+                ext_path = os.path.join(EXTENSIONS_SYS_DIR, ext_name)
+                pattern = os.path.join(ext_path, '*.*-info')
+                if os.path.isdir(ext_path) and glob(pattern):
+                    ext = WheelExtension(ext_name, ext_path)
+                    if ext not in exts:
+                        exts.append(ext)
         return exts
 
 
@@ -193,6 +224,11 @@ class DevExtension(Extension):
                             key = key.lower()
                             if key == 'version':
                                 metadata[key] = '{}'.format(val.strip())
+                            elif key == 'name':
+                                # temporary fix extension name is None
+                                # until wheel upgrade and metadata structure in azure-cli-extensions has upgraded too.
+                                # https://github.com/Azure/azure-cli/pull/12583
+                                metadata[key] = val.strip()
                         except ValueError:
                             continue
 
@@ -271,7 +307,6 @@ def get_extension_path(ext_name):
 
 
 def get_extensions(ext_type=None):
-    logger.debug("Extensions directory: '%s'", EXTENSIONS_DIR)
     extensions = []
     if not ext_type:
         ext_type = EXTENSION_TYPES

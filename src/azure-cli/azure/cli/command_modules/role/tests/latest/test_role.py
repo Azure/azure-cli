@@ -301,6 +301,10 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 with self.assertRaisesRegexp(CLIError, 'Invalid scope. Please use --help to view the valid format.'):
                     self.cmd('role assignment create --assignee {upn} --scope "" --role reader')
                     self.cmd('role assignment delete --assignee {upn} --scope "" --role reader')
+
+                # test role assignment on empty scope
+                with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
+                    self.cmd('role assignment create --assignee fake --role contributor')
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 

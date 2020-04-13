@@ -8,6 +8,7 @@ import tempfile
 
 from knack.util import CLIError
 from knack.log import get_logger
+
 from knack.prompting import prompt_y_n, NoTTYException
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
@@ -255,7 +256,7 @@ def get_yaml_template(cmd_value, timeout, file):
     """
     yaml_template = "version: v1.1.0\n"
     if cmd_value:
-        yaml_template += "steps: \n  - cmd: {0}\n".format(cmd_value)
+        yaml_template += "steps: \n  - cmd: {0}\n    disableWorkingDirectoryOverride: true\n".format(cmd_value)
         if timeout:
             yaml_template += "    timeout: {0}\n".format(timeout)
     else:
@@ -313,8 +314,7 @@ def get_custom_registry_credentials(cmd,
         CustomRegistryCredentials, SecretObject, SecretObjectType = cmd.get_models(
             'CustomRegistryCredentials',
             'SecretObject',
-            'SecretObjectType'
-        )
+            'SecretObjectType')
 
         if not is_remove:
             if is_identity_credential:

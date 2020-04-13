@@ -12,6 +12,7 @@ OUTPUT_LIST = [
     {'name': 'table', 'desc': 'Human-readable output format.'},
     {'name': 'tsv', 'desc': 'Tab- and Newline-delimited. Great for GREP, AWK, etc.'},
     {'name': 'yaml', 'desc': 'YAML formatted output. An alternative to JSON. Great for configuration files.'},
+    {'name': 'yamlc', 'desc': 'Colored YAML formatted output. An alternative to JSON. Great for configuration files.'},
     {'name': 'none', 'desc': 'No output, except for errors and warnings.'}
 ]
 
@@ -28,6 +29,9 @@ MSG_CLOSING = '\nYou\'re all set! Here are some commands to try:\n' \
               ' $ az login\n' \
               ' $ az vm create --help\n' \
               ' $ az feedback\n'
+
+WARNING_CLOUD_FORBID_TELEMETRY = '\nYour current cloud: %s does not allow data collection.' \
+                                 ' Telemetry is disabled regardless of the configuration.'
 
 MSG_GLOBAL_SETTINGS_LOCATION = 'Your settings can be found at {}'
 

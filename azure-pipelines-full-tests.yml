@@ -1,0 +1,153 @@
+resources:
+- repo: self
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - '*'
+
+pr:
+  branches:
+    include:
+      - '*'
+
+jobs:
+  - job: ExtractMetadata
+    displayName: Extract Metadata
+
+    condition: succeeded()
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+      - task: Bash@3
+        displayName: 'Extract Version'
+        inputs:
+          targetType: 'filePath'
+          filePath: scripts/release/get_version.sh
+      - task: PublishPipelineArtifact@0
+        displayName: 'Publish Artifact: metadata'
+        inputs:
+          TargetPath: $(Build.ArtifactStagingDirectory)
+          ArtifactName: metadata
+
+  - job: BuildPythonWheel
+    displayName: Build Python Wheels
+    dependsOn: ExtractMetadata
+    condition: succeeded()
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+      - task: UsePythonVersion@0
+        displayName: 'Use Python 3.7'
+        inputs:
+          versionSpec: 3.7
+
+      - task: Bash@3
+        displayName: 'Run Wheel Build Script'
+        inputs:
+          targetType: 'filePath'
+          filePath: scripts/release/pypi/build.sh
+
+      - task: PublishPipelineArtifact@0
+        displayName: 'Publish Artifact: pypi'
+        inputs:
+          TargetPath: $(Build.ArtifactStagingDirectory)
+          ArtifactName: pypi
+
+  - job: AutomationTest
+    displayName: Automation Test
+    dependsOn: BuildPythonWheel
+    condition: succeeded()
+    timeoutInMinutes: 90
+
+    pool:
+      vmImage: 'ubuntu-16.04'
+    strategy:
+      matrix:
+        Python36:
+          python.version: '3.6'
+        Python38:
+          python.version: '3.8'
+    steps:
+      - task: UsePythonVersion@0
+        displayName: 'Use Python $(python.version)'
+        inputs:
+          versionSpec: '$(python.version)'
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download Python Wheels'
+        inputs:
+          TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+          artifactName: pypi
+      - bash: |
+          pip install --force-reinstall wheel
+      - task: Bash@3
+        displayName: 'Run Test Automation'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/ci/test_automation.sh
+
+  - job: RunAutomationReduced20190301
+    displayName: Run Automation Reduced, Profile 2019-03-01
+    dependsOn: BuildPythonWheel
+    condition: succeeded()
+    pool:
+      vmImage: 'ubuntu-16.04'
+    strategy:
+      matrix:
+        Python36:
+          python.version: '3.6'
+        Python38:
+          python.version: '3.8'
+    steps:
+      - task: UsePythonVersion@0
+        displayName: 'Use Python $(python.version)'
+        inputs:
+          versionSpec: '$(python.version)'
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download Python Wheels'
+        inputs:
+          TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+          artifactName: pypi
+      - bash: |
+          pip install --force-reinstall wheel
+      - task: Bash@3
+        displayName: 'Run Test Automation'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/ci/test_automation.sh
+        env:
+          REDUCE_SDK: 'True'
+          AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+
+  - job: RunAutomation20180301
+    displayName: Run Automation, Profile 2018-03-01
+    dependsOn: BuildPythonWheel
+    condition: succeeded()
+    pool:
+      vmImage: 'ubuntu-16.04'
+    strategy:
+      matrix:
+        Python36:
+          python.version: '3.6'
+        Python38:
+          python.version: '3.8'
+    steps:
+      - task: UsePythonVersion@0
+        displayName: 'Use Python $(python.version)'
+        inputs:
+          versionSpec: '$(python.version)'
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download Python Wheels'
+        inputs:
+          TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+          artifactName: pypi
+      - bash: |
+          pip install --force-reinstall wheel
+      - task: Bash@3
+        displayName: 'Run Test Automation'
+        inputs:
+          targetType: 'filePath'
+          filePath: ./scripts/ci/test_automation.sh
+        env:
+          AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'

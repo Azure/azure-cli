@@ -5,12 +5,15 @@
 
 # pylint: disable=line-too-long
 
+from knack.util import CLIError
 from knack.log import get_logger
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
                                                 ResourceIdentity,
-                                                UserIdentity)
+                                                UserIdentity,
+                                                EncryptionProperties,
+                                                KeyVaultProperties)
 
 from ._utils import resolve_resource_group, user_confirmation
 
@@ -60,12 +63,26 @@ def update_configstore(cmd,
                        name,
                        resource_group_name=None,
                        tags=None,
-                       sku=None):
+                       sku=None,
+                       encryption_key_name=None,
+                       encryption_key_vault=None,
+                       encryption_key_version=None,
+                       identity_client_id=None):
+    __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_resource_group(cmd, name)
 
-    update_params = ConfigurationStoreUpdateParameters(tags=tags,
-                                                       sku=sku)
+    update_params = ConfigurationStoreUpdateParameters(tags=tags if tags else None,
+                                                       sku=Sku(name=sku) if sku else None)
+
+    if encryption_key_name is not None:
+        key_vault_properties = KeyVaultProperties()
+        if encryption_key_name:
+            # key identifier schema https://keyvaultname.vault-int.azure-int.net/keys/keyname/keyversion
+            key_identifier = "{}/keys/{}/{}".format(encryption_key_vault.strip('/'), encryption_key_name, encryption_key_version if encryption_key_version else "")
+            key_vault_properties = KeyVaultProperties(key_identifier=key_identifier, identity_client_id=identity_client_id)
+
+        update_params.encryption = EncryptionProperties(key_vault_properties=key_vault_properties)
 
     return client.update(resource_group_name=resource_group_name,
                          config_store_name=name,
@@ -187,6 +204,22 @@ def __get_resource_identity(assign_identity):
 
     return ResourceIdentity(type=identity_type,
                             user_assigned_identities=user_assigned if user_assigned else None)
+
+
+def __validate_cmk(encryption_key_name=None,
+                   encryption_key_vault=None,
+                   encryption_key_version=None,
+                   identity_client_id=None):
+    if encryption_key_name is None:
+        if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
+            raise CLIError("To modify customer encryption key --encryption-key-name is required")
+    else:
+        if encryption_key_name:
+            if encryption_key_vault is None:
+                raise CLIError("To modify customer encryption key --encryption-key-vault is required")
+        else:
+            if any(arg is not None for arg in [encryption_key_vault, encryption_key_version, identity_client_id]):
+                logger.warning("Removing the customer encryption key. Key vault related arguments are ignored.")
 
 
 def __convert_api_key_to_json(credentail, endpoint):

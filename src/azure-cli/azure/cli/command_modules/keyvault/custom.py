@@ -25,7 +25,7 @@ from cryptography.exceptions import UnsupportedAlgorithm
 from azure.cli.core import telemetry
 from azure.cli.core.profiles import ResourceType
 
-from ._validators import secret_text_encoding_values
+from ._validators import _construct_vnet, secret_text_encoding_values
 
 logger = get_logger(__name__)
 
@@ -264,6 +264,55 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
                                    parameters=params)
 
 
+def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets):
+    if network_acls_json is None:
+        network_acls_json = {}
+
+    rule_names = ['ip', 'vnet']
+    for rn in rule_names:
+        if rn not in network_acls_json:
+            network_acls_json[rn] = []
+
+    if network_acls_ips:
+        for ip_rule in network_acls_ips:
+            if ip_rule not in network_acls_json['ip']:
+                network_acls_json['ip'].append(ip_rule)
+
+    if network_acls_vnets:
+        for vnet_rule in network_acls_vnets:
+            if vnet_rule not in network_acls_json['vnet']:
+                network_acls_json['vnet'].append(vnet_rule)
+
+    VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
+    IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    network_acls = _create_network_rule_set(cmd)
+
+    from msrestazure.tools import is_valid_resource_id
+
+    network_acls.virtual_network_rules = []
+    for vnet_rule in network_acls_json.get('vnet', []):
+        items = vnet_rule.split('/')
+        if len(items) == 2:
+            vnet_name = items[0].lower()
+            subnet_name = items[1].lower()
+            vnet = _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name)
+            network_acls.virtual_network_rules.append(VirtualNetworkRule(id=vnet))
+        else:
+            subnet_id = vnet_rule.lower()
+            if is_valid_resource_id(subnet_id):
+                network_acls.virtual_network_rules.append(VirtualNetworkRule(id=subnet_id))
+            else:
+                raise CLIError('Invalid VNet rule: {}. Format: {{vnet_name}}/{{subnet_name}} or {{subnet_id}}'.
+                               format(vnet_rule))
+
+    network_acls.ip_rules = []
+    for ip_rule in network_acls_json.get('ip', []):
+        network_acls.ip_rules.append(IPRule(value=ip_rule))
+
+    return network_acls
+
+
 def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     resource_group_name, vault_name, location=None, sku=None,
                     enabled_for_deployment=None,
@@ -271,6 +320,10 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     enabled_for_template_deployment=None,
                     enable_soft_delete=None,
                     enable_purge_protection=None,
+                    retention_days=None,
+                    network_acls=None,
+                    network_acls_ips=None,
+                    network_acls_vnets=None,
                     bypass=None,
                     default_action=None,
                     no_self_perms=None,
@@ -302,9 +355,11 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     subscription = profile.get_subscription()
 
     # if bypass or default_action was specified create a NetworkRuleSet
-    # if neither were specified we make network_acls None
+    # if neither were specified we will parse it from parameter `--network-acls`
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_KEYVAULT, min_api='2018-02-14'):
-        network_acls = _create_network_rule_set(cmd, bypass, default_action) if bypass or default_action else None
+        network_acls = _create_network_rule_set(cmd, bypass, default_action) \
+            if bypass or default_action else \
+            _parse_network_acls(cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets)
 
     if no_self_perms:
         access_policies = []
@@ -370,7 +425,8 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
                                  enable_soft_delete=enable_soft_delete,
-                                 enable_purge_protection=enable_purge_protection)
+                                 enable_purge_protection=enable_purge_protection,
+                                 soft_delete_retention_in_days=int(retention_days))
     if hasattr(properties, 'network_acls'):
         properties.network_acls = network_acls
     parameters = VaultCreateOrUpdateParameters(location=location,
@@ -396,6 +452,7 @@ def update_keyvault(cmd, instance, enabled_for_deployment=None,
                     enabled_for_template_deployment=None,
                     enable_soft_delete=None,
                     enable_purge_protection=None,
+                    retention_days=None,
                     bypass=None,
                     default_action=None,):
     if enabled_for_deployment is not None:
@@ -412,6 +469,9 @@ def update_keyvault(cmd, instance, enabled_for_deployment=None,
 
     if enable_purge_protection is not None:
         instance.properties.enable_purge_protection = enable_purge_protection
+
+    if retention_days is not None:
+        instance.properties.soft_delete_retention_in_days = int(retention_days)
 
     if bypass or default_action and (hasattr(instance.properties, 'network_acls')):
         if instance.properties.network_acls is None:
@@ -441,6 +501,12 @@ def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     return object_id
 
 
+def _permissions_distinct(permissions):
+    if permissions:
+        return [_ for _ in {p for p in permissions}]
+    return permissions
+
+
 def set_policy(cmd, client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None, storage_permissions=None):
@@ -453,6 +519,12 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
+
+    key_permissions = _permissions_distinct(key_permissions)
+    secret_permissions = _permissions_distinct(secret_permissions)
+    certificate_permissions = _permissions_distinct(certificate_permissions)
+    storage_permissions = _permissions_distinct(storage_permissions)
+
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
                    if object_id.lower() == p.object_id.lower() and
@@ -526,7 +598,7 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
 
 
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
-    """ Removes a network rule from the network ACLs for a Key Vault. """
+    """ Remove a network rule from the network ACLs for a Key Vault. """
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
                                                    resource_type=ResourceType.MGMT_KEYVAULT)
@@ -566,7 +638,7 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
-    """ Lists the network rules from the network ACLs for a Key Vault. """
+    """ List the network rules from the network ACLs for a Key Vault. """
     vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
     return vault.properties.network_acls
 
@@ -1020,6 +1092,19 @@ def download_certificate(client, file_path, vault_base_url=None, certificate_nam
         raise ex
 
 
+def backup_certificate(client, file_path, vault_base_url=None,
+                       certificate_name=None, identifier=None):  # pylint: disable=unused-argument
+    cert = client.backup_certificate(vault_base_url, certificate_name).value
+    with open(file_path, 'wb') as output:
+        output.write(cert)
+
+
+def restore_certificate(client, vault_base_url, file_path):
+    with open(file_path, 'rb') as file_in:
+        data = file_in.read()
+    return client.restore_certificate(vault_base_url, data)
+
+
 def add_certificate_contact(cmd, client, vault_base_url, contact_email, contact_name=None,
                             contact_phone=None):
     """ Add a contact to the specified vault to receive notifications of certificate operations. """
@@ -1153,4 +1238,73 @@ def restore_storage_account(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
         return client.restore_storage_account(vault_base_url, data)
+# endregion
+
+
+# region private_endpoint
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, vault_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None,
+                                               no_wait=False):
+    PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
+                                                            resource_type=ResourceType.MGMT_KEYVAULT)
+
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    new_status = PrivateEndpointServiceConnectionStatus.approved \
+        if is_approved else PrivateEndpointServiceConnectionStatus.rejected
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+
+    retval = client.put(resource_group_name=resource_group_name,
+                        vault_name=vault_name,
+                        private_endpoint_connection_name=private_endpoint_connection_name,
+                        properties=private_endpoint_connection)
+
+    if no_wait:
+        return retval
+
+    new_retval = \
+        _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name)
+
+    if new_retval:
+        return new_retval
+    return retval
+
+
+def _wait_private_link_operation(client, resource_group_name, vault_name, private_endpoint_connection_name):
+    retries = 0
+    max_retries = 10
+    wait_second = 1
+    while retries < max_retries:
+        pl = client.get(resource_group_name=resource_group_name,
+                        vault_name=vault_name,
+                        private_endpoint_connection_name=private_endpoint_connection_name)
+
+        if pl.provisioning_state == 'Succeeded':
+            return pl
+        time.sleep(wait_second)
+        retries += 1
+
+    return None
+
+
+def approve_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+                                        description=None, no_wait=False):
+    """Approve a private endpoint connection request for a Key Vault."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=True,
+        description=description, no_wait=no_wait
+    )
+
+
+def reject_private_endpoint_connection(cmd, client, resource_group_name, vault_name, private_endpoint_connection_name,
+                                       description=None, no_wait=False):
+    """Reject a private endpoint connection request for a Key Vault."""
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, vault_name, private_endpoint_connection_name, is_approved=False,
+        description=description, no_wait=no_wait
+    )
 # endregion

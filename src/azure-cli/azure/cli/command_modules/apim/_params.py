@@ -8,7 +8,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 get_location_type,
                                                 resource_group_name_type,
                                                 get_three_state_flag)
-from azure.mgmt.apimanagement.models.api_management_client_enums import (SkuType, VirtualNetworkType)
+from azure.mgmt.apimanagement.models import (SkuType, VirtualNetworkType)
 
 
 SKU_TYPES = SkuType

@@ -1,10 +1,14 @@
+**Description<!--Mandatory-->**  
+<!--Why this PR? What is changed? What is the effect? etc. A high-quality description can accelerate the review process.-->
 
+**Testing Guide**  
+<!--Example commands with explanations.-->
 
-**History Notes:**  
-(Fill in the following template if multiple notes are needed, otherwise PR title will be used for history note.)
+**History Notes**  
+<!--If your PR is not customer-facing, use {Component Name} in the PR title. Otherwise, use [Component Name] to allow our pipeline to add the title as a history note. If you need multiple history notes or would like to overwrite the note from the PR title, please fill in the following templates.-->
 
-[Component Name 1] (BREAKING CHANGE:) (az command:) make some customer-facing change.  
-[Component Name 2] (BREAKING CHANGE:) (az command:) make some customer-facing change.
+[Component Name 1] BREAKING CHANGE: az command a: Make some customer-facing breaking change.  
+[Component Name 2] az command b: Add some customer-facing feature.
 
 ---
 

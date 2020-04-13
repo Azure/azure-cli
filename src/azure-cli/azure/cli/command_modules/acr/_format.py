@@ -50,6 +50,10 @@ def task_output_format(result):
     return _output_format(result, _task_format_group)
 
 
+def task_identity_format(result):
+    return _output_format(result, _task_identity_format_group)
+
+
 def taskrun_output_format(result):
     return _output_format(result, _taskrun_format_group)
 
@@ -72,6 +76,10 @@ def token_output_format(result):
 
 def token_credential_output_format(result):
     return _output_format(result, _token_password_format_group)
+
+
+def agentpool_output_format(result):
+    return _output_format(result, _agentpool_format_group)
 
 
 def helm_list_output_format(result):
@@ -188,6 +196,18 @@ def _task_format_group(item):
     ])
 
 
+def _task_identity_format_group(item):
+    identities = _get_array_value(item, 'userAssignedIdentities')
+    identities_by_line = str('\n'.join(identities)) if identities else ' '
+
+    return OrderedDict([
+        ('PRINCIPAL ID', _get_value(item, 'principalId')),
+        ('TENANT ID', _get_value(item, 'tenantId')),
+        ('TYPE', _get_value(item, 'type')),
+        ('USER ASSIGNED IDENTITIES', identities_by_line)
+    ])
+
+
 def _taskrun_format_group(item):
     return OrderedDict([
         ('NAME', _get_value(item, 'name')),
@@ -198,6 +218,17 @@ def _taskrun_format_group(item):
         ('STARTED', _format_datetime(_get_value(item, 'runResult', 'startTime'))),
         ('DURATION', _get_duration(_get_value(item, 'runResult', 'startTime'),
                                    _get_value(item, 'runResult', 'finishTime')))
+    ])
+
+
+def _agentpool_format_group(item):
+    return OrderedDict([
+        ('NAME', _get_value(item, 'name')),
+        ('COUNT', _get_value(item, 'count')),
+        ('TIER', _get_value(item, 'tier')),
+        ('STATE', _get_value(item, 'provisioningState')),
+        ('VNET', _get_value(item, 'virtualNetworkSubnetResourceId')),
+        ('OS', _get_value(item, 'os'))
     ])
 
 
@@ -319,7 +350,7 @@ def _get_value(item, *args):
     try:
         for arg in args:
             item = item[arg]
-        return str(item) if item else ' '
+        return str(item) if item or item == 0 else ' '
     except (KeyError, TypeError, IndexError):
         return ' '
 

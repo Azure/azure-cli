@@ -9,7 +9,11 @@ from mock import patch
 from os.path import expanduser
 from docutils import nodes
 from docutils.statemachine import ViewList
-from sphinx.util.compat import Directive
+try:
+    # Deprecated in 1.6 and removed in 1.7
+    from sphinx.util.compat import Directive
+except ImportError:
+    from docutils.parsers.rst import Directive  # pylint: disable=import-error
 from sphinx.util.nodes import nested_parse_with_titles
 
 
