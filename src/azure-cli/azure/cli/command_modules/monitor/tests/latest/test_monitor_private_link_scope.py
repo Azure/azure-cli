@@ -42,9 +42,7 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         self.cmd('monitor private-link-scope list -g {rg}', checks=[
             self.check('length(@)', 1)
         ])
-        self.cmd('monitor private-link-scope list', checks=[
-            self.check('length(@)', 38)
-        ])
+        self.cmd('monitor private-link-scope list')
 
         app_id = self.cmd('monitor app-insights component create -a {app} -g {rg} -l eastus').get_output_in_json()['id']
         workspace_id = self.cmd('monitor log-analytics workspace create -n {workspace} -g {rg} -l {loc}').get_output_in_json()['id']
