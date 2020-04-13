@@ -1,5 +1,7 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the Apache License 2.0.
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 
 import os
 import unittest
@@ -11,6 +13,7 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer
 
 logger = get_logger(__name__)
+
 
 class AroScenarioTests(ScenarioTest):
 
@@ -44,11 +47,11 @@ class AroScenarioTests(ScenarioTest):
         self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=create', checks=[
             self.check('tags.test', 'create'),
             self.check('name', '{name}'),
-            self.check('masterProfile.subnetId','{master_subnet_resource}'),
+            self.check('masterProfile.subnetId', '{master_subnet_resource}'),
             self.check('workerProfiles[0].subnetId', '{worker_subnet_resource}'),
             self.check('provisioningState', 'Succeeded')
         ])
-    
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_list_cred', location='eastus')
     def test_aro_list_credentials(self, resource_group):
@@ -115,7 +118,6 @@ class AroScenarioTests(ScenarioTest):
             self.check('resourceGroup', '{rg}')
         ])
 
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_list', location='eastus')
     def test_aro_list(self, resource_group):
@@ -180,8 +182,7 @@ class AroScenarioTests(ScenarioTest):
 
         self.cmd('aro create -g {rg} -n {name} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=delete')
 
-        result = self.cmd('aro delete -y -g {rg} -n {name} --subscription {subscription}', expect_failure=False)
-
+        self.cmd('aro delete -y -g {rg} -n {name} --subscription {subscription}', expect_failure=False)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro_update', location='eastus')

@@ -38,7 +38,7 @@ def assign_contributor_to_vnet(cli_ctx, vnet, object_id, label, tags):
     if tags is None:
         tags = {}
 
-    role_uuid = uuid.uuid5(uuid.NAMESPACE_URL, ','.join(cli_ctx.data['safe_params'] + [label, cli_ctx.data['command']] + list(tags.keys()) + list(tags.values())))
+    role_uuid = uuid.uuid5(uuid.NAMESPACE_URL, ','.join(cli_ctx.data['safe_params'] + [label, cli_ctx.data['command']] + list(tags.keys()) + list(tags.values())))  # pylint: disable=line-too-long
 
     client.role_assignments.create(vnet, role_uuid, RoleAssignmentCreateParameters(
         role_definition_id=role_definition_id,
