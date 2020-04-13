@@ -54,7 +54,7 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error("To learn more about --query, please visit: "
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
-        if isinstance(ex, (CLIError, CloudError, AzureException, HttpResponseError, AzureError)):
+        if isinstance(ex, (CLIError, CloudError, AzureException, AzureError)):
             logger.error(ex.args[0])
             try:
                 for detail in ex.args[0].error.details:
