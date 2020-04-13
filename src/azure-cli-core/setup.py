@@ -103,8 +103,6 @@ setup(
         ":python_version<'3.4'": ['enum34'],
         ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
         ':python_version<"3.0"': ['futures'],
-        ":python_version<'3.0'": ['antlr4-python2-runtime'],
-        ":python_version>='3.0'": ['antlr4-python3-runtime'],
         "test": TESTS_REQUIRE,
     },
     tests_require=TESTS_REQUIRE,

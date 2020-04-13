@@ -1442,13 +1442,17 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
+        c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
         c.ignore('dns_name_type')
 
     for item in ['create', 'update']:
         with self.argument_context('network public-ip {}'.format(item)) as c:
             c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
-            c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName))
             c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
+
+    with self.argument_context('network public-ip update') as c:
+        c.argument('sku', min_api='2017-08-01', help='Public IP SKU', arg_type=get_enum_type(PublicIPAddressSkuName),
+                   deprecate_info=c.deprecate(hide=True),)
 
     for scope in ['public-ip', 'lb frontend-ip']:
         with self.argument_context('network {}'.format(scope), min_api='2018-07-01') as c:

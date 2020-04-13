@@ -4,6 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 
+def disable_logging(client, timeout=None):
+    for s in client:
+        s.disable_logging(timeout=timeout)
+
+
 def set_logging(client, log, retention, timeout=None, version=None):
     for s in client:
         s.set_logging('r' in log, 'w' in log, 'd' in log, retention, timeout=timeout, version=version)

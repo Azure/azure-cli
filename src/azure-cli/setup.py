@@ -50,7 +50,8 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-batch~=8.0',
+    'antlr4-python3-runtime~=4.7.2',
+    'azure-batch~=9.0',
     'azure-cli-command_modules-nspkg~=2.0',
     'azure-cli-core=={}.*'.format(VERSION),
     'azure-cli-nspkg~=3.0,>=3.0.3',
@@ -95,7 +96,7 @@ DEPENDENCIES = [
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
     'azure-mgmt-keyvault~=3.0.0b1',
     'azure-mgmt-kusto~=0.3.0',
-    'azure-mgmt-loganalytics~=0.2',
+    'azure-mgmt-loganalytics==0.2',
     'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
