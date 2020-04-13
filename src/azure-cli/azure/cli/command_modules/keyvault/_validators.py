@@ -62,7 +62,8 @@ def process_secret_set_namespace(cmd, namespace):
         raise use_error
 
     from azure.cli.core.profiles import ResourceType
-    SecretAttributes = cmd.get_models('SecretAttributes', resource_type=ResourceType.DATA_KEYVAULT)
+    SecretAttributes = cmd.get_models('SecretAttributes', import_prefix='azure.keyvault.secrets._shared._generated',
+                                      resource_type=ResourceType.DATA_KEYVAULT_SECRETS)
     namespace.secret_attributes = SecretAttributes()
     if namespace.expires:
         namespace.secret_attributes.expires = namespace.expires
@@ -107,6 +108,9 @@ def process_secret_set_namespace(cmd, namespace):
     tags.update({'file-encoding': encoding})
     namespace.tags = tags
     namespace.value = content
+
+    del namespace.file_path
+    del namespace.encoding
 
 
 # PARAMETER NAMESPACE VALIDATORS
