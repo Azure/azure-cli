@@ -2671,6 +2671,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.license_type = license_type
 
     if enable_terminate_notification is not None or terminate_notification_time is not None:
+        if vmss.virtual_machine_profile.scheduled_events_profile is None:
+            ScheduledEventsProfile = cmd.get_models('ScheduledEventsProfile')
+            vmss.virtual_machine_profile.scheduled_events_profile = ScheduledEventsProfile()
         TerminateNotificationProfile = cmd.get_models('TerminateNotificationProfile')
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
