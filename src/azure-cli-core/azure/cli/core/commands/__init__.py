@@ -27,7 +27,7 @@ from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
-from azure.cli.core.local_context import USE
+from azure.cli.core.local_context import GET
 import azure.cli.core.telemetry as telemetry
 
 
@@ -295,7 +295,7 @@ class AzCliCommand(CLICommand):
     def _resolve_default_value_from_local_context(self, arg, overrides):
         if self.cli_ctx.local_context.is_on():
             lca = overrides.settings.get('local_context_attribute', None)
-            if not lca or not lca.actions or USE not in lca.actions:
+            if not lca or not lca.actions or GET not in lca.actions:
                 return
             if lca.name:
                 local_context = self.cli_ctx.local_context
