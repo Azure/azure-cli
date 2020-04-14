@@ -203,7 +203,7 @@ class AzCliCommandParser(CLICommandParser):
             return is_extension_command_source and has_extension_name
 
         # If the arguments have been processed into a namespace...
-        if isinstance(self._namespace, argparse.Namespace):
+        if self._namespace:
             # Select the parsed command.
             if hasattr(self._namespace, 'command'):
                 command = self._namespace.command
