@@ -1219,6 +1219,9 @@ short-summary: Manage monitor private link scope resource.
 helps['monitor private-link-scope create'] = """
 type: command
 short-summary: Create a private link scope resource.
+example:
+    - name: Create a private link scope resource
+      text: az monitor private-link-scope create -g MyRG -n MyScope
 """
 
 helps['monitor private-link-scope update'] = """

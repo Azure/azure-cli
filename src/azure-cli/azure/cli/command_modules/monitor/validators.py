@@ -325,6 +325,6 @@ def validate_private_endpoint_connection_id(namespace):
         namespace.private_endpoint_connection_name = result['child_name_1']
 
     if not all([namespace.scope_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage: [--id ID | --name NAME --scope-name NAME]')
+        raise CLIError('incorrect usage. Please provide [--id ID] or [--name NAME --scope-name NAME -g NAME]')
 
     del namespace.connection_id
