@@ -17,7 +17,7 @@ def load_arguments(self, _):
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
         get_enum_type, get_three_state_flag)
     from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.local_context import LocalContextAttribute, STORE, ALL
+    from azure.cli.core.local_context import LocalContextAttribute, SET, ALL
 
     from knack.arguments import ignore_type, CLIArgumentType
 
@@ -52,6 +52,8 @@ def load_arguments(self, _):
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
                                        'To get more information, please visit https://docs.microsoft.com/en-us/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
+    no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
+                                'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -201,10 +203,12 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
         c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
                    help='Auxiliary tenants which will be used during deployment across tenants.')
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('group deployment validate') as c:
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('group deployment list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -223,11 +227,13 @@ def load_arguments(self, _):
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment operation') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
@@ -242,11 +248,13 @@ def load_arguments(self, _):
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment sub validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment sub list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -266,11 +274,13 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(target='--aux-subs', redirect='--aux-tenants'))
         c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
                    help='Auxiliary tenants which will be used during deployment across tenants.')
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment group validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment group list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -283,11 +293,13 @@ def load_arguments(self, _):
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment mg validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment mg list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -302,11 +314,13 @@ def load_arguments(self, _):
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment tenant validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
+        c.argument('no_prompt', arg_type=no_prompt)
 
     with self.argument_context('deployment tenant list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -319,7 +333,7 @@ def load_arguments(self, _):
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
                    help='name of the new resource group', completer=None,
                    local_context_attribute=LocalContextAttribute(
-                       name='resource_group_name', actions=[STORE], scopes=[ALL]))
+                       name='resource_group_name', actions=[SET], scopes=[ALL]))
         c.argument('managed_by', min_api='2016-09-01', help='The ID of the resource that manages this resource group.')
 
     with self.argument_context('tag') as c:

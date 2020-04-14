@@ -21,7 +21,7 @@ from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
-from .local_context import AzCLILocalContext, STORE
+from .local_context import AzCLILocalContext, SET
 
 logger = get_logger(__name__)
 
@@ -111,7 +111,7 @@ class AzCli(CLI):
     def save_local_context(self, parsed_args, argument_definitions, specified_arguments):
         """ Local Context Attribute arguments
 
-        Save argument value to local context if it is defined as STORE and user specify a value for it.
+        Save argument value to local context if it is defined as SET and user specify a value for it.
 
         :param parsed_args: Parsed args which return by AzCliCommandParser parse_args
         :type parsed_args: Namespace
@@ -122,12 +122,12 @@ class AzCli(CLI):
         """
 
         for argument_name in specified_arguments:
-            # make sure STORE is defined
+            # make sure SET is defined
             if argument_name not in argument_definitions:
                 continue
             argtype = argument_definitions[argument_name].type
             lca = argtype.settings.get('local_context_attribute', None)
-            if not lca or not lca.actions or STORE not in lca.actions:
+            if not lca or not lca.actions or SET not in lca.actions:
                 continue
             # get the specified value
             value = getattr(parsed_args, argument_name)
@@ -228,6 +228,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         continue
                     ext_name = ext.name
                     ext_dir = ext.path or get_extension_path(ext_name)
+                    logger.debug("Extensions directory: '%s'", ext_dir)
                     sys.path.append(ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)

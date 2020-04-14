@@ -312,7 +312,7 @@ def map_keyvalue_to_featureflagvalue(keyvalue):
         raise ValueError(error_msg)
 
     except:
-        logger.error("Exception while parsing key:%s value:%s.", keyvalue.key, keyvalue.value)
+        logger.error("Exception while parsing feature flag. key:%s value:%s.", keyvalue.key, keyvalue.value)
         raise
 
     return feature_flag_value

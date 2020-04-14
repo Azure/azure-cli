@@ -58,7 +58,7 @@ def _aks_table_format(result):
         resourceGroup: resourceGroup,
         kubernetesVersion: kubernetesVersion,
         provisioningState: provisioningState,
-        fqdn: fqdn
+        fqdn: fqdn || privateFqdn
     }""")
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict))
