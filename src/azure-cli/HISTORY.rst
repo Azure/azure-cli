@@ -14,12 +14,6 @@ Release History
 
 * az login: Fix login failure with cloud profiles other than `latest`
 
-**AppService**
-
-* fix to keep existing AppSettings with az webapp create
-* fix to create RG for az webapp up command when using -g flag
-* fix to show values for non-JSON output with az webapp config connection-string list
-
 2.3.0
 ++++++
 
