@@ -15,7 +15,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.redhatopenshift.operations#OpenShiftClustersOperations.{}',  # pylint: disable=line-too-long
         client_factory=cf_aro)
 
-    with self.command_group('aro', aro_sdk, client_factory=cf_aro, is_preview=True) as g:
+    with self.command_group('aro', aro_sdk, client_factory=cf_aro) as g:
         g.custom_command('create', 'aro_create', supports_no_wait=True)
         g.custom_command('delete', 'aro_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('list', 'aro_list', table_transformer=aro_list_table_format)
