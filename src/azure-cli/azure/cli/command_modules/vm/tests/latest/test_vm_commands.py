@@ -2542,7 +2542,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
             'loc': 'westus',
             'vmss': 'vmss1-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': self.create_random_name('vmlinuxkv', 20),
+            'vault': self.create_random_name('vmsslinuxkv', 20),
             'secret': 'mysecret',
             'ssh_key': TEST_SSH_KEY_PUB
         })
