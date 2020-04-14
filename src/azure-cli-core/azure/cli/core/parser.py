@@ -55,8 +55,8 @@ class AzCliCommandParser(CLICommandParser):
 
     @staticmethod
     def recommendation_provider(version, command, parameters, extension):  # pylint: disable=unused-argument
-        format_str = 'recommendation_provider: version %s, command: "%s", parameters: "%s", extension: "%s"'
-        logger.debug(format_str, version, command, parameters, extension)
+        logger.debug("recommendation_provider: version: %s, command: %s, parameters: %s, extension: %s",
+                     version, command, parameters, extension)
         return []
 
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
