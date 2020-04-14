@@ -858,7 +858,8 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
     slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
                               .connection_string_names or []
     result = [{'name': p,
-               'value': result.properties[p],
+               'value': result.properties[p].value,
+               'type':result.properties[p].type,
                'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
