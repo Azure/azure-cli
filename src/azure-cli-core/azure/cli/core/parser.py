@@ -208,7 +208,7 @@ class AzCliCommandParser(CLICommandParser):
             if hasattr(self._namespace, 'command'):
                 command = self._namespace.command
         # Parse parameter names from user input.
-        if isinstance(self._raw_arguments, list):
+        if self._raw_arguments:
             raw_arguments = self._raw_arguments
             parameters = extract_safe_params(self._raw_arguments)
 
