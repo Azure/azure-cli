@@ -533,7 +533,7 @@ examples:
         --managed-image imageInTheSameResourceGroup
   - name: Add a new image version with target regions and customer managed keys for encryption.
     text: >
-        az sig image-version create -g MyResourceGroup --gallery-image-version 1.0.0 --target-regions westus=2=standard_--target-region-encryption DiskEncryptionSet1,0,DiskEncryptionSet2 --gallery-name MyGallery --gallery-image-definition MyImage --managed-image imageInTheSameResourceGroup
+        az sig image-version create -g MyResourceGroup --gallery-image-version 1.0.0 --target-regions westus=2=standard --target-region-encryption DiskEncryptionSet1,0,DiskEncryptionSet2 --gallery-name MyGallery --gallery-image-definition MyImage --managed-image imageInTheSameResourceGroup
 """
 
 helps['sig image-version update'] = """
