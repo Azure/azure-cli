@@ -11,7 +11,6 @@ from msrestazure.tools import resource_id
 class MonitorCloneVMScenarios(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     def test_monitor_clone_vm_metric_alerts_scenario(self, resource_group):
-        self.test_guid_count = 0
         self.kwargs.update({
             'alert': 'alert1',
             'vm1': 'vm1',
@@ -41,7 +40,7 @@ class MonitorCloneVMScenarios(ScenarioTest):
             self.check('evaluationFrequency', '0:01:00'),
             self.check('length(scopes)', 2)
         ])
-        with mock.patch('azure.cli.command_modules.monitor.util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {vm1_id} --target-resource {vm3_id}', checks=[
                 self.check('metricsAlert[0].description', 'High CPU'),
                 self.check('metricsAlert[0].severity', 2),
@@ -57,7 +56,6 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
     @StorageAccountPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_2')
     def test_monitor_clone_storage_metric_alerts_scenario(self, resource_group, storage_account, storage_account_2):
-        self.test_guid_count = 0
         self.kwargs.update({
             'alert': 'alert1',
             'sa': storage_account,
@@ -89,7 +87,7 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
             self.check('length(criteria.allOf[1].dimensions)', 1)
         ])
 
-        with mock.patch('azure.cli.command_modules.monitor.util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2}', checks=[
                 self.check('metricsAlert[0].description', 'Test'),
                 self.check('metricsAlert[0].severity', 2),
@@ -107,7 +105,6 @@ class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
     @StorageAccountPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_2')
     def test_monitor_clone_storage_metric_alerts_always_scenario(self, resource_group, storage_account, storage_account_2):
-        self.test_guid_count = 0
         self.kwargs.update({
             'alert': 'alert1',
             'sa': storage_account,
@@ -139,7 +136,7 @@ class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
             self.check('length(criteria.allOf[1].dimensions)', 1)
         ])
 
-        with mock.patch('azure.cli.command_modules.monitor.util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2} --always-clone', checks=[
                 self.check('metricsAlert[0].description', 'Test'),
                 self.check('metricsAlert[0].severity', 2),
@@ -155,7 +152,6 @@ class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
 class MonitorClonePublicIpScenarios(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
     def test_monitor_clone_public_ip_metric_alerts_scenario(self, resource_group):
-        self.test_guid_count = 0
         self.kwargs.update({
             'alert': 'alert1',
             'alert2': 'alert2',
@@ -190,7 +186,7 @@ class MonitorClonePublicIpScenarios(ScenarioTest):
             self.check('length(scopes)', 1)
         ])
 
-        with mock.patch('azure.cli.command_modules.monitor.util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {ip1_id} --target-resource {ip2_id}', checks=[
                 self.check('length(metricsAlert)', 2),
             ])
@@ -200,7 +196,6 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_clone')
     def test_monitor_clone_storage_metric_alerts_across_subs_scenario(self, resource_group):
-        self.test_guid_count = 0
         self.kwargs.update({
             'alert': 'alert1',
             'sa': self.create_random_name('sa', 24),
@@ -234,7 +229,7 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
                      self.check('length(criteria.allOf[1].dimensions)', 1)
                  ])
 
-        with mock.patch('azure.cli.command_modules.monitor.util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2}', checks=[
                 self.check('metricsAlert[0].description', 'Test'),
                 self.check('metricsAlert[0].severity', 2),
