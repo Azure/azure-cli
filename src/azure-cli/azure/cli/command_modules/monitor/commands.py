@@ -291,18 +291,17 @@ def load_command_table(self, _):
         g.custom_command('clone', 'clone_existed_settings')
 
     with self.command_group('monitor private-link-scope', private_link_scopes_sdk, custom_command_type=private_link_scope_custom) as g:
-        g.command('show', 'get')
         g.custom_show_command('show', 'show_private_link_scope')
         g.custom_command('list', 'list_private_link_scope')
         g.custom_command('create', 'create_private_link_scope')
         g.custom_command('update', 'update_private_link_scope')
-        g.custom_command('delete', 'delete_private_link_scope')
+        g.custom_command('delete', 'delete_private_link_scope', confirmation=True)
 
     with self.command_group('monitor private-link-scope scoped-resource', private_link_scoped_resources_sdk, custom_command_type=private_link_scope_custom) as g:
         g.custom_show_command('show', 'show_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
         g.custom_command('list', 'list_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
         g.custom_command('create', 'create_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
-        g.custom_command('delete', 'delete_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
+        g.custom_command('delete', 'delete_private_link_scope_resource', client_factory=cf_private_link_scoped_resources, confirmation=True)
 
     with self.command_group('monitor private-link-scope private-link-resource', private_link_resources_sdk, custom_command_type=private_link_scope_custom) as g:
         g.custom_show_command('show', 'show_private_link_resource', client_factory=cf_private_link_resources)
@@ -318,4 +317,4 @@ def load_command_table(self, _):
         g.custom_command('reject', 'reject_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
                          validator=validate_private_endpoint_connection_id)
         g.custom_command('delete', 'delete_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
-                         validator=validate_private_endpoint_connection_id)
+                         validator=validate_private_endpoint_connection_id, confirmation=True)

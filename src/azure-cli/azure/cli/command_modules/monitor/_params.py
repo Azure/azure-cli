@@ -31,6 +31,7 @@ def load_arguments(self, _):
     autoscale_name_type = CLIArgumentType(options_list=['--autoscale-name'], help='Name of the autoscale settings.', id_part='name')
     autoscale_profile_name_type = CLIArgumentType(options_list=['--profile-name'], help='Name of the autoscale profile.')
     autoscale_rule_name_type = CLIArgumentType(options_list=['--rule-name'], help='Name of the autoscale rule.')
+    scope_name_type = CLIArgumentType(help='Name of the Azure Monitor Private Link Scope.')
 
     with self.argument_context('monitor') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -357,21 +358,21 @@ def load_arguments(self, _):
     # region Private Link Resources
     for item in ['create', 'update', 'show', 'delete', 'list']:
         with self.argument_context('monitor private-link-scope {}'.format(item)) as c:
-            c.argument('scope_name', options_list=['--name', '-n'], help='Name of the Azure Monitor Private Link Scope.')
+            c.argument('scope_name', scope_name_type, options_list=['--name', '-n'])
     with self.argument_context('monitor private-link-scope create') as c:
         c.ignore('location')
 
     with self.argument_context('monitor private-link-scope scoped-resource') as c:
-        c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.')
+        c.argument('scope_name', scope_name_type)
         c.argument('resource_name', options_list=['--name', '-n'], help='Name of the assigned resource.')
-        c.argument('linked_resource_id', options_list=['--linked-resource'], help='Name or ID of the linked resource. It should be one of log analytics workspace or application insights component.')
+        c.argument('linked_resource_id', options_list=['--linked-resource'], help='ARM resource ID of the linked resource. It should be one of log analytics workspace or application insights component.')
 
     with self.argument_context('monitor private-link-scope private-link-resource') as c:
-        c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.')
+        c.argument('scope_name', scope_name_type)
         c.argument('group_name', options_list=['--name', '-n'], help='Name of the private link resource.')
 
     with self.argument_context('monitor private-link-scope private-endpoint-connection') as c:
-        c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.')
+        c.argument('scope_name', scope_name_type)
         c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
                    help='The name of the private endpoint connection associated with the private link scope.')
     for item in ['approve', 'reject', 'show', 'delete']:

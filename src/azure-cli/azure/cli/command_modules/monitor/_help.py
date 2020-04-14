@@ -1249,6 +1249,9 @@ short-summary: Manage scoped resource of a private link scope resource.
 helps['monitor private-link-scope scoped-resource create'] = """
 type: command
 short-summary: Create a scoped resource for a private link scope resource.
+example:
+    - name: Create a scoped resource for log analytic workspace
+      text: az monitor private-link-scope scoped-resource create -g MyRG -n ScopedWS --linked-resource /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/microsoft.operationalinsights/workspaces/clitest000002 --scope-name MyScope
 """
 
 helps['monitor private-link-scope scoped-resource list'] = """
