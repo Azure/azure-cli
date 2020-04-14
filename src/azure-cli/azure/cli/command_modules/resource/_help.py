@@ -839,7 +839,7 @@ parameters:
 examples:
   - name: Retrieve deployment script logs found in the user's logged-in default subscription, max limit is 4MB.
     text: >
-        az deployment-scripts logs --resource-group contoso-rg --name contosoBashScript
+        az deployment-scripts show-log --resource-group contoso-rg --name contosoBashScript
 """
 
 helps['deployment-scripts delete'] = """
