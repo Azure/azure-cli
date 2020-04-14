@@ -15,6 +15,11 @@ short-summary: Manage and update CLI extensions.
 helps['extension add'] = """
 type: command
 short-summary: Add an extension.
+parameters:
+  - name: --system
+    type: string
+    short-summary: Use a system directory for the extension.
+    long-summary: Default path is azure-cli-extensions folder under the CLI running python environment lib path, configurable by environment variable AZURE_EXTENSION_SYS_DIR. On Windows, you may need to open your shell as Administrator to run with the right permission.
 examples:
   - name: Add extension by name
     text: az extension add --name anextension

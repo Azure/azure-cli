@@ -46,7 +46,7 @@ LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli
 LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
-def _run_pip(pip_exec_args):
+def _run_pip(pip_exec_args, extension_path):
     cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
     logger.debug('Running: %s', cmd)
     try:
@@ -56,6 +56,8 @@ def _run_pip(pip_exec_args):
     except CalledProcessError as e:
         logger.debug(e.output)
         logger.debug(e)
+        if "PermissionError: [WinError 5]" in e.output:
+            logger.warning("You do not have the permission to add extensions in the target directory: %s. You may need to rerun on a shell as administrator.", os.path.split(extension_path)[0])
         returncode = e.returncode
     return returncode
 
@@ -149,7 +151,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
 
     logger.debug('Executing pip with args: %s', pip_args)
     with HomebrewPipPatch():
-        pip_status_code = _run_pip(pip_args)
+        pip_status_code = _run_pip(pip_args, extension_path)
     if pip_status_code > 0:
         logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
         shutil.rmtree(extension_path, ignore_errors=True)
