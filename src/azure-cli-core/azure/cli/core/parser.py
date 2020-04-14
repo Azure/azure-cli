@@ -181,7 +181,7 @@ class AzCliCommandParser(CLICommandParser):
     def _get_failure_recovery_arguments(self, action=None):
         # Strip the leading "az " and any extraneous whitespace.
         command = self.prog[3:].strip()
-        parameters = None
+        parameters = []
         parameter_set = set()
         raw_arguments = None
         extension = None
@@ -262,7 +262,7 @@ class AzCliCommandParser(CLICommandParser):
             print('\n'.join(self._suggestion_msg), file=file)
 
     def parse_known_args(self, args=None, namespace=None):
-        # retrieve the raw arugment list in case parsing known arguments fails.
+        # retrieve the raw argument list in case parsing known arguments fails.
         self._raw_arguments = args
         # if parsing known arguments succeeds, get the command namespace and the argument list
         self._namespace, self._raw_arguments = super().parse_known_args(args=args, namespace=namespace)
