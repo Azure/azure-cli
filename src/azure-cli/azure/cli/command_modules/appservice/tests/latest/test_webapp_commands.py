@@ -474,8 +474,8 @@ class WebappConfigureTest(ScenarioTest):
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 3),
                      JMESPathCheck("[?name=='c1']|[0].slotSetting", False),
-                     JMESPathCheck("[?name=='c1']|[0].value.type", 'MySql'),
-                     JMESPathCheck("[?name=='c1']|[0].value.value", 'conn1'),
+                     JMESPathCheck("[?name=='c1']|[0].type", 'MySql'),
+                     JMESPathCheck("[?name=='c1']|[0].value", 'conn1'),
                      JMESPathCheck("[?name=='c2']|[0].slotSetting", False),
                      JMESPathCheck("[?name=='c3']|[0].slotSetting", True)])
         self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'
