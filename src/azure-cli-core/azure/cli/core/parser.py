@@ -8,8 +8,6 @@ from __future__ import print_function
 import sys
 import difflib
 
-import logging
-
 import argparse
 import argcomplete
 
@@ -57,6 +55,8 @@ class AzCliCommandParser(CLICommandParser):
 
     @staticmethod
     def recommendation_provider(version, command, parameters, extension):  # pylint: disable=unused-argument
+        format_str = 'recommendation_provider: version %s, command: "%s", parameters: "%s", extension: "%s"'
+        logger.debug(format_str, version, command, parameters, extension)
         return []
 
     def __init__(self, cli_ctx=None, cli_help=None, **kwargs):
@@ -201,12 +201,12 @@ class AzCliCommandParser(CLICommandParser):
             return is_extension_command_source and has_extension_name
 
         # If the arguments have been processed into a namespace...
-        if isinstance(self._namespace, argparse.Namespace):
+        if self._namespace:
             # Select the parsed command.
             if hasattr(self._namespace, 'command'):
                 command = self._namespace.command
         # Parse parameter names from user input.
-        if isinstance(self._raw_arguments, list):
+        if self._raw_arguments:
             raw_arguments = self._raw_arguments
             parameters = extract_safe_params(self._raw_arguments)
 
@@ -239,19 +239,6 @@ class AzCliCommandParser(CLICommandParser):
                 else:
                     extension = None
                     break
-
-        if logger.isEnabledFor(logging.DEBUG):
-            import inspect
-            class_name = self.__class__.__name__
-            func_name = inspect.currentframe().f_code.co_name
-            format_str = '\n\t'.join([
-                f"{class_name}.{func_name}(command, parameters, extension):",
-                "Command: %s",
-                "Parameters: %s",
-                "Extension: %s"
-            ])
-
-            logger.debug(format_str, command, parameters, extension)
 
         return command, parameters, extension
 
