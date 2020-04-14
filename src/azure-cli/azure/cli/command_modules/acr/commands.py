@@ -166,7 +166,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_delete')
         g.show_command('show', 'acr_show')
         g.command('show-usage', 'acr_show_usage', table_transformer=usage_output_format)
-        g.command('show-endpoints', 'acr_show_endpoints')
+        g.command('show-endpoints', 'acr_show_endpoints', is_preview=True)
         g.generic_update_command('update',
                                  getter_name='acr_update_get',
                                  setter_name='acr_update_set',
