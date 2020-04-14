@@ -127,7 +127,10 @@ class AzCli(CLI):
                         else:
                             instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
                 elif installer == 'PIP':
-                    instruction_msg = " with 'pip install --upgrade azure-cli' or '{}' if you used our script for installing. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1])
+                    import platform
+                    system = platform.system()
+                    alternative_command = " or '{}' if you used our script for installation. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1]) if system != 'Windows' else ''
+                    instruction_msg = " with 'pip install --upgrade azure-cli'{}".format(alternative_command)
                 if instruction_msg:
                     warning_msg += instruction_msg
                 else:
