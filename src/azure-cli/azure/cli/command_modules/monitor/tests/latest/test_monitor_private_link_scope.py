@@ -116,14 +116,14 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         self.cmd('monitor private-link-scope private-endpoint-connection reject --scope-name {scope} -g {rg} --name {scope_pec_name}',
                  checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
 
-        self.cmd('monitor private-link-scope private-endpoint-connection delete --id {scope_pec_id}')
+        self.cmd('monitor private-link-scope private-endpoint-connection delete --id {scope_pec_id} -y')
         self.cmd('monitor private-link-scope show --name {scope} -g {rg}', checks=[
             self.check('privateEndpointConnections', None)
         ])
-        self.cmd('monitor private-link-scope scoped-resource delete -g {rg} -n {assigned_app} --scope-name {scope}')
+        self.cmd('monitor private-link-scope scoped-resource delete -g {rg} -n {assigned_app} --scope-name {scope} -y')
         self.cmd('monitor private-link-scope scoped-resource list -g {rg} --scope-name {scope}', checks=[
             self.check('length(@)', 1)
         ])
-        self.cmd('monitor private-link-scope delete -n {scope} -g {rg}')
+        self.cmd('monitor private-link-scope delete -n {scope} -g {rg} -y')
         with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('monitor private-link-scope show -n {scope} -g {rg}')
