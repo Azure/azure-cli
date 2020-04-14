@@ -40,3 +40,9 @@ helps['aro list-credentials'] = """
     type: command
     short-summary: List credentials of a cluster.
 """
+
+helps['aro wait'] = """
+type: command
+short-summary: Wait for a aro service to reach a desired state.
+long-summary: If an operation on a aro cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
+"""

@@ -12,7 +12,7 @@ from azure.cli.command_modules.aro._help import helps  # pylint: disable=unused-
 
 def load_command_table(self, _):
     aro_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.aro.vendored_sdks.azure.mgmt.redhatopenshift.v2020_04_30.operations#OpenShiftClustersOperations.{}',  # pylint: disable=line-too-long
+        operations_tmpl='azure.mgmt.redhatopenshift.operations#OpenShiftClustersOperations.{}',  # pylint: disable=line-too-long
         client_factory=cf_aro)
 
     with self.command_group('aro', aro_sdk, client_factory=cf_aro, is_preview=True) as g:
@@ -21,5 +21,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'aro_list', table_transformer=aro_list_table_format)
         g.custom_show_command('show', 'aro_show', table_transformer=aro_show_table_format)
         g.custom_command('update', 'aro_update', supports_no_wait=True)
+        g.wait_command('wait')
 
         g.custom_command('list-credentials', 'aro_list_credentials')
