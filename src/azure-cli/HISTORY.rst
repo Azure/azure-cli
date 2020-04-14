@@ -3,11 +3,6 @@
 Release History
 ===============
 
-**IoT Central**
-
-* az iotcentral: Deprecated
-* Added 'az iot central' command module
-
 2.3.1
 ++++++
 
