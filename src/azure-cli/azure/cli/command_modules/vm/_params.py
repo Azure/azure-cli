@@ -662,7 +662,7 @@ def load_arguments(self, _):
             c.argument('admin_username', help='Username for the VM.', default=get_default_admin_username())
             c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
             c.argument('ssh_key_value', options_list=['--ssh-key-values'], completer=FilesCompleter(), type=file_type, nargs='+')
-            c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key. If the file already exists, the specified key(s) are appended to the file.')
+            c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key. If the file already exists, the specified key(s) are appended to the file. Destination path for SSH public keys is currently limited to its default value "/home/username/.ssh/authorized_keys" due to a known issue in Linux provisioning agent.')
             c.argument('authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux. "all" enables both ssh and password authentication. ', arg_type=get_enum_type(['ssh', 'password', 'all']))
 
         with self.argument_context(scope, arg_group='Storage') as c:
