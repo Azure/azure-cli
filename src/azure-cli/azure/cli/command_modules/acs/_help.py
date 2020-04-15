@@ -323,6 +323,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --enable-node-public-ip
+    type: bool
+    short-summary: Enable VMSS node public IP.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
@@ -613,6 +616,9 @@ parameters:
   - name: --zones -z
     type: string array
     short-summary: Availability zones where agent nodes will be placed.
+  - name: --enable-node-public-ip
+    type: bool
+    short-summary: Enable VMSS node public IP.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
