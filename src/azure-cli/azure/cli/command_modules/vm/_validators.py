@@ -357,7 +357,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
 
     # specialized is only for image
-    if namespace.specialized is not None and namespace.image is None:
+    if getattr(namespace, 'specialized', None) is not None and namespace.image is None:
         raise CLIError('usage error: --specialized is only configurable when --image is specified.')
 
     # use minimal parameters to resolve the expected storage profile
