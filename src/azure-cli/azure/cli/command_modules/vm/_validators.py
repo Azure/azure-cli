@@ -1620,7 +1620,7 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     data_disk_images_len = len(data_disk_images)
                     if data_disk_images_len % 2 != 0:
                         raise CLIError('usage error: LUN and disk encryption set for data disk should appear '
-                                       'in pair in --target-region-encryption')
+                                       'in pair in --target-region-encryption. Example: osdes,0,datades0,1,datades1')
                     data_disk_image_encryption_list = []
                     for j in range(int(data_disk_images_len / 2)):
                         lun = data_disk_images[j * 2]
