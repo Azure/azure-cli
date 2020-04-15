@@ -632,18 +632,18 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
     if no_pretty_print:
         return what_if_result
 
-    if cli_ctx.enable_color:
-        # Diabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
-        # is using. Unfortuanately, the colors that colorama supports are very limited, which doesn't meet our needs.
-        from colorama import deinit
-        deinit()
-
-        # Enable virtual terminal mode for Windows console so it processes color codes.
-        if platform.system() == "Windows":
-            from ._win_vt import enable_vt_mode
-            enable_vt_mode()
-
     try:
+        if cli_ctx.enable_color:
+            # Diabling colorama since it will silently strip out the Xterm 256 color codes the What-If formatter
+            # is using. Unfortuanately, the colors that colorama supports are very limited, which doesn't meet our needs.
+            from colorama import deinit
+            deinit()
+
+            # Enable virtual terminal mode for Windows console so it processes color codes.
+            if platform.system() == "Windows":
+                from ._win_vt import enable_vt_mode
+                enable_vt_mode()
+
         print(format_what_if_operation_result(what_if_result, cli_ctx.enable_color))
     finally:
         if cli_ctx.enable_color:
