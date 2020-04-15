@@ -1291,6 +1291,6 @@ short-summary: Show the container registry's identity details
 
 helps['acr show-endpoints'] = """
 type: command
-short-summary: display the list of endpoints
+short-summary: Display registry endpoints
 """
 # endregion
