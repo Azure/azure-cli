@@ -40,7 +40,7 @@ def load_arguments(self, _):
     management_group_name_type = CLIArgumentType(options_list='--management-group', help='The name of the management group of the policy [set] definition.')
     identity_scope_type = CLIArgumentType(help="Scope that the system assigned identity can access")
     identity_role_type = CLIArgumentType(options_list=['--role'], help="Role name or id that will be assigned to the managed identity")
-    extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true', is_preview=True,
+    extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true',
                                                 help='Support to handle extended template content including multiline and comments in deployment')
     deployment_name_type = CLIArgumentType(options_list=['--name', '-n'], required=True, help='The deployment name.')
     deployment_create_name_type = CLIArgumentType(options_list=['--name', '-n'], required=False, help='The deployment name. Default to template file base name')
