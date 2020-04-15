@@ -1288,4 +1288,9 @@ helps['acr identity show'] = """
 type: command
 short-summary: Show the container registry's identity details
 """
+
+helps['acr show-endpoints'] = """
+type: command
+short-summary: Display registry endpoints
+"""
 # endregion
