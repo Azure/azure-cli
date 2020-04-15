@@ -3604,7 +3604,9 @@ class VMGalleryImage(ScenarioTest):
             'snapshot': 's1',
             'vm1': 'vm1',
             'vm2': 'vm2',
-            'vmss': 'vmss1'
+            'vm3': 'vm3',
+            'vmss1': 'vmss1',
+            'vmss2': 'vmss2'
         })
         self.cmd('sig create -g {rg} --gallery-name {gallery}')
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized -p publisher1 -f offer1 -s sku1', checks=[
@@ -3621,7 +3623,11 @@ class VMGalleryImage(ScenarioTest):
             'image_version': image_version
         })
         self.cmd('vm create -g {rg} -n {vm2} --image {image_version} --specialized --nsg-rule NONE')
-        self.cmd('vmss create -g {rg} -n {vmss} --image {image_version} --specialized')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image_version} --specialized')
+        with self.assertRaises(CLIError):
+            self.cmd('vm create -g {rg} -n {vm3} --specialized')
+        with self.assertRaises(CLIError):
+            self.cmd('vmss create -g {rg} -n {vmss2} --specialized')
 
 # endregion
 

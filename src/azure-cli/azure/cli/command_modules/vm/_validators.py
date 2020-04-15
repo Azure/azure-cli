@@ -355,6 +355,11 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 # pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
+
+    # specialized is only for image
+    if namespace.specialized is not None and namespace.image is None:
+        raise CLIError('usage error: --specialized is only configurable when --image is specified.')
+
     # use minimal parameters to resolve the expected storage profile
     if getattr(namespace, 'attach_os_disk', None) and not namespace.image:
         if namespace.use_unmanaged_disk:
