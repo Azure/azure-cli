@@ -174,7 +174,12 @@ AZURE_API_PROFILES = {
             'scheduled_query_rules': '2018-04-16',
             'service_diagnostic_settings': '2016-09-01',
             'tenant_activity_logs': '2015-04-01',
-            'vm_insights': '2018-11-27-preview'
+            'vm_insights': '2018-11-27-preview',
+            'private_link_resources': '2019-10-17-preview',
+            'private_link_scoped_resources': '2019-10-17-preview',
+            'private_link_scope_operation_status': '2019-10-17-preview',
+            'private_link_scopes': '2019-10-17-preview',
+            'private_endpoint_connections': '2019-10-17-preview'
         }),
         ResourceType.MGMT_APPSERVICE: '2019-08-01',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview'
