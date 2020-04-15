@@ -268,7 +268,8 @@ def load_command_table(self, _):
 
         g.show_command('show', 'get')
         g.custom_command('list', 'list_long_term_retention_backups')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete',
+                  confirmation=True)
 
     with self.command_group('sql db ltr-backup',
                             database_operations,

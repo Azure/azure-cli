@@ -214,7 +214,10 @@ type: command
 short-summary: Restore a long term retention backup to a new database.
 examples:
   - name: Restore LTR backup.
-    text: az sql db ltr-backup restore --dest-database targetdb --dest-server myserver --dest-resource-group mygroup --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionServers/myserver/longTermRetentionDatabases/sourcedb/longTermRetentionBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: |
+        az sql db ltr-backup restore \\
+        --dest-database targetdb --dest-server myserver --dest-resource-group mygroup \\
+        --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionServers/myserver/longTermRetentionDatabases/sourcedb/longTermRetentionBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql db ltr-backup wait'] = """
