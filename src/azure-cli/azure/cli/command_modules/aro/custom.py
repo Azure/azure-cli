@@ -88,7 +88,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
         worker_profiles=[
             v2020_04_30.WorkerProfile(
                 name='worker',  # TODO: 'worker' should not be hard-coded
-                vm_size=worker_vm_size or 'Standard_D2s_v3',
+                vm_size=worker_vm_size or 'Standard_D4s_v3',
                 disk_size_gb=worker_vm_disk_size_gb or 128,
                 subnet_id=worker_subnet,
                 count=worker_count or 3,

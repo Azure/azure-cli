@@ -83,7 +83,11 @@ def _validate_int(key, i):
 
 def validate_pull_secret(namespace):
     if namespace.pull_secret is None:
-        logger.warning("No --pull-secret provided: cluster will not include Red Hat or certified samples or operators.")
+        # TODO: add aka.ms link here
+        warning = "No --pull-secret provided: cluster will not include samples or operators from " + \
+            "Red Hat or from certified partners."
+
+        logger.warning(warning)
 
     else:
         try:
