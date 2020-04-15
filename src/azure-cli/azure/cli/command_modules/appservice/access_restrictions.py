@@ -47,7 +47,12 @@ def add_webapp_access_restriction(
 
     rule_instance = None
     if subnet or vnet_name:
-        subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
+        # Fetch RG of given SubNet
+        subnet_resource_group_name = _get_subnet_resource_group_name(cmd.cli_ctx, subnet, vnet_name)
+        # If unble to fetch SubNet rg from above step, use the input RG to get validation error from api call.
+        if subnet_resource_group_name is None:
+            subnet_resource_group_name = resource_group_name
+        subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, subnet_resource_group_name)
         if not ignore_missing_vnet_service_endpoint:
             _ensure_subnet_service_endpoint(cmd.cli_ctx, subnet_id)
 
@@ -160,3 +165,17 @@ def _ensure_subnet_service_endpoint(cli_ctx, subnet_id):
             subnet_name, subnet_parameters=subnet_obj)
         # Ensure subnet is updated to avoid update conflict
         LongRunningOperation(cli_ctx)(poller)
+
+
+def _get_subnet_resource_group_name(cli_ctx, subnet, vnet_name):
+    vnet_client = network_client_factory(cli_ctx, api_version=NETWORK_API_VERSION)
+    list_all_vnets = vnet_client.virtual_networks.list_all()
+    if list_all_vnets is not None:
+        for v in list_all_vnets:
+            if v.name == vnet_name:
+                for sn in v.subnets:
+                    if sn.name == subnet:
+                        from msrestazure.tools import parse_resource_id
+                        subnet_id_parts = parse_resource_id(sn.id)
+                        return subnet_id_parts['resource_group']
+    return None

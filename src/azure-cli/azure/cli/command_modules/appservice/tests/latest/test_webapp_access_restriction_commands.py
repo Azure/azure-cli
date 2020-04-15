@@ -154,6 +154,37 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
+    def test_webapp_access_restriction_add_service_endpoint_with_different_rg(self, resource_group):
+        self.kwargs.update({
+            'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
+            'plan_name': self.create_random_name(prefix='cli-plan-nwr', length=24),
+            'vnet_name': self.create_random_name(prefix='cli-vnet-nwr', length=24),
+            'vnet_rg_name': self.create_random_name(prefix='cli-vnet-rg-nwr', length=24)
+        })
+
+        self.cmd('group create --location westeurope --name {vnet_rg_name}')
+        self.cmd('appservice plan create -g {rg} -n {plan_name}')
+        self.cmd('webapp create -g {rg} -n {app_name} --plan {plan_name}', checks=[
+            JMESPathCheck('state', 'Running')
+        ])
+
+        self.cmd('az network vnet create -g {vnet_rg_name} -n {vnet_name} --address-prefixes 10.0.0.0/16 --subnet-name endpoint-subnet --subnet-prefixes 10.0.0.0/24', checks=[
+            JMESPathCheck('subnets[0].serviceEndpoints', None)
+        ])
+
+        # Subnet name cannot be provided without vNet name - only when subnet refers to full subnet resource id
+        with self.assertRaisesRegexp(CLIError, "Usage error: --subnet ID | --subnet NAME --vnet-name NAME"):
+            self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name vnet-integration --action Allow --subnet endpoint-subnet --priority 150')
+
+        self.cmd('webapp config access-restriction add -g {rg} -n {app_name} --rule-name vnet-integration --action Allow --vnet-name {vnet_name} --subnet endpoint-subnet --priority 150', checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[0].name', 'vnet-integration'),
+            JMESPathCheck('[0].action', 'Allow'),
+            JMESPathCheck('[1].name', 'Deny all'),
+            JMESPathCheck('[1].action', 'Deny')
+        ])
+
+    @ResourceGroupPreparer()
     def test_webapp_access_restriction_remove(self, resource_group):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-webapp-nwr', length=24),
