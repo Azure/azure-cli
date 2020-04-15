@@ -440,28 +440,16 @@ def validate_encryption_services(cmd, namespace):
         namespace.encryption_services = t_encryption_services(**services)
 
 
-def validate_encryption_source(cmd, namespace):
-    ns = vars(namespace)
-
-    key_name = ns.pop('encryption_key_name', None)
-    key_version = ns.pop('encryption_key_version', None)
-    key_vault_uri = ns.pop('encryption_key_vault', None)
-
-    if namespace.encryption_key_source == 'Microsoft.Keyvault' and not (key_name and key_vault_uri):
+def validate_encryption_source(namespace):
+    if namespace.encryption_key_source == 'Microsoft.Keyvault' and \
+            not (namespace.encryption_key_name and namespace.encryption_key_vault):
         raise ValueError('--encryption-key-name and --encryption-key-vault are required '
                          'when --encryption-key-source=Microsoft.Keyvault is specified.')
 
-    if key_name or key_version or key_vault_uri:
+    if namespace.encryption_key_name or namespace.encryption_key_version is not None or namespace.encryption_key_vault:
         if namespace.encryption_key_source and namespace.encryption_key_source != 'Microsoft.Keyvault':
             raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are not '
                              'applicable without Microsoft.Keyvault key-source.')
-        KeyVaultProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE, 'KeyVaultProperties',
-                                     mod='models')
-        if not KeyVaultProperties:
-            return
-
-        kv_prop = KeyVaultProperties(key_name=key_name, key_version=key_version, key_vault_uri=key_vault_uri)
-        namespace.encryption_key_vault_properties = kv_prop
 
 
 def validate_entity(namespace):
