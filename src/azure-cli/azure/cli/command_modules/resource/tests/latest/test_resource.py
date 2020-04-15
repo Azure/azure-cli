@@ -527,47 +527,68 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'extra_param_tf': os.path.join(curr_dir, 'simple_extra_param_deploy.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60)
         })
 
-        self.cmd('group create --name cli_test_resource_group_deployment --location WestUS', checks=[
+        self.cmd('deployment group validate --resource-group {rg} --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('deployment group validate --resource-group cli_test_resource_group_deployment --template-file {tf} --parameters @"{params}"', checks=[
-            self.check('properties.provisioningState', 'Succeeded')
-        ])
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group validate --resource-group {rg} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt true')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
 
-        self.cmd('deployment group create --resource-group cli_test_resource_group_deployment -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group validate --resource-group {rg} --template-file {extra_param_tf} --parameters @"{params}"')
+            self.assertTrue("Missing input parameters" in str(err.exception))
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group validate --resource-group {rg} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt false')
+            self.assertTrue("Missing input parameters" in str(err.exception))
+
+        self.cmd('deployment group create --resource-group {rg} -n {dn} --template-file {tf} --parameters @"{params}"', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
         ])
 
-        self.cmd('deployment group list --resource-group cli_test_resource_group_deployment', checks=[
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt true')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}"')
+            self.assertTrue("Missing input parameters" in str(err.exception))
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt false')
+            self.assertTrue("Missing input parameters" in str(err.exception))
+
+        self.cmd('deployment group list --resource-group {rg}', checks=[
             self.check('[0].name', '{dn}'),
         ])
 
-        self.cmd('deployment group list --resource-group cli_test_resource_group_deployment --filter "provisioningState eq \'Succeeded\'"', checks=[
+        self.cmd('deployment group list --resource-group {rg} --filter "provisioningState eq \'Succeeded\'"', checks=[
             self.check('[0].name', '{dn}'),
         ])
 
-        self.cmd('deployment group show --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+        self.cmd('deployment group show --resource-group {rg} -n {dn}', checks=[
             self.check('name', '{dn}')
         ])
 
-        self.cmd('deployment group export --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+        self.cmd('deployment group export --resource-group {rg} -n {dn}', checks=[
         ])
 
-        self.cmd('deployment operation group list --resource-group cli_test_resource_group_deployment -n {dn}', checks=[
+        self.cmd('deployment operation group list --resource-group {rg} -n {dn}', checks=[
             self.check('length([])', 2)
         ])
 
-        self.cmd('deployment group create --resource-group cli_test_resource_group_deployment -n {dn2} --template-file {tf} --parameters @"{params}" --no-wait')
+        self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {tf} --parameters @"{params}" --no-wait')
 
-        self.cmd('deployment group cancel -n {dn2} -g cli_test_resource_group_deployment')
+        self.cmd('deployment group cancel -n {dn2} -g {rg}')
 
-        self.cmd('deployment group show -n {dn2} -g cli_test_resource_group_deployment', checks=[
+        self.cmd('deployment group show -n {dn2} -g {rg}', checks=[
             self.check('properties.provisioningState', 'Canceled')
         ])
 

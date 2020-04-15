@@ -77,10 +77,15 @@ class AzCliLogging(CLILogging):
 
             cmd_logger = logging.getLogger(AzCliLogging._COMMAND_METADATA_LOGGER)
 
-            self._init_command_logfile_handlers(cmd_logger, args)  # pylint: disable=protected-access
-            get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.", self.command_log_dir)
+            # overwrite CLILogging._is_file_log_enabled() from knack
+            self.file_log_enabled = cli_ctx.config.getboolean('logging', 'enable_log_file', fallback=True)
 
-            _delete_old_logs(self.command_log_dir)
+            if self.file_log_enabled:
+                self._init_command_logfile_handlers(cmd_logger, args)  # pylint: disable=protected-access
+                get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.",
+                                           self.command_log_dir)
+
+                _delete_old_logs(self.command_log_dir)
 
     def _init_command_logfile_handlers(self, command_metadata_logger, args):
 
