@@ -50,7 +50,7 @@ def load_arguments(self, _):
                                            help="name of the web app. You can configure the default using `az configure --defaults web=<name>`",
                                            local_context_attribute=LocalContextAttribute(name='web_name', actions=[GET]))
     functionapp_name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME', help="name of the function app.",
-                                                local_context_attribute=LocalContextAttribute(name='function_name', actions=[GET]))
+                                                local_context_attribute=LocalContextAttribute(name='functionapp_name', actions=[GET]))
     isolated_sku_arg_type = CLIArgumentType(help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
                                             arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
@@ -75,10 +75,7 @@ def load_arguments(self, _):
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
-        c.argument('name', configured_default='web', arg_type=name_arg_type,
-                   completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                   help="name of the web app. You can configure the default using `az configure --defaults web=<name>`",
-                   local_context_attribute=LocalContextAttribute(name='web_name', actions=[GET]))
+        c.argument('name', arg_type=webapp_name_arg_type)
 
     with self.argument_context('appservice') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -100,7 +97,7 @@ def load_arguments(self, _):
     with self.argument_context('appservice plan create') as c:
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None,
                    validator=validate_asp_create,
-                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[SET], scopes=['webapp', 'appservice']))
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[SET], scopes=['appservice', 'webapp', 'functionapp']))
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'],
                    help="Name or ID of the app service environment",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[GET]))
@@ -236,12 +233,8 @@ def load_arguments(self, _):
             c.argument('build_remote', help='enable remote build during deployment', arg_type=get_three_state_flag(return_label=True))
             c.argument('timeout', type=int, options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the status of deployment', validator=validate_timeout_value)
 
-        if scope == 'webapp':
-            with self.argument_context(scope + ' config appsettings list') as c:
-                c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
-        else:
-            with self.argument_context(scope + ' config appsettings list') as c:
-                c.argument('name', arg_type=functionapp_name_arg_type)
+        with self.argument_context(scope + ' config appsettings list') as c:
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type), id_part=None)
 
         with self.argument_context(scope + ' config hostname list') as c:
             c.argument('webapp_name', arg_type=webapp_name_arg_type, id_part=None, options_list='--webapp-name')
@@ -364,7 +357,7 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
-        c.argument('webapp_name', help='The name of the web app')
+        c.argument('webapp_name', help='The name of the web app', local_context_attribute=LocalContextAttribute(name='web_name', actions=[GET]))
         c.argument('db_name', help='Name of the database in the backup', arg_group='Database')
         c.argument('db_connection_string', help='Connection string for the database in the backup', arg_group='Database')
         c.argument('db_type', help='Type of database in the backup', arg_group='Database', arg_type=get_enum_type(DatabaseType))
@@ -495,7 +488,7 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the function app service plan. Use 'appservice plan create' to get one",
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[GET]))
-        c.argument('new_app_name', options_list=['--name', '-n'], help='name of the new function app',
+        c.argument('name', options_list=['--name', '-n'], help='name of the new function app',
                    local_context_attribute=LocalContextAttribute(name='functionapp_name', actions=[SET], scopes=['functionapp']))
         c.argument('storage_account', options_list=['--storage-account', '-s'],
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
@@ -515,6 +508,8 @@ def load_arguments(self, _):
     # For commands with shared impl between web app and function app and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type)
+    with self.argument_context('functionapp delete') as c:
+        c.argument('name', arg_type=functionapp_name_arg_type, local_context_attribute=None)
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of `<name>=<value>`")
 
@@ -537,7 +532,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
-                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[SET], scopes=['functionapp']))
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[SET], scopes=['appservice', 'webapp', 'functionapp']))
         c.argument('sku', required=True, help='The SKU of the app service plan.')
 
     with self.argument_context('functionapp plan update') as c:
@@ -588,20 +583,11 @@ def load_arguments(self, _):
 
 # Access Restriction Commands
     for scope in ['webapp', 'functionapp']:
-        if scope == 'webapp':
-            with self.argument_context(scope + ' config access-restriction show') as c:
-                c.argument('name', arg_type=webapp_name_arg_type)
-        else:
-            with self.argument_context(scope + ' config access-restriction show') as c:
-                c.argument('name', arg_type=functionapp_name_arg_type)
+        with self.argument_context(scope + ' config access-restriction show') as c:
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
 
         with self.argument_context(scope + ' config access-restriction add') as c:
-            if scope == 'webapp':
-                with self.argument_context(scope + ' config access-restriction show') as c:
-                    c.argument('name', arg_type=webapp_name_arg_type)
-            else:
-                with self.argument_context(scope + ' config access-restriction show') as c:
-                    c.argument('name', arg_type=functionapp_name_arg_type)
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction rule to add')
             c.argument('priority', options_list=['--priority', '-p'],
@@ -620,12 +606,7 @@ def load_arguments(self, _):
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction remove') as c:
-            if scope == 'webapp':
-                with self.argument_context(scope + ' config access-restriction show') as c:
-                    c.argument('name', arg_type=webapp_name_arg_type)
-            else:
-                with self.argument_context(scope + ' config access-restriction show') as c:
-                    c.argument('name', arg_type=functionapp_name_arg_type)
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
             c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
@@ -636,12 +617,7 @@ def load_arguments(self, _):
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
         with self.argument_context(scope + ' config access-restriction set') as c:
-            if scope == 'webapp':
-                with self.argument_context(scope + ' config access-restriction show') as c:
-                    c.argument('name', arg_type=webapp_name_arg_type)
-            else:
-                with self.argument_context(scope + ' config access-restriction show') as c:
-                    c.argument('name', arg_type=functionapp_name_arg_type)
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('use_same_restrictions_for_scm_site',
                        help="Use same access restrictions for scm site",
                        arg_type=get_three_state_flag())
@@ -685,5 +661,5 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[GET]))
     with self.argument_context('appservice ase list-plans') as c:
-        c.argument('name', options_list=['--name', '-n'],help='Name of the app service environment',
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[GET]))

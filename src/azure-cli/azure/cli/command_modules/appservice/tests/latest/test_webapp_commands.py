@@ -2367,5 +2367,67 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
 
 
+class WebappLocalContextTests(ScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    def test_webapp_local_context(self, resource_group):
+        from knack.util import CLIError
+        self.kwargs.update({
+            'plan_name': self.create_random_name(prefix='webapp-plan-', length=24),
+            'webapp_name': self.create_random_name(prefix='webapp-', length=24)
+        })
+        original_working_dir = os.getcwd()
+        working_dir = tempfile.mkdtemp()
+        os.chdir(working_dir)
+        self.cmd('local-context on')
+
+        self.cmd('appservice plan create -g {rg} -n {plan_name}')
+        self.cmd('appservice plan show')
+        with self.assertRaises(CLIError):
+            self.cmd('appservice plan delete')
+
+        self.cmd('webapp create -n {webapp_name}')
+        self.cmd('webapp show')
+        with self.assertRaises(CLIError):
+            self.cmd('webapp delete')
+
+        self.cmd('webapp delete -n {webapp_name}')
+        self.cmd('appservice plan delete -n {plan_name} -y')
+
+        self.cmd('local-context off --yes')
+        os.chdir(original_working_dir)
+
+
+class FunctionappLocalContextTests(ScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    @StorageAccountPreparer()
+    def test_functionapp_local_context(self, resource_group, storage_account):
+        from knack.util import CLIError
+        self.kwargs.update({
+            'plan_name': self.create_random_name(prefix='functionapp-plan-', length=24),
+            'functionapp_name': self.create_random_name(prefix='functionapp-', length=24),
+            'storage_account': storage_account
+        })
+        original_working_dir = os.getcwd()
+        working_dir = tempfile.mkdtemp()
+        os.chdir(working_dir)
+        self.cmd('local-context on')
+
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku B2')
+        self.cmd('functionapp plan show')
+        with self.assertRaises(CLIError):
+            self.cmd('functionapp plan delete')
+
+        self.cmd('functionapp create -n {functionapp_name} --storage-account {storage_account}')
+        self.cmd('functionapp show')
+        with self.assertRaises(CLIError):
+            self.cmd('functionapp delete')
+
+        self.cmd('functionapp delete -n {functionapp_name}')
+        self.cmd('functionapp plan delete -n {plan_name} -y')
+
+        self.cmd('local-context off --yes')
+        os.chdir(original_working_dir)
+
+
 if __name__ == '__main__':
     unittest.main()
