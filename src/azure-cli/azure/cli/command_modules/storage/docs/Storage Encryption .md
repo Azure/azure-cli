@@ -34,11 +34,11 @@ az storage account update \
     --encryption-key-version ""
 ```
 
-#### Enable key auto-rotation for existing cmk
+#### Disable key auto-rotation and pin to specific ky version
 ```
 az storage account update \
     --account-name mystorageaccount \
-    --encryption-key-version ""
+    --encryption-key-version 2780bea583714f33b8051ea24f90a246
 ```
 
 #### Change key source to Microsoft.Storage
