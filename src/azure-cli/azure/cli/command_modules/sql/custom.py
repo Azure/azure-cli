@@ -2735,6 +2735,34 @@ def update_long_term_retention_mi(
     return policy
 
 
+def _get_backup_id_resource_values(backup_id):
+    '''
+    Extract resource values from the backup id
+    '''
+
+    backup_id = backup_id.replace('\'', '')
+    backup_id = backup_id.replace('"', '')
+
+    if backup_id[0] == '/':
+        # remove leading /
+        backup_id = backup_id[1:]
+        print(backup_id)
+
+    resources_list = backup_id.split('/')
+    print(resources_list)
+    resources_dict = {resources_list[i]: resources_list[i + 1] for i in range(0, len(resources_list), 2)}
+
+    if not ('locations'.casefold() in resources_dict and
+            'longTermRetentionManagedInstances'.casefold() not in resources_dict and
+            'longTermRetentionDatabases'.casefold() not in resources_dict and
+            'longTermRetentionManagedInstanceBackups'.casefold() not in resources_dict):
+
+        # backup ID should contain all these
+        raise CLIError('Please provide a valid resource URI.  See --help for example.')
+
+    return resources_dict
+
+
 def get_long_term_retention_mi_backup(
         client,
         location_name=None,
@@ -2747,36 +2775,12 @@ def get_long_term_retention_mi_backup(
     '''
 
     if backup_id:
-        backup_id = backup_id.replace('\'', '')
-        backup_id = backup_id.replace('"', '')
-
-        if backup_id[0] == '/':
-            # remove leading /
-            backup_id = backup_id[1:]
-            print(backup_id)
-
-        resources_list = backup_id.split('/')
-        print(resources_list)
-        resources_dict = {resources_list[i]: resources_list[i + 1] for i in range(0, len(resources_list), 2)}
-
-        if not ('locations'.casefold() in resources_dict and
-                'longTermRetentionManagedInstances'.casefold() not in resources_dict and
-                'longTermRetentionDatabases'.casefold() not in resources_dict and
-                'longTermRetentionManagedInstanceBackups'.casefold() not in resources_dict):
-
-            raise CLIError('Please provide a valid resource URI.  See --help for example.')
+        resources_dict = _get_backup_id_resource_values(backup_id)
 
         location_name = resources_dict['locations']
         managed_instance_name = resources_dict['longTermRetentionManagedInstances']
         database_name = resources_dict['longTermRetentionDatabases']
         backup_name = resources_dict['longTermRetentionManagedInstanceBackups']
-
-    else:
-        if not (location_name and
-                managed_instance_name and
-                database_name and
-                backup_name):
-            raise CLIError('Please provide valid resource to show.  See --help for examples.')
 
     return client.get(
         location_name=location_name,
@@ -2909,6 +2913,32 @@ def list_long_term_retention_mi_backups(
             database_state)
 
     return backups
+
+
+def delete_long_term_retention_mi_backup(
+        client,
+        location_name=None,
+        managed_instance_name=None,
+        database_name=None,
+        backup_name=None,
+        backup_id=None):
+    '''
+    Deletes the requested long term retention backup.
+    '''
+
+    if backup_id:
+        resources_dict = _get_backup_id_resource_values(backup_id)
+
+        location_name = resources_dict['locations']
+        managed_instance_name = resources_dict['longTermRetentionManagedInstances']
+        database_name = resources_dict['longTermRetentionDatabases']
+        backup_name = resources_dict['longTermRetentionManagedInstanceBackups']
+
+    return client.delete(
+        location_name=location_name,
+        managed_instance_name=managed_instance_name,
+        database_name=database_name,
+        backup_name=backup_name)
 
 
 def restore_long_term_retention_mi_backup(

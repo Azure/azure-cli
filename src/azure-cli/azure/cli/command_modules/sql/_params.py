@@ -1533,13 +1533,15 @@ def load_arguments(self, _):
     with self.argument_context('sql midb ltr-backup') as c:
         c.argument('location_name',
                    arg_type=get_location_type(self.cli_ctx),
-                   help='The location of the desired backups.',
+                   help='The location of the desired backup(s).',
                    id_part=None)
 
         c.argument('database_name',
                    options_list=['--database', '-d'],
-                   help='The name of the Azure SQL Managed Database. '
-                   'If specified (along with instance name), retrieves all requested backups under this database.',
+                   id_part=None)
+
+        c.argument('managed_instance_name',
+                   options_list=['--managed-instance', '--mi'],
                    id_part=None)
 
         c.argument('backup_name',
@@ -1551,15 +1553,19 @@ def load_arguments(self, _):
         c.argument('backup_id',
                    options_list=['--backup-id', '--id'],
                    help='The resource id of the backups. '
-                   'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.',
-                   id_part=None)
+                   'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id. '
+                   'If provided, other arguments are not required. ')
 
     with self.argument_context('sql midb ltr-backup list') as c:
+        c.argument('database_name',
+                   options_list=['--database', '-d'],
+                   help='The name of the Azure SQL Managed Database. '
+                   'If specified (along with instance name), retrieves all requested backups under this database.')
+
         c.argument('managed_instance_name',
                    options_list=['--managed-instance', '--mi'],
                    help='Name of the Azure SQL managed instance. '
-                   'If specified, retrieves all requested backups under this managed instance.',
-                   id_part=None)
+                   'If specified, retrieves all requested backups under this managed instance.')
 
         c.argument('database_state',
                    required=False,
@@ -1591,7 +1597,7 @@ def load_arguments(self, _):
                    help='Name of the resource group of the managed instance to restore managed database to.')
 
         c.argument('long_term_retention_backup_resource_id',
-                   options_list=['--backup-id'],
+                   options_list=['--backup-id', '--id'],
                    required=True,
                    help='The resource id of the long term retention backup to be restored. '
                    'Use \'az sql midb ltr-backup show\' or \'az sql midb ltr-backup list\' for backup id.')

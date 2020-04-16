@@ -712,6 +712,8 @@ short-summary: Delete a long term retention backup.
 examples:
   - name: Delete long term retention backup for a managed database.
     text: az sql midb ltr-backup delete -l southeastasia --mi myinstance -d mymanageddb --name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+  - name: Delete long term retention backup for a managed database.
+    text: az sql midb ltr-backup delete --backup-id '/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/mymanageddb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000'
 """
 
 helps['sql midb ltr-backup restore'] = """

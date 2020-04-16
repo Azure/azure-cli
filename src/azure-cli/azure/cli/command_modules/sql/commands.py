@@ -597,8 +597,7 @@ def load_command_table(self, _):
         g.custom_command(
             'list',
             'list_long_term_retention_mi_backups')
-        g.command('delete', 'delete',
-                  confirmation=True)
+        g.custom_command('delete', 'delete_long_term_retention_mi_backup', confirmation=True)
 
     with self.command_group('sql midb ltr-backup',
                             managed_databases_operations,
