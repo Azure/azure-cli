@@ -686,6 +686,8 @@ short-summary: Get a long term retention backup for a managed database.
 examples:
   - name: Show long term retention backup for a managed database.
     text: az sql midb ltr-backup show -l southeastasia --mi myinstance -d mymanageddb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    name: Show long term retention backup for a managed database.
+    text: az sql midb ltr-backup show --backup-id '/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/mymanageddb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000'
 """
 
 helps['sql midb ltr-backup list'] = """
@@ -695,11 +697,11 @@ examples:
   - name: List long term retention backups for a managed database.
     text: az sql midb ltr-backup list -l southeastasia --mi myinstance -d mymanageddb
   - name: List long term retention backups for a managed instance (list only the latest LTR backups, which belong to live databases).
-    text: az sql midb ltr-backup list -l southeastasia --mi myinstance --database-state Live --only-latest-per-database True
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance --database-state Live --only-latest-per-database
   - name: List long term retention backups for a managed instance (with resource group argument).
     text: az sql midb ltr-backup list -l southeastasia -g mygroup --mi myinstance
   - name: List long term retention backups for a location (list only the latest LTR backups, which belong to live databases).
-    text: az sql midb ltr-backup list -l southeastasia --database-state Live --only-latest-per-database True
+    text: az sql midb ltr-backup list -l southeastasia --database-state Live --only-latest-per-database
   - name: List long term retention backups for a location (with resource group argument).
     text: az sql midb ltr-backup list -l southeastasia -g mygroup
 """

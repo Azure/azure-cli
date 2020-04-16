@@ -593,7 +593,7 @@ def load_command_table(self, _):
     with self.command_group('sql midb ltr-backup',
                             managed_database_long_term_retention_backups_operations,
                             client_factory=get_sql_managed_database_long_term_retention_backups_operations) as g:
-        g.show_command('show', 'get')
+        g.custom_command('show', 'get_long_term_retention_mi_backup')
         g.custom_command(
             'list',
             'list_long_term_retention_mi_backups')
