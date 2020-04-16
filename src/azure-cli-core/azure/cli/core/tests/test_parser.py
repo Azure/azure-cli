@@ -49,7 +49,7 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('sub-command the-second-name'.split())
         self.assertIs(args.func, command2)
 
-        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', side_effect=VerifyError(self)):
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
             parser.parse_args('sub-command'.split())
             self.assertTrue(AzCliCommandParser.error.called)
 
@@ -72,7 +72,7 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --req yep'.split())
         self.assertIs(args.func, command)
 
-        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', side_effect=VerifyError(self)):
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
             parser.parse_args('test command'.split())
             self.assertTrue(AzCliCommandParser.error.called)
 
@@ -95,7 +95,7 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --req yep nope'.split())
         self.assertIs(args.func, command)
 
-        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', side_effect=VerifyError(self)):
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
             parser.parse_args('test command -req yep'.split())
             self.assertTrue(AzCliCommandParser.error.called)
 
