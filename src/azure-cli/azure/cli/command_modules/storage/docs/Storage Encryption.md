@@ -34,7 +34,7 @@ az storage account update \
     --encryption-key-version ""
 ```
 
-#### Disable key auto-rotation and pin to specific ky version
+#### Disable key auto-rotation and pin to specific key version
 ```
 az storage account update \
     --account-name mystorageaccount \
