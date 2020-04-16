@@ -880,7 +880,9 @@ class DeploymentScriptsTest(ScenarioTest):
             'template_file': os.path.join(curr_dir, 'deployment-scripts-deploy.json').replace('\\', '\\\\'),
         })
 
-        count = self.cmd("deployment-scripts list --query \"length([?name=='{deployment_script_name}'])\"").get_output_in_json() or 0
+        count = 0
+        self.cmd('deployment-scripts list',
+                 checks=self.check("length([?name=='{deployment_script_name}'])", count))
 
         self.cmd('deployment group create -g {resource_group} -n {deployment_name} --template-file "{template_file}" --parameters scriptName={deployment_script_name}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
@@ -948,7 +950,7 @@ class DeploymentScriptsTest(ScenarioTest):
         self.cmd("deployment-scripts show --resource-group {resource_group} --name {deployment_script_name}",
                  checks=self.check('name', '{deployment_script_name}'))
 
-        self.cmd("deployment-scripts delete --resource-group {resource_group} --name {deployment_script_name}")
+        self.cmd("deployment-scripts delete --resource-group {resource_group} --name {deployment_script_name} --yes")
 
         self.cmd('deployment-scripts list',
                  checks=self.check("length([?name=='{deployment_script_name}'])", 0))
