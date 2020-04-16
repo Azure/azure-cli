@@ -796,11 +796,6 @@ short-summary: Manage deployment scripts at subscription or resource group scope
 helps['deployment-scripts list'] = """
 type: command
 short-summary: List all deployment scripts.
-parameters:
-  - name: --subscription
-    short-summary: Subscription identifier used to retrieve all deployment scripts.
-    long-summary: >
-        If not provided, the command uses the user's logged-in default subscription.
 examples:
   - name: Retrieve all deployment scripts found in the user's logged-in default subscription.
     text: >
@@ -814,10 +809,6 @@ helps['deployment-scripts show'] = """
 type: command
 short-summary: Retrieve a deployment script.
 parameters:
-  - name: --subscription
-    short-summary: Subscription identifier used to retrieve a deployment scripts.
-    long-summary: >
-        If not provided, the command uses the user's logged-in default subscription.
   - name: --name
     short-summary: Deployment script resource name.
 examples:
@@ -830,10 +821,6 @@ helps['deployment-scripts show-log'] = """
 type: command
 short-summary: Show deployment script logs.
 parameters:
-  - name: --subscription
-    short-summary: Subscription identifier used to retrieve deployment script logs.
-    long-summary: >
-        If not provided, the command uses the user's logged-in default subscription.
   - name: --name
     short-summary: Deployment script resource name.
 examples:
@@ -846,10 +833,6 @@ helps['deployment-scripts delete'] = """
 type: command
 short-summary: Delete a deployment script.
 parameters:
-  - name: --subscription
-    short-summary: Subscription identifier used to delete a deployment script.
-    long-summary: >
-        If not provided, the command uses the user's logged-in default subscription.
   - name: --name
     short-summary: Deployment script resource name.
 examples:
