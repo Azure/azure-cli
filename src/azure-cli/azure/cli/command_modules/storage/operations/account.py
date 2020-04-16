@@ -218,7 +218,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         if any([encryption_key_name, encryption_key_vault, encryption_key_version]):
             raise ValueError(
                 'Specify `--encryption-key-source=Microsoft.Keyvault` to configure key vault properties.')
-        elif encryption.key_vault_properties is not None:
+        if encryption.key_vault_properties is not None:
             encryption.key_vault_properties = None
 
     if encryption_key_name:
