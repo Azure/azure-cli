@@ -274,6 +274,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
+    with self.argument_context('storage account encryption-scope') as c:
+        c.argument('account_name', help='The storage account name.')
+        c.argument('resource_group_name', validator=process_resource_group, required=False)
+        c.argument('encryption_scope_name', options_list=['--name', '-n'],
+                   help='The name of the encryption scope within the specified storage account.')
+
+    for scope in ['storage account encryption-scope create', 'storage account encryption-scope update']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE) as c:
+            from ._validators import validate_encryption_key
+            t_encryption_key_source = self.get_models('EncryptionScopeSource', resource_type=ResourceType.MGMT_STORAGE)
+            c.argument('key_source', options_list=['-s', '--key-source'],
+                       arg_type=get_enum_type(t_encryption_key_source, default="Microsoft.Storage"),
+                       help='The provider for the encryption scope.', validator=validate_encryption_key)
+            c.argument('key_uri', options_list=['-u', '--key-uri'],
+                       help='The object identifier for a key vault key object. When applied, the encryption scope will '
+                       'use the key referenced by the identifier to enable customer-managed key support on this '
+                       'encryption scope.')
+
+    with self.argument_context('storage account encryption-scope update') as c:
+        t_state = self.get_models("EncryptionScopeState", resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('key_source', options_list=['-s', '--key-source'],
+                   arg_type=get_enum_type(t_encryption_key_source),
+                   help='The provider for the encryption scope.', validator=validate_encryption_key)
+        c.argument('state', arg_type=get_enum_type(t_state),
+                   help='Change the state the encryption scope. When disabled, '
+                   'all blob read/write operations using this encryption scope will fail.')
+
     with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_expand_key_type = self.get_models('ListKeyExpand', resource_type=ResourceType.MGMT_STORAGE)
         c.argument("expand", options_list=['--expand-key-type'], help='Specify the expanded key types to be listed.',
@@ -628,6 +655,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container create') as c:
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
+        c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
+        c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
+                   arg_group='Encryption Policy', is_preview=True,
+                   help='Default the container to use specified encryption scope for all writes.')
+        c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
+                   arg_type=get_three_state_flag(), arg_group='Encryption Policy', is_preview=True,
+                   help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage container delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the container does not exist.')
