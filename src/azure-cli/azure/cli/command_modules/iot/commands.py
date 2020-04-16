@@ -185,4 +185,4 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_show_command('show', 'iot_central_app_get')
         g.generic_update_command('update', getter_name='iot_central_app_get',
                                  setter_name='iot_central_app_update', command_type=update_custom_util)
-        g.custom_command('delete', 'iot_central_app_delete')
+        g.custom_command('delete', 'iot_central_app_delete', confirmation=True)

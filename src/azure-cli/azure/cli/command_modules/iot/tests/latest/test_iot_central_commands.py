@@ -63,7 +63,7 @@ class IoTCentralTest(ScenarioTest):
             self.check('template', template)])
 
         # Test 'az iot central app delete with template and display name'
-        self.cmd('iot central app delete -n {0} -g {1}'.format(template_app_name, rg), checks=[
+        self.cmd('iot central app delete -n {0} -g {1} --yes'.format(template_app_name, rg), checks=[
             self.is_empty()])
 
         # Test 'az iot central app list'
@@ -76,5 +76,5 @@ class IoTCentralTest(ScenarioTest):
             self.check('[0].sku.name', 'ST2')])
 
         # Test 'az iot central app delete'
-        self.cmd('iot central app delete -n {0} -g {1}'.format(app_name, rg), checks=[
+        self.cmd('iot central app delete -n {0} -g {1} --yes'.format(app_name, rg), checks=[
             self.is_empty()])
