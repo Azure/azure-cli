@@ -521,11 +521,20 @@ class Profile(object):
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
     def get_access_token_for_resource(self, username, tenant, resource):
+        """get access token for current user account, used by vsts and iot module"""
         tenant = tenant or 'common'
-        # todo: msal
+        account = self.get_subscription()
+        home_account_id = account[_USER_ENTITY][_HOME_ACCOUNT_ID]
+        authority = self.cli_ctx.cloud.endpoints.active_directory.lstrip('https://')
         from azure.cli.core._credential import IdentityCredential
-        cred = IdentityCredential(username=username, tenant_id=tenant)
-        return cred.get_token(resource)
+        identity_credential = IdentityCredential(home_account_id=home_account_id,
+                                                 authority=authority,
+                                                 tenant_id=tenant,
+                                                 username=username)
+        from azure.cli.core.authentication import AuthenticationWrapper
+        auth = AuthenticationWrapper(identity_credential, resource=resource)
+        token = auth.get_token()
+        return token.token
 
     @staticmethod
     def _try_parse_msi_account_name(account):
@@ -595,29 +604,16 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    def get_refresh_token(self, resource=None,
-                          subscription=None):
-        account = self.get_subscription(subscription)
-        user_type = account[_USER_ENTITY][_USER_TYPE]
-        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
-        if user_type == _USER:
-            _, _, token_entry = self._creds_cache.retrieve_token_for_user(
-                username_or_sp_id, account[_TENANT_ID], resource)
-            return None, token_entry.get(_REFRESH_TOKEN), token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
-
-        sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
-        return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
-
     def get_raw_token(self, resource=None, subscription=None, tenant=None):
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
         account = self.get_subscription(subscription)
         identity_credential = self._create_identity_credential(account, tenant)
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        token = identity_credential.get_token(resource)
-        cred = 'Bearer', token, None
+        from azure.cli.core.authentication import AuthenticationWrapper, _convert_token_entry
+        auth = AuthenticationWrapper(identity_credential, resource=resource)
+        token = auth.get_token()
+        cred = 'Bearer', token.token, _convert_token_entry(token)
         return (cred,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))

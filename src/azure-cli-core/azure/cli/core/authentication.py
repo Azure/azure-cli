@@ -15,6 +15,12 @@ from azure.core.exceptions import ClientAuthenticationError
 from knack.util import CLIError
 
 
+def _convert_token_entry(token):
+    import datetime
+    return {'accessToken': token.token,
+            'expiresOn': datetime.datetime.fromtimestamp(token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f")}
+
+
 def _create_scopes(resource):
     scope = resource.rstrip('/') + '/.default'
     return scope
@@ -28,12 +34,15 @@ class AuthenticationWrapper(Authentication):
         self._external_credentials = kwargs.pop("external_credentials", None)
         self._resource = kwargs.pop("resource", None)
 
-    def signed_session(self, session=None):
-        session = session or super(AuthenticationWrapper, self).signed_session()
+    def _get_token(self, *scopes):
         external_tenant_tokens = []
+        if not scopes:
+            if self._resource:
+                scopes = _create_scopes(self._resource)
+            else:
+                raise CLIError("Unexpected error: Resource or Scope need be specified to get access token")
         try:
-            scope = _create_scopes(self._resource)
-            token = self._credential.get_token(scope)
+            token = self._credential.get_token(scopes)
             if self._external_credentials:
                 external_tenant_tokens = [cred.get_token() for cred in self._external_credentials]
         except CLIError as err:
@@ -47,7 +56,7 @@ class AuthenticationWrapper(Authentication):
 
             raise CLIError("Credentials have expired due to inactivity or "
                            "configuration of your account was changed.{}".format(
-                           "Please run 'az login'" if not in_cloud_console() else ''))
+                "Please run 'az login'" if not in_cloud_console() else ''))
             # todo: error type
             # err = (getattr(err, 'error_response', None) or {}).get('error_description') or ''
             # if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
@@ -68,16 +77,21 @@ class AuthenticationWrapper(Authentication):
             raise CLIError(SSLERROR_TEMPLATE.format(str(err)))
         except requests.exceptions.ConnectionError as err:
             raise CLIError('Please ensure you have network connection. Error detail: ' + str(err))
+        return token, external_tenant_tokens
 
+    def signed_session(self, session=None):
+        session = session or super(AuthenticationWrapper, self).signed_session()
+        token, external_tenant_tokens = self._get_token()
         header = "{} {}".format('Bearer', token.token)
         session.headers['Authorization'] = header
         if external_tenant_tokens:
-            aux_tokens = ';'.join(['{} {}'.format('Bearer', tokens2) for tokens2 in external_tenant_tokens])
+            aux_tokens = ';'.join(['{} {}'.format('Bearer', tokens2.token) for tokens2 in external_tenant_tokens])
             session.headers['x-ms-authorization-auxiliary'] = aux_tokens
         return session
 
-    def get_token(self, scope):
-        return self._credential.get_token(scope)
+    def get_token(self, *scopes, **kwargs):
+        token, _ = self._get_token(scopes)
+        return token
 
     @staticmethod
     def _log_hostname():
