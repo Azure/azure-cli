@@ -96,7 +96,8 @@ def load_command_table(self, _):
     with self.command_group('cosmosdb private-link-resource',
                             cosmosdb_private_link_resources_sdk,
                             client_factory=cf_db_private_link_resources) as g:
-        g.show_command('show', 'list_by_database_account')
+        from azure.cli.core.commands.transform import gen_dict_to_list_transform
+        g.show_command('list', 'list_by_database_account', transform=gen_dict_to_list_transform(key='values'))
 
     # SQL api
     with self.command_group('cosmosdb sql', is_preview=True):

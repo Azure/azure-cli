@@ -1007,22 +1007,22 @@ def _update_private_endpoint_connection_status(client, resource_group_name, acco
 
 
 def approve_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
-                                        approval_description=None):
+                                        description=None):
     """Approve a private endpoint connection request for Azure Cosmos DB."""
 
     return _update_private_endpoint_connection_status(
         client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=True,
-        description=approval_description
+        description=description
     )
 
 
 def reject_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
-                                       rejection_description=None):
+                                       description=None):
     """Reject a private endpoint connection request for Azure Cosmos DB."""
 
     return _update_private_endpoint_connection_status(
         client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=False,
-        description=rejection_description
+        description=description
     )
 
 

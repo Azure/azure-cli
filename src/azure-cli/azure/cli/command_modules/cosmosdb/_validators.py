@@ -23,13 +23,14 @@ def validate_ip_range_filter(ns):
 
 def validate_private_endpoint_connection_id(ns):
     if ns.connection_id:
-        id_parts = ns.connection_id.split('/')
-        ns.private_endpoint_connection_name = id_parts[-1]
-        ns.account_name = id_parts[-3]
-        ns.resource_group_name = id_parts[-7]
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(ns.connection_id)
+        ns.resource_group_name = result['resource_group']
+        ns.account_name = result['name']
+        ns.private_endpoint_connection_name = result['child_name_1']
 
     if not all([ns.account_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
-        raise CLIError(None, 'incorrect usage: [--id ID | --name NAME --account-name NAME]')
+        raise CLIError(None, 'incorrect usage: [--id ID | --name NAME --account-name NAME --resource-group NAME]')
 
     del ns.connection_id
 

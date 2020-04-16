@@ -495,23 +495,36 @@ short-summary: Manage Azure Comsos DB private endpoint connections.
 helps['cosmosdb private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve the specified private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Approve the specified private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection approve --account-name MyAccount --connection-name MyPrivateEndpoint -resource-group MyResourceGroup --description "Approved"
 """
 
 
 helps['cosmosdb private-endpoint-connection delete'] = """
 type: command
 short-summary: Delete the specified private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Delete the specified private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection delete --account-name MyAccount --connection-name MyPrivateEndpoint -resource-group MyResourceGroup
+
 """
 
 helps['cosmosdb private-endpoint-connection reject'] = """
 type: command
 short-summary: Reject the specified private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Reject the specified private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection reject --account-name MyAccount --connection-name MyPrivateEndpoint -resource-group MyResourceGroup --description "Rejected"
 """
 
 
 helps['cosmosdb private-endpoint-connection show'] = """
 type: command
 short-summary: Show details of a private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Show details of a private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection show --account-name MyAccount --connection-name MyPrivateEndpoint -resource-group MyResourceGroup
 """
 
 helps['cosmosdb private-link-resource'] = """
@@ -522,6 +535,9 @@ short-summary: Manage Azure Comsos DB private link resources.
 helps['cosmosdb private-link-resource show'] = """
 type: command
 short-summary: Show the private link resources supported for Azure Comsos DB.
+example:
+  - name: Show the private link resources supported for Azure Comsos DB.
+    text: cosmosdb private-link-resource show --account-name MyAccount --resource-group MyResourceGroup
 """
 
 
