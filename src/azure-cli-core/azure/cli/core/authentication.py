@@ -90,7 +90,7 @@ class AuthenticationWrapper(Authentication):
         return session
 
     def get_token(self, *scopes, **kwargs):
-        token, _ = self._get_token(scopes)
+        token, _ = self._get_token(*scopes)
         return token
 
     @staticmethod
