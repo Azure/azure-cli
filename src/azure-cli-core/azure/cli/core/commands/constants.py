@@ -35,7 +35,7 @@ BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
 SURVEY_PROMPT = 'Please let us know how we are doing: https://aka.ms/clihats'
 SURVEY_PROMPT_COLOR = Fore.YELLOW + Style.BRIGHT + 'Please let us know how we are doing: ' + Fore.BLUE + \
     'https://aka.ms/clihats' + Style.RESET_ALL
-UX_SURVEY_PROMPT = 'And let us know if you\'re interested in trying out our newest features: https://aka.ms/CLIUXstudy'
+UX_SURVEY_PROMPT = 'and let us know if you\'re interested in trying out our newest features: https://aka.ms/CLIUXstudy'
 UX_SURVEY_PROMPT_COLOR = Fore.YELLOW + Style.BRIGHT + \
-    'And let us know if you\'re interested in trying out our newest features: ' \
+    'and let us know if you\'re interested in trying out our newest features: ' \
     + Fore.BLUE + 'https://aka.ms/CLIUXstudy' + Style.RESET_ALL
