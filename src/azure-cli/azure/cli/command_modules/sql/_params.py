@@ -892,7 +892,7 @@ def load_arguments(self, _):
                    'Use \'az sql db ltr-backup show\' or \'az sql db ltr-backup list\' for backup name.')
 
         c.argument('long_term_retention_server_name',
-                   options_list=['--server-name', '--server', '-s'],
+                   options_list=['--server', '-s'],
                    help='Name of the Azure SQL Server. '
                    'If specified, retrieves all requested backups under this server.')
 
