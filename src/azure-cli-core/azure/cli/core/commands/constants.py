@@ -35,3 +35,6 @@ BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
 SURVEY_PROMPT = 'Please let us know how we are doing: https://aka.ms/clihats'
 SURVEY_PROMPT_COLOR = Fore.YELLOW + Style.BRIGHT + 'Please let us know how we are doing: ' + Fore.BLUE + \
     'https://aka.ms/clihats' + Style.RESET_ALL
+UX_SURVEY_PROMPT = 'Mobile developer using Azure CLI? Come try our newest feature: https://aka.ms/CLIUXstudy'
+UX_SURVEY_PROMPT_COLOR = Fore.YELLOW + Style.BRIGHT + 'Mobile developer using Azure CLI? Come try our newest feature: '\
+    + Fore.BLUE + 'https://aka.ms/CLIUXstudy' + Style.RESET_ALL

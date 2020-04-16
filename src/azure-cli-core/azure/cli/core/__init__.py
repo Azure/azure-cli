@@ -89,7 +89,8 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string
-        from azure.cli.core.commands.constants import SURVEY_PROMPT, SURVEY_PROMPT_COLOR
+        from azure.cli.core.commands.constants import (SURVEY_PROMPT, SURVEY_PROMPT_COLOR,
+                                                       UX_SURVEY_PROMPT, UX_SURVEY_PROMPT_COLOR)
 
         ver_string, updates_available = get_az_version_string()
         print(ver_string)
@@ -101,8 +102,10 @@ class AzCli(CLI):
                            updates_available)
         else:
             print('Your CLI is up-to-date.')
-
-        print('\n' + (SURVEY_PROMPT_COLOR if self.enable_color else SURVEY_PROMPT))
+        show_link = self.config.getboolean('output', 'show_survey_link', True)
+        if show_link:
+            print('\n' + (SURVEY_PROMPT_COLOR if self.enable_color else SURVEY_PROMPT))
+            print(UX_SURVEY_PROMPT_COLOR if self.enable_color else UX_SURVEY_PROMPT)
 
     def exception_handler(self, ex):  # pylint: disable=no-self-use
         from azure.cli.core.util import handle_exception
