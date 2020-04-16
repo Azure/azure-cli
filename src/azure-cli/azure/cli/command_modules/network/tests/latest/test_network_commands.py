@@ -200,14 +200,16 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.cmd('network private-dns zone create -n {zone_name2} -g {rg}')
 
         self.cmd('network private-endpoint dns-zone-group create --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name} '
-                 '--zone-name {private_zone_name1} --private-dns-zone {zone_name1}', checks=[
-            self.check('name', '{private_dns_zone_group_name}')
-        ])
+                 '--zone-name {private_zone_name1} --private-dns-zone {zone_name1}',
+                 checks=[
+                     self.check('name', '{private_dns_zone_group_name}')
+                 ])
 
         self.cmd('network private-endpoint dns-zone-group add --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name} '
-                 '--zone-name {private_zone_name2} --private-dns-zone {zone_name2}', checks=[
-            self.check('length(privateDnsZoneConfigs)', 2)
-        ])
+                 '--zone-name {private_zone_name2} --private-dns-zone {zone_name2}',
+                 checks=[
+                     self.check('length(privateDnsZoneConfigs)', 2)
+                 ])
 
         self.cmd('network private-endpoint dns-zone-group show --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name}', checks=[
             self.check('length(privateDnsZoneConfigs)', 2)
@@ -216,9 +218,10 @@ class NetworkPrivateEndpoints(ScenarioTest):
             self.check('length(@)', 1)
         ])
         self.cmd('network private-endpoint dns-zone-group remove --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name} '
-                 '--zone-name {private_zone_name2}', checks=[
-            self.check('length(privateDnsZoneConfigs)', 1)
-        ])
+                 '--zone-name {private_zone_name2}',
+                 checks=[
+                     self.check('length(privateDnsZoneConfigs)', 1)
+                 ])
         self.cmd('network private-endpoint dns-zone-group show --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name}', checks=[
             self.check('length(privateDnsZoneConfigs)', 1)
         ])

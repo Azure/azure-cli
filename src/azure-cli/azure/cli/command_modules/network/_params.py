@@ -776,7 +776,7 @@ def load_arguments(self, _):
         c.argument('private_dns_zone', help='Name or ID of the private dns zone.', validator=validate_private_dns_zone)
         c.argument('private_dns_zone_name', options_list=['--zone-name'], help='Name of the private dns zone.')
         c.argument('private_dns_zone_group_name', options_list=['--name', '-n'], help='Name of the private dns zone group.')
-        c.argument('private_endpoint_name', private_endpoint_name)
+        c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
     # endregion
 
     # region PrivateLinkService
