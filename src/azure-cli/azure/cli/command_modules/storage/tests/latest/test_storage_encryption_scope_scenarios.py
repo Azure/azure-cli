@@ -107,7 +107,7 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         with self.assertRaisesRegex(CLIError, "usage error: You need to specify both --default-encryption-scope"):
             self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption}")
         with self.assertRaisesRegex(CLIError, "usage error: You need to specify both --default-encryption-scope"):
-            self.cmd("storage container create -n {con} --account-name {sa} -g {rg} -d False")
+            self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --prevent-encryption-scope-override False")
 
-        self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption} -d False",
+        self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption} --prevent-encryption-scope-override false",
                  checks=[JMESPathCheck("created", True)])

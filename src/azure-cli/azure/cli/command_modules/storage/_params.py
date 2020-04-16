@@ -656,9 +656,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
         c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
-        c.argument('default_encryption_scope', arg_group='Encryption Policy', is_preview=True,
+        c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'], arg_group='Encryption Policy', is_preview=True,
                    help='Default the container to use specified encryption scope for all writes.')
-        c.argument('deny_encryption_scope_override', options_list=['--deny-encryption-scope-override', '-d'],
+        c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
                    arg_type=get_three_state_flag(), arg_group='Encryption Policy', is_preview=True,
                    help='Block override of encryption scope from the container default.')
 

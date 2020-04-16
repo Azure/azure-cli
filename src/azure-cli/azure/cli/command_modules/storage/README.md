@@ -77,5 +77,5 @@ az storage container create -n testcontainer \
     --account-name mystorageaccount \
     -g MyResourceGroup \
     --default-encryption-scope myencryption \
-    --deny-encryption-scope-override false
+    --prevent-encryption-scope-override false
 ```

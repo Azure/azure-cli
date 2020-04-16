@@ -1200,16 +1200,17 @@ def pop_data_client_auth(ns):
 
 
 def validate_client_auth_parameter(cmd, ns):
-    if ns.default_encryption_scope and ns.deny_encryption_scope_override is not None:
+    if ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None:
         # simply try to retrieve the remaining variables from environment variables
         if not ns.account_name:
             ns.account_name = get_config_value(cmd, 'storage', 'account', None)
         if ns.account_name and not ns.resource_group_name:
             ns.resource_group_name = _query_account_rg(cmd.cli_ctx, account_name=ns.account_name)[0]
         pop_data_client_auth(ns)
-    elif (ns.default_encryption_scope and ns.deny_encryption_scope_override is None) or \
-         (not ns.default_encryption_scope and ns.deny_encryption_scope_override is not None):
+    elif (ns.default_encryption_scope and ns.prevent_encryption_scope_override is None) or \
+         (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
         raise CLIError("usage error: You need to specify both --default-encryption-scope and "
-                       "--deny-encryption-scope-override to set encryption scope information when creating container.")
+                       "--prevent-encryption-scope-override to set encryption scope information "
+                       "when creating container.")
     else:
         validate_client_parameters(cmd, ns)
