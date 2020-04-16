@@ -3203,7 +3203,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
             'rg': 'clitestxj6awmetud',
             'loc': 'westus',
             'managed_instance_name': 'ayang-ltr-mi',
-            'database_name': 'test-1',
+            'database_name': 'test-4',
             'weekly_retention': 'P1W',
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
