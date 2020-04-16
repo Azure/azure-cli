@@ -1298,6 +1298,18 @@ type: group
 short-summary: Manage storage service logging information.
 """
 
+helps['storage logging off'] = """
+type: command
+short-summary: Turn off logging for a storage account.
+parameters:
+  - name: --services
+    short-summary: 'The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.'
+examples:
+  - name: Turn off logging for a storage account.
+    text: |
+        az storage logging off --account-name MyAccount
+"""
+
 helps['storage logging show'] = """
 type: command
 short-summary: Show logging settings for a storage account.

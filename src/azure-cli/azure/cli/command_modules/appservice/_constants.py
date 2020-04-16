@@ -54,3 +54,8 @@ FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS = {
         'java': ['8']
     }
 }
+# dotnet runtime version : dotnet linuxFxVersion
+DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION = {
+    '2': '2.2',
+    '3': '3.1'
+}

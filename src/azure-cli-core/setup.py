@@ -63,11 +63,11 @@ DEPENDENCIES = [
     'pkginfo',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
-    'pyyaml~=5.2',
     'requests~=2.20',
     'six~=1.12',
     'wheel==0.30.0',
     'azure-mgmt-resource==8.0.1',
+    'azure-mgmt-core==1.0.0'
 ]
 
 TESTS_REQUIRE = [
@@ -103,8 +103,6 @@ setup(
         ":python_version<'3.4'": ['enum34'],
         ":python_version<'2.7.9'": ['pyopenssl', 'ndg-httpsclient', 'pyasn1'],
         ':python_version<"3.0"': ['futures'],
-        ":python_version<'3.0'": ['antlr4-python2-runtime'],
-        ":python_version>='3.0'": ['antlr4-python3-runtime'],
         "test": TESTS_REQUIRE,
     },
     tests_require=TESTS_REQUIRE,
