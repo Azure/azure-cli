@@ -3269,7 +3269,7 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
 
         # setup for test show long term retention backup
         backup = self.cmd(
-            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name} --latest True').get_output_in_json()
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name} --latest').get_output_in_json()
 
         self.kwargs.update({
             'backup_name': backup[0]['name'],
