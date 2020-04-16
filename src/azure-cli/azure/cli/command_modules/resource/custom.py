@@ -447,8 +447,7 @@ def deploy_arm_template_at_resource_group(cmd,
                                           confirm_with_what_if=None, what_if_result_format=None):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name, template_file, template_uri, parameters,
-                                                      deployment_name, mode, aux_subscriptions, aux_tenants,
-                                                      what_if_result_format)
+                                                      deployment_name, mode, aux_tenants, what_if_result_format)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
