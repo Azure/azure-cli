@@ -310,8 +310,8 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
 
-        plr = self.cmd('cosmosdb private-link-resource show --account-name {acc} --resource-group {rg}').get_output_in_json()
-        assert plr[0]['groupId'] == "Sql"
+        self.cmd('cosmosdb private-link-resource list --account-name {acc} --resource-group {rg}',
+                 checks=[self.check('length(@)', 1), self.check('[0].groupId', 'Sql')])
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pe')
     def test_cosmosdb_private_endpoint(self, resource_group):
@@ -343,11 +343,11 @@ class CosmosDBTests(ScenarioTest):
         # Show the connection at cosmos db side
         results = self.kwargs['pe_id'].split('/')
         self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/privateEndpointConnections/{3}'.format(results[2], results[4], self.kwargs['acc'], results[-1])
-        self.cmd('cosmosdb private-endpoint-connection show --connection-id {pec_id}',
+        self.cmd('cosmosdb private-endpoint-connection show --id {pec_id}',
                  checks=self.check('id', '{pec_id}'))
-        self.cmd('cosmosdb private-endpoint-connection show --account-name {acc} --connection-name {pe_name} -g {rg}',
+        self.cmd('cosmosdb private-endpoint-connection show --account-name {acc} --name {pe_name} --resource-group {rg}',
                  checks=self.check('name', '{pe_name}'))
-        self.cmd('cosmosdb private-endpoint-connection show --account-name {acc} -n {pe_name} -g {rg}',
+        self.cmd('cosmosdb private-endpoint-connection show -a {acc} -n {pe_name} -g {rg}',
                  checks=self.check('name', '{pe_name}'))
 
         # Test approval/rejection
@@ -355,16 +355,19 @@ class CosmosDBTests(ScenarioTest):
             'approval_desc': 'You are approved!',
             'rejection_desc': 'You are rejected!'
         })
-        self.cmd('cosmosdb private-endpoint-connection approve --account-name {acc} -g {rg} --connection-name {pe_name} '
-                 '--approval-description "{approval_desc}"', checks=[
+        self.cmd('cosmosdb private-endpoint-connection approve --account-name {acc} --resource-group {rg} --name {pe_name} '
+                 '--description "{approval_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Approved'),
                      self.check('privateLinkServiceConnectionState.description', '{approval_desc}')
                  ])
-        self.cmd('cosmosdb private-endpoint-connection reject --connection-id {pec_id} '
-                 '--rejection-description "{rejection_desc}"', checks=[
+        self.cmd('cosmosdb private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"', checks=[
                      self.check('privateLinkServiceConnectionState.status', 'Rejected'),
                      self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
                  ])
+
+        # Test delete
+        self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
     def test_cosmosdb_database(self, resource_group):

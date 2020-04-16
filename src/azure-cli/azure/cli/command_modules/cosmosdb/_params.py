@@ -119,7 +119,7 @@ def load_arguments(self, _):
             c.argument('description', options_list=['--description'], required=False, help='Comments for the {} operation.'.format(item))
 
     with self.argument_context('cosmosdb private-link-resource') as c:
-        c.argument('account_name', account_name_type, required=True, help="Cosmosdb account name")
+        c.argument('account_name', account_name_type, required=True, help="Cosmosdb account name", id_part=None)
 
 # SQL database
     with self.argument_context('cosmosdb sql database') as c:

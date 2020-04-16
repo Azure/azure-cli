@@ -497,7 +497,7 @@ type: command
 short-summary: Approve the specified private endpoint connection associated with Azure Comsos DB.
 examples:
   - name: Approve the specified private endpoint connection associated with Azure Comsos DB.
-    text: az cosmosdb private-endpoint-connection approve --account-name MyAccount --connection-name MyPrivateEndpoint --resource-group MyResourceGroup --description "Approved"
+    text: az cosmosdb private-endpoint-connection approve --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup --description "Approved"
 """
 
 
@@ -506,7 +506,7 @@ type: command
 short-summary: Delete the specified private endpoint connection associated with Azure Comsos DB.
 examples:
   - name: Delete the specified private endpoint connection associated with Azure Comsos DB.
-    text: az cosmosdb private-endpoint-connection delete --account-name MyAccount --connection-name MyPrivateEndpoint --resource-group MyResourceGroup
+    text: az cosmosdb private-endpoint-connection delete --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup
 
 """
 
@@ -515,7 +515,7 @@ type: command
 short-summary: Reject the specified private endpoint connection associated with Azure Comsos DB.
 examples:
   - name: Reject the specified private endpoint connection associated with Azure Comsos DB.
-    text: az cosmosdb private-endpoint-connection reject --account-name MyAccount --connection-name MyPrivateEndpoint --resource-group MyResourceGroup --description "Rejected"
+    text: az cosmosdb private-endpoint-connection reject --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup --description "Rejected"
 """
 
 
@@ -524,7 +524,7 @@ type: command
 short-summary: Show details of a private endpoint connection associated with Azure Comsos DB.
 examples:
   - name: Show details of a private endpoint connection associated with Azure Comsos DB.
-    text: az cosmosdb private-endpoint-connection show --account-name MyAccount --connection-name MyPrivateEndpoint --resource-group MyResourceGroup
+    text: az cosmosdb private-endpoint-connection show --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup
 """
 
 helps['cosmosdb private-link-resource'] = """
