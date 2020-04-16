@@ -20,7 +20,7 @@ def _create_identity_credential(**kwargs):
         if not username or not authority or not tenant_id:
             raise CLIError("Missing username for user {}".format(home_account_id))
         auth_profile = AuthProfile(authority, home_account_id, tenant_id, username)
-        return InteractiveBrowserCredential(_profile=auth_profile, silent_auth_only=True,
+        return InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True,
                                             tenant_id=tenant_id, authority=authority)
     sp_id = kwargs.pop("sp_id", None)
     if sp_id:

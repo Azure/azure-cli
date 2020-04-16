@@ -327,8 +327,8 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         profile._management_resource_uri = 'https://management.core.windows.net/'
-        profile.find_subscriptions_on_login(False, '1234', 'my-secret', True, self.tenant_id, use_device_code=False,
-                                            allow_no_subscriptions=False, subscription_finder=finder)
+        profile.login(False, '1234', 'my-secret', True, self.tenant_id, use_device_code=False,
+                      allow_no_subscriptions=False, subscription_finder=finder)
         # action
         extended_info = profile.get_sp_auth_info()
         # assert
@@ -368,14 +368,14 @@ class TestProfile(unittest.TestCase):
         profile._management_resource_uri = 'https://management.core.windows.net/'
 
         # action
-        result = profile.find_subscriptions_on_login(False,
+        result = profile.login(False,
                                                      '1234',
                                                      'my-secret',
-                                                     True,
-                                                     self.tenant_id,
-                                                     use_device_code=False,
-                                                     allow_no_subscriptions=True,
-                                                     subscription_finder=finder)
+                               True,
+                               self.tenant_id,
+                               use_device_code=False,
+                               allow_no_subscriptions=True,
+                               subscription_finder=finder)
         # assert
         self.assertEqual(1, len(result))
         self.assertEqual(result[0]['id'], self.tenant_id)
@@ -398,14 +398,14 @@ class TestProfile(unittest.TestCase):
         profile._management_resource_uri = 'https://management.core.windows.net/'
 
         # action
-        result = profile.find_subscriptions_on_login(False,
+        result = profile.login(False,
                                                      '1234',
                                                      'my-secret',
-                                                     True,
-                                                     self.tenant_id,
-                                                     use_device_code=False,
-                                                     allow_no_subscriptions=True,
-                                                     subscription_finder=finder)
+                               True,
+                               self.tenant_id,
+                               use_device_code=False,
+                               allow_no_subscriptions=True,
+                               subscription_finder=finder)
         # assert
         self.assertEqual(1, len(result))
         self.assertEqual(result[0]['id'], self.id1.split('/')[-1])
@@ -433,14 +433,14 @@ class TestProfile(unittest.TestCase):
         profile._management_resource_uri = 'https://management.core.windows.net/'
 
         # action
-        result = profile.find_subscriptions_on_login(False,
+        result = profile.login(False,
                                                      '1234',
                                                      'my-secret',
-                                                     False,
-                                                     None,
-                                                     use_device_code=False,
-                                                     allow_no_subscriptions=True,
-                                                     subscription_finder=finder)
+                               False,
+                               None,
+                               use_device_code=False,
+                               allow_no_subscriptions=True,
+                               subscription_finder=finder)
 
         # assert
         self.assertEqual(1, len(result))
@@ -458,14 +458,14 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
         # action
-        result = profile.find_subscriptions_on_login(True,
+        result = profile.login(True,
                                                      '1234',
                                                      'my-secret',
-                                                     False,
-                                                     None,
-                                                     use_device_code=False,
-                                                     allow_no_subscriptions=True,
-                                                     subscription_finder=finder)
+                               False,
+                               None,
+                               use_device_code=False,
+                               allow_no_subscriptions=True,
+                               subscription_finder=finder)
 
         # assert
         self.assertTrue(0 == len(result))
@@ -1842,7 +1842,7 @@ class TestProfile(unittest.TestCase):
         mgmt_resource = 'https://management.core.windows.net/'
         token_cache = adal.TokenCache()
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
-        all_subscriptions = finder._find_using_common_tenant(access_token="token1", resource=mgmt_resource)
+        all_subscriptions = finder.find_using_common_tenant(access_token="token1", resource=mgmt_resource)
 
         self.assertEqual(len(all_subscriptions), 1)
         self.assertEqual(all_subscriptions[0].tenant_id, self.tenant_id)
@@ -1879,8 +1879,8 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token.side_effect = [self.token_entry1, adal_error_mfa]
 
         # action
-        all_subscriptions = finder._find_using_common_tenant(access_token="token1",
-                                                             resource='https://management.core.windows.net/')
+        all_subscriptions = finder.find_using_common_tenant(access_token="token1",
+                                                            resource='https://management.core.windows.net/')
 
         # assert
         # subscriptions are correctly returned
@@ -1905,7 +1905,7 @@ class TestProfile(unittest.TestCase):
 
         token_cache = adal.TokenCache()
         finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
-        all_subscriptions = finder._find_using_specific_tenant(tenant=token_tenant, access_token="token1")
+        all_subscriptions = finder.find_using_specific_tenant(tenant=token_tenant, access_token="token1")
 
         self.assertEqual(len(all_subscriptions), 1)
         self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
