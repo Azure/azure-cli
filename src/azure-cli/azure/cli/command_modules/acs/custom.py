@@ -1684,6 +1684,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                aad_tenant_id=None,
                tags=None,
                zones=None,
+               enable_node_public_ip=False,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
@@ -1715,6 +1716,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
         vnet_subnet_id=vnet_subnet_id,
         availability_zones=zones,
+        enable_node_public_ip=enable_node_public_ip,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -2775,6 +2777,7 @@ def aks_agentpool_list(cmd, client, resource_group_name, cluster_name):
 def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_name,
                       kubernetes_version=None,
                       zones=None,
+                      enable_node_public_ip=False,
                       node_vm_size=None,
                       node_osdisk_size=0,
                       node_count=3,
@@ -2823,6 +2826,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         max_pods=int(max_pods) if max_pods else None,
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
+        enable_node_public_ip=enable_node_public_ip,
         node_taints=taints_array,
         mode=mode
     )

@@ -19,7 +19,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test',
-            'workspace': 'workspace0424',
+            'workspace': 'workspace042403',
         })
 
         # enable network watcher
@@ -68,7 +68,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace328975',
+            'workspace': 'workspace32897502',
         })
 
         # enable network watcher
@@ -119,7 +119,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace0421',
+            'workspace': 'workspace042104',
         })
 
         # enable network watcher
@@ -166,7 +166,9 @@ class NWFlowLogScenarioTest(ScenarioTest):
             self.check('enabled', True),
             self.check('format.type', 'JSON'),
             self.check('format.version', 1),
-            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration', None),
+            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False),
+            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId',
+                       self.kwargs['workspace_id']),
             self.check('retentionPolicy.days', 0),
             self.check('retentionPolicy.enabled', False)
         ])
@@ -183,7 +185,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
             'watcher_rg': 'NetworkWatcherRG',
             'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
             'flow_log': 'flow_log_test2',
-            'workspace': 'workspace0895',
+            'workspace': 'workspace089504',
         })
 
         # enable network watcher
@@ -198,7 +200,7 @@ class NWFlowLogScenarioTest(ScenarioTest):
         # prepare another storage account in another resource group
         storage_info = self.cmd('storage account create '
                                 '--resource-group {rg} '
-                                '--name {storage_account_2} ').get_output_in_json()
+                                '--name {storage_account_2} --https-only').get_output_in_json()
         self.kwargs.update({
             'another_storage': storage_info['id']
         })
