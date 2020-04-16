@@ -541,7 +541,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vmss create', min_api='2017-03-30', arg_group='Network') as c:
         c.argument('public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules")
-        c.argument('vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'")
+        c.argument('vm_domain_name', help="domain name of VM instances, once configured, the FQDN is `vm<vm-index>.<vm-domain-name>.<..rest..>`")
         c.argument('dns_servers', nargs='+', help="space-separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6")
         c.argument('accelerated_networking', arg_type=get_three_state_flag(),
                    help="enable accelerated networking. Unless specified, CLI will enable it based on machine image and size")
@@ -687,7 +687,7 @@ def load_arguments(self, _):
             c.ignore('disk_info', 'storage_account_type', 'public_ip_address_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
             c.argument('os_caching', options_list=[self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True), '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
             c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
-                       help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
+                       help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use `<lun>=<vaule1> <lun>=<value2>` to configure individual disk")
             c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
             c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2018-06-01',
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.', is_preview=True)
@@ -835,7 +835,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sig image-version create') as c:
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'],
-                   help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. <MajorVersion>.<MinorVersion>.<Patch>')
+                   help='Gallery image version in semantic version pattern. The allowed characters are digit and period. Digits must be within the range of a 32-bit integer, e.g. `<MajorVersion>.<MinorVersion>.<Patch>`')
         c.argument('description', help='the description of the gallery image version')
         c.argument('managed_image', help='image name(if in the same resource group) or resource id')
         c.argument('os_snapshot', help='Name or ID of OS disk snapshot')
@@ -853,7 +853,7 @@ def load_arguments(self, _):
     for scope in ['sig image-version create', 'sig image-version update']:
         with self.argument_context(scope) as c:
             c.argument('target_regions', nargs='*', validator=process_gallery_image_version_namespace,
-                       help='Space-separated list of regions and their replica counts. Use "<region>[=<replica count>][=<storage account type>]" to optionally set the replica count and/or storage account type for each region. '
+                       help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
             c.argument('replica_count', help='The default number of replicas to be created per region. To set regional replication counts, use --target-regions', type=int)
     # endregion
