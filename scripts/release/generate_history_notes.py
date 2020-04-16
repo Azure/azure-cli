@@ -43,8 +43,7 @@ def generate_history_notes():
     for component in sorted(history_notes, key=str.casefold):
         if component.casefold() == 'core':
             core_history += construct_core_history(component)
-        else:
-            cli_history += construct_cli_history(component)
+        cli_history += construct_cli_history(component)
     if core_history == '':
         core_history = '* Minor fixes\n'
     else:
