@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
+
 from __future__ import print_function
 
 __version__ = "2.3.1"
@@ -28,6 +30,16 @@ logger = get_logger(__name__)
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
+
+_PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliYum"),
+                                 "ZYPPER": ("sudo zypper refresh && sudo zypper update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliZypper"),
+                                 "DEB": ("sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli", "https://aka.ms/doc/UpdateAzureCliApt"),
+                                 "HOMEBREW": ("brew update && brew upgrade azure-cli", "https://aka.ms/doc/UpdateAzureCliHomebrew"),
+                                 "PIP": ("curl -L https://aka.ms/InstallAzureCli | bash", "https://aka.ms/doc/UpdateAzureCliLinux"),
+                                 "MSI": ("https://aka.ms/installazurecliwindows", "https://aka.ms/doc/UpdateAzureCliMsi"),
+                                 "DOCKER": ("docker pull mcr.microsoft.com/azure-cli", "https://aka.ms/doc/UpdateAzureCliDocker")}
+
+_GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://aka.ms/doc/InstallAzureCli'
 
 
 class AzCli(CLI):
@@ -96,9 +108,36 @@ class AzCli(CLI):
         if updates_available == -1:
             logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
         elif updates_available:
-            logger.warning('You have %i updates available. Consider updating your CLI installation. '
-                           'Instructions can be found at https://docs.microsoft.com/en-us/cli/azure/install-azure-cli',
-                           updates_available)
+            warning_msg = 'You have %i updates available. Consider updating your CLI installation'
+            from azure.cli.core._environment import _ENV_AZ_INSTALLER
+            installer = os.getenv(_ENV_AZ_INSTALLER)
+            instruction_msg = ''
+            if installer in _PACKAGE_UPGRADE_INSTRUCTIONS:
+                if installer == 'RPM':
+                    from azure.cli.core.util import get_linux_distro
+                    distname, _ = get_linux_distro()
+                    if not distname:
+                        instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+                    else:
+                        distname = distname.lower().strip()
+                        if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
+                            installer = 'YUM'
+                        elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
+                            installer = 'ZYPPER'
+                        else:
+                            instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+                elif installer == 'PIP':
+                    import platform
+                    system = platform.system()
+                    alternative_command = " or '{}' if you used our script for installation. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1]) if system != 'Windows' else ''
+                    instruction_msg = " with 'pip install --upgrade azure-cli'{}".format(alternative_command)
+                if instruction_msg:
+                    warning_msg += instruction_msg
+                else:
+                    warning_msg += " with '{}'. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1])
+            else:
+                warning_msg += '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+            logger.warning(warning_msg, updates_available)
         else:
             print('Your CLI is up-to-date.')
 
