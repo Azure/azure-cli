@@ -42,6 +42,7 @@ _HOME_TENANT_ID = 'homeTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
+_HOME_ACCOUNT_ID = 'homeAccountId'
 _CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
@@ -520,10 +521,20 @@ class Profile(object):
         return self.get_subscription(subscription)[_SUBSCRIPTION_ID]
 
     def get_access_token_for_resource(self, username, tenant, resource):
+        """get access token for current user account, used by vsts and iot module"""
         tenant = tenant or 'common'
-        _, access_token, _ = self._creds_cache.retrieve_token_for_user(
-            username, tenant, resource)
-        return access_token
+        account = self.get_subscription()
+        home_account_id = account[_USER_ENTITY][_HOME_ACCOUNT_ID]
+        authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
+        from azure.cli.core._credential import IdentityCredential
+        identity_credential = IdentityCredential(home_account_id=home_account_id,
+                                                 authority=authority,
+                                                 tenant_id=tenant,
+                                                 username=username)
+        from azure.cli.core.authentication import AuthenticationWrapper
+        auth = AuthenticationWrapper(identity_credential, resource=resource)
+        token = auth.get_token()
+        return token.token
 
     @staticmethod
     def _try_parse_msi_account_name(account):
@@ -537,17 +548,40 @@ class Profile(object):
                 return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
+    def _create_identity_credential(self, account, aux_tenant_id=None):
+        user_type = account[_USER_ENTITY][_USER_TYPE]
+        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+        home_account_id = account[_USER_ENTITY][_HOME_ACCOUNT_ID]
+        identity_type, _ = Profile._try_parse_msi_account_name(account)
+        tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
+        from azure.cli.core._credential import IdentityCredential
+        # initialize IdentityCredential
+        if identity_type is None:
+            if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+                if aux_tenant_id:
+                    raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
+                return IdentityCredential()
+            if user_type == _USER:
+                authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
+                return IdentityCredential(home_account_id=home_account_id,
+                                          authority=authority,
+                                          tenant_id=tenant_id,
+                                          username=username_or_sp_id)
+            use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
+            # todo: get service principle key
+            return IdentityCredential(sp_id=username_or_sp_id, tenant_id=tenant_id,
+                                      use_cert_sn_issuer=use_cert_sn_issuer)
+        # todo: MSI identity_id
+        if aux_tenant_id:
+            raise CLIError("Tenant shouldn't be specified for MSI account")
+        return IdentityCredential()
+
     def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
         if aux_tenants and aux_subscriptions:
             raise CLIError("Please specify only one of aux_subscriptions and aux_tenants, not both")
 
         account = self.get_subscription(subscription_id)
-        user_type = account[_USER_ENTITY][_USER_TYPE]
-        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
-        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
-
         external_tenants_info = []
         if aux_tenants:
             external_tenants_info = [tenant for tenant in aux_tenants if tenant != account[_TENANT_ID]]
@@ -557,91 +591,29 @@ class Profile(object):
                 sub = self.get_subscription(ext_sub)
                 if sub[_TENANT_ID] != account[_TENANT_ID]:
                     external_tenants_info.append(sub[_TENANT_ID])
-
-        if identity_type is None:
-            def _retrieve_token():
-                if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-                    return self._get_token_from_cloud_shell(resource)
-                if user_type == _USER:
-                    return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                     account[_TENANT_ID], resource)
-                use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
-                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource,
-                                                                              account[_TENANT_ID],
-                                                                              use_cert_sn_issuer)
-
-            def _retrieve_tokens_from_external_tenants():
-                external_tokens = []
-                for sub_tenant_id in external_tenants_info:
-                    if user_type == _USER:
-                        external_tokens.append(self._creds_cache.retrieve_token_for_user(
-                            username_or_sp_id, sub_tenant_id, resource))
-                    else:
-                        external_tokens.append(self._creds_cache.retrieve_token_for_service_principal(
-                            username_or_sp_id, resource, sub_tenant_id, resource))
-                return external_tokens
-
-            from azure.cli.core.adal_authentication import AdalAuthentication
-            auth_object = AdalAuthentication(_retrieve_token,
-                                             _retrieve_tokens_from_external_tenants if external_tenants_info else None)
-        else:
-            if self._msi_creds is None:
-                self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
-            auth_object = self._msi_creds
-
+        identity_credential = self._create_identity_credential(account)
+        external_credentials = []
+        for sub_tenant_id in external_tenants_info:
+            external_credentials.append(self._create_identity_credential(account, sub_tenant_id))
+        from azure.cli.core.authentication import AuthenticationWrapper
+        auth_object = AuthenticationWrapper(identity_credential,
+                                            external_credentials=external_credentials if external_credentials else None,
+                                            resource=resource)
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
-
-    def get_refresh_token(self, resource=None,
-                          subscription=None):
-        account = self.get_subscription(subscription)
-        user_type = account[_USER_ENTITY][_USER_TYPE]
-        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
-        if user_type == _USER:
-            _, _, token_entry = self._creds_cache.retrieve_token_for_user(
-                username_or_sp_id, account[_TENANT_ID], resource)
-            return None, token_entry.get(_REFRESH_TOKEN), token_entry[_ACCESS_TOKEN], str(account[_TENANT_ID])
-
-        sp_secret = self._creds_cache.retrieve_secret_of_service_principal(username_or_sp_id)
-        return username_or_sp_id, sp_secret, None, str(account[_TENANT_ID])
 
     def get_raw_token(self, resource=None, subscription=None, tenant=None):
         if subscription and tenant:
             raise CLIError("Please specify only one of subscription and tenant, not both")
         account = self.get_subscription(subscription)
-        user_type = account[_USER_ENTITY][_USER_TYPE]
-        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+        identity_credential = self._create_identity_credential(account, tenant)
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
-        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
-        if identity_type:
-            # MSI
-            if tenant:
-                raise CLIError("Tenant shouldn't be specified for MSI account")
-            msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
-            msi_creds.set_token()
-            token_entry = msi_creds.token
-            creds = (token_entry['token_type'], token_entry['access_token'], token_entry)
-        elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            # Cloud Shell
-            if tenant:
-                raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-            creds = self._get_token_from_cloud_shell(resource)
-        else:
-            tenant_dest = tenant if tenant else account[_TENANT_ID]
-            if user_type == _USER:
-                # User
-                creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                  tenant_dest, resource)
-            else:
-                # Service Principal
-                creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
-                                                                               resource,
-                                                                               tenant_dest)
-        return (creds,
+        from azure.cli.core.authentication import AuthenticationWrapper, _convert_token_entry
+        auth = AuthenticationWrapper(identity_credential, resource=resource)
+        token = auth.get_token()
+        cred = 'Bearer', token.token, _convert_token_entry(token)
+        return (cred,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
 
