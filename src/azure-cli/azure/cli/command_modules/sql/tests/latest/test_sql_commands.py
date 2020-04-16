@@ -3233,39 +3233,39 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql midb ltr-backup list -l {loc} -g {rg}',
             checks=[
-                self.greater_than('length(@)', 0)])
+                self.check('length(@)', 3)])
 
         # without resource group
         self.cmd(
             'sql midb ltr-backup list -l {loc}',
             checks=[
-                self.greater_than('length(@)', 0)])
+                self.check('length(@)', 3)])
 
         # test list long term retention backups for instance
         # with resource group
         self.cmd(
             'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -g {rg}',
             checks=[
-                self.greater_than('length(@)', 0)])
+                self.check('length(@)', 3)])
 
         # without resource group
         self.cmd(
             'sql midb ltr-backup list -l {loc} --mi {managed_instance_name}',
             checks=[
-                self.greater_than('length(@)', 0)])
+                self.check('length(@)', 3)])
 
         # test list long term retention backups for database
         # with resource group
         self.cmd(
             'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name} -g {rg}',
             checks=[
-                self.greater_than('length(@)', 0)])
+                self.check('length(@)', 1)])
 
         # without resource group
         self.cmd(
             'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name}',
             checks=[
-                self.greater_than('length(@)', 0)])
+                self.check('length(@)', 1)])
 
         # setup for test show long term retention backup
         backup = self.cmd(
@@ -3279,6 +3279,14 @@ class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
         # test show long term retention backup
         self.cmd(
             'sql midb ltr-backup show -l {loc} --mi {managed_instance_name} -d {database_name} -n {backup_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('managedInstanceName', '{managed_instance_name}'),
+                self.check('databaseName', '{database_name}'),
+                self.check('name', '{backup_name}')])
+
+        self.cmd(
+            'sql midb ltr-backup show --id {backup_id}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('managedInstanceName', '{managed_instance_name}'),

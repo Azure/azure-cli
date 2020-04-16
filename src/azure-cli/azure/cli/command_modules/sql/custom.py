@@ -2699,6 +2699,14 @@ def get_short_term_retention_mi(
     return policy
 
 
+def _is_int(retention):
+    try:
+        int(retention)
+        return True
+    except ValueError:
+        return False
+
+
 def update_long_term_retention_mi(
         client,
         database_name,
@@ -2712,11 +2720,23 @@ def update_long_term_retention_mi(
     '''
     Updates long term retention for managed database
     '''
+
     if not (weekly_retention or monthly_retention or yearly_retention):
         raise CLIError('Please specify retention setting(s).  See \'--help\' for more details.')
 
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
+
+    # if an int is provided for retention, convert to ISO 8601 using days
+    if (weekly_retention and _is_int(weekly_retention)):
+        weekly_retention = 'P%sD' % weekly_retention
+        print(weekly_retention)
+
+    if (monthly_retention and _is_int(monthly_retention)):
+        monthly_retention = 'P%sD' % monthly_retention
+
+    if (yearly_retention and _is_int(yearly_retention)):
+        yearly_retention = 'P%sD' % yearly_retention
 
     kwargs['weekly_retention'] = weekly_retention
 
@@ -2746,10 +2766,8 @@ def _get_backup_id_resource_values(backup_id):
     if backup_id[0] == '/':
         # remove leading /
         backup_id = backup_id[1:]
-        print(backup_id)
 
     resources_list = backup_id.split('/')
-    print(resources_list)
     resources_dict = {resources_list[i]: resources_list[i + 1] for i in range(0, len(resources_list), 2)}
 
     if not ('locations'.casefold() in resources_dict and
