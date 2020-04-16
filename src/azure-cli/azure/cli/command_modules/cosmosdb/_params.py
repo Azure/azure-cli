@@ -115,7 +115,7 @@ def load_arguments(self, _):
         with self.argument_context('cosmosdb private-endpoint-connection {}'.format(item)) as c:
             c.extra('connection_id', options_list=['--id'], required=False,
                     help='The ID of the private endpoint connection associated with Azure Cosmos DB. '
-                         'If specified --account-name --resource-group/-g and --connection-name/-n, this should be omitted.')
+                         'If specified --account-name --resource-group/-g and --name/-n, this should be omitted.')
             c.argument('description', options_list=['--description'], required=False, help='Comments for the {} operation.'.format(item))
 
     with self.argument_context('cosmosdb private-link-resource') as c:
