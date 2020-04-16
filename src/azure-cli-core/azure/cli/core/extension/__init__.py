@@ -302,7 +302,7 @@ def get_extension_modname(ext_name=None, ext_dir=None):
 
 
 def get_extension_path(ext_name):
-    # This will simply form the path for a WHEEL extension.
+    # This will return the path for a WHEEL extension if exists.
     ext_sys_path = os.path.join(EXTENSIONS_SYS_DIR, ext_name)
     ext_path = os.path.join(EXTENSIONS_DIR, ext_name)
     return ext_path if os.path.isdir(ext_path) else (
