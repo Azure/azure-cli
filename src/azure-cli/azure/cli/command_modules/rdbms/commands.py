@@ -28,6 +28,8 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_replica,
     cf_mysql_private_endpoint_connections_operations,
     cf_mysql_private_link_resources_operations,
+    cf_mysql_server_keys_operations,
+    cf_mysql_server_ad_administrators_operations,
     cf_postgres_servers,
     cf_postgres_db,
     cf_postgres_firewall_rules,
@@ -36,7 +38,9 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_log,
     cf_postgres_replica,
     cf_postgres_private_endpoint_connections_operations,
-    cf_postgres_private_link_resources_operations)
+    cf_postgres_private_link_resources_operations,
+    cf_postgres_server_keys_operations,
+    cf_postgres_server_ad_administrators_operations)
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
@@ -182,6 +186,30 @@ def load_command_table(self, _):
     postgres_private_link_resources_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations#PrivateLinkResourcesOperations.{}',
         client_factory=cf_postgres_private_link_resources_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    mysql_key_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations#ServerKeysOperations.{}',
+        client_factory=cf_mysql_server_keys_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    postgres_key_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ServerKeysOperations.{}',
+        client_factory=cf_postgres_server_keys_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    mysql_adadmin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.mysql.operations#ServerAdministratorsOperations.{}',
+        client_factory=cf_mysql_server_ad_administrators_operations,
+        resource_type=ResourceType.MGMT_RDBMS
+    )
+
+    postgres_adadmin_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations#ServerAdministratorsOperations.{}',
+        client_factory=cf_postgres_server_ad_administrators_operations,
         resource_type=ResourceType.MGMT_RDBMS
     )
 
@@ -388,3 +416,42 @@ def load_command_table(self, _):
                             postgres_private_link_resources_sdk,
                             client_factory=cf_postgres_private_link_resources_operations) as g:
         g.show_command('list', 'list_by_server')
+
+    with self.command_group('mysql server key',
+                            mysql_key_sdk,
+                            client_factory=cf_mysql_server_keys_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_key_create')
+        g.custom_command('delete', 'server_key_delete', confirmation=True)
+        g.custom_show_command('show', 'server_key_get')
+        g.command('list', 'list')
+
+    with self.command_group('postgres server key',
+                            postgres_key_sdk,
+                            client_factory=cf_postgres_server_keys_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_key_create')
+        g.custom_command('delete', 'server_key_delete', confirmation=True)
+        g.custom_show_command('show', 'server_key_get')
+        g.command('list', 'list')
+
+    with self.command_group('mysql server ad-admin',
+                            mysql_adadmin_sdk,
+                            client_factory=cf_mysql_server_ad_administrators_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
+        g.command('list', 'list')
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.custom_wait_command('wait', 'server_ad_admin_get')
+        g.wait_command('wait')
+
+    with self.command_group('postgres server ad-admin',
+                            postgres_adadmin_sdk,
+                            client_factory=cf_postgres_server_ad_administrators_operations,
+                            is_preview=True) as g:
+        g.custom_command('create', 'server_ad_admin_set', supports_no_wait=True)
+        g.command('list', 'list')
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.wait_command('wait')

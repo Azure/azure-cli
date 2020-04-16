@@ -126,6 +126,16 @@ def load_command_table(self, _):
                                  doc_string_source='azure.mgmt.netapp.models#VolumePatch',
                                  exception_handler=netappfiles_exception_handler)
 
+    with self.command_group('netappfiles volume replication', netappfiles_volumes_sdk) as g:
+        g.custom_command('approve', 'authorize_replication',
+                         client_factory=volumes_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#Volume',
+                         exception_handler=netappfiles_exception_handler)
+        g.command('suspend', 'break_replication')
+        g.command('resume', 'resync_replication')
+        g.command('remove', 'delete_replication')
+        g.command('status', 'replication_status_method')
+
     with self.command_group('netappfiles', netappfiles_mount_targets_sdk) as g:
         g.command('list-mount-targets', 'list')
 

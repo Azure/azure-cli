@@ -13,7 +13,7 @@ import time
 import yaml
 
 from knack.util import CLIError
-from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenarioTest)
+from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only, LiveScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
 
@@ -322,6 +322,56 @@ class AppConfigKVScenarioTest(ScenarioTest):
                          self.check('[0].value', keyvault_value),
                          self.check('[0].label', updated_label)])
 
+    @ResourceGroupPreparer()
+    @KeyVaultPreparer()
+    @live_only()
+    def test_resolve_keyvault(self, key_vault, resource_group):
+        config_store_name = self.create_random_name(prefix='KVTest', length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        _create_config_store(self, self.kwargs)
+
+        # Export secret test
+        secret_name = 'testSecret'
+        secret_value = 'testValue'
+        self.kwargs.update({
+            'secret_name': secret_name,
+            'secret_value': secret_value,
+            'keyvault_name': key_vault
+        })
+
+        secret = self.cmd('az keyvault secret set --vault-name {keyvault_name} -n {secret_name} --value {secret_value}').get_output_in_json()
+        self.kwargs.update({
+            'secret_identifier': secret["id"]
+        })
+
+        self.cmd('appconfig kv set-keyvault -n {config_store_name} --key {secret_name} --secret-identifier {secret_identifier} -y')
+
+        self.cmd('appconfig kv list -n {config_store_name} --resolve-keyvault',
+                 checks=[self.check('[0].key', secret_name),
+                         self.check('[0].value', secret_value)])
+
+        exported_file_path = 'export_keyvault.json'
+        self.kwargs.update({
+            'import_source': 'file',
+            'exported_file_path': exported_file_path,
+            'imported_format': 'json',
+        })
+
+        self.cmd('appconfig kv export -n {config_store_name} -d file --path {exported_file_path} --format json --resolve-keyvault -y')
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+
+        assert len(exported_kvs) == 1
+        assert exported_kvs[secret_name] == secret_value
+
 
 class AppConfigImportExportScenarioTest(ScenarioTest):
 
@@ -356,6 +406,19 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} -y')
         with open(imported_file_path) as json_file:
             imported_kvs = json.load(json_file)
+        with open(exported_file_path) as json_file:
+            exported_kvs = json.load(json_file)
+        assert imported_kvs == exported_kvs
+
+        # skip key vault reference while exporting
+        self.kwargs.update({
+            'key': "key_vault_reference",
+            'secret_identifier': "https://testkeyvault.vault.azure.net/secrets/mysecret"
+        })
+        self.cmd(
+            'appconfig kv set-keyvault -n {config_store_name} --key {key} --secret-identifier {secret_identifier} -y')
+        self.cmd(
+            'appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --separator {separator} --skip-keyvault -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
         assert imported_kvs == exported_kvs

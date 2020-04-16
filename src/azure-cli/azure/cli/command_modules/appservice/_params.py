@@ -54,7 +54,9 @@ def load_arguments(self, _):
     functionapp_runtime_to_version = {}
     for functions_version in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS.values():
         for runtime, val in functions_version.items():
-            functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val)
+            # dotnet version is not configurable, so leave out of help menu
+            if runtime != 'dotnet':
+                functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val)
 
     functionapp_runtime_to_version_texts = []
     for runtime, runtime_versions in functionapp_runtime_to_version.items():

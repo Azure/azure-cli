@@ -44,7 +44,19 @@ examples:
         az disk create -g MyResourceGroup -n MyDisk2 --source MyDisk
   - name: Create a disk in an availability zone in the region of "East US 2"
     text: >
-        az disk create -n MyDisk -g MyResourceGroup --size-gb 10 --location eastus2 --zone 1
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --location eastus2 --zone 1
+  - name: Create a disk from image.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --image-reference Canonical:UbuntuServer:18.04-LTS:18.04.202002180
+  - name: Create a disk from gallery image.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --gallery-image-reference $id
+  - name: Create a disk with total number of IOPS and total throughput (MBps) limitation.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30
+  - name: Create a disk and specify maximum number of VMs that can attach to the disk at the same time.
+    text: >
+        az disk create -g MyResourceGroup -n MyDisk --size-gb 256 --max-shares 2 -l centraluseuap
 """
 
 helps['disk delete'] = """
@@ -519,6 +531,9 @@ examples:
         --target-regions westus=2=standard_lrs eastus=3=standard_zrs \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --managed-image imageInTheSameResourceGroup
+  - name: Add a new image version with target regions and customer managed keys for encryption.
+    text: >
+        az sig image-version create -g MyResourceGroup --gallery-image-version 1.0.0 --target-regions westus=2=standard --target-region-encryption DiskEncryptionSet1,0,DiskEncryptionSet2 --gallery-name MyGallery --gallery-image-definition MyImage --managed-image imageInTheSameResourceGroup
 """
 
 helps['sig image-version update'] = """
@@ -796,7 +811,7 @@ parameters:
   - name: --image
     type: string
     short-summary: >
-        The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
+        The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI.
         This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version".
     populator-commands:
       - az vm image list
@@ -821,6 +836,9 @@ examples:
   - name: Create a VM from a custom managed image.
     text: >
         az vm create -g MyResourceGroup -n MyVm --image MyImage
+  - name: Create a VM from a specialized image version.
+    text: >
+        az vm create -g MyResourceGroup -n MyVm --image $id --specialized
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
@@ -831,7 +849,7 @@ examples:
     text: |
         az vm create -n MyVm -g MyResourceGroup --image debian --vnet-name MyVnet --subnet subnet1 \\
             --availability-set MyAvailabilitySet --public-ip-address-dns-name MyUniqueDnsName \\
-            --ssh-key-value @key-file
+            --ssh-key-values @key-file
   - name: Create a simple Ubuntu Linux VM with a public IP address, DNS entry, two data disks (10GB and 20GB), and then generate ssh key pairs.
     text: |
         az vm create -n MyVm -g MyResourceGroup --public-ip-address-dns-name MyUniqueDnsName \\
@@ -1950,6 +1968,8 @@ short-summary: Manage user accounts for a VM.
 helps['vm user delete'] = """
 type: command
 short-summary: Delete a user account from a VM.
+long-summary: >
+    Also deletes the user home directory on Linux VMs.
 examples:
   - name: Delete a user account.
     text: az vm user delete -u username -n MyVm -g MyResourceGroup
@@ -1976,11 +1996,13 @@ examples:
 helps['vm user update'] = """
 type: command
 short-summary: Update a user account.
+long-summary: >
+    This command uses VMAccessForLinux 1.5 for Linux operating system and VMAccessAgent 2.4 for Window operating system.
 parameters:
   - name: --ssh-key-value
     short-summary: SSH public key file value or public key file path. This command appends the new public key text to the ~/.ssh/authorized_keys file for the admin user on the VM. This does not replace or remove any existing SSH keys.
 examples:
-  - name: Update a Windows user account.
+  - name: Update a Windows user account. If username does not exist, a new user will be created.
     text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
   - name: Update a Linux user account. ("$(< filename)" syntax is not supported on Command Prompt or PowerShell.)
     text: az vm user update -u username --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n MyVm -g MyResourceGroup
@@ -2041,6 +2063,9 @@ examples:
   - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init'
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image debian --custom-data MyCloudInitScript.yml
+  - name: Create a Linux VM scale set from a specialized image version.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image $id --specialized
   - name: Create a Debian VM scaleset using Key Vault secrets.
     text: >
         az keyvault certificate create --vault-name vaultname -n cert1 \\
@@ -2124,7 +2149,7 @@ examples:
     crafted: true
   - name: Attach managed data disks of a given size to a scale set or its instances. (autogenerated)
     text: |
-        az vmss disk attach --name MyVmss --resource-group MyResourceGroup --size-gb 50
+        az vmss disk attach --vmss-name MyVmss --resource-group MyResourceGroup --size-gb 50
     crafted: true
 """
 
@@ -2517,6 +2542,14 @@ examples:
     text: az vmss wait --updated --name MyScaleSet --resource-group MyResourceGroup
   - name: Place the CLI in a waiting state until the VMSS instance has been updated.
     text: az vmss wait --updated --instance-id 1 --name MyScaleSet --resource-group MyResourceGroup
+"""
+
+helps['vmss set-orchestration-service-state'] = """
+type: command
+short-summary: Change ServiceState property for a given service within a VMSS.
+examples:
+  - name: Change ServiceState property for AutomaticRepairs
+    text: az vmss set-orchestration-service-state --service-name AutomaticRepairs --action Resume --name MyScaleSet --resource-group MyResourceGroup
 """
 
 helps['vm monitor'] = """

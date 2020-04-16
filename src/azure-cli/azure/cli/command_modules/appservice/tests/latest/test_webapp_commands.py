@@ -375,7 +375,7 @@ class WebappConfigureTest(ScenarioTest):
         checks = [
             JMESPathCheck('alwaysOn', True),
             JMESPathCheck('autoHealEnabled', True),
-            JMESPathCheck('phpVersion', '7.0'),
+            JMESPathCheck('phpVersion', '7.2'),
             JMESPathCheck('netFrameworkVersion', 'v3.0'),
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
@@ -384,7 +384,7 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('http20Enabled', True),
             JMESPathCheck('ftpsState', 'Disabled')]
 
-        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 '
+        self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.2 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
                  '--web-sockets-enabled=true --http20-enabled true --min-tls-version 1.0 --ftps-state Disabled'.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
@@ -474,8 +474,8 @@ class WebappConfigureTest(ScenarioTest):
                  .format(resource_group, linux_webapp)).assert_with_checks([
                      JMESPathCheck('length([])', 3),
                      JMESPathCheck("[?name=='c1']|[0].slotSetting", False),
-                     JMESPathCheck("[?name=='c1']|[0].value.type", 'MySql'),
-                     JMESPathCheck("[?name=='c1']|[0].value.value", 'conn1'),
+                     JMESPathCheck("[?name=='c1']|[0].type", 'MySql'),
+                     JMESPathCheck("[?name=='c1']|[0].value", 'conn1'),
                      JMESPathCheck("[?name=='c2']|[0].slotSetting", False),
                      JMESPathCheck("[?name=='c3']|[0].slotSetting", True)])
         self.cmd('webapp config connection-string delete -g {} -n {} --setting-names c1 c3'
@@ -489,6 +489,50 @@ class WebappConfigureTest(ScenarioTest):
         # see deployment user; just make sure the command does return something
         self.assertTrue(
             self.cmd('webapp deployment user show').get_output_in_json()['type'])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_config_appsettings')
+    def test_webapp_config_appsettings(self, resource_group):
+        webapp_name = self.create_random_name('webapp-config-appsettings-test', 40)
+        plan_name = self.create_random_name('webapp-config-appsettings-plan', 40)
+
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        # site appsettings testing
+        # update through key value pairs
+        self.cmd('webapp config appsettings set -g {} -n {} --settings s1=foo s2=bar s3=bar2'.format(resource_group, webapp_name)).assert_with_checks([
+            JMESPathCheck("length([?name=='s1'])", 1),
+            JMESPathCheck("length([?name=='s2'])", 1),
+            JMESPathCheck("length([?name=='s3'])", 1),
+            JMESPathCheck("length([?value=='foo'])", 1),
+            JMESPathCheck("length([?value=='bar'])", 1),
+            JMESPathCheck("length([?value=='bar2'])", 1)
+        ])
+
+        # show
+        result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
+            resource_group, webapp_name)).get_output_in_json()
+        s2 = next((x for x in result if x['name'] == 's2'))
+        self.assertEqual(s2['name'], 's2')
+        self.assertEqual(s2['slotSetting'], False)
+        self.assertEqual(s2['value'], 'bar')
+        self.assertEqual(set([x['name'] for x in result]), set(
+            ['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
+
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        # show
+        result = self.cmd('webapp config appsettings list -g {} -n {}'.format(
+            resource_group, webapp_name)).get_output_in_json()
+        s2 = next((x for x in result if x['name'] == 's2'))
+        self.assertEqual(s2['name'], 's2')
+        self.assertEqual(s2['slotSetting'], False)
+        self.assertEqual(s2['value'], 'bar')
+        self.assertEqual(set([x['name'] for x in result]), set(
+            ['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
 
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_json')
     def test_update_webapp_settings_thru_json(self, resource_group):
@@ -691,6 +735,7 @@ class LinuxWebappScenarioTest(ScenarioTest):
         self.assertEqual(result2, [])
 
 
+@unittest.skip('This is failing on windows OS. Rised a bug #12844 to fix in future releases')
 class LinuxWebappSSHScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_ssh(self, resource_group):
@@ -1531,6 +1576,25 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
     @ResourceGroupPreparer(location='westus')
     @StorageAccountPreparer()
+    def test_functionapp_windows_runtime_java(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Windows --runtime java'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('javaVersion', '1.8')])
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
     def test_functionapp_windows_runtime_version(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
@@ -1781,6 +1845,24 @@ class FunctionAppOnLinux(ScenarioTest):
                 "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3'),
             JMESPathCheck(
                 "[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~12')
+        ])
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_dotnet_consumption(self, resource_group, storage_account):
+        functionapp = self.create_random_name(
+            prefix='functionapp-linux', length=24)
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --functions-version 3 --runtime dotnet --os-type linux'
+                 .format(resource_group, functionapp, storage_account), checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'dotnet|3.1')
+        ])
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
+            JMESPathCheck(
+                "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~3')
         ])
 
 
@@ -2225,7 +2307,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="centralus")
     def test_webapp_vnetE2E(self, resource_group):
         webapp_name = self.create_random_name('swiftwebapp', 24)
         plan = self.create_random_name('swiftplan', 24)
@@ -2250,7 +2332,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(location="centralus")
     def test_webapp_vnetDelegation(self, resource_group):
         webapp_name = self.create_random_name('swiftwebapp', 24)
         plan = self.create_random_name('swiftplan', 24)

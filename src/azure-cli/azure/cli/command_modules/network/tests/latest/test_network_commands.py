@@ -356,6 +356,23 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway delete --resource-group {rg} -n ag1')
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_basic_with_waf_v2_sku')
+    def test_network_app_gateway_with_waf_v2_sku(self, resource_group):
+        self.cmd('network application-gateway create -g {rg} -n ag1 --sku WAF_v2 --public-ip-address pubip1 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
+
+        self.cmd('network application-gateway list --resource-group {rg}', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?resourceGroup == '{}']) == length(@)".format(resource_group), True)
+        ])
+
+        self.cmd('network application-gateway show --resource-group {rg} --name ag1', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', 'ag1'),
+            self.check('resourceGroup', resource_group),
+            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Dynamic')
+        ])
+
 
 class NetworkAppGatewayIndentityScenarioTest(ScenarioTest):
 
@@ -740,6 +757,39 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_http_listener')
+    def test_network_ag_http_listener_with_multi_host_names(self, resource_group):
+
+        self.kwargs.update({
+            'ag': 'ag1',
+            'res': 'application-gateway http-listener',
+            'name': 'mylistener',
+            'gateway_ip': 'ip1',
+            'port': 'cliport'
+        })
+
+        self.cmd('network public-ip create -g {rg} -n {gateway_ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} '
+                 '--sku WAF_v2 '
+                 '--public-ip-address {gateway_ip} ')
+        self.cmd('network application-gateway frontend-port create -g {rg} --gateway-name {ag} -n {port} --port 18080')
+
+        self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --frontend-port {port} --host-names "*.contoso.com" "www.microsoft.com"')
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
+            self.check('length(hostNames)', 2),
+            self.check('hostNames[0]', "*.contoso.com"),
+            self.check('hostNames[1]', "www.microsoft.com")
+        ])
+        self.cmd('network {res} update -g {rg} --gateway-name {ag} -n {name} --host-names "*.contoso.com" "www.bing.com"')
+        self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
+            self.check('length(hostNames)', 2),
+            self.check('hostNames[0]', "*.contoso.com"),
+            self.check('hostNames[1]', "www.bing.com")
+        ])
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
+        self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
+        self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+
     @ResourceGroupPreparer(name_prefix='cli_test_ag_http_settings')
     def test_network_ag_http_settings(self, resource_group):
 
@@ -1070,11 +1120,24 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
 
         # add two managed rule set to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type OWASP --version 3.0',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[0].ruleSetType', 'OWASP'),
+                     self.check('managedRules.managedRuleSets[0].ruleSetVersion', '3.0')
+                 ])
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp1} --rules 921100 921110')
         self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
                  '--type OWASP --version 3.0 '
                  '--group-name {csr_grp2} --rules 913100')
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf} '
+                 '--type Microsoft_BotManagerRuleSet --version 0.1',
+                 checks=[
+                     self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+                     self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1')
+                 ])
 
         # add one exclusion rule to the managed rules of this waf-policy
         self.cmd('network application-gateway waf-policy managed-rule exclusion add -g {rg} --policy-name {waf} '
@@ -1091,6 +1154,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[0].rules[0].ruleId', '921100'),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].ruleGroupName', self.kwargs['csr_grp2']),
             self.check('managedRules.managedRuleSets[0].ruleGroupOverrides[1].rules[0].ruleId', '913100'),
+            self.check('managedRules.managedRuleSets[1].ruleSetType', 'Microsoft_BotManagerRuleSet'),
+            self.check('managedRules.managedRuleSets[1].ruleSetVersion', '0.1'),
             self.check('policySettings.fileUploadLimitInMb', 64),
             self.check('policySettings.maxRequestBodySizeInKb', 128),
             self.check('policySettings.mode', 'Prevention'),
@@ -2252,7 +2317,7 @@ class NetworkNicConvenienceCommandsScenarioTest(ScenarioTest):
     def test_network_nic_convenience_commands(self, resource_group):
 
         self.kwargs['vm'] = 'conveniencevm1'
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password')
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --admin-username myusername --admin-password aBcD1234!@#$ --authentication-type password --nsg-rule None')
         self.kwargs['nic_id'] = self.cmd('vm show -g {rg} -n {vm} --query "networkProfile.networkInterfaces[0].id"').get_output_in_json()
         self.cmd('network nic list-effective-nsg --ids {nic_id}',
                  checks=self.greater_than('length(@)', 0))
@@ -2955,7 +3020,11 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             'vnet2_id': '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet2}'.format(**self.kwargs)
         })
 
-        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --custom-routes {custom_routes1} --no-wait')
+        with self.assertRaisesRegexp(CLIError, 'vpn_gateway_generation should not be provided if gateway_type is not Vpn.'):
+            self.cmd(
+                'network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --gateway-type ExpressRoute --vpn-gateway-generation Generation1')
+
+        self.cmd('network vnet-gateway create -g {rg} -n {gw1} --vnet {vnet1_id} --public-ip-address {ip1} --vpn-gateway-generation Generation1 --custom-routes {custom_routes1} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw2} --vnet {vnet2_id} --public-ip-address {ip2} --no-wait')
         self.cmd('network vnet-gateway create -g {rg} -n {gw3} --vnet {vnet3} --public-ip-address {ip3} --no-wait --sku standard --asn 12345 --bgp-peering-address 10.2.250.250 --peer-weight 50')
 
@@ -2968,11 +3037,12 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
             self.check('sku.capacity', 2),
             self.check('sku.name', 'Basic'),
             self.check('vpnType', 'RouteBased'),
+            self.check('vpnGatewayGeneration', 'Generation1'),
             self.check('enableBgp', False),
             self.check('customRoutes.addressPrefixes[0]', self.kwargs['custom_routes1'])
         ])
 
-        self.cmd('network vnet-gateway update -g {rg} -n {gw1} --custom-routes {custom_routes1} {custom_routes2}', checks=[
+        self.cmd('network vnet-gateway update -g {rg} -n {gw1} --sku Standard --custom-routes {custom_routes1} {custom_routes2}', checks=[
             self.check('length(customRoutes.addressPrefixes)', 2)
         ])
 
@@ -3189,7 +3259,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'private-ip': '10.0.0.9'
         })
 
-        vm = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --private-ip-address {private-ip}').get_output_in_json()
+        vm = self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --nsg-rule None --private-ip-address {private-ip}').get_output_in_json()
         self.kwargs['vm_id'] = vm['id']
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
@@ -3201,8 +3271,8 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='eastasia')
-    @StorageAccountPreparer(name_prefix='clitestnw', location='eastasia', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log', location='westus')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='westus', kind='StorageV2')
     def test_network_watcher_flow_log(self, resource_group, resource_group_location, storage_account):
 
         self.kwargs.update({
@@ -3221,18 +3291,33 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         # test traffic-analytics features
         self.cmd('resource create -g {rg} -n {ws} --resource-type Microsoft.OperationalInsights/workspaces -p @"{la_prop_path}"')
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws} --interval 10', checks=[
-            self.check("contains(flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId, '{ws}')", True),
-            self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 10),
-            self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled", True)
+            # self.check("contains(flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId, '{ws}')", True),
+            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 10),
+            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled", True)
+        ])
+
+        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}', checks=[
+            # self.check("contains(flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId, '{ws}')", True),
+            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 10),
+            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled", True)
         ])
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace {ws} --interval 60', checks=[
-            self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 60)
+            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 60)
+        ])
+        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}', checks=[
+            # self.check("flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.trafficAnalyticsInterval", 60)
         ])
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --traffic-analytics false', checks=[
-            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False)
+            # self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False)
+        ])
+        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}', checks=[
+            # self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.enabled', False)
         ])
         self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --workspace ""', checks=[
-            self.check('flowAnalyticsConfiguration', None)
+            # self.check('flowAnalyticsConfiguration', None)
+        ])
+        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}', checks=[
+            # self.check('flowAnalyticsConfiguration', None)
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_nw_flow_log2', location='canadaeast')
@@ -3260,7 +3345,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'capture': 'capture1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm}')
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm} --nsg-rule None')
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
 
         self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture} --file-path capture/capture.cap')
@@ -3389,7 +3474,7 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} -n {subnet2} --vnet-name {vnet} --address-prefixes 10.0.2.0/24')
         self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard')
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --vnet-name {vnet} --subnet {subnet2} '
-                 '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password')
+                 '--admin-password TestPassword11!! --admin-username testadmin --authentication-type password --nsg-rule None')
         self.cmd('network bastion create -g {rg} -n {bastion} --vnet-name {vnet} --public-ip-address {ip1}', checks=[
             self.check('type', 'Microsoft.Network/bastionHosts'),
             self.check('name', '{bastion}')

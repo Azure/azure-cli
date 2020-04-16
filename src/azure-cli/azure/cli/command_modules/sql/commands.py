@@ -41,6 +41,7 @@ from ._util import (
     get_sql_managed_instance_azure_ad_administrators_operations,
     get_sql_managed_instance_encryption_protectors_operations,
     get_sql_managed_instance_keys_operations,
+    get_sql_managed_instance_operations_operations,
     get_sql_managed_instances_operations,
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
@@ -420,7 +421,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.generic_update_command('update',
                                  custom_func_name='server_ad_admin_update',
-                                 setter_arg_name='properties')
+                                 setter_arg_name='parameters')
 
     server_keys_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerKeysOperations.{}',
@@ -489,6 +490,16 @@ def load_command_table(self, _):
     ###############################################
     #                sql managed instance         #
     ###############################################
+
+    managed_instance_operations_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceOperations.{}',
+        client_factory=get_sql_managed_instance_operations_operations)
+
+    with self.command_group('sql mi op', managed_instance_operations_operations) as g:
+
+        g.command('list', 'list_by_managed_instance')
+        g.command('show', 'get')
+        g.command('cancel', 'cancel')
 
     managed_instances_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstancesOperations.{}',

@@ -560,7 +560,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         # pylint: disable=too-many-statements
         handler = operations._pool_operations.PoolOperations.add
         args = list(self.command_pool._load_transformed_arguments(handler))
-        self.assertEqual(len(args), 28)
+        self.assertEqual(len(args), 29)
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertTrue('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])

@@ -43,7 +43,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait
-from azure.cli.core.commands.client_factory import UA_AGENT
+from azure.cli.core.util import get_az_user_agent
 from azure.cli.core.profiles import ResourceType
 
 from .tunnel import TunnelServer
@@ -58,7 +58,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
 from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
-                         FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT)
+                         FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT,
+                         DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION)
 
 logger = get_logger(__name__)
 
@@ -91,7 +92,17 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     is_linux = plan_info.reserved
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
-    site_config = SiteConfig(app_settings=[])
+    # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
+    name_validation = client.check_name_availability(name, 'Site')
+    if not name_validation.name_available:
+        existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
+                                                        name, 'list_application_settings')
+        settings = []
+        for k, v in existing_app_settings.properties.items():
+            settings.append(NameValuePair(name=k, value=v))
+        site_config = SiteConfig(app_settings=settings)
+    else:
+        site_config = SiteConfig(app_settings=[])
     if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name.upper() not in ['F1', 'FREE', 'SHARED', 'D1',
                                                                                         'B1', 'B2', 'B3', 'BASIC']:
         site_config.always_on = True
@@ -115,8 +126,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                "Please invoke 'list-runtimes' to cross check".format(runtime))
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
-            site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
-                                                          value="false"))
+            if name_validation.name_available:
+                site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+                                                              value="false"))
         elif multicontainer_config_type and multicontainer_config_file:
             encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
@@ -135,21 +147,26 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         match['setter'](cmd=cmd, stack=match, site_config=site_config)
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
         if not match['displayName'].startswith('node'):
+            if name_validation.name_available:
+                site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
+                                                              value=node_default_version))
+    else:  # windows webapp without runtime specified
+        if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                           value=node_default_version))
-    else:  # windows webapp without runtime specified
-        site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
-                                                      value=node_default_version))
 
     if site_config.app_settings:
         for setting in site_config.app_settings:
             logger.info('Will set appsetting %s', setting)
     if using_webapp_up:  # when the routine is invoked as a help method for webapp up
-        logger.info("will set appsetting for enabling build")
-        site_config.app_settings.append(NameValuePair(name="SCM_DO_BUILD_DURING_DEPLOYMENT", value=True))
+        if name_validation.name_available:
+            logger.info("will set appsetting for enabling build")
+            site_config.app_settings.append(NameValuePair(name="SCM_DO_BUILD_DURING_DEPLOYMENT", value=True))
     if language is not None and language.lower() == 'dotnetcore':
-        site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
-                                                      value='https://{}.scm.azurewebsites.net/detectors'.format(name)))
+        if name_validation.name_available:
+            site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
+                                                          value='https://{}.scm.azurewebsites.net/detectors'
+                                                          .format(name)))
 
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -358,7 +375,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     headers = authorization
     headers['Content-Type'] = 'application/octet-stream'
     headers['Cache-Control'] = 'no-cache'
-    headers['User-Agent'] = UA_AGENT
+    headers['User-Agent'] = get_az_user_agent()
 
     import requests
     import os
@@ -827,7 +844,7 @@ def _get_app_settings_from_scm(cmd, resource_group_name, name, slot=None):
     headers = {
         'Content-Type': 'application/octet-stream',
         'Cache-Control': 'no-cache',
-        'User-Agent': UA_AGENT
+        'User-Agent': get_az_user_agent()
     }
 
     import requests
@@ -842,7 +859,8 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
     slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
                               .connection_string_names or []
     result = [{'name': p,
-               'value': result.properties[p],
+               'value': result.properties[p].value,
+               'type':result.properties[p].type,
                'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
@@ -2122,10 +2140,11 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
     kv_id_parts = parse_resource_id(kv_id)
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
+    kv_subscription = kv_id_parts['subscription']
     cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)
-    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name):
+    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
         logger.warning('Unable to verify Key Vault permissions.')
         logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
         logger.warning(lnk_msg)
@@ -2166,10 +2185,15 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None)
                                                 certificate_envelope=easy_cert_def)
 
 
-def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name):
+def _check_service_principal_permissions(cmd, resource_group_name, key_vault_name, key_vault_subscription):
     from azure.cli.command_modules.keyvault._client_factory import keyvault_client_vaults_factory
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
     from azure.graphrbac.models import GraphErrorException
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription = get_subscription_id(cmd.cli_ctx)
+    # Cannot check if key vault is in another subscription
+    if subscription != key_vault_subscription:
+        return False
     kv_client = keyvault_client_vaults_factory(cmd.cli_ctx, None)
     vault = kv_client.get(resource_group_name=resource_group_name, vault_name=key_vault_name)
     # Check for Microsoft.Azure.WebSites app registration
@@ -2479,9 +2503,17 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError('Must specify --runtime to use --runtime-version')
         allowed_versions = FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version][runtime]
         if runtime_version not in allowed_versions:
+            if runtime == 'dotnet':
+                raise CLIError('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined '
+                               'by --functions-version. Dotnet version {} is not supported by Functions version {}.'
+                               .format(runtime_version, functions_version))
             raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
-                           '--functions_version {}. Supported versions are: {}'
+                           '--functions-version {}. Supported versions are: {}.'
                            .format(runtime_version, runtime, functions_version, ', '.join(allowed_versions)))
+        if runtime == 'dotnet':
+            logger.warning('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined by '
+                           '--functions-version. Dotnet version will be %s for this function app.',
+                           FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime])
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -2510,6 +2542,9 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             site_config.linux_fx_version = _get_linux_fx_functionapp(functions_version, runtime, runtime_version)
     else:
         functionapp_def.kind = 'functionapp'
+        if runtime == "java":
+            site_config.java_version = _get_java_version_functionapp(functions_version, runtime_version)
+
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
                                                   value=_get_extension_version_functionapp(functions_version)))
@@ -2576,11 +2611,13 @@ def _get_extension_version_functionapp(functions_version):
 
 
 def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):
-    if runtime == 'dotnet':
-        return runtime.upper()
     if runtime_version is None:
         runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]
-    return '{}|{}'.format(runtime.upper(), runtime_version)
+    if runtime == 'dotnet':
+        runtime_version = DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION[runtime_version]
+    else:
+        runtime = runtime.upper()
+    return '{}|{}'.format(runtime, runtime_version)
 
 
 def _get_website_node_version_functionapp(functions_version, runtime, runtime_version):
@@ -2589,6 +2626,14 @@ def _get_website_node_version_functionapp(functions_version, runtime, runtime_ve
     if runtime_version is not None:
         return '~{}'.format(runtime_version)
     return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
+
+
+def _get_java_version_functionapp(functions_version, runtime_version):
+    if runtime_version is None:
+        runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version]['java']
+    if runtime_version == '8':
+        return '1.8'
+    return runtime_version
 
 
 def try_create_application_insights(cmd, functionapp):
@@ -3219,7 +3264,7 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
-        create_webapp(cmd, rg_name, name, plan, runtime_version if _is_linux else None, tags={"cli": 'webapp_up'},
+        create_webapp(cmd, rg_name, name, plan, runtime_version if _is_linux else None,
                       using_webapp_up=True, language=language)
         _configure_default_logging(cmd, rg_name, name)
     else:  # for existing app if we might need to update the stack runtime settings

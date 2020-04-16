@@ -1849,6 +1849,48 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('adal.AuthenticationContext', autospec=True)
     @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
+    def test_find_using_common_tenant_mfa_warning(self, _get_authorization_code_mock, mock_auth_context):
+        # Assume 2 tenants. Home tenant tenant1 doesn't require MFA, but tenant2 does
+        import adal
+        cli = DummyCli()
+        mock_arm_client = mock.MagicMock()
+        tenant2_mfa_id = 'tenant2-0000-0000-0000-000000000000'
+        mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id), TenantStub(tenant2_mfa_id)]
+        mock_arm_client.subscriptions.list.return_value = [deepcopy(self.subscription1_raw)]
+        token_cache = adal.TokenCache()
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, token_cache, lambda _: mock_arm_client)
+
+        adal_error_mfa = adal.AdalError(error_msg="", error_response={
+            'error': 'interaction_required',
+            'error_description': "AADSTS50076: Due to a configuration change made by your administrator, "
+                                 "or because you moved to a new location, you must use multi-factor "
+                                 "authentication to access '797f4846-ba00-4fd7-ba43-dac1f8f63013'.\n"
+                                 "Trace ID: 00000000-0000-0000-0000-000000000000\n"
+                                 "Correlation ID: 00000000-0000-0000-0000-000000000000\n"
+                                 "Timestamp: 2020-03-10 04:42:59Z",
+            'error_codes': [50076],
+            'timestamp': '2020-03-10 04:42:59Z',
+            'trace_id': '00000000-0000-0000-0000-000000000000',
+            'correlation_id': '00000000-0000-0000-0000-000000000000',
+            'error_uri': 'https://login.microsoftonline.com/error?code=50076',
+            'suberror': 'basic_action'})
+
+        # adal_error_mfa are raised on the second call
+        mock_auth_context.acquire_token.side_effect = [self.token_entry1, adal_error_mfa]
+
+        # action
+        all_subscriptions = finder._find_using_common_tenant(access_token="token1",
+                                                             resource='https://management.core.windows.net/')
+
+        # assert
+        # subscriptions are correctly returned
+        self.assertEqual(all_subscriptions, [self.subscription1])
+        self.assertEqual(mock_auth_context.acquire_token.call_count, 2)
+
+        # With pytest, use -o log_cli=True to manually check the log
+
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    @mock.patch('azure.cli.core._profile._get_authorization_code', autospec=True)
     def test_find_using_specific_tenant(self, _get_authorization_code_mock, mock_auth_context):
         """ Test tenant_id -> home_tenant_id mapping and token tenant attachment
         """
@@ -1910,8 +1952,10 @@ class ManagedByTenantStub(ManagedByTenant):  # pylint: disable=too-few-public-me
 
 class TenantStub(object):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, tenant_id):
+    def __init__(self, tenant_id, display_name="DISPLAY_NAME"):
         self.tenant_id = tenant_id
+        self.display_name = display_name
+        self.additional_properties = {'displayName': display_name}
 
 
 class MSRestAzureAuthStub:

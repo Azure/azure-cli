@@ -925,6 +925,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup protection disable -v {vault} -g {rg} -c {name} --backup-management-type AzureWorkload --workload-type {wt} -i {item} -y --delete-backup-data true')
 
+    @record_only()
     def test_backup_wl_sql_restore_as_files(self):
         self.kwargs.update({
             'vault': "iaasvmsqlworkloadexistingvault1",

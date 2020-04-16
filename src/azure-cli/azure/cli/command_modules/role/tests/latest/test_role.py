@@ -102,7 +102,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
 
 class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_new_kv_cert')
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
         KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
@@ -137,7 +137,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
 
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_existing_kv_cert')
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
 
         import time
@@ -303,7 +303,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     self.cmd('role assignment delete --assignee {upn} --scope "" --role reader')
 
                 # test role assignment on empty scope
-                with self.assertRaisesRegexp(CLIError, "No matches in graph database for 'fake'"):
+                with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
                     self.cmd('role assignment create --assignee fake --role contributor')
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
