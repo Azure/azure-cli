@@ -395,4 +395,4 @@ def load_command_table(self, _):
         g.custom_command('rest', 'rest_call')
 
     with self.command_group('') as g:
-        g.custom_command('version', 'show_version', is_preview=True)
+        g.custom_command('version', 'show_version')
