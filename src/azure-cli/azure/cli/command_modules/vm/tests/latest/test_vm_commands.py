@@ -2542,7 +2542,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
             'loc': 'westus',
             'vmss': 'vmss1-name',
             'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': []}]),
-            'vault': self.create_random_name('vmlinuxkv', 20),
+            'vault': self.create_random_name('vmsslinuxkv', 20),
             'secret': 'mysecret',
             'ssh_key': TEST_SSH_KEY_PUB
         })
@@ -3595,6 +3595,40 @@ class VMGalleryImage(ScenarioTest):
                      self.check('storageProfile.dataDiskImages[0].lun', 2),
                      self.check('storageProfile.dataDiskImages[1].lun', 3)
                  ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_test_specialized_image_')
+    def test_specialized_image(self, resource_group):
+        self.kwargs.update({
+            'gallery': self.create_random_name(prefix='gallery_', length=20),
+            'image': 'image1',
+            'snapshot': 's1',
+            'vm1': 'vm1',
+            'vm2': 'vm2',
+            'vm3': 'vm3',
+            'vmss1': 'vmss1',
+            'vmss2': 'vmss2'
+        })
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux --os-state specialized -p publisher1 -f offer1 -s sku1', checks=[
+            self.check('osState', 'Specialized')
+        ])
+        self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --nsg-rule NONE')
+        disk = self.cmd('vm show -g {rg} -n {vm1}').get_output_in_json()['storageProfile']['osDisk']['name']
+        self.kwargs.update({
+            'disk': disk
+        })
+        self.cmd('snapshot create -g {rg} -n {snapshot} --source {disk}')
+        image_version = self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version 1.0.0 --os-snapshot {snapshot}').get_output_in_json()['id']
+        self.kwargs.update({
+            'image_version': image_version
+        })
+        self.cmd('vm create -g {rg} -n {vm2} --image {image_version} --specialized --nsg-rule NONE')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image_version} --specialized')
+        with self.assertRaises(CLIError):
+            self.cmd('vm create -g {rg} -n {vm3} --specialized')
+        with self.assertRaises(CLIError):
+            self.cmd('vmss create -g {rg} -n {vmss2} --specialized')
+
 # endregion
 
 
@@ -3828,40 +3862,49 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
         create_not_before_timeout_key = 'vmss.' + update_not_before_timeout_key
 
         self.kwargs.update({
-            'vm': 'vm1'
+            'vmss1': 'vmss1',
+            'vmss2': 'vmss2'
         })
 
         # Create, enable terminate notification
-        self.cmd('vmss create -g {rg} -n {vm} --image UbuntuLTS --terminate-notification-time 5',
+        self.cmd('vmss create -g {rg} -n {vmss1} --image UbuntuLTS --terminate-notification-time 5',
                  checks=[
                      self.check(create_enable_key, True),
                      self.check(create_not_before_timeout_key, 'PT5M')
                  ])
 
         # Update, enable terminate notification and set time
-        self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification --terminate-notification-time 8',
+        self.cmd('vmss update -g {rg} -n {vmss1} --enable-terminate-notification --terminate-notification-time 8',
                  checks=[
                      self.check(update_enable_key, True),
                      self.check(update_not_before_timeout_key, 'PT8M')
                  ])
 
         # Update, set time
-        self.cmd('vmss update -g {rg} -n {vm} --terminate-notification-time 9',
+        self.cmd('vmss update -g {rg} -n {vmss1} --terminate-notification-time 9',
                  checks=[
                      self.check(update_not_before_timeout_key, 'PT9M')
                  ])
 
         # Update, disable terminate notification
-        self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification false',
+        self.cmd('vmss update -g {rg} -n {vmss1} --enable-terminate-notification false',
                  checks=[
                      self.check('virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile', None)
                  ])
 
         # Parameter validation, the following commands should fail
         with self.assertRaises(CLIError):
-            self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification false --terminate-notification-time 5')
+            self.cmd('vmss update -g {rg} -n {vmss1} --enable-terminate-notification false --terminate-notification-time 5')
         with self.assertRaises(CLIError):
-            self.cmd('vmss update -g {rg} -n {vm} --enable-terminate-notification')
+            self.cmd('vmss update -g {rg} -n {vmss1} --enable-terminate-notification')
+
+        # Create vmss without terminate notification and enable it with vmss update
+        self.cmd('vmss create -g {rg} -n {vmss2} --image UbuntuLTS')
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-terminate-notification true --terminate-notification-time 5',
+                 checks=[
+                     self.check(update_enable_key, True),
+                     self.check(update_not_before_timeout_key, 'PT5M')
+                 ])
 
 
 class VMPriorityEvictionBillingTest(ScenarioTest):

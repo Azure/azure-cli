@@ -304,6 +304,26 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('blob.retentionPolicy.days', 1)
         ])
 
+        self.cmd('storage logging off --connection-string {}'.format(connection_string))
+
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('blob.delete', False),
+            JMESPathCheck('blob.write', False),
+            JMESPathCheck('blob.read', False),
+            JMESPathCheck('blob.retentionPolicy.enabled', False),
+            JMESPathCheck('blob.retentionPolicy.days', None),
+            JMESPathCheck('queue.delete', False),
+            JMESPathCheck('queue.write', False),
+            JMESPathCheck('queue.read', False),
+            JMESPathCheck('queue.retentionPolicy.enabled', False),
+            JMESPathCheck('queue.retentionPolicy.days', None),
+            JMESPathCheck('table.delete', False),
+            JMESPathCheck('table.write', False),
+            JMESPathCheck('table.read', False),
+            JMESPathCheck('table.retentionPolicy.enabled', False),
+            JMESPathCheck('table.retentionPolicy.days', None)
+        ])
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_metrics_operations(self, resource_group, storage_account_info):

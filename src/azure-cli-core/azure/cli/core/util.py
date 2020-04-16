@@ -16,9 +16,12 @@ import re
 import logging
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+
+from azure.common import AzureException
+from azure.core.exceptions import AzureError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
-from azure.common import AzureException
+from inspect import getfullargspec as get_arg_spec
 
 logger = get_logger(__name__)
 
@@ -51,8 +54,15 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error("To learn more about --query, please visit: "
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
-        if isinstance(ex, (CLIError, CloudError, AzureException)):
+        if isinstance(ex, (CLIError, CloudError, AzureException, AzureError)):
             logger.error(ex.args[0])
+            try:
+                for detail in ex.args[0].error.details:
+                    logger.error(detail)
+            except (AttributeError, TypeError):
+                pass
+            except:  # pylint: disable=bare-except
+                pass
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
             logger.error('validation error: %s', ex)
@@ -358,6 +368,14 @@ def get_arg_list(op):
         return sig.args
 
 
+def is_track2(client_class):
+    """ IS this client a autorestv3/track2 one?.
+    Could be refined later if necessary.
+    """
+    args = get_arg_spec(client_class.__init__).args
+    return "credential" in args
+
+
 DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 
 
@@ -369,7 +387,8 @@ def should_disable_connection_verify():
 def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
-    return (AzureOperationPoller, LROPoller)
+    from azure.core.polling import LROPoller as AzureCoreLROPoller
+    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
@@ -387,7 +406,7 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
 
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
-        kwargs.update({'raw': True, 'polling': False})
+        kwargs.update({'polling': False})
     return func(*args, **kwargs)
 
 

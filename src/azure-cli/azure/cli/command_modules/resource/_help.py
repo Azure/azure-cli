@@ -235,6 +235,14 @@ examples:
     text: az deployment delete -n deployment01
 """
 
+helps['deployment cancel'] = """
+type: command
+short-summary: Cancel a deployment at subscription scope.
+examples:
+  - name: Cancel a deployment at subscription scope.
+    text: az deployment cancel -n deployment01
+"""
+
 helps['deployment validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
@@ -352,6 +360,14 @@ examples:
     text: az deployment sub delete -n deployment01
 """
 
+helps['deployment sub cancel'] = """
+type: command
+short-summary: Cancel a deployment at subscription scope.
+examples:
+  - name: Cancel a deployment at subscription scope.
+    text: az deployment sub cancel -n deployment01
+"""
+
 helps['deployment sub validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
@@ -463,6 +479,14 @@ short-summary: Delete a deployment at resource group.
 examples:
   - name: Delete a deployment at resource group.
     text: az deployment group delete -g testrg -n deployment01
+"""
+
+helps['deployment group cancel'] = """
+type: command
+short-summary: Cancel a deployment at resource group.
+examples:
+  - name: Cancel a deployment at resource group.
+    text: az deployment group cancel -g testrg -n deployment01
 """
 
 helps['deployment group validate'] = """
@@ -582,6 +606,14 @@ examples:
     text: az deployment mg delete -m testmg -n deployment01
 """
 
+helps['deployment mg cancel'] = """
+type: command
+short-summary: Cancel a deployment at management group.
+examples:
+  - name: Cancel a deployment at management group.
+    text: az deployment mg cancel -m testmg -n deployment01
+"""
+
 helps['deployment mg validate'] = """
 type: command
 short-summary: Validate whether a template is valid at management group.
@@ -697,6 +729,14 @@ short-summary: Delete a deployment at tenant scope.
 examples:
   - name: Delete a deployment at tenant scope.
     text: az deployment tenant delete -n deployment01
+"""
+
+helps['deployment tenant cancel'] = """
+type: command
+short-summary: Cancel a deployment at tenant scope.
+examples:
+  - name: Cancel a deployment at tenant scope.
+    text: az deployment tenant cancel -n deployment01
 """
 
 helps['deployment tenant validate'] = """

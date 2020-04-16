@@ -355,6 +355,11 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 # pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
+
+    # specialized is only for image
+    if getattr(namespace, 'specialized', None) is not None and namespace.image is None:
+        raise CLIError('usage error: --specialized is only configurable when --image is specified.')
+
     # use minimal parameters to resolve the expected storage profile
     if getattr(namespace, 'attach_os_disk', None) and not namespace.image:
         if namespace.use_unmanaged_disk:
@@ -1563,7 +1568,7 @@ def process_remove_identity_namespace(cmd, namespace):
 
 def process_gallery_image_version_namespace(cmd, namespace):
     TargetRegion = cmd.get_models('TargetRegion')
-    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS']]
+    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
     storage_account_types_str = ", ".join(storage_account_types_list)
 
     if namespace.target_regions:

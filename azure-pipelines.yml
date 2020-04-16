@@ -23,6 +23,10 @@ jobs:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
         title=$(curl https://api.github.com/repos/Azure/azure-cli/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix; then
+          echo "Hotfix PR should target release branch."
+          exit 1
+        fi
         [[ $title =~ ^(\[.*\]|\{.*\}).* ]] && exit 0
         echo "Pull Request title should follow https://aka.ms/submitAzPR"
         exit 1
@@ -837,37 +841,6 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: ubuntu-bionic
 
-- job: BuildUbuntuDisco
-  displayName: Build Ubuntu Disco Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Build Artifacts'
-      inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-        artifactName: pypi
-
-
-    - task: Bash@3
-      displayName: 'Build Ubuntu Disco Package'
-      inputs:
-        targetType: 'filePath'
-        filePath: scripts/release/debian/pipeline.sh
-      env:
-        DISTRO: disco
-        DISTRO_BASE_IMAGE: ubuntu:disco
-
-
-    - task: PublishPipelineArtifact@0
-      displayName: 'Publish Artifact: debian'
-      inputs:
-        TargetPath: $(Build.ArtifactStagingDirectory)
-        ArtifactName: ubuntu-disco
-
 - job: BuildUbuntuEoan
   displayName: Build Ubuntu Eoan Package
 
@@ -992,7 +965,6 @@ jobs:
    - BuildUbuntuBionic
    - BuildDebianJessie
    - BuildDebianStretch
-   - BuildUbuntuDisco
    - BuildUbuntuEoan
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
@@ -1028,13 +1000,6 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
       artifactName: ubuntu-bionic
-
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Disco Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-disco
 
 
   - task: DownloadPipelineArtifact@1
@@ -1078,8 +1043,8 @@ jobs:
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic disco eoan buster)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:disco ubuntu:eoan debian:buster)
+       DISTROS=(bionic eoan buster)
+       BASE_IMAGES=(ubuntu:bionic ubuntu:eoan debian:buster)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="
