@@ -18,7 +18,7 @@ def _create_identity_credential(**kwargs):
     if home_account_id:
         username = kwargs.pop("username", None)
         if not username or not authority or not tenant_id:
-            raise CLIError("Missing username for user %s".format(home_account_id))
+            raise CLIError("Missing username for user {}".format(home_account_id))
         auth_profile = AuthProfile(authority, home_account_id, tenant_id, username)
         return InteractiveBrowserCredential(_profile=auth_profile, silent_auth_only=True,
                                             tenant_id=tenant_id, authority=authority)
@@ -26,15 +26,14 @@ def _create_identity_credential(**kwargs):
     if sp_id:
         sp_key = kwargs.pop("sp_key", None)
         # todo: support use_cert_sn_issuer
-        use_cert_sn_issuer = kwargs.pop("use_cert_sn_issuer", None)
+        # use_cert_sn_issuer = kwargs.pop("use_cert_sn_issuer", None)
         if not sp_key or not tenant_id or not authority:
-            raise CLIError("Missing service principle key for service principle %s".format(sp_id))
+            raise CLIError("Missing service principle key for service principle {}".format(sp_id))
         return ClientSecretCredential(tenant_id, sp_id, sp_key, authority=authority)
     return ManagedIdentityCredential()
-    # raise CLIError("Unexpected error: failed to create identity credential")
 
 
-class IdentityCredential(object):
+class IdentityCredential(object):    # pylint: disable=too-few-public-methods
     ''' abstract factory for Azure.Identity.Credential
 
     :keyword str authority

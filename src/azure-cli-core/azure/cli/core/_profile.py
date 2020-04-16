@@ -42,7 +42,7 @@ _HOME_TENANT_ID = 'homeTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
-_HOME_ACCOUNT_ID = 'home_account_id'
+_HOME_ACCOUNT_ID = 'homeAccountId'
 _CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
@@ -525,7 +525,7 @@ class Profile(object):
         tenant = tenant or 'common'
         account = self.get_subscription()
         home_account_id = account[_USER_ENTITY][_HOME_ACCOUNT_ID]
-        authority = self.cli_ctx.cloud.endpoints.active_directory.lstrip('https://')
+        authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         from azure.cli.core._credential import IdentityCredential
         identity_credential = IdentityCredential(home_account_id=home_account_id,
                                                  authority=authority,
@@ -552,7 +552,7 @@ class Profile(object):
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         home_account_id = account[_USER_ENTITY][_HOME_ACCOUNT_ID]
-        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
+        identity_type, _ = Profile._try_parse_msi_account_name(account)
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
         from azure.cli.core._credential import IdentityCredential
         # initialize IdentityCredential
@@ -562,20 +562,19 @@ class Profile(object):
                     raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
                 return IdentityCredential()
             if user_type == _USER:
-                authority = self.cli_ctx.cloud.endpoints.active_directory.lstrip('https://')
+                authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
                 return IdentityCredential(home_account_id=home_account_id,
-                                                         authority=authority,
-                                                         tenant_id=tenant_id,
-                                                         username=username_or_sp_id)
+                                          authority=authority,
+                                          tenant_id=tenant_id,
+                                          username=username_or_sp_id)
             use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
             # todo: get service principle key
             return IdentityCredential(sp_id=username_or_sp_id, tenant_id=tenant_id,
                                       use_cert_sn_issuer=use_cert_sn_issuer)
-        else:
-            # todo: MSI identity_id
-            if aux_tenant_id:
-                raise CLIError("Tenant shouldn't be specified for MSI account")
-            return IdentityCredential()
+        # todo: MSI identity_id
+        if aux_tenant_id:
+            raise CLIError("Tenant shouldn't be specified for MSI account")
+        return IdentityCredential()
 
     def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
         if aux_tenants and aux_subscriptions:

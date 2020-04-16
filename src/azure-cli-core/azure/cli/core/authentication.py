@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import requests
-import adal
 
 from msrest.authentication import Authentication
 
@@ -49,14 +48,14 @@ class AuthenticationWrapper(Authentication):
             if in_cloud_console():
                 AuthenticationWrapper._log_hostname()
             raise err
-        except ClientAuthenticationError as err:
+        except ClientAuthenticationError:
             # pylint: disable=no-member
             if in_cloud_console():
                 AuthenticationWrapper._log_hostname()
 
             raise CLIError("Credentials have expired due to inactivity or "
                            "configuration of your account was changed.{}".format(
-                "Please run 'az login'" if not in_cloud_console() else ''))
+                               "Please run 'az login'" if not in_cloud_console() else ''))
             # todo: error type
             # err = (getattr(err, 'error_response', None) or {}).get('error_description') or ''
             # if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
@@ -89,7 +88,7 @@ class AuthenticationWrapper(Authentication):
             session.headers['x-ms-authorization-auxiliary'] = aux_tokens
         return session
 
-    def get_token(self, *scopes, **kwargs):
+    def get_token(self, *scopes):
         token, _ = self._get_token(*scopes)
         return token
 
