@@ -104,11 +104,6 @@ def _authentication_context_factory(cli_ctx, tenant, cache):
     return adal.AuthenticationContext(authority_url, cache=cache, api_version=None, validate_authority=(not is_adfs))
 
 
-def _msal_authentication_context_factory(cli_ctx, tenant, cache):
-    #import MSAL
-    authority_url, is_adfs = _get_authority_url(cli_ctx, tenant)
-    return adal.AuthenticationContext(authority_url, cache=cache, api_version=None, validate_authority=(not is_adfs))
-
 _AUTH_CTX_FACTORY = _authentication_context_factory
 
 
