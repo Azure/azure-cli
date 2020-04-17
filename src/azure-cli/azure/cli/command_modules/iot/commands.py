@@ -179,7 +179,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('delete', 'pnp_delete_key')
         g.custom_command('update', 'pnp_update_key')
 
-    with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory, is_preview=True) as g:
+    with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory,
+    is_preview=True) as g:
         g.custom_command('create', 'iot_central_app_create')
         g.custom_command('list', 'iot_central_app_list')
         g.custom_show_command('show', 'iot_central_app_get')
