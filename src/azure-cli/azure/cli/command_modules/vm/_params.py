@@ -745,7 +745,7 @@ def load_arguments(self, _):
             c.argument('publisher', help='The name of the extension publisher.')
             c.argument('settings', type=validate_file_or_dict, help='Extension settings in JSON format. A JSON file path is also accepted.')
             c.argument('protected_settings', type=validate_file_or_dict, help='Protected settings in JSON format for sensitive information like credentials. A JSON file path is also accepted.')
-            c.argument('version', help='The version of the extension. If you want to use the exact version number specified, please specify --no-auto-upgrade.')
+            c.argument('version', help='The version of the extension. To pin extension version to this value, please specify --no-auto-upgrade.')
 
     with self.argument_context('vm extension set') as c:
         c.argument('vm_extension_name', name_arg_type,
