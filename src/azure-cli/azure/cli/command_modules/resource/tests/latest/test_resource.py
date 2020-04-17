@@ -923,6 +923,93 @@ class DeploymentThruUriTest(ScenarioTest):
                  checks=self.is_empty())
 
 
+class DeploymentScriptsTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    def test_list_all_deployment_scripts(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'deployment_script_name': self.create_random_name('script', 20),
+            'deployment_name': self.create_random_name('ds', 20),
+            'resource_group': resource_group,
+            'template_file': os.path.join(curr_dir, 'deployment-scripts-deploy.json').replace('\\', '\\\\'),
+        })
+
+        count = 0
+        self.cmd('deployment-scripts list',
+                 checks=self.check("length([?name=='{deployment_script_name}'])", count))
+
+        self.cmd('deployment group create -g {resource_group} -n {deployment_name} --template-file "{template_file}" --parameters scriptName={deployment_script_name}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{resource_group}'),
+        ])
+
+        count += 1
+
+        self.cmd('deployment-scripts list',
+                 checks=self.check("length([?name=='{deployment_script_name}'])", count))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    def test_show_deployment_script(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'deployment_script_name': self.create_random_name('script', 20),
+            'deployment_name': self.create_random_name('ds', 20),
+            'resource_group': resource_group,
+            'template_file': os.path.join(curr_dir, 'deployment-scripts-deploy.json').replace('\\', '\\\\'),
+        })
+
+        self.cmd('deployment group create -g {resource_group} -n {deployment_name} --template-file "{template_file}" --parameters scriptName={deployment_script_name}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{resource_group}'),
+        ])
+
+        self.cmd("deployment-scripts show --resource-group {resource_group} --name {deployment_script_name}",
+                 checks=self.check('name', '{deployment_script_name}'))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    def test_show_deployment_script_logs(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'deployment_script_name': self.create_random_name('script', 20),
+            'deployment_name': self.create_random_name('ds', 20),
+            'resource_group': resource_group,
+            'template_file': os.path.join(curr_dir, 'deployment-scripts-deploy.json').replace('\\', '\\\\'),
+        })
+
+        self.cmd('deployment group create -g {resource_group} -n {deployment_name} --template-file "{template_file}" --parameters scriptName={deployment_script_name}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{resource_group}'),
+        ])
+
+        deployment_script_logs = self.cmd("deployment-scripts show-log --resource-group {resource_group} --name {deployment_script_name}").get_output_in_json()
+
+        self.assertTrue(deployment_script_logs['value'] is not None)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
+    def test_delete_deployment_script(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'deployment_script_name': self.create_random_name('script', 20),
+            'deployment_name': self.create_random_name('ds', 20),
+            'resource_group': resource_group,
+            'template_file': os.path.join(curr_dir, 'deployment-scripts-deploy.json').replace('\\', '\\\\'),
+        })
+
+        self.cmd('deployment group create -g {resource_group} -n {deployment_name} --template-file "{template_file}" --parameters scriptName={deployment_script_name}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{resource_group}'),
+        ])
+
+        # making sure it exists first
+        self.cmd("deployment-scripts show --resource-group {resource_group} --name {deployment_script_name}",
+                 checks=self.check('name', '{deployment_script_name}'))
+
+        self.cmd("deployment-scripts delete --resource-group {resource_group} --name {deployment_script_name} --yes")
+
+        self.cmd('deployment-scripts list',
+                 checks=self.check("length([?name=='{deployment_script_name}'])", 0))
+
+
 class ResourceMoveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_resource_move_dest', parameter_name='resource_group_dest', key='rg2')
     @ResourceGroupPreparer(name_prefix='cli_test_resource_move_source', key='rg1')
