@@ -3530,6 +3530,7 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
 
     return verified_hostname_found
 
+
 def _get_plan_by_name(client, plan):
     plan_info = None
     plan_list = client.app_service_plans.list()
