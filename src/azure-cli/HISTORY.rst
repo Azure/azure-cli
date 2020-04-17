@@ -30,9 +30,9 @@ Release History
 **AppService**
 
 * `az functionapp create`: Changed the way linuxFxVersion was being set for dotnet linux function apps. This should fix a bug that was preventing dotnet linux consumption apps from being created. (#12817)
-* ([BREAKING CHANGE]) (az webapp create:) fix to keep existing AppSettings with az webapp create. (#12865)
-* ([BREAKING CHANGE]) (az webapp up:) fix to create RG for az webapp up command when using -g flag. (#12865)
-* ([BREAKING CHANGE]) (az webapp config:) fix to show values for non-JSON output with az webapp config connection-string list (#12865)
+* [BREAKING CHANGE] `az webapp create`: fix to keep existing AppSettings with az webapp create. (#12865)
+* [BREAKING CHANGE] `az webapp up`: fix to create RG for az webapp up command when using -g flag. (#12865)
+* [BREAKING CHANGE] `az webapp config`: fix to show values for non-JSON output with az webapp config connection-string list (#12865)
 
 **ARM**
 
