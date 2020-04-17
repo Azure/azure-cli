@@ -9,7 +9,7 @@ Release History
 **ACR**
 
 * `az acr run --cmd`: disable working directory override (#12877)
-* Dedicated data endpoint (#12967)
+* Support dedicated data endpoint (#12967)
 
 **AKS**
 
