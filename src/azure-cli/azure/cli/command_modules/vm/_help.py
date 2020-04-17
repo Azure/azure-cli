@@ -531,6 +531,9 @@ examples:
         --target-regions westus=2=standard_lrs eastus=3=standard_zrs \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --managed-image imageInTheSameResourceGroup
+  - name: Add a new image version with target regions and customer managed keys for encryption.
+    text: >
+        az sig image-version create -g MyResourceGroup --gallery-image-version 1.0.0 --target-regions westus=2=standard --target-region-encryption DiskEncryptionSet1,0,DiskEncryptionSet2 --gallery-name MyGallery --gallery-image-definition MyImage --managed-image imageInTheSameResourceGroup
 """
 
 helps['sig image-version update'] = """
@@ -808,7 +811,7 @@ parameters:
   - name: --image
     type: string
     short-summary: >
-        The name of the operating system image as a URN alias, URN, custom image name or ID, or VHD blob URI.
+        The name of the operating system image as a URN alias, URN, custom image name or ID, custom image version ID, or VHD blob URI.
         This parameter is required unless using `--attach-os-disk.` Valid URN format: "Publisher:Offer:Sku:Version".
     populator-commands:
       - az vm image list
@@ -833,6 +836,9 @@ examples:
   - name: Create a VM from a custom managed image.
     text: >
         az vm create -g MyResourceGroup -n MyVm --image MyImage
+  - name: Create a VM from a specialized image version.
+    text: >
+        az vm create -g MyResourceGroup -n MyVm --image $id --specialized
   - name: Create a VM by attaching to a managed operating system disk.
     text: >
         az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
@@ -2057,6 +2063,9 @@ examples:
   - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init'
     text: >
         az vmss create -g MyResourceGroup -n MyVmss --image debian --custom-data MyCloudInitScript.yml
+  - name: Create a Linux VM scale set from a specialized image version.
+    text: >
+        az vmss create -n MyVmss -g MyResourceGroup --image $id --specialized
   - name: Create a Debian VM scaleset using Key Vault secrets.
     text: >
         az keyvault certificate create --vault-name vaultname -n cert1 \\
