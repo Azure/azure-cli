@@ -941,7 +941,6 @@ short-summary: Delete an IoT Central application.
 examples:
   - name: Delete an IoT Central application.
     text: az iot central app delete --name MyIoTCentralApplication --resource-group MyResourceGroup
-    crafted: true
 """
 
 helps['iot central app list'] = """
