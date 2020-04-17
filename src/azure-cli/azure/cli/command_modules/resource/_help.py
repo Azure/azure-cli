@@ -828,6 +828,59 @@ type: command
 short-summary: Show a deployment operation at tenant scope.
 """
 
+helps['deployment-scripts'] = """
+type: group
+short-summary: Manage deployment scripts at subscription or resource group scope.
+"""
+
+helps['deployment-scripts list'] = """
+type: command
+short-summary: List all deployment scripts.
+examples:
+  - name: Retrieve all deployment scripts found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts list
+  - name: Retrieve all deployment scripts found in a resource group
+    text: |
+        az deployment-scripts list --resource-group contoso-rg
+"""
+
+helps['deployment-scripts show'] = """
+type: command
+short-summary: Retrieve a deployment script.
+parameters:
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Retrieve a deployment script found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts show --resource-group contoso-rg --name contosoBashScript
+"""
+
+helps['deployment-scripts show-log'] = """
+type: command
+short-summary: Show deployment script logs.
+parameters:
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Retrieve deployment script logs found in the user's logged-in default subscription, max limit is 4MB.
+    text: >
+        az deployment-scripts show-log --resource-group contoso-rg --name contosoBashScript
+"""
+
+helps['deployment-scripts delete'] = """
+type: command
+short-summary: Delete a deployment script.
+parameters:
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Delete a deployment script found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts delete --resource-group contoso-rg --name contosoBashScript
+"""
+
 helps['feature'] = """
 type: group
 short-summary: Manage resource provider features.
