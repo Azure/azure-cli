@@ -8,7 +8,6 @@
 def load_arguments(self, _):
     from argcomplete.completers import FilesCompleter
 
-    from azure.mgmt.resource.resources.models import DeploymentMode, WhatIfResultFormat
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
 
@@ -27,6 +26,8 @@ def load_arguments(self, _):
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
         validate_msi)
+
+    DeploymentMode, WhatIfResultFormat = self.get_models('DeploymentMode', 'WhatIfResultFormat', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
 
     # BASIC PARAMETER CONFIGURATION
 
