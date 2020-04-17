@@ -57,7 +57,7 @@ def load_arguments(self, _):
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
-                                                            arg_type=get_enum_type(WhatIfResultFormat, WhatIfResultFormat.full_resource_payloads),
+                                                            arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
                                                             is_preview=True, min_api='2019-07-01')
     deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
                                                               help='Disable pretty-print for What-If results. When set, the output format type will be used.')
