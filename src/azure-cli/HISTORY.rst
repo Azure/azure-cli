@@ -73,7 +73,7 @@ Release History
 
 **Cosmos DB**
 
-* Support az cosmosdb private-link-resource and private-endpoint-connection
+* Fix missing --type option for deprecation redirections
 
 **Docker**
 
