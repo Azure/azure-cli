@@ -646,27 +646,39 @@ class Profile(object):
         home_account_id = account[_USER_ENTITY][_USER_HOME_ACCOUNT_ID]
         identity_type, _ = Profile._try_parse_msi_account_name(account)
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
-        from azure.cli.core._credential import IdentityCredential
-        # initialize IdentityCredential
+
+        from azure.identity import (
+            AuthProfile,
+            InteractiveBrowserCredential,
+            ClientSecretCredential,
+            CertificateCredential,
+            ManagedIdentityCredential
+        )
         if identity_type is None:
             if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
                 if aux_tenant_id:
                     raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-                return IdentityCredential()
+                return ManagedIdentityCredential()
+
+            # User
             if user_type == _USER:
                 authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-                return IdentityCredential(home_account_id=home_account_id,
-                                          authority=authority,
-                                          tenant_id=tenant_id,
-                                          username=username_or_sp_id)
+                auth_profile = AuthProfile(authority, home_account_id, tenant_id, username_or_sp_id)
+                return InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True)
+
+            # Service Principal
             use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
             # todo: get service principle key
-            return IdentityCredential(client_id=username_or_sp_id, tenant_id=tenant_id,
-                                      use_cert_sn_issuer=use_cert_sn_issuer)
+            # if client_secret:
+            #     return ClientSecretCredential(tenant_id, client_id, client_secret, use_cert_sn_issuer=use_cert_sn_issuer)
+            # if certificate
+            #     return CertificateCredential(tenant_id, client_id, certificate_path)
+
+        # MSI
         # todo: MSI identity_id
         if aux_tenant_id:
             raise CLIError("Tenant shouldn't be specified for MSI account")
-        return IdentityCredential()
+        return ManagedIdentityCredential()
 
     def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
         if aux_tenants and aux_subscriptions:
@@ -845,11 +857,8 @@ class SubscriptionFinder(object):
         self._auth_context_factory = auth_context_factory
         self.user_id = None  # will figure out after log user in
         self.cli_ctx = cli_ctx
-        self._auth_profile = None
-        self.msal_credential = None
         self.secret = None
         self._graph_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
-        self._msal_arm_scope = self._graph_resource_id + '.default'
 
         def create_arm_client_factory(credentials):
             if arm_client_factory:
