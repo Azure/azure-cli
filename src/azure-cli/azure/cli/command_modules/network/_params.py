@@ -33,7 +33,7 @@ from azure.cli.command_modules.network._validators import (
     validate_express_route_port, bandwidth_validator_factory,
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
-    validate_application_gateway_identity, validate_virtul_network_gateway,
+    validate_application_gateway_identity, validate_virtul_network_gateway, validate_private_dns_zone,
     NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
@@ -771,6 +771,12 @@ def load_arguments(self, _):
         c.argument('manual_request', help='Use manual request to establish the connection', arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
+
+    with self.argument_context('network private-endpoint dns-zone-group') as c:
+        c.argument('private_dns_zone', help='Name or ID of the private dns zone.', validator=validate_private_dns_zone)
+        c.argument('private_dns_zone_name', options_list=['--zone-name'], help='Name of the private dns zone.')
+        c.argument('private_dns_zone_group_name', options_list=['--name', '-n'], help='Name of the private dns zone group.')
+        c.argument('private_endpoint_name', private_endpoint_name, id_part=None)
     # endregion
 
     # region PrivateLinkService

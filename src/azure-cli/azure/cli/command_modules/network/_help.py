@@ -3640,6 +3640,51 @@ examples:
     text: az network private-endpoint update -g MyResourceGroup -n MyPE --request-message "test" --tags mytag=hello
 """
 
+helps['network private-endpoint dns-zone-group'] = """
+type: group
+short-summary: Manage private endpoint dns zone group.
+"""
+
+helps['network private-endpoint dns-zone-group create'] = """
+type: command
+short-summary: Create a private endpoint dns zone group.
+examples:
+  - name: Create a private endpoint dns zone group.
+    text: az network private-endpoint dns-zone-group create --endpoint-name MyPE -g MyRG -n MyZoneGroup --zone-name Zone1 --private-dns-zone PrivateDNSZone1
+
+"""
+
+helps['network private-endpoint dns-zone-group add'] = """
+type: command
+short-summary: Add a private endpoint dns zone into a dns zone group.
+examples:
+  - name: Add a private endpoint dns zone group.
+    text: az network private-endpoint dns-zone-group add --endpoint-name MyPE -g MyRG -n MyZoneGroup --zone-name Zone1 --private-dns-zone PrivateDNSZone1
+"""
+
+helps['network private-endpoint dns-zone-group remove'] = """
+type: command
+short-summary: Remove a private endpoint dns zone into a dns zone group.
+examples:
+  - name: Remove a private endpoint dns zone group.
+    text: az network private-endpoint dns-zone-group remove --endpoint-name MyPE -g MyRG -n MyZoneGroup --zone-name Zone1
+"""
+
+helps['network private-endpoint dns-zone-group delete'] = """
+type: command
+short-summary: Delete a private endpoint dns zone group.
+"""
+
+helps['network private-endpoint dns-zone-group list'] = """
+type: command
+short-summary: List all private endpoint dns zone groups.
+"""
+
+helps['network private-endpoint dns-zone-group show'] = """
+type: command
+short-summary: Show a private endpoint dns zone group.
+"""
+
 helps['network private-link-service'] = """
 type: group
 short-summary: Manage private link services.
