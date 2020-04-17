@@ -6,7 +6,7 @@ Release History
 2.4.0
 ++++++
 * Upgrade msrestazure to 0.6.3 (#12839)
-* Output error detail of exception (#12945)
+* Output more error details of exceptions if possible (#12945)
 * Support track1 and track2 mgmt SDK side by side in CLI (#12952)
 * Fix generic remove property NoneType exception (#12950)
 * `az --version`: Show command instruction and detailed instruction link when updates available (#12981)
