@@ -7,6 +7,7 @@
 # pylint: disable=too-many-lines
 import os
 import unittest
+import tempfile
 
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -3488,6 +3489,39 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             self.check('name', '{bastion}')
         ])
         self.cmd('network bastion delete -g {rg} -n {bastion}')
+
+
+class NetworkVnetLocalContextScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_network_vnet_local_context(self):
+        self.kwargs.update({
+            'vnet': self.create_random_name(prefix='vnet-', length=12),
+            'subnet': self.create_random_name(prefix='subnet-', length=12)
+        })
+        original_working_dir = os.getcwd()
+        working_dir = tempfile.mkdtemp()
+        os.chdir(working_dir)
+        self.cmd('local-context on')
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}',
+                 checks=[self.check('newVNet.name', self.kwargs['vnet'])])
+        self.cmd('network vnet show', checks=[
+            self.check('name', self.kwargs['vnet'])
+        ])
+        self.cmd('network vnet subnet show', checks=[
+            self.check('name', self.kwargs['subnet'])
+        ])
+        with self.assertRaises(CLIError):
+            self.cmd('network vnet delete')
+        with self.assertRaises(CLIError):
+            self.cmd('network vnet subnet delete')
+
+        self.cmd('network vnet subnet delete -n {subnet}')
+        self.cmd('network vnet delete -n {vnet}')
+
+        self.cmd('local-context off --yes')
+        os.chdir(original_working_dir)
 
 
 if __name__ == '__main__':
