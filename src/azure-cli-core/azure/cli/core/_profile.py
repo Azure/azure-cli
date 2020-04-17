@@ -185,6 +185,8 @@ class Profile(object):
 
         credential=None
         auth_profile=None
+        authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
+        identity = Identity(authority, tenant)
 
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx,
@@ -198,13 +200,13 @@ class Profile(object):
             if not use_device_code:
                 from azure.identity import CredentialUnavailableError
                 try:
-                    credential, auth_profile = login_with_interactive_browser(tenant)
+                    credential, auth_profile = identity.login_with_interactive_browser()
                 except CredentialUnavailableError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
-                credential, auth_profile = login_with_device_code(tenant)
+                credential, auth_profile = identity.login_with_device_code()
         else:
             if is_service_principal:
                 if not tenant:
@@ -214,7 +216,7 @@ class Profile(object):
                 else:
                     credential = self.login_with_service_principal_secret(username, password, tenant)
             else:
-                credential, auth_profile = login_with_username_password(username, password, tenant)
+                credential, auth_profile = identity.login_with_username_password(username, password, tenant)
 
         # List tenants and find subscriptions by calling ARM
         subscriptions = []
@@ -383,9 +385,9 @@ class Profile(object):
         else:
             # msal : msi
             identity_type = MsiAccountTypes.system_assigned
-            from azure.identity import AuthenticationRequiredError, ManagedIdentityCredential
+            from azure.identity import AuthenticationRequiredError, ManagedIdentity
             # msi_cred = MSIAuthentication(resource=resource)
-            msi_cred = ManagedIdentityCredential()
+            msi_cred = ManagedIdentity()
 
         token_entry = msi_cred.get_token('https://management.azure.com/.default')
         token = token_entry.token
@@ -567,8 +569,8 @@ class Profile(object):
         account = self.get_subscription()
         home_account_id = account[_USER_ENTITY][_USER_HOME_ACCOUNT_ID]
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-        from azure.cli.core._credential import IdentityCredential
-        identity_credential = IdentityCredential(home_account_id=home_account_id,
+        from azure.cli.core._credential import Identity
+        identity_credential = Identity(home_account_id=home_account_id,
                                                  authority=authority,
                                                  tenant_id=tenant,
                                                  username=username)
@@ -596,21 +598,23 @@ class Profile(object):
         identity_type, _ = Profile._try_parse_msi_account_name(account)
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
 
+        authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
+        identity = Identity(authority, tenant_id)
+
         if identity_type is None:
             if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
                 if aux_tenant_id:
                     raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-                return ManagedIdentityCredential()
+                return ManagedIdentity()
 
             # User
             if user_type == _USER:
-                authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-                return get_user_credential(authority, home_account_id, tenant_id, username_or_sp_id)
+                return identity.get_user_credential(home_account_id, username_or_sp_id)
 
             # Service Principal
             use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
             # todo: get service principle key
-            return get_service_principal_credential()
+            return identity.get_service_principal_credential()
 
         # MSI
         # todo: MSI identity_id
@@ -797,6 +801,7 @@ class SubscriptionFinder(object):
         self.cli_ctx = cli_ctx
         self.secret = None
         self._graph_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
+        self.authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
 
         def create_arm_client_factory(credentials):
             if arm_client_factory:
@@ -822,10 +827,6 @@ class SubscriptionFinder(object):
         self.tenants = [tenant]
         return result
 
-    def _create_auth_context(self, tenant, use_token_cache=True):
-        token_cache = self._adal_token_cache if use_token_cache else None
-        return self._auth_context_factory(self.cli_ctx, tenant, token_cache)
-
     def find_using_common_tenant(self, auth_profile, credential=None):
         import adal
         all_subscriptions = []
@@ -846,8 +847,9 @@ class SubscriptionFinder(object):
             if hasattr(t, 'additional_properties'):  # Remove this line once SDK is fixed
                 t.display_name = t.additional_properties.get('displayName')
 
+            identity = Identity(self.authority, tenant_id)
             try:
-                specific_tenant_credential = get_user_credential(auth_profile.environment, auth_profile.home_account_id, tenant_id, auth_profile.username)
+                specific_tenant_credential = identity.get_user_credential(auth_profile.home_account_id, auth_profile.username)
 
             # TODO: handle MSAL exceptions
             except adal.AdalError as ex:
