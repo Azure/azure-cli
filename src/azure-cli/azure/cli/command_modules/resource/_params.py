@@ -55,11 +55,14 @@ def load_arguments(self, _):
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
-    deployment_what_if_result_format_type = get_enum_type(WhatIfResultFormat, WhatIfResultFormat.full_resource_payloads)
+    deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
+                                                            arg_type=get_enum_type(WhatIfResultFormat, WhatIfResultFormat.full_resource_payloads),
+                                                            is_preview=True, min_api='2019-07-01')
     deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
                                                               help='Disable pretty-print for What-If results. When set, the output format type will be used.')
     deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
-                                                           help='Instruct the command to run deployment What-If before excuting the deployment. It then prompts you to acknowledge resource changes before it continues.')
+                                                           help='Instruct the command to run deployment What-If before excuting the deployment. It then prompts you to acknowledge resource changes before it continues.',
+                                                           is_preview=True, min_api='2019-07-01')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -234,9 +237,9 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, is_preview=True, min_api='2019-07-01')
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
-                   arg_type=deployment_what_if_result_format_type, is_preview=True, min_api='2019-07-01')
+                   arg_type=deployment_what_if_result_format_type)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -258,14 +261,14 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, is_preview=True, min_api='2019-07-01')
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
-                   arg_type=deployment_what_if_result_format_type, is_preview=True, min_api='2019-07-01')
+                   arg_type=deployment_what_if_result_format_type)
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('result_format', options_list=['--result-format', '-r'], arg_type=deployment_what_if_result_format_type)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
 
     with self.argument_context('deployment sub validate') as c:
@@ -293,16 +296,15 @@ def load_arguments(self, _):
         c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
                    help='Auxiliary tenants which will be used during deployment across tenants.')
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, is_preview=True, min_api='2019-07-01')
-        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
-                   arg_type=deployment_what_if_result_format_type, is_preview=True, min_api='2019-07-01')
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'], arg_type=deployment_what_if_result_format_type)
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('aux_tenants', nargs='+', options_list=['--aux-tenants'],
                    help='Auxiliary tenants which will be used during deployment across tenants.')
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('result_format', options_list=['--result-format', '-r'], arg_type=deployment_what_if_result_format_type)
+        c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.ignore("rollback_on_error")
 
