@@ -1370,9 +1370,9 @@ def update_resource(cmd, parameters, resource_ids=None,
 
 
 # pylint: unused-argument
-def tag_resource(cmd, tags, resource_ids=None,
-                 resource_group_name=None, resource_provider_namespace=None,
-                 parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
+def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
+                 parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
+                 is_incremental=None):
     """ Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. """
     parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
@@ -1383,7 +1383,8 @@ def tag_resource(cmd, tags, resource_ids=None,
                                                                               resource_name)]
 
     return _single_or_collection(
-        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version).tag(tags) for id_dict in parsed_ids])
+        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version).tag(tags, is_incremental)
+         for id_dict in parsed_ids])
 
 
 # pylint: unused-argument
@@ -2463,8 +2464,15 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                    self.api_version,
                                                    parameters)
 
-    def tag(self, tags):
+    def tag(self, tags, is_incremental=False):
         resource = self.get_resource()
+
+        if is_incremental is True:
+            if not tags:
+                raise CLIError("When modifying tag incrementally, the parameters of tag must have specific values.")
+            if resource.tags:
+                resource.tags.update(tags)
+                tags = resource.tags
 
         # please add the service type that needs to be requested with PATCH type here
         # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
