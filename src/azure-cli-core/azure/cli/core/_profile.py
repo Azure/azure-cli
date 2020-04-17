@@ -214,8 +214,10 @@ class Profile(object):
             if is_service_principal:
                 if not tenant:
                     raise CLIError('Please supply tenant using "--tenant"')
-                sp_auth = ServicePrincipalAuth(password, use_cert_sn_issuer)
-                credential = self.login_with_service_principal_secret(username, password, tenant)
+                if os.path.isfile(password):
+                    credential = self.login_with_service_principal_certificate(username, password, tenant)
+                else:
+                    credential = self.login_with_service_principal_secret(username, password, tenant)
             else:
                 credential, auth_profile = self.login_with_username_password(username, password, tenant)
 
@@ -234,12 +236,6 @@ class Profile(object):
                     msg = "No subscriptions found."
                 raise CLIError(msg)
 
-            if is_service_principal:
-                self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
-                                                                                           tenant))
-            if self._creds_cache.adal_token_cache.has_state_changed:
-                self._creds_cache.persist_cached_creds()
-
             if allow_no_subscriptions:
                 t_list = [s.tenant_id for s in subscriptions]
                 bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
@@ -252,16 +248,21 @@ class Profile(object):
             bare_tenant = tenant or auth_profile.tenant_id
             subscriptions = self._build_tenant_level_accounts([bare_tenant])
 
-        consolidated = self._normalize_properties(auth_profile.username, subscriptions,
+        home_account_id = None
+        if auth_profile:
+            username = auth_profile.username
+            home_account_id = auth_profile.home_account_id
+
+        consolidated = self._normalize_properties(username, subscriptions,
                                                   is_service_principal, bool(use_cert_sn_issuer),
-                                                  home_account_id=auth_profile.home_account_id)
+                                                  home_account_id=home_account_id)
 
         self._set_subscriptions(consolidated)
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
     def login_with_interactive_browser(self, tenant):
-        # InteractiveBrowserCredential
+        # Use InteractiveBrowserCredential
         from azure.identity import AuthenticationRequiredError, InteractiveBrowserCredential
         if tenant:
             credential, auth_profile = InteractiveBrowserCredential.authenticate(
@@ -279,6 +280,7 @@ class Profile(object):
         return credential, auth_profile
 
     def login_with_device_code(self, tenant):
+        # Use DeviceCodeCredential
         from azure.identity import AuthenticationRequiredError, DeviceCodeCredential
         message = 'To sign in, use a web browser to open the page {} and enter the code {} to authenticate.'
         prompt_callback=lambda verification_uri, user_code, expires_on: \
@@ -295,6 +297,7 @@ class Profile(object):
         return cred, auth_profile
 
     def login_with_username_password(self, username, password, tenant):
+        # Use UsernamePasswordCredential
         from azure.identity import AuthenticationRequiredError, UsernamePasswordCredential, AuthProfile
         if tenant:
             credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password,
@@ -306,24 +309,32 @@ class Profile(object):
         return credential, auth_profile
 
     def login_with_service_principal_secret(self, client_id, client_secret, tenant):
-        # ClientSecretCredential
+        # Use ClientSecretCredential
         from azure.identity import AuthenticationRequiredError, ClientSecretCredential
         credential = ClientSecretCredential(tenant, client_id, client_secret)
 
-        entry = {
-            _SERVICE_PRINCIPAL_ID: client_id,
-            _ACCESS_TOKEN: client_secret,
-            _SERVICE_PRINCIPAL_TENANT: tenant,
-        }
+        # TODO: Persist to encrypted cache
+        # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
+        sp_auth = ServicePrincipalAuth(client_id, tenant, secret=client_secret)
+        entry = sp_auth.get_entry_to_persist()
         self._creds_cache.save_service_principal_cred(entry)
         return credential
 
-    def login_with_service_principal_certificate(self):
-        # CertificateCredential
-        pass
+    def login_with_service_principal_certificate(self, client_id, certificate_path, tenant, use_cert_sn_issuer=False):
+        # Use CertificateCredential
+        from azure.identity import AuthenticationRequiredError, CertificateCredential
+        # TODO: support use_cert_sn_issuer in CertificateCredential
+        credential = CertificateCredential(tenant, client_id, certificate_path)
+
+        # TODO: Persist to encrypted cache
+        # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
+        sp_auth = ServicePrincipalAuth(client_id, tenant, certificate_file=certificate_path)
+        entry = sp_auth.get_entry_to_persist()
+        self._creds_cache.save_service_principal_cred(entry)
+        return credential
 
     def login_with_msi(self):
-        # ManagedIdentityCredential
+        # Use ManagedIdentityCredential
         pass
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
@@ -1248,12 +1259,13 @@ class CredsCache(object):
 
 class ServicePrincipalAuth(object):
 
-    def __init__(self, password_arg_value, use_cert_sn_issuer=None):
-        if not password_arg_value:
-            raise CLIError('missing secret or certificate in order to '
+    def __init__(self, client_id, tenant_id, secret=None, certificate_file=None, use_cert_sn_issuer=None):
+        if not (secret or certificate_file):
+            raise CLIError('Missing secret or certificate in order to '
                            'authnenticate through a service principal')
-        if os.path.isfile(password_arg_value):
-            certificate_file = password_arg_value
+        self.client_id = client_id
+        self.tenant_id = tenant_id
+        if certificate_file:
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM
             self.certificate_file = certificate_file
             self.public_certificate = None
@@ -1268,18 +1280,12 @@ class ServicePrincipalAuth(object):
                                       self.cert_file_string, re.I)
                     self.public_certificate = match.group('public').strip()
         else:
-            self.secret = password_arg_value
+            self.secret = secret
 
-    def acquire_token(self, authentication_context, resource, client_id):
-        if hasattr(self, 'secret'):
-            return authentication_context.acquire_token_with_client_credentials(resource, client_id, self.secret)
-        return authentication_context.acquire_token_with_client_certificate(resource, client_id, self.cert_file_string,
-                                                                            self.thumbprint, self.public_certificate)
-
-    def get_entry_to_persist(self, sp_id, tenant):
+    def get_entry_to_persist(self):
         entry = {
-            _SERVICE_PRINCIPAL_ID: sp_id,
-            _SERVICE_PRINCIPAL_TENANT: tenant,
+            _SERVICE_PRINCIPAL_ID: self.client_id,
+            _SERVICE_PRINCIPAL_TENANT: self.tenant_id,
         }
         if hasattr(self, 'secret'):
             entry[_ACCESS_TOKEN] = self.secret
