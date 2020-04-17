@@ -256,15 +256,15 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def login_with_interactive_browser(self, tenant):
+    def login_with_interactive_browser(self, tenant_id):
         # Use InteractiveBrowserCredential
         from azure.identity import AuthenticationRequiredError, InteractiveBrowserCredential
-        if tenant:
+        if tenant_id:
             credential, auth_profile = InteractiveBrowserCredential.authenticate(
                 client_id=_CLIENT_ID,
                 silent_auth_only=True,
                 scope=self._msal_scope,
-                tenant_id=tenant
+                tenant_id=tenant_id
             )
         else:
             credential, auth_profile = InteractiveBrowserCredential.authenticate(
@@ -274,16 +274,16 @@ class Profile(object):
             )
         return credential, auth_profile
 
-    def login_with_device_code(self, tenant):
+    def login_with_device_code(self, tenant_id):
         # Use DeviceCodeCredential
         from azure.identity import AuthenticationRequiredError, DeviceCodeCredential
         message = 'To sign in, use a web browser to open the page {} and enter the code {} to authenticate.'
         prompt_callback=lambda verification_uri, user_code, expires_on: \
             logger.warning(message.format(verification_uri, user_code))
-        if tenant:
+        if tenant_id:
             cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
                                                                    scope=self._msal_scope,
-                                                                   tenant_id=tenant,
+                                                                   tenant_id=tenant_id,
                                                                    prompt_callback=prompt_callback)
         else:
             cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
@@ -291,39 +291,39 @@ class Profile(object):
                                                                    prompt_callback=prompt_callback)
         return cred, auth_profile
 
-    def login_with_username_password(self, username, password, tenant):
+    def login_with_username_password(self, username, password, tenant_id):
         # Use UsernamePasswordCredential
         from azure.identity import AuthenticationRequiredError, UsernamePasswordCredential, AuthProfile
-        if tenant:
+        if tenant_id:
             credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password,
-                                                                               tenant_id=tenant,
+                                                                               tenant_id=tenant_id,
                                                                                scope=self._msal_scope)
         else:
             credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password,
                                                                                scope=self._msal_scope)
         return credential, auth_profile
 
-    def login_with_service_principal_secret(self, client_id, client_secret, tenant):
+    def login_with_service_principal_secret(self, client_id, client_secret, tenant_id):
         # Use ClientSecretCredential
         from azure.identity import AuthenticationRequiredError, ClientSecretCredential
-        credential = ClientSecretCredential(tenant, client_id, client_secret)
+        credential = ClientSecretCredential(tenant_id, client_id, client_secret)
 
         # TODO: Persist to encrypted cache
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
-        sp_auth = ServicePrincipalAuth(client_id, tenant, secret=client_secret)
+        sp_auth = ServicePrincipalAuth(client_id, tenant_id, secret=client_secret)
         entry = sp_auth.get_entry_to_persist()
         self._creds_cache.save_service_principal_cred(entry)
         return credential
 
-    def login_with_service_principal_certificate(self, client_id, certificate_path, tenant, use_cert_sn_issuer=False):
+    def login_with_service_principal_certificate(self, client_id, certificate_path, tenant_id, use_cert_sn_issuer=False):
         # Use CertificateCredential
         from azure.identity import AuthenticationRequiredError, CertificateCredential
         # TODO: support use_cert_sn_issuer in CertificateCredential
-        credential = CertificateCredential(tenant, client_id, certificate_path)
+        credential = CertificateCredential(tenant_id, client_id, certificate_path)
 
         # TODO: Persist to encrypted cache
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
-        sp_auth = ServicePrincipalAuth(client_id, tenant, certificate_file=certificate_path)
+        sp_auth = ServicePrincipalAuth(client_id, tenant_id, certificate_file=certificate_path)
         entry = sp_auth.get_entry_to_persist()
         self._creds_cache.save_service_principal_cred(entry)
         return credential
@@ -661,7 +661,7 @@ class Profile(object):
                                           username=username_or_sp_id)
             use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
             # todo: get service principle key
-            return IdentityCredential(sp_id=username_or_sp_id, tenant_id=tenant_id,
+            return IdentityCredential(client_id=username_or_sp_id, tenant_id=tenant_id,
                                       use_cert_sn_issuer=use_cert_sn_issuer)
         # todo: MSI identity_id
         if aux_tenant_id:
