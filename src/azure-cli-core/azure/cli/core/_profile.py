@@ -854,7 +854,7 @@ class SubscriptionFinder(object):
         self.msal_credential = None
         self.secret = None
         self._graph_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
-        self._msal_scope = self._graph_resource_id + '.default'
+        self._msal_arm_scope = self._graph_resource_id + '.default'
 
         def create_arm_client_factory(credentials):
             if arm_client_factory:
@@ -872,115 +872,6 @@ class SubscriptionFinder(object):
         self._arm_client_factory = create_arm_client_factory
         self.tenants = []
 
-    def find_from_user_account(self, username, password, tenant, resource):
-        # msal : user
-        context = self._create_auth_context(tenant)
-        if password:
-            from azure.identity import AuthenticationRequiredError, UsernamePasswordCredential, AuthProfile
-            environment = self.cli_ctx.cloud.endpoints.active_directory.lstrip('https://')
-            sp_cred = UsernamePasswordCredential(_CLIENT_ID, username, password,
-                                                 authority=environment)
-            token_entry = sp_cred.get_token(self._msal_scope)
-            # self._auth_profile = AuthProfile(environment, home_account_id, tenant, username)
-            self.msal_credential = sp_cred
-            self.secret = password
-            # token_entry = context.acquire_token_with_username_password(resource, username, password, _CLIENT_ID)
-        # msal : todo
-        else:  # when refresh account, we will leverage local cached tokens
-            token_entry = context.acquire_token(resource, username, _CLIENT_ID)
-
-        if not token_entry:
-            return []
-        self.user_id = username
-
-        if tenant is None:
-            result = self.find_using_common_tenant(token_entry.token, resource)
-        else:
-            result = self.find_using_specific_tenant(tenant, token_entry.token)
-        return result
-
-    def find_through_authorization_code_flow(self, tenant, resource, authority_url):
-        # launch browser and get the code
-        # results = _get_authorization_code(resource, authority_url)
-        #
-        # if not results.get('code'):
-        #     raise CLIError('Login failed')  # error detail is already displayed through previous steps
-        #
-        # # exchange the code for the token
-        # context = self._create_auth_context(tenant)
-        # token_entry = context.acquire_token_with_authorization_code(results['code'], results['reply_url'],
-        #                                                             resource, _CLIENT_ID, None)
-
-        # MSAL: get token
-        # Question: authority url in azure.identity _get_authorization_code
-        from azure.identity import AuthenticationRequiredError, InteractiveBrowserCredential
-        if tenant:
-            credential, auth_profile = InteractiveBrowserCredential.authenticate(
-                client_id=_CLIENT_ID,
-                silent_auth_only=True,
-                scope = 'https://management.azure.com/.default',
-                tenant_id = tenant
-            )
-        else:
-            credential, auth_profile = InteractiveBrowserCredential.authenticate(
-                client_id=_CLIENT_ID,
-                silent_auth_only=True,
-                scope='https://management.azure.com/.default'
-            )
-            auth_profile.tenant_id = 'organizations'
-        # serialize the profile to JSON, including all keyword arguments
-        profile_json = auth_profile.serialize(extra='args', serialized='also')
-        with open(_PROFILE_PATH, 'w') as f:
-            f.write(profile_json)
-
-        token_entry = credential.get_token('https://management.azure.com/.default')
-        self.user_id = auth_profile.username
-        self.msal_credential = credential
-        self._auth_profile = auth_profile
-        # self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
-        logger.warning("You have logged in. Now let us find all the subscriptions to which you have access...")
-        if tenant is None:
-            result = self.find_using_common_tenant(token_entry.token, resource)
-        else:
-            result = self.find_using_specific_tenant(tenant, token_entry.token)
-        return result
-
-    def find_through_interactive_flow(self, tenant, resource):
-        # msal : device
-        from azure.identity import AuthenticationRequiredError, DeviceCodeCredential
-        message = 'To sign in, use a web browser to open the page {} and enter the code {} to authenticate.'
-
-        cred, auth_profile = DeviceCodeCredential.authenticate(_CLIENT_ID,
-                                                               scope='https://management.azure.com/.default',
-                                                               prompt_callback=lambda x, y, z: logger.warning(message.format(x, y)))
-        token_entry = cred.get_token('https://management.azure.com/.default')
-        # context = self._create_auth_context(tenant)
-        # code = context.acquire_user_code(resource, _CLIENT_ID)
-        # logger.warning(code['message'])
-        # token_entry = context.acquire_token_with_device_code(resource, code, _CLIENT_ID)
-        self.user_id = auth_profile.username
-        self.msal_credential = cred
-        self._auth_profile = auth_profile
-        if tenant is None:
-            result = self.find_using_common_tenant(token_entry.token, resource)
-        else:
-            result = self.find_using_specific_tenant(tenant, token_entry.token)
-        return result
-
-    def find_from_service_principal_id(self, client_id, sp_auth, tenant, resource):
-        # context = self._create_auth_context(tenant, False)
-        # msal
-        from azure.identity import AuthenticationRequiredError, ClientSecretCredential
-        sp_cred = ClientSecretCredential(tenant, client_id, sp_auth.secret)
-
-        token_entry = sp_cred.get_token(resource)
-
-        self.user_id = client_id
-        self.msal_credential = sp_cred
-        result = self.find_using_specific_tenant(tenant, token_entry.token)
-        self.tenants = [tenant]
-        return result
-
     #  only occur inside cloud console or VM with identity
     def find_from_raw_token(self, tenant, token):
         # decode the token, so we know the tenant
@@ -995,27 +886,19 @@ class SubscriptionFinder(object):
 
     def find_using_common_tenant(self, auth_profile, credential=None):
         import adal
-        from msrest.authentication import BasicTokenAuthentication
         from azure.identity import InteractiveBrowserCredential, AuthProfile, AuthenticationRequiredError, UsernamePasswordCredential
 
         all_subscriptions = []
         empty_tenants = []
         mfa_tenants = []
 
-        # If credential is not given, try to retrieve it from cache
-        if not credential:
-            credential = InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True)
-        # Don't use ARM_SCOPE as it only applies to public Azure
-        access_token = credential.get_token(self._msal_scope).token
-        token_credential = BasicTokenAuthentication({'access_token': access_token})
-        client = self._arm_client_factory(token_credential)
+        from azure.cli.core.authentication import AuthenticationWrapper
+        track1_credential = AuthenticationWrapper(credential, resource=self._graph_resource_id)
+        client = self._arm_client_factory(track1_credential)
         tenants = client.tenants.list()
 
         for t in tenants:
             tenant_id = t.tenant_id
-            from azure.identity import DeviceCodeCredential
-
-            # temp_context = self._create_auth_context(tenant_id)
             # display_name is available since /tenants?api-version=2018-06-01,
             # not available in /tenants?api-version=2016-06-01
             if not hasattr(t, 'display_name'):
@@ -1024,19 +907,12 @@ class SubscriptionFinder(object):
                 t.display_name = t.additional_properties.get('displayName')
 
             try:
-                temp_profile = AuthProfile(credential._profile.environment,
-                                           credential._profile.home_account_id,
-                                           tenant_id,
-                                           credential._profile.username)
-                # This won't actually launch a browser with silent_auth_only=True
-                # There is no difference between DeviceCodeCredential, InteractiveBrowserCredential and
-                # UsernamePasswordCredential if they are used this way with profile and silent_auth_only
-                specific_tenant_credential = InteractiveBrowserCredential(profile=temp_profile, silent_auth_only=True)
-                # else:
-                #     # msal : todo
-                #     credential = UsernamePasswordCredential(_CLIENT_ID, self.user_id, self.secret, tenant_id=tenant_id,
-                #                                             authority=self.cli_ctx.cloud.endpoints.active_directory.lstrip('https://'))
-                #     pass
+                from azure.cli.core._credential import IdentityCredential
+                specific_tenant_credential = IdentityCredential(home_account_id=auth_profile.home_account_id,
+                                                                authority=auth_profile.environment,
+                                                                tenant_id=tenant_id,
+                                                                username=auth_profile.username)
+            # TODO: handle MSAL exceptions
             except adal.AdalError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
@@ -1092,10 +968,9 @@ class SubscriptionFinder(object):
         return all_subscriptions
 
     def find_using_specific_tenant(self, tenant, credential):
-        from msrest.authentication import BasicTokenAuthentication
-        scope = self._graph_resource_id + '.default'
-        token_credential = BasicTokenAuthentication({'access_token': credential.get_token(scope).token})
-        client = self._arm_client_factory(token_credential)
+        from azure.cli.core.authentication import AuthenticationWrapper
+        track1_credential = AuthenticationWrapper(credential, resource=self._graph_resource_id)
+        client = self._arm_client_factory(track1_credential)
         subscriptions = client.subscriptions.list()
         all_subscriptions = []
         for s in subscriptions:
