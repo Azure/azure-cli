@@ -324,6 +324,33 @@ class TagScenarioTest(ScenarioTest):
 
         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
+    def test_tag_incrementally(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vault': self.create_random_name('vault-', 30),
+        })
+
+        resource = self.cmd(
+            'resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+            checks=self.check('name', '{vault}')).get_output_in_json()
+
+        self.kwargs['vault_id'] = resource['id']
+
+        self.cmd('resource tag --ids {vault_id} --tags cli-test=test cli-test2=test2', checks=self.check('tags', {'cli-test': 'test', 'cli-test2': 'test2'}))
+        self.cmd('resource tag --ids {vault_id} --tags cli-test3=test3 cli-test4=test4', checks=self.check('tags', {'cli-test3': 'test3', 'cli-test4': 'test4'}))
+
+        self.cmd('resource tag --ids {vault_id} --tags cli-test4=test4a cli-test5=test5 -i',
+                 checks=self.check('tags', {'cli-test3': 'test3', 'cli-test4': 'test4a', 'cli-test5': 'test5'}))
+
+        with self.assertRaises(CLIError):
+            self.cmd('resource tag --ids {vault_id} --tags -i ')
+        with self.assertRaises(CLIError):
+            self.cmd('resource tag --ids {vault_id} --tags "" -i ')
+        self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
+
+        self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+
     @ResourceGroupPreparer(name_prefix='cli_test_tag_default_location_scenario', location='westus')
     def test_tag_default_location_scenario(self, resource_group, resource_group_location):
 

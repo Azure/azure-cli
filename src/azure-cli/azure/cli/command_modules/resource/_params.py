@@ -93,6 +93,10 @@ def load_arguments(self, _):
         c.argument('scope', help='Fully-qualified scope for retrieving links.')
         c.argument('filter_string', options_list=['--filter', c.deprecate(target='--filter-string', redirect='--filter', hide=True)], help='Filter string for limiting results.')
 
+    with self.argument_context('resource tag') as c:
+        c.argument('is_incremental', action='store_true', options_list=['--is-incremental', '-i'],
+                   help='The option to add tags incrementally without deleting the original tags. If the key of new tag and original tag are duplicated, the original value will be overwritten.')
+
     with self.argument_context('provider') as c:
         c.ignore('top')
         c.argument('resource_provider_namespace', options_list=['--namespace', '-n'], completer=get_providers_completion_list, help=_PROVIDER_HELP_TEXT)
