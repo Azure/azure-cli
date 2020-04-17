@@ -553,7 +553,7 @@ def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     return success
 
 
-def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
                      body=None, skip_authorization_header=False, resource=None, output_file=None,
                      generated_client_request_id_name='x-ms-client-request-id'):
     import uuid
@@ -616,26 +616,26 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             result[key] = value
     uri_parameters = result or None
 
-    # If uri is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
+    # If url is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
     # default to Azure Resource Manager.
     # https://management.azure.com/ + subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
-    if '://' not in uri:
-        uri = cli_ctx.cloud.endpoints.resource_manager + uri.lstrip('/')
+    if '://' not in url:
+        url = cli_ctx.cloud.endpoints.resource_manager + url.lstrip('/')
 
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
     from azure.cli.core._profile import Profile
     profile = Profile()
-    if '{subscriptionId}' in uri:
-        uri = uri.replace('{subscriptionId}', profile.get_subscription_id())
+    if '{subscriptionId}' in url:
+        url = url.replace('{subscriptionId}', profile.get_subscription_id())
 
-    if not skip_authorization_header and uri.lower().startswith('https://'):
+    if not skip_authorization_header and url.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
-            # If uri starts with ARM endpoint, like https://management.azure.com/,
+            # If url starts with ARM endpoint, like https://management.azure.com/,
             # use active_directory_resource_id for resource.
             # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
-            if uri.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
                 resource = endpoints.active_directory_resource_id
             else:
                 from azure.cli.core.cloud import CloudEndpointNotSetException
@@ -644,7 +644,7 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
                         value = getattr(endpoints, p)
                     except CloudEndpointNotSetException:
                         continue
-                    if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
+                    if isinstance(value, six.string_types) and url.lower().startswith(value.lower()):
                         resource = value
                         break
         if resource:
@@ -659,7 +659,7 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     try:
         # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
         s = Session()
-        req = Request(method=method, url=uri, headers=headers, params=uri_parameters, data=body)
+        req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
         prepped = s.prepare_request(req)
 
         # Merge environment settings into session
