@@ -70,14 +70,14 @@ Release History
 **Monitor**
 
 * Support private link scenario for monitor (#12931)
-* fix wrong mocking way in test_monitor_general_operations.py
+* Fix wrong mocking way in test_monitor_general_operations.py
 
 **Network**
 
 * Deprecate sku for public ip update command (#12898)
 * `az network private-endpoint`: Support private dns zone group. (#13038)
 * Enable local context feature for vnet/subnet parameter (#13059)
-* fix wrong usage example in test_nw_flow_log_delete
+* Fix wrong usage example in test_nw_flow_log_delete
 
 **Packaging**
 
