@@ -692,3 +692,21 @@ examples:
   - name: Pause executing next line of CLI script until the Private DNS zone is successfully provisioned.
     text: az network private-dns zone wait -g MyResourceGroup -n www.mysite.com --created
 """
+
+helps['network private-dns zone export'] = """
+type: command
+short-summary: Export a Private DNS zone as a DNS zone file.
+examples:
+  - name: Export a Private DNS zone as a DNS zone file.
+    text: >
+        az network private-dns zone export -g MyResourceGroup -n www.mysite.com -f mysite_com_zone.txt
+"""
+
+helps['network private-dns zone import'] = """
+type: command
+short-summary: Create a Private DNS zone using a DNS zone file.
+examples:
+  - name: Import a local zone file into a Private DNS zone resource.
+    text: >
+        az network private-dns zone import -g MyResourceGroup -n MyZone -f /path/to/zone/file
+"""
