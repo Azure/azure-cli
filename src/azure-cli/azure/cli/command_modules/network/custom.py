@@ -2489,6 +2489,51 @@ def list_private_endpoints(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
+
+
+def create_private_endpoint_private_dns_zone_group(cmd, resource_group_name, private_endpoint_name,
+                                                   private_dns_zone_group_name,
+                                                   private_dns_zone_name, private_dns_zone):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    PrivateDnsZoneGroup, PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneGroup', 'PrivateDnsZoneConfig')
+    private_dns_zone_group = PrivateDnsZoneGroup(name=private_dns_zone_group_name,
+                                                 private_dns_zone_configs=[PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone,  # pylint: disable=line-too-long
+                                                                                                name=private_dns_zone_name)])  # pylint: disable=line-too-long
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zone_group)
+
+
+def add_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
+                                          private_dns_zone_group_name,
+                                          private_dns_zone_name, private_dns_zone):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneConfig')
+    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
+                                        private_endpoint_name=private_endpoint_name,
+                                        private_dns_zone_group_name=private_dns_zone_group_name)
+    private_dns_zone = PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone, name=private_dns_zone_name)
+    private_dns_zone_group.private_dns_zone_configs.append(private_dns_zone)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zone_group)
+
+
+def remove_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
+                                             private_dns_zone_group_name,
+                                             private_dns_zone_name):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
+                                        private_endpoint_name=private_endpoint_name,
+                                        private_dns_zone_group_name=private_dns_zone_group_name)
+    private_dns_zone_configs = [item for item in private_dns_zone_group.private_dns_zone_configs if item.name != private_dns_zone_name]  # pylint: disable=line-too-long
+    private_dns_zone_group.private_dns_zone_configs = private_dns_zone_configs
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zone_group)
 # endregion
 
 
