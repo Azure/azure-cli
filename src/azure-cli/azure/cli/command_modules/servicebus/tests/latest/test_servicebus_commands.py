@@ -277,7 +277,12 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             'topicname': self.create_random_name(prefix='sb-topiccli', length=25),
             'topicauthoname': self.create_random_name(prefix='cliTopicAutho', length=25),
             'subscriptionname': self.create_random_name(prefix='sb-subscli', length=25),
-            'lockduration': 'PT3M'
+            'lockduration': 'PT4M',
+            'defaultmessagetimetolive': 'PT7M',
+            'autodeleteonidle': 'P9D',
+            'maxdelivery': '3',
+            'false': 'false',
+            'true': 'true'
         })
 
         # Create Namespace
@@ -312,9 +317,19 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             'servicebus topic subscription list --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname}')
 
         # update Subscription
-        self.cmd(
-            'servicebus topic subscription update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {subscriptionname} --lock-duration {lockduration}',
-            checks=[self.check('name', '{subscriptionname}')])
+        updatesubscription = self.cmd(
+            'servicebus topic subscription update --resource-group {rg} --namespace-name {namespacename} --topic-name '
+            '{topicname} --name {subscriptionname} --max-delivery {maxdelivery} '
+            '--default-message-time-to-live {defaultmessagetimetolive} --dead-letter-on-filter-exceptions {false}'
+            ' --enable-dead-lettering-on-message-expiration {false} --auto-delete-on-idle {autodeleteonidle}'
+            ' --default-message-time-to-live {defaultmessagetimetolive} --lock-duration {lockduration}').output
+
+        self.check('updatesubscription.name', '{subscriptionname}'),
+        self.check('updatesubscription.lockDuration', '0:04:00'),
+        self.check('updatesubscription.maxDeliveryCount', '3'),
+        self.check('updatesubscription.defaultMessageTimeToLive', '0:07:00'),
+        self.check('updatesubscription.autoDeleteOnIdle', '9 days, 0:00:00'),
+        self.check('updatesubscription.deadLetteringOnFilterEvaluationExceptions', '{false}')
 
         # Delete Subscription
         self.cmd(

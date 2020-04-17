@@ -132,51 +132,51 @@ def cli_sbqueue_update(instance, lock_duration=None,
     returnobj = SBQueue()
 
     if lock_duration:
-        returnobj.lock_duration = return_valid_duration(instance, 'lock_duration', lock_duration)
+        instance.lock_duration = return_valid_duration(instance, 'lock_duration', lock_duration)
 
     if max_size_in_megabytes:
-        returnobj.max_size_in_megabytes = max_size_in_megabytes
+        instance.max_size_in_megabytes = max_size_in_megabytes
 
     if requires_duplicate_detection:
-        returnobj.requires_duplicate_detection = requires_duplicate_detection
+        instance.requires_duplicate_detection = requires_duplicate_detection
 
     if requires_session:
-        returnobj.requires_session = requires_session
+        instance.requires_session = requires_session
 
     if default_message_time_to_live:
-        returnobj.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
+        instance.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
 
     if dead_lettering_on_message_expiration:
-        returnobj.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
+        instance.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
 
     if duplicate_detection_history_time_window:
-        returnobj.duplicate_detection_history_time_window = return_valid_duration(instance, 'duplicate_detection_history_time_window', duplicate_detection_history_time_window)
+        instance.duplicate_detection_history_time_window = return_valid_duration(instance, 'duplicate_detection_history_time_window', duplicate_detection_history_time_window)
 
     if max_delivery_count:
-        returnobj.max_delivery_count = max_delivery_count
+        instance.max_delivery_count = max_delivery_count
 
     if status:
-        returnobj.status = status
+        instance.status = status
 
     if auto_delete_on_idle:
-        returnobj.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
+        instance.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
 
     if enable_partitioning:
-        returnobj.enable_partitioning = enable_partitioning
+        instance.enable_partitioning = enable_partitioning
 
     if enable_express:
-        returnobj.enable_express = enable_express
+        instance.enable_express = enable_express
 
     if forward_to:
-        returnobj.forward_to = forward_to
+        instance.forward_to = forward_to
 
     if forward_dead_lettered_messages_to:
-        returnobj.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
+        instance.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
 
     if enable_batched_operations:
-        returnobj.enable_batched_operations = enable_batched_operations
+        instance.enable_batched_operations = enable_batched_operations
 
-    return returnobj
+    return instance
 
 
 # Topic Region
@@ -219,36 +219,36 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
     topic_params = SBTopic()
 
     if default_message_time_to_live:
-        topic_params.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
+        instance.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
 
     if max_size_in_megabytes:
-        topic_params.max_size_in_megabytes = max_size_in_megabytes
+        instance.max_size_in_megabytes = max_size_in_megabytes
 
     if requires_duplicate_detection:
-        topic_params.requires_duplicate_detection = requires_duplicate_detection
+        instance.requires_duplicate_detection = requires_duplicate_detection
 
     if duplicate_detection_history_time_window:
-        topic_params.duplicate_detection_history_time_window = return_valid_duration(instance, 'duplicate_detection_history_time_window', duplicate_detection_history_time_window)
+        instance.duplicate_detection_history_time_window = return_valid_duration(instance, 'duplicate_detection_history_time_window', duplicate_detection_history_time_window)
 
     if enable_batched_operations:
-        topic_params.enable_batched_operations = enable_batched_operations
+        instance.enable_batched_operations = enable_batched_operations
 
     if status:
-        topic_params.status = status
+        instance.status = status
 
     if support_ordering:
-        topic_params.support_ordering = support_ordering
+        instance.support_ordering = support_ordering
 
     if auto_delete_on_idle:
-        topic_params.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
+        instance.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
 
     if enable_partitioning:
-        topic_params.enable_partitioning = enable_partitioning
+        instance.enable_partitioning = enable_partitioning
 
     if enable_express:
-        topic_params.enable_express = enable_express
+        instance.enable_express = enable_express
 
-    return topic_params
+    return instance
 
 
 # Subscription Region
@@ -289,38 +289,38 @@ def cli_sbsubscription_update(instance, lock_duration=None,
     subscription_params = SBSubscription()
 
     if lock_duration:
-        subscription_params.lock_duration = return_valid_duration(instance, 'lock_duration', lock_duration)
+        instance.lock_duration = return_valid_duration(instance, 'lock_duration', lock_duration)
 
     if requires_session:
-        subscription_params.requires_session = requires_session
+        instance.requires_session = requires_session
 
     if default_message_time_to_live:
-        subscription_params.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
+        instance.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
 
     if dead_lettering_on_message_expiration:
-        subscription_params.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
+        instance.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
 
     if max_delivery_count:
-        subscription_params.max_delivery_count = max_delivery_count
+        instance.max_delivery_count = max_delivery_count
 
     if status:
-        subscription_params.status = status
+        instance.status = status
 
-    if lock_duration:
-        subscription_params.enable_batched_operations = enable_batched_operations
+    if enable_batched_operations:
+        instance.enable_batched_operations = enable_batched_operations
 
-    subscription_params.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
+    instance.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
 
     if forward_to:
-        subscription_params.forward_to = forward_to
+        instance.forward_to = forward_to
 
     if forward_dead_lettered_messages_to:
-        subscription_params.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
+        instance.forward_dead_lettered_messages_to = forward_dead_lettered_messages_to
 
-    if dead_lettering_on_filter_evaluation_exceptions:
-        subscription_params.dead_lettering_on_filter_evaluation_exceptions = dead_lettering_on_filter_evaluation_exceptions
+    if dead_lettering_on_filter_evaluation_exceptions is not None:
+        instance.dead_lettering_on_filter_evaluation_exceptions = dead_lettering_on_filter_evaluation_exceptions
 
-    return subscription_params
+    return instance
 
 
 # Rule Region
