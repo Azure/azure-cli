@@ -21,6 +21,7 @@ from azure.cli.core._session import ACCOUNT
 from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
     is_windows, is_wsl
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
+from azure.cli.core._identity import *
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -68,7 +69,6 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
                                           'isUserIdDisplayable',
                                           'tenantId']
 
-_CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
@@ -198,13 +198,13 @@ class Profile(object):
             if not use_device_code:
                 from azure.identity import CredentialUnavailableError
                 try:
-                    credential, auth_profile = self.login_with_interactive_browser(tenant)
+                    credential, auth_profile = login_with_interactive_browser(tenant)
                 except CredentialUnavailableError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
-                credential, auth_profile = self.login_with_device_code(tenant)
+                credential, auth_profile = login_with_device_code(tenant)
         else:
             if is_service_principal:
                 if not tenant:
@@ -214,7 +214,7 @@ class Profile(object):
                 else:
                     credential = self.login_with_service_principal_secret(username, password, tenant)
             else:
-                credential, auth_profile = self.login_with_username_password(username, password, tenant)
+                credential, auth_profile = login_with_username_password(username, password, tenant)
 
         # List tenants and find subscriptions by calling ARM
         subscriptions = []
@@ -256,53 +256,6 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def login_with_interactive_browser(self, tenant_id):
-        # Use InteractiveBrowserCredential
-        from azure.identity import AuthenticationRequiredError, InteractiveBrowserCredential
-        if tenant_id:
-            credential, auth_profile = InteractiveBrowserCredential.authenticate(
-                client_id=_CLIENT_ID,
-                silent_auth_only=True,
-                scope=self._msal_scope,
-                tenant_id=tenant_id
-            )
-        else:
-            credential, auth_profile = InteractiveBrowserCredential.authenticate(
-                client_id=_CLIENT_ID,
-                silent_auth_only=True,
-                scope=self._msal_scope
-            )
-        return credential, auth_profile
-
-    def login_with_device_code(self, tenant_id):
-        # Use DeviceCodeCredential
-        from azure.identity import AuthenticationRequiredError, DeviceCodeCredential
-        message = 'To sign in, use a web browser to open the page {} and enter the code {} to authenticate.'
-        prompt_callback=lambda verification_uri, user_code, expires_on: \
-            logger.warning(message.format(verification_uri, user_code))
-        if tenant_id:
-            cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
-                                                                   scope=self._msal_scope,
-                                                                   tenant_id=tenant_id,
-                                                                   prompt_callback=prompt_callback)
-        else:
-            cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
-                                                                   scope=self._msal_scope,
-                                                                   prompt_callback=prompt_callback)
-        return cred, auth_profile
-
-    def login_with_username_password(self, username, password, tenant_id):
-        # Use UsernamePasswordCredential
-        from azure.identity import AuthenticationRequiredError, UsernamePasswordCredential, AuthProfile
-        if tenant_id:
-            credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password,
-                                                                               tenant_id=tenant_id,
-                                                                               scope=self._msal_scope)
-        else:
-            credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password,
-                                                                               scope=self._msal_scope)
-        return credential, auth_profile
-
     def login_with_service_principal_secret(self, client_id, client_secret, tenant_id):
         # Use ClientSecretCredential
         from azure.identity import AuthenticationRequiredError, ClientSecretCredential
@@ -327,10 +280,6 @@ class Profile(object):
         entry = sp_auth.get_entry_to_persist()
         self._creds_cache.save_service_principal_cred(entry)
         return credential
-
-    def login_with_msi(self):
-        # Use ManagedIdentityCredential
-        pass
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
                               user_assigned_identity_id=None, home_account_id=None):
@@ -647,13 +596,6 @@ class Profile(object):
         identity_type, _ = Profile._try_parse_msi_account_name(account)
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
 
-        from azure.identity import (
-            AuthProfile,
-            InteractiveBrowserCredential,
-            ClientSecretCredential,
-            CertificateCredential,
-            ManagedIdentityCredential
-        )
         if identity_type is None:
             if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
                 if aux_tenant_id:
@@ -663,22 +605,18 @@ class Profile(object):
             # User
             if user_type == _USER:
                 authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-                auth_profile = AuthProfile(authority, home_account_id, tenant_id, username_or_sp_id)
-                return InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True)
+                return get_user_credential(authority, home_account_id, tenant_id, username_or_sp_id)
 
             # Service Principal
             use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
             # todo: get service principle key
-            # if client_secret:
-            #     return ClientSecretCredential(tenant_id, client_id, client_secret, use_cert_sn_issuer=use_cert_sn_issuer)
-            # if certificate
-            #     return CertificateCredential(tenant_id, client_id, certificate_path)
+            return get_service_principal_credential()
 
         # MSI
         # todo: MSI identity_id
         if aux_tenant_id:
             raise CLIError("Tenant shouldn't be specified for MSI account")
-        return ManagedIdentityCredential()
+        return get_msi_credential()
 
     def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
         if aux_tenants and aux_subscriptions:
@@ -890,8 +828,6 @@ class SubscriptionFinder(object):
 
     def find_using_common_tenant(self, auth_profile, credential=None):
         import adal
-        from azure.identity import InteractiveBrowserCredential, AuthProfile, AuthenticationRequiredError, UsernamePasswordCredential
-
         all_subscriptions = []
         empty_tenants = []
         mfa_tenants = []
@@ -911,11 +847,8 @@ class SubscriptionFinder(object):
                 t.display_name = t.additional_properties.get('displayName')
 
             try:
-                from azure.cli.core._credential import IdentityCredential
-                specific_tenant_credential = IdentityCredential(home_account_id=auth_profile.home_account_id,
-                                                                authority=auth_profile.environment,
-                                                                tenant_id=tenant_id,
-                                                                username=auth_profile.username)
+                specific_tenant_credential = get_user_credential(auth_profile.environment, auth_profile.home_account_id, tenant_id, auth_profile.username)
+
             # TODO: handle MSAL exceptions
             except adal.AdalError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
@@ -1173,126 +1106,3 @@ class ServicePrincipalAuth(object):
             entry[_SERVICE_PRINCIPAL_CERT_THUMBPRINT] = self.thumbprint
 
         return entry
-
-
-class ClientRedirectServer(BaseHTTPServer.HTTPServer):  # pylint: disable=too-few-public-methods
-    query_params = {}
-
-
-class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-    # pylint: disable=line-too-long
-
-    def do_GET(self):
-        try:
-            from urllib.parse import parse_qs
-        except ImportError:
-            from urlparse import parse_qs  # pylint: disable=import-error
-
-        if self.path.endswith('/favicon.ico'):  # deal with legacy IE
-            self.send_response(204)
-            return
-
-        query = self.path.split('?', 1)[-1]
-        query = parse_qs(query, keep_blank_values=True)
-        self.server.query_params = query
-
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
-        landing_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'auth_landing_pages',
-                                    'ok.html' if 'code' in query else 'fail.html')
-        with open(landing_file, 'rb') as html_file:
-            self.wfile.write(html_file.read())
-
-    def log_message(self, format, *args):  # pylint: disable=redefined-builtin,unused-argument,no-self-use
-        pass  # this prevent http server from dumping messages to stdout
-
-
-def _get_authorization_code_worker(authority_url, resource, results):
-    import socket
-    import random
-
-    reply_url = None
-
-    # On Windows, HTTPServer by default doesn't throw error if the port is in-use
-    # https://github.com/Azure/azure-cli/issues/10578
-    if is_windows():
-        logger.debug('Windows is detected. Set HTTPServer.allow_reuse_address to False')
-        ClientRedirectServer.allow_reuse_address = False
-    elif is_wsl():
-        logger.debug('WSL is detected. Set HTTPServer.allow_reuse_address to False')
-        ClientRedirectServer.allow_reuse_address = False
-
-    for port in range(8400, 9000):
-        try:
-            web_server = ClientRedirectServer(('localhost', port), ClientRedirectHandler)
-            reply_url = "http://localhost:{}".format(port)
-            break
-        except socket.error as ex:
-            logger.warning("Port '%s' is taken with error '%s'. Trying with the next one", port, ex)
-
-    if reply_url is None:
-        logger.warning("Error: can't reserve a port for authentication reply url")
-        return
-
-    try:
-        request_state = ''.join(random.SystemRandom().choice(string.ascii_lowercase + string.digits) for _ in range(20))
-    except NotImplementedError:
-        request_state = 'code'
-
-    # launch browser:
-    url = ('{0}/oauth2/authorize?response_type=code&client_id={1}'
-           '&redirect_uri={2}&state={3}&resource={4}&prompt=select_account')
-    url = url.format(authority_url, _CLIENT_ID, reply_url, request_state, resource)
-    logger.info('Open browser with url: %s', url)
-    succ = open_page_in_browser(url)
-    if succ is False:
-        web_server.server_close()
-        results['no_browser'] = True
-        return
-
-    # wait for callback from browser.
-    while True:
-        web_server.handle_request()
-        if 'error' in web_server.query_params or 'code' in web_server.query_params:
-            break
-
-    if 'error' in web_server.query_params:
-        logger.warning('Authentication Error: "%s". Description: "%s" ', web_server.query_params['error'],
-                       web_server.query_params.get('error_description'))
-        return
-
-    if 'code' in web_server.query_params:
-        code = web_server.query_params['code']
-    else:
-        logger.warning('Authentication Error: Authorization code was not captured in query strings "%s"',
-                       web_server.query_params)
-        return
-
-    if 'state' in web_server.query_params:
-        response_state = web_server.query_params['state'][0]
-        if response_state != request_state:
-            raise RuntimeError("mismatched OAuth state")
-    else:
-        raise RuntimeError("missing OAuth state")
-
-    results['code'] = code[0]
-    results['reply_url'] = reply_url
-
-
-def _get_authorization_code(resource, authority_url):
-    import threading
-    import time
-    results = {}
-    t = threading.Thread(target=_get_authorization_code_worker,
-                         args=(authority_url, resource, results))
-    t.daemon = True
-    t.start()
-    while True:
-        time.sleep(2)  # so that ctrl+c can stop the command
-        if not t.is_alive():
-            break  # done
-    if results.get('no_browser'):
-        raise RuntimeError()
-    return results
