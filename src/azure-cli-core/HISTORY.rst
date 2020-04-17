@@ -7,9 +7,12 @@ Release History
 ++++++
 * Upgrade msrestazure to 0.6.3 (#12839)
 * Output more error details of exceptions if possible (#12945)
-* Support track1 and track2 mgmt SDK side by side in CLI (#12952)
+* Support track1 and track2 mgmt SDK side by side (#12952)
 * Fix generic remove property NoneType exception (#12950)
 * `az --version`: Show command instruction and detailed instruction link when updates available (#12981)
+* Fix bug in core test test_parser that will affect exception stack while existing if argument parse raise Exception
+* Make CLI respect file logging configuration option: enable_log_file and AZURE_LOGGING_ENABLE_LOG_FILE env variable
+* Fix the name of extension of dev type is None if it has incompatibility problem with core
 
 2.3.1
 ++++++

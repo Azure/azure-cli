@@ -13,18 +13,15 @@ Release History
 
 **AKS**
 
-* az aks list -o table should show privateFqdn as fqdn for private clusters (#12784)
+* `az aks list -o table` should show privateFqdn as fqdn for private clusters (#12784)
 * Add --uptime-sla (#12772)
 * Update containerservice package (#12964)
-* Add node public IP support in CLI extension. (#13015)
-* Fixing typo in the help command (#13055)
+* Add node public IP support. (#13015)
+* Fix typo in the help command (#13055)
 
 **AppConfig**
 
 * Resolve key vault reference for kv list and export commands (#12893)
-
-**Appconfig**
-
 * Bug fix for list key values (#12926)
 
 **AppService**
@@ -59,6 +56,7 @@ Release History
 * `az vm/vmss create`: Add support for specialized image version (#12997)
 * SIG API Version 2019-12-01. (#12899)
 * `az sig image-version create`: Add --target-region-encryption. (#12899)
+* Fix tests fail when running in serial due to keyvault name is duplicated in global in-momery cache
 
 **CosmosDB**
 
@@ -72,12 +70,14 @@ Release History
 **Monitor**
 
 * Support private link scenario for monitor (#12931)
+* fix wrong mocking way in test_monitor_general_operations.py
 
 **Network**
 
 * Deprecate sku for public ip update command (#12898)
 * `az network private-endpoint`: Support private dns zone group. (#13038)
 * Enable local context feature for vnet/subnet parameter (#13059)
+* fix wrong usage example in test_nw_flow_log_delete
 
 **Packaging**
 
@@ -93,16 +93,13 @@ Release History
 
 **Service Fabric**
 
-* Fix #12891: az sf application update --application-parameters removes old parameters that are not in the request (#12992)
-
-**ServiceFabric**
-
+* Fix #12891: `az sf application update --application-parameters` removes old parameters that are not in the request (#12992)
 * Fix #12470 az sf create cluster, fix bugs in update durability and reliability and find vmss correctly through the code given a node type name (#12731)
 
 **SQL**
 
-* Add az sql mi op list, az sql mi op get, az sql mi op cancel (#12667)
-* Sql midb Add: update/show long term retention policy,  show/delete long term retention backups, restore long term retention backup (#12712)
+* Add `az sql mi op list`, `az sql mi op get`, `az sql mi op cancel` (#12667)
+* `az sql midb`: update/show long term retention policy,  show/delete long term retention backups, restore long term retention backup (#12712)
 
 **Storage**
 
