@@ -242,6 +242,8 @@ AZURE_PUBLIC_CLOUD = Cloud(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
         sql_server_hostname='.database.windows.net',
+        mysql_server_hostname='.database.azure.com',
+        postgresql_server_hostname='.database.azure.com',
         azure_datalake_store_file_system_endpoint='azuredatalakestore.net',
         azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net',
         acr_login_server_endpoint='.azurecr.io'))
@@ -268,6 +270,8 @@ AZURE_CHINA_CLOUD = Cloud(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
         sql_server_hostname='.database.chinacloudapi.cn',
+        mysql_server_hostname='.database.chinacloudapi.cn',
+        postgresql_server_hostname='.database.chinacloudapi.cn',
         acr_login_server_endpoint='.azurecr.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
@@ -292,6 +296,8 @@ AZURE_US_GOV_CLOUD = Cloud(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
         sql_server_hostname='.database.usgovcloudapi.net',
+        mysql_server_hostname='.database.usgovcloudapi.net',
+        postgresql_server_hostname='.database.usgovcloudapi.net',
         acr_login_server_endpoint='.azurecr.us'))
 
 AZURE_GERMAN_CLOUD = Cloud(
@@ -312,7 +318,9 @@ AZURE_GERMAN_CLOUD = Cloud(
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',
-        sql_server_hostname='.database.cloudapi.de'))
+        sql_server_hostname='.database.cloudapi.de',
+        mysql_server_hostname='.database.cloudapi.de',
+        postgresql_server_hostname='.database.cloudapi.de'))
 
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
