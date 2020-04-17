@@ -2808,6 +2808,9 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
         vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
         data_disks = vmss_vm.storage_profile.data_disks
 
+    if not data_disks:
+        raise CLIError("Data disk doesn't exist")
+
     leftovers = [d for d in data_disks if d.lun != lun]
     if len(data_disks) == len(leftovers):
         raise CLIError("Could not find the data disk with lun '{}'".format(lun))
