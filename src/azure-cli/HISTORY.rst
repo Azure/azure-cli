@@ -60,7 +60,7 @@ Release History
 
 **CosmosDB**
 
-* Support az cosmosdb private-link-resource and private-endpoint-connection (#12960)
+* Support `az cosmosdb private-link-resource/private-endpoint-connection` (#12960)
 
 **IoT Central**
 
