@@ -86,7 +86,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         parse_result = parse_resource_id(plan)
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
-        plan_info = client.app_service_plans.get(resource_group_name, plan)
+        plan_info = _get_plan_by_name(client, plan)
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved
@@ -3529,3 +3529,13 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
             verified_hostname_found = True
 
     return verified_hostname_found
+
+def _get_plan_by_name(client, plan):
+    plan_info = None
+    plan_list = client.app_service_plans.list()
+    if plan_list:
+        candidate_plans = list(filter(lambda x: x.name == plan, plan_list))
+        if candidate_plans:
+            plan_info = candidate_plans[0]
+
+    return plan_info
