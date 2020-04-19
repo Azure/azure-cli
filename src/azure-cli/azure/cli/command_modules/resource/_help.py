@@ -1850,7 +1850,7 @@ long-summary: >
     attaches header `Authorization: Bearer <token>`, where `<token>` is retrieved from AAD. The target resource of the
     token is derived from --url if --url starts with an endpoint from `az cloud show --query endpoints`. You may also
     use --resource for a custom resource.
-    
+
     If Content-Type header is not set and --body is a valid JSON string, Content-Type header will default to
     application/json.
 examples:
