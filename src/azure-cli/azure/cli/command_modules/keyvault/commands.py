@@ -159,7 +159,7 @@ def load_command_table(self, _):
                            transform=transform_secret_property_list(deleted=True))
         g.keyvault_command('set', 'set_secret', validator=process_secret_set_namespace,
                            transform=transform_secret)
-        g.keyvault_command('set-attributes', 'update_secret')
+        g.keyvault_command('set-attributes', 'update_secret_properties')
         g.keyvault_command('show', 'get_secret')
         g.keyvault_command('show-deleted', 'get_deleted_secret')
         g.keyvault_command('delete', 'delete_secret')

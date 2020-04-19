@@ -45,8 +45,8 @@ def load_arguments(self, _):
 
     KeyAttributes = self.get_models('KeyAttributes', import_prefix='azure.keyvault.keys._shared._generated',
                                     resource_type=ResourceType.DATA_KEYVAULT_KEYS)
-    SecretAttributes = self.get_models('SecretAttributes', import_prefix='azure.keyvault.secrets._shared._generated',
-                                       resource_type=ResourceType.DATA_KEYVAULT_SECRETS)
+    KeyVaultSecret = self.get_models('KeyVaultSecret', no_version=True, mod='_models',
+                                     resource_type=ResourceType.DATA_KEYVAULT_SECRETS)
     CertificateAttributes = self.get_models('CertificateAttributes',
                                             import_prefix='azure.keyvault.certificates._shared._generated',
                                             resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES)
@@ -253,7 +253,7 @@ def load_arguments(self, _):
                 help='Description of the secret contents (e.g. password, connection string, etc)')
         c.extra('tags', tags_type,
                 help='Space-separated tags: key[=value] [key[=value] ...]. Use \'\' to clear existing tags.')
-        c.attributes_argument('secret', SecretAttributes, create=True)
+        c.attributes_argument('secret', KeyVaultSecret, create=True)
 
     with self.argument_context('keyvault secret set', arg_group='Id') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the secret.'.format(item),
@@ -272,7 +272,7 @@ def load_arguments(self, _):
                      'and used during download to automatically encode the resulting file.')
 
     with self.argument_context('keyvault secret set-attributes') as c:
-        c.attributes_argument('secret', SecretAttributes)
+        c.attributes_argument('secret', KeyVaultSecret.properties)
 
     with self.argument_context('keyvault secret download') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')

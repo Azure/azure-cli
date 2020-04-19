@@ -100,7 +100,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
 
             class_name = op.__qualname__.split('.')[0]
             if class_name in ['KeyClient', 'SecretClient', 'CertificateClient']:
-                abandoned_args = ['vault_base_url', 'identifier', 'no_wait', 'secret_attributes']
+                abandoned_args = ['vault_base_url', 'identifier', 'no_wait']
                 for abandoned_arg in abandoned_args:
                     if abandoned_arg in command_args:
                         command_args.pop(abandoned_arg)
@@ -111,10 +111,11 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 if 'expires' in command_args:
                     command_args['expires_on'] = command_args.pop('expires')
 
-                if command_args.get('disabled') is not None:
-                    command_args['enabled'] = not command_args.pop('disabled')
-                else:
-                    command_args.pop('disabled')
+                if 'disabled' in command_args:
+                    if command_args.get('disabled') is not None:
+                        command_args['enabled'] = not command_args.pop('disabled')
+                    else:
+                        command_args.pop('disabled')
 
             try:
                 result = op(**command_args)
