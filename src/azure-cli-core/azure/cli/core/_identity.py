@@ -62,12 +62,13 @@ class Identity:
         if self.tenant_id:
             credential, auth_profile = InteractiveBrowserCredential.authenticate(
                 client_id=_CLIENT_ID,
+                authority=self.authority,
                 tenant_id=self.tenant_id
             )
         else:
             credential, auth_profile = InteractiveBrowserCredential.authenticate(
-                client_id=_CLIENT_ID,
-                silent_auth_only=True
+                authority=self.authority,
+                client_id=_CLIENT_ID
             )
         return credential, auth_profile
 
@@ -78,10 +79,12 @@ class Identity:
             logger.warning(message.format(verification_uri, user_code))
         if self.tenant_id:
             cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
+                                                                   authority=self.authority,
                                                                    tenant_id=self.tenant_id,
                                                                    prompt_callback=prompt_callback)
         else:
             cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
+                                                                   authority=self.authority,
                                                                    prompt_callback=prompt_callback)
         return cred, auth_profile
 
@@ -89,9 +92,11 @@ class Identity:
         # Use UsernamePasswordCredential
         if self.tenant_id:
             credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password,
+                                                                               authority=self.authority,
                                                                                tenant_id=self.tenant_id)
         else:
-            credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password)
+            credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password,
+                                                                               authority=self.authority)
         return credential, auth_profile
 
     def login_with_service_principal_secret(self, client_id, client_secret):
@@ -103,7 +108,7 @@ class Identity:
         cred_cache = ServicePrincipalCredentialCache()
         cred_cache.save_service_principal_cred(entry)
 
-        credential = ClientSecretCredential(self.tenant_id, client_id, client_secret)
+        credential = ClientSecretCredential(self.tenant_id, client_id, client_secret, authority=self.authority)
         return credential
 
     def login_with_service_principal_certificate(self, client_id, certificate_path):
@@ -116,7 +121,7 @@ class Identity:
         cred_cache.save_service_principal_cred(entry)
 
         # TODO: support use_cert_sn_issuer in CertificateCredential
-        credential = CertificateCredential(self.tenant_id, client_id, certificate_path)
+        credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
         return credential
 
     def login_with_msi(self):
