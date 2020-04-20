@@ -92,6 +92,7 @@ Steps to reproduce the behavior. Note that argument values have been redacted, a
 ```
 {platform}
 {python_info}
+{installer}
 
 {cli_version}
 ```
@@ -514,6 +515,8 @@ def _build_issue_info_tup(command_log_file=None):
     format_dict["python_info"] = "Python {}".format(platform.python_version())
     format_dict["platform"] = "{}".format(platform.platform())
     format_dict["auto_gen_comment"] = _AUTO_GEN_COMMENT
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+    format_dict["installer"] = "Installer: {}".format(os.getenv(_ENV_AZ_INSTALLER) or '')
 
     pretty_url_name = _get_extension_repo_url(ext_name) if is_ext else _CLI_ISSUES_URL
 

@@ -11,7 +11,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_mgmt_policy,
                                                                cf_blob_data_gen_update, cf_sa_for_keys,
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
-                                                               cf_private_link, cf_private_endpoint)
+                                                               cf_private_link, cf_private_endpoint,
+                                                               cf_mgmt_encryption_scope)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -120,6 +121,27 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account', cloud_data_plane_sdk) as g:
         g.storage_command('generate-sas', 'generate_shared_access_signature')
 
+    encryption_scope_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.storage.operations#EncryptionScopesOperations.{}',
+        client_factory=cf_mgmt_encryption_scope,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    encryption_scope_custom_type = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
+        client_factory=cf_mgmt_encryption_scope,
+        resource_type=ResourceType.MGMT_STORAGE
+    )
+
+    with self.command_group('storage account encryption-scope', encryption_scope_sdk,
+                            custom_command_type=encryption_scope_custom_type, is_preview=True,
+                            resource_type=ResourceType.MGMT_STORAGE, min_api='2019-06-01') as g:
+
+        g.custom_command('create', 'create_encryption_scope')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.custom_command('update', 'update_encryption_scope')
+
     management_policy_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.storage.operations#ManagementPoliciesOperations.{}',
         client_factory=cf_mgmt_policy,
@@ -184,6 +206,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command('show', 'get_logging',
                           table_transformer=transform_logging_list_output,
                           exception_handler=show_exception_handler)
+        g.storage_command('off', 'disable_logging', is_preview=True)
 
     with self.command_group('storage metrics', get_custom_sdk('metrics', multi_service_properties_factory)) as g:
         from ._transformers import transform_metrics_list_output
@@ -298,7 +321,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                      transform_acl_list_output)
         from azure.cli.command_modules.storage._format import (transform_container_list, transform_boolean_for_table,
                                                                transform_container_show)
-        from ._validators import process_container_delete_parameters
+        from ._validators import process_container_delete_parameters, validate_client_auth_parameter
 
         g.storage_command_oauth('list', 'list_containers', transform=transform_storage_list_output,
                                 table_transformer=transform_container_list)
@@ -308,10 +331,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        table_transformer=transform_boolean_for_table)
         g.storage_command_oauth('show', 'get_container_properties', table_transformer=transform_container_show,
                                 exception_handler=show_exception_handler)
-        g.storage_command_oauth('create', 'create_container',
-                                transform=create_boolean_result_output_transformer(
-                                    'created'),
-                                table_transformer=transform_boolean_for_table)
+        g.storage_custom_command_oauth('create', 'create_container', validator=validate_client_auth_parameter,
+                                       client_factory=None,
+                                       transform=create_boolean_result_output_transformer('created'),
+                                       table_transformer=transform_boolean_for_table)
         g.storage_custom_command_oauth('generate-sas', 'generate_container_shared_access_signature',
                                        min_api='2018-11-09')
         g.storage_command_oauth(

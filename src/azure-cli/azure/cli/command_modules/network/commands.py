@@ -27,7 +27,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
-    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs)
+    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs, cf_private_dns_zone_groups)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -183,6 +183,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#PrivateEndpointsOperations.{}',
         client_factory=cf_private_endpoints,
         min_api='2018-08-01'
+    )
+
+    network_private_endpoint_dns_zone_group_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#PrivateDnsZoneGroupsOperations.{}',
+        client_factory=cf_private_dns_zone_groups,
+        min_api='2020-03-01'
     )
 
     network_private_link_service_sdk = CliCommandType(
@@ -697,6 +703,14 @@ def load_command_table(self, _):
             client_factory=cf_private_endpoint_types,
             min_api='2019-04-01'
         )
+
+    with self.command_group('network private-endpoint dns-zone-group', network_private_endpoint_dns_zone_group_sdk, min_api='2020-03-01') as g:
+        g.custom_command('create', 'create_private_endpoint_private_dns_zone_group')
+        g.custom_command('add', 'add_private_endpoint_private_dns_zone')
+        g.custom_command('remove', 'remove_private_endpoint_private_dns_zone')
+        g.command('delete', 'delete')
+        g.show_command('show')
+        g.command('list', 'list')
     # endregion
 
     # region PrivateLinkServices

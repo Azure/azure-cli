@@ -991,6 +991,41 @@ def cli_cosmosdb_network_rule_remove(cmd,
     return docdb_account
 
 
+def _update_private_endpoint_connection_status(client, resource_group_name, account_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, account_name=account_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    new_status = "Approved" if is_approved else "Rejected"
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   account_name=account_name,
+                                   private_endpoint_connection_name=private_endpoint_connection_name,
+                                   private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
+
+
+def approve_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
+                                        description=None):
+    """Approve a private endpoint connection request for Azure Cosmos DB."""
+
+    return _update_private_endpoint_connection_status(
+        client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=True,
+        description=description
+    )
+
+
+def reject_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
+                                       description=None):
+    """Reject a private endpoint connection request for Azure Cosmos DB."""
+
+    return _update_private_endpoint_connection_status(
+        client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=False,
+        description=description
+    )
+
+
 ######################
 # data plane APIs
 ######################

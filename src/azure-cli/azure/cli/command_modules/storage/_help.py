@@ -53,6 +53,8 @@ examples:
     text: az storage account blob-service-properties update --enable-change-feed true -n MyStorageAccount -g MyResourceGroup
   - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
     text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n MyStorageAccount -g MyResourceGroup
+  - name: Enable versioning for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-versioning -n MyStorageAccount -g MyResourceGroup
 """
 
 helps['storage account create'] = """
@@ -79,6 +81,59 @@ examples:
     text: az storage account delete --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Storage/storageAccounts/{StorageAccount}
   - name: Delete a storage account using an account name and resource group.
     text: az storage account delete -n MyStorageAccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope'] = """
+type: group
+short-summary: Manage encryption scope for a storage account.
+"""
+
+helps['storage account encryption-scope create'] = """
+type: command
+short-summary: Create an encryption scope within storage account.
+examples:
+  - name: Create an encryption scope within storage account based on Micosoft.Storage key source.
+    text: |
+        az storage account encryption-scope create --name myencryption -s Microsoft.Storage --account-name mystorageaccount -g MyResourceGroup
+  - name: Create an encryption scope within storage account based on Micosoft.KeyVault key source.
+    text: |
+        az storage account encryption-scope create --name myencryption -s Microsoft.KeyVault -u "https://vaultname.vault.azure.net/keys/keyname/1f7fa7edc99f4cdf82b5b5f32f2a50a7" --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope list'] = """
+type: command
+short-summary: List encryption scopes within storage account.
+examples:
+  - name: List encryption scopes within storage account.
+    text: |
+        az storage account encryption-scope list --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope show'] = """
+type: command
+short-summary: Show properties for specified encryption scope within storage account.
+examples:
+  - name: Show properties for specified encryption scope within storage account.
+    text: |
+        az storage account encryption-scope show --name myencryption --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope update'] = """
+type: command
+short-summary: Update properties for specified encryption scope within storage account.
+examples:
+  - name: Update an encryption scope key source to Micosoft.Storage.
+    text: |
+        az storage account encryption-scope update --name myencryption -s Microsoft.Storage --account-name mystorageaccount -g MyResourceGroup
+  - name: Create an encryption scope within storage account based on Micosoft.KeyVault key source.
+    text: |
+        az storage account encryption-scope update --name myencryption -s Microsoft.KeyVault -u "https://vaultname.vault.azure.net/keys/keyname/1f7fa7edc99f4cdf82b5b5f32f2a50a7" --account-name mystorageaccount -g MyResourceGroup
+  - name: Disable an encryption scope within storage account.
+    text: |
+        az storage account encryption-scope update --name myencryption --state Disabled --account-name mystorageaccount -g MyResourceGroup
+  - name: Enable an encryption scope within storage account.
+    text: |
+        az storage account encryption-scope update --name myencryption --state Enabled --account-name mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account generate-sas'] = """
@@ -1290,6 +1345,18 @@ examples:
 helps['storage logging'] = """
 type: group
 short-summary: Manage storage service logging information.
+"""
+
+helps['storage logging off'] = """
+type: command
+short-summary: Turn off logging for a storage account.
+parameters:
+  - name: --services
+    short-summary: 'The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.'
+examples:
+  - name: Turn off logging for a storage account.
+    text: |
+        az storage logging off --account-name MyAccount
 """
 
 helps['storage logging show'] = """

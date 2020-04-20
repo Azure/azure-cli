@@ -113,6 +113,11 @@ def get_vnet_validator(dest):
     return _validate_vnet_name_or_id
 
 
+def _validate_vpn_gateway_generation(namespace):
+    if namespace.gateway_type != 'Vpn' and namespace.vpn_gateway_generation:
+        raise CLIError('vpn_gateway_generation should not be provided if gateway_type is not Vpn.')
+
+
 def validate_ddos_name_or_id(cmd, namespace):
 
     if namespace.ddos_protection_plan:
@@ -706,6 +711,17 @@ def validate_target_listener(cmd, namespace):
             child_name_1=namespace.target_listener)
 
 
+def validate_private_dns_zone(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.private_dns_zone and not is_valid_resource_id(namespace.private_dns_zone):
+        namespace.private_dns_zone = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            name=namespace.private_dns_zone,
+            namespace='Microsoft.Network',
+            type='privateDnsZones')
+
+
 def get_virtual_network_validator(has_type_field=False, allow_none=False, allow_new=False,
                                   default_none=False):
     from msrestazure.tools import is_valid_resource_id, resource_id
@@ -1049,6 +1065,8 @@ def process_vnet_gateway_create_namespace(cmd, namespace):
     ns = namespace
     get_default_location_from_resource_group(cmd, ns)
     validate_tags(ns)
+
+    _validate_vpn_gateway_generation(ns)
 
     get_virtual_network_validator()(cmd, ns)
 

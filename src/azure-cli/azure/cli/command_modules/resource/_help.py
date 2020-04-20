@@ -235,6 +235,14 @@ examples:
     text: az deployment delete -n deployment01
 """
 
+helps['deployment cancel'] = """
+type: command
+short-summary: Cancel a deployment at subscription scope.
+examples:
+  - name: Cancel a deployment at subscription scope.
+    text: az deployment cancel -n deployment01
+"""
+
 helps['deployment validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
@@ -352,6 +360,14 @@ examples:
     text: az deployment sub delete -n deployment01
 """
 
+helps['deployment sub cancel'] = """
+type: command
+short-summary: Cancel a deployment at subscription scope.
+examples:
+  - name: Cancel a deployment at subscription scope.
+    text: az deployment sub cancel -n deployment01
+"""
+
 helps['deployment sub validate'] = """
 type: command
 short-summary: Validate whether a template is valid at subscription scope.
@@ -463,6 +479,14 @@ short-summary: Delete a deployment at resource group.
 examples:
   - name: Delete a deployment at resource group.
     text: az deployment group delete -g testrg -n deployment01
+"""
+
+helps['deployment group cancel'] = """
+type: command
+short-summary: Cancel a deployment at resource group.
+examples:
+  - name: Cancel a deployment at resource group.
+    text: az deployment group cancel -g testrg -n deployment01
 """
 
 helps['deployment group validate'] = """
@@ -582,6 +606,14 @@ examples:
     text: az deployment mg delete -m testmg -n deployment01
 """
 
+helps['deployment mg cancel'] = """
+type: command
+short-summary: Cancel a deployment at management group.
+examples:
+  - name: Cancel a deployment at management group.
+    text: az deployment mg cancel -m testmg -n deployment01
+"""
+
 helps['deployment mg validate'] = """
 type: command
 short-summary: Validate whether a template is valid at management group.
@@ -699,6 +731,14 @@ examples:
     text: az deployment tenant delete -n deployment01
 """
 
+helps['deployment tenant cancel'] = """
+type: command
+short-summary: Cancel a deployment at tenant scope.
+examples:
+  - name: Cancel a deployment at tenant scope.
+    text: az deployment tenant cancel -n deployment01
+"""
+
 helps['deployment tenant validate'] = """
 type: command
 short-summary: Validate whether a template is valid at tenant scope.
@@ -786,6 +826,59 @@ short-summary: List deployment operations at tenant scope.
 helps['deployment operation tenant show'] = """
 type: command
 short-summary: Show a deployment operation at tenant scope.
+"""
+
+helps['deployment-scripts'] = """
+type: group
+short-summary: Manage deployment scripts at subscription or resource group scope.
+"""
+
+helps['deployment-scripts list'] = """
+type: command
+short-summary: List all deployment scripts.
+examples:
+  - name: Retrieve all deployment scripts found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts list
+  - name: Retrieve all deployment scripts found in a resource group
+    text: |
+        az deployment-scripts list --resource-group contoso-rg
+"""
+
+helps['deployment-scripts show'] = """
+type: command
+short-summary: Retrieve a deployment script.
+parameters:
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Retrieve a deployment script found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts show --resource-group contoso-rg --name contosoBashScript
+"""
+
+helps['deployment-scripts show-log'] = """
+type: command
+short-summary: Show deployment script logs.
+parameters:
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Retrieve deployment script logs found in the user's logged-in default subscription, max limit is 4MB.
+    text: >
+        az deployment-scripts show-log --resource-group contoso-rg --name contosoBashScript
+"""
+
+helps['deployment-scripts delete'] = """
+type: command
+short-summary: Delete a deployment script.
+parameters:
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Delete a deployment script found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts delete --resource-group contoso-rg --name contosoBashScript
 """
 
 helps['feature'] = """
@@ -1011,6 +1104,14 @@ examples:
   - name: Create a read-only subscription level lock.
     text: >
         az lock create --name lockName --resource-group group --lock-type ReadOnly
+  - name: Create a read-only resource level lock on a vnet resource.
+    text: >
+        az lock create --name lockName --resource-group group --lock-type ReadOnly --resource-type \\
+            Microsoft.Network/virtualNetworks --resource myVnet
+  - name: Create a read-only resource level lock on a subnet resource with a specific parent.
+    text: >
+        az lock create --name lockName --resource-group group --lock-type ReadOnly --resource-type \\
+            Microsoft.Network/subnets --parent virtualNetworks/myVnet --resource mySubnet
 """
 
 helps['lock delete'] = """
@@ -1708,6 +1809,13 @@ examples:
   - name: Tag a web app with the key 'vmlist' and value 'vm1', using a resource identifier.
     text: >
         az resource tag --tags vmlist=vm1 --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
+  - name: Tag the virtual machine 'MyVm' with the key 'vmlist' and value 'vm1' incrementally, it doesn't empty the existing tags.
+    text: >
+        az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" -i
+  - name: Tag a resource. (autogenerated)
+    text: |
+        az resource tag --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} --tags vmlist=vm1
+    crafted: true
 """
 
 helps['resource update'] = """

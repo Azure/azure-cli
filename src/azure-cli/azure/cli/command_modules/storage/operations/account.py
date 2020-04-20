@@ -182,7 +182,8 @@ def get_storage_account_properties(cli_ctx, account_id):
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, too-many-boolean-expressions
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
-                           encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
+                           encryption_services=None, encryption_key_source=None, encryption_key_version=None,
+                           encryption_key_name=None, encryption_key_vault=None,
                            access_tier=None, https_only=None, enable_files_aadds=None, assign_identity=False,
                            bypass=None, default_action=None, enable_large_file_share=None, enable_files_adds=None,
                            domain_name=None, net_bios_domain_name=None, forest_name=None, domain_guid=None,
@@ -199,16 +200,33 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             domain.use_sub_domain_name = use_subdomain == 'true'
 
     encryption = instance.encryption
-    if not encryption and any((encryption_services, encryption_key_source, encryption_key_vault_properties)):
+    if not encryption and any((encryption_services, encryption_key_source, encryption_key_name,
+                               encryption_key_vault, encryption_key_version is not None)):
         encryption = Encryption()
     if encryption_services:
         encryption.services = encryption_services
+
     if encryption_key_source:
         encryption.key_source = encryption_key_source
-    if encryption_key_vault_properties:
-        if encryption.key_source != 'Microsoft.Keyvault':
-            raise ValueError('Specify `--encryption-key-source=Microsoft.Keyvault` to configure key vault properties.')
-        encryption.key_vault_properties = encryption_key_vault_properties
+
+    KeySource = cmd.get_models('KeySource')
+    if encryption.key_source == KeySource.microsoft_keyvault:
+        if encryption.key_vault_properties is None:
+            KeyVaultProperties = cmd.get_models('KeyVaultProperties')
+            encryption.key_vault_properties = KeyVaultProperties()
+    else:
+        if any([encryption_key_name, encryption_key_vault, encryption_key_version]):
+            raise ValueError(
+                'Specify `--encryption-key-source=Microsoft.Keyvault` to configure key vault properties.')
+        if encryption.key_vault_properties is not None:
+            encryption.key_vault_properties = None
+
+    if encryption_key_name:
+        encryption.key_vault_properties.key_name = encryption_key_name
+    if encryption_key_vault:
+        encryption.key_vault_properties.key_vault_uri = encryption_key_vault
+    if encryption_key_version is not None:
+        encryption.key_vault_properties.key_version = encryption_key_version
 
     params = StorageAccountUpdateParameters(
         sku=Sku(name=sku) if sku is not None else instance.sku,
@@ -411,12 +429,11 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, account
     )
 
 
-def create_management_policies(client, resource_group_name, account_name, policy=None):
-    if policy:
-        if os.path.exists(policy):
-            policy = get_file_json(policy)
-        else:
-            policy = shell_safe_json_parse(policy)
+def create_management_policies(client, resource_group_name, account_name, policy):
+    if os.path.exists(policy):
+        policy = get_file_json(policy)
+    else:
+        policy = shell_safe_json_parse(policy)
     return client.create_or_update(resource_group_name, account_name, policy=policy)
 
 
@@ -428,7 +445,8 @@ def update_management_policies(client, resource_group_name, account_name, parame
 
 # TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
 def update_blob_service_properties(cmd, instance, enable_change_feed=None, enable_delete_retention=None,
-                                   delete_retention_days=None, enable_restore_policy=None, restore_days=None):
+                                   delete_retention_days=None, enable_restore_policy=None, restore_days=None,
+                                   enable_versioning=None):
     if enable_change_feed is not None:
         instance.change_feed = cmd.get_models('ChangeFeed')(enabled=enable_change_feed)
 
@@ -442,4 +460,40 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, enabl
             restore_days = None
         instance.restore_policy = cmd.get_models('RestorePolicyProperties')(
             enabled=enable_restore_policy, days=restore_days)
+    if enable_versioning is not None:
+        instance.is_versioning_enabled = enable_versioning
     return instance
+
+
+def create_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
+                            key_source=None, key_uri=None):
+    EncryptionScope = cmd.get_models('EncryptionScope')
+
+    if key_source:
+        encryption_scope = EncryptionScope(source=key_source)
+
+    if key_uri:
+        EncryptionScopeKeyVaultProperties = cmd.get_models('EncryptionScopeKeyVaultProperties')
+        encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=key_uri)
+
+    return client.put(resource_group_name=resource_group_name, account_name=account_name,
+                      encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)
+
+
+def update_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
+                            key_source=None, key_uri=None, state=None):
+    EncryptionScope, EncryptionScopeState = cmd.get_models('EncryptionScope', 'EncryptionScopeState')
+    encryption_scope = EncryptionScope()
+
+    if key_source:
+        encryption_scope.source = key_source
+
+    if key_uri:
+        EncryptionScopeKeyVaultProperties = cmd.get_models('EncryptionScopeKeyVaultProperties')
+        encryption_scope.key_vault_properties = EncryptionScopeKeyVaultProperties(key_uri=key_uri)
+
+    if state is not None:
+        encryption_scope.state = EncryptionScopeState(state)
+
+    return client.patch(resource_group_name=resource_group_name, account_name=account_name,
+                        encryption_scope_name=encryption_scope_name, encryption_scope=encryption_scope)

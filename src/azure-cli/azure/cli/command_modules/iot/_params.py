@@ -11,6 +11,7 @@ from azure.cli.core.commands.parameters import (get_location_type,
                                                 get_resource_name_completion_list,
                                                 get_enum_type,
                                                 get_three_state_flag)
+from azure.mgmt.iotcentral.models import AppSku
 from azure.mgmt.iothub.models import IotHubSku
 from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
                                                           AllocationPolicy,
@@ -41,6 +42,10 @@ dps_name_type = CLIArgumentType(
     options_list=['--dps-name'],
     completer=get_resource_name_completion_list('Microsoft.Devices/ProvisioningServices'),
     help='IoT Provisioning Service name')
+
+app_name_type = CLIArgumentType(
+    completer=get_resource_name_completion_list('Microsoft.IoTCentral/IoTApps'),
+    help='IoT Central application name.')
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
@@ -111,8 +116,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('hub_name', hub_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
         c.argument('sku', arg_type=get_enum_type(IotHubSku),
-                   help='Pricing tier for Azure IoT Hub. Default value is F1, which is free. '
-                        'Note that only one free IoT hub instance is allowed in each '
+                   help='Pricing tier for Azure IoT Hub. '
+                        'Note that only one free IoT hub instance (F1) is allowed in each '
                         'subscription. Exception will be thrown if free instances exceed one.')
         c.argument('unit', help='Units in your IoT Hub.', type=int)
         c.argument('partition_count',
@@ -274,3 +279,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Access key for the given IoT Plug and Play repository.')
         c.argument('user_role', options_list=['--role'], arg_type=get_enum_type(UserRole),
                    help='User role of the access key for the given IoT Plug and Play repository.')
+
+    with self.argument_context('iot central app') as c:
+        c.argument('app_name', app_name_type, options_list=['--name', '-n'])
+
+    with self.argument_context('iot central app create') as c:
+        c.argument('app_name', completer=None)
+        c.argument('location', get_location_type(self.cli_ctx),
+                   help='Location of your IoT Central application. Default is the location of target resource group.')
+        c.argument('sku', arg_type=get_enum_type(AppSku),
+                   help='Pricing tier for IoT Central applications. Default value is ST2.')
+        c.argument('subdomain',
+                   help='Subdomain for the IoT Central URL. Each application must have a unique subdomain.')
+        c.argument('template',
+                   help='IoT Central application template name. Default is a custom application.')
+        c.argument('display_name',
+                   help='Custom display name for the IoT Central application. Default is resource name.')
