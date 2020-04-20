@@ -128,11 +128,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
                        auto_delete_on_idle=None, enable_partitioning=None, enable_express=None,
                        forward_to=None, forward_dead_lettered_messages_to=None, enable_batched_operations=None):
 
-    from azure.mgmt.servicebus.models import SBQueue
-    returnobj = SBQueue()
-
-    if lock_duration:
-        instance.lock_duration = return_valid_duration(instance, 'lock_duration', lock_duration)
+    instance.lock_duration = return_valid_duration(instance.lock_duration, lock_duration)
 
     if max_size_in_megabytes:
         instance.max_size_in_megabytes = max_size_in_megabytes
@@ -143,14 +139,12 @@ def cli_sbqueue_update(instance, lock_duration=None,
     if requires_session:
         instance.requires_session = requires_session
 
-    if default_message_time_to_live:
-        instance.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
+    instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
 
     if dead_lettering_on_message_expiration:
         instance.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
 
-    if duplicate_detection_history_time_window:
-        instance.duplicate_detection_history_time_window = return_valid_duration(instance, 'duplicate_detection_history_time_window', duplicate_detection_history_time_window)
+    instance.duplicate_detection_history_time_window = return_valid_duration(instance.duplicate_detection_history_time_window, duplicate_detection_history_time_window)
 
     if max_delivery_count:
         instance.max_delivery_count = max_delivery_count
@@ -158,8 +152,7 @@ def cli_sbqueue_update(instance, lock_duration=None,
     if status:
         instance.status = status
 
-    if auto_delete_on_idle:
-        instance.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
+    instance.auto_delete_on_idle = return_valid_duration(instance.auto_delete_on_idle, auto_delete_on_idle)
 
     if enable_partitioning:
         instance.enable_partitioning = enable_partitioning
@@ -218,8 +211,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
     from azure.mgmt.servicebus.models import SBTopic
     topic_params = SBTopic()
 
-    if default_message_time_to_live:
-        instance.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
+    instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
 
     if max_size_in_megabytes:
         instance.max_size_in_megabytes = max_size_in_megabytes
@@ -227,8 +219,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
     if requires_duplicate_detection:
         instance.requires_duplicate_detection = requires_duplicate_detection
 
-    if duplicate_detection_history_time_window:
-        instance.duplicate_detection_history_time_window = return_valid_duration(instance, 'duplicate_detection_history_time_window', duplicate_detection_history_time_window)
+    instance.duplicate_detection_history_time_window = return_valid_duration(instance.duplicate_detection_history_time_window, duplicate_detection_history_time_window)
 
     if enable_batched_operations:
         instance.enable_batched_operations = enable_batched_operations
@@ -239,8 +230,7 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
     if support_ordering:
         instance.support_ordering = support_ordering
 
-    if auto_delete_on_idle:
-        instance.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
+    instance.auto_delete_on_idle = return_valid_duration(instance.auto_delete_on_idle, auto_delete_on_idle)
 
     if enable_partitioning:
         instance.enable_partitioning = enable_partitioning
@@ -288,14 +278,12 @@ def cli_sbsubscription_update(instance, lock_duration=None,
     from azure.mgmt.servicebus.models import SBSubscription
     subscription_params = SBSubscription()
 
-    if lock_duration:
-        instance.lock_duration = return_valid_duration(instance, 'lock_duration', lock_duration)
+    instance.lock_duration = return_valid_duration(instance.lock_duration, lock_duration)
 
     if requires_session:
         instance.requires_session = requires_session
 
-    if default_message_time_to_live:
-        instance.default_message_time_to_live = return_valid_duration(instance, 'default_message_time_to_live', default_message_time_to_live)
+    instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
 
     if dead_lettering_on_message_expiration:
         instance.dead_lettering_on_message_expiration = dead_lettering_on_message_expiration
@@ -309,7 +297,7 @@ def cli_sbsubscription_update(instance, lock_duration=None,
     if enable_batched_operations:
         instance.enable_batched_operations = enable_batched_operations
 
-    instance.auto_delete_on_idle = return_valid_duration(instance, 'auto_delete_on_idle', auto_delete_on_idle)
+    instance.auto_delete_on_idle = return_valid_duration(instance.auto_delete_on_idle, auto_delete_on_idle)
 
     if forward_to:
         instance.forward_to = forward_to
@@ -436,28 +424,33 @@ iso8601pattern = re.compile("^P(?!$)(\\d+Y)?(\\d+M)?(\\d+W)?(\\d+D)?(T(?=\\d)(\\
 timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
 
-def return_valid_duration(objinstance, duration_property, update_value):
+def return_valid_duration(instance_value, update_value):
     from datetime import timedelta
     from isodate import parse_duration
     if update_value is not None:
-        if iso8601pattern.match(update_value):
-            for attr, value in vars(objinstance).items():
-                if attr == duration_property:
-                    if parse_duration(update_value) < timedelta(days=10675199, minutes=10085, seconds=477581):
-                        return update_value
+        value_toreturn = update_value
+    else:
+        value_toreturn = str(instance_value)
 
-                    if parse_duration(update_value) > timedelta(days=10675199, minutes=10085, seconds=477581):
-                        return None
+    if iso8601pattern.match(value_toreturn):
+        if parse_duration(value_toreturn) < timedelta(days=10675199, minutes=10085, seconds=477581):
+            return value_toreturn
 
-        if timedeltapattern.match(update_value):
-            day, minute, seconds = update_value.split(":")
-            for attr, value in vars(objinstance).items():
-                if attr == duration_property:
-                    if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=10675199, minutes=10085, seconds=477581):
-                        return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
+        if parse_duration(value_toreturn) > timedelta(days=10675198, minutes=10085, seconds=477581):
+            return timedelta(days=10675198, minutes=10085, seconds=477581)
 
-                    if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=10675198, minutes=10085, seconds=477581):
-                        return None
+    if timedeltapattern.match(value_toreturn):
+        day, minute, seconds = value_toreturn.split(":")
+        if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=10675199,
+                                                                                           minutes=10085,
+                                                                                           seconds=477581):
+            return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
+
+        if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=10675198,
+                                                                                           minutes=10085,
+                                                                                           seconds=477581):
+            return timedelta(days=10675198, minutes=10085, seconds=477581)
+
 
 
 def return_valid_duration_create(update_value):
