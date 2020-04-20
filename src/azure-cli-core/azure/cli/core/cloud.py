@@ -188,6 +188,8 @@ def _arm_to_cli_mapper(arm_dict):
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
             sql_server_hostname=arm_dict['suffixes']['sqlServerHostname'],
+            mysql_server_hostname=arm_dict['suffixes']['mysqlServerHostname'],
+            postgresql_server_hostname=arm_dict['suffixes']['postgresqlServerHostname'],
             azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None))  # pylint: disable=line-too-long
