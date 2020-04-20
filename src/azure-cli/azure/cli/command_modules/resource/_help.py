@@ -1809,7 +1809,7 @@ examples:
   - name: Tag a web app with the key 'vmlist' and value 'vm1', using a resource identifier.
     text: >
         az resource tag --tags vmlist=vm1 --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
-  - name: Tag the virtual machine 'MyVm' with the key 'vmlist' and value 'vm1' incrementally, it doesn't empty the existing tags.
+  - name: Tag the virtual machine 'MyVm' with the key 'vmlist' and value 'vm1' incrementally. It doesn't empty the existing tags.
     text: >
         az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" -i
 """
