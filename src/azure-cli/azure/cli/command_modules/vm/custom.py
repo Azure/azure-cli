@@ -1268,7 +1268,7 @@ def list_av_sets(cmd, resource_group_name=None):
     op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
     if resource_group_name:
         return op_group.list(resource_group_name)
-    return op_group.list_by_subscription()
+    return op_group.list_by_subscription(expand='virtualMachines/$ref')
 # endregion
 
 
