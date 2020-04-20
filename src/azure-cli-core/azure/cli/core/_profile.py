@@ -126,9 +126,6 @@ class Profile(object):
               subscription_finder=None,
               use_cert_sn_issuer=None,
               find_subscriptions=True):
-        # TODO: allow disabling SSL verification in MSAL
-        from azure.cli.core._debug import allow_debug_adal_connection
-        allow_debug_adal_connection()
 
         credential=None
         auth_profile=None

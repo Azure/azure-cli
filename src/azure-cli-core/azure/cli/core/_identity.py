@@ -57,6 +57,14 @@ class Identity:
         self.authority = authority
         self.tenant_id = tenant_id
 
+        # TODO: Allow disabling SSL verification
+        # The underlying requests lib of MSAL has been patched with Azure Core by MsalTransportAdapter
+        # connection_verify will be received by azure.core.configuration.ConnectionConfiguration
+        # However, MSAL defaults verify to True, thus overriding ConnectionConfiguration
+        # Still not work yet
+        from azure.cli.core._debug import change_ssl_cert_verification_track2
+        self.ssl_kwargs = change_ssl_cert_verification_track2()
+
     def login_with_interactive_browser(self):
         # Use InteractiveBrowserCredential
         if self.tenant_id:
@@ -91,12 +99,12 @@ class Identity:
     def login_with_username_password(self, username, password):
         # Use UsernamePasswordCredential
         if self.tenant_id:
-            credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password,
-                                                                               authority=self.authority,
-                                                                               tenant_id=self.tenant_id)
+            credential, auth_profile = UsernamePasswordCredential.authenticate(
+                _CLIENT_ID, username, password, authority=self.authority, tenant_id=self.tenant_id,
+                **self.ssl_kwargs)
         else:
-            credential, auth_profile = UsernamePasswordCredential.authenticate(_CLIENT_ID, username, password,
-                                                                               authority=self.authority)
+            credential, auth_profile = UsernamePasswordCredential.authenticate(
+                _CLIENT_ID, username, password, authority=self.authority, **self.ssl_kwargs)
         return credential, auth_profile
 
     def login_with_service_principal_secret(self, client_id, client_secret):
