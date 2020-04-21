@@ -28,7 +28,7 @@ interactions:
       string: '{}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTtiZjE2M2I0NC01OGVmLTRjY2YtOWZkMS05ZTc4YmE0ZmQ3Yjg=?api-version=2018-09-01
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTtiNGRjMTBlMS1lYzcyLTQyYjMtYmVlMS0zNTQ4YjFjMDY2ZjA=?api-version=2018-09-01
       cache-control:
       - private
       content-length:
@@ -36,9 +36,494 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Apr 2020 15:02:37 GMT
+      - Tue, 21 Apr 2020 05:29:20 GMT
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTtiZjE2M2I0NC01OGVmLTRjY2YtOWZkMS05ZTc4YmE0ZmQ3Yjg=?api-version=2018-09-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTtiNGRjMTBlMS1lYzcyLTQyYjMtYmVlMS0zNTQ4YjFjMDY2ZjA=?api-version=2018-09-01
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11992'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/SOA/@?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"da0a7913-897a-472d-9b7e-fb79cd99ea18","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azureprivatedns-host.microsoft.com","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:29:51 GMT
+      etag:
+      - da0a7913-897a-472d-9b7e-fb79cd99ea18
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"ttl": 3600, "soaRecord": {"host": "azureprivatedns.net",
+      "email": "azuredns-hostmaster.microsoft.com.", "serialNumber": 1, "refreshTime":
+      3600, "retryTime": 300, "expireTime": 2419200, "minimumTtl": 300}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '222'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/SOA/@?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"64df2c99-2248-4c90-9e7f-95766b974596","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '594'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:29:52 GMT
+      etag:
+      - 64df2c99-2248-4c90-9e7f-95766b974596
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11994'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"ttl": 172800, "txtRecords": [{"value": ["ns1-03.azure-dns.com."]}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '85'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/TXT/@?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/TXT\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/TXT","etag":"01f4e700-114f-4c87-bbdf-16145a0011ff","properties":{"fqdn":"zone8.com.","ttl":172800,"txtRecords":[{"value":["ns1-03.azure-dns.com."]}],"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '451'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:29:53 GMT
+      etag:
+      - 01f4e700-114f-4c87-bbdf-16145a0011ff
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11999'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"ttl": 3600, "aRecords": [{"ipv4Address": "1.2.3.4"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '71'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/A/ns?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/ns","name":"ns","type":"Microsoft.Network\/privateDnsZones\/A","etag":"31c60e08-b469-43a8-9a8f-2a90008e4cc5","properties":{"fqdn":"ns.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '438'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:29:54 GMT
+      etag:
+      - 31c60e08-b469-43a8-9a8f-2a90008e4cc5
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11989'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"ttl": 3600, "aRecords": [{"ipv4Address": "2.3.4.5"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '71'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/A/*?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/*","name":"*","type":"Microsoft.Network\/privateDnsZones\/A","etag":"172a0f65-4b87-4ffd-a9a3-e9e1de631023","properties":{"fqdn":"*.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '435'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:29:55 GMT
+      etag:
+      - 172a0f65-4b87-4ffd-a9a3-e9e1de631023
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11988'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns record-set list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -z
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/ALL?api-version=2018-09-01
+  response:
+    body:
+      string: '{"value":[{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/*","name":"*","type":"Microsoft.Network\/privateDnsZones\/A","etag":"172a0f65-4b87-4ffd-a9a3-e9e1de631023","properties":{"fqdn":"*.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"64df2c99-2248-4c90-9e7f-95766b974596","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/TXT\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/TXT","etag":"01f4e700-114f-4c87-bbdf-16145a0011ff","properties":{"fqdn":"zone8.com.","ttl":172800,"txtRecords":[{"value":["ns1-03.azure-dns.com."]}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/ns","name":"ns","type":"Microsoft.Network\/privateDnsZones\/A","etag":"31c60e08-b469-43a8-9a8f-2a90008e4cc5","properties":{"fqdn":"ns.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}]}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '1933'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:29:56 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-entities-read:
+      - '59908'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '494'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone export
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --file-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/SOA?api-version=2018-09-01
+  response:
+    body:
+      string: '{"value":[{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"64df2c99-2248-4c90-9e7f-95766b974596","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}}]}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '606'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:29:56 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-entities-read:
+      - '59999'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '498'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone export
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --file-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/ALL?api-version=2018-09-01
+  response:
+    body:
+      string: '{"value":[{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/*","name":"*","type":"Microsoft.Network\/privateDnsZones\/A","etag":"172a0f65-4b87-4ffd-a9a3-e9e1de631023","properties":{"fqdn":"*.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"64df2c99-2248-4c90-9e7f-95766b974596","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/TXT\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/TXT","etag":"01f4e700-114f-4c87-bbdf-16145a0011ff","properties":{"fqdn":"zone8.com.","ttl":172800,"txtRecords":[{"value":["ns1-03.azure-dns.com."]}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/ns","name":"ns","type":"Microsoft.Network\/privateDnsZones\/A","etag":"31c60e08-b469-43a8-9a8f-2a90008e4cc5","properties":{"fqdn":"ns.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}]}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '1933'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:29:57 GMT
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-entities-read:
+      - '59996'
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '499'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "global"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com?api-version=2018-09-01
+  response:
+    body:
+      string: '{}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTtmY2VkNDI4Zi1iMTIwLTQzM2UtOGQzNi1lYmZhY2I3MmRkM2Y=?api-version=2018-09-01
+      cache-control:
+      - private
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:29:59 GMT
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTtmY2VkNDI4Zi1iMTIwLTQzM2UtOGQzNi1lYmZhY2I3MmRkM2Y=?api-version=2018-09-01
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -76,7 +561,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/SOA/@?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"3cba3a00-fe7b-4180-80eb-477ec1b0ac6b","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azureprivatedns-host.microsoft.com","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"64df2c99-2248-4c90-9e7f-95766b974596","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
@@ -85,9 +570,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Apr 2020 15:03:07 GMT
+      - Tue, 21 Apr 2020 05:30:29 GMT
       etag:
-      - 3cba3a00-fe7b-4180-80eb-477ec1b0ac6b
+      - 64df2c99-2248-4c90-9e7f-95766b974596
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -127,7 +612,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com","name":"zone8.com","type":"Microsoft.Network\/privateDnsZones","etag":"b3e053d1-1eca-48eb-b8f6-b89bbf2aafd5","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":1,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com","name":"zone8.com","type":"Microsoft.Network\/privateDnsZones","etag":"0891c6f0-e5ce-4c66-968d-465eb5db57d1","location":"global","properties":{"maxNumberOfRecordSets":25000,"maxNumberOfVirtualNetworkLinks":1000,"maxNumberOfVirtualNetworkLinksWithRegistration":100,"numberOfRecordSets":4,"numberOfVirtualNetworkLinks":0,"numberOfVirtualNetworkLinksWithRegistration":0,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - private
@@ -136,9 +621,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Apr 2020 15:03:08 GMT
+      - Tue, 21 Apr 2020 05:30:30 GMT
       etag:
-      - b3e053d1-1eca-48eb-b8f6-b89bbf2aafd5
+      - 0891c6f0-e5ce-4c66-968d-465eb5db57d1
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -152,7 +637,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '497'
+      - '498'
       x-powered-by:
       - ASP.NET
     status:
@@ -186,7 +671,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/SOA/@?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"880239e9-a3ad-4e9b-b570-66cd2685e6e6","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"b3809be0-931a-452d-b157-2f744111d3df","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
@@ -195,9 +680,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Apr 2020 15:03:08 GMT
+      - Tue, 21 Apr 2020 05:30:30 GMT
       etag:
-      - 880239e9-a3ad-4e9b-b570-66cd2685e6e6
+      - b3809be0-931a-452d-b157-2f744111d3df
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -211,7 +696,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
+      - '11997'
       x-powered-by:
       - ASP.NET
     status:
@@ -243,7 +728,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/TXT/@?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/TXT\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/TXT","etag":"7a8a7fa6-7f66-40b1-bf6f-5d02715368b4","properties":{"fqdn":"zone8.com.","ttl":172800,"txtRecords":[{"value":["ns1-03.azure-dns.com."]}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/TXT\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/TXT","etag":"0483c5bb-921f-4079-9199-64d8d0524440","properties":{"fqdn":"zone8.com.","ttl":172800,"txtRecords":[{"value":["ns1-03.azure-dns.com."]}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
@@ -252,77 +737,28 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Apr 2020 15:03:09 GMT
+      - Tue, 21 Apr 2020 05:30:32 GMT
       etag:
-      - 7a8a7fa6-7f66-40b1-bf6f-5d02715368b4
+      - 0483c5bb-921f-4079-9199-64d8d0524440
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11995'
+      - '11999'
       x-powered-by:
       - ASP.NET
     status:
-      code: 201
-      message: Created
-- request:
-    body: '{"properties": {"ttl": 3600, "aRecords": [{"ipv4Address": "1.2.3.4"}]}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-dns zone import
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '71'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g --file-name
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/A/ns?api-version=2018-09-01
-  response:
-    body:
-      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/ns","name":"ns","type":"Microsoft.Network\/privateDnsZones\/A","etag":"0084aadd-63d1-46e2-93d9-cdba90bad43b","properties":{"fqdn":"ns.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}'
-    headers:
-      cache-control:
-      - private
-      content-length:
-      - '438'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 16 Apr 2020 15:03:11 GMT
-      etag:
-      - 0084aadd-63d1-46e2-93d9-cdba90bad43b
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11992'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
 - request:
     body: '{"properties": {"ttl": 3600, "aRecords": [{"ipv4Address": "2.3.4.5"}]}}'
     headers:
@@ -349,7 +785,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/A/*?api-version=2018-09-01
   response:
     body:
-      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/*","name":"*","type":"Microsoft.Network\/privateDnsZones\/A","etag":"56e15933-0f03-40e3-90fc-3ab8932eeb22","properties":{"fqdn":"*.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}'
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/*","name":"*","type":"Microsoft.Network\/privateDnsZones\/A","etag":"9e4de8f2-b379-4eee-bd59-52db6ee912aa","properties":{"fqdn":"*.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}}'
     headers:
       cache-control:
       - private
@@ -358,13 +794,17 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Apr 2020 15:03:11 GMT
+      - Tue, 21 Apr 2020 05:30:33 GMT
       etag:
-      - 56e15933-0f03-40e3-90fc-3ab8932eeb22
+      - 9e4de8f2-b379-4eee-bd59-52db6ee912aa
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
       x-aspnet-version:
       - 4.0.30319
       x-content-type-options:
@@ -374,8 +814,65 @@ interactions:
       x-powered-by:
       - ASP.NET
     status:
-      code: 201
-      message: Created
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"ttl": 3600, "aRecords": [{"ipv4Address": "1.2.3.4"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-dns zone import
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '71'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g --file-name
+      User-Agent:
+      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/A/ns?api-version=2018-09-01
+  response:
+    body:
+      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/ns","name":"ns","type":"Microsoft.Network\/privateDnsZones\/A","etag":"3751dbb3-d464-4367-aae4-1dbe40fa601e","properties":{"fqdn":"ns.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}'
+    headers:
+      cache-control:
+      - private
+      content-length:
+      - '438'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 21 Apr 2020 05:30:34 GMT
+      etag:
+      - 3751dbb3-d464-4367-aae4-1dbe40fa601e
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '11985'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
@@ -398,7 +895,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/ALL?api-version=2018-09-01
   response:
     body:
-      string: '{"value":[{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/*","name":"*","type":"Microsoft.Network\/privateDnsZones\/A","etag":"56e15933-0f03-40e3-90fc-3ab8932eeb22","properties":{"fqdn":"*.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"880239e9-a3ad-4e9b-b570-66cd2685e6e6","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/TXT\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/TXT","etag":"7a8a7fa6-7f66-40b1-bf6f-5d02715368b4","properties":{"fqdn":"zone8.com.","ttl":172800,"txtRecords":[{"value":["ns1-03.azure-dns.com."]}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/ns","name":"ns","type":"Microsoft.Network\/privateDnsZones\/A","etag":"0084aadd-63d1-46e2-93d9-cdba90bad43b","properties":{"fqdn":"ns.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}]}'
+      string: '{"value":[{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/*","name":"*","type":"Microsoft.Network\/privateDnsZones\/A","etag":"9e4de8f2-b379-4eee-bd59-52db6ee912aa","properties":{"fqdn":"*.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"b3809be0-931a-452d-b157-2f744111d3df","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/TXT\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/TXT","etag":"0483c5bb-921f-4079-9199-64d8d0524440","properties":{"fqdn":"zone8.com.","ttl":172800,"txtRecords":[{"value":["ns1-03.azure-dns.com."]}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/ns","name":"ns","type":"Microsoft.Network\/privateDnsZones\/A","etag":"3751dbb3-d464-4367-aae4-1dbe40fa601e","properties":{"fqdn":"ns.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}]}'
     headers:
       cache-control:
       - private
@@ -407,7 +904,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 16 Apr 2020 15:03:13 GMT
+      - Tue, 21 Apr 2020 05:30:35 GMT
       server:
       - Microsoft-IIS/10.0
       strict-transport-security:
@@ -421,370 +918,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-entities-read:
-      - '59993'
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '498'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-dns zone export
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --file-name
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/SOA?api-version=2018-09-01
-  response:
-    body:
-      string: '{"value":[{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"880239e9-a3ad-4e9b-b570-66cd2685e6e6","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}}]}'
-    headers:
-      cache-control:
-      - private
-      content-length:
-      - '606'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 16 Apr 2020 15:03:13 GMT
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-entities-read:
-      - '59999'
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '499'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-dns zone export
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --file-name
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/ALL?api-version=2018-09-01
-  response:
-    body:
-      string: '{"value":[{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/*","name":"*","type":"Microsoft.Network\/privateDnsZones\/A","etag":"56e15933-0f03-40e3-90fc-3ab8932eeb22","properties":{"fqdn":"*.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"2.3.4.5"}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"880239e9-a3ad-4e9b-b570-66cd2685e6e6","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/TXT\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/TXT","etag":"7a8a7fa6-7f66-40b1-bf6f-5d02715368b4","properties":{"fqdn":"zone8.com.","ttl":172800,"txtRecords":[{"value":["ns1-03.azure-dns.com."]}],"isAutoRegistered":false}},{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/A\/ns","name":"ns","type":"Microsoft.Network\/privateDnsZones\/A","etag":"0084aadd-63d1-46e2-93d9-cdba90bad43b","properties":{"fqdn":"ns.zone8.com.","ttl":3600,"aRecords":[{"ipv4Address":"1.2.3.4"}],"isAutoRegistered":false}}]}'
-    headers:
-      cache-control:
-      - private
-      content-length:
-      - '1933'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 16 Apr 2020 15:03:13 GMT
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-entities-read:
-      - '59992'
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '498'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-dns zone delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com?api-version=2018-09-01
-  response:
-    body:
-      string: ''
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTs3ZGVjNzczNC04MzIxLTRkZmYtYjI2Ny1mMzI2ZGFmN2YwNmY=?api-version=2018-09-01
-      cache-control:
-      - private
-      content-length:
-      - '0'
-      date:
-      - Thu, 16 Apr 2020 15:03:16 GMT
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTs3ZGVjNzczNC04MzIxLTRkZmYtYjI2Ny1mMzI2ZGFmN2YwNmY=?api-version=2018-09-01
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11998'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-dns zone delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n -y
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtEZWxldGVQcml2YXRlRG5zWm9uZTs3ZGVjNzczNC04MzIxLTRkZmYtYjI2Ny1mMzI2ZGFmN2YwNmY=?api-version=2018-09-01
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - private
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 16 Apr 2020 15:03:46 GMT
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '497'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "global"}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-dns zone import
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '22'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -g --file-name
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com?api-version=2018-09-01
-  response:
-    body:
-      string: '{}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com:443/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs5YTY5ODBjYS1jNGI2LTRlZjEtYTMwOC1hYTUwODI5OGVlZTc=?api-version=2018-09-01
-      cache-control:
-      - private
-      content-length:
-      - '2'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 16 Apr 2020 15:04:13 GMT
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationResults/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs5YTY5ODBjYS1jNGI2LTRlZjEtYTMwOC1hYTUwODI5OGVlZTc=?api-version=2018-09-01
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '11997'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-dns zone import
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --file-name
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsZones/zone8.com/SOA/@?api-version=2018-09-01
-  response:
-    body:
-      string: '{"id":"\/subscriptions\/c912f493-60bf-4b11-90e0-3395f2dbdb7c\/resourceGroups\/cli_private_dns_zone8_import000001\/providers\/Microsoft.Network\/privateDnsZones\/zone8.com\/SOA\/@","name":"@","type":"Microsoft.Network\/privateDnsZones\/SOA","etag":"f23d6dec-9d95-4d6b-a30b-a39ef486506b","properties":{"fqdn":"zone8.com.","ttl":3600,"soaRecord":{"email":"azureprivatedns-host.microsoft.com","expireTime":2419200,"host":"azureprivatedns.net","minimumTTL":null,"refreshTime":3600,"retryTime":300,"serialNumber":1,"minimumTtl":300},"isAutoRegistered":false}}'
-    headers:
-      cache-control:
-      - private
-      content-length:
-      - '594'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 16 Apr 2020 15:04:43 GMT
-      etag:
-      - f23d6dec-9d95-4d6b-a30b-a39ef486506b
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '499'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network private-dns zone import
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g --file-name
-      User-Agent:
-      - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-privatedns/0.1.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_private_dns_zone8_import000001/providers/Microsoft.Network/privateDnsOperationStatuses/RnJvbnRFbmRBc3luY09wZXJhdGlvbjtVcHNlcnRQcml2YXRlRG5zWm9uZTs5YTY5ODBjYS1jNGI2LTRlZjEtYTMwOC1hYTUwODI5OGVlZTc=?api-version=2018-09-01
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - private
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 16 Apr 2020 15:04:43 GMT
-      server:
-      - Microsoft-IIS/10.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-aspnet-version:
-      - 4.0.30319
-      x-content-type-options:
-      - nosniff
+      - '59996'
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '499'
       x-powered-by:

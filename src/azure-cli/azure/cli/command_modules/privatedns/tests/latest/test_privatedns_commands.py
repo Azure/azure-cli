@@ -8,7 +8,7 @@ import os
 import unittest
 import time
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.azure_exceptions import CloudError
@@ -898,6 +898,7 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         self.assertTrue(all(recordset in createdRecordsets for recordset in returnedRecordsets))
 
 
+@live_only()
 class PrivateDnsZoneImportTest(ScenarioTest):
 
     def _match_record(self, record_set, name, type):
@@ -935,9 +936,9 @@ class PrivateDnsZoneImportTest(ScenarioTest):
 
         # Export zone file and delete the zone
         self.cmd('network private-dns zone export -g {rg} -n {zone} --file-name "{export}"')
-        self.cmd('network private-dns zone delete -g {rg} -n {zone} -y')
+        # self.cmd('network private-dns zone delete -g {rg} -n {zone} -y')
         # 20 seconds should be enough for the zone delete to finish(Skipped under playback mode)
-        time.sleep(20)
+        # time.sleep(20)
 
         # Reimport zone file and verify both record sets are equivalent
         self.cmd('network private-dns zone import -n {zone} -g {rg} --file-name "{export}"')
