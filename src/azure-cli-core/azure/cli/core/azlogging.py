@@ -177,7 +177,7 @@ class AzCliLogging(CLILogging):
 
     @staticmethod
     def deinit_cmd_metadata_logging(cli_ctx):
-        cli_ctx.logging.end_cmd_metadata_logging(cli_ctx.result.exit_code if cli_ctx else 128)
+        cli_ctx.logging.end_cmd_metadata_logging(cli_ctx.result.exit_code if cli_ctx.result else 128)
 
     def end_cmd_metadata_logging(self, exit_code):  # leave it non '-' prefix to not to break user
         if self.command_metadata_logger:
