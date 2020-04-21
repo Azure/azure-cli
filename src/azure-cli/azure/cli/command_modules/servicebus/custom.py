@@ -447,7 +447,6 @@ def return_valid_duration(instance_value, update_value):
             return timedelta(days=10675198, minutes=10085, seconds=477581)
 
 
-
 def return_valid_duration_create(update_value):
     from datetime import timedelta
     from isodate import parse_duration

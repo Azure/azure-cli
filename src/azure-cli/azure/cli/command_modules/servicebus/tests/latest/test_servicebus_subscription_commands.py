@@ -73,19 +73,18 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
             'servicebus topic subscription list --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname}')
 
         # update Subscription
-        updatesubscription = self.cmd(
+        self.cmd(
             'servicebus topic subscription update --resource-group {rg} --namespace-name {namespacename} --topic-name '
             '{topicname} --name {subscriptionname} --max-delivery {maxdelivery} '
             '--default-message-time-to-live {defaultmessagetimetolive} --dead-letter-on-filter-exceptions {false}'
             ' --enable-dead-lettering-on-message-expiration {false} --auto-delete-on-idle {autodeleteonidle}'
-            ' --default-message-time-to-live {defaultmessagetimetolive} --lock-duration {lockduration}').output
-
-        self.check('updatesubscription.name', '{subscriptionname}'),
-        self.check('updatesubscription.lockDuration', '0:04:00'),
-        self.check('updatesubscription.maxDeliveryCount', '3'),
-        self.check('updatesubscription.defaultMessageTimeToLive', '0:07:00'),
-        self.check('updatesubscription.autoDeleteOnIdle', '9 days, 0:00:00'),
-        self.check('updatesubscription.deadLetteringOnFilterEvaluationExceptions', '{false}')
+            ' --default-message-time-to-live {defaultmessagetimetolive} --lock-duration {lockduration}',
+            checks=[self.check('name', '{subscriptionname}'),
+                    self.check('lockDuration', '0:04:00'),
+                    self.check('maxDeliveryCount', '3'),
+                    self.check('defaultMessageTimeToLive', '0:07:00'),
+                    self.check('autoDeleteOnIdle', '9 days, 0:00:00'),
+                    self.check('deadLetteringOnFilterEvaluationExceptions', 'False')])
 
         # Delete Subscription
         self.cmd(
