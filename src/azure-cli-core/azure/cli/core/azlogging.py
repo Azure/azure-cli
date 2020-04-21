@@ -184,10 +184,6 @@ class AzCliLogging(CLILogging):
         if self.command_metadata_logger:
             self.command_metadata_logger.info("exit code: %s", exit_code)
 
-            for handler in self.command_metadata_logger.handlers[:]:
-                handler.close()
-                self.command_metadata_logger.removeHandler(handler)
-
             # We have finished metadata logging, remove handler and set command_metadata_handler to None.
             # crucial to remove handler as in python logger objects are shared which can affect testing of this logger
             # we do not want duplicate handlers to be added in subsequent calls of _init_command_logfile_handlers

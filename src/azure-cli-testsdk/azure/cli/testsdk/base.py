@@ -133,6 +133,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def tearDown(self):
         for processor in self._processors_to_reset:
             processor.reset()
+
         super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
