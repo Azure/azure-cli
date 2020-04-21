@@ -130,15 +130,9 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             recording_name=recording_name
         )
 
-    def doCleanups(self):
-        self.cli_ctx.logging.end_cmd_metadata_logging(self.cli_ctx.result.exit_code if self.cli_ctx.result else 0)
-
-        return super().doCleanups()
-
     def tearDown(self):
         for processor in self._processors_to_reset:
             processor.reset()
-
         super(ScenarioTest, self).tearDown()
 
     def create_random_name(self, prefix, length):
@@ -187,11 +181,6 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         self.cli_ctx = get_dummy_cli()
         self.kwargs = {}
         self.test_resources_count = 0
-
-    def doCleanups(self):
-        self.cli_ctx.logging.end_cmd_metadata_logging(self.cli_ctx.result.exit_code if self.cli_ctx.result else 0)
-
-        return super().doCleanups()
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)
