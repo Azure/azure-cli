@@ -29,6 +29,7 @@ import datetime
 
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
+from knack.events import EVENT_CLI_POST_EXECUTE
 from knack.log import CLILogging, get_logger
 from knack.util import ensure_dir
 
@@ -46,6 +47,7 @@ class AzCliLogging(CLILogging):
         self.command_logger_handler = None
         self.command_metadata_logger = None
         self.cli_ctx.register_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, AzCliLogging.init_command_file_logging)
+        self.cli_ctx.register_event(EVENT_CLI_POST_EXECUTE, AzCliLogging.deinit_cmd_metadata_logging)
 
     def get_command_log_dir(self):
         return self.command_log_dir
@@ -173,7 +175,12 @@ class AzCliLogging(CLILogging):
             self.command_metadata_logger.info("extension name: %s", extension_name)
             self.command_metadata_logger.info("extension version: %s", extension_version)
 
-    def end_cmd_metadata_logging(self, exit_code):
+    @staticmethod
+    def deinit_cmd_metadata_logging(cli_ctx):
+        self = cli_ctx.logging
+        self.end_cmd_metadata_logging(cli_ctx.result.exit_code if cli_ctx.result else 128)
+
+    def end_cmd_metadata_logging(self, exit_code):  # leave it non '-' prefix to not to break user
         if self.command_metadata_logger:
             self.command_metadata_logger.info("exit code: %s", exit_code)
 
