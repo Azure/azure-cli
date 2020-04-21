@@ -87,7 +87,8 @@ def cli_cosmosdb_create(cmd, client,
                         virtual_network_rules=None,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
-                        key_uri=None):
+                        key_uri=None,
+                        public_network_access=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -119,7 +120,8 @@ def cli_cosmosdb_create(cmd, client,
         virtual_network_rules=virtual_network_rules,
         enable_multiple_write_locations=enable_multiple_write_locations,
         disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
-        key_vault_key_uri=key_uri)
+        key_vault_key_uri=key_uri,
+        public_network_access=public_network_access)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -142,7 +144,8 @@ def cli_cosmosdb_update(client,
                         enable_virtual_network=None,
                         virtual_network_rules=None,
                         enable_multiple_write_locations=None,
-                        disable_key_based_metadata_write_access=None):
+                        disable_key_based_metadata_write_access=None,
+                        public_network_access=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -177,7 +180,8 @@ def cli_cosmosdb_update(client,
         capabilities=capabilities,
         virtual_network_rules=virtual_network_rules,
         enable_multiple_write_locations=enable_multiple_write_locations,
-        disable_key_based_metadata_write_access=disable_key_based_metadata_write_access)
+        disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
+        public_network_access=public_network_access)
 
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
