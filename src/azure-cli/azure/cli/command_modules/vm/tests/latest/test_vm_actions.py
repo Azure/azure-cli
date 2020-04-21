@@ -39,11 +39,12 @@ class TestActions(unittest.TestCase):
         self.assertTrue(expected_err in str(context.exception))
 
     @staticmethod
-    def _get_compute_model(model_type):
+    def _get_compute_model(model_type, api_version=None):
         from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
         from importlib import import_module
 
-        api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].default_api_version
+        if api_version is None:
+            api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].default_api_version
         api_version = "v" + api_version.replace("-", "_")
         result = getattr(import_module('azure.mgmt.compute.{}.models'.format(api_version)), model_type)
         return result
@@ -653,10 +654,15 @@ class TestActions(unittest.TestCase):
                 self.fail("Test Expected value should be a dict or None, instead it is {}.".format(expected))
 
     def test_process_gallery_image_version_namespace(self):
-        np = mock.MagicMock()
-        TargetRegion = self._get_compute_model('TargetRegion')
+        from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
+        np = mock.MagicMock(spec='target_regions')
+        api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].profile['gallery_images']
+        TargetRegion = self._get_compute_model('TargetRegion', api_version)
+        EncryptionImages = self._get_compute_model('EncryptionImages', api_version)
+        OSDiskImageEncryption = self._get_compute_model('OSDiskImageEncryption', api_version)
+        DataDiskImageEncryption = self._get_compute_model('DataDiskImageEncryption', api_version)
         cmd = mock.MagicMock()
-        cmd.get_models.return_value = TargetRegion
+        cmd.get_models.return_value = [TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption]
 
         target_regions_list = ["southcentralus", "westus=1", "westus2=standard_zrs", "eastus=2=standard_lrs"]
         np.target_regions = target_regions_list

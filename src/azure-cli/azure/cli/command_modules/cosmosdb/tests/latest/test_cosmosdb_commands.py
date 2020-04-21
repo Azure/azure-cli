@@ -73,7 +73,6 @@ class CosmosDBTests(ScenarioTest):
 
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
         self.cmd('az cosmosdb delete -n {acc} -g {rg} --yes')
-        self.cmd('az cosmosdb show -n {acc} -g {rg}', expect_failure=True)
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_check_name_exists_database_account(self, resource_group):
@@ -302,6 +301,74 @@ class CosmosDBTests(ScenarioTest):
         vnet_rules = self.cmd('az cosmosdb network-rule list -n {acc} -g {rg}').get_output_in_json()
 
         assert len(vnet_rules) == 0
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_plr')
+    def test_cosmosdb_private_link_resource(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cli-test-cosmosdb-plr-', 28),
+            'loc': 'centraluseuap'
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+
+        self.cmd('cosmosdb private-link-resource list --account-name {acc} --resource-group {rg}',
+                 checks=[self.check('length(@)', 1), self.check('[0].groupId', 'Sql')])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_pe')
+    def test_cosmosdb_private_endpoint(self, resource_group):
+        self.kwargs.update({
+            'acc': self.create_random_name('cli-test-cosmosdb-pe-', 28),
+            'loc': 'centraluseuap',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        # Prepare cosmos db account and network
+        account = self.cmd('az cosmosdb create -n {acc} -g {rg}').get_output_in_json()
+        self.kwargs['acc_id'] = account['id']
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+                      '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
+                      '--group-ids Sql').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Show the connection at cosmos db side
+        results = self.kwargs['pe_id'].split('/')
+        self.kwargs['pec_id'] = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.DocumentDB/databaseAccounts/{2}/privateEndpointConnections/{3}'.format(results[2], results[4], self.kwargs['acc'], results[-1])
+        self.cmd('cosmosdb private-endpoint-connection show --id {pec_id}',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('cosmosdb private-endpoint-connection show --account-name {acc} --name {pe_name} --resource-group {rg}',
+                 checks=self.check('name', '{pe_name}'))
+        self.cmd('cosmosdb private-endpoint-connection show -a {acc} -n {pe_name} -g {rg}',
+                 checks=self.check('name', '{pe_name}'))
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd('cosmosdb private-endpoint-connection approve --account-name {acc} --resource-group {rg} --name {pe_name} '
+                 '--description "{approval_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}')
+                 ])
+        self.cmd('cosmosdb private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}"', checks=[
+                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')
+                 ])
+
+        # Test delete
+        self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
     def test_cosmosdb_database(self, resource_group):
