@@ -6,8 +6,9 @@
 from __future__ import print_function
 
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
@@ -19,6 +20,26 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     check_precondition_success)
 from knack.log import get_logger
 from knack.util import CLIError
+
+
+def create_container(cmd, container_name, resource_group_name=None, account_name=None,
+                     metadata=None, public_access=None, fail_on_exist=False, timeout=None,
+                     default_encryption_scope=None, prevent_encryption_scope_override=None, **kwargs):
+    if default_encryption_scope is not None or prevent_encryption_scope_override is not None:
+        from .._client_factory import storage_client_factory
+        client = storage_client_factory(cmd.cli_ctx).blob_containers
+        BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+        blob_container = BlobContainer(default_encryption_scope=default_encryption_scope,
+                                       deny_encryption_scope_override=prevent_encryption_scope_override)
+        container = client.create(resource_group_name=resource_group_name, account_name=account_name,
+                                  container_name=container_name, blob_container=blob_container)
+        return container is not None
+
+    from .._client_factory import blob_data_service_factory
+    kwargs['account_name'] = account_name
+    client = blob_data_service_factory(cmd.cli_ctx, kwargs)
+    return client.create_container(container_name, metadata=metadata, public_access=public_access,
+                                   fail_on_exist=fail_on_exist, timeout=timeout)
 
 
 def delete_container(client, container_name, fail_not_exist=False, lease_id=None, if_modified_since=None,
@@ -414,6 +435,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     source_blobs = list(collect_blob_objects(client, source_container_name, pattern))
 
     if dryrun:
+        from datetime import timezone
         delete_blobs = []
         if_modified_since_utc = if_modified_since.replace(tzinfo=timezone.utc) if if_modified_since else None
         if_unmodified_since_utc = if_unmodified_since.replace(tzinfo=timezone.utc) if if_unmodified_since else None

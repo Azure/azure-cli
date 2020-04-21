@@ -38,6 +38,9 @@ class ServiceProperties(object):
             logging.version = str(version)
         return self.set_service_properties()(logging=logging, timeout=timeout)
 
+    def disable_logging(self, timeout=None):
+        return self.set_logging(read=False, write=False, delete=False, retention=0, timeout=timeout)
+
     def get_cors(self, timeout=None):
         return self.get_service_properties()(timeout=timeout).__dict__['cors']
 
