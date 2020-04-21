@@ -208,9 +208,6 @@ def cli_sbtopic_update(instance, default_message_time_to_live=None,
                        enable_batched_operations=None, status=None, support_ordering=None, auto_delete_on_idle=None,
                        enable_partitioning=None, enable_express=None):
 
-    from azure.mgmt.servicebus.models import SBTopic
-    topic_params = SBTopic()
-
     instance.default_message_time_to_live = return_valid_duration(instance.default_message_time_to_live, default_message_time_to_live)
 
     if max_size_in_megabytes:
@@ -275,8 +272,6 @@ def cli_sbsubscription_update(instance, lock_duration=None,
                               dead_lettering_on_message_expiration=None,
                               max_delivery_count=None, status=None, enable_batched_operations=None,
                               auto_delete_on_idle=None, forward_to=None, forward_dead_lettered_messages_to=None, dead_lettering_on_filter_evaluation_exceptions=None):
-    from azure.mgmt.servicebus.models import SBSubscription
-    subscription_params = SBSubscription()
 
     instance.lock_duration = return_valid_duration(instance.lock_duration, lock_duration)
 
