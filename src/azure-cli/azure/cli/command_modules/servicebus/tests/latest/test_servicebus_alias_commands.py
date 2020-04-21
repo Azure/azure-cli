@@ -18,7 +18,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
     from azure_devtools.scenario_tests import AllowLargeResponse
 
     @AllowLargeResponse()
-	@ResourceGroupPreparer(name_prefix='cli_test_sb_alias')
+    @ResourceGroupPreparer(name_prefix='cli_test_sb_alias')
     def test_sb_alias(self, resource_group):
         from azure.mgmt.servicebus.models import ProvisioningStateDR
         self.kwargs.update({
