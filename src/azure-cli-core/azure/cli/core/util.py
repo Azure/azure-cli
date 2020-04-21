@@ -93,6 +93,8 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             except (ValueError, KeyError):
                 logger.error(ex)
             return 1
+        if isinstance(ex, SystemExit):
+            return ex.code
 
         logger.error("The command failed with an unexpected error. Here is the traceback:\n")
         logger.exception(ex)
