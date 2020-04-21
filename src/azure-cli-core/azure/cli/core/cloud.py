@@ -119,11 +119,15 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
                  sql_server_hostname=None,
                  azure_datalake_store_file_system_endpoint=None,
                  azure_datalake_analytics_catalog_and_job_endpoint=None,
-                 acr_login_server_endpoint=None):
+                 acr_login_server_endpoint=None,
+                 mysql_server_hostname=None,
+                 postgresql_server_hostname=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.keyvault_dns = keyvault_dns
         self.sql_server_hostname = sql_server_hostname
+        self.mysql_server_hostname = mysql_server_hostname
+        self.postgresql_server_hostname = postgresql_server_hostname
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
         self.acr_login_server_endpoint = acr_login_server_endpoint
