@@ -14,7 +14,6 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
-import time
 
 logger = get_logger(__name__)
 
