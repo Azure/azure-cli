@@ -10,6 +10,7 @@ from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id
 from azure.cli.core.util import CLIError
+from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
@@ -94,7 +95,9 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
         logger.warning(("Please be aware that DNS names ending with .local are reserved for use with multicast DNS "
                         "and may not work as expected with some operating systems. For details refer to your operating systems documentation."))
     zone = PrivateZone(location='global')
-    client.private_zones.create_or_update(resource_group_name, private_zone_name, zone)
+    result = LongRunningOperation(cmd.cli_ctx)(client.private_zones.create_or_update(resource_group_name, private_zone_name, zone))
+    if result.provisioning_state != 'Succeeded':
+        raise CLIError('Error occured while creating or updating private dns zone.')
 
     for key, rs in record_sets.items():
 
@@ -108,8 +111,6 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
         except TypeError:
             record_count = 1
         if rs_name == '@' and rs_type == 'soa':
-            # 30 second sleep in case zone is getting created. else follwoing get soa record-set call fails
-            time.sleep(30)
             root_soa = client.record_sets.get(resource_group_name, private_zone_name, 'soa', '@')
             rs.soa_record.host = root_soa.soa_record.host
             rs_name = '@'
