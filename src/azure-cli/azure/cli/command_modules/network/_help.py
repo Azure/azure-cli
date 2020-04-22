@@ -5792,3 +5792,33 @@ helps['network bastion show'] = """
 type: command
 short-summary: Show a Azure bastion host machine.
 """
+
+helps['network security-partner'] = """
+type: group
+short-summary: Manage Azure security partner provider.
+"""
+
+helps['network security-partner create'] = """
+type: command
+short-summary: Create a Azure security partner provider.
+"""
+
+helps['network security-partner update'] = """
+type: command
+short-summary: Update a Azure security partner provider.
+"""
+
+helps['network security-partner delete'] = """
+type: command
+short-summary: Delete a Azure security partner provider.
+"""
+
+helps['network security-partner list'] = """
+type: command
+short-summary: List all Azure security partner provider.
+"""
+
+helps['network security-partner show'] = """
+type: command
+short-summary: Show a Azure security partner provider.
+"""
