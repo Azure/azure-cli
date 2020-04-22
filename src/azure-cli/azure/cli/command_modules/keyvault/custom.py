@@ -533,7 +533,7 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     storage_permissions = _permissions_distinct(storage_permissions)
 
     if vault.properties.enable_rbac_authorization:
-        raise CLIError('Cannot set policies to a vault with `--enable-rbac-authorization` specified')
+        raise CLIError('Cannot set policies to a vault with \'--enable-rbac-authorization\' specified')
 
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
@@ -662,7 +662,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
                        vault_name=vault_name)
 
     if vault.properties.enable_rbac_authorization:
-        raise CLIError('Cannot delete policies to a vault with `--enable-rbac-authorization` specified')
+        raise CLIError('Cannot delete policies to a vault with \'--enable-rbac-authorization\' specified')
 
     prev_policies_len = len(vault.properties.access_policies)
     vault.properties.access_policies = [p for p in vault.properties.access_policies if
