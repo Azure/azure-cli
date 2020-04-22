@@ -511,7 +511,7 @@ class Profile(object):
     def _create_identity_credential(self, account, aux_tenant_id=None):
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        home_account_id = account[_USER_ENTITY][_USER_HOME_ACCOUNT_ID]
+        home_account_id = account[_USER_ENTITY].get(_USER_HOME_ACCOUNT_ID)
         identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
 
@@ -526,6 +526,8 @@ class Profile(object):
 
             # User
             if user_type == _USER:
+                if not home_account_id:
+                    raise CLIError("CLI authentication is migrated to AADv2.0, please run 'az login' to re-login")
                 return identity.get_user_credential(home_account_id, username_or_sp_id)
 
             # Service Principal
