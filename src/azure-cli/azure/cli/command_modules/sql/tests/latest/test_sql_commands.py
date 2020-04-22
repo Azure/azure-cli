@@ -3129,13 +3129,13 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
-        
+
         self.cmd('sql instance-pool list', checks=[self.greater_than('length(@)', 1)])
 
         # test delete sql managed instance
         self.cmd('sql instance-pool delete -g {} -n {} --yes'
                  .format(resource_group, instance_pool_name_1), checks=NoneCheck())
-        
+
         # test show sql managed instance doesn't return anything
         self.cmd('sql instance-pool show -g {} -n {}'
                  .format(resource_group, instance_pool_name_1),
