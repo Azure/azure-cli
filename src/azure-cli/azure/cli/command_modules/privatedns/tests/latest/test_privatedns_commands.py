@@ -937,6 +937,7 @@ class PrivateDnsZoneImportTest(ScenarioTest):
         # Export zone file and delete the zone
         self.cmd('network private-dns zone export -g {rg} -n {zone} --file-name "{export}"')
         self.cmd('network private-dns zone delete -g {rg} -n {zone} -y')
+        time.sleep(10)
 
         # Reimport zone file and verify both record sets are equivalent
         self.cmd('network private-dns zone import -n {zone} -g {rg} --file-name "{export}"')
