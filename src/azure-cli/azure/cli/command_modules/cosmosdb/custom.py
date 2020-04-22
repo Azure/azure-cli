@@ -88,7 +88,7 @@ def cli_cosmosdb_create(cmd, client,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
                         key_uri=None,
-                        public_network_access=None):
+                        enable_public_network=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -106,6 +106,10 @@ def cli_cosmosdb_create(cmd, client,
     if not locations:
         locations = []
         locations.append(Location(location_name=resource_group_location, failover_priority=0, is_zone_redundant=False))
+
+    public_network_access = None
+    if enable_public_network is not None:
+        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
     params = DatabaseAccountCreateUpdateParameters(
         location=resource_group_location,
@@ -145,7 +149,7 @@ def cli_cosmosdb_update(client,
                         virtual_network_rules=None,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
-                        public_network_access=None):
+                        enable_public_network=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -169,6 +173,10 @@ def cli_cosmosdb_update(client,
         consistency_policy = ConsistencyPolicy(default_consistency_level=default_consistency_level,
                                                max_staleness_prefix=max_staleness_prefix,
                                                max_interval_in_seconds=max_interval)
+
+    public_network_access = None
+    if enable_public_network is not None:
+        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
     params = DatabaseAccountUpdateParameters(
         locations=locations,

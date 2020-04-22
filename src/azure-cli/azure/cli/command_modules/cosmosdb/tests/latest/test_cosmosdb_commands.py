@@ -18,25 +18,26 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --public-network-access Disabled')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', True),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
-            self.check('publicNetworkAccess', 'Disabled'),
+            self.check('publicNetworkAccess', 'Enabled'),
         ])
 
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session --disable-key-based-metadata-write-access --public-network-access Enabled')
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session --disable-key-based-metadata-write-access --enable-public-network false')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', False),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'Session'),
             self.check('disableKeyBasedMetadataWriteAccess', True),
-            self.check('publicNetworkAccess', 'Enabled'),
+            self.check('publicNetworkAccess', 'Disabled'),
         ])
 
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --tags testKey=testValue')
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --tags testKey=testValue --enable-public-network')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', False),
-            self.check('consistencyPolicy.defaultConsistencyLevel', 'Session')
+            self.check('consistencyPolicy.defaultConsistencyLevel', 'Session'),
+            self.check('publicNetworkAccess', 'Enabled')
         ]).get_output_in_json()
         assert account['tags']['testKey'] == "testValue"
 
