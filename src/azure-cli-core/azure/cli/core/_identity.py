@@ -54,6 +54,8 @@ class Identity:
     """Class to interact with Azure Identity.
     """
     def __init__(self, authority, tenant_id):
+        if not authority:
+            raise ValueError("Unexpected CLI error: authority cannot be none.")
         self.authority = authority
         self.tenant_id = tenant_id
 
@@ -140,17 +142,20 @@ class Identity:
         auth_profile = AuthProfile(self.authority, home_account_id, self.tenant_id, username)
         return InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True)
 
-    def get_service_principal_credential(self, client_id):
-        credCache = ServicePrincipalCredentialCache()
-        credCache.retrieve_secret_of_service_principal(client_id)
-        # TODO
+    def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
+        cred_cache = ServicePrincipalCredentialCache()
+        client_secret, certificate_path = cred_cache.retrieve_secret_of_service_principal(client_id, self.tenant_id)
+        # TODO: support use_cert_sn_issuer in CertificateCredential
         if client_secret:
-            return ClientSecretCredential(self.tenant_id, client_id, client_secret, use_cert_sn_issuer=use_cert_sn_issuer)
+            return ClientSecretCredential(self.tenant_id, client_id, client_secret)
         if certificate_path:
             return CertificateCredential(self.tenant_id, client_id, certificate_path)
+        raise CLIError("Secret of service principle {} not found. Please run 'az login'".format(client_id))
 
-    def get_msi_credential(self):
-        pass
+    @staticmethod
+    def get_msi_credential(client_id=None):
+        # TODO: support object_id and msi_res_id
+        return ManagedIdentityCredential(client_id)
 
 
 class ServicePrincipalCredentialCache:
@@ -194,7 +199,7 @@ class ServicePrincipalCredentialCache:
                            "Trying credential under tenant %s, assuming that is an app credential.",
                            sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
             cred = matched[0]
-        return cred.get(_ACCESS_TOKEN, None)
+        return cred.get(_ACCESS_TOKEN, None),  cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
 
     def save_service_principal_cred(self, sp_entry):
         self.load_service_principal_creds()
