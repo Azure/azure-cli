@@ -155,7 +155,7 @@ class Identity:
     @staticmethod
     def get_msi_credential(client_id=None):
         # TODO: support object_id and msi_res_id
-        return ManagedIdentityCredential(client_id)
+        return ManagedIdentityCredential(client_id=client_id)
 
 
 class ServicePrincipalCredentialCache:
