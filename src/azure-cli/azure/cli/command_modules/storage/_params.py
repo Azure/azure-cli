@@ -1184,8 +1184,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('new_name', options_list=['--new-path'],
                    help='The new path the users want to move to. The value must have the following format: '
                    '"{filesystem}/{directory}/{subdirectory}/{file}".')
-        c.argument('permissions', permissions_type)
-        c.argument('umask', umask_type)
 
     with self.argument_context('storage fs file upload') as c:
         t_file_content_settings = self.get_sdk('_models#ContentSettings',

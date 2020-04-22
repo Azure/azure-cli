@@ -24,7 +24,7 @@ def append_file(client, content):
     # START append data
     client.append_data(data=content, offset=file.size, length=len(content))
     # END append data
-    return client.flush_data(offset=len(content))
+    return client.flush_data(offset=file.size + len(content))
 
 
 def download_file(client, destination_path=None, overwrite=True):
@@ -61,13 +61,13 @@ def exists(cmd, client):
 
 
 def get_file_properties(client):
-    from knack.util import todict
     from .._transformers import transform_fs_access_output
 
     prop = client.get_file_properties()
-    from msrest import Serializer
+    if prop.content_settings.content_md5 is not None:
+        from msrest import Serializer
+        prop.content_settings.content_md5 = Serializer.serialize_bytearray(prop.content_settings.content_md5)
 
-    prop.content_settings.content_md5 = Serializer.serialize_bytearray(prop.content_settings.content_md5)
     acl = transform_fs_access_output(client.get_access_control())
     result = dict(prop, **acl)
     return result
@@ -76,13 +76,22 @@ def get_file_properties(client):
 def list_fs_files(client, path=None, recursive=True, num_results=None, upn=None, timeout=None, exclude_dir=None):
     generator = client.get_paths(path=path, recursive=recursive, timeout=timeout, max_results=num_results)
 
+    if num_results is not None:
+        pages = generator.by_page()
+        page1 = next(pages)
+        logger.warning('Next Marker:')
+        logger.warning(pages.continuation_token)
+    else:
+        page1 = generator
+
     if exclude_dir:
-        return list(f for f in generator if not f.is_directory)
+        return list(f for f in page1 if not f.is_directory)
 
-    return generator
+    return page1
 
 
-def upload_file(cmd, client, local_path, overwrite=False, metadata=None, unmask=None, permissions=None):
+def upload_file(cmd, client, local_path, overwrite=False, metadata=None, umask=None, permissions=None,
+                content_settings=None):
     if not exists(cmd, client):
         client.create_file()
     """
@@ -93,5 +102,4 @@ def upload_file(cmd, client, local_path, overwrite=False, metadata=None, unmask=
     with open(local_path, 'rb') as stream:
         data = stream.read(count)
 
-    return client.upload_data(data=data, length=count, overwrite=overwrite, metadata=metadata, umaskoverwrite=unmask,
-                              permissions=permissions)
+    return client.upload_data(data=data, overwrite=True)

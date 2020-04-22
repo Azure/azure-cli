@@ -170,31 +170,49 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         # Create File
         self.storage_cmd('storage fs file exists -n {} -f {}', account_info, file, filesystem) \
             .assert_with_checks(JMESPathCheck('exists', False))
-        self.storage_cmd('storage fs file create -n {} -f {}', account_info, file, filesystem)
+        self.storage_cmd('storage fs file create -n {} -f {} --content-type "application/json"',
+                         account_info, file, filesystem)
         self.storage_cmd('storage fs file exists -n {} -f {}', account_info, file, filesystem) \
             .assert_with_checks(JMESPathCheck('exists', True))
 
-        self.storage_cmd('storage fs file show -n {} -f {}', account_info, file, filesystem)
-        self.storage_cmd('storage fs file append -n {} -f {} --content "testappend"', account_info, file, filesystem)
+        self.storage_cmd('storage fs file show -n {} -f {}', account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('name', file)) \
+            .assert_with_checks(JMESPathCheck('deleted', False)) \
+            .assert_with_checks(JMESPathCheck('size', 0)) \
+            .assert_with_checks(JMESPathCheck('permissions', 'rwxr-x---')) \
+            .assert_with_checks(JMESPathCheck('content_settings.contentType', 'aapplication/json'))
 
+        # Append File
+        content = "testappend"
+        content_size = len(content)
+        self.storage_cmd('storage fs file append -n {} -f {} --content {}', account_info, file, filesystem, content)
+        self.storage_cmd('storage fs file show -n {} -f {}', account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('name', file)) \
+            .assert_with_checks(JMESPathCheck('deleted', False)) \
+            .assert_with_checks(JMESPathCheck('size', content_size)) \
+            .assert_with_checks(JMESPathCheck('permissions', 'rwxr-x---'))
+
+        # Upload File to a new path
         file_path = '/'.join([directory, file])
         local_file = self.create_temp_file(1024)
         self.storage_cmd('storage fs file upload -p {} -f {} -s {}', account_info, file_path, filesystem, local_file)
 
-        self.storage_cmd('storage fs file list -n {} -f {}', account_info, file, filesystem, checks=[
-            JMESPathCheck('length(@)', 3)
-        ])
-
-        self.storage_cmd('storage fs file list -n {} -f {} --exclude-dir', account_info, file, filesystem, checks=[
-            JMESPathCheck('length(@)', 2)
-        ])
+        self.storage_cmd('storage fs file list -n {} -f {}', account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('length(@)', 3))
 
         local_dir = self.create_temp_dir()
         self.storage_cmd('storage fs file download -p {} -f {} -d {}', account_info, file_path, filesystem, local_dir)
         import os
         self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_dir)))
 
-        self.storage_cmd('storage fs file move -p {} -f {} -s {}', account_info, file_path, filesystem, local_file)
+        new_filesystem = self.create_file_system(account_info)
+        self.storage_cmd('storage fs file move -p {} -f {} --new-path {}', account_info, file_path, filesystem,
+                         '/'.join([new_filesystem, file])) \
+            .assert_with_checks(JMESPathCheck('pathName', file))
+        self.storage_cmd('storage fs file exists -p {} -f {}', account_info, file_path, filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', False))
+        self.storage_cmd('storage fs file exists -p {} -f {}', account_info, file, new_filesystem) \
+            .assert_with_checks(JMESPathCheck('exists', False))
 
-        self.storage_cmd('storage fs file delete -p {} -f {} -y', account_info, file_path, filesystem)
-        self.storage_cmd('storage fs file exists -n {} -f {}', account_info, file, filesystem)
+        self.storage_cmd('storage fs file delete -p {} -f {} -y', account_info, file, new_filesystem)
+        self.storage_cmd('storage fs file exists -p {} -f {}', account_info, file, new_filesystem)
