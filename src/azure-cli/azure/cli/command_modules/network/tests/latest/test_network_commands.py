@@ -3652,5 +3652,7 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
             self.check('length(@)', 1)
         ])
         self.cmd('network security-partner delete -n {name} -g {rg}')
+
+
 if __name__ == '__main__':
     unittest.main()
