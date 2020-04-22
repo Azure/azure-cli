@@ -3044,8 +3044,8 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     @record_only()
     def test_sql_instance_pool(self):
 
-        instance_pool_name_1 = "clitestipbwikkrkamao"
-        instance_pool_name_2 = "clitestipbwikkrkamao2"
+        instance_pool_name_1 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
+        instance_pool_name_2 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
         license_type = 'LicenseIncluded'
         location = 'northcentralus'
         v_cores = 8
@@ -3129,24 +3129,21 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('name', instance_pool_name_2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
+        
+        self.cmd('sql instance-pool list', checks=[self.greater_than('length(@)', 1)])
 
         # test delete sql managed instance
         self.cmd('sql instance-pool delete -g {} -n {} --yes'
                  .format(resource_group, instance_pool_name_1), checks=NoneCheck())
-
-        # test delete sql managed instance
-        self.cmd('sql instance-pool delete -g {} -n {} --yes'
-                 .format(resource_group, instance_pool_name_2), checks=NoneCheck())
-
+        
         # test show sql managed instance doesn't return anything
         self.cmd('sql instance-pool show -g {} -n {}'
                  .format(resource_group, instance_pool_name_1),
                  expect_failure=True)
 
-        # test show sql managed instance doesn't return anything
-        self.cmd('sql instance-pool show -g {} -n {}'
-                 .format(resource_group, instance_pool_name_2),
-                 expect_failure=True)
+        # test delete sql managed instance
+        self.cmd('sql instance-pool delete -g {} -n {} --yes --no-wait'
+                 .format(resource_group, instance_pool_name_2), checks=NoneCheck())
 
 
 class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
