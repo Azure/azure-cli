@@ -3619,6 +3619,10 @@ class NetworkVnetLocalContextScenarioTest(ScenarioTest):
 
 
 class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
+                 replay_processors=None, recording_patches=None, replay_patches=None):
+        super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
+        self.cmd('extension add -n virtual-wan')
 
     @ResourceGroupPreparer()
     def test_network_security_partner_provider(self, resource_group):
