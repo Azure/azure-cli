@@ -532,7 +532,7 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     certificate_permissions = _permissions_distinct(certificate_permissions)
     storage_permissions = _permissions_distinct(storage_permissions)
 
-    if vault.properties.enable_rbac_authorization:
+    if getattr(vault.properties, 'enable_rbac_authorization'):
         raise CLIError('Cannot set policies to a vault with \'--enable-rbac-authorization\' specified')
 
     # Find the existing policy to set
