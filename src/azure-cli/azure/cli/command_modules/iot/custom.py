@@ -697,7 +697,6 @@ def validate_authentication_type_input(endpoint_type, connection_string=None, au
 
     has_endpoint_uri = (endpoint_uri is not None)
     has_endpoint_uri_and_path = (has_endpoint_uri) and (entity_path is not None)
-    import pdb; pdb.set_trace()
     if EndpointType.AzureStorageContainer.value == endpoint_type.lower() and not has_endpoint_uri:
         raise CLIError("Please provide an endpoint uri '--endpoint-uri'")
     elif not has_endpoint_uri_and_path:
@@ -937,7 +936,7 @@ def iot_message_enrichment_list(cmd, client, hub_name, resource_group_name=None)
 def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
-    return hub.properties.device_streams
+    return hub.properties.device_streams if hub.properties.device_streams else {}
 
 
 def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_wait=False):
