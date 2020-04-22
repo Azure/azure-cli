@@ -126,7 +126,7 @@ class MetricAlertAddAction(argparse._AppendAction):
         from azure.mgmt.monitor.models import MetricAlertAction
         action = MetricAlertAction(
             action_group_id=values[0],
-            webhook_properties=dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
+            web_hook_properties=dict(x.split('=', 1) for x in values[1:]) if len(values) > 1 else None
         )
         action.odatatype = 'Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.' \
                            'DataContracts.Resources.ScheduledQueryRules.Action'

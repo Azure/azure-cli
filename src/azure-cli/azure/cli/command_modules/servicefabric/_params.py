@@ -147,7 +147,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('application_type_name', options_list=['--name', '--application-type-name'], help='Specify the application type name.')
 
     # application-type version
-    with self.argument_context('sf application-type version create') as c:
+    with self.argument_context('sf application-type version') as c:
         c.argument('version', arg_type=application_type_version)
         c.argument('package_url', arg_type=package_url)
 

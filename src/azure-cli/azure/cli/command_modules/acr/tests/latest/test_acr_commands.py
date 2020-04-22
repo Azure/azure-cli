@@ -440,6 +440,38 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity.type', 'SystemAssigned'))
         self.cmd('acr identity remove --name {registry_name} --identities {system_identity}', self.check('identity', None))
 
+    @ResourceGroupPreparer()
+    def test_acr_with_dedicated_data_endpoints(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20),
+            'rg_loc': resource_group_location,
+            'replication_loc': 'southcentralus'
+        })
+        login_server = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium').get_output_in_json()['loginServer']
+        self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
+            self.check('length(dataEndpoints)', 1),
+            self.check('dataEndpoints[0].endpoint', '*.blob.core.windows.net'),
+            self.check('dataEndpoints[0].region', resource_group_location),
+            self.check('loginServer', login_server)
+        ])
+        suffix = login_server.split('.', 1)[1]
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --data-endpoint-enabled')
+        self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
+            self.check('dataEndpoints[0].endpoint', '{}.{}.data.{}'.format(self.kwargs['registry_name'], self.kwargs['rg_loc'], suffix)),
+        ])
+        self.cmd('acr replication create -r {registry_name} -l {replication_loc}')
+        self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
+            self.check('length(dataEndpoints)', 2),
+            self.check('dataEndpoints[0].endpoint', '{}.{}.data.{}'.format(self.kwargs['registry_name'], self.kwargs['replication_loc'], suffix)),
+            self.check('dataEndpoints[1].endpoint', '{}.{}.data.{}'.format(self.kwargs['registry_name'], self.kwargs['rg_loc'], suffix)),
+        ])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --data-endpoint-enabled false')
+        self.cmd('acr show-endpoints --name {registry_name} --resource-group {rg}', checks=[
+            self.check('length(dataEndpoints)', 2),
+            self.check('dataEndpoints[0].endpoint', '*.blob.core.windows.net'),
+            self.check('dataEndpoints[1].endpoint', '*.blob.core.windows.net'),
+        ])
+
     @ResourceGroupPreparer(location='centraluseuap')
     def test_acr_with_private_endpoint(self, resource_group):
         self.kwargs.update({

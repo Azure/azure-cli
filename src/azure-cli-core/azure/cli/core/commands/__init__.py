@@ -27,7 +27,7 @@ from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)
 from azure.cli.core.extension import get_extension
 from azure.cli.core.util import get_command_type_kwarg, read_file_content, get_arg_list, poller_classes
-from azure.cli.core.local_context import USE
+from azure.cli.core.local_context import GET
 import azure.cli.core.telemetry as telemetry
 
 
@@ -295,7 +295,7 @@ class AzCliCommand(CLICommand):
     def _resolve_default_value_from_local_context(self, arg, overrides):
         if self.cli_ctx.local_context.is_on():
             lca = overrides.settings.get('local_context_attribute', None)
-            if not lca or not lca.actions or USE not in lca.actions:
+            if not lca or not lca.actions or GET not in lca.actions:
                 return
             if lca.name:
                 local_context = self.cli_ctx.local_context
@@ -421,15 +421,21 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
         return _get_operation()
 
 
-def cached_put(cmd_obj, operation, parameters, *args, **kwargs):
-
+def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameters', **kwargs):
+    """
+    setter_arg_name: The name of the argument in the setter which corresponds to the object being updated.
+    In track2, unknown kwargs will raise, so we should not pass 'parameters" for operation when the name of the argument
+    in the setter which corresponds to the object being updated is not 'parameters'.
+    """
     def _put_operation():
         result = None
         if args:
             extended_args = args + (parameters,)
             result = operation(*extended_args)
         elif kwargs is not None:
-            result = operation(parameters=parameters, **kwargs)
+            kwargs[setter_arg_name] = parameters
+            result = operation(**kwargs)
+            del kwargs[setter_arg_name]
         return result
 
     # early out if the command does not use the cache
@@ -1067,7 +1073,8 @@ def _is_paged(obj):
             and not isinstance(obj, list) \
             and not isinstance(obj, dict):
         from msrest.paging import Paged
-        return isinstance(obj, Paged)
+        from azure.core.paging import ItemPaged as AzureCorePaged
+        return isinstance(obj, (AzureCorePaged, Paged))
     return False
 
 

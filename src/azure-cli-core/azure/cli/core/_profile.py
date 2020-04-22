@@ -877,10 +877,12 @@ class SubscriptionFinder(object):
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
-            if not hasattr(t, 'display_name'):  # Available since 2018-06-01
-                t.display_name = ""
-            if hasattr(t, 'additional_properties'):  # remove this line once SDK is fixed
-                t.display_name = t.additional_properties['displayName']
+            # display_name is available since /tenants?api-version=2018-06-01,
+            # not available in /tenants?api-version=2016-06-01
+            if not hasattr(t, 'display_name'):
+                t.display_name = None
+            if hasattr(t, 'additional_properties'):  # Remove this line once SDK is fixed
+                t.display_name = t.additional_properties.get('displayName')
             temp_context = self._create_auth_context(tenant_id)
             try:
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
@@ -922,14 +924,20 @@ class SubscriptionFinder(object):
             logger.warning("The following tenants don't contain accessible subscriptions. "
                            "Use 'az login --allow-no-subscriptions' to have tenant level access.")
             for t in empty_tenants:
-                logger.warning("%s '%s'", t.tenant_id, t.display_name)
+                if t.display_name:
+                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
+                else:
+                    logger.warning("%s", t.tenant_id)
 
         # Show warning for MFA tenants
         if mfa_tenants:
             logger.warning("The following tenants require Multi-Factor Authentication (MFA). "
                            "Use 'az login --tenant TENANT_ID' to explicitly login to a tenant.")
             for t in mfa_tenants:
-                logger.warning("%s '%s'", t.tenant_id, t.display_name)
+                if t.display_name:
+                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
+                else:
+                    logger.warning("%s", t.tenant_id)
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
@@ -1194,6 +1202,11 @@ def _get_authorization_code_worker(authority_url, resource, results):
             break
         except socket.error as ex:
             logger.warning("Port '%s' is taken with error '%s'. Trying with the next one", port, ex)
+        except UnicodeDecodeError:
+            logger.warning("Please make sure there is no international (Unicode) character in the computer name "
+                           r"or C:\Windows\System32\drivers\etc\hosts file's 127.0.0.1 entries. "
+                           "For more details, please see https://github.com/Azure/azure-cli/issues/12957")
+            break
 
     if reply_url is None:
         logger.warning("Error: can't reserve a port for authentication reply url")
