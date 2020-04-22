@@ -29,7 +29,8 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, AppRole,
                                     PasswordCredential, KeyCredential, UserCreateParameters, PasswordProfile,
                                     ServicePrincipalCreateParameters, RequiredResourceAccess, ResourceAccess,
-                                    GroupCreateParameters, CheckGroupMembershipParameters, UserUpdateParameters)
+                                    GroupCreateParameters, CheckGroupMembershipParameters, UserUpdateParameters,
+                                    OptionalClaim, OptionalClaims)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
@@ -726,7 +727,7 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None,
-                       credential_description=None, app_roles=None):
+                       credential_description=None, app_roles=None, optional_claims=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
     existing_apps = list_apps(cmd, display_name=display_name)
@@ -765,6 +766,8 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
 
     if app_roles:
         app_roles = _build_app_roles(app_roles)
+    if optional_claims:
+        optional_claims = _build_optional_claims(optional_claims)
 
     app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
                                                    display_name=display_name,
@@ -775,7 +778,8 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
                                                    password_credentials=password_creds,
                                                    oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
                                                    required_resource_access=required_accesses,
-                                                   app_roles=app_roles)
+                                                   app_roles=app_roles,
+                                                   optional_claims=optional_claims)
 
     try:
         result = graph_client.applications.create(app_create_param)
@@ -943,7 +947,7 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None,
-                       credential_description=None, app_roles=None):
+                       credential_description=None, app_roles=None, optional_claims=None):
 
     # propagate the values
     app_patch_param = ApplicationUpdateParameters()
@@ -967,6 +971,9 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
 
     if app_roles:
         app_patch_param.app_roles = _build_app_roles(app_roles)
+
+    if optional_claims:
+        app_patch_param.optional_claims = _build_optional_claims(optional_claims)
 
     if available_to_other_tenants is not None:
         app_patch_param.available_to_other_tenants = available_to_other_tenants
@@ -1022,6 +1029,29 @@ def _build_app_roles(app_roles):
                        description=x.get('description', None), display_name=x.get('displayName', None),
                        is_enabled=x.get('isEnabled', None), value=x.get('value', None))
         result.append(role)
+    return result
+
+
+def _build_optional_claims(optional_claims):
+    if not optional_claims:
+        return None
+    available_keys = {
+        'idToken': 'id_token',
+        'accessToken': 'access_token'
+    }
+    result = OptionalClaims()
+    for key, object_key in available_keys.items():
+        if optional_claims.get(key, []):
+            tokens = []
+            for token in optional_claims.get(key):
+                tokens.append(OptionalClaim(
+                    name=token.get('name', None),
+                    source=token.get('source', None),
+                    essential=token.get('essential', None),
+                    additional_properties=token.get('additionalProperties', None)
+                ))
+            if tokens:
+                setattr(result, object_key, tokens)
     return result
 
 

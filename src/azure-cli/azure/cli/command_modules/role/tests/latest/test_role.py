@@ -102,7 +102,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
 
 class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_new_kv_cert')
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
         KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
@@ -137,7 +137,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
 
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_existing_kv_cert')
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
 
         import time
@@ -348,7 +348,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
             time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
-            base_dir = os.curdir
+            base_dir = os.path.abspath(os.curdir)
+
             try:
                 temp_dir = self.create_temp_dir()
                 os.chdir(temp_dir)
@@ -368,7 +369,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 0))
             finally:
                 self.cmd('configure --default group="" --scope local')
-                os.chdir(os.path.basename(base_dir))
+                os.chdir(base_dir)
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
