@@ -532,8 +532,13 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     certificate_permissions = _permissions_distinct(certificate_permissions)
     storage_permissions = _permissions_distinct(storage_permissions)
 
-    if getattr(vault.properties, 'enable_rbac_authorization'):
-        raise CLIError('Cannot set policies to a vault with \'--enable-rbac-authorization\' specified')
+    try:
+        enable_rbac_authorization = getattr(vault.properties, 'enable_rbac_authorization')
+    except:  # pylint: disable=bare-except
+        pass
+    else:
+        if enable_rbac_authorization:
+            raise CLIError('Cannot set policies to a vault with \'--enable-rbac-authorization\' specified')
 
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
@@ -661,8 +666,13 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
 
-    if vault.properties.enable_rbac_authorization:
-        raise CLIError('Cannot delete policies to a vault with \'--enable-rbac-authorization\' specified')
+    try:
+        enable_rbac_authorization = getattr(vault.properties, 'enable_rbac_authorization')
+    except:  # pylint: disable=bare-except
+        pass
+    else:
+        if enable_rbac_authorization:
+            raise CLIError('Cannot delete policies to a vault with \'--enable-rbac-authorization\' specified')
 
     prev_policies_len = len(vault.properties.access_policies)
     vault.properties.access_policies = [p for p in vault.properties.access_policies if
