@@ -1035,15 +1035,22 @@ class CredsCache(object):
         It is a temporary solution and will deprecate after adoption to MSAL completely.
         """
         from azure.cli.core._msal import SSHCertificateClientApplication
+        import hashlib
         scopes = ["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]
         tenant = tenant or 'organizations'
         authority = self._ctx.cloud.endpoints.active_directory + '/' + tenant
         app = SSHCertificateClientApplication(_CLIENT_ID, authority=authority)
+
+        key_hash = hashlib.sha256()
+        key_hash.update(modulus.encode('utf-8'))
+        key_hash.update(exponent.encode('utf-8'))
+        key_id = key_hash.hexdigest()
+
         jwk = {
             "kty": "RSA",
             "n": modulus,
             "e": exponent,
-            "kid": str(hash((modulus, exponent)))
+            "kid": key_id
         }
         json_jwk = json.dumps(jwk)
         result = app.acquire_token_silent(scopes, None,
