@@ -1784,3 +1784,11 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', options_list=['--vnet-name'], help='Name of the virtual network. It must have a subnet called AzureBastionSubnet.', validator=get_subnet_validator())
         c.ignore('subnet')
     # endregion
+
+    # region security partner provider
+    with self.argument_context('network security-partner') as c:
+        SecurityProviderName = self.get_models('SecurityProviderName')
+        c.argument('security_provider_name', arg_type=get_enum_type(SecurityProviderName), help='The security provider name', options_list=['--provider'])
+        c.argument('security_partner_provider_name', options_list=['--name', '-n'], help='Name of the Security Partner Provider.')
+        c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
+    # endregion
