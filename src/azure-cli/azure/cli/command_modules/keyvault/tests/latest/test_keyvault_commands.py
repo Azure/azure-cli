@@ -248,10 +248,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=[self.check('properties.enableSoftDelete', True),
                          self.check('properties.enablePurgeProtection', True)])
 
-
-class KeyVaultRBACScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_rbac')
-    def test_keyvault_rbac(self, resource_group):
+        # test '--enable-rbac-authorization'
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
             'loc': 'eastus2'
