@@ -1198,8 +1198,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('local_path', options_list=['--source', '-s'],
                    help='Path of the local file to upload as the file content.')
         c.argument('overwrite', action='store_true', help="Overwrite an existing file when specified.")
+        c.argument('if_match',
+                   help="An ETag value, or the wildcard character (*). Specify this header to perform the operation "
+                   "only if the resource's ETag matches the value specified.")
+        c.argument('if_none_match',
+                   help="An ETag value, or the wildcard character (*). Specify this header to perform the operation "
+                   "only if the resource's ETag does not match the value specified.")
+
         c.argument('permissions', permissions_type)
-        c.argument('umask', umask_type)
+        #TODO: need fixed by sdk
+        #c.argument('umask', umask_type)
 
     for item in ['set', 'show']:
         with self.argument_context('storage fs access {}'.format(item)) as c:

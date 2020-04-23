@@ -89,8 +89,10 @@ def list_fs_files(client, path=None, recursive=True, num_results=None, timeout=N
     return result
 
 
-def upload_file(cmd, client, local_path, overwrite=False, metadata=None, umask=None, permissions=None,
+def upload_file(cmd, client, local_path, overwrite=False, if_match=None, if_none_match=None,
+                metadata=None, umask=None, permissions=None, timeout=None,
                 content_settings=None):
+
     if not exists(cmd, client):
         client.create_file()
     """
@@ -101,4 +103,15 @@ def upload_file(cmd, client, local_path, overwrite=False, metadata=None, umask=N
     with open(local_path, 'rb') as stream:
         data = stream.read(count)
     from azure.core import MatchConditions
-    return client.upload_data(data=data, overwrite=overwrite, etag='*', match_condition=MatchConditions.IfNotModified)
+    upload_file_args = {
+        'content_settings': content_settings,
+        'metadata': metadata,
+        'timeout': timeout
+    }
+    if if_match:
+        upload_file_args['etag'] = if_match
+        upload_file_args['match_condition'] = MatchConditions.IfNotModified
+    if if_none_match:
+        upload_file_args['etag'] = if_none_match
+        upload_file_args['match_condition'] = MatchConditions.IfModified
+    return client.upload_data(data=data, overwrite=overwrite, **upload_file_args)
