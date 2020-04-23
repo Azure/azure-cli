@@ -73,21 +73,20 @@ def get_file_properties(client):
     return result
 
 
-def list_fs_files(client, path=None, recursive=True, num_results=None, upn=None, timeout=None, exclude_dir=None):
-    generator = client.get_paths(path=path, recursive=recursive, timeout=timeout, max_results=num_results)
+def list_fs_files(client, path=None, recursive=True, num_results=None, timeout=None, exclude_dir=None, marker=None):
+    generator = client.get_paths(path=path, max_results=num_results, recursive=recursive, timeout=timeout)
+    pages = generator.by_page(continuation_token=marker)
 
-    if num_results is not None:
-        pages = generator.by_page()
-        page1 = next(pages)
+    result = next(pages)
+
+    if pages.continuation_token:
         logger.warning('Next Marker:')
         logger.warning(pages.continuation_token)
-    else:
-        page1 = generator
 
     if exclude_dir:
-        return list(f for f in page1 if not f.is_directory)
+        return list(f for f in result if not f.is_directory)
 
-    return page1
+    return result
 
 
 def upload_file(cmd, client, local_path, overwrite=False, metadata=None, umask=None, permissions=None,
@@ -101,5 +100,5 @@ def upload_file(cmd, client, local_path, overwrite=False, metadata=None, umask=N
     count = os.path.getsize(local_path)
     with open(local_path, 'rb') as stream:
         data = stream.read(count)
-
-    return client.upload_data(data=data, overwrite=True)
+    from azure.core import MatchConditions
+    return client.upload_data(data=data, overwrite=overwrite, etag='*', match_condition=MatchConditions.IfNotModified)

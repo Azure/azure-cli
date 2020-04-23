@@ -1614,6 +1614,9 @@ examples:
   - name:  List files and directories in a specified path.
     text: |
         az storage fs file list --path dir -f fsname --account-name mystorageaccount --account-key 0000-0000
+  - name:  List files and directories from a specific marker.
+    text: |
+        az storage fs file list --marker "VBaS6LvPufaqrTANTQvbmV3dHJ5FgAAAA==" -f fsname --account-name mystorageaccount --account-key 0000-0000
 """
 
 helps['storage fs file move'] = """

@@ -1149,7 +1149,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('exclude_dir', action='store_true',
                    help='List only files in the given file system.')
         c.argument('path', help='Filter the results to return only paths under the specified path.')
-        c.argument('num_results', type=int, help='Specify the maximum number of results to return.')
+        c.argument('num_results', type=int, default=5000,
+                   help='Specify the maximum number of results to return. If the request does not specify num_results '
+                        'or specifies a value greater than 5,000, the server will return up to 5,000 items.')
+        c.argument('marker',
+                   help='An opaque continuation token. This value can be retrieved from the next_marker field of a '
+                   'previous generator object. If specified, this generator will begin returning results from this '
+                   'point.')
 
     for item in ['create', 'show', 'delete', 'exists', 'upload', 'append', 'download', 'show']:
         with self.argument_context('storage fs file {}'.format(item)) as c:
