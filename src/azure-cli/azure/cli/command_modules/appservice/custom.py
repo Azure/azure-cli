@@ -73,20 +73,23 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, docker_registry_server_password=None, docker_registry_server_user=None,
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
-                  using_webapp_up=False, language=None):
+                  using_webapp_up=False, language=None, plan_resource_group=None):
     SiteConfig, SkuDescription, Site, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'Site', 'NameValuePair')
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
-
+    
     client = web_client_factory(cmd.cli_ctx)
     if is_valid_resource_id(plan):
         parse_result = parse_resource_id(plan)
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
-        plan_info = _get_plan_by_name(client, plan)
+        if plan_resource_group:
+            plan_info = client.app_service_plans.get(plan_resource_group, plan)
+        else:
+            plan_info = client.app_service_plans.get(resource_group_name, plan)
     if not plan_info:
         raise CLIError("The plan '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved

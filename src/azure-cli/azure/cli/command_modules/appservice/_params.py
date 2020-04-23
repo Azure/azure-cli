@@ -120,6 +120,7 @@ def load_arguments(self, _):
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+        c.argument('plan_resource_group', options_list=['--plan-resource-group'], help='resource group where the plan is located. Needed only is plan is in differente rg than webapp will be created')
         c.ignore('language')
         c.ignore('using_webapp_up')
 
