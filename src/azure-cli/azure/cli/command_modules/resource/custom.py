@@ -55,7 +55,6 @@ def _build_resource_id(**kwargs):
 
 
 def _process_parameters(template_param_defs, parameter_lists):
-
     def _try_parse_json_object(value):
         try:
             parsed = shell_safe_json_parse(value)
@@ -330,7 +329,8 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
         sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
     )
 
-    validation_result = deployment_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=properties)
+    validation_result = deployment_client.validate(resource_group_name=resource_group_name,
+                                                   deployment_name=deployment_name, properties=properties)
 
     if validation_result and validation_result.error:
         raise CLIError(validation_result.error)
@@ -382,8 +382,10 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None):
     return _deploy_arm_template_at_subscription_scope(cli_ctx=cmd.cli_ctx,
-                                                      template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                      deployment_name=deployment_name, deployment_location=deployment_location,
+                                                      template_file=template_file, template_uri=template_uri,
+                                                      parameters=parameters,
+                                                      deployment_name=deployment_name,
+                                                      deployment_location=deployment_location,
                                                       validate_only=False,
                                                       no_wait=no_wait)
 
@@ -394,8 +396,10 @@ def validate_arm_template_at_subscription_scope(cmd,
                                                 deployment_name=None, deployment_location=None,
                                                 no_wait=False, handle_extended_json_format=None):
     return _deploy_arm_template_at_subscription_scope(cli_ctx=cmd.cli_ctx,
-                                                      template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                      deployment_name=deployment_name, deployment_location=deployment_location,
+                                                      template_file=template_file, template_uri=template_uri,
+                                                      parameters=parameters,
+                                                      deployment_name=deployment_name,
+                                                      deployment_location=deployment_location,
                                                       validate_only=True,
                                                       no_wait=no_wait)
 
@@ -411,7 +415,9 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
 
     mgmt_client = _get_deployment_management_client(cli_ctx)
 
-    validation_result = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_result = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name,
+                                                                   properties=deployment_properties,
+                                                                   location=deployment_location)
 
     if validation_result and validation_result.error:
         raise CLIError(validation_result.error)
@@ -431,8 +437,10 @@ def deploy_arm_template_at_resource_group(cmd,
                                           aux_subscriptions=None, aux_tenants=None):
     return _deploy_arm_template_at_resource_group(cli_ctx=cmd.cli_ctx,
                                                   resource_group_name=resource_group_name,
-                                                  template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                  deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
+                                                  template_file=template_file, template_uri=template_uri,
+                                                  parameters=parameters,
+                                                  deployment_name=deployment_name, mode=mode,
+                                                  rollback_on_error=rollback_on_error,
                                                   validate_only=False, no_wait=no_wait,
                                                   aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
@@ -445,8 +453,10 @@ def validate_arm_template_at_resource_group(cmd,
                                             no_wait=False, handle_extended_json_format=None):
     return _deploy_arm_template_at_resource_group(cli_ctx=cmd.cli_ctx,
                                                   resource_group_name=resource_group_name,
-                                                  template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                  deployment_name=deployment_name, mode=mode, rollback_on_error=rollback_on_error,
+                                                  template_file=template_file, template_uri=template_uri,
+                                                  parameters=parameters,
+                                                  deployment_name=deployment_name, mode=mode,
+                                                  rollback_on_error=rollback_on_error,
                                                   validate_only=True, no_wait=no_wait)
 
 
@@ -464,7 +474,8 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
     mgmt_client = _get_deployment_management_client(cli_ctx, aux_subscriptions=aux_subscriptions,
                                                     aux_tenants=aux_tenants)
 
-    validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
+    validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name,
+                                             properties=deployment_properties)
 
     if validation_result and validation_result.error:
         raise CLIError(validation_result.error)
@@ -483,8 +494,10 @@ def deploy_arm_template_at_management_group(cmd,
                                             no_wait=False, handle_extended_json_format=None):
     return _deploy_arm_template_at_management_group(cli_ctx=cmd.cli_ctx,
                                                     management_group_id=management_group_id,
-                                                    template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                    deployment_name=deployment_name, deployment_location=deployment_location,
+                                                    template_file=template_file, template_uri=template_uri,
+                                                    parameters=parameters,
+                                                    deployment_name=deployment_name,
+                                                    deployment_location=deployment_location,
                                                     validate_only=False,
                                                     no_wait=no_wait)
 
@@ -497,8 +510,10 @@ def validate_arm_template_at_management_group(cmd,
                                               no_wait=False, handle_extended_json_format=None):
     return _deploy_arm_template_at_management_group(cli_ctx=cmd.cli_ctx,
                                                     management_group_id=management_group_id,
-                                                    template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                    deployment_name=deployment_name, deployment_location=deployment_location,
+                                                    template_file=template_file, template_uri=template_uri,
+                                                    parameters=parameters,
+                                                    deployment_name=deployment_name,
+                                                    deployment_location=deployment_location,
                                                     validate_only=True,
                                                     no_wait=no_wait)
 
@@ -515,7 +530,10 @@ def _deploy_arm_template_at_management_group(cli_ctx,
 
     mgmt_client = _get_deployment_management_client(cli_ctx)
 
-    validation_result = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_result = mgmt_client.validate_at_management_group_scope(group_id=management_group_id,
+                                                                       deployment_name=deployment_name,
+                                                                       properties=deployment_properties,
+                                                                       location=deployment_location)
 
     if validation_result and validation_result.error:
         raise CLIError(validation_result.error)
@@ -532,8 +550,10 @@ def deploy_arm_template_at_tenant_scope(cmd,
                                         deployment_name=None, deployment_location=None,
                                         no_wait=False, handle_extended_json_format=None):
     return _deploy_arm_template_at_tenant_scope(cli_ctx=cmd.cli_ctx,
-                                                template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                deployment_name=deployment_name, deployment_location=deployment_location,
+                                                template_file=template_file, template_uri=template_uri,
+                                                parameters=parameters,
+                                                deployment_name=deployment_name,
+                                                deployment_location=deployment_location,
                                                 validate_only=False,
                                                 no_wait=no_wait)
 
@@ -544,8 +564,10 @@ def validate_arm_template_at_tenant_scope(cmd,
                                           deployment_name=None, deployment_location=None,
                                           no_wait=False, handle_extended_json_format=None):
     return _deploy_arm_template_at_tenant_scope(cli_ctx=cmd.cli_ctx,
-                                                template_file=template_file, template_uri=template_uri, parameters=parameters,
-                                                deployment_name=deployment_name, deployment_location=deployment_location,
+                                                template_file=template_file, template_uri=template_uri,
+                                                parameters=parameters,
+                                                deployment_name=deployment_name,
+                                                deployment_location=deployment_location,
                                                 validate_only=True,
                                                 no_wait=no_wait)
 
@@ -561,7 +583,9 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
 
     mgmt_client = _get_deployment_management_client(cli_ctx)
 
-    validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
+    validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name,
+                                                             properties=deployment_properties,
+                                                             location=deployment_location)
 
     if validation_result and validation_result.error:
         raise CLIError(validation_result.error)
@@ -572,7 +596,8 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
                        deployment_name, deployment_properties, deployment_location)
 
 
-def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, template_uri=None, parameters=None, mode=None, rollback_on_error=None):
+def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, template_uri=None, parameters=None,
+                                              mode=None, rollback_on_error=None):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
                                                                     'OnErrorDeployment', mod='models')
@@ -897,7 +922,6 @@ def create_resource_group(cmd, rg_name, location, tags=None, managed_by=None):
 
 
 def update_resource_group(instance, tags=None):
-
     if tags is not None:
         instance.tags = tags
 
@@ -1148,7 +1172,8 @@ def deploy_arm_template(cmd, resource_group_name,
 def validate_arm_template(cmd, resource_group_name, template_file=None, template_uri=None,
                           parameters=None, mode=None, rollback_on_error=None, handle_extended_json_format=None):
     return _deploy_arm_template_core_unmodified(cmd.cli_ctx, resource_group_name, template_file, template_uri,
-                                                'deployment_dry_run', parameters, mode, rollback_on_error, validate_only=True)
+                                                'deployment_dry_run', parameters, mode, rollback_on_error,
+                                                validate_only=True)
 
 
 def export_template_at_subscription_scope(cmd, deployment_name):
@@ -1360,7 +1385,7 @@ def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
                                                                               resource_name)]
 
     return _single_or_collection([_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version)
-                                  .invoke_action(action, request_body) for id_dict in parsed_ids])
+                                 .invoke_action(action, request_body) for id_dict in parsed_ids])
 
 
 def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
@@ -1538,7 +1563,8 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     params = _load_file_string_or_uri(params, 'params', False)
 
     PolicyAssignment = cmd.get_models('PolicyAssignment')
-    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode)
+    assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope,
+                                  enforcement_mode=enforcement_mode)
     assignment.parameters = params if params else None
 
     if cmd.supported_api_version(min_api='2017-06-01-preview'):
@@ -1574,7 +1600,8 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     # Create the identity's role assignment if requested
     if assign_identity is not None and identity_scope:
         from azure.cli.core.commands.arm import assign_identity as _assign_identity_helper
-        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment, identity_role, identity_scope)
+        _assign_identity_helper(cmd.cli_ctx, lambda: createdAssignment, lambda resource: createdAssignment,
+                                identity_role, identity_scope)
 
     return createdAssignment
 
@@ -1616,7 +1643,8 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     management_group = _parse_management_group_id(scope)
 
     if management_group:
-        result = policy_client.policy_assignments.list_for_management_group(management_group_id=management_group, filter='atScope()')
+        result = policy_client.policy_assignments.list_for_management_group(management_group_id=management_group,
+                                                                            filter='atScope()')
     elif all([resource_type, resource_group, subscription]):
         namespace = id_parts.get('namespace')
         parent_resource_path = '' if not id_parts.get('child_name_1') else (id_parts['type'] + '/' + id_parts['name'])
@@ -1693,7 +1721,8 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
-            return policy_client.policy_definitions.create_or_update_at_management_group(name, parameters, management_group)
+            return policy_client.policy_definitions.create_or_update_at_management_group(name, parameters,
+                                                                                         management_group)
         if subscription:
             subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
@@ -1703,7 +1732,6 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
 
 def create_policy_setdefinition(cmd, name, definitions, params=None, display_name=None, description=None,
                                 subscription=None, management_group=None, definition_groups=None, metadata=None):
-
     definitions = _load_file_string_or_uri(definitions, 'definitions')
     params = _load_file_string_or_uri(params, 'params', False)
     definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
@@ -1718,7 +1746,8 @@ def create_policy_setdefinition(cmd, name, definitions, params=None, display_nam
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
-            return policy_client.policy_set_definitions.create_or_update_at_management_group(name, parameters, management_group)
+            return policy_client.policy_set_definitions.create_or_update_at_management_group(name, parameters,
+                                                                                             management_group)
         if subscription:
             subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
@@ -1733,7 +1762,8 @@ def get_policy_definition(cmd, policy_definition_name, subscription=None, manage
 
 def get_policy_setdefinition(cmd, policy_set_definition_name, subscription=None, management_group=None):
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    return _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
+    return _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group,
+                                         True)
 
 
 def list_policy_definition(cmd, subscription=None, management_group=None):
@@ -1780,7 +1810,8 @@ def delete_policy_setdefinition(cmd, policy_set_definition_name, subscription=No
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
-            return policy_client.policy_set_definitions.delete_at_management_group(policy_set_definition_name, management_group)
+            return policy_client.policy_set_definitions.delete_at_management_group(policy_set_definition_name,
+                                                                                   management_group)
         if subscription:
             subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
@@ -1791,12 +1822,12 @@ def delete_policy_setdefinition(cmd, policy_set_definition_name, subscription=No
 def update_policy_definition(cmd, policy_definition_name, rules=None, params=None,
                              display_name=None, description=None, metadata=None, mode=None,
                              subscription=None, management_group=None):
-
     rules = _load_file_string_or_uri(rules, 'rules', False)
     params = _load_file_string_or_uri(params, 'params', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription, management_group)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name, subscription,
+                                               management_group)
     # pylint: disable=line-too-long,no-member
 
     PolicyDefinition = cmd.get_models('PolicyDefinition')
@@ -1812,7 +1843,8 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
-            return policy_client.policy_definitions.create_or_update_at_management_group(policy_definition_name, parameters, management_group)
+            return policy_client.policy_definitions.create_or_update_at_management_group(policy_definition_name,
+                                                                                         parameters, management_group)
         if subscription:
             subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
@@ -1823,13 +1855,13 @@ def update_policy_definition(cmd, policy_definition_name, rules=None, params=Non
 def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=None, params=None,
                                 display_name=None, description=None,
                                 subscription=None, management_group=None, definition_groups=None, metadata=None):
-
     definitions = _load_file_string_or_uri(definitions, 'definitions', False)
     params = _load_file_string_or_uri(params, 'params', False)
     definition_groups = _load_file_string_or_uri(definition_groups, 'definition_groups', False)
 
     policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription, management_group, True)
+    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, subscription,
+                                               management_group, True)
     # pylint: disable=line-too-long,no-member
     PolicySetDefinition = cmd.get_models('PolicySetDefinition')
     parameters = PolicySetDefinition(
@@ -1843,7 +1875,9 @@ def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=Non
     if cmd.supported_api_version(min_api='2018-03-01'):
         enforce_mutually_exclusive(subscription, management_group)
         if management_group:
-            return policy_client.policy_set_definitions.create_or_update_at_management_group(policy_set_definition_name, parameters, management_group)
+            return policy_client.policy_set_definitions.create_or_update_at_management_group(policy_set_definition_name,
+                                                                                             parameters,
+                                                                                             management_group)
         if subscription:
             subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
             policy_client.config.subscription_id = subscription_id
@@ -2244,6 +2278,8 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
     return lock_client.management_locks.create_or_update_at_resource_level(
         resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, lock_name, params)
+
+
 # endregion
 
 
@@ -2273,6 +2309,8 @@ def list_resource_links(cmd, scope=None, filter_string=None):
     if scope is not None:
         return links_client.list_at_source_scope(scope, filter=filter_string)
     return links_client.list_at_subscription(filter=filter_string)
+
+
 # endregion
 
 
@@ -2294,6 +2332,41 @@ def show_version(cmd):
     from azure.cli.core.util import get_az_version_json
     versions = get_az_version_json()
     return versions
+
+
+def get_tag_at_scope(cmd, resource_id=None):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if resource_id is not None:
+        return rcf.tags.get_at_scope(scope=resource_id)
+    else:
+        return rcf.tags.list()
+
+
+def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=None):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if resource_id is not None:
+        if tags is None or len(tags) == 0:
+            raise IncorrectUsageError("Tags could not be empty.")
+        Tags = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Tags', mod='models')
+        tag_obj = Tags(tags=tags)
+        return rcf.tags.create_or_update_at_scope(scope=resource_id, properties=tag_obj)
+    else:
+        return rcf.tags.create_or_update(tag_name=tag_name)
+
+
+def delete_tag_at_scope(cmd, resource_id=None, tag_name=None):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    if resource_id is not None:
+        return rcf.tags.delete_at_scope(scope=resource_id)
+    else:
+        return rcf.tags.delete(tag_name=tag_name)
+
+
+def update_tag_at_scope(cmd, resource_id, tags, operation):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    Tags = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Tags', mod='models')
+    tag_obj = Tags(tags=tags)
+    return rcf.tags.update_at_scope(scope=resource_id, properties=tag_obj, operation=operation)
 
 
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
@@ -2454,7 +2527,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         client = self.rcf.resources._client  # pylint: disable=protected-access
 
         url = '/subscriptions/{subscriptionId}/resourcegroups/{resourceGroupName}/providers/' \
-            '{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
+              '{resourceProviderNamespace}/{parentResourcePath}/{resourceType}/{resourceName}/{action}'
 
         if self.resource_id:
             url = client.format_url(
@@ -2528,7 +2601,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
             return npv[0] if npv else rt[0].api_versions[0]
         raise IncorrectUsageError(
             'API version is required and could not be resolved for resource {}'
-            .format(resource_type))
+                .format(resource_type))
 
     @staticmethod
     def _resolve_api_version_by_id(rcf, resource_id):

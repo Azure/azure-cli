@@ -18,6 +18,7 @@ from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
 from knack.log import get_logger
 from knack.util import CLIError
+from enum import Enum
 
 logger = get_logger(__name__)
 
@@ -493,3 +494,9 @@ class AzArgumentContext(ArgumentsContext):
             merged_kwargs.pop('dest', None)
             self.command_loader.extra_argument_registry[self.command_scope][dest] = CLICommandArgument(
                 dest, **merged_kwargs)
+
+
+class TagUpdateOperation(str, Enum):
+    merge = "Merge"
+    replace = "Replace"
+    delete = "Delete"
