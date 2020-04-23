@@ -194,7 +194,8 @@ examples:
 
         az image builder create --image-source $imagesource -n mytemplate -g my-group \\
             --scripts $scripts --managed-image-destinations image_1=westus \\
-            --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth
+            --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth \\
+            --identity myidentity
 
   - name: Create an image builder template using an image template file.
     text: |

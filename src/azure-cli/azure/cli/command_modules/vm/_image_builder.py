@@ -380,13 +380,14 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         cmd, client, resource_group_name, image_template_name, location=None,
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
         source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
-        shared_image_destinations=None, no_wait=False, image_template=None):  # pylint: disable=unused-argument, too-many-locals
+        shared_image_destinations=None, no_wait=False, image_template=None, identity=None):  # pylint: disable=unused-argument, too-many-locals
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateIsoSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  # pylint: disable=line-too-long
 
     if image_template is not None:
+        logger.warning('You are using --image-template. All other parameters will be ignored.')
         if os.path.exists(image_template):
             # Local file
             with open(image_template) as f:
@@ -455,8 +456,23 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         else:
             logger.info("No applicable destination found for destination %s", str(tuple([dest_type, rid, loc_info])))
 
+    # Identity
+    identity_body = None
+    if identity is not None:
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        identity_body = {
+            'type': 'UserAssigned',
+            'userAssignedIdentities': {}
+        }
+        for ide in identity:
+            if not is_valid_resource_id(ide):
+                ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
+                                  namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
+            identity_body['userAssignedIdentities'][ide] = {}
+
     image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
-                                   location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}))
+                                   location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}),
+                                   identity=identity_body)
 
     return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=image_template,
                       resource_group_name=resource_group_name, image_template_name=image_template_name)

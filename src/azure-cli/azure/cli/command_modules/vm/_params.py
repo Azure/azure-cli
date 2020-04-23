@@ -198,6 +198,7 @@ def load_arguments(self, _):
 
         c.argument('build_timeout', type=int, help="The Maximum duration to wait while building the image template, in minutes. Default is 60.")
         c.argument('image_template', help='Local path or URL to an image template file. When using --image-template, all other parameters are ignored except -g and -n. Reference: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-json')
+        c.argument('identity', nargs='+', help='List of user assigned identities (name or ID, space delimited) of the image template.')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
