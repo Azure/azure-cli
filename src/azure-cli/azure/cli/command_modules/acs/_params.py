@@ -208,6 +208,8 @@ def load_arguments(self, _):
         c.argument('enable_managed_identity', action='store_true')
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels, help='space-separated labels: key[=value] [key[=value] ...]. You can not change the node labels through CLI after creation. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('enable_node_public_ip', action='store_true', is_preview=True)
+        c.argument('windows_admin_username', options_list=['--windows-admin-username'])
+        c.argument('windows_admin_password', options_list=['--windows-admin-password'])
 
     with self.argument_context('aks update') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
