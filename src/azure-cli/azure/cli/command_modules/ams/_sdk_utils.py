@@ -13,7 +13,7 @@ def get_sdk_model_class(class_name):
 
 
 def get_stand_alone_presets():
-    return ['AudioAnalyzer', 'VideoAnalyzer']
+    return ['AudioAnalyzer', 'VideoAnalyzer', 'FaceDetector']
 
 
 def get_cdn_providers():
@@ -30,7 +30,7 @@ def get_token_types():
 
 
 def get_rentalandlease_types():
-    return ['Undefined', 'PersistentUnlimited', 'PersistentLimited']
+    return ['Undefined', 'DualExpiry', 'PersistentUnlimited', 'PersistentLimited']
 
 
 def get_tokens():
