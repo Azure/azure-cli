@@ -1180,8 +1180,8 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
     # endregion
 
-    # region Bastion
-    with self.command_group('network security-partner', network_security_partner_provider_sdk, is_preview=True) as g:
+    # region Security Partner Provider
+    with self.command_group('network security-partner-provider', network_security_partner_provider_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_security_partner_provider')
         g.generic_update_command('update', custom_func_name='update_security_partner_provider')
         g.show_command('show', 'get')

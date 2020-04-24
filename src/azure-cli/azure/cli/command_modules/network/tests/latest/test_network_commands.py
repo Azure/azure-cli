@@ -3638,24 +3638,24 @@ class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
         self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 -l westus --sku Standard')
         self.cmd('network vpn-gateway create -g {rg} -n {gateway} --vhub {vhub}')
 
-        self.cmd('network security-partner create -n {name} -g {rg} --vhub {vhub} --provider Checkpoint', checks=[
+        self.cmd('network security-partner-provider create -n {name} -g {rg} --vhub {vhub} --provider Checkpoint', checks=[
             self.check('name', '{name}'),
             self.check('securityProviderName', 'Checkpoint')
         ])
-        self.cmd('network security-partner show -n {name} -g {rg}', checks=[
+        self.cmd('network security-partner-provider show -n {name} -g {rg}', checks=[
             self.check('name', '{name}'),
             self.check('securityProviderName', 'Checkpoint')
         ])
-        self.cmd('network security-partner update -n {name} -g {rg} --tag a=b', checks=[
+        self.cmd('network security-partner-provider update -n {name} -g {rg} --tag a=b', checks=[
             self.check('tags.a', 'b')
         ])
-        self.cmd('network security-partner list -g {rg}', checks=[
+        self.cmd('network security-partner-provider list -g {rg}', checks=[
             self.check('length(@)', 1)
         ])
-        self.cmd('network security-partner list', checks=[
+        self.cmd('network security-partner-provider list', checks=[
             self.check('length(@)', 1)
         ])
-        self.cmd('network security-partner delete -n {name} -g {rg}')
+        self.cmd('network security-partner-provider delete -n {name} -g {rg}')
 
 
 if __name__ == '__main__':
