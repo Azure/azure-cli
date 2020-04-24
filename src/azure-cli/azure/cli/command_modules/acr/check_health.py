@@ -27,6 +27,7 @@ HELM_VERSION_REGEX = re.compile(r'(SemVer|Version):"v([.\d]+)"')
 ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
 RECOMMENDED_NOTARY_VERSION = "0.6.0"
 NOTARY_VERSION_REGEX = re.compile(r'Version:\s+([.\d]+)')
+DOCKER_PULL_WRONG_PLATFORM = 'cannot be used on this platform'
 
 
 # Utilities functions
@@ -88,7 +89,9 @@ def _get_docker_status_and_version(ignore_errors, yes):
         print("Docker daemon status: available", file=sys.stderr)
 
     # Docker version check
-    output, warning, stderr = _subprocess_communicate([docker_command, "--version"])
+    output, warning, stderr = _subprocess_communicate(
+        [docker_command, "version", "--format", "'Docker version {{.Server.Version}},"
+         "build {{.Server.GitCommit}}, platform {{.Server.Os}}/{{.Server.Arch}}'"])
     if stderr:
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
@@ -108,7 +111,11 @@ def _get_docker_status_and_version(ignore_errors, yes):
         output, warning, stderr = _subprocess_communicate([docker_command, "pull", IMAGE])
 
         if stderr:
-            _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
+            if DOCKER_PULL_WRONG_PLATFORM in stderr:
+                print_pass("Docker pull of '{}'".format(IMAGE))
+                logger.warning("Image %s can be pulled but cannot be used on this platform", IMAGE)
+            else:
+                _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
                 logger.warning(warning)
