@@ -696,6 +696,7 @@ def load_arguments(self, _):
                        help='Names or IDs (space delimited) of disk encryption sets for data disks.')
             c.argument('data_disk_iops', min_api='2019-07-01', nargs='+', type=int, help='Specify the Read-Write IOPS (space delimited) for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS. If not specified, a default value would be assigned based on diskSizeGB.')
             c.argument('data_disk_mbps', min_api='2019-07-01', nargs='+', type=int, help='Specify the bandwidth in MB per second (space delimited) for the managed disk. Should be used only when StorageAccountType is UltraSSD_LRS. If not specified, a default value would be assigned based on diskSizeGB.')
+            c.argument('specialized', arg_type=get_three_state_flag(), help='Indicate whether the source image is specialized.')
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -744,7 +745,7 @@ def load_arguments(self, _):
             c.argument('publisher', help='The name of the extension publisher.')
             c.argument('settings', type=validate_file_or_dict, help='Extension settings in JSON format. A JSON file path is also accepted.')
             c.argument('protected_settings', type=validate_file_or_dict, help='Protected settings in JSON format for sensitive information like credentials. A JSON file path is also accepted.')
-            c.argument('version', help='The version of the extension')
+            c.argument('version', help='The version of the extension. To pin extension version to this value, please specify --no-auto-upgrade.')
 
     with self.argument_context('vm extension set') as c:
         c.argument('vm_extension_name', name_arg_type,
@@ -845,6 +846,8 @@ def load_arguments(self, _):
         c.argument('end_of_life_date', help="the end of life date, e.g. '2020-12-31'")
         c.argument('storage_account_type', help="The default storage account type to be used per region. To set regional storage account types, use --target-regions",
                    arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS", "Premium_LRS"]), min_api='2019-03-01')
+        c.argument('target_region_encryption', nargs='+',
+                   help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. Format for one region: "<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>". Use "null" as a placeholder.')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")

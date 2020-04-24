@@ -3398,8 +3398,122 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
                      self.check('retentionDays', '{retention_days_dec}')])
 
 
-class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
+class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
+    @record_only()
+    def test_sql_managed_db_long_term_retention(
+            self):
 
+        self.kwargs.update({
+            'rg': 'clitestxj6awmetud',
+            'loc': 'westus',
+            'managed_instance_name': 'ayang-ltr-mi',
+            'database_name': 'test-4',
+            'weekly_retention': 'P1W',
+            'monthly_retention': 'P1M',
+            'yearly_retention': 'P2M',
+            'week_of_year': 12
+        })
+
+        # test update long term retention on live database
+        self.cmd(
+            'sql midb ltr-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --weekly-retention {weekly_retention} --monthly-retention {monthly_retention} --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('monthlyRetention', '{monthly_retention}'),
+                self.check('yearlyRetention', '{yearly_retention}')])
+
+        # test get long term retention policy on live database
+        self.cmd(
+            'sql midb ltr-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('monthlyRetention', '{monthly_retention}'),
+                self.check('yearlyRetention', '{yearly_retention}')])
+
+        # test list long term retention backups for location
+        # with resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} -g {rg}',
+            checks=[
+                self.check('length(@)', 3)])
+
+        # without resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc}',
+            checks=[
+                self.check('length(@)', 3)])
+
+        # test list long term retention backups for instance
+        # with resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -g {rg}',
+            checks=[
+                self.check('length(@)', 3)])
+
+        # without resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name}',
+            checks=[
+                self.check('length(@)', 3)])
+
+        # test list long term retention backups for database
+        # with resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name} -g {rg}',
+            checks=[
+                self.check('length(@)', 1)])
+
+        # without resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name}',
+            checks=[
+                self.check('length(@)', 1)])
+
+        # setup for test show long term retention backup
+        backup = self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name} --latest').get_output_in_json()
+
+        self.kwargs.update({
+            'backup_name': backup[0]['name'],
+            'backup_id': backup[0]['id']
+        })
+
+        # test show long term retention backup
+        self.cmd(
+            'sql midb ltr-backup show -l {loc} --mi {managed_instance_name} -d {database_name} -n {backup_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('managedInstanceName', '{managed_instance_name}'),
+                self.check('databaseName', '{database_name}'),
+                self.check('name', '{backup_name}')])
+
+        self.cmd(
+            'sql midb ltr-backup show --id {backup_id}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('managedInstanceName', '{managed_instance_name}'),
+                self.check('databaseName', '{database_name}'),
+                self.check('name', '{backup_name}')])
+
+        # test restore managed database from LTR backup
+        self.kwargs.update({
+            'dest_database_name': 'cli-restore-dest'
+        })
+
+        self.cmd(
+            'sql midb ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg}',
+            checks=[
+                self.check('name', '{dest_database_name}')])
+
+        # test delete long term retention backup
+        self.cmd(
+            'sql midb ltr-backup delete -l {loc} --mi {managed_instance_name} -d {database_name} -n \'{backup_name}\' --yes',
+            checks=[NoneCheck()])
+
+
+class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_deleted_db_restore(self, resource_group, resource_group_location):
 

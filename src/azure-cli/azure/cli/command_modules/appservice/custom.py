@@ -92,7 +92,17 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     is_linux = plan_info.reserved
     node_default_version = NODE_VERSION_DEFAULT
     location = plan_info.location
-    site_config = SiteConfig(app_settings=[])
+    # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
+    name_validation = client.check_name_availability(name, 'Site')
+    if not name_validation.name_available:
+        existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name,
+                                                        name, 'list_application_settings')
+        settings = []
+        for k, v in existing_app_settings.properties.items():
+            settings.append(NameValuePair(name=k, value=v))
+        site_config = SiteConfig(app_settings=settings)
+    else:
+        site_config = SiteConfig(app_settings=[])
     if isinstance(plan_info.sku, SkuDescription) and plan_info.sku.name.upper() not in ['F1', 'FREE', 'SHARED', 'D1',
                                                                                         'B1', 'B2', 'B3', 'BASIC']:
         site_config.always_on = True
@@ -116,8 +126,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                "Please invoke 'list-runtimes' to cross check".format(runtime))
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_fx_version(deployment_container_image_name)
-            site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
-                                                          value="false"))
+            if name_validation.name_available:
+                site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+                                                              value="false"))
         elif multicontainer_config_type and multicontainer_config_file:
             encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
@@ -136,21 +147,26 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         match['setter'](cmd=cmd, stack=match, site_config=site_config)
         # Be consistent with portal: any windows webapp should have this even it doesn't have node in the stack
         if not match['displayName'].startswith('node'):
+            if name_validation.name_available:
+                site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
+                                                              value=node_default_version))
+    else:  # windows webapp without runtime specified
+        if name_validation.name_available:
             site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
                                                           value=node_default_version))
-    else:  # windows webapp without runtime specified
-        site_config.app_settings.append(NameValuePair(name="WEBSITE_NODE_DEFAULT_VERSION",
-                                                      value=node_default_version))
 
     if site_config.app_settings:
         for setting in site_config.app_settings:
             logger.info('Will set appsetting %s', setting)
     if using_webapp_up:  # when the routine is invoked as a help method for webapp up
-        logger.info("will set appsetting for enabling build")
-        site_config.app_settings.append(NameValuePair(name="SCM_DO_BUILD_DURING_DEPLOYMENT", value=True))
+        if name_validation.name_available:
+            logger.info("will set appsetting for enabling build")
+            site_config.app_settings.append(NameValuePair(name="SCM_DO_BUILD_DURING_DEPLOYMENT", value=True))
     if language is not None and language.lower() == 'dotnetcore':
-        site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
-                                                      value='https://{}.scm.azurewebsites.net/detectors'.format(name)))
+        if name_validation.name_available:
+            site_config.app_settings.append(NameValuePair(name='ANCM_ADDITIONAL_ERROR_PAGE_LINK',
+                                                          value='https://{}.scm.azurewebsites.net/detectors'
+                                                          .format(name)))
 
     poller = client.web_apps.create_or_update(resource_group_name, name, webapp_def)
     webapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -843,7 +859,8 @@ def get_connection_strings(cmd, resource_group_name, name, slot=None):
     slot_constr_names = client.web_apps.list_slot_configuration_names(resource_group_name, name) \
                               .connection_string_names or []
     result = [{'name': p,
-               'value': result.properties[p],
+               'value': result.properties[p].value,
+               'type':result.properties[p].type,
                'slotSetting': p in slot_constr_names} for p in result.properties]
     return result
 
@@ -2728,7 +2745,6 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=authorization,
                                 verify=not should_disable_connection_verify())
-        time.sleep(2)
         try:
             res_dict = response.json()
         except json.decoder.JSONDecodeError:

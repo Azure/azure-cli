@@ -702,7 +702,7 @@ examples:
 
 helps['sql midb short-term-retention-policy'] = """
 type: group
-short-summary: Manage SQL managed instance database backup short term retention policy.
+short-summary: Manage SQL Managed Instance database backup short term retention policy.
 """
 
 helps['sql midb short-term-retention-policy set'] = """
@@ -723,6 +723,84 @@ examples:
     text: az sql midb short-term-retention-policy show -g mygroup --mi myinstance -n mymanageddb
   - name: Show backup short term retention for dropped managed database.
     text: az sql midb short-term-retention-policy show -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22"
+"""
+
+helps['sql midb ltr-policy'] = """
+type: group
+short-summary: Manage SQL Managed Instance database long term retention policy.
+"""
+
+helps['sql midb ltr-policy set'] = """
+type: command
+short-summary: Update long term retention settings for a managed database.
+examples:
+  - name: Set long term retention for a managed database.
+    text: az sql midb ltr-policy set -g mygroup --mi myinstance -n mymanageddb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26
+"""
+
+helps['sql midb ltr-policy show'] = """
+type: command
+short-summary: Show the long term retention policy for a managed database.
+examples:
+  - name: Show long term retention policy for a managed database.
+    text: az sql midb ltr-policy show -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql midb ltr-backup'] = """
+type: group
+short-summary: Manage SQL Managed Instance database long term retention backups.
+"""
+
+helps['sql midb ltr-backup show'] = """
+type: command
+short-summary: Get a long term retention backup for a managed database.
+examples:
+  - name: Show long term retention backup for a managed database.
+    text: az sql midb ltr-backup show -l southeastasia --mi myinstance -d mymanageddb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    name: Show long term retention backup for a managed database.
+    text: az sql midb ltr-backup show --backup-id '/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/mymanageddb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000'
+"""
+
+helps['sql midb ltr-backup list'] = """
+type: command
+short-summary: List the long term retention backups for a location, instance or database.
+examples:
+  - name: List long term retention backups for a managed database.
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance -d mymanageddb
+  - name: List long term retention backups for a managed instance (list only the latest LTR backups, which belong to live databases).
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance --database-state Live --only-latest-per-database
+  - name: List long term retention backups for a managed instance (with resource group argument).
+    text: az sql midb ltr-backup list -l southeastasia -g mygroup --mi myinstance
+  - name: List long term retention backups for a location (list only the latest LTR backups, which belong to live databases).
+    text: az sql midb ltr-backup list -l southeastasia --database-state Live --only-latest-per-database
+  - name: List long term retention backups for a location (with resource group argument).
+    text: az sql midb ltr-backup list -l southeastasia -g mygroup
+"""
+
+helps['sql midb ltr-backup delete'] = """
+type: command
+short-summary: Delete a long term retention backup.
+examples:
+  - name: Delete long term retention backup for a managed database.
+    text: az sql midb ltr-backup delete -l southeastasia --mi myinstance -d mymanageddb --name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+  - name: Delete long term retention backup for a managed database.
+    text: az sql midb ltr-backup delete --backup-id '/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/mymanageddb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000'
+"""
+
+helps['sql midb ltr-backup restore'] = """
+type: command
+short-summary: Restore a long term retention backup to a new database.
+examples:
+  - name: Restore a managed database using LTR backup.
+    text: |
+            az sql midb ltr-backup restore \\
+                --dest-database targetmidb --dest-mi myinstance --dest-resource-group mygroup \\
+                --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql midb ltr-backup wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
 """
 
 helps['sql server'] = """

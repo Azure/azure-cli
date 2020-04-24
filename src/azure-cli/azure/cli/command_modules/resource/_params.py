@@ -40,7 +40,7 @@ def load_arguments(self, _):
     management_group_name_type = CLIArgumentType(options_list='--management-group', help='The name of the management group of the policy [set] definition.')
     identity_scope_type = CLIArgumentType(help="Scope that the system assigned identity can access")
     identity_role_type = CLIArgumentType(options_list=['--role'], help="Role name or id that will be assigned to the managed identity")
-    extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true', is_preview=True,
+    extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true',
                                                 help='Support to handle extended template content including multiline and comments in deployment')
     deployment_name_type = CLIArgumentType(options_list=['--name', '-n'], required=True, help='The deployment name.')
     deployment_create_name_type = CLIArgumentType(options_list=['--name', '-n'], required=False, help='The deployment name. Default to template file base name')
@@ -92,6 +92,10 @@ def load_arguments(self, _):
         c.argument('notes', help='Notes for the link.')
         c.argument('scope', help='Fully-qualified scope for retrieving links.')
         c.argument('filter_string', options_list=['--filter', c.deprecate(target='--filter-string', redirect='--filter', hide=True)], help='Filter string for limiting results.')
+
+    with self.argument_context('resource tag') as c:
+        c.argument('is_incremental', action='store_true', options_list=['--is-incremental', '-i'],
+                   help='The option to add tags incrementally without deleting the original tags. If the key of new tag and original tag are duplicated, the original value will be overwritten.')
 
     with self.argument_context('provider') as c:
         c.ignore('top')

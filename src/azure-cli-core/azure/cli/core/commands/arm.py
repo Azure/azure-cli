@@ -925,6 +925,8 @@ def remove_properties(instance, argument_values):
         except IndexError:
             raise CLIError('index {} doesn\'t exist on {}'
                            .format(list_index, list_attribute_path[-1]))
+        except AttributeError:
+            raise CLIError('{} doesn\'t exist'.format(list_attribute_path[-1]))
 
 
 def throw_and_show_options(instance, part, path):

@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.3.1"
+VERSION = "2.4.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -99,20 +99,21 @@ DEPENDENCIES = [
     'azure-mgmt-maps~=0.1.0',
     'azure-mgmt-marketplaceordering~=0.1',
     'azure-mgmt-media~=1.1,>=1.1.1',
-    'azure-mgmt-monitor~=0.7.0',
+    'azure-mgmt-monitor~=0.9.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.8.0',
-    'azure-mgmt-network~=10.0.0',
+    'azure-mgmt-network~=10.1.0',
     'azure-mgmt-policyinsights~=0.4.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=2.2.0',
     'azure-mgmt-recoveryservices~=0.4.0',
     'azure-mgmt-recoveryservicesbackup~=0.6.0',
+    'azure-mgmt-redhatopenshift==0.1.0',
     'azure-mgmt-redis~=7.0.0rc1',
     'azure-mgmt-relay~=0.1.0',
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
-    'azure-mgmt-resource==8.0.1',
+    'azure-mgmt-resource==9.0.0',
     'azure-mgmt-search~=2.0',
     'azure-mgmt-security~=0.1.0',
     'azure-mgmt-servicebus~=0.6.0',
@@ -130,7 +131,7 @@ DEPENDENCIES = [
     'cryptography>=2.3.1,<3.0.0',
     'fabric~=2.4',
     'jsmin~=2.2.2',
-    'knack==0.7.0rc1',
+    'knack==0.7.0rc4',
     'mock~=4.0',
     'paramiko>=2.0.8,<3.0.0',
     'pyOpenSSL>=17.1.0',

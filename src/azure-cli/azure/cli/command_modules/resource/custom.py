@@ -31,12 +31,12 @@ from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZUR
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
-    _resource_links_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
+    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
-from knack.util import CLIError
+from knack.util import CLIError, todict
 
 from ._validators import MSI_LOCAL_ID
 
@@ -342,7 +342,7 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
     validation_result = deployment_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=properties)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
@@ -425,7 +425,7 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
     validation_result = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
@@ -481,7 +481,7 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
     validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
@@ -533,7 +533,7 @@ def _deploy_arm_template_at_management_group(cli_ctx,
     validation_result = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
@@ -579,7 +579,7 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
     validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(validation_result.error)
+        raise CLIError(todict(validation_result.error))
     if validate_only:
         return validation_result
 
@@ -1148,6 +1148,26 @@ def delete_deployment_at_tenant_scope(cmd, deployment_name):
     return rcf.deployments.delete_at_tenant_scope(deployment_name)
 
 
+def cancel_deployment_at_subscription_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.cancel_at_subscription_scope(deployment_name)
+
+
+def cancel_deployment_at_resource_group(cmd, resource_group_name, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.cancel(resource_group_name, deployment_name)
+
+
+def cancel_deployment_at_management_group(cmd, management_group_id, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.cancel_at_management_group_scope(management_group_id, deployment_name)
+
+
+def cancel_deployment_at_tenant_scope(cmd, deployment_name):
+    rcf = _resource_client_factory(cmd.cli_ctx)
+    return rcf.deployments.cancel_at_tenant_scope(deployment_name)
+
+
 # pylint: disable=unused-argument
 def deploy_arm_template(cmd, resource_group_name,
                         template_file=None, template_uri=None, deployment_name=None,
@@ -1350,9 +1370,9 @@ def update_resource(cmd, parameters, resource_ids=None,
 
 
 # pylint: unused-argument
-def tag_resource(cmd, tags, resource_ids=None,
-                 resource_group_name=None, resource_provider_namespace=None,
-                 parent_resource_path=None, resource_type=None, resource_name=None, api_version=None):
+def tag_resource(cmd, tags, resource_ids=None, resource_group_name=None, resource_provider_namespace=None,
+                 parent_resource_path=None, resource_type=None, resource_name=None, api_version=None,
+                 is_incremental=None):
     """ Updates the tags on an existing resource. To clear tags, specify the --tag option
     without anything else. """
     parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(cmd.cli_ctx,
@@ -1363,7 +1383,8 @@ def tag_resource(cmd, tags, resource_ids=None,
                                                                               resource_name)]
 
     return _single_or_collection(
-        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version).tag(tags) for id_dict in parsed_ids])
+        [_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version).tag(tags, is_incremental)
+         for id_dict in parsed_ids])
 
 
 # pylint: unused-argument
@@ -1422,6 +1443,28 @@ def get_deployment_operations_at_tenant_scope(client, deployment_name, operation
         dep = client.get_at_tenant_scope(deployment_name, op_id)
         result.append(dep)
     return result
+
+
+def list_deployment_scripts(cmd, resource_group_name=None):
+    rcf = _resource_deploymentscripts_client_factory(cmd.cli_ctx)
+    if resource_group_name is not None:
+        return rcf.deployment_scripts.list_by_resource_group(resource_group_name)
+    return rcf.deployment_scripts.list_by_subscription()
+
+
+def get_deployment_script(cmd, resource_group_name, name):
+    rcf = _resource_deploymentscripts_client_factory(cmd.cli_ctx)
+    return rcf.deployment_scripts.get(resource_group_name, name)
+
+
+def get_deployment_script_logs(cmd, resource_group_name, name):
+    rcf = _resource_deploymentscripts_client_factory(cmd.cli_ctx)
+    return rcf.deployment_scripts.get_logs(resource_group_name, name)
+
+
+def delete_deployment_script(cmd, resource_group_name, name):
+    rcf = _resource_deploymentscripts_client_factory(cmd.cli_ctx)
+    rcf.deployment_scripts.delete(resource_group_name, name)
 
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
@@ -2421,8 +2464,15 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                    self.api_version,
                                                    parameters)
 
-    def tag(self, tags):
+    def tag(self, tags, is_incremental=False):
         resource = self.get_resource()
+
+        if is_incremental is True:
+            if not tags:
+                raise CLIError("When modifying tag incrementally, the parameters of tag must have specific values.")
+            if resource.tags:
+                resource.tags.update(tags)
+                tags = resource.tags
 
         # please add the service type that needs to be requested with PATCH type here
         # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back

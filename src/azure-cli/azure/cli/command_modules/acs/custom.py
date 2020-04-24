@@ -32,6 +32,7 @@ import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
+from knack.prompting import prompt_pass, NoTTYException, prompt_y_n
 from msrestazure.azure_exceptions import CloudError
 import requests
 
@@ -67,6 +68,7 @@ from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterAgentPo
 from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterIdentity
 from azure.mgmt.containerservice.v2020_03_01.models import AgentPool
 from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterSKU
+from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterWindowsProfile
 
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
@@ -591,7 +593,6 @@ def delete_role_assignments(cli_ctx, ids=None, assignee=None, role=None, resourc
             assignments_client.delete_by_id(i)
         return
     if not any([ids, assignee, role, resource_group_name, scope, assignee, yes]):
-        from knack.prompting import prompt_y_n
         msg = 'This will delete all role assignments under the subscription. Are you sure?'
         if not prompt_y_n(msg, default="n"):
             return
@@ -1126,7 +1127,6 @@ def _handle_merge(existing, addition, key, replace):
                 if replace or i == j:
                     existing[key].remove(j)
                 else:
-                    from knack.prompting import prompt_y_n, NoTTYException
                     msg = 'A different object named {} already exists in your kubeconfig file.\nOverwrite?'
                     overwrite = False
                     try:
@@ -1644,6 +1644,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                dns_name_prefix=None,
                location=None,
                admin_username="azureuser",
+               windows_admin_username=None,
+               windows_admin_password=None,
                kubernetes_version='',
                node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
@@ -1684,6 +1686,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                aad_tenant_id=None,
                tags=None,
                zones=None,
+               enable_node_public_ip=False,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                api_server_authorized_ip_ranges=None,
                enable_private_cluster=False,
@@ -1715,6 +1718,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         storage_profile=ContainerServiceStorageProfileTypes.managed_disks,
         vnet_subnet_id=vnet_subnet_id,
         availability_zones=zones,
+        enable_node_public_ip=enable_node_public_ip,
         max_pods=int(max_pods) if max_pods else None,
         type=vm_set_type,
         mode="System"
@@ -1730,6 +1734,20 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         ssh_config = ContainerServiceSshConfiguration(
             public_keys=[ContainerServiceSshPublicKey(key_data=ssh_key_value)])
         linux_profile = ContainerServiceLinuxProfile(admin_username=admin_username, ssh=ssh_config)
+
+    windows_profile = None
+    if windows_admin_username:
+        if windows_admin_password is None:
+            try:
+                windows_admin_password = prompt_pass(
+                    msg='windows-admin-password: ', confirm=True)
+            except NoTTYException:
+                raise CLIError(
+                    'Please specify both username and password in non-interactive mode.')
+
+        windows_profile = ManagedClusterWindowsProfile(
+            admin_username=windows_admin_username,
+            admin_password=windows_admin_password)
 
     # Skip create service principal profile for the cluster if the cluster
     # enables managed identity and customer doesn't explicitly provide a service principal.
@@ -1853,6 +1871,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         enable_rbac=not disable_rbac,
         agent_pool_profiles=[agent_pool_profile],
         linux_profile=linux_profile,
+        windows_profile=windows_profile,
         service_principal_profile=service_principal_profile,
         network_profile=network_profile,
         addon_profiles=addon_profiles,
@@ -2203,8 +2222,6 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, cont
         elif instance.provisioning_state == "Failed":
             logger.warning("Cluster currently in failed state. Proceeding with upgrade to existing version %s to "
                            "attempt resolution of failed cluster state.", instance.kubernetes_version)
-
-    from knack.prompting import prompt_y_n
 
     upgrade_all = False
     instance.kubernetes_version = kubernetes_version
@@ -2775,6 +2792,7 @@ def aks_agentpool_list(cmd, client, resource_group_name, cluster_name):
 def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_name,
                       kubernetes_version=None,
                       zones=None,
+                      enable_node_public_ip=False,
                       node_vm_size=None,
                       node_osdisk_size=0,
                       node_count=3,
@@ -2807,8 +2825,9 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
 
     if node_vm_size is None:
         if os_type.lower() == "windows":
-            raise CLIError('Windows nodepool is not supported')
-        node_vm_size = "Standard_DS2_v2"
+            node_vm_size = "Standard_D2s_v3"
+        else:
+            node_vm_size = "Standard_DS2_v2"
 
     agent_pool = AgentPool(
         name=nodepool_name,
@@ -2823,6 +2842,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
         max_pods=int(max_pods) if max_pods else None,
         orchestrator_version=kubernetes_version,
         availability_zones=zones,
+        enable_node_public_ip=enable_node_public_ip,
         node_taints=taints_array,
         mode=mode
     )
