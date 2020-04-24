@@ -1307,7 +1307,7 @@ class VMMonitorTestCreateLinux(ScenarioTest):
             self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace} --nsg {nsg}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'LinuxPerformanceCollection')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1346,7 +1346,7 @@ class VMMonitorTestCreateWindows(ScenarioTest):
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace} -g {rg}').get_output_in_json()[
             'id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'WindowsEvent')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1376,7 +1376,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace1}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace1} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'LinuxPerformanceCollection')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1404,7 +1404,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace2}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace2} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'LinuxPerformanceCollection')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1447,7 +1447,7 @@ class VMMonitorTestUpdateWindows(ScenarioTest):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace1}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace1} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'WindowsEvent')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1465,7 +1465,7 @@ class VMMonitorTestUpdateWindows(ScenarioTest):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace2}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace2} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'WindowsEvent')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
