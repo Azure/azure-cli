@@ -15,7 +15,7 @@ class AdalRefreshTokenBasedClientApplication(ClientApplication):
             self, authority, scopes, account, **kwargs):
         # pylint: disable=line-too-long
         return self._acquire_token_silent_by_finding_specific_refresh_token(
-            authority, scopes, **kwargs)
+            authority, scopes, None, **kwargs)
 
     def _acquire_token_silent_by_finding_specific_refresh_token(
             self, authority, scopes, query,
