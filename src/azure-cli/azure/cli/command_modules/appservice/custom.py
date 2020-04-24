@@ -80,7 +80,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
 
     docker_registry_server_url = parse_docker_image_name(deployment_container_image_name)
-    
+  
     client = web_client_factory(cmd.cli_ctx)
     if is_valid_resource_id(plan):
         parse_result = parse_resource_id(plan)
