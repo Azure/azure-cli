@@ -6,7 +6,7 @@ from knack.util import CLIError
 from msal import ClientApplication
 
 
-class SSHCertificateClientApplication(ClientApplication):
+class AdalRefreshTokenBasedClientApplication(ClientApplication):
     """
     This class is added only for vmssh feature.
     This is a temporary solution and will deprecate after adoption to MSAL completely.

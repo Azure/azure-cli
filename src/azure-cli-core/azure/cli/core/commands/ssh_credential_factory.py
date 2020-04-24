@@ -13,12 +13,12 @@ from knack import log
 logger = log.get_logger(__name__)
 
 
-def get_ssh_credentials(cli_ctx, modulus, exponent):
+def get_ssh_credentials(cli_ctx, scopes, data):
     from azure.cli.core._profile import Profile
     logger.debug("Getting SSH credentials")
     profile = Profile(cli_ctx=cli_ctx)
 
-    user, cert = profile.get_ssh_credentials(modulus, exponent)
+    user, cert = profile.get_ssh_credentials(scopes, data)
     return SSHCredentials(user, cert)
 
 
