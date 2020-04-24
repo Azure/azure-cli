@@ -22,6 +22,8 @@ jobs:
         rm -rf azure-cli
         rm -rf azure-cli-extensions
         git clone -b CLITest https://qwordy:$(PASSWORD)@github.com/qwordy/azure-cli.git
+        git config --global user.email "fey@microsoft.com"
+        git config --global user.name "Feiyue Yu"
         cp CLITest.yml azure-cli/CLITest.yml
         cd azure-cli
         git add .

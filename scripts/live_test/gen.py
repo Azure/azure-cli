@@ -13,7 +13,7 @@ EXTENSION = False
 
 def main():
     env = Environment(loader=FileSystemLoader('./'))
-    template = env.get_template('template.yml')
+    template = env.get_template('/home/vsts/work/1/s/scripts/live_test/template.yml')
     config = {}
     config['modules'] = get_modules()
     result = template.render(config)
