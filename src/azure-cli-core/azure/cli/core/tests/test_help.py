@@ -512,8 +512,12 @@ class TestHelpLoads(unittest.TestCase):
             self.assertEqual(command_help_obj.examples[0].long_summary, "More detail on the simple example.")
             self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 alpha --arg2 beta --arg3 chi")
             self.assertEqual(command_help_obj.examples[0].supported_profiles, "2018-03-01-hybrid, latest")
-        else:
+
+        if self.test_cli.cloud.profile == '2019-03-01-hybrid':
             # only supported example here
+            self.assertEqual(len(command_help_obj.examples), 0)
+
+        if self.test_cli.cloud.profile == '2017-03-09-profile':
             self.assertEqual(len(command_help_obj.examples), 0)
 
         # validate other parameters, which have help from help.py and help.yamls
