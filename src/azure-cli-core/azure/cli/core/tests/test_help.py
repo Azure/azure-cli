@@ -383,7 +383,6 @@ class TestHelpLoads(unittest.TestCase):
         if self.test_cli.cloud.profile == '2017-03-09-profile':
             self.assertEqual(len(command_help_obj.examples), 0)
 
-
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
     @mock.patch('azure.cli.core.commands._load_command_loader', side_effect=mock_load_command_loader)
     def test_load_from_help_yaml(self, mocked_load, mocked_pkg_util):
