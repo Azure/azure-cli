@@ -111,7 +111,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         return val
 
 
-class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
+class CloudSuffixes(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
     def __init__(self,
                  storage_endpoint=None,
