@@ -898,6 +898,7 @@ class PrivateDnsRecordSetsTests(BaseScenarioTests):
         self.assertTrue(all(recordset in createdRecordsets for recordset in returnedRecordsets))
 
 
+# Running only live test because of this isue: Confusing error message if play count mismatches - https://github.com/kevin1024/vcrpy/issues/516
 @live_only()
 class PrivateDnsZoneImportTest(ScenarioTest):
 
@@ -977,6 +978,10 @@ class PrivateDnsZoneImportTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_private_dns_zone8_import')
     def test_Private_Dns_Zone8_Import(self, resource_group):
         self._test_PrivateDnsZone('zone8.com', 'zone8.txt')
+
+    @ResourceGroupPreparer(name_prefix='cli_private_dns_zone_local_import')
+    def test_Private_Dns_Zone_Local_Import(self, resource_group):
+        self._test_PrivateDnsZone('zone.local', 'zone.local.txt')
 
 
 if __name__ == '__main__':
