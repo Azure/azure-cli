@@ -347,6 +347,7 @@ def add_extension_to_path(extension_name, ext_dir=None):
     # but ensures that modules installed by the CLI take priority.
     azure_dir = os.path.join(ext_dir, "azure")
     if os.path.isdir(azure_dir):
+        import azure
         azure.__path__.append(azure_dir)
         azure_mgmt_dir = os.path.join(azure_dir, "mgmt")
         if os.path.isdir(azure_mgmt_dir):
