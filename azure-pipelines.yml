@@ -353,7 +353,7 @@ jobs:
        echo "== Testing pip install on Python 3.8 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"  
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
 
@@ -406,6 +406,50 @@ jobs:
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_profile_integration.sh
       displayName: 'Run Integration Test against Profiles'
+
+- job: AutomationTest
+  displayName: Automation Test (Profile Latest)
+  dependsOn: BuildPythonWheel
+  timeoutInMinutes: 120
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - bash: |
+        set -ev
+
+        git fetch origin dev
+
+        python -m venv env
+        chmox + x env/bin/activate
+        . env/bin/activate
+
+        pip install -q azdev
+        azdev --version
+      displayName: Setup Env
+    - bash: |
+        set -ev
+
+        . env/bin/activate
+
+        if [[ "$(System.PullRequest.TargetBranch)" != "System.PullRequest.TargetBranch" ]]; then
+          azdev test --series --repo=./ --src=HEAD --tgt=$(System.PullRequest.TargetBranch) --cli-ci
+        else
+          azdev test --series
+        fi
+      displayName: "Automation Test"
+      env:
+        ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)
 
 - job: RunAutomationPython3_6
   displayName: Run Automation Python 3.6
@@ -1020,7 +1064,7 @@ jobs:
     displayName: 'Download Ubuntu:Eoan Builds'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-eoan    
+      artifactName: ubuntu-eoan
 
 
   - bash: |
