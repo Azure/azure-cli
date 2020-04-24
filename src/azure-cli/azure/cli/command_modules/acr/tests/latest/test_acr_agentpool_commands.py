@@ -16,8 +16,8 @@ class AcrAgentPoolCommandsTests(ScenarioTest):
             'agents2_name': 'agents2',
             'rg_loc': 'eastus2euap',
             'sku': 'Premium',
-            'vnet_name': 'vnets2',
-            'subnet_name': 'subnets2',
+            'vnet_name': 'vnets',
+            'subnet_name': 'subnets',
         })
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
                  checks=[self.check('name', '{registry_name}'),
@@ -78,5 +78,11 @@ class AcrAgentPoolCommandsTests(ScenarioTest):
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', '{rg}')])
 
-        # test acr delete
+        # Delete registry
+        self.cmd('acr agentpool delete -n {agents2_name} -r {registry_name} -y')
+
+        # Delete registry
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
+
+        # Delete VNET
+        self.cmd('network vnet delete -n {vnet_name} -g {rg}')
