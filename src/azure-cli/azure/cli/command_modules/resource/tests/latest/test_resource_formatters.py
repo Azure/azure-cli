@@ -5,15 +5,22 @@
 
 import unittest
 
-from azure.mgmt.resource.resources.models import (
-    WhatIfOperationResult,
-    WhatIfChange,
-    ChangeType,
-    WhatIfPropertyChange,
-    PropertyChangeType,
-)
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.mock import DummyCli
+from azure.cli.core import AzCommandsLoader
+from azure.cli.core.commands import AzCliCommand
+
 from azure.cli.command_modules.resource._color import Color, ColoredStringBuilder
 from azure.cli.command_modules.resource._formatters import format_json, format_what_if_operation_result
+
+
+cli_ctx = DummyCli()
+loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+cmd = AzCliCommand(loader, "test", None, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+
+WhatIfOperationResult, WhatIfChange, WhatIfPropertyChange, ChangeType, PropertyChangeType = cmd.get_models(
+    "WhatIfOperationResult", "WhatIfChange", "WhatIfPropertyChange", "ChangeType", "PropertyChangeType",
+)
 
 
 class TestFormatJson(unittest.TestCase):
