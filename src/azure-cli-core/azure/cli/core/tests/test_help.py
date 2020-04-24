@@ -445,10 +445,15 @@ class TestHelpLoads(unittest.TestCase):
 
             self.assertEqual(command_help_obj.examples[1].supported_profiles, None)
             self.assertEqual(command_help_obj.examples[1].unsupported_profiles, "2017-03-09-profile")
-        else:
-            # only supported example here
+
+        if self.test_cli.cloud.profile == '2019-03-01-hybrid':
             self.assertEqual(len(command_help_obj.examples), 1)
+            self.assertEqual(command_help_obj.examples[0].short_summary, "Another example unsupported on latest")
+            self.assertEqual(command_help_obj.examples[0].command, "az test alpha --arg1 apple --arg2 ball")
             self.assertEqual(command_help_obj.examples[0].unsupported_profiles, '2017-03-09-profile')
+
+        if self.test_cli.cloud.profile == '2017-03-09-profile':
+            self.assertEqual(len(command_help_obj.examples), 0)
 
     @mock.patch('inspect.getmembers', side_effect=mock_inspect_getmembers)
     @mock.patch('pkgutil.iter_modules', side_effect=lambda x: [(None, MOCKED_COMMAND_LOADER_MOD, None)])
