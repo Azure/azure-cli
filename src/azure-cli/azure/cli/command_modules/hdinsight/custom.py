@@ -445,7 +445,8 @@ def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, worksp
 
         # Only retrieve primary key when not provided
         if not primary_key:
-            shared_keys = log_analytics_client.workspaces.get_shared_keys(workspace_resource_group_name, workspace_name)
+            shared_keys = log_analytics_client.shared_keys.get_shared_keys(workspace_resource_group_name,
+                                                                           workspace_name)
             if not shared_keys:
                 raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
 
