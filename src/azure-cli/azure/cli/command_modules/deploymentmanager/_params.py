@@ -119,24 +119,27 @@ def load_arguments(self, _):
 
     duration_type = CLIArgumentType(options_list='--duration', help='The duration of the wait step in ISO 8601 format.')
     step_name_type = CLIArgumentType(options_list=['--step-name', '--name', '-n'], help='The name of the step', completer=get_resource_name_completion_list('Microsoft.DeploymentManager/steps'))
+    step_type = CLIArgumentType(options_list='--step', help='The step object, specify either the path to a json file or provide a json string that forms the step resource. The json is expected to be of the same format as the output of the relevant `az deploymentmanager step show` command')
 
     with self.argument_context('deploymentmanager step') as c:
         c.argument('resource_group_name', resource_group_name_type)
-        c.argument('location', get_location_type(self.cli_ctx), required=True)
+        c.argument('location', get_location_type(self.cli_ctx))
         c.argument('step_name', step_name_type)
         c.argument('duration', duration_type)
         c.argument('tags', tags_type)
 
     with self.argument_context('deploymentmanager step create') as c:
         c.argument('resource_group_name', resource_group_name_type)
-        c.argument('location', get_location_type(self.cli_ctx), required=True)
+        c.argument('location', get_location_type(self.cli_ctx))
         c.argument('step_name', step_name_type)
+        c.argument('step', step_type)
         c.argument('duration', duration_type)
         c.argument('tags', tags_type)
 
     with self.argument_context('deploymentmanager step update') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('step_name', step_name_type)
+        c.argument('step', step_type)
         c.argument('duration', duration_type)
         c.argument('tags', tags_type)
 

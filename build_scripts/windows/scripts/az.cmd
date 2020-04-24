@@ -4,6 +4,7 @@
 ::
 
 @IF EXIST "%~dp0\..\python.exe" (
+  SET AZ_INSTALLER=MSI
   "%~dp0\..\python.exe" -IBm azure.cli %*
 ) ELSE (
   echo Failed to load python executable.

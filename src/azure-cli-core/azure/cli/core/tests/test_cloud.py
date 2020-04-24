@@ -219,7 +219,11 @@ class TestCloud(unittest.TestCase):
 
     def test_get_clouds_concurrent(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
-            pool_size = 100
+            # Max pool_size is 61, otherwise exception will be thrown on Python 3.8 Windows:
+            #     File "...Python38\lib\multiprocessing\connection.py", line 810, in _exhaustive_wait
+            #       res = _winapi.WaitForMultipleObjects(L, False, timeout)
+            #   ValueError: need at most 63 handles, got a sequence of length 102
+            pool_size = 20
             p = multiprocessing.Pool(pool_size)
             p.map(_helper_get_clouds, range(pool_size))
             p.close()

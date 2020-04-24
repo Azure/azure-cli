@@ -32,6 +32,10 @@ def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
 
 
+def cf_flow_logs(cli_ctx, _):
+    return network_client_factory(cli_ctx).flow_logs
+
+
 def cf_ddos_protection_plans(cli_ctx, _):
     return network_client_factory(cli_ctx).ddos_protection_plans
 
@@ -86,6 +90,10 @@ def cf_express_route_links(cli_ctx, _):
 
 def cf_private_endpoints(cli_ctx, _):
     return network_client_factory(cli_ctx).private_endpoints
+
+
+def cf_private_dns_zone_groups(cli_ctx, _):
+    return network_client_factory(cli_ctx).private_dns_zone_groups
 
 
 def cf_private_endpoint_types(cli_ctx, _):
@@ -242,3 +250,11 @@ def cf_virtual_router(cli_ctx, _):
 
 def cf_virtual_router_peering(cli_ctx, _):
     return network_client_factory(cli_ctx).virtual_router_peerings
+
+
+def cf_bastion_hosts(cli_ctx, _):
+    return network_client_factory(cli_ctx).bastion_hosts
+
+
+def cf_security_partner_providers(cli_ctx, _):
+    return network_client_factory(cli_ctx).security_partner_providers

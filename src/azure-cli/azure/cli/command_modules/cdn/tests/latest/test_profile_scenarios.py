@@ -67,7 +67,6 @@ class CdnCustomDomainScenarioTest(ScenarioTest):
         self.cmd('cdn profile create -g {rg} -n {profile}')
         self.cmd('cdn endpoint create -g {rg} --origin {origin} --profile-name {profile} -n {endpoint}')
         self.cmd('cdn custom-domain list -g {rg} --endpoint-name {endpoint} --profile-name {profile}')
-
         # These will all fail because we don't really have the ability to create the custom endpoint in test.
         # but they should still fail if there was a CLI-level regression.
         with self.assertRaises(ErrorResponseException):
@@ -76,7 +75,7 @@ class CdnCustomDomainScenarioTest(ScenarioTest):
         with self.assertRaises(SystemExit):  # exits with code 3 due to missing resource
             self.cmd('cdn custom-domain show -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
-        with self.assertRaises(CLIError):
+        with self.assertRaises(ErrorResponseException):
             self.cmd(
                 'cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         with self.assertRaises(CLIError):

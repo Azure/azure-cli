@@ -44,10 +44,19 @@
       }
     },
     {
+      "type": "Microsoft.Resources/resourceGroups",
+      "name": "[parameters('nestedRGName')]",
+      "apiVersion": "2018-05-01",
+      "location": "WestUS",
+      "properties": {
+      }
+    },
+    {
       "type": "Microsoft.Resources/deployments",
-      "name": "rg-nested",
+      "name": "rg-nested6",
       "apiVersion": "2017-05-10",
       "resourceGroup": "[parameters('nestedRGName')]",
+      "dependsOn": [ "[parameters('nestedRGName')]" ],
       "properties": {
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
@@ -61,7 +70,8 @@
               "apiVersion": "2015-06-15",
               "location": "East US",
               "properties": {
-                "accountType": "Standard_LRS"
+                "accountType": "Standard_LRS",
+                "supportsHttpsTrafficOnly": true
               }
             }
           ]
@@ -69,5 +79,5 @@
         "mode":"Incremental"
       }
     }
-  ]
+  ] // comment
 }

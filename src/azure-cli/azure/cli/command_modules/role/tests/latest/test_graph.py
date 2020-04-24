@@ -211,6 +211,47 @@ class ApplicationSetScenarioTest(ScenarioTest):
             self.assertEqual(self.cmd('ad app show --id non-exist-identifierUris').exit_code, 3)
             self.assertEqual(self.cmd('ad app show --id 00000000-0000-0000-0000-000000000000').exit_code, 3)
 
+    def test_application_optional_claims(self):
+        name1 = self.create_random_name(prefix='cli-app-', length=14)
+        name2 = self.create_random_name(prefix='cli-app-', length=14)
+        self.kwargs.update({
+            'name1': name1,
+            'name2': name2,
+            'optional_claims': json.dumps({
+                "idToken": [
+                    {
+                        "name": "auth_time",
+                        "source": None,
+                        "essential": False
+                    }
+                ],
+                "accessToken": [
+                    {
+                        "name": "email",
+                        "source": None,
+                        "essential": False
+                    }
+                ]
+            })
+        })
+        self.cmd("ad app create --display-name {name1} --optional-claims '{optional_claims}'",
+                 checks=[
+                     self.check('displayName', '{name1}'),
+                     self.check('length(optionalClaims.idToken)', 1),
+                     self.check('length(optionalClaims.accessToken)', 1)
+                 ])
+        app_id = self.cmd('ad app create --display-name {name2}').get_output_in_json()['appId']
+        self.kwargs.update({
+            'app_id': app_id
+        })
+        self.cmd("ad app update --id {app_id} --optional-claims '{optional_claims}'")
+        self.cmd('ad app show --id {app_id}',
+                 checks=[
+                     self.check('displayName', '{name2}'),
+                     self.check('length(optionalClaims.idToken)', 1),
+                     self.check('length(optionalClaims.accessToken)', 1)
+                 ])
+
 
 class CreateForRbacScenarioTest(ScenarioTest):
 
@@ -259,11 +300,11 @@ class CreateForRbacScenarioTest(ScenarioTest):
 class GraphGroupScenarioTest(ScenarioTest):
 
     def test_graph_group_scenario(self):
-        account_info = self.cmd('account show').get_output_in_json()
-        if account_info['user']['type'] == 'servicePrincipal':
+        username = get_signed_in_user(self)
+        if not username:
             return  # this test delete users which are beyond a SP's capacity, so quit...
-        upn = account_info['user']['name']
-        domain = upn.split('@', 1)[1]
+
+        domain = username.split('@', 1)[1]
         self.kwargs = {
             'user1': 'deleteme1',
             'user2': 'deleteme2',
@@ -363,6 +404,31 @@ class GraphGroupScenarioTest(ScenarioTest):
                      checks=self.check("length([?displayName=='{group}'])", 1))
         finally:
             self.cmd('ad group delete -g {group}')
+
+    def test_graph_group_show(self):
+        account_info = self.cmd('account show').get_output_in_json()
+        if account_info['user']['type'] == 'servicePrincipal':
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        self.kwargs = {
+            'group1': 'show_group_1',
+            'group11': 'show_group_11',
+            'prefix': 'show_prefix',
+            'prefix_group': 'show_prefix_group'
+        }
+
+        self.cmd('ad group create --display-name {group1} --mail-nickname {group1}')
+        self.cmd('ad group create --display-name {group11} --mail-nickname {group11}')
+        self.cmd('ad group create --display-name {prefix_group} --mail-nickname {prefix_group}')
+        self.cmd('ad group show --group {group1}',
+                 checks=self.check('displayName', '{group1}'))
+        self.cmd('ad group show --group {group11}',
+                 checks=self.check('displayName', '{group11}'))
+        self.cmd('ad group show --group {prefix}',
+                 checks=self.check('displayName', '{prefix_group}'))
+        self.cmd('ad group delete -g {group1}')
+        self.cmd('ad group delete -g {group11}')
+        self.cmd('ad group delete -g {prefix}')
 
 
 def get_signed_in_user(test_case):

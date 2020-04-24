@@ -61,3 +61,7 @@ def cf_security_topology(cli_ctx, _):
 
 def cf_security_workspace_settings(cli_ctx, _):
     return _cf_security(cli_ctx).workspace_settings
+
+
+def cf_security_advanced_threat_protection(cli_ctx, _):
+    return _cf_security(cli_ctx).advanced_threat_protection

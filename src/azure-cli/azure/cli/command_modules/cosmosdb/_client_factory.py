@@ -78,6 +78,14 @@ def cf_cosmosdb(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, CosmosDBManagementClient)
 
 
+def cf_db_private_endpoint_connections(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).private_endpoint_connections
+
+
+def cf_db_private_link_resources(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).private_link_resources
+
+
 def cf_db_accounts(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).database_accounts
 

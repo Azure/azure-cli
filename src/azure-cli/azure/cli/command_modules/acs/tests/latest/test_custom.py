@@ -56,8 +56,19 @@ class AcsCustomCommandTest(unittest.TestCase):
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
             ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
+
+    def test_add_role_assignment_msi_basic(self):
+        role = 'Owner'
+        sp = '1234567'
+        cli_ctx = mock.MagicMock()
+
+        with mock.patch(
+                'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
+            ok = _add_role_assignment(cli_ctx, role, sp, False, delay=0)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, False, scope=None)
+            self.assertTrue(ok, 'Expected _add_role_assignment with msi to succeed')
 
     def test_add_role_assignment_exists(self):
         role = 'Owner'
@@ -74,7 +85,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_role_assignment.side_effect = err
             ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
 
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
             self.assertTrue(ok, 'Expected _add_role_assignment to succeed')
 
     def test_add_role_assignment_fails(self):
@@ -92,7 +103,7 @@ class AcsCustomCommandTest(unittest.TestCase):
             create_role_assignment.side_effect = err
             ok = _add_role_assignment(cli_ctx, role, sp, delay=0)
 
-            create_role_assignment.assert_called_with(cli_ctx, role, sp, scope=None)
+            create_role_assignment.assert_called_with(cli_ctx, role, sp, True, scope=None)
             self.assertFalse(ok, 'Expected _add_role_assignment to fail')
 
     @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id')

@@ -14,6 +14,14 @@ def keyvault_client_vaults_factory(cli_ctx, _):
     return keyvault_client_factory(cli_ctx).vaults
 
 
+def keyvault_client_private_endpoint_connections_factory(cli_ctx, _):
+    return keyvault_client_factory(cli_ctx).private_endpoint_connections
+
+
+def keyvault_client_private_link_resources_factory(cli_ctx, _):
+    return keyvault_client_factory(cli_ctx).private_link_resources
+
+
 def keyvault_data_plane_factory(cli_ctx, _):
     from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
     from azure.cli.core.profiles import ResourceType, get_api_version

@@ -31,6 +31,7 @@ def load_arguments(self, _):
     autoscale_name_type = CLIArgumentType(options_list=['--autoscale-name'], help='Name of the autoscale settings.', id_part='name')
     autoscale_profile_name_type = CLIArgumentType(options_list=['--profile-name'], help='Name of the autoscale profile.')
     autoscale_rule_name_type = CLIArgumentType(options_list=['--rule-name'], help='Name of the autoscale rule.')
+    scope_name_type = CLIArgumentType(help='Name of the Azure Monitor Private Link Scope.')
 
     with self.argument_context('monitor') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -263,11 +264,11 @@ def load_arguments(self, _):
         c.argument('offset', type=get_period_type(as_timedelta=True))
 
     with self.argument_context('monitor activity-log list', arg_group='Filter') as c:
-        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='2.1.0'), help='OData filters. Will ignore other filter arguments.')
+        c.argument('filters', deprecate_info=c.deprecate(target='--filters', hide=True, expiration='3.0.0'), help='OData filters. Will ignore other filter arguments.')
         c.argument('correlation_id')
         c.argument('resource_group', resource_group_name_type)
         c.argument('resource_id')
-        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='2.1.0')])
+        c.argument('resource_provider', options_list=['--namespace', c.deprecate(target='--resource-provider', redirect='--namespace', hide=True, expiration='3.0.0')])
         c.argument('caller')
         c.argument('status')
     # endregion
@@ -342,4 +343,47 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
+    # endregion
+
+    # region monitor clone
+    with self.argument_context('monitor clone') as c:
+        c.argument('source_resource', help="Resource ID of the source resource.")
+        c.argument('target_resource', help="Resource ID of the target resource.")
+        c.argument('always_clone', action='store_true',
+                   help="If this argument is applied, "
+                        "all monitor settings would be cloned instead of expanding its scope.")
+        c.argument('monitor_types', options_list=['--types', '-t'], arg_type=get_enum_type(['metricsAlert']),
+                   nargs='+', help='List of types of monitor settings which would be cloned.', default=['metricsAlert'])
+
+    # region Private Link Resources
+    for item in ['create', 'update', 'show', 'delete', 'list']:
+        with self.argument_context('monitor private-link-scope {}'.format(item)) as c:
+            c.argument('scope_name', scope_name_type, options_list=['--name', '-n'])
+    with self.argument_context('monitor private-link-scope create') as c:
+        c.ignore('location')
+
+    with self.argument_context('monitor private-link-scope scoped-resource') as c:
+        c.argument('scope_name', scope_name_type)
+        c.argument('resource_name', options_list=['--name', '-n'], help='Name of the assigned resource.')
+        c.argument('linked_resource_id', options_list=['--linked-resource'], help='ARM resource ID of the linked resource. It should be one of log analytics workspace or application insights component.')
+
+    with self.argument_context('monitor private-link-scope private-link-resource') as c:
+        c.argument('scope_name', scope_name_type)
+        c.argument('group_name', options_list=['--name', '-n'], help='Name of the private link resource.')
+
+    with self.argument_context('monitor private-link-scope private-endpoint-connection') as c:
+        c.argument('scope_name', scope_name_type)
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with the private link scope.')
+    for item in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('monitor private-link-scope private-endpoint-connection {}'.format(item)) as c:
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the private link scope.')
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the private link scope. You can get '
+                    'it using `az monitor private-link-scope show`.')
+            c.argument('scope_name', help='Name of the Azure Monitor Private Link Scope.', required=False)
+            c.argument('resource_group_name', help='The resource group name of specified private link scope.',
+                       required=False)
+            c.argument('description', help='Comments for {} operation.'.format(item))
     # endregion

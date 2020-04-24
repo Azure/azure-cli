@@ -31,7 +31,7 @@ def load_command_table(self, _):
         g.command('create', 'signalr_create')
         g.command('delete', 'signalr_delete')
         g.command('list', 'signalr_list')
-        g.command('show', 'signalr_show', exception_handler=empty_on_404)
+        g.show_command('show', 'signalr_show', exception_handler=empty_on_404)
         g.command('restart', 'signalr_restart', exception_handler=empty_on_404)
         g.generic_update_command('update', getter_name='signalr_update_get',
                                  setter_name='signalr_update_set', custom_func_name='signalr_update_custom',

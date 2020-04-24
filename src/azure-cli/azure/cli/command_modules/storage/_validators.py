@@ -5,6 +5,8 @@
 
 # pylint: disable=protected-access
 
+import argparse
+
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -16,7 +18,9 @@ from azure.cli.command_modules.storage.util import glob_files_locally, guess_con
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
+
 from knack.log import get_logger
+from knack.util import CLIError
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
@@ -65,6 +69,16 @@ def _create_token_credential(cli_ctx):
 
 
 # region PARAMETER VALIDATORS
+def parse_storage_account(cmd, namespace):
+    """Parse storage account which can be either account name or account id"""
+    from msrestazure.tools import parse_resource_id, is_valid_resource_id
+
+    if namespace.account_name and is_valid_resource_id(namespace.account_name):
+        namespace.resource_group_name = parse_resource_id(namespace.account_name)['resource_group']
+        namespace.account_name = parse_resource_id(namespace.account_name)['name']
+    elif namespace.account_name and not namespace.resource_group_name:
+        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
+
 
 def process_resource_group(cmd, namespace):
     """Processes the resource group parameter from the account name"""
@@ -88,34 +102,36 @@ def validate_bypass(namespace):
         namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
 
 
+def get_config_value(cmd, section, key, default):
+    return cmd.cli_ctx.config.get(section, key, default)
+
+
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
     n = namespace
 
-    def get_config_value(section, key, default):
-        return cmd.cli_ctx.config.get(section, key, default)
-
     if hasattr(n, 'auth_mode'):
-        auth_mode = n.auth_mode or get_config_value('storage', 'auth_mode', None)
+        auth_mode = n.auth_mode or get_config_value(cmd, 'storage', 'auth_mode', None)
         del n.auth_mode
         if not n.account_name:
-            n.account_name = get_config_value('storage', 'account', None)
+            n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
             n.token_credential = _create_token_credential(cmd.cli_ctx)
 
-            # give warning if there are account key args being ignored
-            account_key_args = [n.account_key and "--account-key", n.sas_token and "--sas-token",
-                                n.connection_string and "--connection-string"]
-            account_key_args = [arg for arg in account_key_args if arg]
+    if hasattr(n, 'token_credential') and n.token_credential:
+        # give warning if there are account key args being ignored
+        account_key_args = [n.account_key and "--account-key", n.sas_token and "--sas-token",
+                            n.connection_string and "--connection-string"]
+        account_key_args = [arg for arg in account_key_args if arg]
 
-            if account_key_args:
-                logger.warning('In "login" auth mode, the following arguments are ignored: %s',
-                               ' ,'.join(account_key_args))
-            return
+        if account_key_args:
+            logger.warning('In "login" auth mode, the following arguments are ignored: %s',
+                           ' ,'.join(account_key_args))
+        return
 
     if not n.connection_string:
-        n.connection_string = get_config_value('storage', 'connection_string', None)
+        n.connection_string = get_config_value(cmd, 'storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
     if n.connection_string:
@@ -126,11 +142,11 @@ def validate_client_parameters(cmd, namespace):
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
-        n.account_name = get_config_value('storage', 'account', None)
+        n.account_name = get_config_value(cmd, 'storage', 'account', None)
     if not n.account_key:
-        n.account_key = get_config_value('storage', 'key', None)
+        n.account_key = get_config_value(cmd, 'storage', 'key', None)
     if not n.sas_token:
-        n.sas_token = get_config_value('storage', 'sas_token', None)
+        n.sas_token = get_config_value(cmd, 'storage', 'sas_token', None)
 
     # strip the '?' from sas token. the portal and command line are returns sas token in different
     # forms
@@ -139,7 +155,21 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
+        logger.warning('No connection string, account key or sas token found, we will query account keys for your '
+                       'storage account. Please try to use --auth-mode login or provide one of the following parameters'
+                       ': connection string, account key or sas token for your storage account.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
+
+
+def validate_encryption_key(cmd, namespace):
+    encryption_key_source = cmd.get_models('EncryptionScopeSource', resource_type=ResourceType.MGMT_STORAGE)
+    if namespace.key_source == encryption_key_source.microsoft_key_vault and \
+            not namespace.key_uri:
+        raise CLIError("usage error: Please specify --key-uri when using {} as key source."
+                       .format(encryption_key_source.microsoft_key_vault))
+    if namespace.key_source != encryption_key_source.microsoft_key_vault and namespace.key_uri:
+        raise CLIError("usage error: Specify `--key-source={}` and --key-uri to configure key vault properties."
+                       .format(encryption_key_source.microsoft_key_vault))
 
 
 def process_blob_source_uri(cmd, namespace):
@@ -361,13 +391,13 @@ def get_content_setting_validator(settings_class, update, guess_from_file=None):
             key = ns.get('account_key')
             cs = ns.get('connection_string')
             sas = ns.get('sas_token')
+            token_credential = ns.get('token_credential')
             if _class_name(settings_class) == _class_name(t_blob_content_settings):
                 client = get_storage_data_service_client(cmd.cli_ctx,
-                                                         t_base_blob_service,
-                                                         account,
-                                                         key,
-                                                         cs,
-                                                         sas)
+                                                         service=t_base_blob_service,
+                                                         name=account,
+                                                         key=key, connection_string=cs, sas_token=sas,
+                                                         token_credential=token_credential)
                 container = ns.get('container_name')
                 blob = ns.get('blob_name')
                 lease_id = ns.get('lease_id')
@@ -422,28 +452,16 @@ def validate_encryption_services(cmd, namespace):
         namespace.encryption_services = t_encryption_services(**services)
 
 
-def validate_encryption_source(cmd, namespace):
-    ns = vars(namespace)
-
-    key_name = ns.pop('encryption_key_name', None)
-    key_version = ns.pop('encryption_key_version', None)
-    key_vault_uri = ns.pop('encryption_key_vault', None)
-
-    if namespace.encryption_key_source == 'Microsoft.Keyvault' and not (key_name and key_version and key_vault_uri):
-        raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are required '
+def validate_encryption_source(namespace):
+    if namespace.encryption_key_source == 'Microsoft.Keyvault' and \
+            not (namespace.encryption_key_name and namespace.encryption_key_vault):
+        raise ValueError('--encryption-key-name and --encryption-key-vault are required '
                          'when --encryption-key-source=Microsoft.Keyvault is specified.')
 
-    if key_name or key_version or key_vault_uri:
+    if namespace.encryption_key_name or namespace.encryption_key_version is not None or namespace.encryption_key_vault:
         if namespace.encryption_key_source and namespace.encryption_key_source != 'Microsoft.Keyvault':
             raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are not '
                              'applicable without Microsoft.Keyvault key-source.')
-        KeyVaultProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE, 'KeyVaultProperties',
-                                     mod='models')
-        if not KeyVaultProperties:
-            return
-
-        kv_prop = KeyVaultProperties(key_name=key_name, key_version=key_version, key_vault_uri=key_vault_uri)
-        namespace.encryption_key_vault_properties = kv_prop
 
 
 def validate_entity(namespace):
@@ -465,7 +483,6 @@ def validate_entity(namespace):
     missing_keys = '{}PartitionKey'.format(missing_keys) \
         if 'PartitionKey' not in keys else missing_keys
     if missing_keys:
-        import argparse
         raise argparse.ArgumentError(
             None, 'incorrect usage: entity requires: {}'.format(missing_keys))
 
@@ -504,7 +521,6 @@ def validate_marker(namespace):
             del marker[key]
             marker[new_key] = val
     if expected_keys:
-        import argparse
         raise argparse.ArgumentError(
             None, 'incorrect usage: marker requires: {}'.format(' '.join(expected_keys)))
 
@@ -778,7 +794,6 @@ def process_blob_upload_batch_parameters(cmd, namespace):
             namespace.blob_type = 'page'
         elif any(vhd_files):
             # source files contain vhd files but not all of them
-            from knack.util import CLIError
             raise CLIError("""Fail to guess the required blob type. Type of the files to be
             uploaded are not consistent. Default blob type for .vhd files is "page", while
             others are "block". You can solve this problem by either explicitly set the blob
@@ -893,7 +908,6 @@ def process_file_download_namespace(namespace):
 
 
 def process_metric_update_namespace(namespace):
-    import argparse
     namespace.hour = namespace.hour == 'true'
     namespace.minute = namespace.minute == 'true'
     namespace.api = namespace.api == 'true' if namespace.api else None
@@ -925,7 +939,6 @@ def validate_subnet(cmd, namespace):
             child_type_1='subnets',
             child_name_1=subnet)
     else:
-        from knack.util import CLIError
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
 
@@ -1104,7 +1117,6 @@ def validate_azcopy_remove_arguments(cmd, namespace):
 def as_user_validator(namespace):
     if namespace.as_user:
         if namespace.expiry is None:
-            import argparse
             raise argparse.ArgumentError(
                 None, 'incorrect usage: specify --expiry when as-user is enabled')
 
@@ -1112,13 +1124,11 @@ def as_user_validator(namespace):
 
         from datetime import datetime, timedelta
         if expiry > datetime.utcnow() + timedelta(days=7):
-            import argparse
             raise argparse.ArgumentError(
                 None, 'incorrect usage: --expiry should be within 7 days from now')
 
         if ((not hasattr(namespace, 'token_credential') or namespace.token_credential is None) and
                 (not hasattr(namespace, 'auth_mode') or namespace.auth_mode != 'login')):
-            import argparse
             raise argparse.ArgumentError(
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
 
@@ -1145,3 +1155,62 @@ def validator_delete_retention_days(namespace):
         if namespace.delete_retention_days > 365:
             raise ValueError(
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
+
+
+# pylint: disable=too-few-public-methods
+class BlobRangeAddAction(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        if not namespace.blob_ranges:
+            namespace.blob_ranges = []
+        if isinstance(values, list):
+            values = ' '.join(values)
+        BlobRange = namespace._cmd.get_models('BlobRestoreRange', resource_type=ResourceType.MGMT_STORAGE)
+        try:
+            start_range, end_range = values.split(' ')
+        except (ValueError, TypeError):
+            raise CLIError('usage error: --blob-range VARIABLE OPERATOR VALUE')
+        namespace.blob_ranges.append(BlobRange(
+            start_range=start_range,
+            end_range=end_range
+        ))
+
+
+def validate_private_endpoint_connection_id(cmd, namespace):
+    if namespace.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(namespace.connection_id)
+        namespace.resource_group_name = result['resource_group']
+        namespace.account_name = result['name']
+        namespace.private_endpoint_connection_name = result['child_name_1']
+
+    if namespace.account_name and not namespace.resource_group_name:
+        namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
+
+    if not all([namespace.account_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --account-name NAME]')
+
+    del namespace.connection_id
+
+
+def pop_data_client_auth(ns):
+    del ns.auth_mode
+    del ns.account_key
+    del ns.connection_string
+    del ns.sas_token
+
+
+def validate_client_auth_parameter(cmd, ns):
+    if ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None:
+        # simply try to retrieve the remaining variables from environment variables
+        if not ns.account_name:
+            ns.account_name = get_config_value(cmd, 'storage', 'account', None)
+        if ns.account_name and not ns.resource_group_name:
+            ns.resource_group_name = _query_account_rg(cmd.cli_ctx, account_name=ns.account_name)[0]
+        pop_data_client_auth(ns)
+    elif (ns.default_encryption_scope and ns.prevent_encryption_scope_override is None) or \
+         (not ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None):
+        raise CLIError("usage error: You need to specify both --default-encryption-scope and "
+                       "--prevent-encryption-scope-override to set encryption scope information "
+                       "when creating container.")
+    else:
+        validate_client_parameters(cmd, ns)

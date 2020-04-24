@@ -420,8 +420,7 @@ Virtual Network Rule Arguments
 
 ## Coding Practices
 
-- All code must support Python 2 & 3.
-The CLI supports 2.7, 3.5, 3.6, 3.7 and 3.8
+- All code must support Python 3.6, 3.7 and 3.8
 - PRs to Azure/azure-cli and Azure/azure-cli-extensions must pass CI
 - Code must pass style checks with pylint and pep8
 - (*) All commands should have tests

@@ -196,7 +196,7 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
             policy_option.configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=widevine_template)
     elif isinstance(policy_option.configuration, ContentKeyPolicyFairPlayConfiguration):
         if ask is not None:
-            policy_option.configuration.ask = bytearray(ask, 'utf-8')
+            policy_option.configuration.ask = bytearray.fromhex(ask)
 
         if fair_play_pfx_password is not None:
             policy_option.configuration.fair_play_pfx_password = fair_play_pfx_password
@@ -269,7 +269,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 
     if valid_fairplay_configuration:
         configuration = ContentKeyPolicyFairPlayConfiguration(
-            ask=bytearray(ask, 'utf-8'), fair_play_pfx_password=fair_play_pfx_password,
+            ask=bytearray.fromhex(ask), fair_play_pfx_password=fair_play_pfx_password,
             fair_play_pfx=_b64_to_str(_read_binary(fair_play_pfx)).decode('ascii'),
             rental_and_lease_key_type=rental_and_lease_key_type,
             rental_duration=rental_duration)

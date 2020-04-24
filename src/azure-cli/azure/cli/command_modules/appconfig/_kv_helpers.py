@@ -3,10 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long,too-many-nested-blocks
 
 import io
 import json
+import re
 import sys
 
 import chardet
@@ -16,6 +17,7 @@ from jsondiff import JsonDiffer
 from knack.log import get_logger
 from knack.util import CLIError
 
+from ._constants import FeatureFlagConstants, KeyVaultConstants
 from ._utils import resolve_connection_string, user_confirmation
 from ._azconfig.azconfig_client import AzconfigClient
 from ._azconfig.models import (KeyValue,
@@ -26,8 +28,6 @@ from._featuremodels import (map_keyvalue_to_featureflag,
                             FeatureFlagValue)
 
 logger = get_logger(__name__)
-FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
-FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
 FEATURE_MANAGEMENT_KEYWORDS = ["FeatureManagement", "featureManagement", "feature_management", "feature-management"]
 ENABLED_FOR_KEYWORDS = ["EnabledFor", "enabledFor", "enabled_for", "enabled-for"]
 
@@ -89,6 +89,36 @@ def __compare_kvs_for_restore(restore_kvs, current_kvs):
 
     return kvs_to_restore, kvs_to_modify, kvs_to_delete
 
+
+def validate_import_key(key):
+    if key:
+        if key == '.' or key == '..' or '%' in key:
+            logger.warning("Ignoring invalid key '%s'. Key cannot be a '.' or '..', or contain the '%%' character.", key)
+            return False
+        if key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX):
+            logger.warning("Ignoring invalid key '%s'. Key cannot start with the reserved prefix for feature flags.", key)
+            return False
+    else:
+        logger.warning("Ignoring invalid key ''. Key cannot be empty.")
+        return False
+
+    return True
+
+
+def validate_import_feature(feature):
+    if feature:
+        invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')
+        invalid = re.search(invalid_pattern, feature)
+        if invalid:
+            logger.warning("Ignoring invalid feature '%s'. Only alphanumeric characters, '.', '-' and '_' are allowed in feature name.", feature)
+            return False
+    else:
+        logger.warning("Ignoring invalid feature ''. Feature name cannot be empty.")
+        return False
+
+    return True
+
+
 # File <-> List of KeyValue object
 
 
@@ -138,7 +168,8 @@ def __read_kv_from_file(file_path, format_, separator=None, prefix_to_add="", de
     # convert to KeyValue list
     key_values = []
     for k, v in flattened_data.items():
-        key_values.append(KeyValue(key=k, value=v))
+        if validate_import_key(key=k):
+            key_values.append(KeyValue(key=k, value=v))
     return key_values
 
 
@@ -191,7 +222,7 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
             exported_features = __export_features(features, naming_convention)
             exported_keyvalues.update(exported_features)
 
-        with open(file_path, 'w') as fp:
+        with open(file_path, 'w', encoding='utf-8') as fp:
             if format_ == 'json':
                 json.dump(exported_keyvalues, fp, indent=2, ensure_ascii=False)
             elif format_ == 'yaml':
@@ -204,31 +235,74 @@ def __write_kv_and_features_to_file(file_path, key_values=None, features=None, f
 
 # Config Store <-> List of KeyValue object
 
+def __read_kv_from_config_store(cmd,
+                                name=None,
+                                connection_string=None,
+                                key=None,
+                                label=None,
+                                datetime=None,
+                                fields=None,
+                                top=None,
+                                all_=True,
+                                resolve_keyvault=False,
+                                prefix_to_remove="",
+                                prefix_to_add=""):
+    connection_string = resolve_connection_string(cmd, name, connection_string)
+    azconfig_client = AzconfigClient(connection_string)
 
-def __read_kv_from_config_store(cmd, name=None, connection_string=None, key=None, label=None, prefix_to_remove="", prefix_to_add=""):
-    from .keyvalue import list_key
+    query_option = QueryKeyValueCollectionOptions(key_filter=key,
+                                                  label_filter=label if label else QueryKeyValueCollectionOptions.empty_label,
+                                                  query_datetime=datetime,
+                                                  fields=fields)
     try:
-        # fetch complete keyvalue list
-        key_values = list_key(cmd,
-                              key=key,
-                              label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
-                              name=name,
-                              connection_string=connection_string,
-                              all_=True)
-        # add prefix, remove label, remove non-user-info attributes
-        for kv in key_values:
+        keyvalue_iterable = azconfig_client.get_keyvalues(query_option)
+        retrieved_kvs = []
+        count = 0
+
+        if all_:
+            top = float('inf')
+        elif top is None:
+            top = 100
+
+        keyvault_client = __get_keyvault_client(cmd.cli_ctx) if resolve_keyvault else None
+
+        for kv in keyvalue_iterable:
             # remove prefix if specified
-            if not kv.key.startswith(prefix_to_remove):
-                continue
-            kv.key = kv.key[len(prefix_to_remove):]
+            if kv.key.startswith(prefix_to_remove):
+                kv.key = kv.key[len(prefix_to_remove):]
+
             # add prefix if specified
             kv.key = prefix_to_add + kv.key
+
+            # resolve key vault reference
+            if keyvault_client and kv.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+                __resolve_secret(keyvault_client, kv)
+
+            # select fields
+            if fields:
+                partial_kv = {}
+                for field in fields:
+                    partial_kv[field.name.lower()] = kv.__dict__[
+                        field.name.lower()]
+                retrieved_kvs.append(partial_kv)
+            else:
+                retrieved_kvs.append(kv)
+            count += 1
+            if count >= top:
+                return retrieved_kvs
+        return retrieved_kvs
     except Exception as exception:
         raise CLIError(str(exception))
-    return key_values
 
 
-def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name=None, connection_string=None, label=None):
+def __write_kv_and_features_to_config_store(cmd,
+                                            key_values,
+                                            features=None,
+                                            name=None,
+                                            connection_string=None,
+                                            label=None,
+                                            preserve_labels=False,
+                                            content_type=None):
     if not key_values and not features:
         return
     try:
@@ -240,15 +314,20 @@ def __write_kv_and_features_to_config_store(cmd, key_values, features=None, name
             key_values.extend(__convert_featureflag_list_to_keyvalue_list(features))
 
         for kv in key_values:
-            kv.label = label
+            if not preserve_labels:
+                kv.label = label
+            if content_type:
+                kv.content_type = content_type
+
             azconfig_client.set_keyvalue(kv, ModifyKeyValueOptions())
+
     except Exception as exception:
         raise CLIError(str(exception))
 
 
 def __is_feature_flag(kv):
     if kv and kv.key and kv.content_type:
-        return kv.key.startswith(FEATURE_FLAG_PREFIX) and kv.content_type == FEATURE_FLAG_CONTENT_TYPE
+        return kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX) and kv.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
     return False
 
 
@@ -269,14 +348,49 @@ def __read_kv_from_app_service(cmd, appservice_account, prefix_to_add=""):
             cmd, resource_group_name=appservice_account["resource_group"], name=appservice_account["name"], slot=None)
         for item in settings:
             key = prefix_to_add + item['name']
-            value = item['value']
-            tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
-            kv = KeyValue(key=key, value=value, tags=tags)
-            key_values.append(kv)
+            if validate_import_key(key):
+                tags = {'AppService:SlotSetting': str(item['slotSetting']).lower()} if item['slotSetting'] else {}
+                value = item['value']
+
+                # Value will look like one of the following if it is a KeyVault reference:
+                # @Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret/ec96f02080254f109c51a1f14cdb1931)
+                # @Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=ec96f02080254f109c51a1f14cdb1931)
+                if value and value.strip().lower().startswith(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX.lower()):
+                    try:
+                        # Strip all whitespaces from value string.
+                        # Valid values of SecretUri, VaultName, SecretName or SecretVersion will never have whitespaces.
+                        value = value.replace(" ", "")
+                        appsvc_value_dict = dict(x.split('=') for x in value[len(KeyVaultConstants.APPSVC_KEYVAULT_PREFIX) + 1: -1].split(';'))
+                        appsvc_value_dict = {k.lower(): v for k, v in appsvc_value_dict.items()}
+                        secret_identifier = appsvc_value_dict.get('secreturi')
+                        if not secret_identifier:
+                            # Construct secreturi
+                            vault_name = appsvc_value_dict.get('vaultname')
+                            secret_name = appsvc_value_dict.get('secretname')
+                            secret_version = appsvc_value_dict.get('secretversion')
+                            secret_identifier = "https://{0}.vault.azure.net/secrets/{1}/{2}".format(vault_name, secret_name, secret_version)
+                        try:
+                            from azure.keyvault.key_vault_id import KeyVaultIdentifier
+                            # this throws an exception for invalid format of secret identifier
+                            KeyVaultIdentifier(uri=secret_identifier)
+                            kv = KeyValue(key=key,
+                                          value=json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':')),
+                                          tags=tags,
+                                          content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
+                            key_values.append(kv)
+                            continue
+                        except (TypeError, ValueError) as e:
+                            logger.debug(
+                                'Exception while validating the format of KeyVault identifier. Key "%s" with value "%s" will be treated like a regular key-value.\n%s', key, value, str(e))
+                    except (AttributeError, TypeError, ValueError) as e:
+                        logger.debug(
+                            'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', key, value, str(e))
+
+                kv = KeyValue(key=key, value=value, tags=tags)
+                key_values.append(kv)
         return key_values
     except Exception as exception:
-        raise CLIError(
-            "Fail to read key-values from appservice." + str(exception))
+        raise CLIError("Failed to read key-values from appservice." + str(exception))
 
 
 def __write_kv_to_app_service(cmd, key_values, appservice_account):
@@ -286,6 +400,19 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
         for kv in key_values:
             name = kv.key
             value = kv.value
+            # If its a KeyVault ref, convert the format to AppService KeyVault ref format
+            if kv.content_type and kv.content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+                try:
+                    secret_uri = json.loads(value).get("uri")
+                    if secret_uri:
+                        value = KeyVaultConstants.APPSVC_KEYVAULT_PREFIX + '(SecretUri={0})'.format(secret_uri)
+                    else:
+                        logger.debug(
+                            'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n', name, value)
+                except (AttributeError, TypeError, ValueError) as e:
+                    logger.debug(
+                        'Key "%s" with value "%s" is not a well-formatted KeyVault reference. It will be treated like a regular key-value.\n%s', name, value, str(e))
+
             if 'AppService:SlotSetting' in kv.tags and kv.tags['AppService:SlotSetting'] == 'true':
                 slot_settings.append(name + '=' + value)
             else:
@@ -295,8 +422,7 @@ def __write_kv_to_app_service(cmd, key_values, appservice_account):
         update_app_settings(cmd, resource_group_name=appservice_account["resource_group"],
                             name=appservice_account["name"], settings=non_slot_settings, slot_settings=slot_settings)
     except Exception as exception:
-        raise CLIError(
-            "Fail to write key-values to appservice: " + str(exception))
+        raise CLIError("Failed to write key-values to appservice: " + str(exception))
 
 
 # Helper functions
@@ -649,47 +775,50 @@ def __convert_feature_dict_to_keyvalue_list(features_dict, enabled_for_keyword):
 
     try:
         for k, v in features_dict.items():
-            key = FEATURE_FLAG_PREFIX + str(k)
-            feature_flag_value = FeatureFlagValue(id_=str(k))
+            if validate_import_feature(feature=k):
 
-            if isinstance(v, dict):
-                # This may be a conditional feature
-                feature_flag_value.enabled = False
-                try:
-                    feature_flag_value.conditions = {'client_filters': v[enabled_for_keyword]}
-                except KeyError:
-                    raise CLIError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
+                key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + str(k)
+                feature_flag_value = FeatureFlagValue(id_=str(k))
 
-                if feature_flag_value.conditions["client_filters"]:
-                    feature_flag_value.enabled = True
+                if isinstance(v, dict):
+                    # This may be a conditional feature
+                    feature_flag_value.enabled = False
+                    try:
+                        feature_flag_value.conditions = {'client_filters': v[enabled_for_keyword]}
+                    except KeyError:
+                        raise CLIError("Feature '{0}' must contain '{1}' definition or have a true/false value. \n".format(str(k), enabled_for_keyword))
 
-                    for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
-                        # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
-                        val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
-                        if not val.get("name", None):
-                            logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
-                            continue
+                    if feature_flag_value.conditions["client_filters"]:
+                        feature_flag_value.enabled = True
 
-                        if val["name"].lower() == "alwayson":
-                            # We support alternate format for specifying always ON features
-                            # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
-                            feature_flag_value.conditions = default_conditions
-                            break
+                        for idx, val in enumerate(feature_flag_value.conditions["client_filters"]):
+                            # each val should be a dict with at most 2 keys (Name, Parameters) or at least 1 key (Name)
+                            val = {filter_key.lower(): filter_val for filter_key, filter_val in val.items()}
+                            if not val.get("name", None):
+                                logger.warning("Ignoring a filter for feature '%s' because it doesn't have a 'Name' attribute.", str(k))
+                                continue
 
-                        filter_param = val.get("parameters", {})
-                        new_val = {'name': val["name"]}
-                        if filter_param:
-                            new_val["parameters"] = filter_param
-                        feature_flag_value.conditions["client_filters"][idx] = new_val
+                            if val["name"].lower() == "alwayson":
+                                # We support alternate format for specifying always ON features
+                                # "FeatureT": {"EnabledFor": [{ "Name": "AlwaysOn"}]}
+                                feature_flag_value.conditions = default_conditions
+                                break
 
-            else:
-                feature_flag_value.enabled = v
-                feature_flag_value.conditions = default_conditions
+                            filter_param = val.get("parameters", {})
+                            new_val = {'name': val["name"]}
+                            if filter_param:
+                                new_val["parameters"] = filter_param
+                            feature_flag_value.conditions["client_filters"][idx] = new_val
+                elif isinstance(v, bool):
+                    feature_flag_value.enabled = v
+                    feature_flag_value.conditions = default_conditions
+                else:
+                    raise ValueError("The type of '{}' should be either boolean or dictionary.".format(v))
 
-            set_kv = KeyValue(key=key,
-                              value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
-                              content_type=FEATURE_FLAG_CONTENT_TYPE)
-            key_values.append(set_kv)
+                set_kv = KeyValue(key=key,
+                                  value=json.dumps(feature_flag_value, default=lambda o: o.__dict__, ensure_ascii=False),
+                                  content_type=FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE)
+                key_values.append(set_kv)
 
     except Exception as exception:
         raise CLIError("File contains feature flags in invalid format. " + str(exception))
@@ -736,6 +865,35 @@ def __compact_key_values(key_values):
             else:
                 compacted.update({key: value})
     return compacted
+
+
+def __get_keyvault_client(cli_ctx):
+    from azure.cli.core._profile import Profile
+    from azure.keyvault import KeyVaultAuthentication, KeyVaultClient
+    from azure.cli.core.profiles import ResourceType, get_api_version
+    version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
+
+    def _get_token(server, resource, scope):  # pylint: disable=unused-argument
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+
+    return KeyVaultClient(KeyVaultAuthentication(_get_token), api_version=version)
+
+
+def __resolve_secret(keyvault_client, keyvault_reference):
+    from azure.keyvault.key_vault_id import SecretId
+    try:
+        secret_id = json.loads(keyvault_reference.value)["uri"]
+        kv_identifier = SecretId(uri=secret_id)
+
+        secret = keyvault_client.get_secret(vault_base_url=kv_identifier.vault,
+                                            secret_name=kv_identifier.name,
+                                            secret_version=kv_identifier.version)
+        keyvault_reference.value = secret.value
+        return keyvault_reference
+    except (TypeError, ValueError):
+        raise CLIError("Invalid key vault reference for key {} value:{}.".format(keyvault_reference.key, keyvault_reference.value))
+    except Exception as exception:
+        raise CLIError(str(exception))
 
 
 class Undef(object):  # pylint: disable=too-few-public-methods

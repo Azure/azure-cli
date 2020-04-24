@@ -12,6 +12,7 @@ import datetime
 import mock
 import unittest
 
+from knack.util import CLIError
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
@@ -101,7 +102,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
 
 class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_new_kv_cert')
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
         KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
@@ -136,7 +137,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
 
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_existing_kv_cert')
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
 
         import time
@@ -295,6 +296,15 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment delete --assignee {upn} --role reader')
+
+                # test role assignment on empty scope
+                with self.assertRaisesRegexp(CLIError, 'Invalid scope. Please use --help to view the valid format.'):
+                    self.cmd('role assignment create --assignee {upn} --scope "" --role reader')
+                    self.cmd('role assignment delete --assignee {upn} --scope "" --role reader')
+
+                # test role assignment on empty scope
+                with self.assertRaisesRegexp(CLIError, "Cannot find user or service principal in graph database for 'fake'."):
+                    self.cmd('role assignment create --assignee fake --role contributor')
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
@@ -338,7 +348,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
             time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
-            base_dir = os.curdir
+            base_dir = os.path.abspath(os.curdir)
+
             try:
                 temp_dir = self.create_temp_dir()
                 os.chdir(temp_dir)
@@ -358,7 +369,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 0))
             finally:
                 self.cmd('configure --default group="" --scope local')
-                os.chdir(os.path.basename(base_dir))
+                os.chdir(base_dir)
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')

@@ -27,3 +27,7 @@ def policy_states_operations(cli_ctx, _):
 
 def policy_remediations_operations(cli_ctx, _):
     return cf_policy_insights(cli_ctx).remediations
+
+
+def policy_metadata_operations(cli_ctx, _):
+    return cf_policy_insights(cli_ctx).policy_metadata

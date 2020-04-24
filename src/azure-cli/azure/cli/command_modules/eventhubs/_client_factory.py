@@ -6,8 +6,8 @@
 
 def cf_eventhub(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.eventhub import EventHubManagementClient
-    return get_mgmt_service_client(cli_ctx, EventHubManagementClient)
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_EVENTHUB)
 
 
 def namespaces_mgmt_client_factory(cli_ctx, _):

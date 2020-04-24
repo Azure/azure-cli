@@ -77,7 +77,7 @@ class StatusCodes:
 class Versions:
     """Constants of versions.
     """
-    SDKVersion = '1.0.0'
+    SDKVersion = '2.0.0'
     ApiVersion = '1.0'
 
 

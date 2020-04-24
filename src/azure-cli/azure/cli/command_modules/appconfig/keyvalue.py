@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-locals
 
 import json
 import time
@@ -12,6 +12,7 @@ from itertools import chain
 from knack.log import get_logger
 from knack.util import CLIError
 
+from ._constants import FeatureFlagConstants, KeyVaultConstants
 from ._utils import resolve_connection_string, user_confirmation
 from ._azconfig.azconfig_client import AzconfigClient
 from ._azconfig.constants import StatusCodes
@@ -28,9 +29,6 @@ from ._kv_helpers import (__compare_kvs_for_restore, __read_kv_from_file, __read
 from .feature import list_feature
 
 logger = get_logger(__name__)
-FEATURE_FLAG_PREFIX = ".appconfig.featureflag/"
-FEATURE_FLAG_CONTENT_TYPE = "application/vnd.microsoft.appconfig.ff+json;charset=utf-8"
-KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
 def import_config(cmd,
@@ -40,6 +38,8 @@ def import_config(cmd,
                   label=None,
                   prefix="",  # prefix to add
                   yes=False,
+                  skip_features=False,
+                  content_type=None,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -50,10 +50,9 @@ def import_config(cmd,
                   src_connection_string=None,
                   src_key=None,
                   src_label=None,
+                  preserve_labels=False,
                   # from-appservice parameters
-                  appservice_account=None,
-                  skip_features=False):
-    # pylint: disable=too-many-locals
+                  appservice_account=None):
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -70,6 +69,14 @@ def import_config(cmd,
             src_features = __read_features_from_file(file_path=path, format_=format_)
 
     elif source == 'appconfig':
+        if label is not None and preserve_labels:
+            raise CLIError("Import failed! Please provide only one of these arguments: '--label' or '--preserve-labels'. See 'az appconfig kv import -h' for examples.")
+        if preserve_labels:
+            # We need label to be the same as src_label for preview later.
+            # This will have no effect on label while writing to config store
+            # as we check preserve_labels again before labelling KVs.
+            label = src_label
+
         src_kvs = __read_kv_from_config_store(cmd, name=src_name, connection_string=src_connection_string,
                                               key=src_key, label=src_label, prefix_to_add=prefix)
         # We need to separate KV from feature flags
@@ -78,9 +85,9 @@ def import_config(cmd,
         if not skip_features:
             # Get all Feature flags with matching label
             all_features = __read_kv_from_config_store(cmd, name=src_name, connection_string=src_connection_string,
-                                                       key=FEATURE_FLAG_PREFIX + '*', label=src_label)
+                                                       key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*', label=src_label)
             for feature in all_features:
-                if feature.content_type == FEATURE_FLAG_CONTENT_TYPE:
+                if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     src_features.append(feature)
 
     elif source == 'appservice':
@@ -103,9 +110,9 @@ def import_config(cmd,
         if src_features and not skip_features:
             # Append all features to dest_features list
             all_features = __read_kv_from_config_store(
-                cmd, name=name, connection_string=connection_string, key=FEATURE_FLAG_PREFIX + '*', label=label)
+                cmd, name=name, connection_string=connection_string, key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*', label=label)
             for feature in all_features:
-                if feature.content_type == FEATURE_FLAG_CONTENT_TYPE:
+                if feature.content_type == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
                     dest_features.append(feature)
 
             need_feature_change = __print_features_preview(
@@ -121,8 +128,13 @@ def import_config(cmd,
     src_kvs.extend(src_features)
 
     # import into configstore
-    __write_kv_and_features_to_config_store(
-        cmd, key_values=src_kvs, name=name, connection_string=connection_string, label=label)
+    __write_kv_and_features_to_config_store(cmd,
+                                            key_values=src_kvs,
+                                            name=name,
+                                            connection_string=connection_string,
+                                            label=label,
+                                            preserve_labels=preserve_labels,
+                                            content_type=content_type)
 
 
 def export_config(cmd,
@@ -133,18 +145,21 @@ def export_config(cmd,
                   key=None,
                   prefix="",  # prefix to remove
                   yes=False,
+                  skip_features=False,
+                  skip_keyvault=False,
                   # to-file parameters
                   path=None,
                   format_=None,
                   separator=None,
+                  naming_convention='pascal',
+                  resolve_keyvault=False,
                   # to-config-store parameters
                   dest_name=None,
                   dest_connection_string=None,
                   dest_label=None,
+                  preserve_labels=False,
                   # to-app-service parameters
-                  appservice_account=None,
-                  skip_features=False,
-                  naming_convention='pascal'):
+                  appservice_account=None):
     src_features = []
     dest_features = []
     dest_kvs = []
@@ -152,27 +167,36 @@ def export_config(cmd,
     format_ = format_.lower() if format_ else None
     naming_convention = naming_convention.lower()
 
+    if destination == 'appconfig':
+        if dest_label is not None and preserve_labels:
+            raise CLIError("Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'. See 'az appconfig kv export -h' for examples.")
+        if preserve_labels:
+            # We need dest_label to be the same as label for preview later.
+            # This will have no effect on label while writing to config store
+            # as we check preserve_labels again before labelling KVs.
+            dest_label = label
+
     # fetch key values from user's configstore
-    src_kvs = __read_kv_from_config_store(
-        cmd, name=name, connection_string=connection_string, key=key, label=label, prefix_to_remove=prefix)
+    src_kvs = __read_kv_from_config_store(cmd,
+                                          name=name,
+                                          connection_string=connection_string,
+                                          key=key,
+                                          label=label,
+                                          prefix_to_remove=prefix,
+                                          resolve_keyvault=resolve_keyvault)
+
+    if skip_keyvault:
+        src_kvs = [keyvalue for keyvalue in src_kvs if keyvalue.content_type != KeyVaultConstants.KEYVAULT_CONTENT_TYPE]
 
     # We need to separate KV from feature flags
     __discard_features_from_retrieved_kv(src_kvs)
 
     if not skip_features:
         # Get all Feature flags with matching label
-        if destination == 'file':
-            if format_ == 'properties':
-                skip_features = True
-            else:
-                # src_features is a list of FeatureFlag objects
-                src_features = list_feature(cmd,
-                                            feature='*',
-                                            label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
-                                            name=name,
-                                            connection_string=connection_string,
-                                            all_=True)
-        elif destination == 'appconfig':
+        if (destination == 'file' and format_ == 'properties') or destination == 'appservice':
+            skip_features = True
+            logger.warning("Exporting feature flag to yaml file or appservice is currently not supported.")
+        else:
             # src_features is a list of FeatureFlag objects
             src_features = list_feature(cmd,
                                         feature='*',
@@ -224,7 +248,7 @@ def export_config(cmd,
                                         naming_convention=naming_convention)
     elif destination == 'appconfig':
         __write_kv_and_features_to_config_store(cmd, key_values=src_kvs, features=src_features, name=dest_name,
-                                                connection_string=dest_connection_string, label=dest_label)
+                                                connection_string=dest_connection_string, label=dest_label, preserve_labels=preserve_labels)
     elif destination == 'appservice':
         __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
 
@@ -241,6 +265,12 @@ def set_key(cmd,
     connection_string = resolve_connection_string(
         cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
+
+    if content_type:
+        if content_type.lower() == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+            logger.warning("There is a dedicated command to set key vault reference. 'appconfig kv set-keyvault -h'")
+        elif content_type.lower() == FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE:
+            logger.warning("There is a dedicated command to set feature flag. 'appconfig feature set -h'")
 
     retry_times = 3
     retry_interval = 1
@@ -300,7 +330,7 @@ def set_keyvault(cmd,
     connection_string = resolve_connection_string(cmd, name, connection_string)
     azconfig_client = AzconfigClient(connection_string)
 
-    keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False)
+    keyvault_ref_value = json.dumps({"uri": secret_identifier}, ensure_ascii=False, separators=(',', ':'))
     retry_times = 3
     retry_interval = 1
 
@@ -312,13 +342,13 @@ def set_keyvault(cmd,
             raise CLIError(str(exception))
 
         if retrieved_kv is None:
-            set_kv = KeyValue(key, keyvault_ref_value, label, tags, KEYVAULT_CONTENT_TYPE)
+            set_kv = KeyValue(key, keyvault_ref_value, label, tags, KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
         else:
             logger.warning("This operation will result in overwriting existing key whose value is: %s", retrieved_kv.value)
             set_kv = KeyValue(key=key,
                               label=label,
                               value=keyvault_ref_value,
-                              content_type=KEYVAULT_CONTENT_TYPE,
+                              content_type=KeyVaultConstants.KEYVAULT_CONTENT_TYPE,
                               tags=retrieved_kv.tags if tags is None else tags)
             set_kv.etag = retrieved_kv.etag
 
@@ -364,11 +394,10 @@ def delete_key(cmd,
     user_confirmation(confirmation_message, yes)
 
     try:
-        entries = list_key(cmd,
-                           key=key,
-                           label=QueryKeyValueCollectionOptions.empty_label if label is None else label,
-                           connection_string=connection_string,
-                           all_=True)
+        entries = __read_kv_from_config_store(cmd,
+                                              connection_string=connection_string,
+                                              key=key,
+                                              label=label if label else QueryKeyValueCollectionOptions.empty_label)
     except HTTPException as exception:
         raise CLIError('Deletion operation failed. ' + str(exception))
 
@@ -485,39 +514,19 @@ def list_key(cmd,
              datetime=None,
              connection_string=None,
              top=None,
-             all_=False):
-    connection_string = resolve_connection_string(cmd, name, connection_string)
-    azconfig_client = AzconfigClient(connection_string)
-
-    query_option = QueryKeyValueCollectionOptions(key_filter=key,
-                                                  label_filter=QueryKeyValueCollectionOptions.empty_label if label is not None and not label else label,
-                                                  query_datetime=datetime,
-                                                  fields=fields)
-    try:
-        keyvalue_iterable = azconfig_client.get_keyvalues(query_option)
-        retrieved_kvs = []
-        count = 0
-
-        if all_:
-            top = float('inf')
-        elif top is None:
-            top = 100
-
-        for kv in keyvalue_iterable:
-            if fields:
-                partial_kv = {}
-                for field in fields:
-                    partial_kv[field.name.lower()] = kv.__dict__[
-                        field.name.lower()]
-                retrieved_kvs.append(partial_kv)
-            else:
-                retrieved_kvs.append(kv)
-            count += 1
-            if count >= top:
-                return retrieved_kvs
-        return retrieved_kvs
-    except Exception as exception:
-        raise CLIError(str(exception))
+             all_=False,
+             resolve_keyvault=False):
+    keyvalues = __read_kv_from_config_store(cmd,
+                                            name=name,
+                                            connection_string=connection_string,
+                                            key=key if key else QueryKeyValueCollectionOptions.any_key,
+                                            label=label if label else QueryKeyValueCollectionOptions.any_label,
+                                            datetime=datetime,
+                                            fields=fields,
+                                            top=top,
+                                            all_=all_,
+                                            resolve_keyvault=resolve_keyvault)
+    return keyvalues
 
 
 def restore_key(cmd,

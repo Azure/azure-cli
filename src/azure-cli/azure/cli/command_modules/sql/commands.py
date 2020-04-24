@@ -25,6 +25,7 @@ from ._util import (
     get_sql_capabilities_operations,
     get_sql_databases_operations,
     get_sql_database_blob_auditing_policies_operations,
+    get_sql_database_sensitivity_labels_operations,
     get_sql_database_operations_operations,
     get_sql_database_threat_detection_policies_operations,
     get_sql_database_transparent_data_encryption_activities_operations,
@@ -36,12 +37,17 @@ from ._util import (
     get_sql_failover_groups_operations,
     get_sql_firewall_rules_operations,
     get_sql_managed_databases_operations,
+    get_sql_managed_backup_short_term_retention_policies_operations,
+    get_sql_managed_database_long_term_retention_policies_operations,
+    get_sql_managed_database_long_term_retention_backups_operations,
     get_sql_managed_instance_azure_ad_administrators_operations,
     get_sql_managed_instance_encryption_protectors_operations,
     get_sql_managed_instance_keys_operations,
+    get_sql_managed_instance_operations_operations,
     get_sql_managed_instances_operations,
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
+    get_sql_restorable_dropped_managed_databases_operations,
     get_sql_server_connection_policies_operations,
     get_sql_server_dns_aliases_operations,
     get_sql_server_keys_operations,
@@ -219,6 +225,16 @@ def load_command_table(self, _):
 
         g.command('list-deleted', 'list_by_server')
 
+    restorable_dropped_managed_databases_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#RestorableDroppedManagedDatabasesOperations.{}',
+        client_factory=get_sql_restorable_dropped_managed_databases_operations)
+
+    with self.command_group('sql midb',
+                            restorable_dropped_managed_databases_operations,
+                            client_factory=get_sql_restorable_dropped_managed_databases_operations) as g:
+
+        g.command('list-deleted', 'list_by_instance')
+
     database_blob_auditing_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseBlobAuditingPoliciesOperations.{}',
         client_factory=get_sql_database_blob_auditing_policies_operations)
@@ -230,6 +246,27 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.generic_update_command('update',
                                  custom_func_name='db_audit_policy_update')
+
+    database_sensitivity_labels_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#SensitivityLabelsOperations.{}',
+        client_factory=get_sql_database_sensitivity_labels_operations)
+
+    with self.command_group('sql db classification',
+                            database_sensitivity_labels_operations,
+                            client_factory=get_sql_database_sensitivity_labels_operations) as g:
+
+        g.command('list', 'list_current_by_database')
+        g.custom_command('show', 'db_sensitivity_label_show')
+        g.command('delete', 'delete')
+        g.custom_command('update', 'db_sensitivity_label_update')
+
+    with self.command_group('sql db classification recommendation',
+                            database_sensitivity_labels_operations,
+                            client_factory=get_sql_database_sensitivity_labels_operations) as g:
+
+        g.command('list', 'list_recommended_by_database')
+        g.command('enable', 'enable_recommendation')
+        g.command('disable', 'disable_recommendation')
 
     database_threat_detection_policies_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#DatabaseThreatDetectionPoliciesOperations.{}',
@@ -386,7 +423,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.generic_update_command('update',
                                  custom_func_name='server_ad_admin_update',
-                                 setter_arg_name='properties')
+                                 setter_arg_name='parameters')
 
     server_keys_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ServerKeysOperations.{}',
@@ -456,6 +493,16 @@ def load_command_table(self, _):
     #                sql managed instance         #
     ###############################################
 
+    managed_instance_operations_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceOperations.{}',
+        client_factory=get_sql_managed_instance_operations_operations)
+
+    with self.command_group('sql mi op', managed_instance_operations_operations) as g:
+
+        g.command('list', 'list_by_managed_instance')
+        g.command('show', 'get')
+        g.command('cancel', 'cancel')
+
     managed_instances_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations#ManagedInstancesOperations.{}',
         client_factory=get_sql_managed_instances_operations)
@@ -524,6 +571,55 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list_by_instance')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+
+    managed_backup_short_term_retention_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedBackupShortTermRetentionPoliciesOperations.{}',
+        client_factory=get_sql_managed_backup_short_term_retention_policies_operations)
+
+    with self.command_group('sql midb short-term-retention-policy',
+                            managed_backup_short_term_retention_policies_operations,
+                            client_factory=get_sql_managed_backup_short_term_retention_policies_operations) as g:
+
+        g.custom_command(
+            'set',
+            'update_short_term_retention_mi',
+            supports_no_wait=True,
+            is_preview=True)
+        g.custom_command('show', 'get_short_term_retention_mi', is_preview=True)
+
+    managed_database_long_term_retention_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedInstanceLongTermRetentionPoliciesOperations.{}',
+        client_factory=get_sql_managed_database_long_term_retention_policies_operations)
+
+    with self.command_group('sql midb ltr-policy',
+                            managed_database_long_term_retention_policies_operations,
+                            client_factory=get_sql_managed_database_long_term_retention_policies_operations) as g:
+
+        g.custom_command('set', 'update_long_term_retention_mi', is_preview=True)
+        g.show_command('show', 'get', is_preview=True)
+
+    managed_database_long_term_retention_backups_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#LongTermRetentionManagedInstanceBackupsOperations.{}',
+        client_factory=get_sql_managed_database_long_term_retention_backups_operations)
+
+    with self.command_group('sql midb ltr-backup',
+                            managed_database_long_term_retention_backups_operations,
+                            client_factory=get_sql_managed_database_long_term_retention_backups_operations) as g:
+        g.custom_command('show', 'get_long_term_retention_mi_backup', is_preview=True)
+        g.custom_command(
+            'list',
+            'list_long_term_retention_mi_backups', is_preview=True)
+        g.custom_command('delete', 'delete_long_term_retention_mi_backup', confirmation=True, is_preview=True)
+
+    with self.command_group('sql midb ltr-backup',
+                            managed_databases_operations,
+                            client_factory=get_sql_managed_databases_operations) as g:
+        g.custom_command(
+            'restore',
+            'restore_long_term_retention_mi_backup',
+            supports_no_wait=True,
+            is_preview=True)
+        g.wait_command('wait')
 
     ###############################################
     #                sql virtual cluster         #

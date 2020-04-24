@@ -17,7 +17,8 @@ from azure.cli.core.commands.parameters import \
 from azure.cli.command_modules.batch._completers import load_supported_images
 from azure.cli.command_modules.batch._validators import \
     (application_enabled, application_package_reference_format,
-     certificate_reference_format, datetime_format, environment_setting_format,
+     certificate_reference_format, datetime_format,
+     disk_encryption_configuration_format, environment_setting_format,
      keyvault_id, metadata_item_format, resource_file_format,
      storage_account_id, validate_cert_file, validate_cert_settings,
      validate_client_parameters, validate_json_file,
@@ -121,6 +122,9 @@ def load_arguments(self, _):
     with self.argument_context('batch pool create') as c:
         c.argument('os_family', arg_type=get_enum_type(['2', '3', '4', '5', '6']))
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
+        c.extra('disk_encryption_targets',
+                arg_group="Pool: Virtual Machine Configuration",
+                help='A space seperated list of DiskEncryptionTargets. current possible values include OsDisk and TemporaryDisk.', type=disk_encryption_configuration_format)
         c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
                 help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
 

@@ -25,6 +25,16 @@ What an Extension is not
 - If you're looking to build your own CLI using `az` patterns, see [knack](https://github.com/Microsoft/knack).
 
 
+How to find and install an Extension
+------------------------
+
+- List all available extensions: `az extension list-available`
+
+- Install an extension: `az extension install --name <extension-name>`
+
+More details on usage in [Extensions for Azure CLI 2.0](https://docs.microsoft.com/cli/azure/azure-cli-extensions-overview?view=azure-cli-latest#install-extensions)
+
+
 Doc Sections
 ------------
 

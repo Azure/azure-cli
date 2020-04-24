@@ -23,3 +23,13 @@ def get_policy_remediation_completion_list(cmd, prefix, namespace, **kwargs):  #
         result = client.remediations.list_for_subscription(subscription_id=sub)
 
     return [i.name for i in result]
+
+
+@Completer
+def get_policy_metadata_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    client = cf_policy_insights(cmd.cli_ctx).policy_metadata
+
+    from azure.mgmt.policyinsights.models import QueryOptions
+    query_options = QueryOptions(top=2000)
+
+    return [metadata.name for metadata in client.list(query_options) if metadata.name.startswith(prefix)]

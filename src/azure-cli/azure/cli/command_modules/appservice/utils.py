@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
 from knack.util import CLIError
 
 
@@ -46,3 +47,19 @@ def get_sku_name(tier):  # pylint: disable=too-many-return-statements
     if tier in ['I1', 'I2', 'I3']:
         return 'Isolated'
     raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
+
+
+def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
+    def decorate(func):
+        def call(*args, **kwargs):
+            current_retry = retries
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                except excpt_type as exception:  # pylint: disable=broad-except
+                    current_retry -= 1
+                    if current_retry <= 0:
+                        raise exception
+                time.sleep(interval_sec)
+        return call
+    return decorate

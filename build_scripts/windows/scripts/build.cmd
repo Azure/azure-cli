@@ -13,6 +13,7 @@ set PYTHON_VERSION=3.6.6
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/Python366-32.zip"
+set PROPAGATE_ENV_CHANGE_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/util/propagate_env_change.zip"
 
 :: Set up the output directory and temp. directories
 echo Cleaning previous build artifacts...
@@ -26,6 +27,7 @@ set TEMP_SCRATCH_FOLDER=%ARTIFACTS_DIR%\cli_scratch
 set BUILDING_DIR=%ARTIFACTS_DIR%\cli
 set WIX_DIR=%ARTIFACTS_DIR%\wix
 set PYTHON_DIR=%ARTIFACTS_DIR%\Python366-32
+set PROPAGATE_ENV_CHANGE_DIR=%~dp0..\propagate_env_change
 
 set REPO_ROOT=%~dp0..\..\..
 
@@ -153,6 +155,20 @@ for /d /r %BUILDING_DIR%\Lib\site-packages\pip %%d in (__pycache__) do (
 )
 
 if %errorlevel% neq 0 goto ERROR
+
+::ensure propagate_env_change.exe is available
+if exist "%PROPAGATE_ENV_CHANGE_DIR%\propagate_env_change.exe" (
+    echo Using existing propagate_env_change.exe at %PROPAGATE_ENV_CHANGE_DIR%
+) else (
+    pushd %PROPAGATE_ENV_CHANGE_DIR%
+    echo Downloading propagate_env_change.exe.
+    curl -o propagate_env_change.zip %PROPAGATE_ENV_CHANGE_DOWNLOAD_URL% -k
+    unzip -q propagate_env_change.zip
+    if %errorlevel% neq 0 goto ERROR
+    del propagate_env_change.zip
+    echo propagate_env_change.exe downloaded and extracted successfully.
+    popd
+)
 
 echo Building MSI...
 msbuild /t:rebuild /p:Configuration=Release %REPO_ROOT%\build_scripts\windows\azure-cli.wixproj
