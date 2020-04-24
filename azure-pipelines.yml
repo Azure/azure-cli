@@ -453,6 +453,46 @@ jobs:
       env:
         ADO_PULL_REQUEST_LATEST_COMMIT: $(System.PullRequest.TargetBranch)
 
+- job: AutomationTest20190301
+  displayName: Automation Test (Profile 2019-03-01)
+  dependsOn: BuildPythonWheel
+  timeoutInMinutes: 30
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - bash: |
+        set -ev
+
+        git fetch origin dev
+
+        python -m venv env
+        chmod +x env/bin/activate
+        source env/bin/activate
+
+        pip install -q azdev
+        azdev --version
+
+        azdev setup -c ./
+      displayName: Setup Env
+    - bash: |
+        set -ev
+
+        source env/bin/activate
+
+        azdev test --series --profile 2019-03-01-hybrid
+      displayName: "Automation Test"
+
 - job: RunAutomationReduced20190301
   displayName: Run Automation Reduced Python 3.6, Profile 2019-03-01
   dependsOn: BuildPythonWheel
