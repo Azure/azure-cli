@@ -548,33 +548,6 @@ jobs:
       AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
       ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
-- job: RunAutomationPython3_8
-  displayName: Run Automation Python 3.8
-  dependsOn: BuildPythonWheel
-  timeoutInMinutes: 90
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.8'
-    inputs:
-      versionSpec: 3.8
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
-
 - job: RunAutomationReduced20190301Python3_8
   displayName: Run Automation Reduced Python 3.8, Profile 2019-03-01
   dependsOn: BuildPythonWheel
