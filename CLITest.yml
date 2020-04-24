@@ -15,7 +15,6 @@ jobs:
 - job: LiveTestPython38
   displayName: Live Test Python 3.8
   timeoutInMinutes: 9999
-  #condition: contains(variables.USER_TARGET, variables.Target)
   strategy:
     maxParallel: 20
     matrix:
@@ -183,6 +182,9 @@ jobs:
         architecture: 'x64'
     - bash: |
         pwd
-        commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
-        pip install sendgrid
-        python /home/vsts/work/1/s/scripts/ci/sendemail.py $(SENDGRID_KEY) $(Build.BuildId) $(USER_REPO) $(USER_BRANCH)
+        # Send notification when target is all.
+        if [[ "$(USER_TARGET)" == "" ]]; then
+          commit_id=`git ls-remote https://github.com/Azure/azure-cli.git HEAD`
+          pip install sendgrid
+          python /home/vsts/work/1/s/scripts/ci/sendemail.py $(SENDGRID_KEY) $(Build.BuildId) $(USER_REPO) $(USER_BRANCH)
+        fi

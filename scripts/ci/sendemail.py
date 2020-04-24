@@ -12,7 +12,7 @@ def main():
     print(sys.argv)
     message = Mail(
         from_email='azclibot@microsoft.com',
-        to_emails='fey@microsoft.com; iamyfy@163.com',
+        to_emails='AzPyCLI@microsoft.com',
         subject='Test results of Azure CLI dev branch',
         html_content=get_content())
     try:
