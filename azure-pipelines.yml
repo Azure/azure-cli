@@ -533,33 +533,6 @@ jobs:
         azdev test --series --profile 2018-03-01-hybrid
       displayName: "Automation Test"
 
-- job: RunAutomation20180301
-  displayName: Run Automation, Profile 2018-03-01
-  dependsOn: BuildPythonWheel
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
-    inputs:
-      versionSpec: 3.6
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
-      ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
-
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
   dependsOn: BuildPythonWheel
@@ -581,33 +554,6 @@ jobs:
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_extensions.sh
       displayName: 'Load extensions'
-
-- job: RunAutomation20180301Python3_8
-  displayName: Run Automation Python 3.8, Profile 2018-03-01
-  dependsOn: BuildPythonWheel
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.8'
-    inputs:
-      versionSpec: 3.8
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
-      ADO_PULL_REQUEST_TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
