@@ -189,10 +189,8 @@ def validate_principal(ns):
         raise argparse.ArgumentError(
             None, 'specify exactly one: --object-id, --spn, --upn')
 
-    attrs = ['object_id', 'spn', 'upn']
-    for attr in attrs:
-        if getattr(ns, attr):
-            setattr(ns, attr, getattr(ns, attr).strip('"'))
+    if ns.object_id:
+        ns.object_id = ns.object_id.strip('"')
 
 
 def validate_resource_group_name(cmd, ns):
