@@ -1197,14 +1197,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_content_settings_argument(t_file_content_settings, update=False)
         c.argument('local_path', options_list=['--source', '-s'],
                    help='Path of the local file to upload as the file content.')
-        c.argument('overwrite', action='store_true', help="Overwrite an existing file when specified.")
-        c.argument('if_match',
+        c.argument('overwrite', arg_type=get_three_state_flag(), help="Overwrite an existing file when specified.")
+        c.argument('if_match', arg_group='Precondition',
                    help="An ETag value, or the wildcard character (*). Specify this header to perform the operation "
                    "only if the resource's ETag matches the value specified.")
-        c.argument('if_none_match',
+        c.argument('if_none_match', arg_group='Precondition',
                    help="An ETag value, or the wildcard character (*). Specify this header to perform the operation "
                    "only if the resource's ETag does not match the value specified.")
-
+        c.argument('if_modified_since', arg_group='Precondition',
+                   help="A Commence only if modified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
+        c.argument('if_unmodified_since', arg_group='Precondition',
+                   help="A Commence only if unmodified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
         c.argument('permissions', permissions_type)
         #TODO: need fixed by sdk
         #c.argument('umask', umask_type)

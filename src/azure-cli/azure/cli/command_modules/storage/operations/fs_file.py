@@ -89,13 +89,13 @@ def list_fs_files(client, path=None, recursive=True, num_results=None, timeout=N
     return result
 
 
-def upload_file(cmd, client, local_path, overwrite=False, if_match=None, if_none_match=None,
-                metadata=None, umask=None, permissions=None, timeout=None,
-                content_settings=None):
-
+def upload_file(cmd, client, local_path, overwrite=True, content_settings=None, metadata=None, timeout=None,
+                if_match=None, if_none_match=None, if_modified_since=None, if_unmodified_since=None,
+                umask=None, permissions=None):
+    """
     if not exists(cmd, client):
         client.create_file()
-    """
+
     local_file = open(local_path, 'r')
     data = local_file.read()
     """
@@ -106,12 +106,26 @@ def upload_file(cmd, client, local_path, overwrite=False, if_match=None, if_none
     upload_file_args = {
         'content_settings': content_settings,
         'metadata': metadata,
-        'timeout': timeout
+        'timeout': timeout,
+        'if_modified_since': if_modified_since,
+        'if_unmodified_since': if_unmodified_since,
     }
+
+    # Precondition Check
     if if_match:
-        upload_file_args['etag'] = if_match
-        upload_file_args['match_condition'] = MatchConditions.IfNotModified
+        if if_match == '*':
+            upload_file_args['match_condition'] = MatchConditions.IfPresent
+        else:
+            upload_file_args['etag'] = if_match
+            upload_file_args['match_condition'] = MatchConditions.IfNotModified
+
     if if_none_match:
         upload_file_args['etag'] = if_none_match
         upload_file_args['match_condition'] = MatchConditions.IfModified
-    return client.upload_data(data=data, overwrite=overwrite, **upload_file_args)
+
+    # Overwrite
+    if not overwrite:
+        upload_file_args['etag'] = '*'
+        upload_file_args['match_condition'] = MatchConditions.IfNotModified
+
+    return client.upload_data(data=data, length=count, overwrite=overwrite, **upload_file_args)
