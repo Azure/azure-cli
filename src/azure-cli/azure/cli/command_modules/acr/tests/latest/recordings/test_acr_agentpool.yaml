@@ -26,16 +26,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T01:19:41.262246Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T01:19:41.9585795+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T06:29:43.5445461Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T06:29:44.9219501+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '985'
+      - '986'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:19:41 GMT
+      - Fri, 24 Apr 2020 06:29:45 GMT
       expires:
       - '-1'
       pragma:
@@ -52,198 +52,6 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: '{"location": "eastus2euap", "tags": {}, "properties": {"addressSpace":
-      {"addressPrefixes": ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties":
-      {"addressPrefix": "10.0.0.0/24"}, "name": "agentsubnets"}]}}'
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '215'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n --subnet-name -g -l
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-network/10.0.0
-        Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets?api-version=2019-11-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"agentvnets\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets\",\r\n
-        \ \"etag\": \"W/\\\"ea114ded-e250-4d65-895d-475038e285f6\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"65f848c7-558b-4c72-81ea-074a19e4c9f0\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"agentsubnets\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets\",\r\n
-        \       \"etag\": \"W/\\\"ea114ded-e250-4d65-895d-475038e285f6\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
-    headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/690dfd00-7c0d-4e47-9167-82c412faf92d?api-version=2019-11-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '1467'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:19:43 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 17efff5a-e4ef-4536-8dbd-16fcf1aae4ec
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n --subnet-name -g -l
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-network/10.0.0
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/690dfd00-7c0d-4e47-9167-82c412faf92d?api-version=2019-11-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:19:46 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 46c2b62f-7100-4fca-ab4d-b9c7ce1be2d6
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n --subnet-name -g -l
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-network/10.0.0
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets?api-version=2019-11-01
-  response:
-    body:
-      string: "{\r\n  \"name\": \"agentvnets\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets\",\r\n
-        \ \"etag\": \"W/\\\"f2358132-3483-4f9f-b95a-81fba1f2e337\\\"\",\r\n  \"type\":
-        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"eastus2euap\",\r\n
-        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"65f848c7-558b-4c72-81ea-074a19e4c9f0\",\r\n    \"addressSpace\":
-        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
-        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
-        \   \"subnets\": [\r\n      {\r\n        \"name\": \"agentsubnets\",\r\n        \"id\":
-        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets\",\r\n
-        \       \"etag\": \"W/\\\"f2358132-3483-4f9f-b95a-81fba1f2e337\\\"\",\r\n
-        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
-        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
-        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
-        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
-        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
-        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1469'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:19:47 GMT
-      etag:
-      - W/"f2358132-3483-4f9f-b95a-81fba1f2e337"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 312fd782-b6cf-49b0-9fc8-be45a58fb55d
     status:
       code: 200
       message: OK
@@ -269,7 +77,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2019-07-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
@@ -278,7 +86,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:19:47 GMT
+      - Fri, 24 Apr 2020 06:29:44 GMT
       expires:
       - '-1'
       pragma:
@@ -314,16 +122,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T01:19:41.262246Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T01:19:41.9585795+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T06:29:43.5445461Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T06:29:44.9219501+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '985'
+      - '986'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:19:48 GMT
+      - Fri, 24 Apr 2020 06:29:45 GMT
       expires:
       - '-1'
       pragma:
@@ -371,7 +179,7 @@ interactions:
       string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S1","os":"Linux","provisioningState":"Creating"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1","name":"agents1","location":"eastus2euap"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -379,7 +187,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:19:50 GMT
+      - Fri, 24 Apr 2020 06:29:47 GMT
       expires:
       - '-1'
       pragma:
@@ -412,7 +220,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -424,7 +232,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:20:00 GMT
+      - Fri, 24 Apr 2020 06:29:59 GMT
       expires:
       - '-1'
       pragma:
@@ -459,7 +267,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -471,7 +279,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:20:30 GMT
+      - Fri, 24 Apr 2020 06:30:29 GMT
       expires:
       - '-1'
       pragma:
@@ -506,7 +314,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -518,7 +326,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:21:01 GMT
+      - Fri, 24 Apr 2020 06:30:58 GMT
       expires:
       - '-1'
       pragma:
@@ -553,7 +361,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -565,7 +373,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:21:31 GMT
+      - Fri, 24 Apr 2020 06:31:29 GMT
       expires:
       - '-1'
       pragma:
@@ -600,54 +408,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"error":{"code":"GatewayTimeout","message":"The gateway did not receive
-        a response from ''Microsoft.ContainerRegistry'' within the specified time
-        period."}}'
-    headers:
-      cache-control:
-      - no-cache
-      connection:
-      - close
-      content-length:
-      - '155'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:23:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - service
-    status:
-      code: 504
-      message: Gateway Timeout
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -659,7 +420,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:23:02 GMT
+      - Fri, 24 Apr 2020 06:31:59 GMT
       expires:
       - '-1'
       pragma:
@@ -694,7 +455,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -706,7 +467,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:23:32 GMT
+      - Fri, 24 Apr 2020 06:32:29 GMT
       expires:
       - '-1'
       pragma:
@@ -741,7 +502,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -753,7 +514,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:24:02 GMT
+      - Fri, 24 Apr 2020 06:33:00 GMT
       expires:
       - '-1'
       pragma:
@@ -788,7 +549,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -800,7 +561,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:24:33 GMT
+      - Fri, 24 Apr 2020 06:33:30 GMT
       expires:
       - '-1'
       pragma:
@@ -835,7 +596,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -847,7 +608,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:25:05 GMT
+      - Fri, 24 Apr 2020 06:34:00 GMT
       expires:
       - '-1'
       pragma:
@@ -882,7 +643,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -894,7 +655,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:25:35 GMT
+      - Fri, 24 Apr 2020 06:34:30 GMT
       expires:
       - '-1'
       pragma:
@@ -929,7 +690,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -941,7 +702,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:26:06 GMT
+      - Fri, 24 Apr 2020 06:35:01 GMT
       expires:
       - '-1'
       pragma:
@@ -976,7 +737,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -988,7 +749,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:26:36 GMT
+      - Fri, 24 Apr 2020 06:35:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1023,7 +784,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -1035,7 +796,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:27:06 GMT
+      - Fri, 24 Apr 2020 06:36:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1070,7 +831,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -1082,7 +843,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:27:36 GMT
+      - Fri, 24 Apr 2020 06:36:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1117,7 +878,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Creating"}'
@@ -1129,7 +890,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:28:06 GMT
+      - Fri, 24 Apr 2020 06:37:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1164,7 +925,54 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/36aff34d-a827-4303-bb52-d66f4acada57?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
+  response:
+    body:
+      string: '{"status":"Creating"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Apr 2020 06:37:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - nginx/1.15.10
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - acr agentpool create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -r
+      User-Agent:
+      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
+        Azure-SDK-For-Python AZURECLI/2.3.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/adc41d98-a8b3-4f3c-acc8-e6b797f61786?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1176,7 +984,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:28:36 GMT
+      - Fri, 24 Apr 2020 06:38:02 GMT
       expires:
       - '-1'
       pragma:
@@ -1223,766 +1031,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:28:37 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-resource/8.0.1
-        Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2019-07-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '765'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:28:38 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T01:19:41.262246Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T01:19:41.9585795+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '985'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:28:39 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: 'b''{"location": "eastus2euap", "properties": {"count": 1, "tier": "S2",
-      "os": "Linux", "virtualNetworkSubnetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets"}}'''
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '340'
-      Content-Type:
-      - application/json; charset=utf-8
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Creating"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:28:40 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:28:51 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:29:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:29:51 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:30:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:30:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:31:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:31:52 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:32:22 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:32:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:33:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Creating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:33:53 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationStatuses/2c0fba97-244d-483b-a340-18771ef6c574?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:34:23 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r --tier --subnet-id
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '677'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:34:23 GMT
+      - Fri, 24 Apr 2020 06:38:02 GMT
       expires:
       - '-1'
       pragma:
@@ -2022,7 +1071,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2019-07-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
@@ -2031,7 +1080,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:34:24 GMT
+      - Fri, 24 Apr 2020 06:38:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2067,16 +1116,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T01:19:41.262246Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T01:19:41.9585795+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T06:29:43.5445461Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T06:29:44.9219501+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '985'
+      - '986'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:34:25 GMT
+      - Fri, 24 Apr 2020 06:38:04 GMT
       expires:
       - '-1'
       pragma:
@@ -2116,16 +1165,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools?api-version=2019-06-01-preview
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"},{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S1","os":"Linux","provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1","name":"agents1","location":"eastus2euap"}]}'
+      string: '{"value":[{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S1","os":"Linux","provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1","name":"agents1","location":"eastus2euap"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1113'
+      - '435'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:34:26 GMT
+      - Fri, 24 Apr 2020 06:38:05 GMT
       expires:
       - '-1'
       pragma:
@@ -2143,2248 +1192,6 @@ interactions:
     status:
       code: 200
       message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-resource/8.0.1
-        Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2019-07-01
-  response:
-    body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '765'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:34:26 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
-  response:
-    body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T01:19:41.262246Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T01:19:41.9585795+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '985'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:34:27 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:34:29 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:34:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:34:39 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:34:49 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:35:00 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:35:00 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:35:11 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:35:21 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:35:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:35:31 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:35:41 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:35:51 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:36:00 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:36:01 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:36:11 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:36:21 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:36:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:36:32 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:36:43 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:36:53 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:37:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:37:03 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:37:13 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:37:23 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:37:30 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:37:33 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:37:43 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:37:54 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:38:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:38:04 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:38:15 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:38:25 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:38:31 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:38:35 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:38:45 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:38:55 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:39:01 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:39:05 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:39:15 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:39:26 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:39:32 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:39:36 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:39:47 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Deleting"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:39:57 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":1,"tier":"S2","os":"Linux","virtualNetworkSubnetResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets/subnets/agentsubnets","provisioningState":"Deleting"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2","name":"agents2","location":"eastus2euap"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '676'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:40:02 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2/operationResults/e99b1678-f101-4f6f-8233-4375d67678c3?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Succeeded"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '22'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:40:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -y
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents2''
-        under resource group ''clitest.rg000001'' was not found."}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '257'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:40:32 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-    status:
-      code: 404
-      message: Not Found
 - request:
     body: null
     headers:
@@ -4407,7 +1214,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2019-07-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
@@ -4416,7 +1223,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:40:33 GMT
+      - Fri, 24 Apr 2020 06:38:05 GMT
       expires:
       - '-1'
       pragma:
@@ -4452,16 +1259,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T01:19:41.262246Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T01:19:41.9585795+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T06:29:43.5445461Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T06:29:44.9219501+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '985'
+      - '986'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:40:34 GMT
+      - Fri, 24 Apr 2020 06:38:06 GMT
       expires:
       - '-1'
       pragma:
@@ -4508,7 +1315,7 @@ interactions:
       string: '{"type":"Microsoft.ContainerRegistry/registries/agentPools","properties":{"count":2,"tier":"S1","os":"Linux","provisioningState":"Updating"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1","name":"agents1","location":"eastus2euap"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -4516,7 +1323,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:40:36 GMT
+      - Fri, 24 Apr 2020 06:38:08 GMT
       expires:
       - '-1'
       pragma:
@@ -4549,7 +1356,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4561,7 +1368,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:40:46 GMT
+      - Fri, 24 Apr 2020 06:38:19 GMT
       expires:
       - '-1'
       pragma:
@@ -4596,7 +1403,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4608,7 +1415,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:41:16 GMT
+      - Fri, 24 Apr 2020 06:38:49 GMT
       expires:
       - '-1'
       pragma:
@@ -4643,7 +1450,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4655,7 +1462,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:41:47 GMT
+      - Fri, 24 Apr 2020 06:39:19 GMT
       expires:
       - '-1'
       pragma:
@@ -4690,7 +1497,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4702,7 +1509,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:42:17 GMT
+      - Fri, 24 Apr 2020 06:39:49 GMT
       expires:
       - '-1'
       pragma:
@@ -4737,7 +1544,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4749,7 +1556,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:42:47 GMT
+      - Fri, 24 Apr 2020 06:40:19 GMT
       expires:
       - '-1'
       pragma:
@@ -4784,7 +1591,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4796,7 +1603,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:43:17 GMT
+      - Fri, 24 Apr 2020 06:40:50 GMT
       expires:
       - '-1'
       pragma:
@@ -4831,7 +1638,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4843,7 +1650,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:43:47 GMT
+      - Fri, 24 Apr 2020 06:41:20 GMT
       expires:
       - '-1'
       pragma:
@@ -4878,7 +1685,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4890,7 +1697,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:44:17 GMT
+      - Fri, 24 Apr 2020 06:41:50 GMT
       expires:
       - '-1'
       pragma:
@@ -4925,7 +1732,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4937,7 +1744,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:44:47 GMT
+      - Fri, 24 Apr 2020 06:42:21 GMT
       expires:
       - '-1'
       pragma:
@@ -4972,7 +1779,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -4984,7 +1791,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:45:19 GMT
+      - Fri, 24 Apr 2020 06:42:51 GMT
       expires:
       - '-1'
       pragma:
@@ -5019,7 +1826,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -5031,7 +1838,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:45:49 GMT
+      - Fri, 24 Apr 2020 06:43:21 GMT
       expires:
       - '-1'
       pragma:
@@ -5066,7 +1873,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -5078,7 +1885,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:46:19 GMT
+      - Fri, 24 Apr 2020 06:43:52 GMT
       expires:
       - '-1'
       pragma:
@@ -5113,7 +1920,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -5125,7 +1932,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:46:49 GMT
+      - Fri, 24 Apr 2020 06:44:22 GMT
       expires:
       - '-1'
       pragma:
@@ -5160,7 +1967,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -5172,7 +1979,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:47:20 GMT
+      - Fri, 24 Apr 2020 06:44:52 GMT
       expires:
       - '-1'
       pragma:
@@ -5207,7 +2014,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -5219,7 +2026,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:47:50 GMT
+      - Fri, 24 Apr 2020 06:45:22 GMT
       expires:
       - '-1'
       pragma:
@@ -5254,7 +2061,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Updating"}'
@@ -5266,7 +2073,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:48:20 GMT
+      - Fri, 24 Apr 2020 06:45:53 GMT
       expires:
       - '-1'
       pragma:
@@ -5301,101 +2108,7 @@ interactions:
       - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Updating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:48:50 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -c
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
-  response:
-    body:
-      string: '{"status":"Updating"}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '21'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:49:20 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - nginx/1.15.10
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding,Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - acr agentpool update
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -r -c
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/65bad155-6936-4fb5-a450-5aa4aaa06e54?api-version=2019-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002/agentPools/agents1/operationStatuses/4ca2bc2e-bd69-4863-8074-907c4d8609f3?api-version=2019-06-01-preview
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -5407,7 +2120,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:49:50 GMT
+      - Fri, 24 Apr 2020 06:46:23 GMT
       expires:
       - '-1'
       pragma:
@@ -5454,7 +2167,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:49:51 GMT
+      - Fri, 24 Apr 2020 06:46:23 GMT
       expires:
       - '-1'
       pragma:
@@ -5494,7 +2207,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceType%20eq%20%27Microsoft.ContainerRegistry%2Fregistries%27&api-version=2019-07-01
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgwsg3rhcy7t3ore23mq2d6c4watbiulb3vlolw6euv653qwu6ggbt7iqdkq5tvlgmo/providers/Microsoft.ContainerRegistry/registries/clireggspeuniydnuuwi","name":"clireggspeuniydnuuwi","type":"Microsoft.ContainerRegistry/registries","sku":{"name":"Premium","tier":"Premium"},"location":"eastus2euap","tags":{}}]}'
     headers:
       cache-control:
       - no-cache
@@ -5503,7 +2216,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:49:52 GMT
+      - Fri, 24 Apr 2020 06:46:24 GMT
       expires:
       - '-1'
       pragma:
@@ -5539,16 +2252,16 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T01:19:41.262246Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T01:19:41.9585795+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/clireg000002","name":"clireg000002","location":"eastus2euap","tags":{},"properties":{"loginServer":"clireg000002.azurecr.io","creationDate":"2020-04-24T06:29:43.5445461Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-24T06:29:44.9219501+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '985'
+      - '986'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:49:52 GMT
+      - Fri, 24 Apr 2020 06:46:24 GMT
       expires:
       - '-1'
       pragma:
@@ -5597,7 +2310,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Apr 2020 01:49:54 GMT
+      - Fri, 24 Apr 2020 06:46:25 GMT
       expires:
       - '-1'
       pragma:
@@ -5646,7 +2359,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Apr 2020 01:49:56 GMT
+      - Fri, 24 Apr 2020 06:46:27 GMT
       expires:
       - '-1'
       pragma:
@@ -5659,112 +2372,6 @@ interactions:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet delete
-      Connection:
-      - keep-alive
-      Content-Length:
-      - '0'
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-network/10.0.0
-        Azure-SDK-For-Python AZURECLI/2.3.1
-      accept-language:
-      - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/agentvnets?api-version=2019-11-01
-  response:
-    body:
-      string: ''
-    headers:
-      azure-asyncnotification:
-      - Enabled
-      azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/91c41f1a-deb1-46d3-abec-4fe91b7f5320?api-version=2019-11-01
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Fri, 24 Apr 2020 01:49:56 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operationResults/91c41f1a-deb1-46d3-abec-4fe91b7f5320?api-version=2019-11-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - f79bb2a1-6357-410f-b77d-5b9b60120ae8
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - network vnet delete
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -n -g
-      User-Agent:
-      - python/3.7.7 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.2 azure-mgmt-network/10.0.0
-        Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2euap/operations/91c41f1a-deb1-46d3-abec-4fe91b7f5320?api-version=2019-11-01
-  response:
-    body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '29'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Fri, 24 Apr 2020 01:50:07 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-      x-ms-arm-service-request-id:
-      - 0d730358-6928-4c42-9252-827e5c86c078
     status:
       code: 200
       message: OK
