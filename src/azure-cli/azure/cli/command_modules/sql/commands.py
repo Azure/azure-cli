@@ -376,7 +376,7 @@ def load_command_table(self, _):
                          table_transformer=instance_pool_table_format)
         g.command('update', 'update')
         g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
-        g.custom_command('create','instance_pool_create',
+        g.custom_command('create', 'instance_pool_create',
                          supports_no_wait=True, table_transformer=instance_pool_table_format)
         g.wait_command('wait')
 
