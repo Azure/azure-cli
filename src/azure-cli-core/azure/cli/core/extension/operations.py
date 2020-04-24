@@ -359,6 +359,7 @@ def add_extension_to_path(extension_name, ext_dir=None):
             else:
                 azure.mgmt.__path__.append(azure_mgmt_dir)
 
+
 def get_lsb_release():
     try:
         with open(LSB_RELEASE_FILE, 'r') as lr:
