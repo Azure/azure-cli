@@ -8,8 +8,8 @@ from msal import ClientApplication
 
 class AdalRefreshTokenBasedClientApplication(ClientApplication):
     """
-    This class is added only for vmssh feature.
-    This is a temporary solution and will deprecate after adoption to MSAL completely.
+    This is added only for vmssh feature.
+    It is a temporary solution and will deprecate after MSAL adopted completely.
     """
     def _acquire_token_silent_by_finding_rt_belongs_to_me_or_my_family(
             self, authority, scopes, account, **kwargs):
