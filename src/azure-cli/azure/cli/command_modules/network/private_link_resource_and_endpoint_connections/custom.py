@@ -3,18 +3,31 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from .resource_providers.keyvault_provider import KeyVaultPrivateEndpointClient
+from .resource_providers import GeneralPrivateEndpointClient
 from knack.util import CLIError
 
 TYPE_CLIENT_MAPPING = {
-    'microsoft.keyvault/vaults': KeyVaultPrivateEndpointClient # vaults
+    # 'Microsoft.Keyvault/vaults': KeyVaultPrivateEndpointClient # vaults
 }
+
+def register_providers():
+    _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', False)
+
+
+def _register_one_provider(type, api_version, has_list_or_not):
+    general_client_settings = {
+        "api_version": api_version,
+        "support_list_or_not": has_list_or_not
+    }
+
+    TYPE_CLIENT_MAPPING[type] = general_client_settings
 
 
 def _get_client(rp_mapping, resource_provider):
-
     for key, value in rp_mapping.items():
         if str.lower(key) == str.lower(resource_provider):
+            if isinstance(value, dict):
+                return GeneralPrivateEndpointClient(key, value['api_version'], value['support_list_or_not'])
             return value
     raise CLIError("Resource type must be one of {}".format(", ".join(rp_mapping.keys())))
 

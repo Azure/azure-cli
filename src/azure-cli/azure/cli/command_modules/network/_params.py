@@ -1796,7 +1796,8 @@ def load_arguments(self, _):
         c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
 
     # region PrivateLinkResource and PrivateEndpointConnection
-    from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom import TYPE_CLIENT_MAPPING
+    from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom import TYPE_CLIENT_MAPPING, register_providers
+    register_providers()
     with self.argument_context('network private-link-resource list') as c:
         c.argument('name', required=False, help='Name of the resource', options_list=['--name', '-n'])
         c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type', arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
