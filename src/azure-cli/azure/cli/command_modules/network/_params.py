@@ -1786,7 +1786,7 @@ def load_arguments(self, _):
     # endregion
 
     # region security partner provider
-    with self.argument_context('network security-partner') as c:
+    with self.argument_context('network security-partner-provider') as c:
         SecurityProviderName = self.get_models('SecurityProviderName')
         c.argument('security_provider_name', arg_type=get_enum_type(SecurityProviderName), help='The security provider name', options_list=['--provider'])
         c.argument('security_partner_provider_name', options_list=['--name', '-n'], help='Name of the Security Partner Provider.')
