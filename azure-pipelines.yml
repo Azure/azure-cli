@@ -445,7 +445,7 @@ jobs:
         . env/bin/activate
 
         if [[ "$(System.PullRequest.TargetBranch)" != "System.PullRequest.TargetBranch" ]]; then
-          azdev test --series --repo=./ --src=HEAD --tgt=$(System.PullRequest.TargetBranch) --cli-ci
+          azdev test --series --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci
         else
           azdev test --series
         fi
