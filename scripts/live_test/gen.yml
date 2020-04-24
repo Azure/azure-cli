@@ -21,6 +21,9 @@ jobs:
           python /home/vsts/work/1/s/scripts/live_test/gen.py
           rm -rf azure-cli
           rm -rf azure-cli-extensions
-          git clone -b CLITest https://username:password@github.com/username/repository.git
+          git clone -b CLITest https://qwordy:$(PASSWORD)@github.com/qwordy/azure-cli.git
+          cp CLITest.yml azure-cli/CLITest.yml
           cd azure-cli
+          git add .
+          git commit -m "Update CLITest.yml"
           git push origin CLITest
