@@ -432,7 +432,7 @@ jobs:
 
         python -m venv env
         chmod +x env/bin/activate
-        . env/bin/activate
+        . env/bin/activate > /dev/null
 
         pip install -q azdev
         azdev --version
@@ -442,7 +442,7 @@ jobs:
     - bash: |
         set -ev
 
-        . env/bin/activate
+        . env/bin/activate > /dev/null
 
         if [[ "$(System.PullRequest.TargetBranch)" != "System.PullRequest.TargetBranch" ]]; then
           azdev test --series --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch) --cli-ci
