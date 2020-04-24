@@ -18,6 +18,7 @@ jobs:
         cd ..
         git clone -b dev https://github.com/Azure/azure-cli.git
         git clone -b master https://github.com/Azure/azure-cli-extensions.git
+        pip install jinja2
         python /home/vsts/work/1/s/scripts/live_test/gen.py
         rm -rf azure-cli
         rm -rf azure-cli-extensions
