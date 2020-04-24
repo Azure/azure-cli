@@ -347,7 +347,7 @@ class TestCustom(unittest.TestCase):
         
     @mock.patch("knack.prompting.prompt_y_n", autospec=True)
     @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_subscription_scope", autospec=True)
-    def test_confirm_with_what_if_prompt_at_resource_group(self, what_if_command_mock, prompt_y_n_mock):
+    def test_confirm_with_what_if_prompt_at_subscription_scope(self, what_if_command_mock, prompt_y_n_mock):
         # Arrange.
         prompt_y_n_mock.return_value = False
         # Act.
