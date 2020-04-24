@@ -340,6 +340,11 @@ def reload_extension(extension_name, extension_module=None):
 def add_extension_to_path(extension_name, ext_dir=None):
     ext_dir = ext_dir or get_extension(extension_name).path
     sys.path.append(ext_dir)
+    # If we would have made a new "azure" module importable, extend our
+    # existing module with its path. This allows extensions to include
+    # (or depend on) Azure SDK modules that are not yet part of the CLI
+    if os.path.isdir(os.path.join(ext_dir, "azure")):
+        azure.__path__.append(os.path.join(ext_dir, "azure"))
 
 
 def get_lsb_release():
