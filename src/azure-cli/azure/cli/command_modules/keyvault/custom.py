@@ -318,6 +318,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
+                    enable_rbac_authorization=None,
                     enable_soft_delete=None,
                     enable_purge_protection=None,
                     retention_days=None,
@@ -361,7 +362,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
             if bypass or default_action else \
             _parse_network_acls(cmd, resource_group_name, network_acls, network_acls_ips, network_acls_vnets)
 
-    if no_self_perms:
+    if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
         permissions = Permissions(keys=[KeyPermissions.get,
@@ -417,6 +418,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
         access_policies = [AccessPolicyEntry(tenant_id=tenant_id,
                                              object_id=object_id,
                                              permissions=permissions)]
+
     properties = VaultProperties(tenant_id=tenant_id,
                                  sku=Sku(name=sku),
                                  access_policies=access_policies,
@@ -424,6 +426,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                                  enabled_for_deployment=enabled_for_deployment,
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
+                                 enable_rbac_authorization=enable_rbac_authorization,
                                  enable_soft_delete=enable_soft_delete,
                                  enable_purge_protection=enable_purge_protection,
                                  soft_delete_retention_in_days=int(retention_days))
@@ -450,6 +453,7 @@ def update_keyvault_setter(cmd, client, parameters, resource_group_name, vault_n
 def update_keyvault(cmd, instance, enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
+                    enable_rbac_authorization=None,
                     enable_soft_delete=None,
                     enable_purge_protection=None,
                     retention_days=None,
@@ -463,6 +467,9 @@ def update_keyvault(cmd, instance, enabled_for_deployment=None,
 
     if enabled_for_template_deployment is not None:
         instance.properties.enabled_for_template_deployment = enabled_for_template_deployment
+
+    if enable_rbac_authorization is not None:
+        instance.properties.enable_rbac_authorization = enable_rbac_authorization
 
     if enable_soft_delete is not None:
         instance.properties.enable_soft_delete = enable_soft_delete
@@ -524,6 +531,14 @@ def set_policy(cmd, client, resource_group_name, vault_name,
     secret_permissions = _permissions_distinct(secret_permissions)
     certificate_permissions = _permissions_distinct(certificate_permissions)
     storage_permissions = _permissions_distinct(storage_permissions)
+
+    try:
+        enable_rbac_authorization = getattr(vault.properties, 'enable_rbac_authorization')
+    except:  # pylint: disable=bare-except
+        pass
+    else:
+        if enable_rbac_authorization:
+            raise CLIError('Cannot set policies to a vault with \'--enable-rbac-authorization\' specified')
 
     # Find the existing policy to set
     policy = next((p for p in vault.properties.access_policies
@@ -650,6 +665,15 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
     object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
+
+    try:
+        enable_rbac_authorization = getattr(vault.properties, 'enable_rbac_authorization')
+    except:  # pylint: disable=bare-except
+        pass
+    else:
+        if enable_rbac_authorization:
+            raise CLIError('Cannot delete policies to a vault with \'--enable-rbac-authorization\' specified')
+
     prev_policies_len = len(vault.properties.access_policies)
     vault.properties.access_policies = [p for p in vault.properties.access_policies if
                                         vault.properties.tenant_id.lower() != p.tenant_id.lower() or
