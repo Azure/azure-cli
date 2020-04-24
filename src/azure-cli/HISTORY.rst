@@ -116,11 +116,6 @@ Release History
 2.3.1
 ++++++
 
-**SQL**
-
-* Add new cmdlets for Instance Pools 'sql instance-pool'
-* Support create, delete, show, list and update for Instance Pools.
-
 **ACR**
 
 * Fix wrong version of azure-mgmt-containerregistry for Linux
