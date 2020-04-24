@@ -363,7 +363,7 @@ def load_arguments(self, _):
         c.argument('sku_capacity', help='The capacity of the SKU. It must be in the range of 1000-2000 per day and must'
                                         ' be in multiples of 100. If you want to increase the limit, please contact'
                                         ' LAIngestionRate@microsoft.com. It can be decreased only after 31 days.')
-        c.argument('identity_type', help='The identity type. Supported values: SystemAssigned, None')
+        c.argument('identity_type', help='The identity type. Supported values: SystemAssigned')
 
     with self.argument_context('monitor log-analytics cluster update') as c:
         c.argument('key_vault_uri', help='The Key Vault uri which holds the key associated with the Log Analytics cluster.')

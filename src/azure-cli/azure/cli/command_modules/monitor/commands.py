@@ -15,7 +15,7 @@ def load_command_table(self, _):
         cf_metric_alerts, cf_log_analytics_workspace, cf_log_analytics_workspace_management_groups,
         cf_log_analytics_workspace_usage, cf_log_analytics_workspace_schema, cf_log_analytics_workspace_shared_keys,
         cf_log_analytics_workspace_intelligence_packs, cf_log_analytics_cluster,
-        cf_log_analytics_workspace_linker_service, cf_diagnostics_category,
+        cf_log_analytics_workspace_linked_service, cf_diagnostics_category,
         cf_private_link_resources, cf_private_link_scoped_resources,
         cf_private_link_scopes, cf_private_endpoint_connections)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
@@ -207,13 +207,13 @@ def load_command_table(self, _):
 
     log_analytics_workspace_linked_service_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#LinkedServicesOperations.{}',
-        client_factory=cf_log_analytics_workspace_linker_service,
+        client_factory=cf_log_analytics_workspace_linked_service,
         exception_handler=monitor_exception_handler
     )
 
     log_analytics_workspace_linked_service_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace_linked_service#{}',
-        client_factory=cf_log_analytics_workspace_linker_service,
+        client_factory=cf_log_analytics_workspace_linked_service,
         exception_handler=monitor_exception_handler
     )
 
