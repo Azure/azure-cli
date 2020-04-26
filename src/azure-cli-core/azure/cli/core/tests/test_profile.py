@@ -28,6 +28,8 @@ class TestProfile(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.tenant_id = None
+
         cls.tenant_id = 'microsoft.com'
         cls.user1 = 'foo@foo.com'
         cls.id1 = 'subscriptions/1'
