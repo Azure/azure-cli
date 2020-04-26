@@ -8,12 +8,12 @@ import time
 
 
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer)
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
 
 
-class NetworkPrivateLinkResourceKeyVaultScenarioTest(ScenarioTest):
+class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_plr')
     def test_private_link_resource_keyvault(self, resource_group):
         self.kwargs.update({
@@ -76,7 +76,7 @@ class NetworkPrivateLinkResourceKeyVaultScenarioTest(ScenarioTest):
         self.kwargs['kv_pe_id'] = keyvault['properties']['privateEndpointConnections'][0]['id']
         print(self.kwargs['kv_pe_id'])
         self.cmd('network private-endpoint-connection show '
-                 '--connection-id {kv_pe_id}',
+                 '--id {kv_pe_id}',
                  checks=self.check('id', '{kv_pe_id}'))
         self.kwargs['kv_pe_name'] = self.kwargs['kv_pe_id'].split('/')[-1]
         self.cmd('network private-endpoint-connection show  '
@@ -107,7 +107,7 @@ class NetworkPrivateLinkResourceKeyVaultScenarioTest(ScenarioTest):
             'rejection_desc': 'You are rejected!'
         })
         self.cmd('network private-endpoint-connection reject '
-                 '--connection-id {kv_pe_id} '
+                 '--id {kv_pe_id} '
                  '--description "{rejection_desc}"',
                  checks=[
                      self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
@@ -116,7 +116,7 @@ class NetworkPrivateLinkResourceKeyVaultScenarioTest(ScenarioTest):
                  ])
 
 
-        self.cmd('network private-endpoint-connection show --connection-id {kv_pe_id}',
+        self.cmd('network private-endpoint-connection show --id {kv_pe_id}',
                  checks=self.check('properties.provisioningState', 'Succeeded'))
 
         self.cmd('network private-endpoint-connection approve '
@@ -131,11 +131,86 @@ class NetworkPrivateLinkResourceKeyVaultScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Succeeded')
                  ])
 
-        self.cmd('network private-endpoint-connection show --connection-id {kv_pe_id}',
+        self.cmd('network private-endpoint-connection show --id {kv_pe_id}',
                  checks=self.check('properties.provisioningState', 'Succeeded'))
 
         self.cmd('network private-endpoint-connection list --id {kv_id}',
                  checks=self.check('length(@)', 1))
+
+        self.cmd('network private-endpoint-connection delete --id {sa_pec_id} -y')
+
+
+class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
+    @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2', sku='Standard_LRS')
+    def test_private_link_resource_storage_account(self, storage_account):
+        self.kwargs.update({
+            'sa': storage_account
+        })
+        self.cmd('network private-link-resource list --name {sa} -g {rg} --type Microsoft.Storage/storageAccounts', checks=[
+            self.check('length(@)', 6)])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
+    @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
+    def test_private_endpoint_connection_storage_account(self, storage_account):
+        from msrestazure.azure_exceptions import CloudError
+        self.kwargs.update({
+            'sa': storage_account,
+            'loc': 'eastus',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+        })
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pr = self.cmd('storage account private-link-resource list --account-name {sa} -g {rg}').get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+
+        storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+        self.kwargs['sa_id'] = storage['id']
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {sa_id} '
+            '--group-ids blob').get_output_in_json()
+        self.assertEqual(private_endpoint['name'], self.kwargs['pe'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], self.kwargs['pe_connection'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], self.kwargs['group_id'])
+        self.kwargs['pe_id'] = private_endpoint['privateLinkServiceConnections'][0]['id']
+
+        # Show the connection at storage account
+        storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+        self.assertIn('privateEndpointConnections', storage)
+        self.assertEqual(len(storage['privateEndpointConnections']), 1)
+        self.assertEqual(storage['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+                         'Approved')
+
+        self.kwargs['sa_pec_id'] = storage['privateEndpointConnections'][0]['id']
+        self.kwargs['sa_pec_name'] = storage['privateEndpointConnections'][0]['name']
+
+        self.cmd('network private-endpoint-connection show --name {sa_pec_name} -g {rg} --service-name {sa} --type Microsoft.Storage/storageAccounts',
+                 checks=self.check('id', '{sa_pec_id}'))
+
+        self.cmd('network private-endpoint-connection approve --name {sa_pec_name} -g {rg} --service-name {sa} --type Microsoft.Storage/storageAccounts',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+
+        self.cmd('network private-endpoint-connection reject --name {sa_pec_name} -g {rg} --service-name {sa} --type Microsoft.Storage/storageAccounts',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+
+        self.cmd('network private-endpoint-connection list --id {sa_pec_id}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network private-endpoint-connection delete --id {sa_pec_id} -y')
 
 
 if __name__ == '__main__':

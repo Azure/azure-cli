@@ -82,6 +82,10 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
     def list_private_link_resource(self, cmd, resource_group_name, name):
         url = self._build_link_resource_url_endpoint(resource_group_name, self.rp, name, self.api_version)
         r = send_raw_request(cmd.cli_ctx, 'get', url)
+        try:
+            return r.json()['value']
+        except:
+            pass
         return r.json()
 
 
@@ -106,7 +110,7 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
     def remove_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):
         url = self._build_connection_url_endpoint(resource_group_name, self.rp, service_name, name, self.api_version)
         r = send_raw_request(cmd.cli_ctx, 'delete', url)
-        return r.json()
+        return None
 
 
     def show_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):

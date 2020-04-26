@@ -1195,7 +1195,7 @@ def load_command_table(self, _):
     with self.command_group('network private-endpoint-connection', custom_command_type=plr_and_pec_custom) as g:
         g.custom_command('approve', 'approve_private_endpoint_connection')
         g.custom_command('reject', 'reject_private_endpoint_connection')
-        g.custom_command('remove', 'remove_private_endpoint_connection')
+        g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
         g.custom_show_command('show', 'show_private_endpoint_connection')
         g.custom_command('list', 'list_private_endpoint_connection')
     # endregion
