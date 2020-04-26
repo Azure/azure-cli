@@ -57,6 +57,8 @@ DEPENDENCIES = [
     'humanfriendly>=4.7,<9.0',
     'jmespath',
     'knack==0.7.0rc4',
+    'msal~=1.0.0',
+    'msal-extensions~=0.1.3',
     'msrest>=0.4.4',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
