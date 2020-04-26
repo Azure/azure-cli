@@ -74,6 +74,8 @@ class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
 class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pec')
     def test_keyvault_private_endpoint_connection(self, resource_group):
+        self.kwargs.update({})
+
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-kv-pec-', 24),
             'loc': 'centraluseuap',
