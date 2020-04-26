@@ -165,7 +165,7 @@ def load_arguments(self, _):
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('nodepool_name', type=str, default='nodepool1',
-                   help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
+                   help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('aad_client_app_id')
@@ -281,7 +281,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks scale') as c:
         c.argument('nodepool_name', type=str,
-                   help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
+                   help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
 
     with self.argument_context('aks nodepool') as c:
         c.argument('cluster_name', type=str, help='The cluster name.')
