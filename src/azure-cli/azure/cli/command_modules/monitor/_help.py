@@ -1105,7 +1105,7 @@ examples:
 
 helps['monitor log-analytics workspace linked-storage'] = """
 type: group
-short-summary: Manage linked storage for log analytics workspace.
+short-summary: Manage linked storage account for log analytics workspace.
 """
 
 helps['monitor log-analytics workspace linked-storage create'] = """
@@ -1126,17 +1126,17 @@ examples:
 
 helps['monitor log-analytics workspace linked-storage add'] = """
 type: command
-short-summary: Add linked storages for log analytics workspace.
+short-summary: Add some linked storages with specific data source type for log analytics workspace.
 examples:
-  - name: Add a linked storage for a log analytics workspace
+  - name: Add two linked storage for a log analytics workspace
     text: az monitor log-analytics workspace linked-storage add --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts SA1 SA2
 """
 
 helps['monitor log-analytics workspace linked-storage remove'] = """
 type: command
-short-summary: Remove all linked storages with specific data source type for log analytics workspace
+short-summary: Remove some linked storages with specific data source type for log analytics workspace
 examples:
-  - name: Remove a linked storage for a log analytics workspace
+  - name: Remove two linked storage for a log analytics workspace
     text: az monitor log-analytics workspace linked-storage remove --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace --storage-accounts SA1 SA2.
 """
 

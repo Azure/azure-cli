@@ -206,7 +206,7 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage delete '
-                 '--type CustomLogs -g {rg} -n {name}')
+                 '--type CustomLogs -g {rg} -n {name} -y')
 
         self.cmd('monitor log-analytics workspace linked-storage list '
                  '-g {rg} -n {name}',
