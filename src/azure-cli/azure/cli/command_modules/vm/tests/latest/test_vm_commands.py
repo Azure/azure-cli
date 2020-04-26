@@ -80,6 +80,8 @@ class VMOpenPortTest(ScenarioTest):
             'vm': 'vm1'
         })
 
+        print(self.kwargs)
+
         self.cmd('vm create -g {rg} -l westus -n {vm} --admin-username ubuntu --image Canonical:UbuntuServer:14.04.4-LTS:latest --admin-password @PasswordPassword1! --public-ip-address-allocation dynamic --authentication-type password')
 
         # min params - apply to existing NIC (updates existing NSG)
