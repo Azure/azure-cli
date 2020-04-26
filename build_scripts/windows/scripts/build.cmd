@@ -86,26 +86,17 @@ set PYTHON_EXE=%PYTHON_DIR%\python.exe
 
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
-:: Build & install all the packages with bdist_wheel
-%BUILDING_DIR%\python.exe -m pip install wheel
-echo Building CLI packages...
 set CLI_SRC=%REPO_ROOT%\src
+%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
 for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-nspkg %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
-   %BUILDING_DIR%\python.exe setup.py bdist_wheel -d %TEMP_SCRATCH_FOLDER%
+   %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir --no-deps .
    popd
 )
-echo Built CLI packages successfully.
+%BUILDING_DIR%\python.exe -m pip install -r %CLI_SRC%\azure-cli\requirements.py3.windows.txt
 
 if %errorlevel% neq 0 goto ERROR
 
-set ALL_MODULES=
-for %%i in (%TEMP_SCRATCH_FOLDER%\*.whl) do (
-    set ALL_MODULES=!ALL_MODULES! %%i
-)
-echo All modules: %ALL_MODULES%
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall pycparser==2.18
-%BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --no-cache-dir %ALL_MODULES%
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 %BUILDING_DIR%\python.exe -m pip install --no-warn-script-location --force-reinstall urllib3==1.24.2
 
