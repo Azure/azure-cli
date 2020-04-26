@@ -22,6 +22,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='source_account')
     @StorageAccountPreparer(parameter_name='target_account')
     def test_storage_blob_incremental_copy(self, resource_group, source_account, target_account):
+
+        source_file = None
         source_file = self.create_temp_file(16)
         source_account_info = self.get_account_info(resource_group, source_account)
         source_container = self.create_container(source_account_info)
