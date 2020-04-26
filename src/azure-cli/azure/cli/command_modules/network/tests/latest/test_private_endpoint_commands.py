@@ -22,12 +22,12 @@ class NetworkPrivateLinkResourceKeyVaultScenarioTest(ScenarioTest):
             'rg': resource_group
         })
 
-        _create_keyvault(self, self.kwargs)
+        _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete')
         self.cmd('network private-link-resource list '
                  '--name {kv} '
                  '-g {rg} '
                  '--type microsoft.keyvault/vaults',
-                 checks=self.check('value[0].groupId', 'vault'))
+                 checks=self.check('value[0].properties.groupId', 'vault'))
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
@@ -43,7 +43,7 @@ class NetworkPrivateLinkResourceKeyVaultScenarioTest(ScenarioTest):
         })
 
         # Prepare vault and network
-        keyvault = _create_keyvault(self, self.kwargs).get_output_in_json()
+        keyvault = _create_keyvault(self, self.kwargs, additional_args='--enable-soft-delete').get_output_in_json()
         self.kwargs['kv_id'] = keyvault['id']
         self.cmd('network vnet create '
                  '-n {vnet} '
@@ -108,45 +108,34 @@ class NetworkPrivateLinkResourceKeyVaultScenarioTest(ScenarioTest):
         })
         self.cmd('network private-endpoint-connection reject '
                  '--connection-id {kv_pe_id} '
-                 '--rejection-description "{rejection_desc}"',
+                 '--description "{rejection_desc}"',
                  checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}'),
-                     self.check('provisioningState', 'Updating')
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}'),
+                     self.check('properties.provisioningState', 'Succeeded')
                  ])
 
-        max_retries = 20
-        retries = 0
-        while self.cmd('network private-endpoint-connection show --connection-id {kv_pe_id}'). \
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                time.sleep(5)
-            retries += 1
 
         self.cmd('network private-endpoint-connection show --connection-id {kv_pe_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
+                 checks=self.check('properties.provisioningState', 'Succeeded'))
 
         self.cmd('network private-endpoint-connection approve '
                  '--service-name {kv} '
                  '--name {kv_pe_name} '
                  '-g {rg} '
                  '--type microsoft.keyvault/vaults '
-                 '--approval-description "{approval_desc}"',
+                 '--description "{approval_desc}"',
                  checks=[
-                     self.check('privateLinkServiceConnectionState.status', 'Approved'),
-                     self.check('privateLinkServiceConnectionState.description', '{approval_desc}'),
-                     self.check('provisioningState', 'Updating')
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}'),
+                     self.check('properties.provisioningState', 'Succeeded')
                  ])
 
-        retries = 0
-        while self.cmd('network private-endpoint-connection show --connection-id {kv_pe_id}'). \
-                get_output_in_json()['provisioningState'] != 'Succeeded' or retries > max_retries:
-            if self.is_live:
-                time.sleep(5)
-            retries += 1
-
         self.cmd('network private-endpoint-connection show --connection-id {kv_pe_id}',
-                 checks=self.check('provisioningState', 'Succeeded'))
+                 checks=self.check('properties.provisioningState', 'Succeeded'))
+
+        self.cmd('network private-endpoint-connection list --id {kv_id}',
+                 checks=self.check('length(@)', 1))
 
 
 if __name__ == '__main__':
