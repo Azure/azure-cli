@@ -1264,7 +1264,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2020-03-01-preview
   response:
     body:
       string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.OperationalInsights/workspaces/cliworkspace000002''
@@ -1361,7 +1361,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2020-03-01-preview
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
@@ -1419,7 +1419,7 @@ interactions:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.2.0
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2020-03-01-preview
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
@@ -1485,9 +1485,9 @@ interactions:
       "properties": {"publisher": "Microsoft.EnterpriseCloud.Monitoring", "type":
       "MicrosoftMonitoringAgent", "typeHandlerVersion": "1.0", "autoUpgradeMinorVersion":
       "true", "settings": {"workspaceId": "[reference(parameters(\''workspaceId\''),
-      \''2015-11-01-preview\'').customerId]", "stopOnMultipleConnections": "true"},
+      \''2020-03-01-preview\'').customerId]", "stopOnMultipleConnections": "true"},
       "protectedSettings": {"workspaceKey": "[listKeys(parameters(\''workspaceId\''),
-      \''2015-11-01-preview\'').primarySharedKey]"}}, "name": "monitorvm/MicrosoftMonitoringAgent",
+      \''2020-03-01-preview\'').primarySharedKey]"}}, "name": "monitorvm/MicrosoftMonitoringAgent",
       "location": "eastus", "dependsOn": ["Microsoft.Compute/virtualMachines/monitorvm"]},
       {"apiVersion": "2019-07-01", "type": "Microsoft.Compute/virtualMachines", "name":
       "monitorvm", "location": "eastus", "tags": {}, "dependsOn": ["Microsoft.Network/networkInterfaces/monitorvmVMNic"],
@@ -1524,7 +1524,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Resources/deployments/vm_deploy_8XbKTGVrE0Vd0Fok9MlTE8eZuKAyfVPe","name":"vm_deploy_8XbKTGVrE0Vd0Fok9MlTE8eZuKAyfVPe","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5805408734151410733","parameters":{"workspaceId":{"type":"SecureString"},"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-04-07T07:34:16.5556873Z","duration":"PT3.5853052S","correlationId":"695dc988-6690-4d0a-b7be-1309e5af655e","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines/extensions","locations":["eastus"]},{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"monitorvmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"monitorvmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","apiVersion":"2015-11-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","actionName":"listKeys","apiVersion":"2015-11-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/MicrosoftMonitoringAgent","resourceType":"Microsoft.Compute/virtualMachines/extensions","resourceName":"monitorvm/MicrosoftMonitoringAgent"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Resources/deployments/vm_deploy_8XbKTGVrE0Vd0Fok9MlTE8eZuKAyfVPe","name":"vm_deploy_8XbKTGVrE0Vd0Fok9MlTE8eZuKAyfVPe","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5805408734151410733","parameters":{"workspaceId":{"type":"SecureString"},"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2020-04-07T07:34:16.5556873Z","duration":"PT3.5853052S","correlationId":"695dc988-6690-4d0a-b7be-1309e5af655e","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines/extensions","locations":["eastus"]},{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"monitorvmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"monitorvmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","apiVersion":"2020-03-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","actionName":"listKeys","apiVersion":"2020-03-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/MicrosoftMonitoringAgent","resourceType":"Microsoft.Compute/virtualMachines/extensions","resourceName":"monitorvm/MicrosoftMonitoringAgent"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"}]}}'
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Resources/deployments/vm_deploy_8XbKTGVrE0Vd0Fok9MlTE8eZuKAyfVPe/operationStatuses/08586153620325072597?api-version=2019-07-01
@@ -2257,7 +2257,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Resources/deployments/vm_deploy_8XbKTGVrE0Vd0Fok9MlTE8eZuKAyfVPe","name":"vm_deploy_8XbKTGVrE0Vd0Fok9MlTE8eZuKAyfVPe","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5805408734151410733","parameters":{"workspaceId":{"type":"SecureString"},"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-04-07T07:42:03.4533564Z","duration":"PT7M50.4829743S","correlationId":"695dc988-6690-4d0a-b7be-1309e5af655e","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines/extensions","locations":["eastus"]},{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"monitorvmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"monitorvmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","apiVersion":"2015-11-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","actionName":"listKeys","apiVersion":"2015-11-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/MicrosoftMonitoringAgent","resourceType":"Microsoft.Compute/virtualMachines/extensions","resourceName":"monitorvm/MicrosoftMonitoringAgent"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/MicrosoftMonitoringAgent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET"}]}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Resources/deployments/vm_deploy_8XbKTGVrE0Vd0Fok9MlTE8eZuKAyfVPe","name":"vm_deploy_8XbKTGVrE0Vd0Fok9MlTE8eZuKAyfVPe","type":"Microsoft.Resources/deployments","properties":{"templateHash":"5805408734151410733","parameters":{"workspaceId":{"type":"SecureString"},"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2020-04-07T07:42:03.4533564Z","duration":"PT7M50.4829743S","correlationId":"695dc988-6690-4d0a-b7be-1309e5af655e","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus"]},{"resourceType":"publicIPAddresses","locations":["eastus"]},{"resourceType":"networkInterfaces","locations":["eastus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines/extensions","locations":["eastus"]},{"resourceType":"virtualMachines","locations":["eastus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"monitorvmVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"monitorvmPublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","apiVersion":"2020-03-01-preview"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002","resourceType":"microsoft.operationalinsights/workspaces","resourceName":"cliworkspace000002","actionName":"listKeys","apiVersion":"2020-03-01-preview"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/MicrosoftMonitoringAgent","resourceType":"Microsoft.Compute/virtualMachines/extensions","resourceName":"monitorvm/MicrosoftMonitoringAgent"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"monitorvmVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"monitorvm"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Compute/virtualMachines/monitorvm/extensions/MicrosoftMonitoringAgent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/networkInterfaces/monitorvmVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/publicIPAddresses/monitorvmPublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.Network/virtualNetworks/monitorvmVNET"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -2550,7 +2550,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsEvent_88888888-0000-0000-0000-000000000001?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsEvent_88888888-0000-0000-0000-000000000001?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsEvent","properties":{"eventLogName":"System","eventTypes":[{"eventType":"Error"},{"eventType":"Warning"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_WindowsEvent_88888888-0000-0000-0000-000000000001","etag":"W/\"datetime''2020-04-07T07%3A42%3A34.9601154Z''\"","name":"DataSource_WindowsEvent_88888888-0000-0000-0000-000000000001","type":"Microsoft.OperationalInsights/workspaces/datasources"}'
@@ -2609,7 +2609,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000002?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000002?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Disk
@@ -2669,7 +2669,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000003?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000003?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Disk
@@ -2729,7 +2729,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000004?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000004?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Bytes
@@ -2789,7 +2789,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000005?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000005?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Available
@@ -2849,7 +2849,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000006?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000006?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"%
@@ -2909,7 +2909,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000007?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000007?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Avg.
@@ -2969,7 +2969,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000008?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000008?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Bytes
@@ -3030,7 +3030,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000009?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000009?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Current
@@ -3090,7 +3090,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000a?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000a?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"%
@@ -3150,7 +3150,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000b?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000b?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Free
@@ -3210,7 +3210,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000c?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000c?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Avg.
@@ -3270,7 +3270,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000d?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000d?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Bytes
@@ -3330,7 +3330,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000e?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000e?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"%
@@ -3390,7 +3390,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000f?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-00000000000f?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Disk
@@ -3450,7 +3450,7 @@ interactions:
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000010?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/dataSources/DataSource_WindowsPerformanceCounter_88888888-0000-0000-0000-000000000010?api-version=2020-03-01-preview
   response:
     body:
       string: '{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Processor
@@ -3506,7 +3506,7 @@ interactions:
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002?api-version=2020-03-01-preview
   response:
     body:
       string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
@@ -3565,7 +3565,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002/dataSources?$filter=kind%20eq%20'WindowsEvent'&api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002/dataSources?$filter=kind%20eq%20'WindowsEvent'&api-version=2020-03-01-preview
   response:
     body:
       string: '{"value":[{"kind":"WindowsEvent","properties":{"eventLogName":"System","eventTypes":[{"eventType":"Error"},{"eventType":"Warning"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_create_with_workspace_windows000001/providers/Microsoft.OperationalInsights/workspaces/cliworkspace000002/datasources/DataSource_WindowsEvent_88888888-0000-0000-0000-000000000001","etag":"W/\"datetime''2020-04-07T07%3A42%3A34.9601154Z''\"","name":"DataSource_WindowsEvent_88888888-0000-0000-0000-000000000001","type":"Microsoft.OperationalInsights/workspaces/datasources"}]}'
@@ -3613,7 +3613,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002/dataSources?$filter=kind%20eq%20'WindowsPerformanceCounter'&api-version=2015-11-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_create_with_workspace_windows000001/providers/microsoft.operationalinsights/workspaces/cliworkspace000002/dataSources?$filter=kind%20eq%20'WindowsPerformanceCounter'&api-version=2020-03-01-preview
   response:
     body:
       string: '{"value":[{"kind":"WindowsPerformanceCounter","properties":{"counterName":"Disk

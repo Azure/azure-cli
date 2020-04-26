@@ -866,7 +866,65 @@ examples:
 
 helps['monitor log-analytics'] = """
 type: group
-short-summary: Manage Azure log analytics
+short-summary: Manage Azure log analytics.
+"""
+
+helps['monitor log-analytics cluster'] = """
+type: group
+short-summary: Manage Azure log analytics cluster.
+"""
+
+helps['monitor log-analytics cluster create'] = """
+type: command
+short-summary: Create a cluster instance.
+examples:
+  - name: Create a cluster instance.
+    text: az monitor log-analytics cluster create -g MyResourceGroup -n MyCluster --sku-capacity 1000
+"""
+
+helps['monitor log-analytics cluster update'] = """
+type: command
+short-summary: Update a cluster instance.
+examples:
+  - name: Update a cluster instance.
+    text: |
+        az monitor log-analytics cluster update -g MyResourceGroup -n MyCluster \\
+          --key-vault-uri https://myvault.vault.azure.net/ --key-name my-key \\
+          --key-version fe0adcedd8014aed9c22e9aefb81a1ds --sku-capacity 1000
+"""
+
+helps['monitor log-analytics cluster delete'] = """
+type: command
+short-summary: Delete a cluster instance.
+examples:
+  - name: Delete a cluster instance.
+    text: az monitor log-analytics cluster delete -g MyResourceGroup -n MyCluster
+"""
+
+helps['monitor log-analytics cluster show'] = """
+type: command
+short-summary: Show the properties of a cluster instance.
+examples:
+  - name: Show the properties of a cluster instance.
+    text: az monitor log-analytics cluster show -g MyResourceGroup -n MyCluster
+"""
+
+helps['monitor log-analytics cluster list'] = """
+type: command
+short-summary: Gets all cluster instances in a resource group or in current subscription.
+examples:
+  - name: Gets all cluster instances in a resource group.
+    text: az monitor log-analytics cluster list -g MyResourceGroup
+  - name: Gets all cluster instances in current subscription.
+    text: az monitor log-analytics cluster list
+"""
+
+helps['monitor log-analytics cluster wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the cluster is met.
+examples:
+  - name: Pause executing next line of CLI script until the cluster is successfully provisioned.
+    text: az monitor log-analytics cluster wait -n MyCluster -g MyResourceGroup --created
 """
 
 helps['monitor log-analytics workspace'] = """
@@ -983,6 +1041,66 @@ examples:
 helps['monitor log-analytics workspace update'] = """
 type: command
 short-summary: Update a workspace instance
+"""
+
+helps['monitor log-analytics workspace linked-service'] = """
+type: group
+short-summary: Manage linked service for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace linked-service create'] = """
+type: command
+short-summary: Create a linked service.
+examples:
+  - name: Create a linked service.
+    text: |
+        az monitor log-analytics workspace linked-service create -g MyResourceGroup -n cluster \\
+          --workspace-name MyWorkspace --write-access-resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/clusters/MyCluster
+"""
+
+helps['monitor log-analytics workspace linked-service update'] = """
+type: command
+short-summary: Update a linked service.
+examples:
+  - name: Update a linked service.
+    text: |
+        az monitor log-analytics workspace linked-service update -g MyResourceGroup -n cluster \\
+          --workspace-name MyWorkspace --write-access-resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/clusters/MyCluster
+"""
+
+helps['monitor log-analytics workspace linked-service show'] = """
+type: command
+short-summary: Show the properties of a linked service.
+examples:
+  - name: Show the properties of a linked service.
+    text: |
+        az monitor log-analytics workspace linked-service show -g MyResourceGroup -n cluster --workspace-name MyWorkspace
+"""
+
+helps['monitor log-analytics workspace linked-service delete'] = """
+type: command
+short-summary: Delete a linked service.
+examples:
+  - name: Delete a linked service.
+    text: |
+        az monitor log-analytics workspace linked-service delete -g MyResourceGroup -n cluster --workspace-name MyWorkspace
+"""
+
+helps['monitor log-analytics workspace linked-service list'] = """
+type: command
+short-summary: Gets all the linked services in a workspace.
+examples:
+  - name: Gets all the linked services in a workspace.
+    text: |
+        az monitor log-analytics workspace linked-service list -g MyResourceGroup --workspace-name MyWorkspace
+"""
+
+helps['monitor log-analytics workspace linked-service wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the linked service is met.
+examples:
+  - name: Pause executing next line of CLI script until the linked service is successfully provisioned.
+    text: az monitor log-analytics workspace linked-service wait -n cluster -g MyResourceGroup --workspace-name MyWorkspace --created
 """
 
 helps['monitor log-profiles'] = """
