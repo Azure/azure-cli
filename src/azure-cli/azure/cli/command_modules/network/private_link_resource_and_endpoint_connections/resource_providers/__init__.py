@@ -3,7 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import abc
+import time
+import json
+from knack.log import get_logger
 from azure.cli.core.util import send_raw_request
+
+logger = get_logger(__name__)
+
 
 class PrivateEndpointClient(object):
     __metaclass__ = abc.ABCMeta
@@ -38,52 +44,97 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
         self.api_version = api_version
         self.support_list = support_list
 
-    def _update_private_endpoint_connection_status(self, cmd, client, resource_group_name, vault_name,
+    def _update_private_endpoint_connection_status(self, cmd, resource_group_name, service_name,
                                                    private_endpoint_connection_name, is_approved=True, description=None):
-        PrivateEndpointServiceConnectionStatus = cmd.get_models('PrivateEndpointServiceConnectionStatus',
-                                                                resource_type=ResourceType.MGMT_KEYVAULT)
 
-        private_endpoint_connection = client.get(resource_group_name=resource_group_name, vault_name=vault_name,
-                                                 private_endpoint_connection_name=private_endpoint_connection_name)
 
-        new_status = PrivateEndpointServiceConnectionStatus.approved \
-            if is_approved else PrivateEndpointServiceConnectionStatus.rejected
-        private_endpoint_connection.private_link_service_connection_state.status = new_status
-        private_endpoint_connection.private_link_service_connection_state.description = description
+        private_endpoint_connection = self.show_private_endpoint_connection(cmd,
+                                                                            resource_group_name,
+                                                                            service_name,
+                                                                            private_endpoint_connection_name)
 
-        return client.put(resource_group_name=resource_group_name,
-                          vault_name=vault_name,
-                          private_endpoint_connection_name=private_endpoint_connection_name,
-                          properties=private_endpoint_connection)
+        new_status = "Approved" if is_approved else "Rejected"
+        private_endpoint_connection['properties']['privateLinkServiceConnectionState']['status'] = new_status
+        private_endpoint_connection['properties']['privateLinkServiceConnectionState']['description'] = description
+
+        url = self._build_connection_url_endpoint(resource_group_name,
+                                                  self.rp,
+                                                  service_name,
+                                                  private_endpoint_connection_name,
+                                                  self.api_version)
+        r = send_raw_request(cmd.cli_ctx, 'put', url, body=json.dumps(private_endpoint_connection))
+        query_counts = 3
+        while query_counts:
+            time.sleep(10)
+            query_counts -= 1
+            private_endpoint_connection = self.show_private_endpoint_connection(cmd,
+                                                                                resource_group_name,
+                                                                                service_name,
+                                                                                private_endpoint_connection_name)
+            if private_endpoint_connection['properties'].get('provisioningState'):
+                if private_endpoint_connection['properties']['provisioningState'] == "Succeeded":
+                    return private_endpoint_connection
+        logger.warning("Cannot query the state of private endpoint connection. "
+                       "Please use `az network private-endpoint-connection show` command to check the status.")
+        return r.json()
+
 
     def list_private_link_resource(self, cmd, resource_group_name, name):
-        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_link_resources
-        return client.list_by_vault(resource_group_name, name)
+        url = self._build_link_resource_url_endpoint(resource_group_name, self.rp, name, self.api_version)
+        r = send_raw_request(cmd.cli_ctx, 'get', url)
+        return r.json()
+
 
     def approve_private_endpoint_connection(self, cmd, resource_group_name, service_name, name, approval_description=None):
-        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_endpoint_connections
         return self._update_private_endpoint_connection_status(cmd=cmd,
-                                                               client=client,
                                                                resource_group_name=resource_group_name,
-                                                               vault_name=service_name,
+                                                               service_name=service_name,
                                                                private_endpoint_connection_name=name,
                                                                is_approved=True,
                                                                description=approval_description)
 
+
     def reject_private_endpoint_connection(self, cmd, resource_group_name, service_name, name, reject_description=None):
-        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_endpoint_connections
         return self._update_private_endpoint_connection_status(cmd=cmd,
-                                                               client=client,
                                                                resource_group_name=resource_group_name,
-                                                               vault_name=service_name,
+                                                               service_name=service_name,
                                                                private_endpoint_connection_name=name,
                                                                is_approved=False,
                                                                description=reject_description)
 
+
     def remove_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):
-        client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT).private_endpoint_connections
-        return client.delete(resource_group_name, service_name, name)
+        url = self._build_connection_url_endpoint(resource_group_name, self.rp, service_name, name, self.api_version)
+        r = send_raw_request(cmd.cli_ctx, 'delete', url)
+        return r.json()
+
 
     def show_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):
-        r = send_raw_request(cmd.cli_ctx, method, uri, headers, uri_parameters, body,
-                             skip_authorization_header, resource, output_file)
+        url = self._build_connection_url_endpoint(resource_group_name, self.rp, service_name, name, self.api_version)
+        r = send_raw_request(cmd.cli_ctx, 'get', url)
+        return r.json()
+
+
+    def _build_connection_url_endpoint(self, resource_group_name, namespace_type, service_name, name, api_version):
+        connection_url_endpoint = "/subscriptions/{{subscriptionId}}/" \
+                                  "resourceGroups/{resource_group_name}/" \
+                                  "providers/{namespace_type}/" \
+                                  "{service_name}/privateEndpointConnections/" \
+                                  "{name}?api-version={api_version}".format(resource_group_name=resource_group_name,
+                                                                            namespace_type=namespace_type,
+                                                                            service_name=service_name,
+                                                                            name=name,
+                                                                            api_version=api_version)
+        return connection_url_endpoint
+
+    # sub issue
+    def _build_link_resource_url_endpoint(self, resource_group_name, namespace_type, service_name, api_version):
+        link_resource_url_endpoint = "/subscriptions/{{subscriptionId}}/" \
+                                     "resourceGroups/{resource_group_name}/" \
+                                     "providers/{namespace_type}/" \
+                                     "{service_name}/privateLinkResources" \
+                                     "?api-version={api_version}".format(resource_group_name=resource_group_name,
+                                                                         namespace_type=namespace_type,
+                                                                         service_name=service_name,
+                                                                         api_version=api_version)
+        return link_resource_url_endpoint

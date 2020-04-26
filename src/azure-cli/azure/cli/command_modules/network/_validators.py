@@ -1883,7 +1883,8 @@ def process_private_link_resource_id_argument(namespace):
     del namespace.id
 
 
-def process_private_endpoint_connection_id_argument(namespace):
+def process_private_endpoint_connection_id_argument(cmd, namespace):
+    from azure.cli.core.util import parse_proxy_resource_id
     if all([namespace.resource_group_name,
             namespace.name,
             namespace.resource_provider,
@@ -1896,11 +1897,12 @@ def process_private_endpoint_connection_id_argument(namespace):
                                             namespace.name,
                                             namespace.resource_provider,
                                             namespace.service_name])):
-        raise CLIError("usage error: --id / -g -n --type --service-name")
+        raise CLIError("usage error: --connection-id / -g -n --type --service-name")
 
-    id_parts = namespace.connection_id.split('/')
-    namespace.resource_group_name = id_parts[-7]
-    namespace.service_name = id_parts[-3]
-    namespace.resource_provider = '{}/{}'.format(id_parts[-5], id_parts[-4])
-    namespace.name = id_parts[-1]
+    result = parse_proxy_resource_id(namespace.connection_id)
+    cmd.cli_ctx.data['subscription_id'] = result['subscription']
+    namespace.resource_group_name = result['resource_group']
+    namespace.service_name = result['name']
+    namespace.resource_provider = '{}/{}'.format(result['namespace'], result['type'])
+    namespace.name = result['child_name_1']
     del namespace.connection_id
