@@ -53,6 +53,8 @@ class VMImageListByAliasesScenarioTest(ScenarioTest):
         self.assertEqual(result[0]['publisher'], 'Canonical')
         self.assertTrue(result[0]['sku'].endswith('LTS'))
 
+        print(result)
+
 
 class VMUsageScenarioTest(ScenarioTest):
 
