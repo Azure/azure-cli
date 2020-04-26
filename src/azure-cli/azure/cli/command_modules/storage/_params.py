@@ -1177,7 +1177,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination_path', options_list=['--destination', '-d'], type=file_type,
                    help='The local file where the file or folder will be downloaded to. The source filename will be '
                         'used if not specified.')
-        c.argument('overwrite', arg_type=get_three_state_flag(), help="Overwrite an existing file when specified.")
+        c.argument('overwrite', arg_type=get_three_state_flag(),
+                   help="Overwrite an existing file when specified. Default value is false.")
 
     with self.argument_context('storage fs file move') as c:
         t_file_content_settings = self.get_sdk('_models#ContentSettings',

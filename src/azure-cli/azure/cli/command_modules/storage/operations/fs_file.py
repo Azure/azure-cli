@@ -89,16 +89,10 @@ def list_fs_files(client, path=None, recursive=True, num_results=None, timeout=N
     return result
 
 
-def upload_file(cmd, client, local_path, overwrite=True, content_settings=None, metadata=None, timeout=None,
+def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, metadata=None, timeout=None,
                 if_match=None, if_none_match=None, if_modified_since=None, if_unmodified_since=None,
                 umask=None, permissions=None):
-    """
-    if not exists(cmd, client):
-        client.create_file()
 
-    local_file = open(local_path, 'r')
-    data = local_file.read()
-    """
     count = os.path.getsize(local_path)
     with open(local_path, 'rb') as stream:
         data = stream.read(count)
@@ -123,9 +117,27 @@ def upload_file(cmd, client, local_path, overwrite=True, content_settings=None, 
         upload_file_args['etag'] = if_none_match
         upload_file_args['match_condition'] = MatchConditions.IfModified
 
-    # Overwrite
+    # Overwrite sets to true will overwrite existing data.
+    # Overwrite sets to false will be able to upload to empty file and non-existing file,
+    # but will raise exception when uploading to non-empty file with new data.
     if not overwrite:
-        upload_file_args['etag'] = '*'
-        upload_file_args['match_condition'] = MatchConditions.IfNotModified
+
+        # For non-existing file path, create one
+        if not exists(cmd, client):
+            client.create_file()
+
+        upload_file_args['match_condition'] = MatchConditions.IfPresent
+        try:
+            return client.upload_data(data=data, length=count, overwrite=overwrite, **upload_file_args)
+        except HttpResponseError as ex:
+            StorageErrorCode = cmd.get_models("_shared.models#StorageErrorCode",
+                                              resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+
+            if ex.error_code == StorageErrorCode.invalid_flush_position:
+                raise CLIError("You cannot upload to an existing non-empty file with overwrite=false. "
+                               "Please set --overwrite to overwrite the existing file.")
+            else:
+                raise ex
 
     return client.upload_data(data=data, length=count, overwrite=overwrite, **upload_file_args)
+
