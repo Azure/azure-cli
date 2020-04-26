@@ -511,8 +511,8 @@ class Profile(object):
     def _create_identity_credential(self, account, aux_tenant_id=None):
         user_type = account[_USER_ENTITY][_USER_TYPE]
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
-        home_account_id = account[_USER_ENTITY][_USER_HOME_ACCOUNT_ID]
-        identity_type, _ = Profile._try_parse_msi_account_name(account)
+        home_account_id = account[_USER_ENTITY].get(_USER_HOME_ACCOUNT_ID)
+        identity_type, identity_id = Profile._try_parse_msi_account_name(account)
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
 
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
@@ -522,22 +522,22 @@ class Profile(object):
             if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
                 if aux_tenant_id:
                     raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
-                return ManagedIdentity()
+                return Identity.get_msi_credential()
 
             # User
             if user_type == _USER:
+                if not home_account_id:
+                    raise CLIError("CLI authentication is migrated to AADv2.0, please run 'az login' to re-login")
                 return identity.get_user_credential(home_account_id, username_or_sp_id)
 
             # Service Principal
             use_cert_sn_issuer = account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH)
-            # todo: get service principle key
-            return identity.get_service_principal_credential()
+            return identity.get_service_principal_credential(username_or_sp_id, use_cert_sn_issuer)
 
         # MSI
-        # todo: MSI identity_id
         if aux_tenant_id:
             raise CLIError("Tenant shouldn't be specified for MSI account")
-        return get_msi_credential()
+        return Identity.get_msi_credential(identity_id)
 
     def get_login_credentials(self, resource=None, subscription_id=None, aux_subscriptions=None, aux_tenants=None):
         if aux_tenants and aux_subscriptions:
