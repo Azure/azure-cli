@@ -22,6 +22,8 @@ class ResourceGroupScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
     def test_resource_group(self, resource_group):
 
+        print(self.kwargs)
+
         self.cmd('group delete -n {rg} --yes')
         self.cmd('group exists -n {rg}',
                  checks=self.check('@', False))
