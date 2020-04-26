@@ -1798,20 +1798,22 @@ def load_arguments(self, _):
     # region PrivateLinkResource and PrivateEndpointConnection
     from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom import TYPE_CLIENT_MAPPING, register_providers
     register_providers()
-    with self.argument_context('network private-link-resource list') as c:
-        c.argument('name', required=False, help='Name of the resource', options_list=['--name', '-n'])
-        c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type', arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
-        c.argument('resource_group_name', required=False)
-        c.extra('id', help='ID of the resource', validator=process_private_link_resource_id_argument)
-    with self.argument_context('network private-endpoint-connection'.format(scope)) as c:
-        c.argument('approval_description', help='Comments for the approval.')
-        c.argument('reject_description', help='Comments for the rejection.')
+    for scope in ['private-link-resource', 'private-endpoint-connection']:
+        with self.argument_context('network {} list'.format(scope)) as c:
+            c.argument('name', required=False, help='Name of the resource', options_list=['--name', '-n'])
+            c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type', arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
+            c.argument('resource_group_name', required=False)
+            c.extra('id', help='ID of the resource', validator=process_private_link_resource_id_argument)
     for scope in ['show', 'approve', 'reject', 'remove']:
         with self.argument_context('network private-endpoint-connection {}'.format(scope)) as c:
-            c.argument('name', required=False, help='Name of the private endpoint connection', options_list=['--name', '-n'])
+            c.extra('connection_id', help='ID of the private endpoint connection', validator=process_private_endpoint_connection_id_argument)
+            c.argument('approval_description', options_list=['--description', '-d'], help='Comments for the approval.')
+            c.argument('rejection_description', options_list=['--description', '-d'],
+                       help='Comments for the rejection.')
+            c.argument('name', required=False, help='Name of the private endpoint connection',
+                       options_list=['--name', '-n'])
             c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type',
                        arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
             c.argument('resource_group_name', required=False)
             c.argument('service_name', required=False, help='Name of the resource')
-            c.extra('connection_id', help='ID of the private endpoint connection', validator=process_private_endpoint_connection_id_argument)
     # endregion

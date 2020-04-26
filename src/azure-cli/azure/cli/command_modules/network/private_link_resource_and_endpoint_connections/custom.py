@@ -12,6 +12,7 @@ TYPE_CLIENT_MAPPING = {
 
 def register_providers():
     _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', False)
+    _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
 
 
 def _register_one_provider(type, api_version, has_list_or_not):
@@ -57,3 +58,8 @@ def remove_private_endpoint_connection(cmd, resource_group_name, service_name, r
 def show_private_endpoint_connection(cmd, resource_group_name, service_name, resource_provider, name):
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
     return client.show_private_endpoint_connection(cmd, resource_group_name, service_name, name)
+
+
+def list_private_endpoint_connection(cmd, resource_group_name, name, resource_provider):
+    client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
+    return client.list_private_endpoint_connection(cmd, resource_group_name, name)

@@ -115,6 +115,17 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
         return r.json()
 
 
+    def list_private_endpoint_connection(self, cmd, resource_group_name, service_name):
+        if self.support_list:
+            url = self._build_connections_url_endpoint(resource_group_name, self.rp, service_name, self.api_version)
+            r = send_raw_request(cmd.cli_ctx, 'get', url)
+            return r.json()
+        else:
+            url = self._build_resource_url_endpoint(resource_group_name, self.rp, service_name, self.api_version)
+            r = send_raw_request(cmd.cli_ctx, 'get', url)
+            return r.json()['properties']['privateEndpointConnections']
+
+
     def _build_connection_url_endpoint(self, resource_group_name, namespace_type, service_name, name, api_version):
         connection_url_endpoint = "/subscriptions/{{subscriptionId}}/" \
                                   "resourceGroups/{resource_group_name}/" \
@@ -127,7 +138,7 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
                                                                             api_version=api_version)
         return connection_url_endpoint
 
-    # sub issue
+
     def _build_link_resource_url_endpoint(self, resource_group_name, namespace_type, service_name, api_version):
         link_resource_url_endpoint = "/subscriptions/{{subscriptionId}}/" \
                                      "resourceGroups/{resource_group_name}/" \
@@ -138,3 +149,27 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
                                                                          service_name=service_name,
                                                                          api_version=api_version)
         return link_resource_url_endpoint
+
+
+    def _build_connections_url_endpoint(self, resource_group_name, namespace_type, service_name, api_version):
+        connections_url_endpoint = "/subscriptions/{{subscriptionId}}/" \
+                                   "resourceGroups/{resource_group_name}/" \
+                                   "providers/{namespace_type}/" \
+                                   "{service_name}/privateEndpointConnections" \
+                                   "?api-version={api_version}".format(resource_group_name=resource_group_name,
+                                                                       namespace_type=namespace_type,
+                                                                       service_name=service_name,
+                                                                       api_version=api_version)
+        return connections_url_endpoint
+
+
+    def _build_resource_url_endpoint(self, resource_group_name, namespace_type, service_name, api_version):
+        resource_url_endpoint = "/subscriptions/{{subscriptionId}}/" \
+                                "resourceGroups/{resource_group_name}/" \
+                                "providers/{namespace_type}/" \
+                                "{service_name}" \
+                                "?api-version={api_version}".format(resource_group_name=resource_group_name,
+                                                                    namespace_type=namespace_type,
+                                                                    service_name=service_name,
+                                                                    api_version=api_version)
+        return resource_url_endpoint

@@ -1197,4 +1197,5 @@ def load_command_table(self, _):
         g.custom_command('reject', 'reject_private_endpoint_connection')
         g.custom_command('remove', 'remove_private_endpoint_connection')
         g.custom_show_command('show', 'show_private_endpoint_connection')
+        g.custom_command('list', 'list_private_endpoint_connection')
     # endregion

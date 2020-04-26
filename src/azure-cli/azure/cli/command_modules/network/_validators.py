@@ -1860,7 +1860,7 @@ def get_header_configuration_validator(dest):
     return validator
 
 
-def process_private_link_resource_id_argument(namespace):
+def process_private_link_resource_id_argument(cmd, namespace):
     if all([namespace.resource_group_name,
             namespace.name,
             namespace.resource_provider]):
@@ -1877,6 +1877,7 @@ def process_private_link_resource_id_argument(namespace):
     if not is_valid_resource_id(namespace.id):
         raise CLIError("Resource ID is not invalid. Please check it.")
     split_resource_id = parse_resource_id(namespace.id)
+    cmd.cli_ctx.data['subscription_id'] = split_resource_id['subscription']
     namespace.resource_group_name = split_resource_id['resource_group']
     namespace.name = split_resource_id['name']
     namespace.resource_provider = '{}/{}'.format(split_resource_id['namespace'], split_resource_id['type'])
