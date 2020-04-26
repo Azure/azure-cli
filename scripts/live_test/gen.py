@@ -5,15 +5,15 @@ Generate CLITest.yml in ./
 
 import os
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import Environment, FileSystemLoader
 
 # If include extensions
 EXTENSION = False
 
 
 def main():
-    env = Environment(loader=FileSystemLoader('./'))
-    template = env.get_template('/home/vsts/work/1/s/scripts/live_test/template.yml')
+    env = Environment(loader=FileSystemLoader('/home/vsts/work/1/s/scripts/live_test/'))
+    template = env.get_template('template.yml')
     config = {}
     config['modules'] = get_modules()
     result = template.render(config)
