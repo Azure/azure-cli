@@ -345,6 +345,32 @@ def load_arguments(self, _):
         c.argument('workspace_name', options_list='--workspace-name')
     # endregion
 
+    # region Log Analytics Workspace Linked Service
+    with self.argument_context('monitor log-analytics workspace linked-service') as c:
+        c.argument('linked_service_name', name_arg_type, help='Name of the linkedServices resource. Supported values: cluster, automation.')
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('resource_id', help='The resource id of the resource that will be linked to the workspace. This '
+                                       'should be used for linking resources which require read access.')
+        c.argument('write_access_resource_id', help='The resource id of the resource that will be linked to the '
+                                                    'workspace. This should be used for linking resources which '
+                                                    'require write access.')
+    # endregion
+
+    # region Log Analytics Cluster
+    with self.argument_context('monitor log-analytics cluster') as c:
+        c.argument('cluster_name', name_arg_type, help='The name of the Log Analytics cluster.')
+        c.argument('sku_name', help="The name of the SKU. Currently only support 'CapacityReservation'")
+        c.argument('sku_capacity', help='The capacity of the SKU. It must be in the range of 1000-2000 per day and must'
+                                        ' be in multiples of 100. If you want to increase the limit, please contact'
+                                        ' LAIngestionRate@microsoft.com. It can be decreased only after 31 days.')
+        c.argument('identity_type', help='The identity type. Supported values: SystemAssigned')
+
+    with self.argument_context('monitor log-analytics cluster update') as c:
+        c.argument('key_vault_uri', help='The Key Vault uri which holds the key associated with the Log Analytics cluster.')
+        c.argument('key_name', help='The name of the key associated with the Log Analytics cluster.')
+        c.argument('key_version', help='The version of the key associated with the Log Analytics cluster.')
+    # endregion
+
     # region monitor clone
     with self.argument_context('monitor clone') as c:
         c.argument('source_resource', help="Resource ID of the source resource.")
