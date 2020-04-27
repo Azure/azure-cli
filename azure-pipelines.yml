@@ -452,11 +452,11 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-    steps:
-      - template: .azure-pipelines/templates/automation_test.yml
-        parameters:
-          pythonVersion: '$(python.version)'
-          profile: '2018-03-01-hybrid'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2018-03-01-hybrid'
 
 - job: AutomationTest20170309
   displayName: Automation Test (Profile 2017-03-09)
@@ -469,11 +469,11 @@ jobs:
         python.version: '3.6'
       Python38:
         python.version: '3.8'
-    steps:
-      - template: .azure-pipelines/templates/automation_test.yml
-        parameters:
-          pythonVersion: '$(python.version)'
-          profile: '2017-03-09-profile'
+  steps:
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2017-03-09-profile'
 
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
