@@ -940,10 +940,8 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sa': storage_account
         }
+
         # Create storage account with GZRS
-        gzrs_name = self.create_random_name(prefix='cligzrs', length=24)
-        GZRS = 'Standard_GZRS'
-        #create_cmd = 'az storage account create -n {gzrs_sa} -g {rg} --sku {GZRS}'.format(gzrs_name, resource_group, GZRS)
         self.cmd('az storage account create -n {gzrs_sa} -g {rg} --sku {GZRS} --https-only', checks=[
             self.check('sku.name', '{GZRS}'),
             self.check('name', '{gzrs_sa}')
