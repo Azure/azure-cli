@@ -53,9 +53,8 @@ def _delete_file(file_path):
 class Identity:
     """Class to interact with Azure Identity.
     """
-    def __init__(self, authority, tenant_id):
-        if not authority:
-            raise ValueError("Unexpected CLI error: authority cannot be none.")
+
+    def __init__(self, authority=None, tenant_id=None):
         self.authority = authority
         self.tenant_id = tenant_id
 
@@ -85,7 +84,7 @@ class Identity:
     def login_with_device_code(self):
         # Use DeviceCodeCredential
         message = 'To sign in, use a web browser to open the page {} and enter the code {} to authenticate.'
-        prompt_callback=lambda verification_uri, user_code, expires_on: \
+        prompt_callback = lambda verification_uri, user_code, expires_on: \
             logger.warning(message.format(verification_uri, user_code))
         if self.tenant_id:
             cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
@@ -134,9 +133,83 @@ class Identity:
         credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
         return credential
 
-    def login_with_msi(self):
-        # Use ManagedIdentityCredential
-        pass
+    MANAGED_IDENTITY_TENANT_ID = "tenant_id"
+    MANAGED_IDENTITY_CLIENT_ID = "client_id"
+    MANAGED_IDENTITY_OBJECT_ID = "object_id"
+    MANAGED_IDENTITY_RESOURCE_ID = "resource_id"
+    MANAGED_IDENTITY_SYSTEM_ASSIGNED = 'systemAssignedIdentity'
+    MANAGED_IDENTITY_USER_ASSIGNED = 'userAssignedIdentity'
+    MANAGED_IDENTITY_TYPE = 'type'
+    MANAGED_IDENTITY_ID_TYPE = "id_type"
+
+    def login_with_managed_identity(self, identity_id, resource):
+        from msrestazure.tools import is_valid_resource_id
+        from requests import HTTPError
+
+        credential = None
+        id_type = None
+        if identity_id:
+            # Try resource ID
+            if is_valid_resource_id(identity_id):
+                credential = ManagedIdentityCredential(resource=resource, msi_res_id=identity_id)
+                id_type = self.MANAGED_IDENTITY_RESOURCE_ID
+            else:
+                authenticated = False
+                try:
+                    # Try client ID
+                    credential = ManagedIdentityCredential(client_id=identity_id)
+                    id_type = self.MANAGED_IDENTITY_CLIENT_ID
+                    authenticated = True
+                except HTTPError as ex:
+                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                        logger.info('Sniff: not an MSI client id')
+                    else:
+                        raise
+
+                if not authenticated:
+                    try:
+                        # Try object ID
+                        credential = ManagedIdentityCredential(resource=resource, object_id=identity_id)
+                        id_type = self.MANAGED_IDENTITY_OBJECT_ID
+                        authenticated = True
+                    except HTTPError as ex:
+                        if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                            logger.info('Sniff: not an MSI object id')
+                        else:
+                            raise
+
+                if not authenticated:
+                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
+
+        else:
+            credential = ManagedIdentityCredential()
+
+        # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
+        # The resource is only used for acquiring the initial access token
+        scope = resource.rstrip('/') + '/.default'
+        token = credential.get_token(scope)
+        from msal.oauth2cli.oidc import decode_part
+        access_token = token.token
+
+        # Access token consists of headers.claims.signature. Decode the claim part
+        decoded_str = decode_part(access_token.split('.')[1])
+        logger.debug('MSI token retrieved: %s', decoded_str)
+        decoded = json.loads(decoded_str)
+
+        resource_id = decoded['xms_mirid']
+        managed_identity_info = {
+            self.MANAGED_IDENTITY_TYPE: self.MANAGED_IDENTITY_USER_ASSIGNED
+            if 'Microsoft.ManagedIdentity' in resource_id else self.MANAGED_IDENTITY_SYSTEM_ASSIGNED,
+            # The type of the ID provided with --username, only valid for a user-assigned managed identity
+            self.MANAGED_IDENTITY_ID_TYPE: id_type,
+            self.MANAGED_IDENTITY_TENANT_ID: decoded['tid'],
+            self.MANAGED_IDENTITY_CLIENT_ID: decoded['appid'],
+            self.MANAGED_IDENTITY_OBJECT_ID: decoded['oid'],
+            self.MANAGED_IDENTITY_RESOURCE_ID: resource_id
+        }
+        logger.warning('Using Managed Identity: %s', json.dumps(managed_identity_info))
+
+        return credential, managed_identity_info
 
     def get_user_credential(self, home_account_id, username):
         auth_profile = AuthProfile(self.authority, home_account_id, self.tenant_id, username)
@@ -161,6 +234,7 @@ class Identity:
 class ServicePrincipalCredentialCache:
     """Caches service principal secrets, and persistence will also be handled
     """
+
     # TODO: Persist to encrypted cache
     def __init__(self, async_persist=True):
         # AZURE_ACCESS_TOKEN_FILE is used by Cloud Console and not meant to be user configured
@@ -199,7 +273,7 @@ class ServicePrincipalCredentialCache:
                            "Trying credential under tenant %s, assuming that is an app credential.",
                            sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
             cred = matched[0]
-        return cred.get(_ACCESS_TOKEN, None),  cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
+        return cred.get(_ACCESS_TOKEN, None), cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
 
     def save_service_principal_cred(self, sp_entry):
         self.load_service_principal_creds()
@@ -210,7 +284,8 @@ class ServicePrincipalCredentialCache:
         if matched:
             # pylint: disable=line-too-long
             if (sp_entry.get(_ACCESS_TOKEN, None) != matched[0].get(_ACCESS_TOKEN, None) or
-                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE, None)):
+                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE,
+                                                                                       None)):
                 self._service_principal_creds.remove(matched[0])
                 self._service_principal_creds.append(sp_entry)
                 state_changed = True
