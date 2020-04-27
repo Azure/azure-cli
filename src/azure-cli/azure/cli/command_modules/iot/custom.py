@@ -514,9 +514,12 @@ def update_iot_hub_custom(instance,
     identityBased_fileUpload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
     if identityBased_fileUpload:
         instance.properties.storage_endpoints['$default'].authentication_type = AuthenticationType.IdentityBased
-        instance.properties.storage_endpoints['$default'].connection_string = None
         instance.properties.storage_endpoints['$default'].container_uri = fileupload_storage_container_uri
-    elif fileupload_storage_connectionstring is not None and fileupload_storage_container_name is not None:
+    else:
+        instance.properties.storage_endpoints['$default'].authentication_type = None
+        instance.properties.storage_endpoints['$default'].container_uri = None
+    # TODO - remove connection string and set containerURI once fileUpload SAS URL is enabled
+    if fileupload_storage_connectionstring is not None and fileupload_storage_container_name is not None:
         instance.properties.storage_endpoints['$default'].connection_string = fileupload_storage_connectionstring
         instance.properties.storage_endpoints['$default'].container_name = fileupload_storage_container_name
     elif fileupload_storage_connectionstring is not None:
@@ -934,10 +937,11 @@ def iot_message_enrichment_list(cmd, client, hub_name, resource_group_name=None)
 
 
 def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client, ResourceType
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
-    return hub.properties.device_streams if hub.properties.device_streams else {}
-
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_IOTHUB, api_version='2019-07-01-preview')
+    hub = client.iot_hub_resource.get(resource_group_name, hub_name)
+    return hub.properties.device_streams
 
 def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_wait=False):
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
