@@ -72,7 +72,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         self.cmd(
             'servicebus topic subscription list --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname}')
 
-        # update Subscription 
+        # update Subscription
         self.cmd(
             'servicebus topic subscription update --resource-group {rg} --namespace-name {namespacename} --topic-name '
             '{topicname} --name {subscriptionname} --max-delivery {maxdelivery} '
