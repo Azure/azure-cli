@@ -63,9 +63,9 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
                                                   private_endpoint_connection_name,
                                                   self.api_version)
         r = send_raw_request(cmd.cli_ctx, 'put', url, body=json.dumps(private_endpoint_connection))
-        query_counts = 3
+        query_counts = 10
         while query_counts:
-            time.sleep(10)
+            time.sleep(30)
             query_counts -= 1
             private_endpoint_connection = self.show_private_endpoint_connection(cmd,
                                                                                 resource_group_name,
@@ -123,6 +123,10 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
         if self.support_list:
             url = self._build_connections_url_endpoint(resource_group_name, self.rp, service_name, self.api_version)
             r = send_raw_request(cmd.cli_ctx, 'get', url)
+            try:
+                return r.json()['value']
+            except:
+                pass
             return r.json()
         else:
             url = self._build_resource_url_endpoint(resource_group_name, self.rp, service_name, self.api_version)

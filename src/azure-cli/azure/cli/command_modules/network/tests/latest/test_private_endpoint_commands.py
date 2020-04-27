@@ -213,5 +213,92 @@ class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection delete --id {sa_pec_id} -y')
 
 
+class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
+    def test_private_link_resource_acr(self):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20)
+        })
+        result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium').get_output_in_json()
+        self.kwargs['registry_id'] = result['id']
+        self.cmd('network private-link-resource list --id {registry_id}', checks=[
+            self.check('length(@)', 1)])
+
+    @ResourceGroupPreparer(location='centraluseuap')
+    def test_private_endpoint_connection_acr(self, resource_group):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20),
+            'vnet_name': self.create_random_name('testvnet', 20),
+            'subnet_name': self.create_random_name('testsubnet', 20),
+            'endpoint_name': self.create_random_name('priv_endpoint', 25),
+            'endpoint_conn_name': self.create_random_name('priv_endpointconn', 25),
+            'second_endpoint_name': self.create_random_name('priv_endpoint', 25),
+            'second_endpoint_conn_name': self.create_random_name('priv_endpointconn', 25),
+            'description_msg': 'somedescription'
+        })
+
+        # create subnet with disabled endpoint network policies
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
+
+        result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium').get_output_in_json()
+        self.kwargs['registry_id'] = result['id']
+
+        # add an endpoint and approve it
+        result = self.cmd(
+            'network private-endpoint create -n {endpoint_name} -g {rg} --subnet {subnet_name} --vnet-name {vnet_name}  '
+            '--private-connection-resource-id {registry_id} --group-ids registry --connection-name {endpoint_conn_name} --manual-request').get_output_in_json()
+        self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
+
+        result = self.cmd(
+            'network private-endpoint-connection list -g {rg} --name {registry_name} --type Microsoft.ContainerRegistry/registries').get_output_in_json()
+        self.kwargs['endpoint_request'] = result[0]['name']
+
+        self.cmd(
+            'network private-endpoint-connection approve -g {rg} --service-name {registry_name} -n {endpoint_request} --description {description_msg} --type Microsoft.ContainerRegistry/registries',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('properties.privateLinkServiceConnectionState.description', '{description_msg}')
+            ])
+
+        # add an endpoint and then reject it
+        self.cmd(
+            'network private-endpoint create -n {second_endpoint_name} -g {rg} --subnet {subnet_name} --vnet-name {vnet_name} --private-connection-resource-id {registry_id} --group-ids registry --connection-name {second_endpoint_conn_name} --manual-request')
+        result = self.cmd('network private-endpoint-connection list -g {rg} --name {registry_name} --type Microsoft.ContainerRegistry/registries').get_output_in_json()
+
+        # the connection request name starts with the registry / resource name
+        self.kwargs['second_endpoint_request'] = [conn['name'] for conn in result if
+                                                  self.kwargs['second_endpoint_name'].lower() in
+                                                  conn['properties']['privateEndpoint']['id'].lower()][0]
+
+        self.cmd(
+            'network private-endpoint-connection reject -g {rg} --service-name {registry_name} -n {second_endpoint_request} --description {description_msg} --type Microsoft.ContainerRegistry/registries',
+            checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                self.check('properties.privateLinkServiceConnectionState.description', '{description_msg}')
+            ])
+
+        # list endpoints
+        self.cmd('network private-endpoint-connection list -g {rg} -n {registry_name} --type Microsoft.ContainerRegistry/registries', checks=[
+            self.check('length(@)', '2'),
+        ])
+
+        # remove endpoints
+        self.cmd(
+            'network private-endpoint-connection delete -g {rg} --service-name {registry_name} -n {second_endpoint_request} --type Microsoft.ContainerRegistry/registries -y')
+        self.cmd('network private-endpoint-connection list -g {rg} -n {registry_name} --type Microsoft.ContainerRegistry/registries', checks=[
+            self.check('length(@)', '1'),
+        ])
+        self.cmd('network private-endpoint-connection show -g {rg} --service-name {registry_name} -n {endpoint_request} --type Microsoft.ContainerRegistry/registries', checks=[
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+            self.check('properties.privateLinkServiceConnectionState.description', '{description_msg}'),
+            self.check('name', '{endpoint_request}')
+        ])
+
+        self.cmd('network private-endpoint-connection delete -g {rg} --service-name {registry_name} -n {endpoint_request} --type Microsoft.ContainerRegistry/registries -y')
+        result = self.cmd('network private-endpoint-connection list -g {rg} -n {registry_name} --type Microsoft.ContainerRegistry/registries').get_output_in_json()
+        self.assertFalse(result)
+
+
 if __name__ == '__main__':
     unittest.main()
