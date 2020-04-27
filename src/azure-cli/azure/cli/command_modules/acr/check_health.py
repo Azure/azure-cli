@@ -31,9 +31,7 @@ DOCKER_PULL_WRONG_PLATFORM = 'cannot be used on this platform'
 
 # Utilities functions
 def print_pass(message):
-    from colorama import Fore, Style, init
-    init()
-    logger.warning(str(message) + " : " + Fore.GREEN + "OK" + Style.RESET_ALL)
+    logger.warning("%s : OK", str(message))
 
 
 def _handle_error(error, ignore_errors):
@@ -112,7 +110,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
         if stderr:
             if DOCKER_PULL_WRONG_PLATFORM in stderr:
                 print_pass("Docker pull of '{}'".format(IMAGE))
-                logger.warning("Image %s can be pulled but cannot be used on this platform", IMAGE)
+                logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
             else:
                 _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
