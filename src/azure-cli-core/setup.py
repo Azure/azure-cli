@@ -67,7 +67,7 @@ DEPENDENCIES = [
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests~=2.20',
     'six~=1.12',
-    'wheel>=0.30.0',
+    'wheel==0.30.0',
     'pkginfo>=1.5.0.1',
     'azure-mgmt-resource==9.0.0',
     'azure-mgmt-core==1.0.0'
