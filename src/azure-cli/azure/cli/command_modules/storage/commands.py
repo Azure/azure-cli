@@ -109,6 +109,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          'show_storage_account_connection_string')
         g.generic_update_command('update', getter_name='get_properties', setter_name='update',
                                  custom_func_name='update_storage_account', min_api='2016-12-01')
+        failover_confirmation = """
+        The secondary cluster will become the primary cluster after failover. Please understand the following impact to your storage account before you initiate the failover:
+            1. Please check the Last Sync Time using `az storage account show` with `--expand geoReplicationStats` and check the "geoReplicationStats" property. This is the data you may lose if you initiate the failover.
+            2. After the failover, your storage account type will be converted to locally redundant storage (LRS). You can convert your account to use geo-redundant storage (GRS).
+            3. Once you re-enable GRS/GZRS for your storage account, Microsoft will replicate data to your new secondary region. Replication time is dependent on the amount of data to replicate. Please note that there are bandwidth charges for the bootstrap. Please refer to doc: https://azure.microsoft.com/pricing/details/bandwidth/
+        """
+        g.command('failover', 'failover', supports_no_wait=True, is_preview=True,
+                  confirmation=failover_confirmation)
 
     with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE) as g:
         from ._validators import validate_key_name

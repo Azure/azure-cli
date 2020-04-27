@@ -136,6 +136,23 @@ examples:
         az storage account encryption-scope update --name myencryption --state Enabled --account-name mystorageaccount -g MyResourceGroup
 """
 
+helps['storage account failover'] = """
+type: command
+short-summary: Failover request can be triggered for a storage account in case of availability issues.
+long-summary: |
+    The failover occurs from the storage account's primary cluster to secondary cluster for (RA-)GRS/GZRS accounts. The secondary
+    cluster will become primary after failover. For more information, please refer to
+    https://docs.microsoft.com/en-us/azure/storage/common/storage-disaster-recovery-guidance.
+examples:
+  - name: Failover a storage account.
+    text: |
+        az storage account failover --account-name mystorageaccount -g MyResourceGroup
+  - name: Failover a storage account without waiting for complete.
+    text: |
+        az storage account failover --account-name mystorageaccount -g MyResourceGroup --no-wait
+        az storage account show --account-name mystorageaccount --expand geoReplicationStats
+"""
+
 helps['storage account generate-sas'] = """
 type: command
 parameters:
