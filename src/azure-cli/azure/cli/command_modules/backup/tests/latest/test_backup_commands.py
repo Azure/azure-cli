@@ -188,6 +188,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm2': vm2
         })
 
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+
         self.kwargs['policy1_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy1}', checks=[
             self.check('name', '{policy1}'),
             self.check('resourceGroup', '{rg}')
@@ -207,6 +209,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
+        self.kwargs['policy1_json']['properties']['instantRpDetails']['azureBackupRgNamePrefix'] = 'RG_prefix'
+        self.kwargs['policy1_json']['properties']['instantRpDetails']['azureBackupRgNameSuffix'] = 'RG_suffix'
         self.kwargs['policy1_json'] = json.dumps(self.kwargs['policy1_json'])
 
         self.cmd("backup policy set -g {rg} -v {vault} --policy '{policy1_json}'", checks=[
