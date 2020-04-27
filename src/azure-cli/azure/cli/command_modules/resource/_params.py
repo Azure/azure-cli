@@ -93,6 +93,10 @@ def load_arguments(self, _):
         c.argument('scope', help='Fully-qualified scope for retrieving links.')
         c.argument('filter_string', options_list=['--filter', c.deprecate(target='--filter-string', redirect='--filter', hide=True)], help='Filter string for limiting results.')
 
+    with self.argument_context('resource tag') as c:
+        c.argument('is_incremental', action='store_true', options_list=['--is-incremental', '-i'],
+                   help='The option to add tags incrementally without deleting the original tags. If the key of new tag and original tag are duplicated, the original value will be overwritten.')
+
     with self.argument_context('provider') as c:
         c.ignore('top')
         c.argument('resource_provider_namespace', options_list=['--namespace', '-n'], completer=get_providers_completion_list, help=_PROVIDER_HELP_TEXT)
@@ -417,14 +421,16 @@ def load_arguments(self, _):
     with self.argument_context('rest') as c:
         c.argument('method', options_list=['--method', '-m'], arg_type=get_enum_type(['head', 'get', 'put', 'post', 'delete', 'options', 'patch'], default='get'),
                    help='HTTP request method')
-        c.argument('uri', options_list=['--uri', '-u'], help='request uri. For uri without host, CLI will assume "https://management.azure.com/". '
-                   "Common token '{subscriptionId}' will be replaced with the current subscription ID specified by 'az account set'")
+        c.argument('uri', options_list=['--url', '--uri', '-u'], help='Request URL. If it doesn\'t start with a host, '
+                   'CLI assumes it as an Azure resource ID and prefixes it with the ARM endpoint of the current '
+                   'cloud shown by `az cloud show --query endpoints.resourceManager`. Common token {subscriptionId} '
+                   'will be replaced with the current subscription ID specified by `az account set`')
         c.argument('headers', nargs='+', help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
         c.argument('uri_parameters', nargs='+', help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
-        c.argument('skip_authorization_header', action='store_true', help='do not auto append "Authorization" header')
-        c.argument('body', options_list=['--body', '-b'], help='request body. Use @{file} to load from a file')
+        c.argument('skip_authorization_header', action='store_true', help='Do not auto-append Authorization header')
+        c.argument('body', options_list=['--body', '-b'], help='Request body. Use @{file} to load from a file. For quoting issues in different terminals, see https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues')
         c.argument('output_file', help='save response payload to a file')
-        c.argument('resource', help='Resource url for which CLI should acquire a token in order to access '
-                   'the service. The token will be placed in the "Authorization" header. By default, '
-                   'CLI can figure this out based on "--url" argument, unless you use ones not in the list '
+        c.argument('resource', help='Resource url for which CLI should acquire a token from AAD in order to access '
+                   'the service. The token will be placed in the Authorization header. By default, '
+                   'CLI can figure this out based on --url argument, unless you use ones not in the list '
                    'of "az cloud show --query endpoints"')

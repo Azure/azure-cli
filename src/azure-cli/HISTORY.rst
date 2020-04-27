@@ -3,6 +3,116 @@
 Release History
 ===============
 
+2.4.0
+++++++
+
+**ACR**
+
+* `az acr run --cmd`: disable working directory override (#12877)
+* Support dedicated data endpoint (#12967)
+
+**AKS**
+
+* `az aks list -o table` should show privateFqdn as fqdn for private clusters (#12784)
+* Add --uptime-sla (#12772)
+* Update containerservice package (#12964)
+* Add node public IP support. (#13015)
+* Fix typo in the help command (#13055)
+
+**AppConfig**
+
+* Resolve key vault reference for kv list and export commands (#12893)
+* Bug fix for list key values (#12926)
+
+**AppService**
+
+* `az functionapp create`: Changed the way linuxFxVersion was being set for dotnet linux function apps. This should fix a bug that was preventing dotnet linux consumption apps from being created. (#12817)
+* [BREAKING CHANGE] `az webapp create`: fix to keep existing AppSettings with az webapp create. (#12865)
+* [BREAKING CHANGE] `az webapp up`: fix to create RG for az webapp up command when using -g flag. (#12865)
+* [BREAKING CHANGE] `az webapp config`: fix to show values for non-JSON output with az webapp config connection-string list (#12865)
+
+**ARM**
+
+* `az deployment create/validate`: Add parameter `--no-prompt` to support skipping the prompt of missing parameters for ARM template (#11972)
+* `az deployment group/mg/sub/tenant validate`: Support comments in deployment parameter file (#12389)
+* `az deployment`: Remove `is_preview` for parameter `--handle-extended-json-format` (#12943)
+* `az deployment group/mg/sub/tenant cancel`: Support cancel deployment for ARM template (#12252)
+* `az deployment group/mg/sub/tenant validate`: Improve the error message when deployment verification fails (#12241)
+* `az deployment-scripts`: Add new commands for DeploymentScripts (#12928)
+* `az resource tag`: Add parameter `--is-incremental` to support adding tags to resource incrementally (#12736)
+
+**ARO**
+
+* `az aro`:  Add Azure RedHat OpenShift V4 aro command module (#12793)
+
+**Batch**
+
+* Update Batch API (#12813)
+
+**Compute**
+
+* `az sig image-version create`: Add storage account type Premium_LRS (#12919)
+* `az vmss update`: Fix terminate notification update issue (#12948)
+* `az vm/vmss create`: Add support for specialized image version (#12997)
+* SIG API Version 2019-12-01. (#12899)
+* `az sig image-version create`: Add --target-region-encryption. (#12899)
+* Fix tests fail when running in serial due to keyvault name is duplicated in global in-momery cache
+
+**CosmosDB**
+
+* Support `az cosmosdb private-link-resource/private-endpoint-connection` (#12960)
+
+**IoT Central**
+
+* Deprecate `az iotcentral` (#12681)
+* Add `az iot central` command module (#12681)
+
+**Monitor**
+
+* Support private link scenario for monitor (#12931)
+* Fix wrong mocking way in test_monitor_general_operations.py
+
+**Network**
+
+* Deprecate sku for public ip update command (#12898)
+* `az network private-endpoint`: Support private dns zone group. (#13038)
+* Enable local context feature for vnet/subnet parameter (#13059)
+* Fix wrong usage example in test_nw_flow_log_delete
+
+**Packaging**
+
+* Drop support for Ubuntu/Disco package (#13036)
+
+**RBAC**
+
+* `az ad app create/update`: support --optional-claims as a parameter (#12954)
+
+**RDBMS**
+
+* Add Azure active directory administrator commands for PostgreSQL and MySQL (#12812)
+
+**Service Fabric**
+
+* Fix #12891: `az sf application update --application-parameters` removes old parameters that are not in the request (#12992)
+* Fix #12470 az sf create cluster, fix bugs in update durability and reliability and find vmss correctly through the code given a node type name (#12731)
+
+**SQL**
+
+* Add `az sql mi op list`, `az sql mi op get`, `az sql mi op cancel` (#12667)
+* `az sql midb`: update/show long term retention policy,  show/delete long term retention backups, restore long term retention backup (#12712)
+
+**Storage**
+
+* Upgrade azure-mgmt-storage to 9.0.0 (#12799)
+* `az storage logging off`: Support turning off logging for a storage account (#12918)
+* `az storage account update`: Enable key auto-rotated for CMK (#12932)
+* `az storage account encryption-scope create/update/list/show`: Add support to customize encryption scope. (#12425)
+* `az storage container create`: Add --default-encryption-scope and --deny-encryption-scope-override to set encryption scope for container level. (#12425)
+
+**Survey**
+
+* Add switch to turn off survey link (#13041)
+
 2.3.1
 ++++++
 

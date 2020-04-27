@@ -216,6 +216,12 @@ parameters:
   - name: --admin-username -u
     type: string
     short-summary: User account to create on node VMs for SSH access.
+  - name: --windows-admin-username
+    type: string
+    short-summary: Username to create on Windows node VMs.
+  - name: --windows-admin-password
+    type: string
+    short-summary: Password to create on Windows node VMs.
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
@@ -323,6 +329,9 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --enable-node-public-ip
+    type: bool
+    short-summary: Enable VMSS node public IP.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
@@ -368,6 +377,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
   - name: Create a kubernetes cluster with userDefinedRouting, standard load balancer SKU and a custom subnet preconfigured with a route table
     text: az aks create -g MyResourceGroup -n MyManagedCluster --outbound-type userDefinedRouting --load-balancer-sku standard --vnet-subnet-id customUserSubnetVnetID
+  - name: Create a kubernetes cluster with supporting Windows agent pools.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --vm-set-type VirtualMachineScaleSet --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$'
 """
 
 helps['aks update'] = """
@@ -613,6 +624,9 @@ parameters:
   - name: --zones -z
     type: string array
     short-summary: Availability zones where agent nodes will be placed.
+  - name: --enable-node-public-ip
+    type: bool
+    short-summary: Enable VMSS node public IP.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.

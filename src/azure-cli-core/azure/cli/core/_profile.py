@@ -593,6 +593,18 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
+    def get_msal_token(self, scopes, data):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        account = self.get_subscription()
+        username = account[_USER_ENTITY][_USER_NAME]
+        tenant = account[_TENANT_ID] or 'common'
+        _, refresh_token, _, _ = self.get_refresh_token()
+        certificate = self._creds_cache.retrieve_msal_token(tenant, scopes, data, refresh_token)
+        return username, certificate
+
     def get_refresh_token(self, resource=None,
                           subscription=None):
         account = self.get_subscription(subscription)
@@ -1008,6 +1020,19 @@ class CredsCache(object):
             self.persist_cached_creds()
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
 
+    def retrieve_msal_token(self, tenant, scopes, data, refresh_token):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        from azure.cli.core._msal import AdalRefreshTokenBasedClientApplication
+        tenant = tenant or 'organizations'
+        authority = self._ctx.cloud.endpoints.active_directory + '/' + tenant
+        app = AdalRefreshTokenBasedClientApplication(_CLIENT_ID, authority=authority)
+        result = app.acquire_token_silent(scopes, None, data=data, refresh_token=refresh_token)
+
+        return result["access_token"]
+
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
@@ -1202,6 +1227,11 @@ def _get_authorization_code_worker(authority_url, resource, results):
             break
         except socket.error as ex:
             logger.warning("Port '%s' is taken with error '%s'. Trying with the next one", port, ex)
+        except UnicodeDecodeError:
+            logger.warning("Please make sure there is no international (Unicode) character in the computer name "
+                           r"or C:\Windows\System32\drivers\etc\hosts file's 127.0.0.1 entries. "
+                           "For more details, please see https://github.com/Azure/azure-cli/issues/12957")
+            break
 
     if reply_url is None:
         logger.warning("Error: can't reserve a port for authentication reply url")
