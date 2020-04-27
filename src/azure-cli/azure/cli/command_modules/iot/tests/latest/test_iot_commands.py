@@ -15,15 +15,12 @@ class IoTHubTest(ScenarioTest):
     @StorageAccountPreparer()
     def test_iot_hub(self, resource_group, resource_group_location, storage_account):
         hub = 'iot-hub-for-test-11'
-        identity_hub = 'iot-identity-enabled-hub'
         rg = resource_group
         location = resource_group_location
         containerName = 'iothubcontainer1'
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         ehConnectionString = self._get_eventhub_connectionstring(rg)
         subscription_id = self._get_current_subscription()
-        identity_based_auth = 'identityBased'
-        key_based_auth = 'keyBased'
         
         # Test hub life cycle in free tier
         self.cmd('iot hub create -n {0} -g {1} --sku F1'.format(hub, rg), expect_failure=True)
@@ -279,13 +276,6 @@ class IoTHubTest(ScenarioTest):
         assert len(endpoint['serviceBusTopics']) == 0
         assert len(endpoint['eventHubs']) == 1
 
-        # TODO - ensure hub is created with managed identity, and add an MSI-enabled storage endpoint and event hub endpoint.
-        event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
-        storage_identity_endpoint_name = 'IdentityStorage'
-        storage_identity_container_name = 'IdentityContainer'
-        storage_identity_endpoint_uri = 'https://IdentityStorage.windows.core.net'
-        eventhub_endpoint_uri = 'eh://test'
-        entity_path = 'entity'
 
 
         # Test 'az iot hub route create'
@@ -408,57 +398,57 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
-        # Test IoT Hub create with identity
-        self.cmd('deployment group create --name {0} -g {1} --template-file {2} --parameters name={3} --parameters location={4}'
-                 .format("identity-hub-deployment", resource_group, './template.json', identity_hub, location))
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='westus2')
+    @StorageAccountPreparer()
+    def test_identity_hub(self, resource_group, resource_group_location, storage_account):
+        # Test IoT Hub create with identity
+        subscription_id = self._get_current_subscription()
+        rg = resource_group
+        location = resource_group_location
+        
+        identity_hub = 'iot-identity-enabled-hub-test'
+        identity_based_auth = 'identityBased'
+        key_based_auth = 'keyBased'
+        event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
+
+        containerName = 'iothubcontainer1'
+        storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
+        endpoint_name = 'Event1'
+        endpoint_type = 'EventHub'
+        eventhub_endpoint_uri = 'eh://test'
+        storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
+        entity_path = 'entity'
+        
+        #identity hub creation
+        import os
+        templateFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'template.json')
+        self.cmd('deployment group create --name {0} -g {1} --template-file "{2}" --parameters name={3} --parameters location={4}'.format("identity-hub-deployment", resource_group, templateFile, identity_hub, location))
         self.cmd('iot hub show --name {0}'.format(identity_hub),checks=[
                          self.check('properties.minTlsVersion', '1.2'),
                          self.check('identity.type', 'SystemAssigned')])
 
         # Test 'az iot hub update' with Identity-based fileUpload
-        storage_container_uri = 'https://testStorage.blob.windows.core/container'
-        updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fcs {2} --fcu {3}'
-                              .format(identity_hub, identity_based_auth, storageConnectionString, storage_container_uri)).get_output_in_json()
+        updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fcs {2} --fc {3}'.format(identity_hub, identity_based_auth, storageConnectionString, containerName)).get_output_in_json()
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
-        assert updated_hub['properties']['storageEndpoints']['$default']['connectionString'] == None
-        # assert updated_hub['properties']['storageEndpoints']['$default']['containerUri'] == storage_container_uri
-
-
-        # Test 'az iot hub routing-endpoint create' with Identity-based storage endpoint (no connection string)
-        endpoint = self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} '
-                            '--container-name {6} --encoding {7} -b {8} -w {9} --auth-type {10} --endpoint-uri {11}'
-                            .format(identity_hub, rg, storage_identity_endpoint_name, storage_endpoint_type, rg, subscription_id,
-                                    storage_identity_container_name, storage_encoding_format, storage_batch_frequency, 
-                                    storage_chunk_size, identity_based_auth, storage_identity_endpoint_uri)).get_output_in_json()
-
-        assert len(endpoint['storageContainers']) == 1
-        assert endpoint["storageContainers"][1]["containerName"] == storage_identity_container_name
-        assert endpoint["storageContainers"][1]["name"] == storage_identity_endpoint_name
-        assert endpoint["storageContainers"][1]["batchFrequencyInSeconds"] == storage_batch_frequency
-        assert endpoint["storageContainers"][1]["maxChunkSizeInBytes"] == 1048576 * storage_chunk_size
-        assert endpoint["storageContainers"][1]["fileNameFormat"] == storage_file_name_format
-        assert endpoint["storageContainers"][1]["authenticationType"] == identity_based_auth
-        assert endpoint["storageContainers"][1]["endpointUri"] == storage_identity_endpoint_uri
-        assert endpoint["storageContainers"][1]["connectionString"] is None
-        assert len(endpoint['serviceBusQueues']) == 0
-        assert len(endpoint['serviceBusTopics']) == 0
-        assert len(endpoint['eventHubs']) == 1
+        assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
+        # TODO - implement file upload container URI instead of connectionString once implemented in service
 
         # Test 'az iot hub routing-endpoint create' with Identity-based event hub endpoint
         self.cmd('iot hub routing-endpoint create --hub-name {0} -g {1} -n {2} -t {3} -r {4} -s {5} --auth-type {6} --endpoint-uri {7} --entity-path {8}'
                  .format(identity_hub, rg, event_hub_identity_endpoint_name, endpoint_type, rg, subscription_id, identity_based_auth, eventhub_endpoint_uri, entity_path),
                  checks=[self.check('length(eventHubs[*])', 1),
-                         self.check('eventHubs[1].resourceGroup', rg),
-                         self.check('eventHubs[1].name', event_hub_identity_endpoint_name),
-                         self.check('eventHubs[1].authenticationType', identity_based_auth),
-                         self.check('eventHubs[1].connectionString', None),
-                         self.check('eventHubs[1].endpointUri', eventhub_endpoint_uri),
-                         self.check('eventHubs[1].entityPath', entity_path),
+                         self.check('eventHubs[0].resourceGroup', rg),
+                         self.check('eventHubs[0].name', event_hub_identity_endpoint_name),
+                         self.check('eventHubs[0].authenticationType', identity_based_auth),
+                         self.check('eventHubs[0].connectionString', None),
+                         self.check('eventHubs[0].endpointUri', eventhub_endpoint_uri),
+                         self.check('eventHubs[0].entityPath', entity_path),
                          self.check('length(serviceBusQueues[*])', 0),
                          self.check('length(serviceBusTopics[*])', 0),
-                         self.check('length(storageContainers[*])', 1)])
-    
+                         self.check('length(storageContainers[*])', 0)])
+            
         self.cmd('iot hub delete -n {0}'.format(identity_hub), checks=self.is_empty())
 
     def _get_eventhub_connectionstring(self, rg):
