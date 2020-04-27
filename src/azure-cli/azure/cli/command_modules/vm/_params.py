@@ -725,6 +725,13 @@ def load_arguments(self, _):
             c.argument('identity_role', options_list=['--role'], arg_group=arg_group, help="Role name or id the system assigned identity will have")
             c.ignore('identity_role_id')
 
+    with self.argument_context('vm auto-shutdown') as c:
+        c.argument('disable', arg_type=get_three_state_flag(), help='Disable auto-shutdown for VM')
+        c.argument('email', help='The email recipient to send notifications to (can be a list of semi-colon separated email addresses)')
+        c.argument('time', help='The time of day the schedule will occur. Format: hhmm. Example: 1730')
+        c.argument('webhook', help='The webhook URL to which the notification will be sent')
+        c.argument('location', validator=get_default_location_from_resource_group)
+
     for scope in ['vm diagnostics', 'vmss diagnostics']:
         with self.argument_context(scope) as c:
             c.argument('version', help='version of the diagnostics extension. Will use the latest if not specfied')
