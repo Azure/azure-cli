@@ -199,7 +199,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs file upload -p {} -f {} -s "{}"', account_info, file_path, filesystem, local_file)
 
         # Upload File to an existing non-empty file with default overwrite=false
-        new_local_file = self.create_temp_file(1024)
+        new_local_file = self.create_temp_file(512)
         with self.assertRaisesRegexp(CLIError, 'You cannot upload to an existing non-empty file with overwrite=false.'):
             self.storage_cmd('storage fs file upload -p {} -f {} -s "{}"', account_info, file_path, filesystem,
                              new_local_file)
@@ -225,7 +225,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         # Download file
         local_dir = self.create_temp_dir()
-        self.storage_cmd('storage fs file download -p {} -f {} -d {}', account_info, file_path, filesystem, local_dir)
+        self.storage_cmd('storage fs file download -p {} -f {} -d "{}"', account_info, file_path, filesystem, local_dir)
         import os
         self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_dir)))
 
@@ -237,7 +237,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs file exists -p {} -f {}', account_info, file_path, filesystem) \
             .assert_with_checks(JMESPathCheck('exists', False))
         self.storage_cmd('storage fs file exists -p {} -f {}', account_info, file, new_filesystem) \
-            .assert_with_checks(JMESPathCheck('exists', False))
+            .assert_with_checks(JMESPathCheck('exists', True))
 
         self.storage_cmd('storage fs file delete -p {} -f {} -y', account_info, file, new_filesystem)
 
