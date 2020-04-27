@@ -956,16 +956,16 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l eastus2 -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Restrictions'])
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Restrictions'])
         # spot check the first 4 entries
         fd_found, ud_found, size_found, zone_found = False, False, False, False
         for l in lines[2:]:
             parts = l.split()
-            if not fd_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Aligned', 'MaximumPlatformFaultDomainCount=3']):
+            if not fd_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Classic', 'None']):
                 fd_found = True
-            elif not ud_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Classic', 'MaximumPlatformFaultDomainCount=3']):
+            elif not ud_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Aligned', 'None']):
                 ud_found = True
-            elif not size_found and parts[:3] == ['virtualMachines', 'eastus2', 'Standard_DS1_v2']:
+            elif not size_found and parts[:3] == ['disks', 'eastus2', 'Standard_LRS']:
                 size_found = True
             elif not zone_found and parts[3] == '1,2,3':
                 zone_found = True
