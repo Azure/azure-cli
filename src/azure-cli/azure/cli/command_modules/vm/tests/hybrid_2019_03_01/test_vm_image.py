@@ -56,7 +56,6 @@ class TestVMImage(unittest.TestCase):
         self.assertEqual(parts[2], ubuntu_image['sku'])
         self.assertEqual(parts[3], ubuntu_image['version'])
 
-    @unittest.skip('It will not throw an exception now. Instead, it will failover to a local copy.')
     @mock.patch('azure.cli.core.cloud.get_active_cloud', autospec=True)
     def test_when_alias_doc_is_missing(self, mock_get_active_cloud):
         from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
@@ -67,8 +66,9 @@ class TestVMImage(unittest.TestCase):
         # assert
         cli_ctx = DummyCli()
         cli_ctx.cloud = mock_cloud
-        with self.assertRaises(CLIError):
-            load_images_from_aliases_doc(cli_ctx)
+        images = load_images_from_aliases_doc(cli_ctx)
+        self.assertEqual(images[0], {'urnAlias': 'CentOS', 'publisher': 'OpenLogic',
+                                     'offer': 'CentOS', 'sku': '7.5', 'version': 'latest'})
 
 
 if __name__ == '__main__':
