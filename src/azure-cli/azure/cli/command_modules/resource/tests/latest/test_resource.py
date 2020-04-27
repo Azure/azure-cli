@@ -950,6 +950,47 @@ class DeploymentThruUriTest(ScenarioTest):
                  checks=self.is_empty())
 
 
+class DeploymentWhatIfAtResourceGroupScopeTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_what_if')
+    def test_resource_group_level_what_if(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'storage_account_deploy.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'storage_account_deploy_parameters.json').replace('\\', '\\\\'),
+        })
+
+        deployment_output = self.cmd('deployment group create --resource-group {rg} --template-file {tf}').get_output_in_json()
+        self.kwargs['storage_account_id'] = deployment_output['properties']['outputs']['storageAccountId']['value']
+
+        self.cmd('deployment group what-if --resource-group {rg} --template-file {tf} --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+            self.check("changes[?resourceId == '{storage_account_id}'].changeType | [0]", 'Modify'),
+            self.check("changes[?resourceId == '{storage_account_id}'] | [0].delta[?path == 'sku.name'] | [0].propertyChangeType", 'Modify'),
+            self.check("changes[?resourceId == '{storage_account_id}'] | [0].delta[?path == 'sku.name'] | [0].before", 'Standard_LRS'),
+            self.check("changes[?resourceId == '{storage_account_id}'] | [0].delta[?path == 'sku.name'] | [0].after", 'Standard_GRS')
+        ])
+
+
+class DeploymentWhatIfAtSubscriptionScopeTest(ScenarioTest):
+    def test_subscription_level_what_if(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'policy_definition_deploy.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'policy_definition_deploy_parameters.json').replace('\\', '\\\\'),
+        })
+
+        deployment_output = self.cmd('deployment sub create --location westus --template-file {tf}').get_output_in_json()
+        self.kwargs['policy_definition_id'] = deployment_output['properties']['outputs']['policyDefinitionId']['value']
+
+        self.cmd('deployment sub what-if --location westus --template-file {tf} --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+            self.check("changes[?resourceId == '{policy_definition_id}'].changeType | [0]", 'Modify'),
+            self.check("changes[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].propertyChangeType", 'Modify'),
+            self.check("changes[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].before", 'northeurope'),
+            self.check("changes[?resourceId == '{policy_definition_id}'] | [0].delta[?path == 'properties.policyRule.if.equals'] | [0].after", 'westeurope'),
+        ])
+
+
 class DeploymentScriptsTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_scripts')
     def test_list_all_deployment_scripts(self, resource_group):
