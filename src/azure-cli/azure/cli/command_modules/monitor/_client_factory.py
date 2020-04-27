@@ -119,3 +119,7 @@ def cf_log_analytics_workspace_linked_service(cli_ctx, _):
 
 def cf_log_analytics_cluster(cli_ctx, _):
     return _log_analytics_client_factory(cli_ctx).clusters
+
+
+def cf_log_analytics_linked_storage(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).linked_storage_accounts
