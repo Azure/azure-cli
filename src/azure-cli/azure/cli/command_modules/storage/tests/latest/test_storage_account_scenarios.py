@@ -931,8 +931,8 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
 
 class StorageAccountSkuScenarioTest(ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-    @ResourceGroupPreparer(name_prefix='clistorage', location='eastus')
-    @StorageAccountPreparer(name_prefix='clistoragesku', location='eastus', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    @StorageAccountPreparer(name_prefix='clistoragesku', location='westus2', kind='StorageV2', sku='Standard_ZRS')
     def test_storage_account_sku(self, resource_group, storage_account):
         self.kwargs = {
             'gzrs_sa': self.create_random_name(prefix='cligzrs', length=24),
@@ -949,9 +949,9 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
             self.check('name', '{gzrs_sa}')
         ])
 
-        # Convert LRS to GZRS
+        # Convert RS to GZRS
         self.cmd('az storage account show -n {sa} -g {rg}', checks=[
-            self.check('sku.name', 'Standard_LRS'),
+            self.check('sku.name', 'Standard_ZRS'),
             self.check('name', '{sa}')
         ])
 
@@ -964,3 +964,5 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
             self.check('sku.name', '{GZRS}'),
             self.check('name', '{sa}')
         ])
+
+        self.cmd('az storage account delete -n {gzrs_sa} -g {rg} -y')
