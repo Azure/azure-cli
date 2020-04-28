@@ -14,7 +14,7 @@ from knack.util import CLIError
 # pylint: disable=too-many-lines
 
 
-class SBNamespaceCURDScenarioTest(ScenarioTest):
+class SBNSMigrationCURDScenarioTest(ScenarioTest):
     from azure_devtools.scenario_tests import AllowLargeResponse
 
     # Test playback fails and the live-only flag will be removed once it is addressed

@@ -21,7 +21,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-04-21T06:04:58Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-04-28T00:15:37Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:03 GMT
+      - Tue, 28 Apr 2020 00:15:42 GMT
       expires:
       - '-1'
       pragma:
@@ -72,10 +72,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"049ff119-63eb-4e37-b760-05895e77f590\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"47684a2e-f423-4e77-b040-3161dca23862\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"6c1528ff-6350-4a78-983f-3f5cabccb229\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"51a1507d-48a0-4b57-8346-b8c8e86f545c\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
@@ -84,7 +84,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2f89862c-aea5-4e55-9110-ecbb0ac75259?api-version=2020-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/95a93753-cb9b-460a-bf0a-dbba11a41021?api-version=2020-03-01
       cache-control:
       - no-cache
       content-length:
@@ -92,7 +92,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:05 GMT
+      - Tue, 28 Apr 2020 00:15:46 GMT
       expires:
       - '-1'
       pragma:
@@ -105,9 +105,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ad424817-ddf9-47bb-be54-bd1b03b609d1
+      - 94c6f136-cf59-431a-afbf-9d777a32333c
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 201
       message: Created
@@ -128,19 +128,19 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2f89862c-aea5-4e55-9110-ecbb0ac75259?api-version=2020-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/95a93753-cb9b-460a-bf0a-dbba11a41021?api-version=2020-03-01
   response:
     body:
-      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '29'
+      - '30'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:08 GMT
+      - Tue, 28 Apr 2020 00:15:48 GMT
       expires:
       - '-1'
       pragma:
@@ -157,7 +157,107 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5ef356a0-c08b-4a32-9731-f23dd3209a00
+      - 36a07942-e663-4db3-8b12-cce3fa8f01e0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.3.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/95a93753-cb9b-460a-bf0a-dbba11a41021?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 28 Apr 2020 00:15:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 87d969f4-873c-4ed8-bed0-09dabe0827ea
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.3.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/95a93753-cb9b-460a-bf0a-dbba11a41021?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 28 Apr 2020 00:16:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b35f11db-2f35-4094-a83c-133144a673bf
     status:
       code: 200
       message: OK
@@ -182,10 +282,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"e276af2b-65ca-497a-8d48-9d6c280ff78e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"cd5124af-cdc6-4353-b44a-d6d3ab58ee2b\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"6c1528ff-6350-4a78-983f-3f5cabccb229\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"51a1507d-48a0-4b57-8346-b8c8e86f545c\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
@@ -198,9 +298,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:08 GMT
+      - Tue, 28 Apr 2020 00:16:09 GMT
       etag:
-      - W/"e276af2b-65ca-497a-8d48-9d6c280ff78e"
+      - W/"cd5124af-cdc6-4353-b44a-d6d3ab58ee2b"
       expires:
       - '-1'
       pragma:
@@ -217,7 +317,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 147e96fb-46fe-41bd-aab0-fd850c78735a
+      - 85a44be7-5c4c-4bcf-ae9c-5ab490605c15
     status:
       code: 200
       message: OK
@@ -243,7 +343,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-04-21T06:04:58Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-04-28T00:15:37Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -252,7 +352,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:09 GMT
+      - Tue, 28 Apr 2020 00:16:09 GMT
       expires:
       - '-1'
       pragma:
@@ -294,10 +394,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"65db5387-dba7-45cb-b11e-956e5225c06d\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5004ad08-2c37-4d22-891d-94f362c510f2\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"f75a2451-f21a-4f82-bf6a-389d3fd86de3\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"adfe1e2e-42df-4644-b308-b6e599f470c3\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
@@ -306,7 +406,7 @@ interactions:
       azure-asyncnotification:
       - Enabled
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/18bf948c-854e-4dee-8d32-61a67d3eb473?api-version=2020-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f3562870-9314-4186-a377-5138cbe861c6?api-version=2020-03-01
       cache-control:
       - no-cache
       content-length:
@@ -314,7 +414,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:10 GMT
+      - Tue, 28 Apr 2020 00:16:11 GMT
       expires:
       - '-1'
       pragma:
@@ -327,7 +427,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 8e209f21-ef3e-4b9d-93ca-b4ab4d671cc1
+      - 662ce859-4094-4ef3-8c89-e2f760419449
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -350,7 +450,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/18bf948c-854e-4dee-8d32-61a67d3eb473?api-version=2020-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f3562870-9314-4186-a377-5138cbe861c6?api-version=2020-03-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -362,7 +462,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:13 GMT
+      - Tue, 28 Apr 2020 00:16:14 GMT
       expires:
       - '-1'
       pragma:
@@ -379,7 +479,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - e3ead6ef-23e5-4c93-b8b3-d5bbbe8b93e7
+      - 8b5cb0f4-a601-4bfb-b81e-6d4ea2406c6b
     status:
       code: 200
       message: OK
@@ -404,10 +504,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"a676d040-506b-4ecd-83c1-10a3f34d4c7f\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9544e8a2-48da-4cc2-99bf-6092462d69de\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"f75a2451-f21a-4f82-bf6a-389d3fd86de3\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"adfe1e2e-42df-4644-b308-b6e599f470c3\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
@@ -420,9 +520,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:13 GMT
+      - Tue, 28 Apr 2020 00:16:14 GMT
       etag:
-      - W/"a676d040-506b-4ecd-83c1-10a3f34d4c7f"
+      - W/"9544e8a2-48da-4cc2-99bf-6092462d69de"
       expires:
       - '-1'
       pragma:
@@ -439,7 +539,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 9caf2976-7557-446c-949f-6f2eec9e9d5d
+      - a200c94f-ae39-438d-87a0-2e3c0ffcc602
     status:
       code: 200
       message: OK
@@ -466,10 +566,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"e276af2b-65ca-497a-8d48-9d6c280ff78e\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"cd5124af-cdc6-4353-b44a-d6d3ab58ee2b\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"6c1528ff-6350-4a78-983f-3f5cabccb229\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"51a1507d-48a0-4b57-8346-b8c8e86f545c\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
@@ -482,9 +582,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:14 GMT
+      - Tue, 28 Apr 2020 00:16:14 GMT
       etag:
-      - W/"e276af2b-65ca-497a-8d48-9d6c280ff78e"
+      - W/"cd5124af-cdc6-4353-b44a-d6d3ab58ee2b"
       expires:
       - '-1'
       pragma:
@@ -501,7 +601,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5b3c025c-879f-4cfd-a114-c7a9934564ff
+      - e5a39ab6-8938-4fee-84ad-5c1c21ba18a3
     status:
       code: 200
       message: OK
@@ -536,15 +636,15 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"ee5cd276-2997-419d-8b95-d65b33c55184\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"3975c808-4ea1-4ccd-bd91-ec6f08d59675\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"6c1528ff-6350-4a78-983f-3f5cabccb229\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"51a1507d-48a0-4b57-8346-b8c8e86f545c\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"ee5cd276-2997-419d-8b95-d65b33c55184\\\"\",\r\n
+        \       \"etag\": \"W/\\\"3975c808-4ea1-4ccd-bd91-ec6f08d59675\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -553,7 +653,7 @@ interactions:
         false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a1b10d92-de42-4588-911f-80d2158d1eee?api-version=2020-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4fa85d48-8aeb-46f9-8a34-d08d4b23332b?api-version=2020-03-01
       cache-control:
       - no-cache
       content-length:
@@ -561,7 +661,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:14 GMT
+      - Tue, 28 Apr 2020 00:16:14 GMT
       expires:
       - '-1'
       pragma:
@@ -578,7 +678,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b6d2be5b-ccf8-4b24-8d5e-338190a93758
+      - 05ab4c7d-6697-4a2b-a86c-0136a33282cc
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -601,7 +701,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a1b10d92-de42-4588-911f-80d2158d1eee?api-version=2020-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4fa85d48-8aeb-46f9-8a34-d08d4b23332b?api-version=2020-03-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -613,7 +713,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:18 GMT
+      - Tue, 28 Apr 2020 00:16:18 GMT
       expires:
       - '-1'
       pragma:
@@ -630,7 +730,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - b9ac55fd-1041-4654-95ad-dd4f82ea953b
+      - e9704564-5329-466d-ad99-212f483c52d3
     status:
       code: 200
       message: OK
@@ -655,15 +755,15 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1\",\r\n
-        \ \"etag\": \"W/\\\"3de599d6-ad8b-4e15-a784-3af82f3e8470\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"ce75655b-1555-4fa6-845b-4f93bab63f8d\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"6c1528ff-6350-4a78-983f-3f5cabccb229\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"51a1507d-48a0-4b57-8346-b8c8e86f545c\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"default\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default\",\r\n
-        \       \"etag\": \"W/\\\"3de599d6-ad8b-4e15-a784-3af82f3e8470\\\"\",\r\n
+        \       \"etag\": \"W/\\\"ce75655b-1555-4fa6-845b-4f93bab63f8d\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -678,9 +778,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:18 GMT
+      - Tue, 28 Apr 2020 00:16:18 GMT
       etag:
-      - W/"3de599d6-ad8b-4e15-a784-3af82f3e8470"
+      - W/"ce75655b-1555-4fa6-845b-4f93bab63f8d"
       expires:
       - '-1'
       pragma:
@@ -697,7 +797,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - affc8353-d8df-4ec4-8920-2a6d72d79875
+      - dd719983-bafd-4a5d-81d9-36cf64b93a85
     status:
       code: 200
       message: OK
@@ -724,10 +824,10 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"a676d040-506b-4ecd-83c1-10a3f34d4c7f\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"9544e8a2-48da-4cc2-99bf-6092462d69de\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"f75a2451-f21a-4f82-bf6a-389d3fd86de3\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"adfe1e2e-42df-4644-b308-b6e599f470c3\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
@@ -740,9 +840,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:18 GMT
+      - Tue, 28 Apr 2020 00:16:19 GMT
       etag:
-      - W/"a676d040-506b-4ecd-83c1-10a3f34d4c7f"
+      - W/"9544e8a2-48da-4cc2-99bf-6092462d69de"
       expires:
       - '-1'
       pragma:
@@ -759,7 +859,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - ea57f34d-8969-4238-a207-2751930de7d4
+      - 54d243c8-33a4-4bb4-a34c-f83185c4dc83
     status:
       code: 200
       message: OK
@@ -794,15 +894,15 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"4312b6c6-312d-43d8-9bf5-176b99cb789c\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"5c001478-6864-4be0-9a5a-a177544285d6\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
-        \   \"resourceGuid\": \"f75a2451-f21a-4f82-bf6a-389d3fd86de3\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"adfe1e2e-42df-4644-b308-b6e599f470c3\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"secondvnet\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet\",\r\n
-        \       \"etag\": \"W/\\\"4312b6c6-312d-43d8-9bf5-176b99cb789c\\\"\",\r\n
+        \       \"etag\": \"W/\\\"5c001478-6864-4be0-9a5a-a177544285d6\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -811,7 +911,7 @@ interactions:
         false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/61143a94-d15b-4086-863a-c8cc5f0c99a6?api-version=2020-03-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f13c8476-e888-4e15-b344-9564e92729df?api-version=2020-03-01
       cache-control:
       - no-cache
       content-length:
@@ -819,7 +919,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:19 GMT
+      - Tue, 28 Apr 2020 00:16:19 GMT
       expires:
       - '-1'
       pragma:
@@ -836,7 +936,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 6406043f-97ba-4efa-8eef-0a637873fd0a
+      - b25d8b65-70ef-41d3-a8cf-f371f6af1a51
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
     status:
@@ -859,7 +959,7 @@ interactions:
       - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
         Azure-SDK-For-Python AZURECLI/2.3.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/61143a94-d15b-4086-863a-c8cc5f0c99a6?api-version=2020-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f13c8476-e888-4e15-b344-9564e92729df?api-version=2020-03-01
   response:
     body:
       string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
@@ -871,7 +971,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:22 GMT
+      - Tue, 28 Apr 2020 00:16:22 GMT
       expires:
       - '-1'
       pragma:
@@ -888,7 +988,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 22194cd2-fbaf-44ae-9e45-dfeb8c23a7b6
+      - 40c93847-ad87-47b1-932c-9d7cba795477
     status:
       code: 200
       message: OK
@@ -913,15 +1013,15 @@ interactions:
   response:
     body:
       string: "{\r\n  \"name\": \"sbehvnettest2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2\",\r\n
-        \ \"etag\": \"W/\\\"cf0127dd-5a78-4d48-a5ac-7dc0f22ecbd8\\\"\",\r\n  \"type\":
+        \ \"etag\": \"W/\\\"2ae0ff8f-5304-461f-bf06-472236683500\\\"\",\r\n  \"type\":
         \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
         \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
-        \   \"resourceGuid\": \"f75a2451-f21a-4f82-bf6a-389d3fd86de3\",\r\n    \"addressSpace\":
+        \   \"resourceGuid\": \"adfe1e2e-42df-4644-b308-b6e599f470c3\",\r\n    \"addressSpace\":
         {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
         \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
         \   \"subnets\": [\r\n      {\r\n        \"name\": \"secondvnet\",\r\n        \"id\":
         \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet\",\r\n
-        \       \"etag\": \"W/\\\"cf0127dd-5a78-4d48-a5ac-7dc0f22ecbd8\\\"\",\r\n
+        \       \"etag\": \"W/\\\"2ae0ff8f-5304-461f-bf06-472236683500\\\"\",\r\n
         \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
         \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
         [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
@@ -936,9 +1036,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:22 GMT
+      - Tue, 28 Apr 2020 00:16:23 GMT
       etag:
-      - W/"cf0127dd-5a78-4d48-a5ac-7dc0f22ecbd8"
+      - W/"2ae0ff8f-5304-461f-bf06-472236683500"
       expires:
       - '-1'
       pragma:
@@ -955,7 +1055,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-arm-service-request-id:
-      - 5a1bf9de-a9d7-4f5d-bc8c-b77f97417514
+      - 8977620c-66da-4320-babc-0ee5829a3314
     status:
       code: 200
       message: OK
@@ -994,7 +1094,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:23 GMT
+      - Tue, 28 Apr 2020 00:16:23 GMT
       expires:
       - '-1'
       pragma:
@@ -1039,7 +1139,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-04-21T06:04:58Z"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001","name":"cli_test_sb_network000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-04-28T00:15:37Z"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -1048,7 +1148,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:23 GMT
+      - Tue, 28 Apr 2020 00:16:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1090,16 +1190,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Created","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:05:25.337Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Created","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:16:27.52Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '684'
+      - '682'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:25 GMT
+      - Tue, 28 Apr 2020 00:16:27 GMT
       expires:
       - '-1'
       pragma:
@@ -1143,16 +1243,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Created","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:05:25.337Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Created","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:16:27.52Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '684'
+      - '682'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:05:55 GMT
+      - Tue, 28 Apr 2020 00:16:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1194,7 +1294,7 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:06:23.813Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Created","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:16:27.52Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
@@ -1203,7 +1303,58 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:06:26 GMT
+      - Tue, 28 Apr 2020 00:17:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Service-Bus-Resource-Provider/SN1
+      - Microsoft-HTTPAPI/2.0
+      server-sb:
+      - Service-Bus-Resource-Provider/SN1
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --tags --sku --default-action
+      User-Agent:
+      - python/3.7.3 (Windows-10-10.0.18362-SP0) msrest/0.6.6 msrest_azure/0.6.3 azure-mgmt-servicebus/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.3.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002?api-version=2017-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:17:31.06Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '680'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 28 Apr 2020 00:17:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1256,7 +1407,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:06:26 GMT
+      - Tue, 28 Apr 2020 00:17:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1314,7 +1465,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:06:33 GMT
+      - Tue, 28 Apr 2020 00:18:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1360,16 +1511,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:06:23.813Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:17:31.06Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '680'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:06:34 GMT
+      - Tue, 28 Apr 2020 00:18:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1413,16 +1564,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:06:23.813Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:17:31.06Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '680'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:06:34 GMT
+      - Tue, 28 Apr 2020 00:18:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1466,16 +1617,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:06:23.813Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:17:31.06Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '680'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:06:34 GMT
+      - Tue, 28 Apr 2020 00:18:07 GMT
       expires:
       - '-1'
       pragma:
@@ -1528,7 +1679,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:06:35 GMT
+      - Tue, 28 Apr 2020 00:18:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1586,7 +1737,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:06:41 GMT
+      - Tue, 28 Apr 2020 00:18:14 GMT
       expires:
       - '-1'
       pragma:
@@ -1637,16 +1788,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Updating","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:06:48.717Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Updating","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:18:21.287Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Activating"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '685'
+      - '684'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:06:48 GMT
+      - Tue, 28 Apr 2020 00:18:21 GMT
       expires:
       - '-1'
       pragma:
@@ -1665,7 +1816,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
     status:
       code: 200
       message: OK
@@ -1690,16 +1841,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:06:50.053Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:18:23.72Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Active"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '682'
+      - '680'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:18 GMT
+      - Tue, 28 Apr 2020 00:18:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1752,7 +1903,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:19 GMT
+      - Tue, 28 Apr 2020 00:18:51 GMT
       expires:
       - '-1'
       pragma:
@@ -1805,7 +1956,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:21 GMT
+      - Tue, 28 Apr 2020 00:18:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1863,7 +2014,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:27 GMT
+      - Tue, 28 Apr 2020 00:18:58 GMT
       expires:
       - '-1'
       pragma:
@@ -1918,7 +2069,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:27 GMT
+      - Tue, 28 Apr 2020 00:18:59 GMT
       expires:
       - '-1'
       pragma:
@@ -1976,7 +2127,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:34 GMT
+      - Tue, 28 Apr 2020 00:19:07 GMT
       expires:
       - '-1'
       pragma:
@@ -2031,7 +2182,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:35 GMT
+      - Tue, 28 Apr 2020 00:19:08 GMT
       expires:
       - '-1'
       pragma:
@@ -2084,7 +2235,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:36 GMT
+      - Tue, 28 Apr 2020 00:19:09 GMT
       expires:
       - '-1'
       pragma:
@@ -2142,7 +2293,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:42 GMT
+      - Tue, 28 Apr 2020 00:19:16 GMT
       expires:
       - '-1'
       pragma:
@@ -2197,7 +2348,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:07:43 GMT
+      - Tue, 28 Apr 2020 00:19:17 GMT
       expires:
       - '-1'
       pragma:
@@ -2257,7 +2408,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:08:01 GMT
+      - Tue, 28 Apr 2020 00:19:34 GMT
       expires:
       - '-1'
       pragma:
@@ -2312,7 +2463,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:08:02 GMT
+      - Tue, 28 Apr 2020 00:19:35 GMT
       expires:
       - '-1'
       pragma:
@@ -2373,7 +2524,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:08:19 GMT
+      - Tue, 28 Apr 2020 00:19:53 GMT
       expires:
       - '-1'
       pragma:
@@ -2419,7 +2570,7 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -2428,7 +2579,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:08:20 GMT
+      - Tue, 28 Apr 2020 00:19:54 GMT
       expires:
       - '-1'
       pragma:
@@ -2472,7 +2623,7 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002/networkRuleSets/default","name":"default","type":"Microsoft.ServiceBus/Namespaces/NetworkRuleSets","location":"West
-        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
+        US","properties":{"defaultAction":"Deny","virtualNetworkRules":[{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest1/subnets/default"},"ignoreMissingVnetServiceEndpoint":true},{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_network000001/providers/Microsoft.Network/virtualNetworks/sbehvnettest2/subnets/secondvnet"},"ignoreMissingVnetServiceEndpoint":true}],"ipRules":[{"ipMask":"1.1.1.1","action":"Allow"}]}}'
     headers:
       cache-control:
       - no-cache
@@ -2481,7 +2632,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:08:21 GMT
+      - Tue, 28 Apr 2020 00:19:55 GMT
       expires:
       - '-1'
       pragma:
@@ -2541,7 +2692,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:08:27 GMT
+      - Tue, 28 Apr 2020 00:20:03 GMT
       expires:
       - '-1'
       pragma:
@@ -2560,7 +2711,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -2595,7 +2746,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 21 Apr 2020 06:08:28 GMT
+      - Tue, 28 Apr 2020 00:20:04 GMT
       expires:
       - '-1'
       location:
@@ -2637,16 +2788,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:08:29.443Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Removing"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:20:04.59Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Removing"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '684'
+      - '682'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:08:59 GMT
+      - Tue, 28 Apr 2020 00:20:34 GMT
       expires:
       - '-1'
       location:
@@ -2686,16 +2837,16 @@ interactions:
   response:
     body:
       string: '{"sku":{"name":"Premium","tier":"Premium","capacity":1},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_network000001/providers/Microsoft.ServiceBus/namespaces/servicebus-cli000002","name":"servicebus-cli000002","type":"Microsoft.ServiceBus/Namespaces","location":"West
-        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-21T06:05:25.337Z","updatedAt":"2020-04-21T06:08:29.443Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Removing"}}'
+        US","tags":{"{tag1":"value1}"},"properties":{"provisioningState":"Succeeded","metricId":"1196a38f-8e8a-4916-9056-787c19a53125:servicebus-cli000002","createdAt":"2020-04-28T00:16:27.52Z","updatedAt":"2020-04-28T00:20:04.59Z","serviceBusEndpoint":"https://servicebus-cli000002.servicebus.windows.net:443/","status":"Removing"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '684'
+      - '682'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 21 Apr 2020 06:09:50 GMT
+      - Tue, 28 Apr 2020 00:21:06 GMT
       expires:
       - '-1'
       location:
@@ -2741,7 +2892,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 21 Apr 2020 06:10:23 GMT
+      - Tue, 28 Apr 2020 00:21:55 GMT
       expires:
       - '-1'
       pragma:

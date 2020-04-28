@@ -14,7 +14,7 @@ from knack.util import CLIError
 # pylint: disable=too-many-lines
 
 
-class SBNamespaceCURDScenarioTest(ScenarioTest):
+class SBSubscriptionCURDScenarioTest(ScenarioTest):
     from azure_devtools.scenario_tests import AllowLargeResponse
 
     @AllowLargeResponse()
