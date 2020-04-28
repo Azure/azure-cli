@@ -276,8 +276,11 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
         offline_configuration = None
         if rental_and_lease_key_type == 'DualExpiry':
             offline_configuration = ContentKeyPolicyFairPlayOfflineRentalConfiguration(playback_duration_seconds=fp_playback_duration_seconds, storage_duration_seconds=fp_storage_duration_seconds)
+        if (ask is not None):
+            ask=bytearray.fromhex(ask)
         configuration = ContentKeyPolicyFairPlayConfiguration(
-            ask=bytearray.fromhex(ask), fair_play_pfx_password=fair_play_pfx_password,
+            ask=ask, 
+            fair_play_pfx_password=fair_play_pfx_password,
             fair_play_pfx=_b64_to_str(_read_binary(fair_play_pfx)).decode('ascii'),
             rental_and_lease_key_type=rental_and_lease_key_type,
             rental_duration=rental_duration, offline_rental_configuration=offline_configuration)
@@ -474,11 +477,7 @@ def _valid_token_restriction(token_key, token_key_type, token_type, issuer, audi
 
 def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx,
                                   rental_and_lease_key_type, rental_duration, fp_playback_duration_seconds, fp_storage_duration_seconds):
-    if rental_and_lease_key_type == 'DualExpiry':
-        return any([ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration, fp_playback_duration_seconds, fp_storage_duration_seconds])
-    else:
-        return any([ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration])
-
+    return any([ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration])
 
 def _valid_playready_configuration(play_ready_template):
     if play_ready_template is None:
