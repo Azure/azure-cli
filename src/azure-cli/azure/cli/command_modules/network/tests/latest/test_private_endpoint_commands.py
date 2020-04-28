@@ -27,7 +27,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  '--name {kv} '
                  '-g {rg} '
                  '--type microsoft.keyvault/vaults',
-                 checks=self.check('value[0].properties.groupId', 'vault'))
+                 checks=self.check('@[0].properties.groupId', 'vault'))
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
@@ -137,7 +137,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection list --id {kv_id}',
                  checks=self.check('length(@)', 1))
 
-        self.cmd('network private-endpoint-connection delete --id {sa_pec_id} -y')
+        self.cmd('network private-endpoint-connection delete --id {kv_pe_id} -y')
 
 
 class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
@@ -286,6 +286,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
         # remove endpoints
         self.cmd(
             'network private-endpoint-connection delete -g {rg} --service-name {registry_name} -n {second_endpoint_request} --type Microsoft.ContainerRegistry/registries -y')
+        time.sleep(30)
         self.cmd('network private-endpoint-connection list -g {rg} -n {registry_name} --type Microsoft.ContainerRegistry/registries', checks=[
             self.check('length(@)', '1'),
         ])
@@ -296,8 +297,6 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network private-endpoint-connection delete -g {rg} --service-name {registry_name} -n {endpoint_request} --type Microsoft.ContainerRegistry/registries -y')
-        result = self.cmd('network private-endpoint-connection list -g {rg} -n {registry_name} --type Microsoft.ContainerRegistry/registries').get_output_in_json()
-        self.assertFalse(result)
 
 
 class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
@@ -387,8 +386,6 @@ class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
 
         self.cmd('network private-endpoint-connection show --service-name {scope} -g {rg} --name {scope_pec_name} --type microsoft.insights/privateLinkScopes',
                  checks=self.check('id', '{scope_pec_id}'))
-
-        self.cmd('network private-endpoint-connection approve --service-name {scope} -g {rg} --name {scope_pec_name} --type microsoft.insights/privateLinkScopes')
 
         self.cmd('network private-endpoint-connection reject --service-name {scope} -g {rg} --name {scope_pec_name} --type microsoft.insights/privateLinkScopes',
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])

@@ -110,6 +110,9 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
     def remove_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):
         url = self._build_connection_url_endpoint(resource_group_name, self.rp, service_name, name, self.api_version)
         r = send_raw_request(cmd.cli_ctx, 'delete', url)
+        if r.status_code != 200:
+            logger.warning('Deleting operation is asynchronous. '
+                           'Please use `az network private-endpoint-connection show to query the status.')
         return None
 
 
