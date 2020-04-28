@@ -3044,6 +3044,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
     @record_only()
     def test_sql_instance_pool(self):
 
+        print("Starting instance pool tests")
         instance_pool_name_1 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
         instance_pool_name_2 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
         license_type = 'LicenseIncluded'
@@ -3055,6 +3056,7 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
         vnet_name = 'vnet-billingPool1'
         subnet_name = 'InstancePool'
         subnet = self.cmd('network vnet subnet show -g {} --vnet-name {} -n {}'.format(resource_group, vnet_name, subnet_name)).get_output_in_json()['id']
+        num_pools = len(self.cmd('sql instance-pool list -g {}'.format(resource_group)).get_output_in_json())
 
         # test create sql managed_instance
         self.cmd(
@@ -3130,7 +3132,10 @@ class SqlManagedInstancePoolScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('tags', {})])
 
-        self.cmd('sql instance-pool list', checks=[self.greater_than('length(@)', 1)])
+        self.cmd('sql instance-pool list -g {}'
+                 .format(resource_group),
+                 checks=[
+                     JMESPathCheck('length(@)', num_pools + 2)])
 
         # test delete sql managed instance
         self.cmd('sql instance-pool delete -g {} -n {} --yes'
