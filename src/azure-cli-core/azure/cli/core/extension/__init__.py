@@ -213,7 +213,8 @@ class DevExtension(Extension):
             egg_metadata_path = os.path.join(ext_dir, egg_info_dirname, )
             try:
                 ext_whl_metadata = pkginfo.Develop(egg_metadata_path)
-                metadata.update(vars(ext_whl_metadata))
+                if self.name == ext_whl_metadata.name:
+                    metadata.update(vars(ext_whl_metadata))
             except ValueError:
                 logger.warning('extension % contains invalid metadata for Python Package', self.name)
 
