@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.5.0
+++++++
+* Fix logging file fd leaking (#13102)
+* Fix core tests failed under certain profiles (#13136)
+* Use pkginfo to query metadata for Python Package (#12782)
+
 2.4.0
 ++++++
 * Upgrade msrestazure to 0.6.3 (#12839)

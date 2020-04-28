@@ -16,7 +16,7 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension)
+    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
 
 from knack.arguments import CLIArgumentType
 
@@ -339,6 +339,11 @@ def load_arguments(self, _):
         c.argument('workspace_name', options_list=['--workspace-name', '-n'], help="Name of the Log Analytics Workspace.")
         c.ignore('sku')
         c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
+        from azure.mgmt.loganalytics.models import PublicNetworkAccessType
+        c.argument('public_network_access_for_ingestion', options_list=['--ingestion-access'], help='The public network access type to access workspace ingestion.',
+                   arg_type=get_enum_type(PublicNetworkAccessType))
+        c.argument('public_network_access_for_query', options_list=['--query-access'], help='The public network access type to access workspace query.',
+                   arg_type=get_enum_type(PublicNetworkAccessType))
 
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
@@ -369,6 +374,16 @@ def load_arguments(self, _):
         c.argument('key_vault_uri', help='The Key Vault uri which holds the key associated with the Log Analytics cluster.')
         c.argument('key_name', help='The name of the key associated with the Log Analytics cluster.')
         c.argument('key_version', help='The version of the key associated with the Log Analytics cluster.')
+    # endregion
+
+    # region Log Analytics Linked Storage Account
+    with self.argument_context('monitor log-analytics workspace linked-storage') as c:
+        from azure.mgmt.loganalytics.models import DataSourceType
+        c.argument('data_source_type', help='Data source type for the linked storage account.',
+                   options_list=['--type'], arg_type=get_enum_type(DataSourceType))
+        c.argument('storage_account_ids', nargs='+', options_list=['--storage-accounts'],
+                   help='List of Name or ID of Azure Storage Account.',
+                   validator=validate_storage_accounts_name_or_id)
     # endregion
 
     # region monitor clone

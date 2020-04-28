@@ -17,7 +17,7 @@ def load_command_table(self, _):
         cf_log_analytics_workspace_intelligence_packs, cf_log_analytics_cluster,
         cf_log_analytics_workspace_linked_service, cf_diagnostics_category,
         cf_private_link_resources, cf_private_link_scoped_resources,
-        cf_private_link_scopes, cf_private_endpoint_connections)
+        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id,\
@@ -229,6 +229,18 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler
     )
 
+    log_analytics_linked_storage_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#LinkedStorageAccountsOperations.{}',
+        client_factory=cf_log_analytics_linked_storage,
+        exception_handler=monitor_exception_handler
+    )
+
+    log_analytics_linked_storage_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_linked_storage_account#{}',
+        client_factory=cf_log_analytics_linked_storage,
+        exception_handler=monitor_exception_handler
+    )
+
     monitor_general_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.general_operations#{}',
         client_factory=cf_metric_alerts,
@@ -345,7 +357,7 @@ def load_command_table(self, _):
         g.command('enable', 'enable')
         g.command('disable', 'disable')
 
-    with self.command_group('monitor log-analytics workspace linked-service', log_analytics_workspace_linked_service_sdk, custom_command_type=log_analytics_workspace_linked_service_custom) as g:
+    with self.command_group('monitor log-analytics workspace linked-service', log_analytics_workspace_linked_service_sdk, custom_command_type=log_analytics_workspace_linked_service_custom, is_preview=True) as g:
         g.custom_command('create', 'create_log_analytics_workspace_linked_service', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_linked_service', supports_no_wait=True)
         g.show_command('show', 'get')
@@ -361,28 +373,36 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_log_analytics_clusters')
         g.wait_command('wait')
 
-    with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom, is_preview=True) as g:
-        g.custom_command('clone', 'clone_existed_settings')
+    with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom, is_preview=True) as g:
+        g.command('create', 'create_or_update')
+        g.custom_command('add', 'add_log_analytics_workspace_linked_storage_accounts')
+        g.custom_command('remove', 'remove_log_analytics_workspace_linked_storage_accounts')
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_workspace')
 
-    with self.command_group('monitor private-link-scope', private_link_scopes_sdk, custom_command_type=private_link_scope_custom) as g:
+    with self.command_group('monitor', metric_alert_sdk, custom_command_type=monitor_general_custom) as g:
+        g.custom_command('clone', 'clone_existed_settings', is_preview=True)
+
+    with self.command_group('monitor private-link-scope', private_link_scopes_sdk, custom_command_type=private_link_scope_custom, is_preview=True) as g:
         g.custom_show_command('show', 'show_private_link_scope')
         g.custom_command('list', 'list_private_link_scope')
         g.custom_command('create', 'create_private_link_scope')
         g.custom_command('update', 'update_private_link_scope')
         g.custom_command('delete', 'delete_private_link_scope', confirmation=True)
 
-    with self.command_group('monitor private-link-scope scoped-resource', private_link_scoped_resources_sdk, custom_command_type=private_link_scope_custom) as g:
+    with self.command_group('monitor private-link-scope scoped-resource', private_link_scoped_resources_sdk, custom_command_type=private_link_scope_custom, is_preview=True) as g:
         g.custom_show_command('show', 'show_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
         g.custom_command('list', 'list_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
         g.custom_command('create', 'create_private_link_scope_resource', client_factory=cf_private_link_scoped_resources)
         g.custom_command('delete', 'delete_private_link_scope_resource', client_factory=cf_private_link_scoped_resources, confirmation=True)
 
-    with self.command_group('monitor private-link-scope private-link-resource', private_link_resources_sdk, custom_command_type=private_link_scope_custom) as g:
+    with self.command_group('monitor private-link-scope private-link-resource', private_link_resources_sdk, custom_command_type=private_link_scope_custom, is_preview=True) as g:
         g.custom_show_command('show', 'show_private_link_resource', client_factory=cf_private_link_resources)
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
         g.custom_command('list', 'list_private_link_resource', client_factory=cf_private_link_resources, transform=gen_dict_to_list_transform(key="value"))
 
-    with self.command_group('monitor private-link-scope private-endpoint-connection', private_endpoint_connections_sdk, custom_command_type=private_link_scope_custom) as g:
+    with self.command_group('monitor private-link-scope private-endpoint-connection', private_endpoint_connections_sdk, custom_command_type=private_link_scope_custom, is_preview=True) as g:
         g.custom_show_command('show', 'show_private_endpoint_connection', client_factory=cf_private_endpoint_connections,
                               validator=validate_private_endpoint_connection_id)
         g.custom_command('list', 'list_private_endpoint_connection', client_factory=cf_private_endpoint_connections)

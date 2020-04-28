@@ -338,3 +338,18 @@ def validate_private_endpoint_connection_id(namespace):
         raise CLIError('incorrect usage. Please provide [--id ID] or [--name NAME --scope-name NAME -g NAME]')
 
     del namespace.connection_id
+
+
+def validate_storage_accounts_name_or_id(cmd, namespace):
+    if namespace.storage_account_ids:
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        for index, storage_account_id in enumerate(namespace.storage_account_ids):
+            if not is_valid_resource_id(storage_account_id):
+                namespace.storage_account_ids[index] = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=namespace.resource_group_name,
+                    namespace='Microsoft.Storage',
+                    type='storageAccounts',
+                    name=storage_account_id
+                )
