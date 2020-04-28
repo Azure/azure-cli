@@ -89,7 +89,7 @@ class TestMonitorPrivateLinkScope(ScenarioTest):
         private_endpoint = self.cmd(
             'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
             '--connection-name {pe_connection} --private-connection-resource-id {scope_id} '
-            '--group-ids {group_id} --manual-request').get_output_in_json()
+            '--group-ids {group_id}').get_output_in_json()
         self.assertEqual(private_endpoint['name'], self.kwargs['pe'])
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], self.kwargs['pe_connection'])
         self.assertEqual(
