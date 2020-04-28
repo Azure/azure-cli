@@ -147,7 +147,8 @@ class WheelExtension(Extension):
         for dist_info_dirname in info_dirs:
             try:
                 ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
-                metadata.update(vars(ext_whl_metadata))
+                if self.name == ext_whl_metadata.name:
+                    metadata.update(vars(ext_whl_metadata))
             except ValueError:
                 logger.warning('extension % contains invalid metadata for Python Package', self.name)
 
