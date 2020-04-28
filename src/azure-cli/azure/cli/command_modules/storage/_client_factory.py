@@ -219,34 +219,6 @@ def cf_blob_client(cli_ctx, kwargs):
                                                             blob=kwargs['blob_name'])
 
 
-def generic_data_service_factory_track2(cli_ctx, **kwargs):
-    service = kwargs.pop('service', None)
-    credential = kwargs.pop('credential', None)
-    connection_string = kwargs.pop('connection_string', None)
-    account_url = kwargs.pop('account_url', None)
-    if credential:
-        client = service(account_url=account_url, credential=credential, **kwargs)
-    if connection_string:
-        client = service.from_connection_string(conn_str=connection_string)
-    return client
-
-
-def resolve_client_parameters(**kwargs):
-    service = kwargs.pop('service', None)
-    account_name = kwargs.pop('account_name', None)
-    kwargs['credential'] = kwargs.pop('sas_token', None) or kwargs.pop('account_key', None)
-    kwargs['account_url'] = "https://{}.{}.core.windows.net".format(account_name, service)
-    return kwargs
-
-
-def get_account_url(cli_ctx, account_name, service):
-    from knack.util import CLIError
-    if account_name is None:
-        raise CLIError("Please provide storage account name or connection string.")
-    storage_endpoint = cli_ctx.cloud.suffixes.storage_endpoint
-    return "https://{}.{}.{}".format(account_name, service, storage_endpoint)
-
-
 def cf_adls_service(cli_ctx, kwargs):
     t_adls_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
                              '_data_lake_service_client#DataLakeServiceClient')
@@ -297,7 +269,7 @@ def cf_adls_directory(cli_ctx, kwargs):
 
     connection_string = kwargs.pop('connection_string', None)
     if connection_string:
-        return t_adls_directory .from_connection_string(connection_string=connection_string,
+        return t_adls_directory.from_connection_string(connection_string=connection_string,
                                                         file_system_name=kwargs.pop('file_system_name'),
                                                         directory_name=kwargs.pop('directory_name'))
 
