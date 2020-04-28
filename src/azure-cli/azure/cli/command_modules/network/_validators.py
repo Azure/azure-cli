@@ -1869,8 +1869,8 @@ def process_private_link_resource_id_argument(cmd, namespace):
         return
 
     if not (namespace.id or all([namespace.resource_group_name,
-                             namespace.name,
-                             namespace.resource_provider])):
+                                 namespace.name,
+                                 namespace.resource_provider])):
         raise CLIError("usage error: --id / -g -n --type")
 
     from msrestazure.tools import is_valid_resource_id, parse_resource_id

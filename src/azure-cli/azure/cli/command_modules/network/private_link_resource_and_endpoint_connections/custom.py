@@ -10,6 +10,7 @@ TYPE_CLIENT_MAPPING = {
     # 'Microsoft.Keyvault/vaults': KeyVaultPrivateEndpointClient # vaults
 }
 
+
 def register_providers():
     _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', False)
     _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
@@ -17,13 +18,13 @@ def register_providers():
     _register_one_provider('microsoft.insights/privateLinkScopes', '2019-10-17-preview', True)
 
 
-def _register_one_provider(type, api_version, has_list_or_not):
+def _register_one_provider(provider, api_version, has_list_or_not):
     general_client_settings = {
         "api_version": api_version,
         "support_list_or_not": has_list_or_not
     }
 
-    TYPE_CLIENT_MAPPING[type] = general_client_settings
+    TYPE_CLIENT_MAPPING[provider] = general_client_settings
 
 
 def _get_client(rp_mapping, resource_provider):
@@ -43,13 +44,17 @@ def list_private_link_resource(cmd, resource_group_name, name, resource_provider
 def approve_private_endpoint_connection(cmd, resource_group_name, service_name, resource_provider,
                                         name, approval_description=None):
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
-    return client.approve_private_endpoint_connection(cmd, resource_group_name, service_name, name, approval_description)
+    return client.approve_private_endpoint_connection(cmd, resource_group_name,
+                                                      service_name, name,
+                                                      approval_description)
 
 
 def reject_private_endpoint_connection(cmd, resource_group_name, service_name, resource_provider,
                                        name, rejection_description=None):
     client = _get_client(TYPE_CLIENT_MAPPING, resource_provider)
-    return client.reject_private_endpoint_connection(cmd, resource_group_name, service_name, name, rejection_description)
+    return client.reject_private_endpoint_connection(cmd, resource_group_name,
+                                                     service_name, name,
+                                                     rejection_description)
 
 
 def remove_private_endpoint_connection(cmd, resource_group_name, service_name, resource_provider, name):

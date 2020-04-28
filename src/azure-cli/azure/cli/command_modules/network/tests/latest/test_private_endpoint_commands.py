@@ -29,7 +29,6 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  '--type microsoft.keyvault/vaults',
                  checks=self.check('@[0].properties.groupId', 'vault'))
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pe')
     def test_private_endpoint_connection_keyvault(self, resource_group):
         self.kwargs.update({
@@ -115,7 +114,6 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Succeeded')
                  ])
 
-
         self.cmd('network private-endpoint-connection show --id {kv_pe_id}',
                  checks=self.check('properties.provisioningState', 'Succeeded'))
 
@@ -149,7 +147,6 @@ class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
         })
         self.cmd('network private-link-resource list --name {sa} -g {rg} --type Microsoft.Storage/storageAccounts', checks=[
             self.check('length(@)', 6)])
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
     @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
