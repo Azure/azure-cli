@@ -3618,5 +3618,45 @@ class NetworkVnetLocalContextScenarioTest(ScenarioTest):
         os.chdir(original_working_dir)
 
 
+class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
+                 replay_processors=None, recording_patches=None, replay_patches=None):
+        super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
+        self.cmd('extension add -n virtual-wan')
+
+    @ResourceGroupPreparer()
+    def test_network_security_partner_provider(self, resource_group):
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clitestvhub',
+            'gateway': 'cligateway',
+            'name': 'clisecuritypartnerprovider',
+            'rg': resource_group
+        })
+
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 -l westus --sku Standard')
+        self.cmd('network vpn-gateway create -g {rg} -n {gateway} --vhub {vhub}')
+
+        self.cmd('network security-partner-provider create -n {name} -g {rg} --vhub {vhub} --provider Checkpoint', checks=[
+            self.check('name', '{name}'),
+            self.check('securityProviderName', 'Checkpoint')
+        ])
+        self.cmd('network security-partner-provider show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('securityProviderName', 'Checkpoint')
+        ])
+        self.cmd('network security-partner-provider update -n {name} -g {rg} --tag a=b', checks=[
+            self.check('tags.a', 'b')
+        ])
+        self.cmd('network security-partner-provider list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network security-partner-provider list', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network security-partner-provider delete -n {name} -g {rg}')
+
+
 if __name__ == '__main__':
     unittest.main()
