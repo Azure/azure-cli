@@ -100,8 +100,6 @@ def _get_cloud_console_token_endpoint():
 # pylint: disable=too-many-lines,too-many-instance-attributes
 class Profile(object):
 
-    _global_creds_cache = None
-
     def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
                  async_persist=True, cli_ctx=None):
         from azure.cli.core import get_default_cli
@@ -111,9 +109,7 @@ class Profile(object):
 
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        self._msal_scope = self.cli_ctx.cloud.endpoints.active_directory_resource_id + '/.default'
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
-        self._msi_creds = None
 
     def login(self,
               interactive,
@@ -131,9 +127,10 @@ class Profile(object):
         auth_profile=None
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         identity = Identity(authority, tenant)
+        adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
 
         if not subscription_finder:
-            subscription_finder = SubscriptionFinder(self.cli_ctx)
+            subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=adal_cache)
         if interactive:
             if not use_device_code and (in_cloud_console() or not can_launch_browser()):
                 logger.info('Detect no GUI is available, so fall back to device code')
@@ -149,6 +146,8 @@ class Profile(object):
 
             if use_device_code:
                 credential, auth_profile = identity.login_with_device_code()
+            # todo: remove after ADAL token deprecation
+            adal_cache.add_credential(credential)
         else:
             if is_service_principal:
                 if not tenant:
@@ -197,6 +196,8 @@ class Profile(object):
                                                   home_account_id=home_account_id)
 
         self._set_subscriptions(consolidated)
+        # todo: remove after ADAL token deprecation
+        adal_cache.persist_cached_creds()
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
@@ -710,13 +711,14 @@ class MsiAccountTypes(object):
 class SubscriptionFinder(object):
     # An ARM client. It finds subscriptions for a user or service principal. It shouldn't do any
     # authentication work, but only find subscriptions
-    def __init__(self, cli_ctx, arm_client_factory=None):
+    def __init__(self, cli_ctx, arm_client_factory=None, **kwargs):
 
         self.user_id = None  # will figure out after log user in
         self.cli_ctx = cli_ctx
         self.secret = None
         self._graph_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
         self.authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
+        self.adal_cache = kwargs.pop("adal_cache", None)
 
         def create_arm_client_factory(credentials):
             if arm_client_factory:
@@ -765,7 +767,9 @@ class SubscriptionFinder(object):
             identity = Identity(self.authority, tenant_id)
             try:
                 specific_tenant_credential = identity.get_user_credential(auth_profile.home_account_id, auth_profile.username)
-
+                # todo: remove after ADAL deprecation
+                if self.adal_cache:
+                    self.adal_cache.add_credential(specific_tenant_credential)
             # TODO: handle MSAL exceptions
             except adal.AdalError as ex:
                 # because user creds went through the 'common' tenant, the error here must be
