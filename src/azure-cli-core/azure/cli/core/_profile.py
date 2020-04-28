@@ -201,8 +201,57 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
+    def login_with_managed_identity(self, identity_id=None, allow_no_subscriptions=None, find_subscriptions=True):
+        # pylint: disable=too-many-statements
+
+        # https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
+        # Managed identities for Azure resources is the new name for the service formerly known as
+        # Managed Service Identity (MSI).
+
+        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        identity = Identity()
+        credential, mi_info = identity.login_with_managed_identity(identity_id, resource)
+
+        tenant = mi_info[Identity.MANAGED_IDENTITY_TENANT_ID]
+        if find_subscriptions:
+            logger.info('Finding subscriptions...')
+            subscription_finder = SubscriptionFinder(self.cli_ctx)
+            subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
+            if not subscriptions:
+                if allow_no_subscriptions:
+                    subscriptions = self._build_tenant_level_accounts([tenant])
+                else:
+                    raise CLIError('No access was configured for the VM, hence no subscriptions were found. '
+                                   "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
+        else:
+            subscriptions = self._build_tenant_level_accounts([tenant])
+
+        # Get info for persistence
+        user_name = mi_info[Identity.MANAGED_IDENTITY_TYPE]
+        id_type_to_identity_type = {
+            Identity.MANAGED_IDENTITY_CLIENT_ID: MsiAccountTypes.user_assigned_client_id,
+            Identity.MANAGED_IDENTITY_OBJECT_ID: MsiAccountTypes.user_assigned_object_id,
+            Identity.MANAGED_IDENTITY_RESOURCE_ID: MsiAccountTypes.user_assigned_resource_id,
+            None: MsiAccountTypes.system_assigned
+        }
+
+        # Previously we persist user's input in assignedIdentityInfo:
+        #     "assignedIdentityInfo": "MSIClient-eecb2419-a29d-4580-a92a-f6a7b7b71300",
+        # Now we persist the output - info extracted from the access token.
+        # client_id, object_id, and resource_id are unified to client_id, which is the only persisted field.
+        # Also, the name "MSI" is deprecated. So will be assignedIdentityInfo.
+        legacy_identity_type = id_type_to_identity_type[mi_info[Identity.MANAGED_IDENTITY_ID_TYPE]]
+        legacy_base_name = ('{}-{}'.format(legacy_identity_type, identity_id) if identity_id else legacy_identity_type)
+        client_id = mi_info[Identity.MANAGED_IDENTITY_CLIENT_ID]
+
+        consolidated = self._normalize_properties(user_name, subscriptions, is_service_principal=True,
+                                                  user_assigned_identity_id=legacy_base_name,
+                                                  managed_identity_client_id=client_id)
+        self._set_subscriptions(consolidated)
+        return deepcopy(consolidated)
+
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
-                              user_assigned_identity_id=None, home_account_id=None):
+                              user_assigned_identity_id=None, home_account_id=None, managed_identity_client_id=None):
         import sys
         consolidated = []
         for s in subscriptions:
@@ -220,13 +269,15 @@ class Profile(object):
                 _STATE: s.state.value,
                 _USER_ENTITY: {
                     _USER_NAME: user,
-                    _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER,
-                    _USER_HOME_ACCOUNT_ID: home_account_id
+                    _USER_TYPE: _SERVICE_PRINCIPAL if is_service_principal else _USER
                 },
                 _IS_DEFAULT_SUBSCRIPTION: False,
                 _TENANT_ID: s.tenant_id,
                 _ENVIRONMENT_NAME: self.cli_ctx.cloud.name
             }
+
+            if home_account_id:
+                subscription_dict[_USER_ENTITY][_USER_HOME_ACCOUNT_ID] = home_account_id
             # for Subscriptions - List REST API 2019-06-01's subscription account
             if subscription_dict[_SUBSCRIPTION_NAME] != _TENANT_LEVEL_ACCOUNT_NAME:
                 if hasattr(s, 'home_tenant_id'):
@@ -234,12 +285,17 @@ class Profile(object):
                 if hasattr(s, 'managed_by_tenants'):
                     subscription_dict[_MANAGED_BY_TENANTS] = [{_TENANT_ID: t.tenant_id} for t in s.managed_by_tenants]
 
-            consolidated.append(subscription_dict)
-
             if cert_sn_issuer_auth:
-                consolidated[-1][_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
+                subscription_dict[_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
+            if managed_identity_client_id:
+                subscription_dict[_USER_ENTITY]['clientId'] = managed_identity_client_id
+
+            # This will be deprecated and client_id will be the only persisted ID
+            logger.warning("assignedIdentityInfo will be deprecated in the future. Only client ID should be used.")
             if user_assigned_identity_id:
-                consolidated[-1][_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
+                subscription_dict[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
+
+            consolidated.append(subscription_dict)
         return consolidated
 
     def _build_tenant_level_accounts(self, tenants):
@@ -260,74 +316,6 @@ class Profile(object):
         s = SubscriptionType()
         s.state = StateType.enabled
         return s
-
-    def find_subscriptions_in_vm_with_msi(self, identity_id=None, allow_no_subscriptions=None):
-        # pylint: disable=too-many-statements
-
-        import jwt
-        from requests import HTTPError
-        from msrestazure.azure_active_directory import MSIAuthentication
-        from msrestazure.tools import is_valid_resource_id
-        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-
-        if identity_id:
-            if is_valid_resource_id(identity_id):
-                msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
-                identity_type = MsiAccountTypes.user_assigned_resource_id
-            else:
-                authenticated = False
-                try:
-                    msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
-                    identity_type = MsiAccountTypes.user_assigned_client_id
-                    authenticated = True
-                except HTTPError as ex:
-                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                        logger.info('Sniff: not an MSI client id')
-                    else:
-                        raise
-
-                if not authenticated:
-                    try:
-                        identity_type = MsiAccountTypes.user_assigned_object_id
-                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
-                        authenticated = True
-                    except HTTPError as ex:
-                        if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                            logger.info('Sniff: not an MSI object id')
-                        else:
-                            raise
-
-                if not authenticated:
-                    raise CLIError('Failed to connect to MSI, check your managed service identity id.')
-
-        else:
-            # msal : msi
-            identity_type = MsiAccountTypes.system_assigned
-            from azure.identity import AuthenticationRequiredError, ManagedIdentity
-            # msi_cred = MSIAuthentication(resource=resource)
-            msi_cred = ManagedIdentity()
-
-        token_entry = msi_cred.get_token('https://management.azure.com/.default')
-        token = token_entry.token
-        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
-        tenant = decode['tid']
-
-        subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
-        subscriptions = subscription_finder.find_from_raw_token(tenant, token)
-        base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
-        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
-        if not subscriptions:
-            if allow_no_subscriptions:
-                subscriptions = self._build_tenant_level_accounts([tenant])
-            else:
-                raise CLIError('No access was configured for the VM, hence no subscriptions were found. '
-                               "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
-
-        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True,
-                                                  user_assigned_identity_id=base_name)
-        self._set_subscriptions(consolidated)
-        return deepcopy(consolidated)
 
     def find_subscriptions_in_cloud_console(self):
         import jwt
