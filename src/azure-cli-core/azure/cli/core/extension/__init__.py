@@ -138,7 +138,8 @@ class WheelExtension(Extension):
             return None
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
-        info_dirs = glob(os.path.join(ext_dir, '*.*-info'))
+        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '*.*-info'))
+
         azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
             metadata.update(azext_metadata)
@@ -146,7 +147,8 @@ class WheelExtension(Extension):
         for dist_info_dirname in info_dirs:
             try:
                 ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
-                metadata.update(vars(ext_whl_metadata))
+                if self.name == ext_whl_metadata.name:
+                    metadata.update(vars(ext_whl_metadata))
             except ValueError:
                 logger.warning('extension % contains invalid metadata for Python Package', self.name)
 
@@ -211,7 +213,8 @@ class DevExtension(Extension):
             egg_metadata_path = os.path.join(ext_dir, egg_info_dirname, )
             try:
                 ext_whl_metadata = pkginfo.Develop(egg_metadata_path)
-                metadata.update(vars(ext_whl_metadata))
+                if self.name == ext_whl_metadata.name:
+                    metadata.update(vars(ext_whl_metadata))
             except ValueError:
                 logger.warning('extension % contains invalid metadata for Python Package', self.name)
 
