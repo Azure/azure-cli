@@ -138,7 +138,8 @@ class WheelExtension(Extension):
             return None
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
-        info_dirs = glob(os.path.join(ext_dir, '*.*-info'))
+        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '*.*-info'))
+
         azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
             metadata.update(azext_metadata)
