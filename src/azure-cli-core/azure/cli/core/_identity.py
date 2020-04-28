@@ -85,7 +85,7 @@ class Identity:
     def login_with_device_code(self):
         # Use DeviceCodeCredential
         message = 'To sign in, use a web browser to open the page {} and enter the code {} to authenticate.'
-        prompt_callback=lambda verification_uri, user_code, expires_on: \
+        prompt_callback = lambda verification_uri, user_code, expires_on: \
             logger.warning(message.format(verification_uri, user_code))
         if self.tenant_id:
             cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
@@ -115,7 +115,7 @@ class Identity:
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
         sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, secret=client_secret)
         entry = sp_auth.get_entry_to_persist()
-        cred_cache = ServicePrincipalCredentialCache()
+        cred_cache = ADALCredentialCache()
         cred_cache.save_service_principal_cred(entry)
 
         credential = ClientSecretCredential(self.tenant_id, client_id, client_secret, authority=self.authority)
@@ -127,7 +127,7 @@ class Identity:
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
         sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, certificate_file=certificate_path)
         entry = sp_auth.get_entry_to_persist()
-        cred_cache = ServicePrincipalCredentialCache()
+        cred_cache = ADALCredentialCache()
         cred_cache.save_service_principal_cred(entry)
 
         # TODO: support use_cert_sn_issuer in CertificateCredential
@@ -143,7 +143,7 @@ class Identity:
         return InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
-        cred_cache = ServicePrincipalCredentialCache()
+        cred_cache = ADALCredentialCache()
         client_secret, certificate_path = cred_cache.retrieve_secret_of_service_principal(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
         if client_secret:
@@ -158,16 +158,26 @@ class Identity:
         return ManagedIdentityCredential(client_id=client_id)
 
 
-class ServicePrincipalCredentialCache:
-    """Caches service principal secrets, and persistence will also be handled
+TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
+                                          'givenName',
+                                          'isUserIdDisplayable',
+                                          'tenantId']
+_TOKEN_ENTRY_USER_ID = 'userId'
+
+
+class ADALCredentialCache:
+    """Caches secrets in ADAL format, will be deprecated
     """
-    # TODO: Persist to encrypted cache
-    def __init__(self, async_persist=True):
+
+    # TODO: Persist SP to encrypted cache
+    def __init__(self, async_persist=True, cli_ctx=None):
         # AZURE_ACCESS_TOKEN_FILE is used by Cloud Console and not meant to be user configured
         self._token_file = (os.environ.get('AZURE_ACCESS_TOKEN_FILE', None) or
                             os.path.join(get_config_dir(), 'accessTokens.json'))
         self._service_principal_creds = []
+        self._adal_token_cache_attr = None
         self._should_flush_to_disk = False
+        self._cli_ctx = cli_ctx
         self._async_persist = async_persist
         if async_persist:
             import atexit
@@ -182,7 +192,16 @@ class ServicePrincipalCredentialCache:
         if self._should_flush_to_disk:
             with os.fdopen(os.open(self._token_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
                            'w+') as cred_file:
-                cred_file.write(json.dumps(self._service_principal_creds))
+                items = self.adal_token_cache.read_items()
+                all_creds = [entry for _, entry in items]
+
+                # trim away useless fields (needed for cred sharing with xplat)
+                for i in all_creds:
+                    for key in TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE:
+                        i.pop(key, None)
+
+                all_creds.extend(self._service_principal_creds)
+                cred_file.write(json.dumps(all_creds))
 
     def retrieve_secret_of_service_principal(self, sp_id, tenant):
         self.load_service_principal_creds()
@@ -199,7 +218,7 @@ class ServicePrincipalCredentialCache:
                            "Trying credential under tenant %s, assuming that is an app credential.",
                            sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
             cred = matched[0]
-        return cred.get(_ACCESS_TOKEN, None),  cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
+        return cred.get(_ACCESS_TOKEN, None), cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
 
     def save_service_principal_cred(self, sp_entry):
         self.load_service_principal_creds()
@@ -210,7 +229,8 @@ class ServicePrincipalCredentialCache:
         if matched:
             # pylint: disable=line-too-long
             if (sp_entry.get(_ACCESS_TOKEN, None) != matched[0].get(_ACCESS_TOKEN, None) or
-                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE, None)):
+                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE,
+                                                                                       None)):
                 self._service_principal_creds.remove(matched[0])
                 self._service_principal_creds.append(sp_entry)
                 state_changed = True
@@ -221,18 +241,70 @@ class ServicePrincipalCredentialCache:
         if state_changed:
             self.persist_cached_creds()
 
-    def load_service_principal_creds(self):
-        creds = _load_tokens_from_file(self._token_file)
+    # noinspection PyBroadException
+    def add_credential(self, credential):
+        try:
+            query = {
+                "client_id": _CLIENT_ID,
+                "environment": credential._profile.environment,
+                "home_account_id": credential._profile.home_account_id
+            }
+            refresh_token = credential._cache.find(
+                credential._cache.CredentialType.REFRESH_TOKEN,
+                # target=scopes,  # AAD RTs are scope-independent
+                query=query)
+            access_token = credential.get_token(self._cli_ctx.cloud.endpoints.active_directory_resource_id.rstrip('/')
+                                                + '/.default')
+            import datetime
+            entry = {
+                "tokenType": "Bearer",
+                "expiresOn": datetime.datetime.fromtimestamp(access_token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f"),
+                "resource": self._cli_ctx.cloud.endpoints.active_directory_resource_id,
+                "userId": credential._profile.username,
+                "accessToken": access_token.token,
+                "refreshToken": refresh_token[0]['secret'],
+                "_clientId": _CLIENT_ID,
+                "_authority": self._cli_ctx.cloud.endpoints.active_directory.rstrip('/')
+                              + "/" + credential._profile.tenant_id
+            }
+            self.adal_token_cache.add([entry])
+        except Exception as e:
+            logger.debug("Failed to store ADAL token: {}".format(e))
+            # swallow all errors since it does not impact az
+
+    @property
+    def adal_token_cache(self):
+        return self.load_adal_token_cache()
+
+    def load_adal_token_cache(self):
+        if self._adal_token_cache_attr is None:
+            import adal
+            all_entries = _load_tokens_from_file(self._token_file)
+            self.load_service_principal_creds(all_entries=all_entries)
+            real_token = [x for x in all_entries if x not in self._service_principal_creds]
+            self._adal_token_cache_attr = adal.TokenCache(json.dumps(real_token))
+        return self._adal_token_cache_attr
+
+    def load_service_principal_creds(self, **kwargs):
+        creds = kwargs.pop("all_entries", None)
+        if not creds:
+            creds = _load_tokens_from_file(self._token_file)
         for c in creds:
             if c.get(_SERVICE_PRINCIPAL_ID):
                 self._service_principal_creds.append(c)
         return self._service_principal_creds
 
-    def remove_cached_creds(self, sp):
+    def remove_cached_creds(self, user_or_sp):
         state_changed = False
+        # clear AAD tokens
+        tokens = self.adal_token_cache.find({_TOKEN_ENTRY_USER_ID: user_or_sp})
+        if tokens:
+            state_changed = True
+            self.adal_token_cache.remove(tokens)
+
         # clear service principal creds
         matched = [x for x in self._service_principal_creds
-                   if x[_SERVICE_PRINCIPAL_ID] == sp]
+                   if x[_SERVICE_PRINCIPAL_ID] == user_or_sp]
         if matched:
             state_changed = True
             self._service_principal_creds = [x for x in self._service_principal_creds
