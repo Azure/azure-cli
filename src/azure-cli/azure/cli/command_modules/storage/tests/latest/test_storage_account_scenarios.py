@@ -927,3 +927,40 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')
+
+
+class StorageAccountSkuScenarioTest(ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    @StorageAccountPreparer(name_prefix='clistoragesku', location='westus2', kind='StorageV2', sku='Standard_ZRS')
+    def test_storage_account_sku(self, resource_group, storage_account):
+        self.kwargs = {
+            'gzrs_sa': self.create_random_name(prefix='cligzrs', length=24),
+            'GZRS': 'Standard_GZRS',
+            'rg': resource_group,
+            'sa': storage_account
+        }
+
+        # Create storage account with GZRS
+        self.cmd('az storage account create -n {gzrs_sa} -g {rg} --sku {GZRS} --https-only', checks=[
+            self.check('sku.name', '{GZRS}'),
+            self.check('name', '{gzrs_sa}')
+        ])
+
+        # Convert RS to GZRS
+        self.cmd('az storage account show -n {sa} -g {rg}', checks=[
+            self.check('sku.name', 'Standard_ZRS'),
+            self.check('name', '{sa}')
+        ])
+
+        self.cmd('az storage account update -n {sa} -g {rg} --sku {GZRS}', checks=[
+            self.check('sku.name', '{GZRS}'),
+            self.check('name', '{sa}'),
+        ])
+
+        self.cmd('az storage account show -n {sa} -g {rg}', checks=[
+            self.check('sku.name', '{GZRS}'),
+            self.check('name', '{sa}')
+        ])
+
+        self.cmd('az storage account delete -n {gzrs_sa} -g {rg} -y')
