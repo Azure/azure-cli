@@ -209,8 +209,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
-        self.kwargs['policy1_json']['properties']['instantRpDetails']['azureBackupRgNamePrefix'] = 'RG_prefix'
-        self.kwargs['policy1_json']['properties']['instantRpDetails']['azureBackupRgNameSuffix'] = 'RG_suffix'
+        self.kwargs['policy1_json']['properties']['instantRpDetails'] = {'azureBackupRgNamePrefix' : 'RG_prefix', 'azureBackupRgNameSuffix': 'RG_suffix'}
         self.kwargs['policy1_json'] = json.dumps(self.kwargs['policy1_json'])
 
         self.cmd("backup policy set -g {rg} -v {vault} --policy '{policy1_json}'", checks=[
