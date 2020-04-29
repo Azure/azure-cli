@@ -54,9 +54,10 @@ class Identity:
     """Class to interact with Azure Identity.
     """
 
-    def __init__(self, authority=None, tenant_id=None):
+    def __init__(self, authority=None, tenant_id=None, **kwargs):
         self.authority = authority
         self.tenant_id = tenant_id
+        self._cred_cache = kwargs.pop('cred_cache', None)
 
         # TODO: Allow disabling SSL verification
         # The underlying requests lib of MSAL has been patched with Azure Core by MsalTransportAdapter
@@ -79,6 +80,8 @@ class Identity:
                 authority=self.authority,
                 client_id=_CLIENT_ID
             )
+        # todo: remove after ADAL token deprecation
+        self._cred_cache.add_credential(credential)
         return credential, auth_profile
 
     def login_with_device_code(self):
@@ -95,6 +98,8 @@ class Identity:
             cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
                                                                    authority=self.authority,
                                                                    prompt_callback=prompt_callback)
+        # todo: remove after ADAL token deprecation
+        self._cred_cache.add_credential(cred)
         return cred, auth_profile
 
     def login_with_username_password(self, username, password):
@@ -106,6 +111,8 @@ class Identity:
         else:
             credential, auth_profile = UsernamePasswordCredential.authenticate(
                 _CLIENT_ID, username, password, authority=self.authority, **self.ssl_kwargs)
+        # todo: remove after ADAL token deprecation
+        self._cred_cache.add_credential(credential)
         return credential, auth_profile
 
     def login_with_service_principal_secret(self, client_id, client_secret):
@@ -114,8 +121,7 @@ class Identity:
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
         sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, secret=client_secret)
         entry = sp_auth.get_entry_to_persist()
-        cred_cache = ADALCredentialCache()
-        cred_cache.save_service_principal_cred(entry)
+        self._cred_cache.save_service_principal_cred(entry)
 
         credential = ClientSecretCredential(self.tenant_id, client_id, client_secret, authority=self.authority)
         return credential
@@ -126,8 +132,7 @@ class Identity:
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
         sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, certificate_file=certificate_path)
         entry = sp_auth.get_entry_to_persist()
-        cred_cache = ADALCredentialCache()
-        cred_cache.save_service_principal_cred(entry)
+        self._cred_cache.save_service_principal_cred(entry)
 
         # TODO: support use_cert_sn_issuer in CertificateCredential
         credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
@@ -216,8 +221,7 @@ class Identity:
         return InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
-        cred_cache = ADALCredentialCache()
-        client_secret, certificate_path = cred_cache.retrieve_secret_of_service_principal(client_id, self.tenant_id)
+        client_secret, certificate_path = self._cred_cache.retrieve_secret_of_service_principal(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
         if client_secret:
             return ClientSecretCredential(self.tenant_id, client_id, client_secret)
@@ -295,7 +299,7 @@ class ADALCredentialCache:
         return cred.get(_ACCESS_TOKEN, None), cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
 
     def save_service_principal_cred(self, sp_entry):
-        self.load_service_principal_creds()
+        self.load_adal_token_cache()
         matched = [x for x in self._service_principal_creds
                    if sp_entry[_SERVICE_PRINCIPAL_ID] == x[_SERVICE_PRINCIPAL_ID] and
                    sp_entry[_SERVICE_PRINCIPAL_TENANT] == x[_SERVICE_PRINCIPAL_TENANT]]

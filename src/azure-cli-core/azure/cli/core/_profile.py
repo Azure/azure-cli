@@ -110,6 +110,7 @@ class Profile(object):
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
+        self._adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
 
     def login(self,
               interactive,
@@ -126,11 +127,10 @@ class Profile(object):
         credential=None
         auth_profile=None
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-        identity = Identity(authority, tenant)
-        adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+        identity = Identity(authority, tenant, cred_cache=self._adal_cache)
 
         if not subscription_finder:
-            subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=adal_cache)
+            subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
         if interactive:
             if not use_device_code and (in_cloud_console() or not can_launch_browser()):
                 logger.info('Detect no GUI is available, so fall back to device code')
@@ -146,8 +146,6 @@ class Profile(object):
 
             if use_device_code:
                 credential, auth_profile = identity.login_with_device_code()
-            # todo: remove after ADAL token deprecation
-            adal_cache.add_credential(credential)
         else:
             if is_service_principal:
                 if not tenant:
@@ -197,7 +195,7 @@ class Profile(object):
 
         self._set_subscriptions(consolidated)
         # todo: remove after ADAL token deprecation
-        adal_cache.persist_cached_creds()
+        self._adal_cache.persist_cached_creds()
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
@@ -475,11 +473,8 @@ class Profile(object):
         account = self.get_subscription()
         home_account_id = account[_USER_ENTITY][_USER_HOME_ACCOUNT_ID]
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-        from azure.cli.core._credential import Identity
-        identity_credential = Identity(home_account_id=home_account_id,
-                                                 authority=authority,
-                                                 tenant_id=tenant,
-                                                 username=username)
+        identity = Identity(authority, tenant, cred_cache=self._adal_cache)
+        identity_credential = identity.get_user_credential(home_account_id, username)
         from azure.cli.core.authentication import AuthenticationWrapper
         auth = AuthenticationWrapper(identity_credential, resource=resource)
         token = auth.get_token()
@@ -505,7 +500,7 @@ class Profile(object):
         tenant_id = aux_tenant_id if aux_tenant_id else account[_TENANT_ID]
 
         authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-        identity = Identity(authority, tenant_id)
+        identity = Identity(authority, tenant_id, cred_cache=self._adal_cache)
 
         if identity_type is None:
             if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
