@@ -2593,9 +2593,12 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     if create_app_insights:
         try:
             try_create_application_insights(cmd, functionapp)
+            # raise Exception('hello')
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
+            update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                ['AzureWebJobsDashboard={}'.format(con_string)])
 
     if deployment_container_image_name:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
