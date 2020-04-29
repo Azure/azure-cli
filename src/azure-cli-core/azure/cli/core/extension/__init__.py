@@ -177,13 +177,13 @@ class WheelExtension(Extension):
         if os.path.isdir(EXTENSIONS_DIR):
             for ext_name in os.listdir(EXTENSIONS_DIR):
                 ext_path = os.path.join(EXTENSIONS_DIR, ext_name)
-                pattern = os.path.join(ext_path, '*.*-info')
+                pattern = os.path.join(ext_path, '*.dist-info')
                 if os.path.isdir(ext_path) and glob(pattern):
                     exts.append(WheelExtension(ext_name, ext_path))
         if os.path.isdir(EXTENSIONS_SYS_DIR):
             for ext_name in os.listdir(EXTENSIONS_SYS_DIR):
                 ext_path = os.path.join(EXTENSIONS_SYS_DIR, ext_name)
-                pattern = os.path.join(ext_path, '*.*-info')
+                pattern = os.path.join(ext_path, '*.dist-info')
                 if os.path.isdir(ext_path) and glob(pattern):
                     ext = WheelExtension(ext_name, ext_path)
                     if ext not in exts:
