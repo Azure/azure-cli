@@ -49,9 +49,9 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('sub-command the-second-name'.split())
         self.assertIs(args.func, command2)
 
-        AzCliCommandParser.error = VerifyError(self,)
-        parser.parse_args('sub-command'.split())
-        self.assertTrue(AzCliCommandParser.error.called)
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
+            parser.parse_args('sub-command'.split())
+            self.assertTrue(AzCliCommandParser.error.called)
 
     def test_required_parameter(self):
         def test_handler(args):  # pylint: disable=unused-argument
@@ -72,9 +72,9 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --req yep'.split())
         self.assertIs(args.func, command)
 
-        AzCliCommandParser.error = VerifyError(self)
-        parser.parse_args('test command'.split())
-        self.assertTrue(AzCliCommandParser.error.called)
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
+            parser.parse_args('test command'.split())
+            self.assertTrue(AzCliCommandParser.error.called)
 
     def test_nargs_parameter(self):
         def test_handler():
@@ -95,9 +95,9 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --req yep nope'.split())
         self.assertIs(args.func, command)
 
-        AzCliCommandParser.error = VerifyError(self)
-        parser.parse_args('test command -req yep'.split())
-        self.assertTrue(AzCliCommandParser.error.called)
+        with mock.patch('azure.cli.core.parser.AzCliCommandParser.error', new=VerifyError(self)):
+            parser.parse_args('test command -req yep'.split())
+            self.assertTrue(AzCliCommandParser.error.called)
 
     def test_case_insensitive_enum_choices(self):
         from enum import Enum

@@ -418,11 +418,56 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  '--key-permissions get wrapKey unwrapKey recover')
         self.cmd('az keyvault update -n {vt} -g {rg} --set properties.enableSoftDelete=true')
         self.cmd('az resource update --id {vid} --set properties.enablePurgeProtection=true')
-        self.cmd('az storage account update -n {sa} -g {rg} '
-                 '--encryption-key-source Microsoft.Keyvault '
-                 '--encryption-key-vault {vtn} '
-                 '--encryption-key-name testkey '
-                 '--encryption-key-version {ver} ')
+
+        # Enable key auto-rotation
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey ').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Pin to a version and opt out for key auto-rotation
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-version {ver}').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], self.kwargs['ver'])
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Enable key auto-rotation again
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-version ""').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], "")
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Change Key name
+        self.cmd("az keyvault key create -n newkey -p software --vault-name {vt} ")
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name "newkey"').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'newkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], "")
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Change Key source
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-source Microsoft.Storage').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -882,3 +927,40 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
             self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
 
         self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')
+
+
+class StorageAccountSkuScenarioTest(ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    @StorageAccountPreparer(name_prefix='clistoragesku', location='westus2', kind='StorageV2', sku='Standard_ZRS')
+    def test_storage_account_sku(self, resource_group, storage_account):
+        self.kwargs = {
+            'gzrs_sa': self.create_random_name(prefix='cligzrs', length=24),
+            'GZRS': 'Standard_GZRS',
+            'rg': resource_group,
+            'sa': storage_account
+        }
+
+        # Create storage account with GZRS
+        self.cmd('az storage account create -n {gzrs_sa} -g {rg} --sku {GZRS} --https-only', checks=[
+            self.check('sku.name', '{GZRS}'),
+            self.check('name', '{gzrs_sa}')
+        ])
+
+        # Convert RS to GZRS
+        self.cmd('az storage account show -n {sa} -g {rg}', checks=[
+            self.check('sku.name', 'Standard_ZRS'),
+            self.check('name', '{sa}')
+        ])
+
+        self.cmd('az storage account update -n {sa} -g {rg} --sku {GZRS}', checks=[
+            self.check('sku.name', '{GZRS}'),
+            self.check('name', '{sa}'),
+        ])
+
+        self.cmd('az storage account show -n {sa} -g {rg}', checks=[
+            self.check('sku.name', '{GZRS}'),
+            self.check('name', '{sa}')
+        ])
+
+        self.cmd('az storage account delete -n {gzrs_sa} -g {rg} -y')

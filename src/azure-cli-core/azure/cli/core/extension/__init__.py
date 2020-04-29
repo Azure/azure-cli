@@ -138,24 +138,19 @@ class WheelExtension(Extension):
             return None
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
-        info_dirs = glob(os.path.join(ext_dir, '*.*-info'))
+        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '*.*-info'))
+
         azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
             metadata.update(azext_metadata)
 
         for dist_info_dirname in info_dirs:
-            parsed_dist_info_dir = WHEEL_INFO_RE(dist_info_dirname)
-            if not parsed_dist_info_dir:
-                continue
-
-            parsed_dist_info_dir = parsed_dist_info_dir.groupdict().get('name')
-            if os.path.split(parsed_dist_info_dir)[-1] == self.name.replace('-', '_'):
-                whl_metadata_filepath = os.path.join(dist_info_dirname, WHL_METADATA_FILENAME)
-                if os.path.isfile(whl_metadata_filepath):
-                    with open(whl_metadata_filepath) as f:
-                        metadata.update(json.loads(f.read()))
-                elif os.path.isfile(os.path.join(dist_info_dirname, 'PKG-INFO')):
-                    metadata.update(pkginfo.Develop(dist_info_dirname).__dict__)
+            try:
+                ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
+                if self.name == ext_whl_metadata.name:
+                    metadata.update(vars(ext_whl_metadata))
+            except ValueError:
+                logger.warning('extension % contains invalid metadata for Python Package', self.name)
 
         return metadata
 
@@ -214,27 +209,14 @@ class DevExtension(Extension):
         if azext_metadata:
             metadata.update(azext_metadata)
 
-        def _apply_egginfo_metadata(filename):
-            # extract version info for dev extensions from PKG-INFO
-            if os.path.isfile(filename):
-                with open(filename) as f:
-                    for line in f.readlines():
-                        try:
-                            key, val = line.split(':', 1)
-                            key = key.lower()
-                            if key == 'version':
-                                metadata[key] = '{}'.format(val.strip())
-                            elif key == 'name':
-                                # temporary fix extension name is None
-                                # until wheel upgrade and metadata structure in azure-cli-extensions has upgraded too.
-                                # https://github.com/Azure/azure-cli/pull/12583
-                                metadata[key] = val.strip()
-                        except ValueError:
-                            continue
-
         for egg_info_dirname in egg_info_dirs:
-            egg_metadata_filepath = os.path.join(ext_dir, egg_info_dirname, EGG_INFO_METADATA_FILE_NAME)
-            _apply_egginfo_metadata(egg_metadata_filepath)
+            egg_metadata_path = os.path.join(ext_dir, egg_info_dirname, )
+            try:
+                ext_whl_metadata = pkginfo.Develop(egg_metadata_path)
+                if self.name == ext_whl_metadata.name:
+                    metadata.update(vars(ext_whl_metadata))
+            except ValueError:
+                logger.warning('extension % contains invalid metadata for Python Package', self.name)
 
         return metadata
 

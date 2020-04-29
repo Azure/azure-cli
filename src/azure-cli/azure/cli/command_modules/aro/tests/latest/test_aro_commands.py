@@ -10,7 +10,8 @@ from random import randint
 
 from knack.log import get_logger
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk.checkers import StringContainCheck
 
 logger = get_logger(__name__)
 
@@ -93,8 +94,9 @@ class AroScenarioTests(ScenarioTest):
         master_subnet = self.create_random_name('dev_master', 14)
         worker_subnet = self.create_random_name('dev_worker', 14)
 
+        name = self.create_random_name('aro', 14)
         self.kwargs.update({
-            'name': self.create_random_name('aro', 14),
+            'name': name,
             'resource_group': resource_group,
             'subscription': subscription,
             'master_subnet': master_subnet,
@@ -116,6 +118,12 @@ class AroScenarioTests(ScenarioTest):
             self.check('name', '{name}'),
             self.check_pattern('id', '.*{name}'),
             self.check('resourceGroup', '{rg}')
+        ])
+        self.cmd('aro show -g {rg} -n {name} --subscription {subscription} --output table', checks=[
+            StringContainCheck(name),
+            StringContainCheck(resource_group),
+            StringContainCheck('eastus'),
+            StringContainCheck('Succeeded'),
         ])
 
     @AllowLargeResponse()

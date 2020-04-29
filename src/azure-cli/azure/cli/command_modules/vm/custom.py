@@ -990,7 +990,7 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
             }
             for ip_configuration in nic.ip_configurations:
                 network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
-                if ip_configuration.public_ip_address:
+                if ip_configuration.public_ip_address and ip_configuration.public_ip_address.id in ip_address_lookup:
                     public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
 
                     public_ip_addr_info = {
@@ -1268,7 +1268,7 @@ def list_av_sets(cmd, resource_group_name=None):
     op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
     if resource_group_name:
         return op_group.list(resource_group_name)
-    return op_group.list_by_subscription()
+    return op_group.list_by_subscription(expand='virtualMachines/$ref')
 # endregion
 
 
@@ -2808,6 +2808,9 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
         vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
         data_disks = vmss_vm.storage_profile.data_disks
 
+    if not data_disks:
+        raise CLIError("Data disk doesn't exist")
+
     leftovers = [d for d in data_disks if d.lun != lun]
     if len(data_disks) == len(leftovers):
         raise CLIError("Could not find the data disk with lun '{}'".format(lun))
@@ -2993,7 +2996,9 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
-                         os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None):
+                         os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
+                         target_region_encryption=None):
+    # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
@@ -3161,18 +3166,19 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
         log_client = _get_log_analytics_client(cmd)
         workspace_result = None
         try:
-            workspace_result = log_client.get(resource_group_name, workspace_name)
+            workspace_result = log_client.workspaces.get(resource_group_name, workspace_name)
         except CloudError:
-            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
-            sku = Sku(name=SkuNameEnum.per_gb2018.value)
+            from azure.mgmt.loganalytics.models import Workspace, WorkspaceSku, WorkspaceSkuNameEnum
+            sku = WorkspaceSku(name=WorkspaceSkuNameEnum.per_gb2018.value)
             retention_time = 30  # default value
             location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
             workspace_instance = Workspace(location=location,
                                            sku=sku,
                                            retention_in_days=retention_time)
-            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
-                                                                                             workspace_name,
-                                                                                             workspace_instance))
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.workspaces.create_or_update(
+                resource_group_name,
+                workspace_name,
+                workspace_instance))
         workspace_id = workspace_result.id
     else:
         workspace_id = workspace
@@ -3234,12 +3240,12 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
     log_client = _get_log_analytics_client(cmd)
-    customer_id = log_client.get(resource_group_name, workspace_name).customer_id
+    customer_id = log_client.workspaces.get(resource_group_name, workspace_name).customer_id
     settings = {
         'workspaceId': customer_id,
         'stopOnMultipleConnections': 'true'
     }
-    primary_shared_key = log_client.get_shared_keys(resource_group_name, workspace_name).primary_shared_key
+    primary_shared_key = log_client.shared_keys.get_shared_keys(resource_group_name, workspace_name).primary_shared_key
     protected_settings = {
         'workspaceKey': primary_shared_key,
     }

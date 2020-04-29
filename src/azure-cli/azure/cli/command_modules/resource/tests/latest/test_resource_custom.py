@@ -19,7 +19,8 @@ except ImportError:
 from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.resource.custom import \
     (_get_missing_parameters, _extract_lock_params, _process_parameters, _find_missing_parameters,
-     _prompt_for_parameters, _load_file_string_or_uri)
+     _prompt_for_parameters, _load_file_string_or_uri, deploy_arm_template_at_resource_group,
+     deploy_arm_template_at_subscription_scope)
 
 
 def _simulate_no_tty():
@@ -332,6 +333,28 @@ class TestCustom(unittest.TestCase):
                              "['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
         results = _prompt_for_parameters(dict(missing_parameters), fail_on_no_tty=False)
         self.assertTrue(str(list(results.keys())) in param_alpha_order)
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_resource_group", autospec=True)
+    def test_confirm_with_what_if_prompt_at_resource_group(self, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        prompt_y_n_mock.return_value = False
+        # Act.
+        result = deploy_arm_template_at_resource_group(mock.MagicMock(), confirm_with_what_if=True)
+        # Assert.
+        prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
+        self.assertIsNone(result)
+
+    @mock.patch("knack.prompting.prompt_y_n", autospec=True)
+    @mock.patch("azure.cli.command_modules.resource.custom.what_if_deploy_arm_template_at_subscription_scope", autospec=True)
+    def test_confirm_with_what_if_prompt_at_subscription_scope(self, what_if_command_mock, prompt_y_n_mock):
+        # Arrange.
+        prompt_y_n_mock.return_value = False
+        # Act.
+        result = deploy_arm_template_at_subscription_scope(mock.MagicMock(), confirm_with_what_if=True)
+        # Assert.
+        prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
+        self.assertIsNone(result)
 
 
 if __name__ == '__main__':
