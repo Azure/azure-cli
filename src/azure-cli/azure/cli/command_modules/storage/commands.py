@@ -115,7 +115,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             2. After the failover, your storage account type will be converted to locally redundant storage (LRS). You can convert your account to use geo-redundant storage (GRS).
             3. Once you re-enable GRS/GZRS for your storage account, Microsoft will replicate data to your new secondary region. Replication time is dependent on the amount of data to replicate. Please note that there are bandwidth charges for the bootstrap. Please refer to doc: https://azure.microsoft.com/pricing/details/bandwidth/
         """
-        g.command('failover', 'failover', supports_no_wait=True, is_preview=True,
+        g.command('failover', 'failover', supports_no_wait=True, is_preview=True, min_api='2018-07-01',
                   confirmation=failover_confirmation)
 
     with self.command_group('storage account', storage_account_sdk_keys, resource_type=ResourceType.MGMT_STORAGE) as g:
