@@ -48,7 +48,6 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs access show -f {} -p {} ', account_info, filesystem, file_path) \
             .assert_with_checks(JMESPathCheck('permissions', permissions))
 
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_filesystem_scenarios(self, resource_group, storage_account):
@@ -222,6 +221,10 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs file download -p {} -f {} -d "{}"', account_info, file_path, filesystem, local_dir)
         import os
         self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_dir)))
+
+        with self.assertRaisesRegexp(CLIError, "The specified path already exists. Please change to a valid path."):
+            self.storage_cmd('storage fs file download -p {} -f {} -d "{}" --overwrite false', account_info, file_path,
+                             filesystem, local_dir)
 
         # Move file
         new_filesystem = self.create_file_system(account_info)

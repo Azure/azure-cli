@@ -38,7 +38,7 @@ def download_file(client, destination_path=None, overwrite=True):
         destination_path = os.path.join(destination_path, file_name) \
             if destination_path else file_name
 
-    if not overwrite:
+    if not overwrite and os.path.exists(destination_path):
         raise CLIError('The specified path already exists. Please change to a valid path. ')
 
     with open(destination_path, 'wb') as stream:
