@@ -132,7 +132,6 @@ DEPENDENCIES = [
     'fabric~=2.4',
     'jsmin~=2.2.2',
     'knack==0.7.0rc4',
-    'mock~=4.0',
     'paramiko>=2.0.8,<3.0.0',
     'pyOpenSSL>=17.1.0',
     'pytz==2019.1',
@@ -146,6 +145,10 @@ DEPENDENCIES = [
     'xmltodict~=0.12',
     'javaproperties==0.5.1',
     'jsondiff==1.2.0'
+]
+
+TESTS_REQUIRE = [
+    'mock~=4.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
