@@ -35,7 +35,7 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 
 
 #### Visual Studio Code (Any platform)
-Experimental steps – still haven’t been able to get virtual environments to work well with VSCode
+
 
 1. Install [VS Code](https://code.visualstudio.com/)
 2. Install (one of) the [python extension(s)](https://marketplace.visualstudio.com/items?itemName=ms-python.python) for VS Code
