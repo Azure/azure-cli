@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
 
-from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
+from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
 
 
@@ -12,12 +12,13 @@ class IoTHubTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
-    def test_iot_hub(self, resource_group, resource_group_location):
-        hub = 'iot-hub-for-test-1'
+    @StorageAccountPreparer()
+    def test_iot_hub(self, resource_group, resource_group_location, storage_account):
+        hub = 'iot-hub-for-test-11'
         rg = resource_group
         location = resource_group_location
         containerName = 'iothubcontainer1'
-        storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName)
+        storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         ehConnectionString = self._get_eventhub_connectionstring(rg)
         subscription_id = self._get_current_subscription()
 
@@ -395,7 +396,7 @@ class IoTHubTest(ScenarioTest):
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
     def _get_eventhub_connectionstring(self, rg):
-        ehNamespace = 'ehNamespaceiothubfortest-1'
+        ehNamespace = 'ehNamespaceiothubfortest1'
         eventHub = 'eventHubiothubfortest'
         eventHubPolicy = 'eventHubPolicyiothubfortest'
         eventHubPolicyRight = 'Send'
@@ -413,11 +414,7 @@ class IoTHubTest(ScenarioTest):
                           .format(rg, ehNamespace, eventHub, eventHubPolicy))
         return output.get_output_in_json()['primaryConnectionString']
 
-    def _get_azurestorage_connectionstring(self, rg, container_name):
-        storage_name = 'iothubteststorage1'
-
-        self.cmd('storage account create --resource-group {0} --name {1}'
-                 .format(rg, storage_name))
+    def _get_azurestorage_connectionstring(self, rg, container_name, storage_name):
 
         self.cmd('storage container create --name {0} --account-name {1}'
                  .format(container_name, storage_name))

@@ -7,8 +7,6 @@ pip install -U pip
 pip install -r $root/requirements.txt
 pip install azure-cli==$CLI_VERSION -f /mnt/pypi
 
-pip install msrestazure==0.6.2
-
 pip list
 
 python $root/formula_generate.py

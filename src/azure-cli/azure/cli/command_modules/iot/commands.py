@@ -7,7 +7,7 @@ from azure.cli.core.commands import LongRunningOperation, CliCommandType
 from ._client_factory import iot_hub_service_factory
 from ._client_factory import iot_service_provisioning_factory
 from ._client_factory import iot_pnp_service_factory
-
+from ._client_factory import iot_central_service_factory
 
 JOB_DEPRECATION_INFO = 'IoT Extension (azure-cli-iot-ext) Job commands'
 
@@ -46,6 +46,10 @@ class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few
 def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     update_custom_util = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
+
+    iot_central_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.iotcentral.operations#IoTCentaralOperations.{}'
+    )
 
     # iot dps commands
     with self.command_group('iot dps', client_factory=iot_service_provisioning_factory) as g:
@@ -138,7 +142,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                          transform=EndpointUpdateResultTransform(self.cli_ctx))
 
     # iot hub message enrichment commands
-    with self.command_group('iot hub message-enrichment', client_factory=iot_hub_service_factory) as g:
+    with self.command_group('iot hub message-enrichment', client_factory=iot_hub_service_factory,
+                            min_api="2019-07-01-preview") as g:
         g.custom_command('create', 'iot_message_enrichment_create')
         g.custom_command('list', 'iot_message_enrichment_list')
         g.custom_command('delete', 'iot_message_enrichment_delete')
@@ -154,7 +159,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('test', 'iot_hub_route_test')
 
     # iot hub device stream commands
-    with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory) as g:
+    with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory,
+                            min_api="2019-07-01-preview") as g:
         g.custom_command('show', 'iot_hub_devicestream_show')
 
     # iot pnp commands
@@ -172,3 +178,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('create', 'pnp_create_key')
         g.custom_command('delete', 'pnp_delete_key')
         g.custom_command('update', 'pnp_update_key')
+
+    with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory,
+                            is_preview=True) as g:
+        g.custom_command('create', 'iot_central_app_create')
+        g.custom_command('list', 'iot_central_app_list')
+        g.custom_show_command('show', 'iot_central_app_get')
+        g.generic_update_command('update', getter_name='iot_central_app_get',
+                                 setter_name='iot_central_app_update', command_type=update_custom_util)
+        g.custom_command('delete', 'iot_central_app_delete', confirmation=True)

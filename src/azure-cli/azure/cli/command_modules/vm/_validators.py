@@ -355,6 +355,11 @@ def _validate_location(cmd, namespace, zone_info, size_info):
 # pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
+
+    # specialized is only for image
+    if getattr(namespace, 'specialized', None) is not None and namespace.image is None:
+        raise CLIError('usage error: --specialized is only configurable when --image is specified.')
+
     # use minimal parameters to resolve the expected storage profile
     if getattr(namespace, 'attach_os_disk', None) and not namespace.image:
         if namespace.use_unmanaged_disk:
@@ -1562,13 +1567,18 @@ def process_remove_identity_namespace(cmd, namespace):
 
 
 def process_gallery_image_version_namespace(cmd, namespace):
-    TargetRegion = cmd.get_models('TargetRegion')
-    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS']]
+    TargetRegion, EncryptionImages, OSDiskImageEncryption, DataDiskImageEncryption = cmd.get_models(
+        'TargetRegion', 'EncryptionImages', 'OSDiskImageEncryption', 'DataDiskImageEncryption')
+    storage_account_types_list = [item.lower() for item in ['Standard_LRS', 'Standard_ZRS', 'Premium_LRS']]
     storage_account_types_str = ", ".join(storage_account_types_list)
 
     if namespace.target_regions:
+        if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
+            if len(namespace.target_regions) != len(namespace.target_region_encryption):
+                raise CLIError(
+                    'usage error: Length of --target-region-encryption should be as same as length of target regions')
         regions_info = []
-        for t in namespace.target_regions:
+        for i, t in enumerate(namespace.target_regions):
             parts = t.split('=', 2)
             replica_count = None
             storage_account_type = None
@@ -1598,12 +1608,58 @@ def process_gallery_image_version_namespace(cmd, namespace):
                     raise CLIError("usage error: {} is an invalid target region argument. "
                                    "The second part must be a valid integer replica count.".format(t))
 
+            # Parse target region encryption, example: ['des1,0,des2,1,des3', 'null', 'des4']
+            encryption = None
+            if hasattr(namespace, 'target_region_encryption') and namespace.target_region_encryption:
+                terms = namespace.target_region_encryption[i].split(',')
+                # OS disk
+                os_disk_image = terms[0]
+                if os_disk_image == 'null':
+                    os_disk_image = None
+                else:
+                    des_id = _disk_encryption_set_format(cmd, namespace, os_disk_image)
+                    os_disk_image = OSDiskImageEncryption(disk_encryption_set_id=des_id)
+                # Data disk
+                if len(terms) > 1:
+                    data_disk_images = terms[1:]
+                    data_disk_images_len = len(data_disk_images)
+                    if data_disk_images_len % 2 != 0:
+                        raise CLIError('usage error: LUN and disk encryption set for data disk should appear '
+                                       'in pair in --target-region-encryption. Example: osdes,0,datades0,1,datades1')
+                    data_disk_image_encryption_list = []
+                    for j in range(int(data_disk_images_len / 2)):
+                        lun = data_disk_images[j * 2]
+                        des_id = data_disk_images[j * 2 + 1]
+                        des_id = _disk_encryption_set_format(cmd, namespace, des_id)
+                        data_disk_image_encryption_list.append(DataDiskImageEncryption(
+                            lun=lun, disk_encryption_set_id=des_id))
+                    data_disk_images = data_disk_image_encryption_list
+                else:
+                    data_disk_images = None
+                encryption = EncryptionImages(os_disk_image=os_disk_image, data_disk_images=data_disk_images)
+
             # At least the region is specified
             if len(parts) >= 1:
                 regions_info.append(TargetRegion(name=parts[0], regional_replica_count=replica_count,
-                                                 storage_account_type=storage_account_type))
+                                                 storage_account_type=storage_account_type,
+                                                 encryption=encryption))
 
         namespace.target_regions = regions_info
+
+
+def _disk_encryption_set_format(cmd, namespace, name):
+    """
+    Transform name to ID. If it's already a valid ID, do nothing.
+    :param name: string
+    :return: ID
+    """
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if name is not None and not is_valid_resource_id(name):
+        name = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Compute', type='diskEncryptionSets', name=name)
+    return name
 # endregion
 
 

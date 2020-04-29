@@ -87,7 +87,8 @@ def cli_cosmosdb_create(cmd, client,
                         virtual_network_rules=None,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
-                        key_uri=None):
+                        key_uri=None,
+                        enable_public_network=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -106,6 +107,10 @@ def cli_cosmosdb_create(cmd, client,
         locations = []
         locations.append(Location(location_name=resource_group_location, failover_priority=0, is_zone_redundant=False))
 
+    public_network_access = None
+    if enable_public_network is not None:
+        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+
     params = DatabaseAccountCreateUpdateParameters(
         location=resource_group_location,
         locations=locations,
@@ -119,7 +124,8 @@ def cli_cosmosdb_create(cmd, client,
         virtual_network_rules=virtual_network_rules,
         enable_multiple_write_locations=enable_multiple_write_locations,
         disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
-        key_vault_key_uri=key_uri)
+        key_vault_key_uri=key_uri,
+        public_network_access=public_network_access)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -142,7 +148,8 @@ def cli_cosmosdb_update(client,
                         enable_virtual_network=None,
                         virtual_network_rules=None,
                         enable_multiple_write_locations=None,
-                        disable_key_based_metadata_write_access=None):
+                        disable_key_based_metadata_write_access=None,
+                        enable_public_network=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -167,6 +174,10 @@ def cli_cosmosdb_update(client,
                                                max_staleness_prefix=max_staleness_prefix,
                                                max_interval_in_seconds=max_interval)
 
+    public_network_access = None
+    if enable_public_network is not None:
+        public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+
     params = DatabaseAccountUpdateParameters(
         locations=locations,
         tags=tags,
@@ -177,7 +188,8 @@ def cli_cosmosdb_update(client,
         capabilities=capabilities,
         virtual_network_rules=virtual_network_rules,
         enable_multiple_write_locations=enable_multiple_write_locations,
-        disable_key_based_metadata_write_access=disable_key_based_metadata_write_access)
+        disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
+        public_network_access=public_network_access)
 
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
@@ -989,6 +1001,42 @@ def cli_cosmosdb_network_rule_remove(cmd,
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
+
+
+def _update_private_endpoint_connection_status(client, resource_group_name, account_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):
+    private_endpoint_connection = client.get(resource_group_name=resource_group_name, account_name=account_name,
+                                             private_endpoint_connection_name=private_endpoint_connection_name)
+
+    new_status = "Approved" if is_approved else "Rejected"
+    private_endpoint_connection.private_link_service_connection_state.status = new_status
+    private_endpoint_connection.private_link_service_connection_state.description = description
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   account_name=account_name,
+                                   private_endpoint_connection_name=private_endpoint_connection_name,
+                                   private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state,
+                                   parameters=private_endpoint_connection)
+
+
+def approve_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
+                                        description=None):
+    """Approve a private endpoint connection request for Azure Cosmos DB."""
+
+    return _update_private_endpoint_connection_status(
+        client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=True,
+        description=description
+    )
+
+
+def reject_private_endpoint_connection(client, resource_group_name, account_name, private_endpoint_connection_name,
+                                       description=None):
+    """Reject a private endpoint connection request for Azure Cosmos DB."""
+
+    return _update_private_endpoint_connection_status(
+        client, resource_group_name, account_name, private_endpoint_connection_name, is_approved=False,
+        description=description
+    )
 
 
 ######################
