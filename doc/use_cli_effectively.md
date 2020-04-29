@@ -1,8 +1,8 @@
-# Tips for using Azure CLI effectively #
+# Tips for using Azure CLI effectively
 
 For clarity, Bash scripts are used inline. Windows batch or PowerScript examples are listed in the appendix, which you can use to build similar examples.
 
-## Use the right output mode for your work (json, table, or tsv) ##
+## Output formatting (json, table, or tsv)
 
 1. `json` format is the CLI's default, and is intended to give you the most comprehensive information. If you prefer a different format, use the `--output` argument to override for an individual command invocation, or use `az configure` to update your global default. Note that JSON format preserves the double quotes, generally making in unsuitable for scripting purposes.
 
@@ -22,7 +22,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
     az vm stop --ids $vm_ids
     ```
 
-## Passing values from one command to the other ##
+## Pass values from one command to another
 
 1. If the value will be used more than once, assign it to a variable. Note the use of `-o tsv` in the following example:
 
@@ -58,7 +58,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
     az vm list -d -g my_rg --query "[?powerState=='VM stopped'].id" -o tsv | az vm start --ids @-
     ```
 
-## Async Operations ##
+## Async operations
 
 Many commands and group expose `--no-wait` flags on their long-running operations as well as a dedicated `wait` command. These become handy for certain scenarios:
 
@@ -78,7 +78,8 @@ Many commands and group expose `--no-wait` flags on their long-running operation
     az vm wait --created --ids $vm1_id $vm2_id
     ```
 
-## Using the Generic Update Arguments ##
+## Generic update arguments
+
 Most update commands in the CLI feature the three generic arguments: `--add`, `--set` and `--remove`. These arguments are powerful but often less convenient than the strongly-typed arguments typically featured in update commands. The CLI provides strongly-typed arguments for most common scenarios for ease-of-use, but if the property you want to set isn't listed, the generic update arguments will often present a path forward to unblock you without having to wait for a new release.
 
 1. The generic update syntax isn't the most user friendly, so it will require some patience.
@@ -94,7 +95,35 @@ Most update commands in the CLI feature the three generic arguments: `--add`, `-
     az vm update -g my_rg -n my_vm --add storageProfile.dataDisks @~/my_disk.json
     ```
 
-## Quoting Issues ##
+## Generic resource commands - `az resource`
+
+There may be cases where a service you are interested in does not have CLI command coverage. You can use the `az resource create/show/list/delete/update/invoke-action` commands to work with these resources. A few suggestions here:
+  1. If only `create/update` are involved, consider using `az group deployment create`. Leverage [Azure Quickstart Templates](https://github.com/Azure/azure-quickstart-templates) for working examples.
+  2. Check out the Rest API reference for the request payload, URL and API version. As an example, check out the community's comments on [how to create AppInsights](https://github.com/Azure/azure-cli/issues/5543).
+
+## REST API command - `az rest`
+
+If neither generic update arguments nor `az resource` meets your needs, you can use `az rest` command to call the REST API. It automatically authenticates using the credential logged in and sets header `Content-Type: application/json`.
+
+This is extremely useful for calling [Microsoft Graph API](https://docs.microsoft.com/en-us/graph/api/overview?toc=./ref/toc.json&view=graph-rest-1.0) which is not supported by CLI commands yet ([#12946](https://github.com/Azure/azure-cli/issues/12946)). 
+
+For example, to update `redirectUris` for an [Application](https://docs.microsoft.com/en-us/graph/api/resources/application?view=graph-rest-1.0),
+we call the [Update application](https://docs.microsoft.com/en-us/graph/api/application-update?view=graph-rest-1.0&tabs=http) REST API with:
+
+```sh
+# Line breaks for legibility only
+
+# Get the application
+az rest --method GET 
+        --url 'https://graph.microsoft.com/v1.0/applications/b4e4d2ab-e2cb-45d5-a31a-98eb3f364001'
+
+# Update `redirectUris` for `web` property
+az rest --method PATCH
+        --uri 'https://graph.microsoft.com/v1.0/applications/b4e4d2ab-e2cb-45d5-a31a-98eb3f364001'
+        --body '{"web":{"redirectUris":["https://myapp.com"]}}'
+```
+ 
+## Quoting issues
 
 This becomes an issue because when the command shell (bash, zsh, Windows Command Prompt, PowerShell etc) parses the CLI command, it will interpret the quotes. To avoid surprises, here are a few suggestions:
 
@@ -126,12 +155,8 @@ This becomes an issue because when the command shell (bash, zsh, Windows Command
      
     This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995#issuecomment-539822061
 
-## Generic Resource Commands
-  There may be cases where a service you are interested in does not have CLI command coverage. You can use the `az resource create/show/list/delete/update/invoke-action` commands to work with these resources. A few suggestions here:
-  1. If only `create/update` are involved, consider using `az group deployment create`. Leverage [Azure Quickstart Templates](https://github.com/Azure/azure-quickstart-templates) for working examples.
-  2. Check out the Rest API reference for the request payload, URL and API version. As an example, check out the community's comments on [how to create AppInsights](https://github.com/Azure/azure-cli/issues/5543).
+## Work behind a proxy
 
-## Working behind a proxy
 Proxy is common behind corporate network or introduced by tracing tools like Fiddler, mitmproxy, etc. If the proxy uses self-signed certificates, the Python [Requests](https://github.com/kennethreitz/requests) library which CLI uses will throw `SSLError("bad handshake: Error([('SSL routines', 'tls_process_server_certificate', 'certificate verify failed')],)",)`. There are 2 ways to handle this error:
 
 1. Set environment variable `REQUESTS_CA_BUNDLE` to the path of CA bundle certificate file in PEM format. This is recommended if you use CLI frequently behind a corporate proxy. The default CA bundle which CLI uses is located at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\Lib\site-packages\certifi\cacert.pem` on Windows and ` /opt/az/lib/python3.6/site-packages/certifi/cacert.pem` on Linux. You may append the proxy server's certificate to this file or copy the contents to another certificate file, then set `REQUESTS_CA_BUNDLE` to it. For example:
@@ -155,7 +180,9 @@ Proxy is common behind corporate network or introduced by tracing tools like Fid
 If you are using az on a build machine, and multiple jobs can be run in parallel, then there is a risk that the login tokens are shared between two build jobs is the jobs run as the same OS user.  To avoid mix ups like this, set AZURE_CONFIG_DIR to a directory where the login tokens should be stored.  It could be a randomly created folder, or just the name of the jenkins workspace, like this ```AZURE_CONFIG_DIR=.```
 
 ## Appendix
+
 ### Windows batch scripts for saving to variables and using it later
+
 ```batch
 ECHO OFF
 SETLOCAL
