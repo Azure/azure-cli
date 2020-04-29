@@ -888,7 +888,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     return vm
 
 
-def auto_shutdown_vm(cmd, resource_group_name, vm_name, disable=None, email=None, webhook=None, time=None,
+def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
                      location=None):
     from msrestazure.tools import resource_id
     from azure.mgmt.devtestlabs.models.schedule import Schedule
@@ -896,34 +896,29 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, disable=None, email=None
     name = 'shutdown-computevm-' + vm_name
     vm_id = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                         namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
-    if disable:
-        schedule = Schedule(status='Disabled',
-                            target_resource_id=vm_id,
-                            daily_recurrence={'time': '0000'},
-                            time_zone_id='UTC',
-                            task_type='ComputeVmShutdownTask',
-                            location=location)
-    else:
-        if time is None:
-            raise CLIError('usage error: --time is a required parameter')
-        if email and not webhook:
-            raise CLIError('usage error: --webhook is missing')
-        daily_recurrence = {'time': time}
-        notification_settings = None
-        if webhook:
-            notification_settings = {
-                'emailRecipient': email,
-                'webhookUrl': webhook,
-                'timeInMinutes': 30,
-                'status': 'Enabled'
-            }
-        schedule = Schedule(status='Enabled',
-                            target_resource_id=vm_id,
-                            daily_recurrence=daily_recurrence,
-                            notification_settings=notification_settings,
-                            time_zone_id='UTC',
-                            task_type='ComputeVmShutdownTask',
-                            location=location)
+    if off:
+        return client.global_schedules.delete(resource_group_name, name)
+
+    if time is None:
+        raise CLIError('usage error: --time is a required parameter')
+    if email and not webhook:
+        raise CLIError('usage error: --webhook is missing')
+    daily_recurrence = {'time': time}
+    notification_settings = None
+    if webhook:
+        notification_settings = {
+            'emailRecipient': email,
+            'webhookUrl': webhook,
+            'timeInMinutes': 30,
+            'status': 'Enabled'
+        }
+    schedule = Schedule(status='Enabled',
+                        target_resource_id=vm_id,
+                        daily_recurrence=daily_recurrence,
+                        notification_settings=notification_settings,
+                        time_zone_id='UTC',
+                        task_type='ComputeVmShutdownTask',
+                        location=location)
     return client.global_schedules.create_or_update(resource_group_name, name, schedule)
 
 

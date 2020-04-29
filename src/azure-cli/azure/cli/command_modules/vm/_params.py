@@ -726,9 +726,9 @@ def load_arguments(self, _):
             c.ignore('identity_role_id')
 
     with self.argument_context('vm auto-shutdown') as c:
-        c.argument('disable', arg_type=get_three_state_flag(), help='Disable auto-shutdown for VM')
+        c.argument('off', action='store_true', help='Turn off auto-shutdown for VM. Configuration will be cleared.')
         c.argument('email', help='The email recipient to send notifications to (can be a list of semi-colon separated email addresses)')
-        c.argument('time', help='The time of day the schedule will occur. Format: hhmm. Example: 1730')
+        c.argument('time', help='The UTC time of day the schedule will occur every day. Format: hhmm. Example: 1730')
         c.argument('webhook', help='The webhook URL to which the notification will be sent')
         c.argument('location', validator=get_default_location_from_resource_group)
 

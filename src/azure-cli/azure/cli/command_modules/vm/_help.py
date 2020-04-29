@@ -641,6 +641,16 @@ type: group
 short-summary: Manage Linux or Windows virtual machines.
 """
 
+helps['vm auto-shutdown'] = """
+type: command
+short-summary: Manage auto-shutdown for VM.
+examples:
+  - name: Create auto-shutdown schedule for a VM.
+    text: az vm auto-shutdown -g MyResourceGroup -n MyVm --time 1730 --email "foo@bar.com" --webhook "https://example.com/"
+  - name: Delete auto-shutdown schedule for a VM.
+    text: az vm auto-shutdown -g MyResourceGroup -n MyVm --off
+"""
+
 helps['vm availability-set'] = """
 type: group
 short-summary: Group resources into availability sets.
