@@ -113,7 +113,7 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         self.cmd(
             "storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption} --prevent-encryption-scope-override false",
             checks=[JMESPathCheck("created", True)])
-        
+
         # Specify encryption scope for blob
         blob = self.create_random_name(prefix='blob', length=12)
         file = self.create_temp_file(size_kb=1024)

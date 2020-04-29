@@ -317,8 +317,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
 def transform_blob_type(cmd, blob_type):
     """
     get_blob_types() will get ['block', 'page', 'append']
-
-
+    transform it to BlobType in track2
     """
     BlobType = cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB)
     if blob_type == 'block':
@@ -327,8 +326,10 @@ def transform_blob_type(cmd, blob_type):
         return BlobType.PageBlob
     if blob_type == 'append':
         return BlobType.AppendBlob
-    
-    
+    return None
+
+
+# pylint: disable=too-many-locals
 def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
                 validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
                 if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,

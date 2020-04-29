@@ -190,6 +190,7 @@ def get_account_url(cli_ctx, account_name, service):
 
 
 def cf_blob_service(cli_ctx, kwargs):
+    from knack.util import CLIError
     t_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                              '_blob_service_client#BlobServiceClient')
     connection_string = kwargs.pop('connection_string', None)
@@ -204,6 +205,8 @@ def cf_blob_service(cli_ctx, kwargs):
 
     if account_url and credential:
         return t_blob_service(account_url=account_url, credential=credential)
+    raise CLIError("Please provide valid connection string, or account name with account key, "
+                   "sas token or login auth mode.")
 
 
 def cf_blob_client(cli_ctx, kwargs):
