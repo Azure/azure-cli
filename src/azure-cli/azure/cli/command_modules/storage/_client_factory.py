@@ -67,7 +67,7 @@ def page_blob_service_factory(cli_ctx, kwargs):
 
 
 def blob_data_service_factory(cli_ctx, kwargs):
-    if kwargs['encryption_scope']:
+    if 'encryption_scope' in kwargs and kwargs['encryption_scope']:
         return cf_blob_client(cli_ctx, kwargs)
     from azure.cli.command_modules.storage.sdkutil import get_blob_service_by_type
     blob_type = kwargs.get('blob_type')
