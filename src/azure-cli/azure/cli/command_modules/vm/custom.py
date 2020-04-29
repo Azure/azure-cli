@@ -1030,7 +1030,7 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
             }
             for ip_configuration in nic.ip_configurations:
                 network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
-                if ip_configuration.public_ip_address:
+                if ip_configuration.public_ip_address and ip_configuration.public_ip_address.id in ip_address_lookup:
                     public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
 
                     public_ip_addr_info = {
