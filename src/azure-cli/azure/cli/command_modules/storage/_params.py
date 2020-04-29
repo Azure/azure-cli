@@ -479,7 +479,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         ' in other words, when a browser requests a page that does not exist.')
 
     with self.argument_context('storage blob upload') as c:
-        from ._validators import page_blob_tier_validator
+        from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
         from .sdkutil import get_blob_types, get_blob_tier_names
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
@@ -498,6 +498,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tier', validator=page_blob_tier_validator,
                    arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
                    min_api='2017-04-17')
+        c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
+                   help='A predefined encryption scope used to encrypt the data on the service.')
 
     with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types

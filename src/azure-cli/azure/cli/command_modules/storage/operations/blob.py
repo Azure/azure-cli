@@ -317,8 +317,34 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
 def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
                 validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
                 if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
-                progress_callback=None):
+                progress_callback=None, encryption_scope=None):
     """Upload a blob to a container."""
+
+    if encryption_scope:
+        count = os.path.getsize(file_path)
+        with open(file_path, 'rb') as stream:
+            data = stream.read(count)
+        from azure.core import MatchConditions
+        upload_args = {
+            'content_settings': content_settings,
+            'metadata': metadata,
+            'timeout': timeout,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+        }
+
+        # Precondition Check
+        if if_match:
+            if if_match == '*':
+                upload_args['match_condition'] = MatchConditions.IfPresent
+            else:
+                upload_args['etag'] = if_match
+                upload_args['match_condition'] = MatchConditions.IfNotModified
+
+        if if_none_match:
+            upload_args['etag'] = if_none_match
+            upload_args['match_condition'] = MatchConditions.IfModified
+        return client.upload_blob(data=data, encryption_scope=encryption_scope, **upload_args)
 
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
     content_settings = guess_content_type(file_path, content_settings, t_content_settings)
