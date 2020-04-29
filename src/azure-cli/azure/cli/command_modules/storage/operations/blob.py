@@ -349,10 +349,15 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
             'blob_type': transform_blob_type(cmd, blob_type),
             'validate_content': validate_content,
             'lease': lease_id,
-            'premium_page_blob_tier': tier,
-            'maxsize_condition': maxsize_condition,
             'max_concurrency': max_connections,
         }
+
+        if cmd.supported_api_version(min_api='2017-04-17') and tier:
+            upload_args['premium_page_blob_tier'] = tier
+        if maxsize_condition:
+            upload_args['maxsize_condition'] = maxsize_condition
+        if cmd.supported_api_version(min_api='2016-05-31'):
+            upload_args['validate_content'] = validate_content
 
         # Precondition Check
         if if_match:

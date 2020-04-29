@@ -20,7 +20,7 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
             "vault": self.create_random_name(prefix="vault", length=24),
             "key": self.create_random_name(prefix="key", length=24)
         })
-
+        account_info = self.get_account_info(resource_group, storage_account)
         # Create with Microsoft.KeyVault key source without key uri
         with self.assertRaisesRegex(CLIError, "usage error: Please specify --key-uri when using"):
             self.cmd("storage account encryption-scope create --account-name {sa} -g {rg} -n {encryption} -s Microsoft.KeyVault")
@@ -103,12 +103,21 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck("state", "Enabled")
                  ])
 
-        # Specify encryption scope for
-        self.kwargs['con'] = 'con1'
+        # Specify encryption scope for container
+        self.kwargs['con'] = self.create_random_name(prefix='container', length=24)
         with self.assertRaisesRegex(CLIError, "usage error: You need to specify both --default-encryption-scope"):
             self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption}")
         with self.assertRaisesRegex(CLIError, "usage error: You need to specify both --default-encryption-scope"):
             self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --prevent-encryption-scope-override False")
 
-        self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption} --prevent-encryption-scope-override false",
-                 checks=[JMESPathCheck("created", True)])
+        self.cmd(
+            "storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption} --prevent-encryption-scope-override false",
+            checks=[JMESPathCheck("created", True)])
+        
+        # Specify encryption scope for blob
+        blob = self.create_random_name(prefix='blob', length=12)
+        file = self.create_temp_file(size_kb=1024)
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}" --encryption-scope {}',
+                         account_info, self.kwargs['con'], blob, file, self.kwargs['encryption'])\
+            .assert_with_checks(JMESPathCheck("encryption_scope", self.kwargs['encryption']))
