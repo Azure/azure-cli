@@ -344,7 +344,11 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
         if if_none_match:
             upload_args['etag'] = if_none_match
             upload_args['match_condition'] = MatchConditions.IfModified
-        return client.upload_blob(data=data, encryption_scope=encryption_scope, **upload_args)
+        response = client.upload_blob(data=data, encryption_scope=encryption_scope, **upload_args)
+        if response['content_md5'] is not None:
+            from msrest import Serializer
+            response['content_md5'] = Serializer.serialize_bytearray(response['content_md5'])
+        return response
 
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
     content_settings = guess_content_type(file_path, content_settings, t_content_settings)
