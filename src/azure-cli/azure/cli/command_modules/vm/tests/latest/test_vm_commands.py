@@ -4498,7 +4498,7 @@ class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
         ])
 
 
-class VMAutoShutdown(ScenarioTest):
+class VMAutoShutdownScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_auto_shutdown')
     def test_vm_auto_shutdown(self, resource_group):
