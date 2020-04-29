@@ -75,6 +75,8 @@ def load_arguments(self, _):
         c.argument('enabled_for_deployment', arg_type=get_three_state_flag(), help='Allow Virtual Machines to retrieve certificates stored as secrets from the vault.')
         c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(), help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.')
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(), help='Allow Resource Manager to retrieve secrets from the vault.')
+        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), help='Enable RBAC authorization for the vault, and all contained entities.')
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Prevents manual purging of deleted vault, and all contained entities')
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:

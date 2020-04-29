@@ -49,6 +49,8 @@ def load_arguments(self, _):
                    help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
         c.argument('app_roles', type=validate_file_or_dict,
                    help="declare the roles you want to associate with your application. Should be in manifest json format. See examples below for details")
+        c.argument('optional_claims', type=validate_file_or_dict,
+                   help="declare the optional claims for the application. Should be in manifest json format. See examples below for details. Please reference https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-optional-claims#optionalclaim-type for optional claim properties.")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
         c.argument('credential_description', help="the description of the password")
 

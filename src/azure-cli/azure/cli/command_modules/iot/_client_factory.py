@@ -34,3 +34,9 @@ def get_pnp_client(repo_endpoint):
     # pylint: disable=line-too-long
     from .digitaltwinrepositoryprovisioningservice.digital_twin_repository_provisioning_service import DigitalTwinRepositoryProvisioningService
     return DigitalTwinRepositoryProvisioningService(repo_endpoint)
+
+
+def iot_central_service_factory(cli_ctx, *_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.iotcentral import IotCentralClient
+    return get_mgmt_service_client(cli_ctx, IotCentralClient)

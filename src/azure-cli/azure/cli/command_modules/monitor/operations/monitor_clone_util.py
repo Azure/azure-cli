@@ -47,7 +47,7 @@ def _clone_and_replace_action_group(source_monitor_client, target_monitor_client
                                                                                     action_group)
             MetricAlertAction = cmd.get_models('MetricAlertAction', operation_group='metric_alerts')
             new_action = MetricAlertAction(action_group_id=new_action_group.id,
-                                           webhook_properties=action.webhook_properties)
+                                           web_hook_properties=action.web_hook_properties)
             alert_rule.actions[index] = new_action
             action_group_mapping[action.action_group_id] = [new_action_group.id, new_action]
     return alert_rule

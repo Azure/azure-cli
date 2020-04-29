@@ -193,6 +193,13 @@ def validate_key(namespace):
         raise CLIError("Key cannot be empty.")
 
 
+def validate_resolve_keyvault(namespace):
+    if namespace.resolve_keyvault:
+        identifier = getattr(namespace, 'destination', None)
+        if identifier and identifier != "file":
+            raise CLIError("--resolve-keyvault is only applicable for exporting to file.")
+
+
 def validate_feature(namespace):
     if namespace.feature:
         invalid_pattern = re.compile(r'[^a-zA-Z0-9._-]')

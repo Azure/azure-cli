@@ -3,7 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
 from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
+
+
+def make_cluster_creation_as_no_wait_by_default(cmd, namespace):
+    get_default_location_from_resource_group(cmd, namespace)
+
+    # Make cluster creation no wait by default before ADX cluster can be provisioned automatically.
+    # TODO: remove this method and make cluster creation support both wait and no wait
+    #  after ADX cluster can be provisioned automatically.
+    cmd.supports_no_wait = True
+    namespace.no_wait = True
 
 
 def process_autoscale_create_namespace(cmd, namespace):
@@ -17,7 +28,6 @@ def process_autoscale_create_namespace(cmd, namespace):
 
 
 def validate_autoscale_recurrence(namespace):
-    from knack.util import CLIError
     from azure.mgmt.monitor.models import Recurrence, RecurrentSchedule, RecurrenceFrequency
 
     def _validate_weekly_recurrence(namespace):
@@ -102,7 +112,6 @@ def validate_autoscale_timegrain(namespace):
 def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False, alias='resource'):
     def _validator(cmd, namespace):
         from msrestazure.tools import is_valid_resource_id
-        from knack.util import CLIError
         name_or_id = getattr(namespace, dest)
         rg = namespace.resource_group_name
         res_ns = namespace.namespace
@@ -142,7 +151,6 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
-    from knack.util import CLIError
 
     get_target_resource_validator('resource_uri', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
     if not namespace.resource_group_name:
@@ -246,7 +254,6 @@ def validate_metric_dimension(namespace):
         return
 
     if namespace.filters:
-        from knack.util import CLIError
         raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
 
     namespace.filters = ' and '.join("{} eq '*'".format(d) for d in namespace.dimension)
@@ -317,3 +324,32 @@ def get_action_group_id_validator(dest):
             action_group_ids.append(group.lower())
         setattr(namespace, dest, action_group_ids)
     return validate_action_group_ids
+
+
+def validate_private_endpoint_connection_id(namespace):
+    if namespace.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(namespace.connection_id)
+        namespace.resource_group_name = result['resource_group']
+        namespace.scope_name = result['name']
+        namespace.private_endpoint_connection_name = result['child_name_1']
+
+    if not all([namespace.scope_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage. Please provide [--id ID] or [--name NAME --scope-name NAME -g NAME]')
+
+    del namespace.connection_id
+
+
+def validate_storage_accounts_name_or_id(cmd, namespace):
+    if namespace.storage_account_ids:
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        for index, storage_account_id in enumerate(namespace.storage_account_ids):
+            if not is_valid_resource_id(storage_account_id):
+                namespace.storage_account_ids[index] = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=namespace.resource_group_name,
+                    namespace='Microsoft.Storage',
+                    type='storageAccounts',
+                    name=storage_account_id
+                )

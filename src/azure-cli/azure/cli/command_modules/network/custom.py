@@ -2489,6 +2489,51 @@ def list_private_endpoints(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
+
+
+def create_private_endpoint_private_dns_zone_group(cmd, resource_group_name, private_endpoint_name,
+                                                   private_dns_zone_group_name,
+                                                   private_dns_zone_name, private_dns_zone):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    PrivateDnsZoneGroup, PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneGroup', 'PrivateDnsZoneConfig')
+    private_dns_zone_group = PrivateDnsZoneGroup(name=private_dns_zone_group_name,
+                                                 private_dns_zone_configs=[PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone,  # pylint: disable=line-too-long
+                                                                                                name=private_dns_zone_name)])  # pylint: disable=line-too-long
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zone_group)
+
+
+def add_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
+                                          private_dns_zone_group_name,
+                                          private_dns_zone_name, private_dns_zone):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneConfig')
+    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
+                                        private_endpoint_name=private_endpoint_name,
+                                        private_dns_zone_group_name=private_dns_zone_group_name)
+    private_dns_zone = PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone, name=private_dns_zone_name)
+    private_dns_zone_group.private_dns_zone_configs.append(private_dns_zone)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zone_group)
+
+
+def remove_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
+                                             private_dns_zone_group_name,
+                                             private_dns_zone_name):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
+                                        private_endpoint_name=private_endpoint_name,
+                                        private_dns_zone_group_name=private_dns_zone_group_name)
+    private_dns_zone_configs = [item for item in private_dns_zone_group.private_dns_zone_configs if item.name != private_dns_zone_name]  # pylint: disable=line-too-long
+    private_dns_zone_group.private_dns_zone_configs = private_dns_zone_configs
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zone_group)
 # endregion
 
 
@@ -5737,6 +5782,37 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
 
 def list_bastion_host(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+    return client.list()
+# endregion
+
+
+# region security partner provider
+def create_security_partner_provider(cmd, resource_group_name, security_partner_provider_name,
+                                     security_provider_name, virtual_hub, location=None, tags=None):
+    client = network_client_factory(cmd.cli_ctx).security_partner_providers
+    SecurityPartnerProvider, SubResource = cmd.get_models('SecurityPartnerProvider', 'SubResource')
+
+    security_partner_provider = SecurityPartnerProvider(security_provider_name=security_provider_name,
+                                                        virtual_hub=SubResource(id=virtual_hub),
+                                                        location=location,
+                                                        tags=tags)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   security_partner_provider_name=security_partner_provider_name,
+                                   parameters=security_partner_provider)
+
+
+def update_security_partner_provider(instance, cmd, security_provider_name=None, virtual_hub=None, tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('security_provider_name', security_provider_name)
+        c.set_param('virtual_hub', virtual_hub)
+        c.set_param('tags', tags)
+    return instance
+
+
+def list_security_partner_provider(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).security_partner_providers
     if resource_group_name is not None:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list()
