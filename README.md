@@ -86,10 +86,23 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 |2   |Parser error; check input to command line.   |
 |3   |Missing ARM resource; used for existence check from `show` commands.   |
 
-#### More Samples and Snippets
-For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
+#### Common Scenarios and Using CLI Effectively
 
-For how to use CLI effectively, check out [tips](./doc/use_cli_effectively.md).
+Please check [Tips for using Azure CLI effectively](doc/use_cli_effectively.md). It describes some common scenarios:
+
+- [Output formatting (json, table, or tsv)](doc/use_cli_effectively.md#output-formatting-json-table-or-tsv)
+- [Pass values from one command to another](doc/use_cli_effectively.md#pass-values-from-one-command-to-another)
+- [Async operations](doc/use_cli_effectively.md#async-operations)
+- [Generic update arguments](doc/use_cli_effectively.md#generic-update-arguments)
+- [Generic resource commands - az resource](doc/use_cli_effectively.md#generic-resource-commands---az-resource)
+- [REST API command - az rest](doc/use_cli_effectively.md#rest-api-command---az-rest)
+- [Quoting issues](doc/use_cli_effectively.md#quoting-issues)
+- [Work behind a proxy](doc/use_cli_effectively.md#work-behind-a-proxy)
+- [Concurrent builds](doc/use_cli_effectively.md#concurrent-builds)
+
+#### More Samples and Snippets
+
+For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
 
 ## Reporting issues and feedback
 
