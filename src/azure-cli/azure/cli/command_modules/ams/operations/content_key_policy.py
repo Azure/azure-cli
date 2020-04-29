@@ -137,8 +137,8 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
                                      add_alt_token_key_type=None, token_claims=None, token_type=None,
                                      open_id_connect_discovery_document=None, widevine_template=None,
                                      ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
-                                     rental_and_lease_key_type=None, rental_duration=None,
-                                     play_ready_template=None):
+                                     rental_and_lease_key_type=None, rental_duration=None, play_ready_template=None,
+                                     fp_playback_duration_seconds=None, fp_storage_duration_seconds=None):
     policy = client.get_policy_properties_with_secrets(
         resource_group_name=resource_group_name,
         account_name=account_name,
@@ -213,6 +213,13 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
 
         if rental_duration is not None:
             policy_option.configuration.rental_duration = rental_duration
+
+        if fp_playback_duration_seconds is not None:
+            policy_option.configuration.fp_playback_duration_seconds = fp_playback_duration_seconds
+
+        if fp_storage_duration_seconds is not None:
+            policy_option.configuration.fp_storage_duration_seconds = fp_storage_duration_seconds
+
     elif isinstance(policy_option.configuration, ContentKeyPolicyPlayReadyConfiguration):
         if play_ready_template is not None and _valid_playready_configuration(play_ready_template):
             _play_ready_configuration_factory(json.loads(play_ready_template))
