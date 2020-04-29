@@ -4499,10 +4499,13 @@ class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
 
 
 class VMAutoShutdown(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_auto_shutdown')
     def test_vm_auto_shutdown(self, resource_group):
         self.kwargs.update({
             'vm': 'vm1'
         })
+        self.cmd('vm create -g {rg} -n {vm} --image centos --nsg-rule NONE')
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --time 1730 --email "foo@bar.com" --webhook "https://example.com/"', checks=[
             self.check('name', 'shutdown-computevm-{vm}'),
             self.check('taskType', 'ComputeVmShutdownTask'),
@@ -4512,6 +4515,7 @@ class VMAutoShutdown(ScenarioTest):
             self.check('notificationSettings.webhookUrl', 'https://example.com/'),
             self.check('notificationSettings.emailRecipient', 'foo@bar.com')
         ])
+        self.cmd('vm auto-shutdown -g {rg} -n {vm} --off')
 
 
 if __name__ == '__main__':

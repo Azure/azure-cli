@@ -891,7 +891,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
                      location=None):
     from msrestazure.tools import resource_id
-    from azure.mgmt.devtestlabs.models.schedule import Schedule
+    from azure.mgmt.devtestlabs.models import Schedule
     client = _dev_test_labs_client_factory(cmd.cli_ctx)
     name = 'shutdown-computevm-' + vm_name
     vm_id = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
@@ -901,7 +901,7 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
 
     if time is None:
         raise CLIError('usage error: --time is a required parameter')
-    if email and not webhook:
+    if email is not None and webhook is None:
         raise CLIError('usage error: --webhook is missing')
     daily_recurrence = {'time': time}
     notification_settings = None
