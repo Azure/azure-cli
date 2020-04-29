@@ -62,7 +62,6 @@ DEPENDENCIES = [
     'msrest>=0.4.4',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
-    'pkginfo',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests~=2.20',
