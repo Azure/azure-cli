@@ -314,6 +314,21 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
     return results
 
 
+def transform_blob_type(cmd, blob_type):
+    """
+    get_blob_types() will get ['block', 'page', 'append']
+
+
+    """
+    BlobType = cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if blob_type == 'block':
+        return BlobType.BlockBlob
+    if blob_type == 'page':
+        return BlobType.PageBlob
+    if blob_type == 'append':
+        return BlobType.AppendBlob
+    
+    
 def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
                 validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
                 if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
@@ -331,6 +346,12 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
             'timeout': timeout,
             'if_modified_since': if_modified_since,
             'if_unmodified_since': if_unmodified_since,
+            'blob_type': transform_blob_type(cmd, blob_type),
+            'validate_content': validate_content,
+            'lease': lease_id,
+            'premium_page_blob_tier': tier,
+            'maxsize_condition': maxsize_condition,
+            'max_concurrency': max_connections,
         }
 
         # Precondition Check
@@ -344,7 +365,7 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
         if if_none_match:
             upload_args['etag'] = if_none_match
             upload_args['match_condition'] = MatchConditions.IfModified
-        response = client.upload_blob(data=data, encryption_scope=encryption_scope, **upload_args)
+        response = client.upload_blob(data=data, length=count, encryption_scope=encryption_scope, **upload_args)
         if response['content_md5'] is not None:
             from msrest import Serializer
             response['content_md5'] = Serializer.serialize_bytearray(response['content_md5'])

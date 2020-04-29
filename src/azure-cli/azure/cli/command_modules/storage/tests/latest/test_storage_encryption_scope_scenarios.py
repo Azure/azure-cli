@@ -103,6 +103,7 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck("state", "Enabled")
                  ])
 
+        # Specify encryption scope for
         self.kwargs['con'] = 'con1'
         with self.assertRaisesRegex(CLIError, "usage error: You need to specify both --default-encryption-scope"):
             self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption}")
