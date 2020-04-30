@@ -61,7 +61,9 @@ def get_container_service_client(cli_ctx, **_):
     from azure.mgmt.containerservice import ContainerServiceClient
     from azure.cli.core.profiles import ResourceType, get_api_version
 
-    return get_mgmt_service_client(cli_ctx, ContainerServiceClient, api_version=get_api_version(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE))
+    return get_mgmt_service_client(cli_ctx,
+                                   ContainerServiceClient,
+                                   api_version=get_api_version(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE))
 
 
 def get_osa_container_service_client(cli_ctx, **_):
