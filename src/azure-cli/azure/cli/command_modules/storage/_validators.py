@@ -1214,3 +1214,9 @@ def validate_client_auth_parameter(cmd, ns):
                        "when creating container.")
     else:
         validate_client_parameters(cmd, ns)
+
+
+def validate_encryption_scope_client_params(ns):
+    if ns.encryption_scope:
+        # will use track2 client and socket_timeout is unused
+        del ns.socket_timeout
