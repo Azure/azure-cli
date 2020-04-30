@@ -12,6 +12,7 @@ from azure.cli.testsdk import ScenarioTest
 
 class LocalContextScenarioTest(ScenarioTest):
 
+    @unittest.skip("will roll back when TurnOnLocalContext annotation is ready")
     def test_resource_group_with_local_context(self):
         self.kwargs.update({
             'group': 'test_local_context_group',
