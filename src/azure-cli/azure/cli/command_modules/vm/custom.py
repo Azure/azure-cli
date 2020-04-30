@@ -897,6 +897,9 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
     vm_id = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                         namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
     if off:
+        if email is not None or webhook is not None or time is not None:
+            # I don't want to disturb users. So I warn instead of raising an error.
+            logger.warning('If --off, other parameters will be ignored.')
         return client.global_schedules.delete(resource_group_name, name)
 
     if time is None:
