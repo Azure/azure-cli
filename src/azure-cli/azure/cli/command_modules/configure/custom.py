@@ -250,15 +250,48 @@ def purge_cache_contents():
 
 
 def turn_local_context_on(cmd):
-    cmd.cli_ctx.local_context.turn_on()
+    if cmd.cli_ctx.local_context.is_on:
+        logger.warning('Local context is currently on')
+    else:
+        cmd.cli_ctx.local_context.turn_on()
+        logger.warning('Local context is on, you can run `az local-context off` to turn it off')
 
 
 def turn_local_context_off(cmd, yes=False):
-    if cmd.cli_ctx.local_context.is_on():
-        from azure.cli.core.util import user_confirmation
-        dir_path = cmd.cli_ctx.local_context.current_turn_on_dir()
-        user_confirmation('Local context in {} will be removed and can\'t be recovered. Are you sure you want to '
-                          'continue this operation ?'.format(dir_path), yes)
-        cmd.cli_ctx.local_context.turn_off()
+    if not cmd.cli_ctx.local_context.is_on:
+        logger.warning('Local context is currently off')
     else:
-        raise CLIError('local context is not turned on in {} and all its parent directories'.format(os.getcwd()))
+        from azure.cli.core.util import user_confirmation
+        user_confirmation('You are going to turn local context off. '
+                          'Parameters saved will not apply to following commands. '
+                          'Are you sure you want to continue this operation ?', yes)
+        cmd.cli_ctx.local_context.turn_off()
+        logger.warning('Local context is off')
+
+
+def list_local_context(cmd):
+    return cmd.cli_ctx.local_context.get_value()
+
+
+def show_local_context(cmd, scope, name=None):
+    return cmd.cli_ctx.local_context.get_value(scope, name)
+
+
+def delete_local_context(cmd, scope, name=None):
+    return cmd.cli_ctx.local_context.delete(scope, name)
+
+
+def clear_local_context(cmd, yes=False, purge=False):
+    from azure.cli.core.util import user_confirmation
+    user_confirmation('You are going to clear local context in {}. '
+                      'Local context data will be lost and can\'t be recovered. '
+                      'Are you sure you want to continue this operation ?'
+                      .format(cmd.cli_ctx.local_context.effective_working_directory()), yes)
+    if purge:
+        if cmd.cli_ctx.local_context.delete_file():
+            logger.warning('Local context in %s is purged.', cmd.cli_ctx.local_context.effective_working_directory())
+        else:
+            logger.warning('Fail to purge local context in %s.', cmd.cli_ctx.local_context.effective_working_directory())
+    else:
+        cmd.cli_ctx.local_context.clear()
+        logger.warning('Local context in %s is cleared.', cmd.cli_ctx.local_context.effective_working_directory())

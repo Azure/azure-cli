@@ -11,6 +11,8 @@ from azure.cli.testsdk import ScenarioTest
 
 
 class LocalContextTest(ScenarioTest):
+    
+    @unittest.skip("will roll back when TurnOnLocalContext annotation is ready")
     def test_local_context_on_off(self):
         original_working_dir = os.getcwd()
         working_dir = tempfile.mkdtemp()

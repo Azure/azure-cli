@@ -22,3 +22,15 @@ def load_arguments(self, _):
 
     with self.argument_context('local-context off') as c:
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+
+    with self.argument_context('local-context show') as c:
+        c.argument('scope', nargs='+', help='Local context scope')
+        c.argument('name', nargs='+', help='parameter name')
+
+    with self.argument_context('local-context delete') as c:
+        c.argument('scope', nargs='+', help='Local context scope')
+        c.argument('name', nargs='+', help='parameter name')
+
+    with self.argument_context('local-context clear') as c:
+        c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('purge', help='Remove local context file from working directory', action='store_true')

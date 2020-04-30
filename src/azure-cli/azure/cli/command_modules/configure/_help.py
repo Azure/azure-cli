@@ -53,10 +53,30 @@ short-summary: Manage Local Context
 
 helps['local-context on'] = """
 type: command
-short-summary: Turn on local context in current directory
+short-summary: Turn on local context
 """
 
 helps['local-context off'] = """
 type: command
 short-summary: Turn off local context
+"""
+
+helps['local-context list'] = """
+type: command
+short-summary: List all local context data
+"""
+
+helps['local-context show'] = """
+type: command
+short-summary: Show local context data
+"""
+
+helps['local-context clear'] = """
+type: command
+short-summary: Clear local context data
+"""
+
+helps['local-context delete'] = """
+type: command
+short-summary: Delete local context data
 """
