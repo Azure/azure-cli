@@ -28,7 +28,7 @@ To override help for a given command:
 
 ### Example YAML help file, _help.py ###
 
-<pre>
+```py
 #---------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -39,40 +39,40 @@ from knack.help_files import helps
 #pylint: disable=line-too-long
 
 helps['account clear'] = """
-            type: command
-            short-summary: Clear account
-            long-summary: Longer summary of clearing account
-            parameters: 
-                - name: --account-name -n
-                  type: string
-                  short-summary: 'Account name'
-                  long-summary: |
-                      Longer summary with newlines preserved.  Preserving newlines is helpful for paragraph breaks.
-                  populator-commands: 
-                    - az account list
-                - name: --another-parameter
-                  short-summary: These parameter names must match what is shown in the command's CLI help output, including abbreviation.
-            examples:
-                - name: Collapse whitespace in YAML
-                  text: >
-                    The > character collapses multiple lines into a single line, which is good for on-screen wrapping.
-            """
-</pre>
+type: command
+short-summary: Clear account
+long-summary: Longer summary of clearing account
+parameters: 
+    - name: --account-name -n
+      type: string
+      short-summary: 'Account name'
+      long-summary: |
+          Longer summary with newlines preserved.  Preserving newlines is helpful for paragraph breaks.
+      populator-commands: 
+        - az account list
+    - name: --another-parameter
+      short-summary: These parameter names must match what is shown in the command's CLI help output, including abbreviation.
+examples:
+    - name: Collapse whitespace in YAML
+      text: >
+        The > character collapses multiple lines into a single line, which is good for on-screen wrapping.
+"""
+```
 
 You can also document groups using the same format.
 
-<pre>
+```py
 helps['account'] = """
-            type: group
-            short-summary: The account group
-            long-summary: Longer summary of account            
-            examples:
-                - name: Clear an account 
-                  text: Description
-                - name: Choose your current account
-                  text: az account set...
-            """
-</pre>
+type: group
+short-summary: The account group
+long-summary: Longer summary of account            
+examples:
+    - name: Clear an account 
+      text: Description
+    - name: Choose your current account
+      text: az account set...
+"""
+```
 
 # Tips to write effective help for your command
 
@@ -81,6 +81,7 @@ helps['account'] = """
 - Don't use "etc". Sometimes it makes sense to spell out a list completely. Sometimes it works to say "like ..." instead of "..., etc".
 - Use active voice. For example, say "Update web app configurations" instead of "Updates web app congfigurations" or "Updating web app configurations".
 - Don't use highly formal language. If you imagine that another dev sat down with you and you were telling him what he needs to know to use the command, that's exactly what you need to write, in those words.
+- If the help message contains **angle brackets**, like `<name>`, it will be parsed as an HTML tag during document rendering. To bypass that, quote the content with backticks `` `<name>` `` to tell the document renderer to parse it as **code**. 
 
 # Testing Authored Help #
 
