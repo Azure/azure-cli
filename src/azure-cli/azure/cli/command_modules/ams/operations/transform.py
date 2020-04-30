@@ -70,7 +70,7 @@ def validate_arguments(preset, insights_to_extract, audio_language, resolution):
     if insights_to_extract and preset != 'VideoAnalyzer':
         raise CLIError("insights-to-extract argument only works with VideoAnalyzer preset type.")
 
-    if audio_language and (preset != 'VideoAnalyzer' or preset != 'AudioAnalyzer'):
+    if audio_language and preset != 'VideoAnalyzer' and preset != 'AudioAnalyzer':
         raise CLIError("audio-language argument only works with VideoAnalyzer or AudioAnalyzer preset types.")
 
     if resolution and preset != 'FaceDetector':
