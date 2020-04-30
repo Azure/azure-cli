@@ -3587,6 +3587,7 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
 
 class NetworkVnetLocalContextScenarioTest(ScenarioTest):
 
+    @unittest.skip("will roll back when TurnOnLocalContext annotation is ready")
     @ResourceGroupPreparer()
     def test_network_vnet_local_context(self):
         self.kwargs.update({
