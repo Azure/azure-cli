@@ -892,7 +892,9 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
                      location=None):
     from msrestazure.tools import resource_id
     from azure.mgmt.devtestlabs.models import Schedule
-    client = _dev_test_labs_client_factory(cmd.cli_ctx)
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    client = _dev_test_labs_client_factory(cmd.cli_ctx, subscription_id)
     name = 'shutdown-computevm-' + vm_name
     vm_id = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
                         namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
