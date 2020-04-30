@@ -71,7 +71,9 @@ class CLIPrintMixin(CLIHelp):
     def _get_choices_defaults_sources_str(p):
         choice_str = u'  Allowed values: {}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
             if p.choices else ''
-        default_str = u'  Default: {}.'.format(p.default) if p.default and p.default != argparse.SUPPRESS else ''
+        default_from = p.default_from if p.default_from else u'Default'
+        default_str = u'  {}: {}.'.format(default_from, p.default) \
+            if p.default and p.default != argparse.SUPPRESS else ''
         value_sources_str = CLIPrintMixin._process_value_sources(p) if p.value_sources else ''
         return u'{}{}{}'.format(choice_str, default_str, value_sources_str)
 
@@ -301,6 +303,7 @@ class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
                     'deprecate_info': getattr(action, 'deprecate_info', None),
                     'preview_info': getattr(action, 'preview_info', None),
                     'experimental_info': getattr(action, 'experimental_info', None),
+                    'default_from': getattr(action, 'default_from', None),
                     'description': action.help,
                     'choices': action.choices,
                     'required': False,

@@ -23,7 +23,7 @@ from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
-from .local_context import AzCLILocalContext, SET
+from .local_context import AzCLILocalContext, LocalContextAction
 
 logger = get_logger(__name__)
 
@@ -69,9 +69,7 @@ class AzCli(CLI):
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
-        self.local_context = AzCLILocalContext(
-            dir_name=os.path.basename(self.config.config_dir), file_name='local_context'
-        )
+        self.local_context = AzCLILocalContext(self)
         register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
@@ -169,7 +167,7 @@ class AzCli(CLI):
                 continue
             argtype = argument_definitions[argument_name].type
             lca = argtype.settings.get('local_context_attribute', None)
-            if not lca or not lca.actions or SET not in lca.actions:
+            if not lca or not lca.actions or LocalContextAction.SET not in lca.actions:
                 continue
             # get the specified value
             value = getattr(parsed_args, argument_name)
