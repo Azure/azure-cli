@@ -37,6 +37,7 @@ Release History
 * Upgrade package azure-multiapi-storage to 0.3.0 (#13183)
 * Support GZRS for storage account creation and update (#13196)
 * `az storage account failover`: Add support for grs/gzrs storage account failover (#13201)
+* `az storage blob upload`: Add --encryption-scope parameter to support specifying encryption scope information (#13246)
 
 2.5.0
 ++++++
