@@ -26,7 +26,7 @@ To override help for a given command:
 >  2. The Help Authoring System now supports **help.yaml** files. Eventually, **_help.py** files will be replaced by **help.yaml**.
 
 
-### Example YAML help file, _help.py
+### Example YAML help file, \_help.py
 
 ```py
 #---------------------------------------------------------------------------------------------
