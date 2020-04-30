@@ -3,6 +3,41 @@
 Release History
 ===============
 
+2.5.1
+++++++
+
+**ACR**
+
+* `az acr check-health`: Fix "DOCKER_PULL_ERROR" on Windows (#13158)
+
+**Compute**
+
+* vm list-ip-addresses: Error handling (#13186)
+* Fix a bug of vm create if endpoint_vm_image_alias_doc is not set in cloud profile (#13022)
+* vmss create: Add --os-disk-size-gb (#13180)
+
+**Cosmos DB**
+
+* `az cosmosdb create/update`: add --enable-public-network support (#13109)
+
+**Extension**
+
+* Fix loading wrong metadata for wheel type extension (#13222)
+
+**Packaging**
+
+* Add az script for Git Bash/Cygwin on Windows (#13197)
+
+**SQL**
+
+* `az sql instance-pool`: Add instance pools command group (#11721)
+
+**Storage**
+
+* Upgrade package azure-multiapi-storage to 0.3.0 (#13183)
+* Support GZRS for storage account creation and update (#13196)
+* `az storage account failover`: Add support for grs/gzrs storage account failover (#13201)
+
 2.5.0
 ++++++
 
