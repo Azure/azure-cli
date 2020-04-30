@@ -17,8 +17,8 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
     def test_storage_account_encryption_scope(self, resource_group, storage_account):
         self.kwargs.update({
             "encryption": self.create_random_name(prefix="encryption", length=24),
-            "vault": self.create_random_name(prefix="vault", length=24),
-            "key": self.create_random_name(prefix="key", length=24)
+            "vault": self.create_random_name(prefix="envault", length=24),
+            "key": self.create_random_name(prefix="enkey", length=24)
         })
         account_info = self.get_account_info(resource_group, storage_account)
         # Create with Microsoft.KeyVault key source without key uri
@@ -60,9 +60,10 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
         self.kwargs["sa_pid"] = storage["identity"]["principalId"]
 
         # Configure keyvault
-        self.cmd("keyvault create -n {vault} -g {rg} --enable-purge-protection", checks=[
+        self.cmd("keyvault create -n {vault} -g {rg} --enable-purge-protection --enable-soft-delete", checks=[
             JMESPathCheck("name", self.kwargs["vault"]),
-            JMESPathCheck("properties.enablePurgeProtection", True)
+            JMESPathCheck("properties.enablePurgeProtection", True),
+            JMESPathCheck("properties.enableSoftDelete", True)
         ])
 
         self.cmd("keyvault set-policy -n {vault} -g {rg} --object-id {sa_pid} --key-permissions get wrapKey unwrapkey")

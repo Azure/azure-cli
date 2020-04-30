@@ -194,13 +194,14 @@ def cf_blob_service(cli_ctx, kwargs):
     t_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                              '_blob_service_client#BlobServiceClient')
     connection_string = kwargs.pop('connection_string', None)
+    account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
     if connection_string:
         return t_blob_service.from_connection_string(connection_string=connection_string)
 
-    account_url = get_account_url(cli_ctx, account_name=kwargs.pop('account_name', None), service='blob')
+    account_url = get_account_url(cli_ctx, account_name=account_name, service='blob')
     credential = account_key or sas_token or token_credential
 
     if account_url and credential:
