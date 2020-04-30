@@ -20,7 +20,7 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
             "vault": self.create_random_name(prefix="envault", length=24),
             "key": self.create_random_name(prefix="enkey", length=24)
         })
-        account_info = self.get_account_info(resource_group, storage_account)
+
         # Create with Microsoft.KeyVault key source without key uri
         with self.assertRaisesRegex(CLIError, "usage error: Please specify --key-uri when using"):
             self.cmd("storage account encryption-scope create --account-name {sa} -g {rg} -n {encryption} -s Microsoft.KeyVault")
