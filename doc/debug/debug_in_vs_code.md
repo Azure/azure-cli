@@ -21,7 +21,6 @@ The `launch.json` under `.vscode` folder has already been pre-configured to enab
 1. Set `false` to `stopOnEntry` property to break at the first break point you specified.
 2. Update the `args` array to run specified command. You need to make sure the arguments are split by space. 
 3. Choose between external termninal and integrated termninal. The latter can be toggle by Ctrl + `
-4. 
 
 ## Reference
 - `launch.json` schema: https://code.visualstudio.com/Docs/editor/debugging

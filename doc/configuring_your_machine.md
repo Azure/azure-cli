@@ -44,7 +44,7 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
     - If there is an existing virtual environment you wish to use, skip this step 
 4.  Open the folder containing the clone of this repository in VS Code
 5. Set the [Python Interpreter](https://code.visualstudio.com/docs/python/environments#_select-and-activate-an-environment) to use as the python.exe located in your virtual environment
-    - If your virtual environment's Python Interpreter is not shown you may need to add the root folder it's located in to the extension's venv path. This will be under File -> Preferences -> Settings -> Python: Venv Path.
+    - If your virtual environment's Python Interpreter is not shown, you may need to add the root folder it's located in to the extension's venv path. This will be under File -> Preferences -> Settings -> Python: Venv Path.
     - You can also create a settings.json file under the .vscode folder and specify the interpreter's path similar to the JSON below
       ```
       {
