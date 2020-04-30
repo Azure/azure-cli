@@ -12,9 +12,9 @@ Release History
 
 **Compute**
 
-* vm list-ip-addresses: Error handling (#13186)
+* `az vm list-ip-addresses`: Error handling (#13186)
 * Fix a bug of vm create if endpoint_vm_image_alias_doc is not set in cloud profile (#13022)
-* vmss create: Add --os-disk-size-gb (#13180)
+* `az vmss create`: Add --os-disk-size-gb (#13180)
 
 **Cosmos DB**
 
