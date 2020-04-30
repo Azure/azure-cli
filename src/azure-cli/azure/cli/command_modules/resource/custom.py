@@ -383,6 +383,7 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
             partial_request = json.dumps(http_request.data)
 
             http_request.data = partial_request[:-2] + ", template:" + template.template_as_bytes + r"}}"
+            http_request.data = http_request.data.encode('utf-8')
 
 
 # pylint: disable=unused-argument
