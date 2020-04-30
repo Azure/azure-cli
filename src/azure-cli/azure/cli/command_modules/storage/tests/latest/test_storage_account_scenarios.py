@@ -964,3 +964,31 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
         ])
 
         self.cmd('az storage account delete -n {gzrs_sa} -g {rg} -y')
+
+
+class StorageAccountFailoverScenarioTest(ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    def test_storage_account_failover(self, resource_group):
+        self.kwargs = {
+            'sa': self.create_random_name(prefix="storagegrzs", length=24),
+            'rg': resource_group
+        }
+        self.cmd('storage account create -n {sa} -g {rg} -l westus2 --kind StorageV2 --sku Standard_GZRS --https-only',
+                 checks=[self.check('name', '{sa}'),
+                         self.check('sku.name', 'Standard_GZRS'),
+                         self.check('failoverInProgress', None)])
+
+        self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa}'),
+            self.check('sku.name', 'Standard_GZRS'),
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
+
+        self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa}'),
+            self.check('failoverInProgress', True)
+        ])
