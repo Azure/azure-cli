@@ -133,7 +133,7 @@ For command examples, you can optionally specify the profile the example is for 
 Here's a demonstration for `storage account create`:
 The first example is only supported on the `latest` and `2018-03-01-hybrid` profiles whilst the second example is only supported on `2017-03-09-profile`.
 
-### _help.py
+### \_help.py
 
 ```
     examples:
