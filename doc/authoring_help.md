@@ -1,8 +1,8 @@
-# Azure CLI Help System #
+# Azure CLI Help System
 
 Help authoring for commands is done in a number of places, all of which are contained in the Az code base.  Some help text comes from product code, but it can be overridden using a YAML-based help authoring system.  The YAML-based system is the recommended way to update command and group help text.
 
-## YAML Help Authoring ##
+## YAML Help Authoring
 
 If you're not familiar with YAML, see the [YAML specification](http://www.yaml.org/spec/1.2/spec.html).
 
@@ -26,7 +26,7 @@ To override help for a given command:
 >  2. The Help Authoring System now supports **help.yaml** files. Eventually, **_help.py** files will be replaced by **help.yaml**.
 
 
-### Example YAML help file, _help.py ###
+### Example YAML help file, _help.py
 
 ```py
 #---------------------------------------------------------------------------------------------
@@ -83,19 +83,19 @@ examples:
 - Don't use highly formal language. If you imagine that another dev sat down with you and you were telling him what he needs to know to use the command, that's exactly what you need to write, in those words.
 - If the help message contains **angle brackets**, like `<name>`, it will be parsed as an HTML tag during document rendering. To bypass that, quote the content with backticks `` `<name>` `` to tell the document renderer to parse it as **code**. 
 
-# Testing Authored Help #
+# Testing Authored Help
 
 To verify the YAML help is correctly formatted, the command/group's help command must be executed at runtime.  For example, to verify "az account clear", run the command "az account clear -h" and verify the text.  
 
 Runtime is also when help authoring errors will be reported, such as documenting a parameter that doesn't exist.  Errors will only show when the CLI help is executed, so verifying the CLI help is required to ensure your authoring is correct.   
 
-# Other Help Authoring #
+# Other Help Authoring
 
 Commands without YAML usually still have help text.  Where does it come from?  These sections briefly outline where Az help text comes from.
 
 Authoring note: it is not recommended to use the product code to author command/group help--YAML is the recommended way (see above).  This information is provided for completeness and may be useful for fixing small typos in existing help text.
 
-## Help Layers ##
+## Help Layers
 
 Command help starts with its raw SDK docstring text, if available.  Non-SDK commands may have their own docstring.  Code can specify values that replace the SDK/docstring contents.  YAML is the final override for help content and is the recommended way for authoring command and group help.  Note that group help can only be authored via YAML.  
 
@@ -108,11 +108,11 @@ Here are the layers of Project Az help, with each layer overriding the layer bel
 | Docstring                     |
 | SDK Text                      |
 
-## Page titles for command groups ##
+## Page titles for command groups
 
 Page titles for your command groups as generated from the source are simply the command syntax, "az vm", but we use friendly titles on the published pages - "Virtual machines - az vm". To do that, ee add the friendly part of the page title to [titlemapping.json](https://github.com/Azure/azure-docs-cli/blob/master/titleMapping.json) in the azure-docs-cli repo. When you add a new command group, make sure to update the mapping.
 
-## Profile specific help ##
+## Profile specific help
 
 The CLI supports multiple profiles. Help can be authored to take advantage of this.  
 Commands available, arguments, descriptions and examples all change dynamically based on the profile in use.
@@ -167,7 +167,7 @@ Examples
         Standard_LRS
 ```
 
-## Online Reference Documentation ##
+## Online Reference Documentation
 
 The help that you author above will be available online as reference documentation.
 
