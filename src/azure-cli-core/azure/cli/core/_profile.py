@@ -109,6 +109,7 @@ class Profile(object):
 
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
 
@@ -126,8 +127,8 @@ class Profile(object):
 
         credential=None
         auth_profile=None
-        authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-        identity = Identity(authority, tenant, cred_cache=self._adal_cache)
+        adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+        identity = Identity(self._authority, tenant, cred_cache=self._adal_cache)
 
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
@@ -289,8 +290,8 @@ class Profile(object):
                 subscription_dict[_USER_ENTITY]['clientId'] = managed_identity_client_id
 
             # This will be deprecated and client_id will be the only persisted ID
-            logger.warning("assignedIdentityInfo will be deprecated in the future. Only client ID should be used.")
             if user_assigned_identity_id:
+                logger.warning("assignedIdentityInfo will be deprecated in the future. Only client ID should be used.")
                 subscription_dict[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
 
             consolidated.append(subscription_dict)
@@ -420,14 +421,42 @@ class Profile(object):
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
         result = [x for x in subscriptions
                   if user_or_sp.lower() == x[_USER_ENTITY][_USER_NAME].lower()]
-        subscriptions = [x for x in subscriptions if x not in result]
+        if not result:
+            raise CLIError("Account {} is not logged in.".format(user_or_sp))
 
+        # Remove the account from the profile
+        subscriptions = [x for x in subscriptions if x not in result]
         self._storage[_SUBSCRIPTIONS] = subscriptions
-        self._creds_cache.remove_cached_creds(user_or_sp)
+
+        # Remove the credential
+        account = result[0]
+
+        #tenant=account[_TENANT_ID]
+        username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
+        home_account_id = account[_USER_ENTITY].get(_USER_HOME_ACCOUNT_ID)
+
+        identity = Identity(self._authority)
+        identity.logout_user(home_account_id)
+
+        # Remove credential from the legacy cred cache
+        adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+        adal_cache.remove_cached_creds(user_or_sp)
+
+        logger.warning('Account %s is logged out. To clear the cached credentials too, run'
+                       '`az logout --username %s --clear-credential`.', user_or_sp, user_or_sp)
 
     def logout_all(self):
         self._storage[_SUBSCRIPTIONS] = []
-        self._creds_cache.remove_all_cached_creds()
+
+        identity = Identity(self._authority)
+        identity.logout_all()
+
+        # Clear the legacy token cache
+        adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+        adal_cache.remove_all_cached_creds()
+
+        logger.warning('All accounts are logged out. To clear the cached credentials too, run'
+                       '`az account clear --clear-credentials`.')
 
     def load_cached_subscriptions(self, all_clouds=False):
         subscriptions = self._storage.get(_SUBSCRIPTIONS) or []

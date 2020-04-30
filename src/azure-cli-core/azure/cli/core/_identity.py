@@ -216,6 +216,45 @@ class Identity:
 
         return credential, managed_identity_info
 
+    def logout_user(self, home_account_id):
+        from msal import PublicClientApplication
+        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:122
+        from azure.identity._internal.msal_credentials import _load_cache
+        cache = _load_cache()
+        app = PublicClientApplication(authority=self.authority, client_id=_CLIENT_ID, token_cache=cache)
+
+        accounts = app.get_accounts()
+        logger.warning('Before account removal:')
+        logger.warning(json.dumps(accounts))
+
+        account = {
+            "environment": self.authority,
+            "home_account_id": home_account_id
+        }
+        app.remove_account(account)
+
+        accounts = app.get_accounts()
+        logger.warning('After account removal:')
+        logger.warning(json.dumps(accounts))
+
+    def logout_all(self):
+        from msal import PublicClientApplication
+        from azure.identity._internal.msal_credentials import _load_cache
+        cache = _load_cache()
+        # TODO: Support multi-authority logout
+        app = PublicClientApplication(authority=self.authority, client_id=_CLIENT_ID, token_cache=cache)
+
+        accounts = app.get_accounts()
+        logger.warning('Before account removal:')
+        logger.warning(json.dumps(accounts))
+
+        for account in accounts:
+            app.remove_account(account)
+
+        accounts = app.get_accounts()
+        logger.warning('After account removal:')
+        logger.warning(json.dumps(accounts))
+
     def get_user_credential(self, home_account_id, username):
         auth_profile = AuthProfile(self.authority, home_account_id, self.tenant_id, username)
         return InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True)
