@@ -146,11 +146,11 @@ long-summary: |
 examples:
   - name: Failover a storage account.
     text: |
-        az storage account failover --account-name mystorageaccount -g MyResourceGroup
+        az storage account failover -n mystorageaccount -g MyResourceGroup
   - name: Failover a storage account without waiting for complete.
     text: |
-        az storage account failover --account-name mystorageaccount -g MyResourceGroup --no-wait
-        az storage account show --account-name mystorageaccount --expand geoReplicationStats
+        az storage account failover -n mystorageaccount -g MyResourceGroup --no-wait
+        az storage account show -n mystorageaccount --expand geoReplicationStats
 """
 
 helps['storage account generate-sas'] = """
