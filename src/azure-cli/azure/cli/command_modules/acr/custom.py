@@ -95,6 +95,7 @@ def acr_update_custom(cmd,
                       admin_enabled=None,
                       default_action=None,
                       data_endpoint_enabled=None,
+                      public_network_access_enabled=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -112,6 +113,11 @@ def acr_update_custom(cmd,
 
     if data_endpoint_enabled is not None:
         instance.data_endpoint_enabled = data_endpoint_enabled
+
+    if public_network_access_enabled is not None:
+        PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
+        instance.public_network_access = (PublicNetworkAccess.enabled if public_network_access_enabled
+                                          else PublicNetworkAccess.disabled)
 
     return instance
 
