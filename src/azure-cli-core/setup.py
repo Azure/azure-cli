@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.5.0"
+VERSION = "2.5.1"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -62,12 +62,10 @@ DEPENDENCIES = [
     'msrest>=0.4.4',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
-    'pkginfo',
     'PyJWT',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'requests~=2.20',
     'six~=1.12',
-    'wheel==0.30.0',
     'pkginfo>=1.5.0.1',
     'azure-mgmt-resource==9.0.0',
     'azure-mgmt-core==1.0.0'
