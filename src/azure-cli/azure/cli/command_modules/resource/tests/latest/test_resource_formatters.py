@@ -413,7 +413,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
                     "stringValue": "The quick brown fox jumps over the lazy dog.",
                     "emptyArray": [],
                     "emptyObject": {},
-                    "arrayContaingValues": ["foo", "bar"]
+                    "arrayContaingValues": ["foo", "bar"],
                 },
             ),
         ]
@@ -445,16 +445,8 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
                 resource_id="subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
                 change_type=ChangeType.modify,
                 delta=[
-                    WhatIfPropertyChange(
-                        path="path",
-                        property_change_type=PropertyChangeType.delete,
-                        before={},
-                    ),
-                    WhatIfPropertyChange(
-                        path="long.path",
-                        property_change_type=PropertyChangeType.create,
-                        after=[],
-                    ),
+                    WhatIfPropertyChange(path="path", property_change_type=PropertyChangeType.delete, before={},),
+                    WhatIfPropertyChange(path="long.path", property_change_type=PropertyChangeType.create, after=[],),
                     WhatIfPropertyChange(
                         path="long.nested.path",
                         property_change_type=PropertyChangeType.array,
