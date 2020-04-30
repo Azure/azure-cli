@@ -79,7 +79,7 @@ examples:
 - Make sure the doc contains all the details that someone unfamiliar with the API needs to use the command.
 - Examples are worth a thousand words. Provide examples that cover common use cases.
 - Don't use "etc". Sometimes it makes sense to spell out a list completely. Sometimes it works to say "like ..." instead of "..., etc".
-- Use active voice. For example, say "Update web app configurations" instead of "Updates web app congfigurations" or "Updating web app configurations".
+- Use active voice. For example, say "Update web app configurations" instead of "Updates web app configurations" or "Updating web app configurations".
 - Don't use highly formal language. If you imagine that another dev sat down with you and you were telling him what he needs to know to use the command, that's exactly what you need to write, in those words.
 - If the help message contains **angle brackets**, like `<name>`, it will be parsed as an HTML tag during document rendering. To bypass that, quote the content with backticks `` `<name>` `` to tell the document renderer to parse it as **code**. 
 
