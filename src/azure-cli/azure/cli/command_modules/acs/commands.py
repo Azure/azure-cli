@@ -24,14 +24,16 @@ from ._format import aks_versions_table_format
 def load_command_table(self, _):
 
     container_services_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2017_07_01.operations.'
+        operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_container_services_operations#ContainerServicesOperations.{}',
+        operation_group='container_services',
         client_factory=cf_container_services
     )
 
     managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2020_03_01.operations.'
+        operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
+        operation_group='managed_clusters',
         client_factory=cf_managed_clusters
     )
 
@@ -42,8 +44,9 @@ def load_command_table(self, _):
     )
 
     openshift_managed_clusters_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.containerservice.v2019_10_27_preview.operations.'
+        operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_open_shift_managed_clusters_operations#OpenShiftManagedClustersOperations.{}',
+        operation_group='open_shift_managed_clusters',
         client_factory=cf_openshift_managed_clusters
     )
 
