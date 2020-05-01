@@ -190,7 +190,11 @@ AZURE_API_PROFILES = {
         }),
         ResourceType.MGMT_APPSERVICE: '2019-08-01',
         ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
-        ResourceType.MGMT_ARO: '2020-04-30'
+        ResourceType.MGMT_ARO: '2020-04-30',
+        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2020-03-01', {
+            'container_services': '2017-07-01',
+            'open_shift_managed_clusters': '2019-10-27-preview'
+        })
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
