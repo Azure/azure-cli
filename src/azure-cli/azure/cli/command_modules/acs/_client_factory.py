@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.parameters import get_resources_in_subscription
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_api_version
 from knack.util import CLIError
 
 
@@ -59,7 +59,6 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
 
 def get_container_service_client(cli_ctx, **_):
     from azure.mgmt.containerservice import ContainerServiceClient
-    from azure.cli.core.profiles import ResourceType, get_api_version
 
     return get_mgmt_service_client(cli_ctx,
                                    ContainerServiceClient,
