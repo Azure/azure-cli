@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.parameters import get_resources_in_subscription
-from azure.cli.core.profiles import ResourceType, get_api_version
+from azure.cli.core.profiles import ResourceType
 from knack.util import CLIError
 
 
