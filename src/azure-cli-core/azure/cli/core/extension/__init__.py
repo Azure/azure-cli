@@ -153,7 +153,7 @@ class WheelExtension(Extension):
                 elif dist_info_dirname.endswith('.dist-info'):
                     ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
                 else:
-                    logger.warning('unsupported folder %s for Azure CLI to read Python metadata.', dist_info_dirname)
+                    raise ValueError()
 
                 if self.name == ext_whl_metadata.name:
                     metadata.update(vars(ext_whl_metadata))
