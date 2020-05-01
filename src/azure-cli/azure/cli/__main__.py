@@ -14,6 +14,8 @@ from azure.cli.core import get_default_cli
 
 import azure.cli.core.telemetry as telemetry
 
+# Log the start time
+start_time = timeit.default_timer()
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
 # If uuid1 raises ValueError, use uuid4 instead.
@@ -34,9 +36,11 @@ az_cli = get_default_cli()
 
 telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
+# Log the init finish time
+init_time = timeit.default_timer()
+
 try:
     telemetry.start()
-    start_time = timeit.default_timer()
 
     exit_code = cli_main(az_cli, sys.argv[1:])
 
@@ -45,7 +49,8 @@ try:
     else:
         telemetry.set_success()
 
-    elapsed_time = timeit.default_timer() - start_time
+    # Log the invoke finish time
+    invoke_time = timeit.default_timer()
 
     sys.exit(exit_code)
 
@@ -56,7 +61,8 @@ except SystemExit as ex:  # some code directly call sys.exit, this is to make su
     exit_code = ex.code if ex.code is not None else 1
 
     try:
-        elapsed_time = timeit.default_timer() - start_time
+        # Log the invoke finish time
+        invoke_time = timeit.default_timer()
     except NameError:
         pass
 
@@ -66,6 +72,7 @@ finally:
     telemetry.conclude()
 
     try:
-        logger.info("command ran in %.3f seconds.", elapsed_time)
+        logger.info("Command ran in %.3f seconds (init: %.3f, invoke: %.3f)",
+                    invoke_time - start_time, init_time - start_time, invoke_time - init_time)
     except NameError:
         pass

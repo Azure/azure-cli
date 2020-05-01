@@ -104,3 +104,6 @@ CONFIG = Session()
 
 # SESSION provides read-write session variables
 SESSION = Session()
+
+# INDEX contains command to command_module mapping index
+INDEX = Session()
