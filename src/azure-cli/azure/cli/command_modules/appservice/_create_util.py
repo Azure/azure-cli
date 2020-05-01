@@ -318,7 +318,8 @@ def get_rg_to_use(cmd, user, loc, os_name, rg_name=None):
             return rg_name
         raise CLIError("The ResourceGroup '{}' cannot be used with the os '{}'. Use a different RG".format(rg_name,
                                                                                                            os_name))
-    rg_name = default_rg
+    if rg_name is None:
+        rg_name = default_rg
     return rg_name
 
 

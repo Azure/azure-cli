@@ -38,7 +38,7 @@ class TestCoreCLIOutput(unittest.TestCase):
         }
 
         output_producer = AzOutputProducer(DummyCli())
-        yaml_output = output_producer.format_yaml(CommandResultItem(result=OrderedDict(account_dict)))
+        yaml_output = output_producer.get_formatter('yaml')(CommandResultItem(result=OrderedDict(account_dict)))
         self.assertEqual(account_dict, yaml.safe_load(yaml_output))
 
 

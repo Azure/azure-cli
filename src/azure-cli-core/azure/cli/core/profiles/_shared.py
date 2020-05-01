@@ -47,14 +47,18 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_RESOURCE_POLICY = ('azure.mgmt.resource.policy', 'PolicyClient')
     MGMT_RESOURCE_RESOURCES = ('azure.mgmt.resource.resources', 'ResourceManagementClient')
     MGMT_RESOURCE_SUBSCRIPTIONS = ('azure.mgmt.resource.subscriptions', 'SubscriptionClient')
+    MGMT_RESOURCE_DEPLOYMENTSCRIPTS = ('azure.mgmt.resource.deploymentscripts', 'DeploymentScriptsClient')
     MGMT_MONITOR = ('azure.mgmt.monitor', 'MonitorManagementClient')
     DATA_KEYVAULT = ('azure.keyvault', 'KeyVaultClient')
     MGMT_EVENTHUB = ('azure.mgmt.eventhub', 'EventHubManagementClient')
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
+    MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
+    MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
     DATA_STORAGE = ('azure.multiapi.storage', None)
+    DATA_STORAGE_BLOB = ('azure.multiapi.storagev2.blob', None)
     DATA_COSMOS_TABLE = ('azure.multiapi.cosmosdb', None)
     MGMT_CONTAINERSERVICE = ('azure.mgmt.containerservice', None)
     MGMT_ADVISOR = ('azure.mgmt.advisor', None)
@@ -74,7 +78,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_DATALAKE_STORE = ('azure.mgmt.datalake.store', None)
     MGMT_DATAMIGRATION = ('azure.mgmt.datamigration', None)
     MGMT_EVENTGRID = ('azure.mgmt.eventgrid', None)
-    MGMT_IOT = ('azure.mgmt.iothub', None)
     MGMT_IOTCENTRAL = ('azure.mgmt.iotcentral', None)
     MGMT_DEVTESTLABS = ('azure.mgmt.devtestlabs', None)
     MGMT_MAPS = ('azure.mgmt.maps', None)
@@ -124,12 +127,15 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2019-06-01',
-        ResourceType.MGMT_NETWORK: '2019-11-01',
+        ResourceType.MGMT_NETWORK: '2020-03-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2019-07-01', {
             'resource_skus': '2019-04-01',
-            'disks': '2019-07-01',
+            'disks': '2019-11-01',
             'snapshots': '2019-07-01',
-            'galleries': '2019-07-01'
+            'galleries': '2019-12-01',
+            'gallery_images': '2019-12-01',
+            'gallery_image_versions': '2019-12-01',
+            'virtual_machine_scale_sets': '2019-12-01'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -137,6 +143,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2019-09-01',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2019-07-01',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2019-06-01',
+        ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS: '2019-10-01-preview',
         ResourceType.MGMT_NETWORK_DNS: '2018-05-01',
         ResourceType.MGMT_KEYVAULT: '2019-09-01',
         ResourceType.MGMT_AUTHORIZATION: SDKProfile('2018-09-01-preview', {
@@ -147,6 +154,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-12-01-preview',
         ResourceType.DATA_KEYVAULT: '7.0',
         ResourceType.DATA_STORAGE: '2018-11-09',
+        ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17',
         ResourceType.MGMT_EVENTHUB: '2017-04-01',
         ResourceType.MGMT_MONITOR: SDKProfile('2019-06-01', {
@@ -173,9 +181,16 @@ AZURE_API_PROFILES = {
             'scheduled_query_rules': '2018-04-16',
             'service_diagnostic_settings': '2016-09-01',
             'tenant_activity_logs': '2015-04-01',
-            'vm_insights': '2018-11-27-preview'
+            'vm_insights': '2018-11-27-preview',
+            'private_link_resources': '2019-10-17-preview',
+            'private_link_scoped_resources': '2019-10-17-preview',
+            'private_link_scope_operation_status': '2019-10-17-preview',
+            'private_link_scopes': '2019-10-17-preview',
+            'private_endpoint_connections': '2019-10-17-preview'
         }),
-        ResourceType.MGMT_APPSERVICE: '2019-08-01'
+        ResourceType.MGMT_APPSERVICE: '2019-08-01',
+        ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
+        ResourceType.MGMT_ARO: '2020-04-30'
     },
     '2019-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
@@ -204,7 +219,8 @@ AZURE_API_PROFILES = {
         # to have commands show up in the hybrid profile which happens to have the latest
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
-        ResourceType.MGMT_EVENTHUB: '2017-04-01'
+        ResourceType.MGMT_EVENTHUB: '2017-04-01',
+        ResourceType.MGMT_IOTHUB: '2019-03-22'
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',

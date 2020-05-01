@@ -7,6 +7,11 @@ trigger:
     include:
     - '*'
 
+pr:
+  branches:
+    include:
+      - '*'
+
 jobs:
 - job: CheckPullRequestTitle
   displayName: "Check the Format of Pull Request Title"
@@ -18,6 +23,10 @@ jobs:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
         title=$(curl https://api.github.com/repos/Azure/azure-cli/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+        if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix; then
+          echo "Hotfix PR should target release branch."
+          exit 1
+        fi
         [[ $title =~ ^(\[.*\]|\{.*\}).* ]] && exit 0
         echo "Pull Request title should follow https://aka.ms/submitAzPR"
         exit 1
@@ -344,7 +353,7 @@ jobs:
        echo "== Testing pip install on Python 3.8 =="
        docker run \
          --rm -v $PYPI_FILES:/mnt/pypi python:3.8 \
-         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"  
+         /bin/bash -c "ls /mnt/pypi && pip install -f /mnt/pypi -q azure-cli==$CLI_VERSION && az self-test && az --version && sleep 5"
 
     displayName: 'Test pip Install'
 
@@ -398,143 +407,76 @@ jobs:
     - bash: ./scripts/ci/test_profile_integration.sh
       displayName: 'Run Integration Test against Profiles'
 
-- job: RunAutomationReducedPython3_6
-  displayName: Run Automation Reduced Python 3.6
-  dependsOn: BuildPythonWheel
-  timeoutInMinutes: 90
-
+- job: AutomationTest
+  displayName: Automation Test (Profile Latest)
+  timeoutInMinutes: 120
   pool:
     vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
   steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
-    inputs:
-      versionSpec: 3.6
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      REDUCE_SDK: 'True'
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: 'latest'
 
-- job: RunAutomationReduced20190301
-  displayName: Run Automation Reduced Python 3.6, Profile 2019-03-01
-  dependsOn: BuildPythonWheel
-
+- job: AutomationTest20190301
+  displayName: Automation Test (Profile 2019-03-01)
+  timeoutInMinutes: 120
   pool:
     vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
   steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
-    inputs:
-      versionSpec: 3.6
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      REDUCE_SDK: 'True'
-      AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2019-03-01-hybrid'
 
-- job: RunAutomation20180301
-  displayName: Run Automation, Profile 2018-03-01
-  dependsOn: BuildPythonWheel
-
+- job: AutomationTest20180301
+  displayName: Automation Test (Profile 2018-03-01)
+  timeoutInMinutes: 120
   pool:
     vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
   steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.6'
-    inputs:
-      versionSpec: 3.6
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2018-03-01-hybrid'
 
-- job: RunAutomationReducedPython3_8
-  displayName: Run Automation Reduced Python 3.8
-  dependsOn: BuildPythonWheel
-  timeoutInMinutes: 90
-
+- job: AutomationTest20170309
+  displayName: Automation Test (Profile 2017-03-09)
+  timeoutInMinutes: 120
   pool:
     vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python36:
+        python.version: '3.6'
+      Python38:
+        python.version: '3.8'
   steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.8'
-    inputs:
-      versionSpec: 3.8
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      REDUCE_SDK: 'True'
-
-- job: RunAutomationReduced20190301Python3_8
-  displayName: Run Automation Reduced Python 3.8, Profile 2019-03-01
-  dependsOn: BuildPythonWheel
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.8'
-    inputs:
-      versionSpec: 3.8
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      REDUCE_SDK: 'True'
-      AZURE_CLI_TEST_TARGET_PROFILE: '2019-03-01'
+    - template: .azure-pipelines/templates/automation_test.yml
+      parameters:
+        pythonVersion: '$(python.version)'
+        profile: '2017-03-09-profile'
 
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
-  dependsOn: BuildPythonWheel
   condition: succeeded()
   timeoutInMinutes: 10
 
@@ -553,32 +495,6 @@ jobs:
       displayName: 'Install pip and wheel'
     - bash: ./scripts/ci/test_extensions.sh
       displayName: 'Load extensions'
-
-- job: RunAutomation20180301Python3_8
-  displayName: Run Automation Python 3.8, Profile 2018-03-01
-  dependsOn: BuildPythonWheel
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: UsePythonVersion@0
-    displayName: 'Use Python 3.8'
-    inputs:
-      versionSpec: 3.8
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Python Wheels'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-  - bash: |
-      pip install --force-reinstall wheel
-  - task: Bash@3
-    displayName: 'Run Test Automation'
-    inputs:
-      targetType: 'filePath'
-      filePath: ./scripts/ci/test_automation.sh
-    env:
-      AZURE_CLI_TEST_TARGET_PROFILE: '2018-03-01'      
 
 - job: BuildHomebrewFormula
   displayName: Build Homebrew Formula
@@ -828,37 +744,6 @@ jobs:
       TargetPath: $(Build.ArtifactStagingDirectory)
       ArtifactName: ubuntu-bionic
 
-- job: BuildUbuntuDisco
-  displayName: Build Ubuntu Disco Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Build Artifacts'
-      inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-        artifactName: pypi
-
-
-    - task: Bash@3
-      displayName: 'Build Ubuntu Disco Package'
-      inputs:
-        targetType: 'filePath'
-        filePath: scripts/release/debian/pipeline.sh
-      env:
-        DISTRO: disco
-        DISTRO_BASE_IMAGE: ubuntu:disco
-
-
-    - task: PublishPipelineArtifact@0
-      displayName: 'Publish Artifact: debian'
-      inputs:
-        TargetPath: $(Build.ArtifactStagingDirectory)
-        ArtifactName: ubuntu-disco
-
 - job: BuildUbuntuEoan
   displayName: Build Ubuntu Eoan Package
 
@@ -983,7 +868,6 @@ jobs:
    - BuildUbuntuBionic
    - BuildDebianJessie
    - BuildDebianStretch
-   - BuildUbuntuDisco
    - BuildUbuntuEoan
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
@@ -1022,13 +906,6 @@ jobs:
 
 
   - task: DownloadPipelineArtifact@1
-    displayName: 'Download Ubuntu:Disco Builds'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-disco
-
-
-  - task: DownloadPipelineArtifact@1
     displayName: 'Download Ubuntu:Xenial Builds'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
@@ -1046,7 +923,7 @@ jobs:
     displayName: 'Download Ubuntu:Eoan Builds'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
-      artifactName: ubuntu-eoan    
+      artifactName: ubuntu-eoan
 
 
   - bash: |
@@ -1069,8 +946,8 @@ jobs:
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic disco eoan buster)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:disco ubuntu:eoan debian:buster)
+       DISTROS=(bionic eoan buster)
+       BASE_IMAGES=(ubuntu:bionic ubuntu:eoan debian:buster)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="

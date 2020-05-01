@@ -36,7 +36,8 @@ from time import sleep
 server_name_prefix = 'clitestserver'
 server_name_max_length = 62
 managed_instance_name_prefix = 'clitestmi'
-managed_instance_name_max_length = 63
+instance_pool_name_prefix = 'clitestip'
+managed_instance_name_max_length = 20
 
 
 class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
@@ -711,6 +712,103 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server, database_name, ops[0]['name']))
 
 
+class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
+
+    def test_sql_mi_operation_mgmt(self):
+        managed_instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+
+        license_type = 'LicenseIncluded'
+        loc = 'eastus2euap'
+        v_cores = 8
+        storage_size_in_gb = '128'
+        edition = 'GeneralPurpose'
+        family = 'Gen5'
+        resource_group = "DejanDuVnetRG"
+        user = admin_login
+
+        self.kwargs.update({
+            'loc': loc,
+            'resource_group': resource_group,
+            'vnet_name': 'vcCliTestVnet',
+            'subnet_name': 'vcCliTestSubnet',
+            'route_table_name': 'vcCliTestRouteTable',
+            'route_name_default': 'default',
+            'route_name_subnet_to_vnet_local': 'subnet_to_vnet_local',
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length),
+            'admin_login': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'storage_size_in_gb': '128',
+            'edition': 'GeneralPurpose',
+            'family': 'Gen5',
+            'collation': "Serbian_Cyrillic_100_CS_AS",
+            'proxy_override': "Proxy"
+        })
+
+        # Create and prepare VNet and subnet for new virtual cluster
+        self.cmd('network route-table create -g {resource_group} -n {route_table_name} -l {loc}')
+        self.cmd('network route-table show -g {resource_group} -n {route_table_name}')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_default} --next-hop-type Internet --address-prefix 0.0.0.0/0')
+        self.cmd('network route-table route create -g {resource_group} --route-table-name {route_table_name} -n {route_name_subnet_to_vnet_local} --next-hop-type VnetLocal --address-prefix 10.0.0.0/24')
+        self.cmd('network vnet create -g {resource_group} -n {vnet_name} --location {loc} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {resource_group} --vnet-name {vnet_name} -n {subnet_name} --address-prefix 10.0.0.0/24 --route-table {route_table_name}')
+        subnet = self.cmd('network vnet subnet show -g {resource_group} --vnet-name {vnet_name} -n {subnet_name}').get_output_in_json()
+
+        print('Creating subnet...\n')
+
+        self.kwargs.update({
+            'subnet_id': subnet['id']
+        })
+
+        print('Creating MI...\n')
+
+        # Create sql managed_instance
+        self.cmd('sql mi create -g {} -n {} -l {} '
+                 '-u {} -p {} --subnet {} --license-type {} --capacity {} --storage {} --edition {} --family {}'
+                 .format(resource_group, managed_instance_name, loc, user, admin_password, subnet['id'], license_type, v_cores, storage_size_in_gb, edition, family),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', user),
+                     JMESPathCheck('vCores', v_cores),
+                     JMESPathCheck('storageSizeInGb', storage_size_in_gb),
+                     JMESPathCheck('licenseType', license_type),
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('sku.family', family),
+                     JMESPathCheck('sku.capacity', v_cores),
+                     JMESPathCheck('identity', None)]).get_output_in_json()
+
+        edition_updated = 'BusinessCritical'
+
+        print('Updating MI...\n')
+
+        # Update sql managed_instance
+        self.cmd('sql mi update -g {} -n {} --edition {} --no-wait'
+                 .format(resource_group, managed_instance_name, edition_updated))
+
+        print('Listing all operations...\n')
+
+        # List operations
+        ops = list(
+            self.cmd('sql mi op list -g {} --mi {}'
+                     .format(resource_group, managed_instance_name),
+                     checks=[
+                         JMESPathCheck('length(@)', 2),
+                         JMESPathCheck('[0].resourceGroup', resource_group),
+                         JMESPathCheck('[0].managedInstanceName', managed_instance_name)
+                     ])
+                .get_output_in_json())
+
+        print('Canceling operation...\n')
+
+        # Cancel operation
+        self.cmd('sql mi op cancel -g {} --mi {} -n {}'
+                 .format(resource_group, managed_instance_name, ops[1]['name']))
+
+
 class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
@@ -727,37 +825,43 @@ class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
                      checks=[JMESPathCheck('connectionType', type)])
 
 
-class AzureActiveDirectoryAdministratorScenarioTest(LiveScenarioTest):
-    #  convert to ScenarioTest and re-record when ISSUE #6011 is fixed
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(location='westeurope')
+    @SqlServerPreparer(location='westeurope')
     def test_aad_admin(self, resource_group, server):
-        sn = server
-        oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
-        oid2 = 'e4d43337-d52c-4a0c-b581-09055e0359a0'
-        user = 'DSEngAll'
-        user2 = 'TestUser'
 
-        self.cmd('sql server ad-admin create -s {} -g {} -i {} -u {}'
-                 .format(sn, resource_group, oid, user),
-                 checks=[JMESPathCheck('login', user),
-                         JMESPathCheck('sid', oid)])
+        self.kwargs.update({
+            'rg': resource_group,
+            'sn': server,
+            'oid': '5e90ef3b-9b42-4777-819b-25c36961ea4d',
+            'oid2': 'e4d43337-d52c-4a0c-b581-09055e0359a0',
+            'user': 'DSEngAll',
+            'user2': 'TestUser'
+        })
 
-        self.cmd('sql server ad-admin list -s {} -g {}'
-                 .format(sn, resource_group),
-                 checks=[JMESPathCheck('[0].login', user)])
+        print('Arguments are updated with login and sid data')
 
-        self.cmd('sql server ad-admin update -s {} -g {} -u {} -i {}'
-                 .format(sn, resource_group, user2, oid2),
-                 checks=[JMESPathCheck('login', user2),
-                         JMESPathCheck('sid', oid2)])
+        self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid} -u {user}',
+                 checks=[
+                     self.check('login', '{user}'),
+                     self.check('sid', '{oid}')])
 
-        self.cmd('sql server ad-admin delete -s {} -g {}'
-                 .format(sn, resource_group))
+        self.cmd('sql server ad-admin list -s {sn} -g {rg}',
+                 checks=[
+                     self.check('[0].login', '{user}'),
+                     self.check('[0].sid', '{oid}')])
 
-        self.cmd('sql server ad-admin list -s {} -g {}'
-                 .format(sn, resource_group),
-                 checks=[JMESPathCheck('login', None)])
+        self.cmd('sql server ad-admin update -s {sn} -g {rg} -u {user2} -i {oid2}',
+                 checks=[
+                     self.check('login', '{user2}'),
+                     self.check('sid', '{oid2}')])
+
+        self.cmd('sql server ad-admin delete -s {sn} -g {rg}')
+
+        self.cmd('sql server ad-admin list -s {sn} -g {rg}',
+                 checks=[
+                     self.check('[0].login', None),
+                     self.check('[0].sid', None)])
 
 
 class SqlServerDbCopyScenarioTest(ScenarioTest):
@@ -2919,8 +3023,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
-        # test list sql managed_instance in the subscription should be at least 2
-        self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 1)])
+        # test list sql managed_instance in the subscription should be at least 1
+        self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
         self.cmd('sql mi delete -g {} -n {} --yes'
                  .format(resource_group_1, managed_instance_name_2), checks=NoneCheck())
@@ -2934,6 +3038,117 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         self.cmd('sql mi show -g {} -n {}'
                  .format(resource_group_1, managed_instance_name_2),
                  expect_failure=True)
+
+
+class SqlManagedInstancePoolScenarioTest(ScenarioTest):
+    @record_only()
+    def test_sql_instance_pool(self):
+
+        print("Starting instance pool tests")
+        instance_pool_name_1 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
+        instance_pool_name_2 = self.create_random_name(instance_pool_name_prefix, managed_instance_name_max_length)
+        license_type = 'LicenseIncluded'
+        location = 'northcentralus'
+        v_cores = 8
+        edition = 'GeneralPurpose'
+        family = 'Gen5'
+        resource_group = 'billingPools'
+        vnet_name = 'vnet-billingPool1'
+        subnet_name = 'InstancePool'
+        subnet = self.cmd('network vnet subnet show -g {} --vnet-name {} -n {}'.format(resource_group, vnet_name, subnet_name)).get_output_in_json()['id']
+        num_pools = len(self.cmd('sql instance-pool list -g {}'.format(resource_group)).get_output_in_json())
+
+        # test create sql managed_instance
+        self.cmd(
+            'sql instance-pool create -g {} -n {} -l {} '
+            '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
+                resource_group, instance_pool_name_1, location, subnet, license_type, v_cores, edition, family), checks=[
+                JMESPathCheck('name', instance_pool_name_1),
+                JMESPathCheck('resourceGroup', resource_group),
+                JMESPathCheck('vCores', v_cores),
+                JMESPathCheck('licenseType', license_type),
+                JMESPathCheck('sku.tier', edition),
+                JMESPathCheck('sku.family', family)])
+
+        # test show sql instance pool
+        self.cmd('sql instance-pool show -g {} -n {}'
+                 .format(resource_group, instance_pool_name_1),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_1),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # test updating tags of an instance pool
+        tag1 = "bar=foo"
+        tag2 = "foo=bar"
+        self.cmd('sql instance-pool update -g {} -n {} --tags {} {}'
+                 .format(resource_group, instance_pool_name_1, tag1, tag2),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('tags', "{'bar': 'foo', 'foo': 'bar'}")])
+
+        # test updating instance pool to clear tags by passing ""
+        self.cmd('sql instance-pool update -g {} -n {} --tags ""'
+                 .format(resource_group, instance_pool_name_1),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_1),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('tags', {})])
+
+        # Instance Pool 2
+        self.cmd(
+            'sql instance-pool create -g {} -n {} -l {} '
+            '--subnet {} --license-type {} --capacity {} -e {} -f {}'.format(
+                resource_group, instance_pool_name_2, location, subnet, license_type, v_cores, edition, family), checks=[
+                JMESPathCheck('name', instance_pool_name_2),
+                JMESPathCheck('resourceGroup', resource_group),
+                JMESPathCheck('vCores', v_cores),
+                JMESPathCheck('licenseType', license_type),
+                JMESPathCheck('sku.tier', edition),
+                JMESPathCheck('sku.family', family)])
+
+        # test show sql instance pool
+        self.cmd('sql instance-pool show -g {} -n {}'
+                 .format(resource_group, instance_pool_name_2),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # test updating tags of an instance pool
+        tag1 = "bar=foo"
+        tag2 = "foo=bar"
+        self.cmd('sql instance-pool update -g {} -n {} --tags {} {}'
+                 .format(resource_group, instance_pool_name_2, tag1, tag2),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('tags', "{'bar': 'foo', 'foo': 'bar'}")])
+
+        # test updating instance pool to clear tags by passing ""
+        self.cmd('sql instance-pool update -g {} -n {} --tags ""'
+                 .format(resource_group, instance_pool_name_2),
+                 checks=[
+                     JMESPathCheck('name', instance_pool_name_2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('tags', {})])
+
+        self.cmd('sql instance-pool list -g {}'
+                 .format(resource_group),
+                 checks=[
+                     JMESPathCheck('length(@)', num_pools + 2)])
+
+        # test delete sql managed instance
+        self.cmd('sql instance-pool delete -g {} -n {} --yes'
+                 .format(resource_group, instance_pool_name_1), checks=NoneCheck())
+
+        # test show sql managed instance doesn't return anything
+        self.cmd('sql instance-pool show -g {} -n {}'
+                 .format(resource_group, instance_pool_name_1),
+                 expect_failure=True)
+
+        # test delete sql managed instance
+        self.cmd('sql instance-pool delete -g {} -n {} --yes --no-wait'
+                 .format(resource_group, instance_pool_name_2), checks=NoneCheck())
 
 
 class SqlManagedInstanceTransparentDataEncryptionScenarioTest(ScenarioTest):
@@ -3188,8 +3403,122 @@ class SqlManagedInstanceDbShortTermRetentionScenarioTest(ScenarioTest):
                      self.check('retentionDays', '{retention_days_dec}')])
 
 
-class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
+class SqlManagedInstanceDbLongTermRetentionScenarioTest(ScenarioTest):
+    @record_only()
+    def test_sql_managed_db_long_term_retention(
+            self):
 
+        self.kwargs.update({
+            'rg': 'clitestxj6awmetud',
+            'loc': 'westus',
+            'managed_instance_name': 'ayang-ltr-mi',
+            'database_name': 'test-4',
+            'weekly_retention': 'P1W',
+            'monthly_retention': 'P1M',
+            'yearly_retention': 'P2M',
+            'week_of_year': 12
+        })
+
+        # test update long term retention on live database
+        self.cmd(
+            'sql midb ltr-policy set -g {rg} --mi {managed_instance_name} -n {database_name} --weekly-retention {weekly_retention} --monthly-retention {monthly_retention} --yearly-retention {yearly_retention} --week-of-year {week_of_year}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('monthlyRetention', '{monthly_retention}'),
+                self.check('yearlyRetention', '{yearly_retention}')])
+
+        # test get long term retention policy on live database
+        self.cmd(
+            'sql midb ltr-policy show -g {rg} --mi {managed_instance_name} -n {database_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('monthlyRetention', '{monthly_retention}'),
+                self.check('yearlyRetention', '{yearly_retention}')])
+
+        # test list long term retention backups for location
+        # with resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} -g {rg}',
+            checks=[
+                self.check('length(@)', 3)])
+
+        # without resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc}',
+            checks=[
+                self.check('length(@)', 3)])
+
+        # test list long term retention backups for instance
+        # with resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -g {rg}',
+            checks=[
+                self.check('length(@)', 3)])
+
+        # without resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name}',
+            checks=[
+                self.check('length(@)', 3)])
+
+        # test list long term retention backups for database
+        # with resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name} -g {rg}',
+            checks=[
+                self.check('length(@)', 1)])
+
+        # without resource group
+        self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name}',
+            checks=[
+                self.check('length(@)', 1)])
+
+        # setup for test show long term retention backup
+        backup = self.cmd(
+            'sql midb ltr-backup list -l {loc} --mi {managed_instance_name} -d {database_name} --latest').get_output_in_json()
+
+        self.kwargs.update({
+            'backup_name': backup[0]['name'],
+            'backup_id': backup[0]['id']
+        })
+
+        # test show long term retention backup
+        self.cmd(
+            'sql midb ltr-backup show -l {loc} --mi {managed_instance_name} -d {database_name} -n {backup_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('managedInstanceName', '{managed_instance_name}'),
+                self.check('databaseName', '{database_name}'),
+                self.check('name', '{backup_name}')])
+
+        self.cmd(
+            'sql midb ltr-backup show --id {backup_id}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('managedInstanceName', '{managed_instance_name}'),
+                self.check('databaseName', '{database_name}'),
+                self.check('name', '{backup_name}')])
+
+        # test restore managed database from LTR backup
+        self.kwargs.update({
+            'dest_database_name': 'cli-restore-dest'
+        })
+
+        self.cmd(
+            'sql midb ltr-backup restore --backup-id \'{backup_id}\' --dest-database {dest_database_name} --dest-mi {managed_instance_name} --dest-resource-group {rg}',
+            checks=[
+                self.check('name', '{dest_database_name}')])
+
+        # test delete long term retention backup
+        self.cmd(
+            'sql midb ltr-backup delete -l {loc} --mi {managed_instance_name} -d {database_name} -n \'{backup_name}\' --yes',
+            checks=[NoneCheck()])
+
+
+class SqlManagedInstanceRestoreDeletedDbScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
     def test_sql_managed_deleted_db_restore(self, resource_group, resource_group_location):
 

@@ -214,9 +214,12 @@ class Profile(object):
                     username, password, tenant, self._ad_resource_uri)
 
         if not allow_no_subscriptions and not subscriptions:
-            raise CLIError("No subscriptions were found for '{}'. If this is expected, use "
-                           "'--allow-no-subscriptions' to have tenant level access".format(
-                               username))
+            if username:
+                msg = "No subscriptions found for {}.".format(username)
+            else:
+                # Don't show username if bare 'az login' is used
+                msg = "No subscriptions found."
+            raise CLIError(msg)
 
         if is_service_principal:
             self._creds_cache.save_service_principal_cred(sp_auth.get_entry_to_persist(username,
@@ -590,6 +593,18 @@ class Profile(object):
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
+    def get_msal_token(self, scopes, data):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        account = self.get_subscription()
+        username = account[_USER_ENTITY][_USER_NAME]
+        tenant = account[_TENANT_ID] or 'common'
+        _, refresh_token, _, _ = self.get_refresh_token()
+        certificate = self._creds_cache.retrieve_msal_token(tenant, scopes, data, refresh_token)
+        return username, certificate
+
     def get_refresh_token(self, resource=None,
                           subscription=None):
         account = self.get_subscription(subscription)
@@ -867,11 +882,19 @@ class SubscriptionFinder(object):
         from msrest.authentication import BasicTokenAuthentication
 
         all_subscriptions = []
+        empty_tenants = []
+        mfa_tenants = []
         token_credential = BasicTokenAuthentication({'access_token': access_token})
         client = self._arm_client_factory(token_credential)
         tenants = client.tenants.list()
         for t in tenants:
             tenant_id = t.tenant_id
+            # display_name is available since /tenants?api-version=2018-06-01,
+            # not available in /tenants?api-version=2016-06-01
+            if not hasattr(t, 'display_name'):
+                t.display_name = None
+            if hasattr(t, 'additional_properties'):  # Remove this line once SDK is fixed
+                t.display_name = t.additional_properties.get('displayName')
             temp_context = self._create_auth_context(tenant_id)
             try:
                 temp_credentials = temp_context.acquire_token(resource, self.user_id, _CLIENT_ID)
@@ -879,11 +902,19 @@ class SubscriptionFinder(object):
                 # because user creds went through the 'common' tenant, the error here must be
                 # tenant specific, like the account was disabled. For such errors, we will continue
                 # with other tenants.
-                logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
+                msg = (getattr(ex, 'error_response', None) or {}).get('error_description') or ''
+                if 'AADSTS50076' in msg:
+                    # The tenant requires MFA and can't be accessed with home tenant's refresh token
+                    mfa_tenants.append(t)
+                else:
+                    logger.warning("Failed to authenticate '%s' due to error '%s'", t, ex)
                 continue
             subscriptions = self._find_using_specific_tenant(
                 tenant_id,
                 temp_credentials[_ACCESS_TOKEN])
+
+            if not subscriptions:
+                empty_tenants.append(t)
 
             # When a subscription can be listed by multiple tenants, only the first appearance is retained
             for sub_to_add in subscriptions:
@@ -892,7 +923,7 @@ class SubscriptionFinder(object):
                     if sub_to_add.subscription_id == sub_to_compare.subscription_id:
                         logger.warning("Subscription %s '%s' can be accessed from tenants %s(default) and %s. "
                                        "To select a specific tenant when accessing this subscription, "
-                                       "please include --tenant in 'az login'.",
+                                       "use 'az login --tenant TENANT_ID'.",
                                        sub_to_add.subscription_id, sub_to_add.display_name,
                                        sub_to_compare.tenant_id, sub_to_add.tenant_id)
                         add_sub = False
@@ -900,6 +931,25 @@ class SubscriptionFinder(object):
                 if add_sub:
                     all_subscriptions.append(sub_to_add)
 
+        # Show warning for empty tenants
+        if empty_tenants:
+            logger.warning("The following tenants don't contain accessible subscriptions. "
+                           "Use 'az login --allow-no-subscriptions' to have tenant level access.")
+            for t in empty_tenants:
+                if t.display_name:
+                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
+                else:
+                    logger.warning("%s", t.tenant_id)
+
+        # Show warning for MFA tenants
+        if mfa_tenants:
+            logger.warning("The following tenants require Multi-Factor Authentication (MFA). "
+                           "Use 'az login --tenant TENANT_ID' to explicitly login to a tenant.")
+            for t in mfa_tenants:
+                if t.display_name:
+                    logger.warning("%s '%s'", t.tenant_id, t.display_name)
+                else:
+                    logger.warning("%s", t.tenant_id)
         return all_subscriptions
 
     def _find_using_specific_tenant(self, tenant, access_token):
@@ -969,6 +1019,19 @@ class CredsCache(object):
         if self.adal_token_cache.has_state_changed:
             self.persist_cached_creds()
         return (token_entry[_TOKEN_ENTRY_TOKEN_TYPE], token_entry[_ACCESS_TOKEN], token_entry)
+
+    def retrieve_msal_token(self, tenant, scopes, data, refresh_token):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        from azure.cli.core._msal import AdalRefreshTokenBasedClientApplication
+        tenant = tenant or 'organizations'
+        authority = self._ctx.cloud.endpoints.active_directory + '/' + tenant
+        app = AdalRefreshTokenBasedClientApplication(_CLIENT_ID, authority=authority)
+        result = app.acquire_token_silent(scopes, None, data=data, refresh_token=refresh_token)
+
+        return result["access_token"]
 
     def retrieve_token_for_service_principal(self, sp_id, resource, tenant, use_cert_sn_issuer=False):
         self.load_adal_token_cache()
@@ -1164,6 +1227,11 @@ def _get_authorization_code_worker(authority_url, resource, results):
             break
         except socket.error as ex:
             logger.warning("Port '%s' is taken with error '%s'. Trying with the next one", port, ex)
+        except UnicodeDecodeError:
+            logger.warning("Please make sure there is no international (Unicode) character in the computer name "
+                           r"or C:\Windows\System32\drivers\etc\hosts file's 127.0.0.1 entries. "
+                           "For more details, please see https://github.com/Azure/azure-cli/issues/12957")
+            break
 
     if reply_url is None:
         logger.warning("Error: can't reserve a port for authentication reply url")
