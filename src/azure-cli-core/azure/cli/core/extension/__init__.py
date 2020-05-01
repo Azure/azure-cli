@@ -138,7 +138,9 @@ class WheelExtension(Extension):
             return None
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
-        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '-' + '*.dist-info'))
+
+        # include *.egg-info and *.dist-info
+        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '-' + '*.*-info'))
 
         azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
@@ -146,11 +148,17 @@ class WheelExtension(Extension):
 
         for dist_info_dirname in info_dirs:
             try:
-                ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
+                if dist_info_dirname.endswith('.egg-info'):
+                    ext_whl_metadata = pkginfo.Develop(dist_info_dirname)
+                elif dist_info_dirname.endswith('.dist-info'):
+                    ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
+                else:
+                    logger.warning('unsupported folder %s for Azure CLI to read Python metadata.', dist_info_dirname)
+
                 if self.name == ext_whl_metadata.name:
                     metadata.update(vars(ext_whl_metadata))
             except ValueError:
-                logger.warning('extension % contains invalid metadata for Python Package', self.name)
+                logger.warning('extension %s contains invalid metadata for Python Package', self.name)
 
         return metadata
 
@@ -177,13 +185,13 @@ class WheelExtension(Extension):
         if os.path.isdir(EXTENSIONS_DIR):
             for ext_name in os.listdir(EXTENSIONS_DIR):
                 ext_path = os.path.join(EXTENSIONS_DIR, ext_name)
-                pattern = os.path.join(ext_path, '*.dist-info')
+                pattern = os.path.join(ext_path, '*.*-info')    # include *.egg-info and *.dist-info
                 if os.path.isdir(ext_path) and glob(pattern):
                     exts.append(WheelExtension(ext_name, ext_path))
         if os.path.isdir(EXTENSIONS_SYS_DIR):
             for ext_name in os.listdir(EXTENSIONS_SYS_DIR):
                 ext_path = os.path.join(EXTENSIONS_SYS_DIR, ext_name)
-                pattern = os.path.join(ext_path, '*.dist-info')
+                pattern = os.path.join(ext_path, '*.*-info')    # include *.egg-info and *.dist-info
                 if os.path.isdir(ext_path) and glob(pattern):
                     ext = WheelExtension(ext_name, ext_path)
                     if ext not in exts:
