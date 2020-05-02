@@ -408,7 +408,7 @@ class IoTHubTest(ScenarioTest):
         rg = resource_group
         location = resource_group_location
         
-        identity_hub = 'iot-identity-enabled-hub-test'
+        identity_hub = 'iot-cli-identity-enabled-hub-test'
         identity_based_auth = 'identityBased'
         key_based_auth = 'keyBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
@@ -448,7 +448,72 @@ class IoTHubTest(ScenarioTest):
                          self.check('length(serviceBusQueues[*])', 0),
                          self.check('length(serviceBusTopics[*])', 0),
                          self.check('length(storageContainers[*])', 0)])
-            
+        
+        vnet = 'test-iot-vnet'
+        subnet = 'subnet1'
+        endpoint_name = 'iot-private-endpoint'
+        connection_name = 'iot-private-endpoint-connection'
+
+        # Test private endpoints
+        # Prepare network
+        self.cmd('network vnet create -n {0} -g {1} -l {2} --subnet-name {3}'
+                 .format(vnet, rg, location, subnet),
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {0} --vnet-name {1} -g {2} '
+                 '--disable-private-endpoint-network-policies true'
+                 .format(subnet, vnet, rg),
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pr = self.cmd('iot hub private-link-resource list --hub-name {0} -g {1}'
+                      .format(identity_hub, rg)).get_output_in_json()
+        group_id = pr[0]['properties']['groupId']
+
+        hub = self.cmd('iot hub show -n {0} -g {1}'.format(identity_hub, rg)).get_output_in_json()
+        hub_id = hub['id']
+
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {0} -n {1} --vnet-name {2} --subnet {3} -l {4} '
+            '--connection-name {5} --private-connection-resource-id {6} --group-ids {7}'
+            .format(rg, endpoint_name, vnet, subnet, location, connection_name, hub_id, group_id)
+        ).get_output_in_json()
+        
+        self.assertEqual(private_endpoint['name'], endpoint_name)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], connection_name)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        hub = self.cmd('iot hub show -n {0} -g {1}'.format(identity_hub, rg)).get_output_in_json()
+        endpoint_id = hub['properties']['privateEndpointConnections'][0]['id']
+        private_endpoint_name = hub['properties']['privateEndpointConnections'][0]['name']
+        # endpoint connection approve by name
+        approve_desc = 'Approving endpoint connection'
+        self.cmd('iot hub private-endpoint-connection approve -n {0} --hub-name {1} -g {2} --desc "{3}"'
+                 .format(private_endpoint_name, identity_hub, rg, approve_desc),
+            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+
+        # endpoint approve by id
+        self.cmd('iot hub private-endpoint-connection approve --id {0} --desc "{1}"'
+                 .format(endpoint_id, approve_desc),
+            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+
+        # endpoint connection reject by name
+        reject_desc = 'Rejecting endpoint connection'
+        self.cmd('iot hub private-endpoint-connection reject -n {0} --hub-name {1} -g {2} --desc "{3}"'
+                 .format(private_endpoint_name, identity_hub, rg, reject_desc),
+            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+
+        # endpoint show
+        self.cmd('iot hub private-endpoint-connection show -n {0} --hub-name {1} -g {2}'
+                 .format(private_endpoint_name, identity_hub, rg),
+             checks=self.check('id', '{endpoint_id}'))
+
+        # endpoint delete
+        self.cmd('iot hub private-endpoint-connection delete -n {0} --hub-name {1} -g {2} -y'
+                 .format(private_endpoint_name, identity_hub, rg),
+            checks=self.check('status', 'Succeeded'))
+
         self.cmd('iot hub delete -n {0}'.format(identity_hub), checks=self.is_empty())
 
     def _get_eventhub_connectionstring(self, rg):

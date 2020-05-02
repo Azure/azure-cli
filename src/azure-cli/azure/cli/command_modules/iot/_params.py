@@ -6,6 +6,7 @@
 from argcomplete.completers import FilesCompleter
 from knack.arguments import CLIArgumentType
 
+from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.parameters import (get_location_type,
                                                 file_type,
                                                 get_resource_name_completion_list,
@@ -34,7 +35,6 @@ from ._validators import (validate_policy_permissions,
                           validate_c2d_max_delivery_count,
                           validate_c2d_ttl)
 
-
 hub_name_type = CLIArgumentType(
     completer=get_resource_name_completion_list('Microsoft.Devices/IotHubs'),
     help='IoT Hub name.')
@@ -47,7 +47,6 @@ dps_name_type = CLIArgumentType(
 app_name_type = CLIArgumentType(
     completer=get_resource_name_completion_list('Microsoft.IoTCentral/IoTApps'),
     help='IoT Central application name.')
-
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     # Arguments for IoT DPS
@@ -309,3 +308,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='IoT Central application template name. Default is a custom application.')
         c.argument('display_name',
                    help='Custom display name for the IoT Central application. Default is resource name.')
+
+    with self.argument_context('iot hub private-link-resource list') as c:
+        c.argument('hub_name', options_list=['--hub-name', '--name', '-n'], help='The name of the IoT hub.')
+
+    with self.argument_context('iot hub private-endpoint-connection') as c:
+        c.argument('hub_name', options_list=['--hub-name'], help='The name of the IoT hub.')
+        c.argument('private_endpoint_connection_name', options_list=['-n', '--name'], help='The name of the private endpoint connection.')
+
+    for command in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('iot hub private-endpoint-connection {}'.format(command)) as c:
+            c.extra(
+                'connection_id',
+                options_list=['--id'],
+                help='The ID of the private endpoint connection associated with the IoT hub. You can get '
+                'it using `az iot hub show`.'
+            )
+            c.argument('description', options_list=['--description', '--desc', '-d'], help='Comments for {} operation.'.format(command))

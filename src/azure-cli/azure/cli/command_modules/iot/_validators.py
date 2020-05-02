@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from argparse import ArgumentError
+from knack.util import CLIError
 from .custom import SimpleAccessRights
-
 
 def validate_policy_permissions(ns):
     if ns.permissions is None or ns.permissions == []:
@@ -75,3 +75,19 @@ def validate_c2d_ttl(ns):
             ns.c2d_ttl not in range(1, 49, 1)):
         raise ArgumentError(None, 'Please specify the default time from 1 to 48 hours to live for cloud-to-device'
                                   ' messages in the device queue.')
+
+def validate_private_endpoint_connection_id(namespace):
+    if namespace.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(namespace.connection_id)
+        namespace.resource_group_name = result['resource_group']
+        namespace.hub_name = result['name']
+        namespace.private_endpoint_connection_name = result['child_name_1']
+
+    if namespace.hub_name and not namespace.resource_group_name:
+        raise CLIError('Please provide resource group name with `-g ResourceGroup`')
+
+    if not all([namespace.hub_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
+        raise CLIError('Incorrect usage: [--id ID | --name CONNECTION_NAME --hub-name HUB_NAME]')
+
+    del namespace.connection_id
