@@ -40,6 +40,16 @@ _PROXYID_RE = re.compile(
 
 _CHILDREN_RE = re.compile('(?i)/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
 
+_PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliYum"),
+                                 "ZYPPER": ("sudo zypper refresh && sudo zypper update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliZypper"),
+                                 "DEB": ("sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli", "https://aka.ms/doc/UpdateAzureCliApt"),
+                                 "HOMEBREW": ("brew update && brew upgrade azure-cli", "https://aka.ms/doc/UpdateAzureCliHomebrew"),
+                                 "PIP": ("curl -L https://aka.ms/InstallAzureCli | bash", "https://aka.ms/doc/UpdateAzureCliLinux"),
+                                 "MSI": ("https://aka.ms/installazurecliwindows", "https://aka.ms/doc/UpdateAzureCliMsi"),
+                                 "DOCKER": ("docker pull mcr.microsoft.com/azure-cli", "https://aka.ms/doc/UpdateAzureCliDocker")}
+
+_GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://aka.ms/doc/InstallAzureCli'
+
 
 def handle_exception(ex):  # pylint: disable=too-many-return-statements
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
@@ -150,6 +160,38 @@ def _update_latest_from_pypi(versions):
     return versions, success
 
 
+def _get_latest_versions(versions):
+    import os
+    import datetime
+    from azure.cli.core._environment import get_config_dir
+    from distutils.version import LooseVersion
+    az_versions_file = os.path.join(get_config_dir(), 'version', 'azVersions.json')
+    if os.path.exists(az_versions_file):
+        try:
+            file_json = get_file_json(az_versions_file, throw_on_empty=False) or []
+            cache_versions = file_json['versions']
+            if cache_versions['azure-cli']['local'] == versions['azure-cli']['local']:
+                if LooseVersion(versions['azure-cli']['local']) < LooseVersion(cache_versions['azure-cli']['pypi']):
+                    return cache_versions, True
+                time_now = datetime.datetime.now()
+                update_time = datetime.datetime.strptime(file_json['update_time'], '%Y-%m-%d %H:%M:%S.%f')
+                if time_now - update_time < datetime.timedelta(days=1):
+                    return cache_versions, True
+        except (CLIError, ValueError):
+            import shutil
+            shutil.rmtree(az_versions_file)
+    versions, success = _update_latest_from_pypi(versions)
+    if success:
+        file_path = os.path.join(get_config_dir(), 'version')
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+        with os.fdopen(os.open(az_versions_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
+                       'w+') as version_file:
+            file_json = {'versions': versions, 'update_time': str(datetime.datetime.now())}
+            version_file.write(json.dumps(file_json))
+    return versions, success
+
+
 def get_az_version_string():
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
 
@@ -165,7 +207,7 @@ def get_az_version_string():
             versions[comp_name] = {'local': dist.version}
 
     # get the versions from pypi
-    versions, success = _update_latest_from_pypi(versions)
+    versions, success = _get_latest_versions(versions)
     updates_available = 0
 
     def _print(val=''):
@@ -230,6 +272,48 @@ def get_az_version_json():
         for ext in extensions:
             versions['extensions'][ext.name] = ext.version or 'Unknown'
     return versions
+
+
+def show_version():
+    ver_string, updates_available = get_az_version_string()
+    print(ver_string)
+    if updates_available == -1:
+        logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
+    elif updates_available:  # pylint: disable=too-many-nested-blocks
+        if in_cloud_console():
+            warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
+        else:
+            warning_msg = 'You have %i updates available. Consider updating your CLI installation'
+            from azure.cli.core._environment import _ENV_AZ_INSTALLER
+            import os
+            installer = os.getenv(_ENV_AZ_INSTALLER)
+            instruction_msg = ''
+            if installer in _PACKAGE_UPGRADE_INSTRUCTIONS:
+                if installer == 'RPM':
+                    distname, _ = get_linux_distro()
+                    if not distname:
+                        instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+                    else:
+                        distname = distname.lower().strip()
+                        if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
+                            installer = 'YUM'
+                        elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
+                            installer = 'ZYPPER'
+                        else:
+                            instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+                elif installer == 'PIP':
+                    system = platform.system()
+                    alternative_command = " or '{}' if you used our script for installation. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1]) if system != 'Windows' else ''
+                    instruction_msg = " with 'pip install --upgrade azure-cli'{}".format(alternative_command)
+                if instruction_msg:
+                    warning_msg += instruction_msg
+                else:
+                    warning_msg += " with '{}'. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1])
+            else:
+                warning_msg += '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+        logger.warning(warning_msg, updates_available)
+    else:
+        print('Your CLI is up-to-date.')
 
 
 def get_json_object(json_string):
