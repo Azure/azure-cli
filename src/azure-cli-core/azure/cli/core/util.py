@@ -16,9 +16,12 @@ import re
 import logging
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+
+from azure.common import AzureException
+from azure.core.exceptions import AzureError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
-from azure.common import AzureException
+from inspect import getfullargspec as get_arg_spec
 
 logger = get_logger(__name__)
 
@@ -51,8 +54,15 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error("To learn more about --query, please visit: "
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
-        if isinstance(ex, (CLIError, CloudError, AzureException)):
+        if isinstance(ex, (CLIError, CloudError, AzureException, AzureError)):
             logger.error(ex.args[0])
+            try:
+                for detail in ex.args[0].error.details:
+                    logger.error(detail)
+            except (AttributeError, TypeError):
+                pass
+            except:  # pylint: disable=bare-except
+                pass
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
             logger.error('validation error: %s', ex)
@@ -199,9 +209,6 @@ def get_az_version_string():
     _print('Python ({}) {}'.format(platform.system(), sys.version))
     _print()
     _print('Legal docs and information: aka.ms/AzureCliLegal')
-    _print()
-    if sys.version.startswith('2.7'):
-        _print("* DEPRECATION: Python 2.7 will reach the end of its life on January 1st, 2020. \nA future version of Azure CLI will drop support for Python 2.7.")
     _print()
     version_string = output.getvalue()
 
@@ -358,6 +365,14 @@ def get_arg_list(op):
         return sig.args
 
 
+def is_track2(client_class):
+    """ IS this client a autorestv3/track2 one?.
+    Could be refined later if necessary.
+    """
+    args = get_arg_spec(client_class.__init__).args
+    return "credential" in args
+
+
 DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 
 
@@ -369,7 +384,8 @@ def should_disable_connection_verify():
 def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
-    return (AzureOperationPoller, LROPoller)
+    from azure.core.polling import LROPoller as AzureCoreLROPoller
+    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
@@ -387,7 +403,7 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
 
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
-        kwargs.update({'raw': True, 'polling': False})
+        kwargs.update({'polling': False})
     return func(*args, **kwargs)
 
 
@@ -398,7 +414,9 @@ def open_page_in_browser(url):
 
     if is_wsl():   # windows 10 linux subsystem
         try:
-            return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
+            # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+            # Ampersand (&) should be quoted
+            return subprocess.call(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
@@ -537,7 +555,7 @@ def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     return success
 
 
-def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
                      body=None, skip_authorization_header=False, resource=None, output_file=None,
                      generated_client_request_id_name='x-ms-client-request-id'):
     import uuid
@@ -600,26 +618,26 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             result[key] = value
     uri_parameters = result or None
 
-    # If uri is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
+    # If url is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
     # default to Azure Resource Manager.
     # https://management.azure.com/ + subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
-    if '://' not in uri:
-        uri = cli_ctx.cloud.endpoints.resource_manager + uri.lstrip('/')
+    if '://' not in url:
+        url = cli_ctx.cloud.endpoints.resource_manager + url.lstrip('/')
 
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
     from azure.cli.core._profile import Profile
     profile = Profile()
-    if '{subscriptionId}' in uri:
-        uri = uri.replace('{subscriptionId}', profile.get_subscription_id())
+    if '{subscriptionId}' in url:
+        url = url.replace('{subscriptionId}', profile.get_subscription_id())
 
-    if not skip_authorization_header and uri.lower().startswith('https://'):
+    if not skip_authorization_header and url.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
-            # If uri starts with ARM endpoint, like https://management.azure.com/,
+            # If url starts with ARM endpoint, like https://management.azure.com/,
             # use active_directory_resource_id for resource.
             # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
-            if uri.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
                 resource = endpoints.active_directory_resource_id
             else:
                 from azure.cli.core.cloud import CloudEndpointNotSetException
@@ -628,7 +646,7 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
                         value = getattr(endpoints, p)
                     except CloudEndpointNotSetException:
                         continue
-                    if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
+                    if isinstance(value, six.string_types) and url.lower().startswith(value.lower()):
                         resource = value
                         break
         if resource:
@@ -643,7 +661,7 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
     try:
         # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
         s = Session()
-        req = Request(method=method, url=uri, headers=headers, params=uri_parameters, data=body)
+        req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
         prepped = s.prepare_request(req)
 
         # Merge environment settings into session
@@ -805,8 +823,8 @@ def get_az_user_agent():
 
     agents = ["AZURECLI/{}".format(core_version)]
 
-    _ENV_AZ_INSTALLER = 'AZ_INSTALLER'
     import os
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
     if _ENV_AZ_INSTALLER in os.environ:
         agents.append('({})'.format(os.environ[_ENV_AZ_INSTALLER]))
 
@@ -828,3 +846,22 @@ def user_confirmation(message, yes=False):
     except NoTTYException:
         raise CLIError(
             'Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+def get_linux_distro():
+    if platform.system() != 'Linux':
+        return None, None
+
+    try:
+        with open('/etc/os-release') as lines:
+            tokens = [line.strip() for line in lines]
+    except Exception:  # pylint: disable=broad-except
+        return None, None
+
+    release_info = {}
+    for token in tokens:
+        if '=' in token:
+            k, v = token.split('=', 1)
+            release_info[k.lower()] = v.strip('"')
+
+    return release_info.get('name', None), release_info.get('version_id', None)

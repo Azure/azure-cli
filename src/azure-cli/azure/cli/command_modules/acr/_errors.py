@@ -45,13 +45,13 @@ DOCKER_DAEMON_ERROR = ErrorClass(
 
 DOCKER_VERSION_ERROR = ErrorClass(
     "DOCKER_VERSION_ERROR",
-    "An error occured while retrieving Docker version. Please try verifying it manually."
+    "An error occurred while retrieving Docker version. Please try verifying it manually."
 )
 
 
 DOCKER_PULL_ERROR = ErrorClass(
     "DOCKER_PULL_ERROR",
-    "An error occurred while pulling a sample image. Please validate your network connection and verify if docker daemon is running properly."
+    "An error occurred while pulling a sample image. Please validate your network connection and verify if Docker daemon is running properly."
 )
 
 

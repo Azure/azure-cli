@@ -47,7 +47,6 @@ try:
 
     elapsed_time = timeit.default_timer() - start_time
 
-    az_cli.logging.end_cmd_metadata_logging(exit_code)
     sys.exit(exit_code)
 
 except KeyboardInterrupt:
@@ -61,7 +60,6 @@ except SystemExit as ex:  # some code directly call sys.exit, this is to make su
     except NameError:
         pass
 
-    az_cli.logging.end_cmd_metadata_logging(exit_code)
     raise ex
 
 finally:

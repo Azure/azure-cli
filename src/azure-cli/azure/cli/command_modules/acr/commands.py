@@ -24,7 +24,8 @@ from ._format import (
     helm_show_output_format,
     scope_map_output_format,
     token_output_format,
-    token_credential_output_format
+    token_credential_output_format,
+    agentpool_output_format
 )
 from ._client_factory import (
     cf_acr_registries,
@@ -36,7 +37,8 @@ from ._client_factory import (
     cf_acr_scope_maps,
     cf_acr_tokens,
     cf_acr_token_credentials,
-    cf_acr_private_endpoint_connections
+    cf_acr_private_endpoint_connections,
+    cf_acr_agentpool
 )
 
 
@@ -146,6 +148,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         client_factory=cf_acr_token_credentials
     )
 
+    acr_agentpool_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.agentpool#{}',
+        table_transformer=agentpool_output_format,
+        client_factory=cf_acr_agentpool
+    )
+
     acr_private_endpoint_connection_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.private_endpoint_connection#{}',
         client_factory=cf_acr_private_endpoint_connections
@@ -158,6 +166,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.command('delete', 'acr_delete')
         g.show_command('show', 'acr_show')
         g.command('show-usage', 'acr_show_usage', table_transformer=usage_output_format)
+        g.command('show-endpoints', 'acr_show_endpoints', is_preview=True)
         g.generic_update_command('update',
                                  getter_name='acr_update_get',
                                  setter_name='acr_update_set',
@@ -298,6 +307,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     with self.command_group('acr token credential', acr_token_credential_generate_util) as g:
         g.command('generate', 'acr_token_credential_generate')
+
+    with self.command_group('acr agentpool', acr_agentpool_util, is_preview=True) as g:
+        g.command('create', 'acr_agentpool_create', supports_no_wait=True)
+        g.command('update', 'acr_agentpool_update', supports_no_wait=True)
+        g.command('delete', 'acr_agentpool_delete', supports_no_wait=True)
+        g.command('list', 'acr_agentpool_list')
+        g.show_command('show', 'acr_agentpool_show')
 
     with self.command_group('acr private-endpoint-connection', acr_private_endpoint_connection_util,
                             is_preview=True) as g:

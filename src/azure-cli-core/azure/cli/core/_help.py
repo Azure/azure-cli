@@ -7,7 +7,8 @@ from __future__ import print_function
 import argparse
 
 from azure.cli.core.commands import ExtensionCommandSource
-from azure.cli.core.commands.constants import SURVEY_PROMPT, SURVEY_PROMPT_COLOR
+from azure.cli.core.commands.constants import (SURVEY_PROMPT, SURVEY_PROMPT_COLOR,
+                                               UX_SURVEY_PROMPT, UX_SURVEY_PROMPT_COLOR)
 
 from knack.help import (HelpFile as KnackHelpFile, CommandHelpFile as KnackCommandHelpFile,
                         GroupHelpFile as KnackGroupHelpFile, ArgumentGroupRegistry as KnackArgumentGroupRegistry,
@@ -172,8 +173,11 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         else:
             AzCliHelp.update_examples(help_file)
         self._print_detailed_help(cli_name, help_file)
-
-        print(SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else SURVEY_PROMPT)
+        show_link = self.cli_ctx.config.getboolean('output', 'show_survey_link', True)
+        if show_link:
+            print(SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else SURVEY_PROMPT)
+            if not nouns:
+                print(UX_SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else UX_SURVEY_PROMPT)
 
     def _register_help_loaders(self):
         import azure.cli.core._help_loaders as help_loaders

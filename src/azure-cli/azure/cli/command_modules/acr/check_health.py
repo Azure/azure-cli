@@ -6,7 +6,6 @@
 from __future__ import print_function
 
 import re
-import sys
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom import get_docker_command
@@ -27,13 +26,12 @@ HELM_VERSION_REGEX = re.compile(r'(SemVer|Version):"v([.\d]+)"')
 ACR_CHECK_HEALTH_MSG = "Try running 'az acr check-health -n {} --yes' to diagnose this issue."
 RECOMMENDED_NOTARY_VERSION = "0.6.0"
 NOTARY_VERSION_REGEX = re.compile(r'Version:\s+([.\d]+)')
+DOCKER_PULL_WRONG_PLATFORM = 'cannot be used on this platform'
 
 
 # Utilities functions
 def print_pass(message):
-    from colorama import Fore, Style, init
-    init()
-    print(str(message) + " : " + Fore.GREEN + "OK" + Style.RESET_ALL, file=sys.stderr)
+    logger.warning("%s : OK", str(message))
 
 
 def _handle_error(error, ignore_errors):
@@ -85,16 +83,18 @@ def _get_docker_status_and_version(ignore_errors, yes):
         docker_daemon_available = False
 
     if docker_daemon_available:
-        print("Docker daemon status: available", file=sys.stderr)
+        logger.warning("Docker daemon status: available")
 
     # Docker version check
-    output, warning, stderr = _subprocess_communicate([docker_command, "--version"])
+    output, warning, stderr = _subprocess_communicate(
+        [docker_command, "version", "--format", "'Docker version {{.Server.Version}}, "
+         "build {{.Server.GitCommit}}, platform {{.Server.Os}}/{{.Server.Arch}}'"])
     if stderr:
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
         if warning:
             logger.warning(warning)
-        print("Docker version: {}".format(output), file=sys.stderr)
+        logger.warning("Docker version: %s", output)
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
@@ -108,7 +108,11 @@ def _get_docker_status_and_version(ignore_errors, yes):
         output, warning, stderr = _subprocess_communicate([docker_command, "pull", IMAGE])
 
         if stderr:
-            _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
+            if DOCKER_PULL_WRONG_PLATFORM in stderr:
+                print_pass("Docker pull of '{}'".format(IMAGE))
+                logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
+            else:
+                _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
                 logger.warning(warning)
@@ -130,7 +134,7 @@ def _get_cli_version():
     if cli_component_name in working_set.by_key:
         cli_version = working_set.by_key[cli_component_name].version
 
-    print('Azure CLI version: {}'.format(cli_version), file=sys.stderr)
+    logger.warning('Azure CLI version: %s', cli_version)
 
 
 # Get helm versions
@@ -333,4 +337,4 @@ def acr_check_health(cmd,  # pylint: disable useless-return
         _get_helm_version(ignore_errors)
         _get_notary_version(ignore_errors)
 
-    print(FAQ_MESSAGE, file=sys.stderr)
+    logger.warning(FAQ_MESSAGE)

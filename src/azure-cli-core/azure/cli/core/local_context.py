@@ -12,8 +12,8 @@ from knack.log import get_logger
 from knack.config import _ConfigFile
 from knack.util import ensure_dir, CLIError
 
-STORE = 'STORE'   # action for a parameter in local context, STORE means its value will be saved to local context
-USE = 'USE'   # action for a parameter in local context, USE means will read value from local context for this parameter
+SET = 'SET'   # action for a parameter in local context, SET means its value will be saved to local context
+GET = 'GET'   # action for a parameter in local context, GET means will read value from local context for this parameter
 ALL = 'ALL'   # effective level of local context, ALL means all commands can share this parameter value
 logger = get_logger(__name__)
 
@@ -104,9 +104,9 @@ class LocalContextAttribute(object):
     def __init__(self, name, actions, scopes=None):
         """ Local Context Attribute arguments
 
-        :param name: Argument name in local context. Make sure it is consistent for STORE and USE.
+        :param name: Argument name in local context. Make sure it is consistent for SET and GET.
         :type name: str
-        :param actions: Which action should be taken for local context. Allowed values: STORE, USE
+        :param actions: Which action should be taken for local context. Allowed values: SET, GET
         :type actions: list
         :param scopes: The effective commands or command groups of this argument when saved to local context.
         :type scopes: list
@@ -119,6 +119,6 @@ class LocalContextAttribute(object):
 
         if isinstance(scopes, str):
             scopes = [scopes]
-        if scopes is None and STORE in actions:
+        if scopes is None and SET in actions:
             scopes = [ALL]
         self.scopes = scopes
