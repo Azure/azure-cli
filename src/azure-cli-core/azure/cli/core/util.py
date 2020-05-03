@@ -177,14 +177,14 @@ def _get_latest_versions(versions):
                 update_time = datetime.datetime.strptime(file_json['update_time'], '%Y-%m-%d %H:%M:%S.%f')
                 if time_now - update_time < datetime.timedelta(days=1):
                     return cache_versions, True
-        except (CLIError, ValueError):
-            import shutil
-            shutil.rmtree(az_versions_file)
+        except (CLIError, ValueError) as ex:
+            logger.info(ex)
+            os.remove(az_versions_file)
     versions, success = _update_latest_from_pypi(versions)
     if success:
-        file_path = os.path.join(get_config_dir(), 'version')
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
+        dir_path = os.path.join(get_config_dir(), 'version')
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
         with os.fdopen(os.open(az_versions_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
                        'w+') as version_file:
             file_json = {'versions': versions, 'update_time': str(datetime.datetime.now())}
@@ -274,9 +274,57 @@ def get_az_version_json():
     return versions
 
 
+def show_updates_available(new_line_before=False, new_line_after=False):
+    if should_show_updates_available():
+        _, updates_available = get_az_version_string()
+        if updates_available > 0:
+            import os
+            from azure.cli.core._environment import get_config_dir
+            if new_line_before:
+                logger.warning("")
+            show_updates(updates_available)
+            if new_line_after:
+                logger.warning("")
+        # Cache the last time that should show updates available
+        dir_path = os.path.join(get_config_dir(), 'version')
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        version_time_file = os.path.join(dir_path, 'showUpdatesAvailable.txt')
+        with os.fdopen(os.open(version_time_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
+                       'w+') as time_file:
+            from datetime import datetime
+            time_file.write(str(datetime.now()))
+
+
+def should_show_updates_available():
+    """Only show once in a wait period"""
+    import datetime
+    import os
+    import stat
+    from azure.cli.core._environment import get_config_dir
+    wait_period = datetime.timedelta(days=7)
+    file_path = os.path.join(get_config_dir(), 'version', 'showUpdatesAvailable.txt')
+    if not os.path.exists(file_path):
+        return True
+
+    file_stat = os.stat(file_path)
+    if not stat.S_ISREG(file_stat.st_mode):
+        return False
+
+    modify_time = datetime.datetime.fromtimestamp(file_stat.st_mtime)
+    if datetime.datetime.now() - modify_time > wait_period:
+        return True
+
+    return False
+
+
 def show_version():
     ver_string, updates_available = get_az_version_string()
     print(ver_string)
+    show_updates(updates_available)
+
+
+def show_updates(updates_available):
     if updates_available == -1:
         logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
     elif updates_available:  # pylint: disable=too-many-nested-blocks

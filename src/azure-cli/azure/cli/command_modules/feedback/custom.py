@@ -759,6 +759,8 @@ def handle_feedback(cmd):
 
         if res:
             print(_MSG_THNK)
+            from azure.cli.core.util import show_updates_available
+            show_updates_available(new_line_before=True)
         return
     except NoTTYException:
         raise CLIError('This command is interactive, however no tty is available.')
