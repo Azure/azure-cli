@@ -3232,14 +3232,10 @@ def _remove_osa_nulls(managed_clusters):
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
     attrs = ['tags', 'plan', 'type', 'id']
-    ap_master_attrs = ['name', 'os_type']
     for managed_cluster in managed_clusters:
         for attr in attrs:
             if getattr(managed_cluster, attr, None) is None:
                 delattr(managed_cluster, attr)
-        for attr in ap_master_attrs:
-            if getattr(managed_cluster.master_pool_profile, attr, None) is None:
-                delattr(managed_cluster.master_pool_profile, attr)
     return managed_clusters
 
 
