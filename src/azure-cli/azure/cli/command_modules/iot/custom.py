@@ -1047,7 +1047,7 @@ def _get_iot_hub_by_name(client, hub_name):
 def _ensure_location(cli_ctx, resource_group_name, location):
     if location is None:
         resource_group_client = resource_service_factory(cli_ctx).resource_groups
-        return resource_group_client.iot_hub_operations.get(resource_group_name).location
+        return resource_group_client.get(resource_group_name).location
     return location
 
 
