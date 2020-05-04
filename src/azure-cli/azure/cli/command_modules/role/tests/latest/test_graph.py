@@ -88,7 +88,7 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
                 self.check('requiredResourceAccess|[0].resourceAccess|[0].id',
                            '311a71cc-e848-46a1-bdf8-97ff7156d8e6')
             ])
-        except Exception:
+        finally:
             self.cmd('ad app delete --id {id}')
 
     def test_web_app_no_identifier_uris_other_tenants_create_scenario(self):
@@ -464,7 +464,7 @@ class GraphOwnerScenarioTest(ScenarioTest):
             self.cmd('ad app owner list --id {app_id}', checks=self.check('length([*])', 0))
         finally:
             if self.kwargs['app_id']:
-                self.cmd('ad sp delete --id {app_id}')
+                self.cmd('ad app delete --id {app_id}')
 
     def test_graph_group_ownership(self):
         owner = get_signed_in_user(self)
@@ -556,31 +556,46 @@ class GraphAppCredsScenarioTest(ScenarioTest):
 class GraphAppRequiredAccessScenarioTest(ScenarioTest):
 
     def test_graph_required_access_e2e(self):
-        if not get_signed_in_user(self):
-            return  # this test delete users which are beyond a SP's capacity, so quit...
         self.kwargs = {
             'display_name': self.create_random_name('cli-app-', 15),
             'graph_resource': '00000002-0000-0000-c000-000000000000',
-            'target_api': 'a42657d6-7f20-40e3-b6f0-cee03008a62a',
-            'target_api2': '311a71cc-e848-46a1-bdf8-97ff7156d8e6'
+            'permission_1': '311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope',  # User.Read
+            'permission_2': '5778995a-e1bf-45b8-affa-663a9f3f4d04=Role',   # Directory.Read.All
+            'permission_3': 'cba73afc-7f69-4d86-8450-4978e04ecd1a=Scope',  # User.ReadBasic.All
         }
-        app_id = None
+        self.kwargs['app_id'] = None
         try:
             result = self.cmd('ad sp create-for-rbac --name {display_name} --skip-assignment').get_output_in_json()
             self.kwargs['app_id'] = result['appId']
-            self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {target_api}=Scope')
-            self.cmd('ad app permission grant --id {app_id} --api {graph_resource}')
-            permissions = self.cmd('ad app permission list --id {app_id}', checks=[
-                self.check('length([*])', 1)
-            ]).get_output_in_json()
-            self.assertTrue(dateutil.parser.parse(permissions[0]['expiryTime']))  # verify it is a time
-            self.cmd('ad app permission list-grants --id {app_id}', checks=self.check('length([*])', 1))
-            self.cmd('ad app permission list-grants --id {app_id} --show-resource-name',
-                     checks=self.check('[0].resourceDisplayName', "Windows Azure Active Directory"))
-            self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {target_api2}=Scope')
-            self.cmd('ad app permission grant --id {app_id} --api {graph_resource}')
+
+            self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {permission_1}')
+            self.cmd('ad app permission list --id {app_id}', checks=[
+                self.check('length([*])', 1),
+                self.check('length([*].resourceAccess[])', 1),
+                self.check("length([*].resourceAccess[?type == 'Scope'][])", 1),
+                self.check("length([*].resourceAccess[?type == 'Role'][])", 0)
+            ])
+
+            self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {permission_2} {permission_3}')
+            self.cmd('ad app permission list --id {app_id}', checks=[
+                self.check('length([*])', 1),
+                self.check('length([*].resourceAccess[])', 3),
+                self.check("length([*].resourceAccess[?type == 'Scope'][])", 2),
+                self.check("length([*].resourceAccess[?type == 'Role'][])", 1)
+            ])
+
+            self.cmd('ad app permission delete --id {app_id} --api {graph_resource} --api-permissions {permission_1} {permission_2}')
+            self.cmd('ad app permission list --id {app_id}', checks=[
+                self.check('length([*])', 1),
+                self.check('length([*].resourceAccess[])', 1),
+                self.check("length([*].resourceAccess[?type == 'Scope'][])", 1),
+                self.check("length([*].resourceAccess[?type == 'Role'][])", 0)
+            ])
+
             self.cmd('ad app permission delete --id {app_id} --api {graph_resource}')
-            self.cmd('ad app permission list --id {app_id}', checks=self.check('length([*])', 0))
+            self.cmd('ad app permission list --id {app_id}', checks=[
+                self.check('length([*])', 0)
+            ])
         finally:
-            if app_id:
-                self.cmd('ad app delete --id ' + app_id)
+            if self.kwargs['app_id']:
+                self.cmd('ad app delete --id {app_id}')

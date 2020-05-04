@@ -142,9 +142,9 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_apps')
         g.custom_show_command('show', 'show_application')
         g.custom_command('permission grant', 'grant_application')
-        g.custom_command('permission list', 'list_permissions')
-        g.custom_command('permission add', 'add_permission')
-        g.custom_command('permission delete', 'delete_permission')
+        g.custom_command('permission list', 'list_required_permissions')
+        g.custom_command('permission add', 'add_required_permission')
+        g.custom_command('permission delete', 'remove_required_permission')
         g.custom_command('permission list-grants', 'list_permission_grants')
         g.custom_command('permission admin-consent', 'admin_consent')
         g.generic_update_command('update', setter_name='patch_application', setter_type=role_custom,

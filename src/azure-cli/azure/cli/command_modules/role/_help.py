@@ -146,16 +146,23 @@ short-summary: remove an application owner.
 
 helps['ad app permission'] = """
 type: group
-short-summary: manage an application's OAuth2 permissions.
+short-summary: Manage an app registration's required API permissions (requiredResourceAccess).
 """
 
 helps['ad app permission add'] = """
 type: command
-short-summary: add an API permission
-long-summary: invoking "az ad app permission grant" is needed to activate it
+short-summary: Add required API permissions.
+long-summary: Adds required API permissions to the app registration. Does not grant permissions.
 examples:
-  - name: add a Graph API permission of "Sign in and read user profile"
-    text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
+  - name: Add the delegated permission User.Read for Microsoft Graph to the required permissions.
+    text: az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api "00000002-0000-0000-c000-000000000000" --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope
+  - name: Retrieve the permission IDs for the delegated permission User.Read and the app role Application.Read.All, both for Microsoft Graph, then add these as required permissions.
+    text: |
+      az ad sp show --id "https://graph.microsoft.com" --query "oauth2Permissions[?value == 'User.Read'].[id, value]" -o tsv
+      e1fe6dd8-ba31-4d61-89e7-88639da4683d    User.Read
+      az ad sp show --id "https://graph.microsoft.com" --query "appRoles[?value == 'Application.Read.All'].[id, value]" -o tsv
+      9a5d68dd-52b0-4cc2-bd40-abcf44ac3a30    Application.Read.All
+      az ad app permission add --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api "https://graph.microsoft.com" --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope 9a5d68dd-52b0-4cc2-bd40-abcf44ac3a30=Role
 """
 
 helps['ad app permission admin-consent'] = """
@@ -170,16 +177,18 @@ examples:
 
 helps['ad app permission delete'] = """
 type: command
-short-summary: remove an API permission
+short-summary: Remove required API permissions.
+long-summary: Removes required API permissions from the app registration. Does not revoke any granted permissions.
 examples:
-  - name: remove an AAD graph permission
-    text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000002-0000-0000-c000-000000000000
+  - name: Remove all required permissions to Microsoft Graph.
+    text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api 00000003-0000-0000-c000-000000000000
+  - name: Remove a specific required delegated permission to Microsoft Graph (User.Read, in this example).
+    text: az ad app permission delete --id eeba0b46-78e5-4a1a-a1aa-cafe6c123456 --api "https://graph.microsoft.com" --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope
 """
 
 helps['ad app permission grant'] = """
 type: command
-short-summary: Grant the app an API Delegated permissions
-long-summary: for Application permissions, please use "ad app permission admin-consent"
+short-summary: Grant delegated permissions
 examples:
   - name: Grant a native application with permissions to access an existing API with TTL of 2 years
     text: az ad app permission grant --id e042ec79-34cd-498f-9d9f-1234234 --api a0322f79-57df-498f-9d9f-12678 --expires 2
@@ -187,9 +196,10 @@ examples:
 
 helps['ad app permission list'] = """
 type: command
-short-summary: List API permissions the application has requested
+short-summary: List required API permissions for an app registration.
+long-summary: Lists required API permissions for an app registration. Does not list permission grants.
 examples:
-  - name: List the OAuth2 permissions for an existing AAD app
+  - name: List the required API permissions for an app registration.
     text: az ad app permission list --id e042ec79-34cd-498f-9d9f-1234234
 """
 

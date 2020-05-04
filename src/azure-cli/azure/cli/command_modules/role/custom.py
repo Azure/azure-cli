@@ -812,29 +812,11 @@ def _get_grant_permissions(graph_client, client_sp_object_id=None, query_filter=
     return grant_info
 
 
-def list_permissions(cmd, identifier):
-    # the important and hard part is to tell users which permissions have been granted.
-    # we will due diligence to dig out what matters
-
-    graph_client = _graph_client_factory(cmd.cli_ctx)
-
-    # first get the permission grant history
-    client_sp_object_id = _resolve_service_principal(graph_client.service_principals, identifier)
-    grant_permissions = _get_grant_permissions(graph_client, client_sp_object_id=client_sp_object_id)
-
-    # get original permissions required by the application, we will cross check the history
-    # and mark out granted ones
+def list_required_permissions(cmd, identifier):
+    # Returns the required API permissions (requiredResourceAccess)
     graph_client = _graph_client_factory(cmd.cli_ctx)
     application = show_application(graph_client.applications, identifier)
     permissions = application.required_resource_access
-    for p in permissions:
-        result = list(graph_client.service_principals.list(
-            filter="servicePrincipalNames/any(c:c eq '{}')".format(p.resource_app_id)))
-        expiry_time = 'N/A'
-        if result:
-            expiry_time = ', '.join([x.expiry_time for x in grant_permissions if
-                                     x.resource_id == result[0].object_id])
-        setattr(p, 'expiryTime', expiry_time)
     return permissions
 
 
@@ -854,35 +836,75 @@ def list_permission_grants(cmd, identifier=None, query_filter=None, show_resourc
     return result
 
 
-def add_permission(cmd, identifier, api, api_permissions):
+def add_required_permission(cmd, identifier, api, api_permissions):
+    """Adds a required permissions for an API to requiredResourceAccess"""
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
+    api_app_id = _resolve_api_identifier_to_app_id(graph_client, api)
     application = show_application(graph_client.applications, identifier)
-    existing = application.required_resource_access
-    resource_accesses = []
+    rras = application.required_resource_access
+
+    # If a required resource access for the API exists, use it. Otherwise, create a new one.
+    rra = next((e for e in rras if e.resource_app_id == api_app_id), None)
+    if rra is None:
+        rra = RequiredResourceAccess(resource_app_id=api_app_id, resource_access=[])
+        rras.append(rra)
+
+    # Add each required permission unless it already exists in the RRA.
     for e in api_permissions:
-        access_id, access_type = e.split('=')
-        resource_accesses.append(ResourceAccess(id=access_id, type=access_type))
+        permission_id, permission_type = e.split('=')
+        if not any((ra.id == permission_id and ra.type == permission_type) for ra in rra.resource_access):
+            rra.resource_access.append(ResourceAccess(id=permission_id, type=permission_type))
 
-    existing_resource_access = next((e for e in existing if e.resource_app_id == api), None)
-    if existing_resource_access:
-        existing_resource_access.resource_access += resource_accesses
-    else:
-        required_resource_access = RequiredResourceAccess(resource_app_id=api,
-                                                          resource_access=resource_accesses)
-        existing.append(required_resource_access)
-    update_parameter = ApplicationUpdateParameters(required_resource_access=existing)
+    update_parameter = ApplicationUpdateParameters(required_resource_access=rras)
     graph_client.applications.patch(application.object_id, update_parameter)
-    logger.warning('Invoking "az ad app permission grant --id %s --api %s" is needed to make the '
-                   'change effective', identifier, api)
 
 
-def delete_permission(cmd, identifier, api):
+def remove_required_permission(cmd, identifier, api, api_permissions=None):
+    """Removes a required permissions for an API from requiredResourceAccess
+
+    :param api_permissions: If given, only these required permissions will be removed. If
+            omitted, all required permissions for the API will be removed.
+    """
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
+    api_app_id = _resolve_api_identifier_to_app_id(graph_client, api)
     application = show_application(graph_client.applications, identifier)
-    existing_accesses = application.required_resource_access
-    existing_accesses = [e for e in existing_accesses if e.resource_app_id != api]
-    update_parameter = ApplicationUpdateParameters(required_resource_access=existing_accesses)
+    rras = application.required_resource_access
+
+    updated_rras = []
+    for rra in rras:
+        if rra.resource_app_id == api_app_id:
+            if api_permissions is not None:
+                # If specific permissions were given, include the RRA only if there are any remaining
+                # permissions after filtering out the permissions to remove.
+                for api_permission in api_permissions:
+                    permission_id, permission_type = api_permission.split('=')
+                    rra.resource_access = [ra for ra in rra.resource_access
+                                           if ra.type != permission_type or ra.id != permission_id]
+                if rra.resource_access:
+                    updated_rras.append(rra)
+        else:
+            updated_rras.append(rra)
+
+    update_parameter = ApplicationUpdateParameters(required_resource_access=updated_rras)
     return graph_client.applications.patch(application.object_id, update_parameter)
+
+
+def _resolve_api_identifier_to_app_id(graph_client, api_identifier):
+    """Resolves an API identifier to an app ID
+
+    The identifier can be an object ID or service principal name for an existing service principal
+    object. If no matching service principal object is found but the identifier is a Guid, it is
+    assumed to be the app ID of an API which is not instantiated in the tenant.
+    """
+    try:
+        resource_sp = show_service_principal(graph_client.service_principals, api_identifier)
+        return resource_sp.app_id
+    except CLIError:
+        if _is_guid(api_identifier):
+            return api_identifier
+    raise CLIError("No API was found for identifier '{}'.".format(api_identifier))
 
 
 def admin_consent(cmd, identifier):
@@ -1137,11 +1159,6 @@ def _create_service_principal(cli_ctx, identifier, resolve_app=True):
     return client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id, account_enabled=True))
 
 
-def show_service_principal(client, identifier):
-    object_id = _resolve_service_principal(client, identifier)
-    return client.get(object_id)
-
-
 def delete_service_principal(cmd, identifier):
     from azure.cli.core._profile import Profile
     client = _graph_client_factory(cmd.cli_ctx)
@@ -1222,12 +1239,16 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
 
 
 def _resolve_service_principal(client, identifier):
-    # todo: confirm with graph team that a service principal name must be unique
-    result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
-    if result:
-        return result[0].object_id
+    return show_service_principal(client=client, identifier=identifier).object_id
+
+
+def show_service_principal(client, identifier):
+    query_filter = "servicePrincipalNames/any(c:c eq '{}')".format(identifier)
     if _is_guid(identifier):
-        return identifier  # assume an object id
+        query_filter += " or objectId eq '{}'".format(identifier)
+    result = list(client.list(filter=query_filter))
+    if result:
+        return result[0]
     error = CLIError("Service principal '{}' doesn't exist".format(identifier))
     error.status_code = 404  # Make sure CLI returns 3
     raise error
