@@ -34,6 +34,7 @@ from ._validators import (validate_policy_permissions,
                           validate_c2d_max_delivery_count,
                           validate_c2d_ttl)
 
+
 hub_name_type = CLIArgumentType(
     completer=get_resource_name_completion_list('Microsoft.Devices/IotHubs'),
     help='IoT Hub name.')
@@ -46,6 +47,7 @@ dps_name_type = CLIArgumentType(
 app_name_type = CLIArgumentType(
     completer=get_resource_name_completion_list('Microsoft.IoTCentral/IoTApps'),
     help='IoT Central application name.')
+
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
     # Arguments for IoT DPS
@@ -212,7 +214,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    options_list=['--endpoint-type', '--type', '-t'], help='Type of the Routing Endpoint.')
         c.argument('encoding', options_list=['--encoding'], arg_type=get_enum_type(EncodingFormat),
                    help='Encoding format for the container. The default is AVRO. '
-                        'Note that this field is applicable only for blob container endpoints.'),
+                        'Note that this field is applicable only for blob container endpoints.')
         c.argument('endpoint_uri', options_list=['--endpoint-uri'],
                    help='The uri of the endpoint resource.')
         c.argument('entity_path', options_list=['--entity-path'],

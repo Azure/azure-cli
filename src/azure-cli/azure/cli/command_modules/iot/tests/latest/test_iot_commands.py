@@ -21,7 +21,7 @@ class IoTHubTest(ScenarioTest):
         storageConnectionString = self._get_azurestorage_connectionstring(rg, containerName, storage_account)
         ehConnectionString = self._get_eventhub_connectionstring(rg)
         subscription_id = self._get_current_subscription()
-        
+
         # Test hub life cycle in free tier
         self.cmd('iot hub create -n {0} -g {1} --sku F1'.format(hub, rg), expect_failure=True)
         self.cmd('iot hub create -n {0} -g {1} --sku F1 --partition-count 4'.format(hub, rg), expect_failure=True)
@@ -53,7 +53,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('properties.cloudToDevice.defaultTtlAsIso8601', '23:00:00'),
                          self.check('properties.messagingEndpoints.fileNotifications.ttlAsIso8601', '20:00:00'),
                          self.check('properties.messagingEndpoints.fileNotifications.maxDeliveryCount', '79')])
-        
+
         # Test 'az iot hub show-connection-string'
         conn_str_pattern = r'^HostName={0}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(
             hub)
@@ -90,7 +90,6 @@ class IoTHubTest(ScenarioTest):
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
         assert updated_hub['properties']['storageEndpoints']['$default']['sasTtlAsIso8601'] == '3:00:00'
-
 
         # Test 'az iot hub show'
         self.cmd('iot hub show -n {0}'.format(hub), checks=[
@@ -275,8 +274,6 @@ class IoTHubTest(ScenarioTest):
         assert len(endpoint['serviceBusQueues']) == 0
         assert len(endpoint['serviceBusTopics']) == 0
         assert len(endpoint['eventHubs']) == 1
-
-
 
         # Test 'az iot hub route create'
         route_name = 'route1'

@@ -7,6 +7,7 @@ from argparse import ArgumentError
 from knack.util import CLIError
 from .custom import SimpleAccessRights
 
+
 def validate_policy_permissions(ns):
     if ns.permissions is None or ns.permissions == []:
         raise ArgumentError(None, 'the following arguments are required: --permissions')

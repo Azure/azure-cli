@@ -709,9 +709,8 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                                     endpoint_resource_group, endpoint_subscription_id,
                                     connection_string=None, container_name=None, encoding=None,
                                     resource_group_name=None, batch_frequency=300, chunk_size_window=300,
-                                    auth_type=None, endpoint_uri=None, entity_path=None,
-                                    file_name_format='{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}'):
-
+                                    file_name_format='{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}',
+                                    auth_type=None, endpoint_uri=None, entity_path=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     if EndpointType.EventHub.value == endpoint_type.lower():
