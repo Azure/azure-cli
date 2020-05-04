@@ -507,7 +507,7 @@ class IoTHubTest(ScenarioTest):
         # endpoint show
         self.cmd('iot hub private-endpoint-connection show -n {0} --hub-name {1} -g {2}'
                  .format(private_endpoint_name, identity_hub, rg),
-             checks=self.check('id', '{endpoint_id}'))
+             checks=self.check('id', endpoint_id))
 
         # endpoint delete
         self.cmd('iot hub private-endpoint-connection delete -n {0} --hub-name {1} -g {2} -y'
