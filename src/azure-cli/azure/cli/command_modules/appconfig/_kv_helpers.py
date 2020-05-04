@@ -252,8 +252,7 @@ def __read_kv_from_config_store(cmd,
 
     query_option = QueryKeyValueCollectionOptions(key_filter=key,
                                                   label_filter=label if label else QueryKeyValueCollectionOptions.empty_label,
-                                                  query_datetime=datetime,
-                                                  fields=fields)
+                                                  query_datetime=datetime)
     try:
         keyvalue_iterable = azconfig_client.get_keyvalues(query_option)
         retrieved_kvs = []
