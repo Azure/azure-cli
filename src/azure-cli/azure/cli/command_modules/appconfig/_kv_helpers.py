@@ -252,7 +252,8 @@ def __read_kv_from_config_store(cmd,
 
     query_option = QueryKeyValueCollectionOptions(key_filter=key,
                                                   label_filter=label if label else QueryKeyValueCollectionOptions.empty_label,
-                                                  query_datetime=datetime)
+                                                  query_datetime=datetime,
+                                                  fields=fields)
     try:
         keyvalue_iterable = azconfig_client.get_keyvalues(query_option)
         retrieved_kvs = []
@@ -277,15 +278,7 @@ def __read_kv_from_config_store(cmd,
             if keyvault_client and kv.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
                 __resolve_secret(keyvault_client, kv)
 
-            # select fields
-            if fields:
-                partial_kv = {}
-                for field in fields:
-                    partial_kv[field.name.lower()] = kv.__dict__[
-                        field.name.lower()]
-                retrieved_kvs.append(partial_kv)
-            else:
-                retrieved_kvs.append(kv)
+            retrieved_kvs.append(kv)
             count += 1
             if count >= top:
                 return retrieved_kvs
