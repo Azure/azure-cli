@@ -6,10 +6,7 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-few-public-methods
 
-import json
 import unittest
-import jmespath
-import tempfile
 import os
 
 from azure.cli.testsdk import (
@@ -182,11 +179,13 @@ class WebAppUpE2ETests(ScenarioTest):
             os.sep + os.sep, os.sep), up_working_dir)
         self.assertTrue(result['runtime_version'] == 'dotnetcore|2.2')
         self.assertTrue(result['os'].lower() == 'windows')
+        self.assertNotEqual(result['location'], 'None')
 
         # test the full E2E operation works
         full_result = self.cmd(
             'webapp up -n {} -g {} --plan {}'.format(webapp_name, resource_group, plan)).get_output_in_json()
-        self.assertTrue(result['name'] == full_result['name'])
+        self.assertEqual(result['name'], full_result['name'])
+        self.assertEqual(result['location'], full_result['location'])
 
         # Verify app is created
         # since we set local context, -n and -g are no longer required

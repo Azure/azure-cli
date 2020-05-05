@@ -10,6 +10,10 @@ Release History
 
 * `az acr check-health`: Fix "DOCKER_PULL_ERROR" on Windows (#13158)
 
+**AppService**
+
+* `az webapp up`: Fixing case for creating RG is failing when location is not provided
+
 **Compute**
 
 * `az vm list-ip-addresses`: Error handling (#13186)
