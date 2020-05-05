@@ -63,6 +63,7 @@ class RenewKeyType(Enum):
     Secondary = 'secondary'
     Swap = 'swap'
 
+
 # pylint: disable=too-few-public-methods
 class AuthenticationType(Enum):
     """

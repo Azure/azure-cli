@@ -403,7 +403,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     identityBased_fileUpload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
     if not identityBased_fileUpload and not fileupload_storage_connectionstring and fileupload_storage_container_name:
         raise CLIError('Key-based authentication requires a connection string.')
-    elif identityBased_fileUpload and not fileupload_storage_container_uri:
+    if identityBased_fileUpload and not fileupload_storage_container_uri:
         raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
     _check_name_availability(client.iot_hub_resource, hub_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
@@ -691,8 +691,8 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.iot_hub_resource.get_stats(resource_group_name, hub_name)
 
+
 def validate_authentication_type_input(endpoint_type, connection_string=None, authentication_type=None, endpoint_uri=None, entity_path=None):
-    print('validating...')
     is_keyBased = (AuthenticationType.KeyBased.value == authentication_type.lower()) or (authentication_type is None)
     has_connection_string = (connection_string is not None)
     if is_keyBased and not has_connection_string:
@@ -702,15 +702,16 @@ def validate_authentication_type_input(endpoint_type, connection_string=None, au
     has_endpoint_uri_and_path = (has_endpoint_uri) and (entity_path is not None)
     if EndpointType.AzureStorageContainer.value == endpoint_type.lower() and not has_endpoint_uri:
         raise CLIError("Please provide an endpoint uri '--endpoint-uri'")
-    elif not has_endpoint_uri_and_path:
+    if not has_endpoint_uri_and_path:
         raise CLIError("Please provide an endpoint uri '--endpoint-uri' and entity path '--entity-path'")
+
 
 def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoint_type,
                                     endpoint_resource_group, endpoint_subscription_id,
                                     connection_string=None, container_name=None, encoding=None,
                                     resource_group_name=None, batch_frequency=300, chunk_size_window=300,
                                     file_name_format='{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}',
-                                    auth_type=None, endpoint_uri=None, entity_path=None):
+                                    authentication_type=None, endpoint_uri=None, entity_path=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     if EndpointType.EventHub.value == endpoint_type.lower():
@@ -720,7 +721,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 name=endpoint_name,
                 subscription_id=endpoint_subscription_id,
                 resource_group=endpoint_resource_group,
-                authentication_type=auth_type,
+                authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
                 entity_path=entity_path
             )
@@ -732,7 +733,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 name=endpoint_name,
                 subscription_id=endpoint_subscription_id,
                 resource_group=endpoint_resource_group,
-                authentication_type=auth_type,
+                authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
                 entity_path=entity_path
             )
@@ -744,7 +745,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 name=endpoint_name,
                 subscription_id=endpoint_subscription_id,
                 resource_group=endpoint_resource_group,
-                authentication_type=auth_type,
+                authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri,
                 entity_path=entity_path
             )
@@ -763,7 +764,7 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 file_name_format=file_name_format,
                 batch_frequency_in_seconds=batch_frequency,
                 max_chunk_size_in_bytes=(chunk_size_window * 1048576),
-                authentication_type=auth_type,
+                authentication_type=authentication_type,
                 endpoint_uri=endpoint_uri
             )
         )
@@ -938,9 +939,11 @@ def iot_message_enrichment_list(cmd, client, hub_name, resource_group_name=None)
 def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client, ResourceType
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
+    # DeviceStreams property is still in preview, so until GA we need to use an older API version (2019-07-01-preview)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_IOTHUB, api_version='2019-07-01-preview')
     hub = client.iot_hub_resource.get(resource_group_name, hub_name)
     return hub.properties.device_streams
+
 
 def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_wait=False):
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
@@ -1188,8 +1191,10 @@ def iot_central_app_update(client, app_name, parameters, resource_group_name):
     etag = parameters.additional_properties['etag']
     return client.apps.update(resource_group_name, app_name, parameters, {'IF-MATCH': etag})
 
+
 def iot_private_link_list(client, hub_name, resource_group_name):
     return client.private_link_resources.list(resource_group_name=resource_group_name, resource_name=hub_name)
+
 
 def iot_private_endpoint_approve(cmd, client, hub_name, private_endpoint_connection_name, description, resource_group_name):
     return _update_private_endpoint_connection_status(
@@ -1197,11 +1202,13 @@ def iot_private_endpoint_approve(cmd, client, hub_name, private_endpoint_connect
         private_endpoint_connection_name=private_endpoint_connection_name, is_approved=True, description=description
     )
 
+
 def iot_private_endpoint_reject(cmd, client, hub_name, private_endpoint_connection_name, description, resource_group_name):
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name=resource_group_name, hub_name=hub_name,
         private_endpoint_connection_name=private_endpoint_connection_name, is_approved=False, description=description
     )
+
 
 def iot_private_endpoint_delete(client, hub_name, private_endpoint_connection_name, resource_group_name):
     private_endpoint_connection = client.private_endpoint_connections.get(
@@ -1214,13 +1221,13 @@ def iot_private_endpoint_delete(client, hub_name, private_endpoint_connection_na
             "No private endpoint connection named '{0}' found in hub {1}"
             .format(private_endpoint_connection_name, hub_name)
         )
-    else:
-        return client.private_endpoint_connections.delete(
-            resource_group_name=resource_group_name,
-            resource_name=hub_name,
-            private_endpoint_connection_name=private_endpoint_connection.name,
-            properties=private_endpoint_connection
-        )
+    return client.private_endpoint_connections.delete(
+        resource_group_name=resource_group_name,
+        resource_name=hub_name,
+        private_endpoint_connection_name=private_endpoint_connection.name,
+        properties=private_endpoint_connection
+    )
+
 
 def iot_private_endpoint_show(client, hub_name, private_endpoint_connection_name, resource_group_name):
     private_endpoint_connection = client.private_endpoint_connections.get(
@@ -1233,8 +1240,8 @@ def iot_private_endpoint_show(client, hub_name, private_endpoint_connection_name
             "No private endpoint connection named '{0}' found in hub {1}"
             .format(private_endpoint_connection_name, hub_name)
         )
-    else:
-        return private_endpoint_connection
+    return private_endpoint_connection
+
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, hub_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):
@@ -1255,10 +1262,12 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
     private_endpoint_connection.properties.private_link_service_connection_state.status = new_status
     private_endpoint_connection.properties.private_link_service_connection_state.description = description
     try:
-        return client.private_endpoint_connections.update(resource_group_name=resource_group_name,
-                          resource_name=hub_name,
-                          private_endpoint_connection_name=private_endpoint_connection_name,
-                          properties=private_endpoint_connection.properties)
+        return client.private_endpoint_connections.update(
+            resource_group_name=resource_group_name,
+            resource_name=hub_name,
+            private_endpoint_connection_name=private_endpoint_connection_name,
+            properties=private_endpoint_connection.properties
+        )
     except ErrorDetailsException as ex:
         if ex.response.status_code == 400:
             from msrestazure.azure_exceptions import CloudError
@@ -1266,6 +1275,7 @@ def _update_private_endpoint_connection_status(cmd, client, resource_group_name,
                 raise CloudError(ex.response, "You cannot approve the connection request after rejection. "
                                  "Please create a new connection for approval.")
         raise ex
+
 
 def _ensure_location(cli_ctx, resource_group_name, location):
     """Check to see if a location was provided. If not,

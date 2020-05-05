@@ -972,16 +972,21 @@ type: command
 short-summary: Update metadata for an IoT Central application.
 """
 
+helps['iot hub private-endpoint-connection'] = """
+type: group
+short-summary: Manage private endpoint connections to an IoT Hub.
+"""
+
 helps['iot hub private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve a private endpoint connection to an IoT Hub.
 examples:
   - name: Approve a private endpoint connection to an IoT Hub by name
     text: >
-        az iot hub private-endpoint-connection approve -n MyPrivateEndpointConnection --hub-name MyIotHub -g MyGroup --desc 'Approved connection'
+        az iot hub private-endpoint-connection approve -n MyPrivateEndpointConnection --hub-name MyIotHub -g MyGroup -d 'Approved connection'
   - name: Approve a private endpoint connection to an IoT Hub by ID
     text: >
-        az iot hub private-endpoint-connection approve --id {id} --desc 'Approved connection'
+        az iot hub private-endpoint-connection approve --id {id} -d 'Approved connection'
 """
 
 helps['iot hub private-endpoint-connection reject'] = """
@@ -990,10 +995,10 @@ short-summary: Reject a private endpoint connection to an IoT Hub.
 examples:
   - name: Reject a private endpoint connection to an IoT Hub by name
     text: >
-        az iot hub private-endpoint-connection reject -n MyPrivateEndpointConnection --hub-name MyIotHub -g MyGroup --desc 'Rejected connection'
+        az iot hub private-endpoint-connection reject -n MyPrivateEndpointConnection --hub-name MyIotHub -g MyGroup -d 'Rejected connection'
   - name: Reject a private endpoint connection to an IoT Hub by ID
     text: >
-        az iot hub private-endpoint-connection reject --id {id} --desc 'Rejected connection'
+        az iot hub private-endpoint-connection reject --id {id} -d 'Rejected connection'
 """
 
 helps['iot hub private-endpoint-connection show'] = """
@@ -1005,7 +1010,7 @@ examples:
         az iot hub private-endpoint-connection show -n MyPrivateEndpointConnection --hub-name MyIotHub -g MyGroup
   - name: Show details about a private endpoint connection to an IoT Hub by ID
     text: >
-        az iot hub private-endpoint-connection show --id {id}'
+        az iot hub private-endpoint-connection show --id {id}
 """
 
 helps['iot hub private-endpoint-connection delete'] = """
@@ -1017,7 +1022,12 @@ examples:
         az iot hub private-endpoint-connection delete -n MyPrivateEndpointConnection --hub-name MyIotHub -g MyGroup
   - name: Delete a private endpoint connection to an IoT Hub by ID
     text: >
-        az iot hub private-endpoint-connection delete --id {id}'
+        az iot hub private-endpoint-connection delete --id {id}
+"""
+
+helps['iot hub private-link-resource'] = """
+type: group
+short-summary: Manage private link resources for an IoT Hub.
 """
 
 helps['iot hub private-link-resource list'] = """

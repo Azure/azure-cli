@@ -77,6 +77,7 @@ def validate_c2d_ttl(ns):
         raise ArgumentError(None, 'Please specify the default time from 1 to 48 hours to live for cloud-to-device'
                                   ' messages in the device queue.')
 
+
 def validate_private_endpoint_connection_id(namespace):
     if namespace.connection_id:
         from azure.cli.core.util import parse_proxy_resource_id

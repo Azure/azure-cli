@@ -164,7 +164,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('fileupload_storage_authentication_type',
                    options_list=['--fileupload-storage-auth-type', '--fsa'],
                    help='The authentication type for the Azure Storage account to which files are uploaded.'
-                        'Possible values are ''keyBased'' and ''identityBased''')
+                        'Possible values are keyBased and identityBased')
         c.argument('fileupload_storage_container_uri',
                    options_list=['--fileupload-storage-container-uri', '--fcu'],
                    help='The container URI for the Azure Storage account to which files are uploaded.')
@@ -219,8 +219,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='The uri of the endpoint resource.')
         c.argument('entity_path', options_list=['--entity-path'],
                    help='The entity path of the endpoint resource.')
-        c.argument('authentication_type', options_list=['--auth-type'], arg_type=get_enum_type(AuthenticationType),
-                   help='Authentication type for the endpoint. The default is keyBased.')
 
     with self.argument_context('iot hub routing-endpoint create') as c:
         c.argument('batch_frequency', options_list=['--batch-frequency', '-b'], type=int,
@@ -232,6 +230,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='File name format for the blob. The file name format must contain {iothub},'
                         ' {partition}, {YYYY}, {MM}, {DD}, {HH} and {mm} fields. All parameters are'
                         ' mandatory but can be reordered with or without delimiters.')
+        c.argument('authentication_type', options_list=['--auth-type'], arg_type=get_enum_type(AuthenticationType),
+                   help='Authentication type for the endpoint. The default is keyBased.')
 
     with self.argument_context('iot hub certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
@@ -328,4 +328,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 help='The ID of the private endpoint connection associated with the IoT hub. You can get '
                 'it using `az iot hub show`.'
             )
-            c.argument('description', options_list=['--description', '--desc', '-d'], help='Comments for {} operation.'.format(command))
+            c.argument(
+                'description', options_list=['--description', '-d'], help='Comments for {} operation.'.format(command)
+            )

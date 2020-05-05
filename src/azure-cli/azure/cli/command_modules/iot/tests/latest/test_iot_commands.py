@@ -395,7 +395,6 @@ class IoTHubTest(ScenarioTest):
         # Test 'az iot hub delete'
         self.cmd('iot hub delete -n {0}'.format(hub), checks=self.is_empty())
 
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
@@ -404,10 +403,9 @@ class IoTHubTest(ScenarioTest):
         subscription_id = self._get_current_subscription()
         rg = resource_group
         location = resource_group_location
-        
+
         identity_hub = 'iot-cli-identity-enabled-hub-test'
         identity_based_auth = 'identityBased'
-        key_based_auth = 'keyBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
         containerName = 'iothubcontainer1'
@@ -417,14 +415,14 @@ class IoTHubTest(ScenarioTest):
         eventhub_endpoint_uri = 'eh://test'
         storage_cs_pattern = 'DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName='
         entity_path = 'entity'
-        
-        #identity hub creation
+
+        # identity hub creation
         import os
         templateFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'template.json')
         self.cmd('deployment group create --name {0} -g {1} --template-file "{2}" --parameters name={3} --parameters location={4}'.format("identity-hub-deployment", resource_group, templateFile, identity_hub, location))
-        self.cmd('iot hub show --name {0}'.format(identity_hub),checks=[
-                         self.check('properties.minTlsVersion', '1.2'),
-                         self.check('identity.type', 'SystemAssigned')])
+        self.cmd('iot hub show --name {0}'.format(identity_hub), checks=[
+                 self.check('properties.minTlsVersion', '1.2'),
+                 self.check('identity.type', 'SystemAssigned')])
 
         # Test 'az iot hub update' with Identity-based fileUpload
         updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fcs {2} --fc {3}'.format(identity_hub, identity_based_auth, storageConnectionString, containerName)).get_output_in_json()
@@ -445,7 +443,7 @@ class IoTHubTest(ScenarioTest):
                          self.check('length(serviceBusQueues[*])', 0),
                          self.check('length(serviceBusTopics[*])', 0),
                          self.check('length(storageContainers[*])', 0)])
-        
+
         vnet = 'test-iot-vnet'
         subnet = 'subnet1'
         endpoint_name = 'iot-private-endpoint'
@@ -474,7 +472,7 @@ class IoTHubTest(ScenarioTest):
             '--connection-name {5} --private-connection-resource-id {6} --group-ids {7}'
             .format(rg, endpoint_name, vnet, subnet, location, connection_name, hub_id, group_id)
         ).get_output_in_json()
-        
+
         self.assertEqual(private_endpoint['name'], endpoint_name)
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], connection_name)
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
@@ -486,30 +484,30 @@ class IoTHubTest(ScenarioTest):
         private_endpoint_name = hub['properties']['privateEndpointConnections'][0]['name']
         # endpoint connection approve by name
         approve_desc = 'Approving endpoint connection'
-        self.cmd('iot hub private-endpoint-connection approve -n {0} --hub-name {1} -g {2} --desc "{3}"'
+        self.cmd('iot hub private-endpoint-connection approve -n {0} --hub-name {1} -g {2} --description "{3}"'
                  .format(private_endpoint_name, identity_hub, rg, approve_desc),
-            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
         # endpoint approve by id
-        self.cmd('iot hub private-endpoint-connection approve --id {0} --desc "{1}"'
+        self.cmd('iot hub private-endpoint-connection approve --id {0} --description "{1}"'
                  .format(endpoint_id, approve_desc),
-            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
         # endpoint connection reject by name
         reject_desc = 'Rejecting endpoint connection'
-        self.cmd('iot hub private-endpoint-connection reject -n {0} --hub-name {1} -g {2} --desc "{3}"'
+        self.cmd('iot hub private-endpoint-connection reject -n {0} --hub-name {1} -g {2} --description "{3}"'
                  .format(private_endpoint_name, identity_hub, rg, reject_desc),
-            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
 
         # endpoint show
         self.cmd('iot hub private-endpoint-connection show -n {0} --hub-name {1} -g {2}'
                  .format(private_endpoint_name, identity_hub, rg),
-             checks=self.check('id', endpoint_id))
+                 checks=self.check('id', endpoint_id))
 
         # endpoint delete
         self.cmd('iot hub private-endpoint-connection delete -n {0} --hub-name {1} -g {2} -y'
                  .format(private_endpoint_name, identity_hub, rg),
-            checks=self.check('status', 'Succeeded'))
+                 checks=self.check('status', 'Succeeded'))
 
         self.cmd('iot hub delete -n {0}'.format(identity_hub), checks=self.is_empty())
 

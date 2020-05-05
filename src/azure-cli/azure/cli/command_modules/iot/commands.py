@@ -195,7 +195,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('approve', 'iot_private_endpoint_approve', validator=validate_private_endpoint_connection_id)
         g.custom_command('reject', 'iot_private_endpoint_reject', validator=validate_private_endpoint_connection_id)
         g.custom_command('show', 'iot_private_endpoint_show', validator=validate_private_endpoint_connection_id)
-        g.custom_command('delete', 'iot_private_endpoint_delete', confirmation=True, validator=validate_private_endpoint_connection_id)
+        g.custom_command('delete', 'iot_private_endpoint_delete', confirmation=True,
+                         validator=validate_private_endpoint_connection_id)
 
     with self.command_group('iot hub private-link-resource', client_factory=iot_hub_service_factory) as g:
         g.custom_command('list', 'iot_private_link_list', transform=gen_dict_to_list_transform(key='value'))
