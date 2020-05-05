@@ -20,6 +20,8 @@ logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
+CLOUD_ENDPOINTS_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'cloudEndpoints.json')
+
 # Add names of clouds that don't allow telemetry data collection here such as JEDI.
 CLOUDS_FORBIDDING_TELEMETRY = []
 
@@ -72,7 +74,8 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
                  ossrdbms_resource_id=None,
                  log_analytics_resource_id=None,
                  app_insights_resource_id=None,
-                 app_insights_telemetry_channel_resource_id=None):
+                 app_insights_telemetry_channel_resource_id=None,
+                 **entries):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.management = management
         self.resource_manager = resource_manager
@@ -90,6 +93,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         self.log_analytics_resource_id = log_analytics_resource_id
         self.app_insights_resource_id = app_insights_resource_id
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
+        self.__dict__.update(entries)
 
     def has_endpoint_set(self, endpoint_name):
         try:
@@ -119,7 +123,8 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
                  sql_server_hostname=None,
                  azure_datalake_store_file_system_endpoint=None,
                  azure_datalake_analytics_catalog_and_job_endpoint=None,
-                 acr_login_server_endpoint=None):
+                 acr_login_server_endpoint=None,
+                 **entries):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.keyvault_dns = keyvault_dns
@@ -127,6 +132,7 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
         self.acr_login_server_endpoint = acr_login_server_endpoint
+        self.__dict__.update(entries)
 
     def __getattribute__(self, name):
         val = object.__getattribute__(self, name)
@@ -217,6 +223,15 @@ class Cloud(object):  # pylint: disable=too-few-public-methods
             'suffixes': vars(self.suffixes),
         }
         return pformat(o)
+
+    def toJSON(self):
+        return {'name': self.name, "endpoints": self.endpoints.__dict__, "suffixes": self.suffixes.__dict__}
+
+    @classmethod
+    def fromJSON(cls, json_str):
+        return cls(json_str['name'],
+                   endpoints=CloudEndpoints(**json_str['endpoints']),
+                   suffixes=CloudSuffixes(**json_str['suffixes']))
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
@@ -314,18 +329,42 @@ AZURE_GERMAN_CLOUD = Cloud(
         keyvault_dns='.vault.microsoftazure.de',
         sql_server_hostname='.database.cloudapi.de'))
 
-KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+KNOWN_CLOUDS = []
 
-if 'ARM_CLOUD_METADATA_URL' in os.environ:
-    try:
-        arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
-        cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
-        if 'AzureCloud' in cli_cloud_dict:
-            cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
-        KNOWN_CLOUDS = list(cli_cloud_dict.values())
-    except Exception as ex:  # pylint: disable=broad-except
-        logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
-        raise ex
+
+def get_known_clouds():
+    global KNOWN_CLOUDS  # pylint:disable=global-statement
+    if KNOWN_CLOUDS:
+        return KNOWN_CLOUDS
+    # read from file
+    if os.path.exists(CLOUD_ENDPOINTS_FILE):
+        from azure.cli.core.util import get_file_json
+        clouds_json = get_file_json(CLOUD_ENDPOINTS_FILE, throw_on_empty=False) or []
+        if clouds_json:
+            KNOWN_CLOUDS = [Cloud.fromJSON(c) for c in clouds_json['clouds']]
+            return KNOWN_CLOUDS
+
+    if 'ARM_CLOUD_METADATA_URL' in os.environ:
+        try:
+            arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
+            cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
+            if 'AzureCloud' in cli_cloud_dict:
+                cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
+            KNOWN_CLOUDS = list(cli_cloud_dict.values())
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
+            raise ex
+    else:
+        # TODO query discover.azure.com
+        # if above query fails, use default values in public cloud
+        KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+        # TODO throw error in air-gapped cloud
+
+    with os.fdopen(os.open(CLOUD_ENDPOINTS_FILE, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
+                   'w+') as version_file:
+        file_json = {'clouds': [c.toJSON() for c in KNOWN_CLOUDS]}
+        version_file.write(json.dumps(file_json))
+    return KNOWN_CLOUDS
 
 
 def _set_active_cloud(cli_ctx, cloud_name):
@@ -350,7 +389,7 @@ def cloud_is_registered(cli_ctx, cloud_name):
 
 
 def get_custom_clouds(cli_ctx):
-    known_cloud_names = [c.name for c in KNOWN_CLOUDS]
+    known_cloud_names = [c.name for c in get_known_clouds()]
     return [c for c in get_clouds(cli_ctx) if c.name not in known_cloud_names]
 
 
@@ -362,7 +401,7 @@ def get_clouds(cli_ctx):
     clouds = []
     config = get_config_parser()
     # Start off with known clouds and apply config file on top of current config
-    for c in KNOWN_CLOUDS:
+    for c in get_known_clouds():
         _config_add_cloud(config, c)
     try:
         config.read(CLOUD_CONFIG_FILE)
@@ -525,7 +564,7 @@ def remove_cloud(cli_ctx, cloud_name):
     if cloud_name == cli_ctx.cloud.name:
         raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
                                              "as it's currently active.".format(cloud_name))
-    is_known_cloud = next((x for x in KNOWN_CLOUDS if x.name == cloud_name), None)
+    is_known_cloud = next((x for x in get_known_clouds() if x.name == cloud_name), None)
     if is_known_cloud:
         raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
                                              "as it's not a custom cloud.".format(cloud_name))
