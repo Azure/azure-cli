@@ -111,7 +111,7 @@ class CloudEndpoints(object):  # pylint: disable=too-few-public-methods,too-many
         return val
 
 
-class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
+class CloudSuffixes(object):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
     def __init__(self,
                  storage_endpoint=None,
@@ -119,11 +119,17 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
                  sql_server_hostname=None,
                  azure_datalake_store_file_system_endpoint=None,
                  azure_datalake_analytics_catalog_and_job_endpoint=None,
-                 acr_login_server_endpoint=None):
+                 acr_login_server_endpoint=None,
+                 mysql_server_endpoint=None,
+                 postgresql_server_endpoint=None,
+                 mariadb_server_endpoint=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.keyvault_dns = keyvault_dns
         self.sql_server_hostname = sql_server_hostname
+        self.mysql_server_endpoint = mysql_server_endpoint
+        self.postgresql_server_endpoint = postgresql_server_endpoint
+        self.mariadb_server_endpoint = mariadb_server_endpoint
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
         self.acr_login_server_endpoint = acr_login_server_endpoint
@@ -188,6 +194,9 @@ def _arm_to_cli_mapper(arm_dict):
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
             sql_server_hostname=arm_dict['suffixes']['sqlServerHostname'],
+            mysql_server_endpoint=arm_dict['suffixes']['mysqlServerEndpoint'],
+            postgresql_server_endpoint=arm_dict['suffixes']['postgresqlServerEndpoint'],
+            mariadb_server_endpoint=arm_dict['suffixes']['mariadbServerEndpoint'],
             azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None))  # pylint: disable=line-too-long
@@ -242,6 +251,9 @@ AZURE_PUBLIC_CLOUD = Cloud(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
         sql_server_hostname='.database.windows.net',
+        mysql_server_endpoint='.mysql.database.azure.com',
+        postgresql_server_endpoint='.postgres.database.azure.com',
+        mariadb_server_endpoint='.mariadb.database.azure.com',
         azure_datalake_store_file_system_endpoint='azuredatalakestore.net',
         azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net',
         acr_login_server_endpoint='.azurecr.io'))
@@ -268,6 +280,9 @@ AZURE_CHINA_CLOUD = Cloud(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
         sql_server_hostname='.database.chinacloudapi.cn',
+        mysql_server_endpoint='.mysql.database.chinacloudapi.cn',
+        postgresql_server_endpoint='.postgres.database.chinacloudapi.cn',
+        mariadb_server_endpoint='.mariadb.database.chinacloudapi.cn',
         acr_login_server_endpoint='.azurecr.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
@@ -292,6 +307,9 @@ AZURE_US_GOV_CLOUD = Cloud(
         storage_endpoint='core.usgovcloudapi.net',
         keyvault_dns='.vault.usgovcloudapi.net',
         sql_server_hostname='.database.usgovcloudapi.net',
+        mysql_server_endpoint='.mysql.database.usgovcloudapi.net',
+        postgresql_server_endpoint='.postgres.database.usgovcloudapi.net',
+        mariadb_server_endpoint='.mariadb.database.usgovcloudapi.net',
         acr_login_server_endpoint='.azurecr.us'))
 
 AZURE_GERMAN_CLOUD = Cloud(
@@ -312,7 +330,10 @@ AZURE_GERMAN_CLOUD = Cloud(
     suffixes=CloudSuffixes(
         storage_endpoint='core.cloudapi.de',
         keyvault_dns='.vault.microsoftazure.de',
-        sql_server_hostname='.database.cloudapi.de'))
+        sql_server_hostname='.database.cloudapi.de',
+        mysql_server_endpoint='.mysql.database.cloudapi.de',
+        postgresql_server_endpoint='.postgres.database.cloudapi.de',
+        mariadb_server_endpoint='.mariadb.database.cloudapi.de'))
 
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
