@@ -31,7 +31,7 @@ class TestWheelTypeExtensionMetadata(ExtensionTypeTestMixin):
         ext_name, ext_version = 'hello', '0.1.0'
 
         whl_extension = WheelExtension(ext_name, self.ext_dir)
-        metadata = whl_extension.get_metadata() # able to read metadata from wheel==0.30.0 built extension
+        metadata = whl_extension.get_metadata()  # able to read metadata from wheel==0.30.0 built extension
 
         # wheel type extension generates .dist-info
         dist_info = ext_name + '-' + ext_version + '.dist-info'
@@ -62,7 +62,7 @@ class TestWheelTypeExtensionMetadata(ExtensionTypeTestMixin):
         ext_name, ext_version = 'hello', '0.1.0'
 
         whl_extension = WheelExtension(ext_name, self.ext_dir)
-        metadata = whl_extension.get_metadata() # able to read metadata from wheel==0.30.0 built extension
+        metadata = whl_extension.get_metadata()  # able to read metadata from wheel==0.30.0 built extension
 
         # wheel type extension generates .dist-info
         dist_info = ext_name + '-' + ext_version + '.dist-info'
@@ -91,10 +91,9 @@ class TestWheelTypeExtensionMetadata(ExtensionTypeTestMixin):
             tar.extractall(self.ext_dir)
 
         ext_name, ext_version = 'hello', '0.1.0'
-        egg_info = ext_name + '.egg-info'
 
         ext_extension = WheelExtension(ext_name, os.path.join(self.ext_dir, ext_name + '-' + ext_version))
-        metadata = ext_extension.get_metadata() # able to read metadata from source code even in wheel type extension
+        metadata = ext_extension.get_metadata()  # able to read metadata from source code even in wheel type extension
 
         # assert Python metadata
         self.assertEqual(metadata['name'], ext_name)

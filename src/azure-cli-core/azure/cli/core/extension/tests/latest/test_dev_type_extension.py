@@ -28,10 +28,9 @@ class TestWheelTypeExtensionMetadata(ExtensionTypeTestMixin):
             tar.extractall(self.ext_dir)
 
         ext_name, ext_version = 'hello', '0.1.0'
-        egg_info = ext_name + '.egg-info'
 
         ext_extension = DevExtension(ext_name, os.path.join(self.ext_dir, ext_name + '-' + ext_version))
-        metadata = ext_extension.get_metadata() # able to read metadata from source code
+        metadata = ext_extension.get_metadata()  # able to read metadata from source code
 
         # assert Python metadata
         self.assertEqual(metadata['name'], ext_name)
