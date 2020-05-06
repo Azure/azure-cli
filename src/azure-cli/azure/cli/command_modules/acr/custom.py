@@ -43,7 +43,8 @@ def acr_create(cmd,
                tags=None,
                workspace=None,
                identity=None,
-               key_encryption_key=None):
+               key_encryption_key=None,
+               public_network_access_enabled=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -55,6 +56,9 @@ def acr_create(cmd,
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
+
+    if public_network_access_enabled is not None:
+        _configure_public_network_access(cmd, registry, public_network_access_enabled)
 
     if identity or key_encryption_key:
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
@@ -115,11 +119,14 @@ def acr_update_custom(cmd,
         instance.data_endpoint_enabled = data_endpoint_enabled
 
     if public_network_access_enabled is not None:
-        PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
-        instance.public_network_access = (PublicNetworkAccess.enabled if public_network_access_enabled
-                                          else PublicNetworkAccess.disabled)
+        _configure_public_network_access(cmd, instance, public_network_access_enabled)
 
     return instance
+
+
+def _configure_public_network_access(cmd, registry, enabled):
+    PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
+    registry.public_network_access = (PublicNetworkAccess.enabled if enabled else PublicNetworkAccess.disabled)
 
 
 def acr_update_get(cmd):
