@@ -940,6 +940,7 @@ class DeploymentThruUriTest(ScenarioTest):
         self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
+            self.check('properties.templateLink.uri', '{tf}'),
         ]).get_output_in_json()['name']
 
         self.cmd('group deployment show -g {rg} -n {dn}',

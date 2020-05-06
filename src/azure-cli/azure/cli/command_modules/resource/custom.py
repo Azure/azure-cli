@@ -291,8 +291,7 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
     template_content = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_content = _urlretrieve(template_uri).decode('utf-8')
-        template_obj = _remove_comments_from_json(template_content)
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'))
     else:
         template_content = read_file_content(template_file)
         template_obj = _remove_comments_from_json(template_content)
@@ -317,30 +316,32 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
 
     deployment_client = smc.deployments  # This solves the multi-api for you
 
-    # pylint: disable=protected-access
-    deployment_client._serialize = JSONSerializer(
-        deployment_client._serialize.dependencies
-    )
+    if not template_uri:
 
-    # Plug this as default HTTP pipeline
-    from msrest.pipeline import Pipeline
-    from msrest.pipeline.requests import (
-        RequestsCredentialsPolicy,
-        RequestsPatchSession,
-        PipelineRequestsHTTPSender
-    )
-    from msrest.universal_http.requests import RequestsHTTPSender
+        # pylint: disable=protected-access
+        deployment_client._serialize = JSONSerializer(
+            deployment_client._serialize.dependencies
+        )
 
-    smc.config.pipeline = Pipeline(
-        policies=[
-            JsonCTemplatePolicy(),
-            smc.config.user_agent_policy,
-            RequestsPatchSession(),
-            smc.config.http_logger_policy,
-            RequestsCredentialsPolicy(smc.config.credentials)
-        ],
-        sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
-    )
+        # Plug this as default HTTP pipeline
+        from msrest.pipeline import Pipeline
+        from msrest.pipeline.requests import (
+            RequestsCredentialsPolicy,
+            RequestsPatchSession,
+            PipelineRequestsHTTPSender
+        )
+        from msrest.universal_http.requests import RequestsHTTPSender
+
+        smc.config.pipeline = Pipeline(
+            policies=[
+                JsonCTemplatePolicy(),
+                smc.config.user_agent_policy,
+                RequestsPatchSession(),
+                smc.config.http_logger_policy,
+                RequestsCredentialsPolicy(smc.config.credentials)
+            ],
+            sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
+        )
 
     validation_result = deployment_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=properties)
 
