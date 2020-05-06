@@ -140,7 +140,7 @@ class WheelExtension(Extension):
         ext_dir = self.path or get_extension_path(self.name)
 
         # include *.egg-info and *.dist-info
-        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '-' + '*.*-info'))
+        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '*.*-info'))
 
         azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
