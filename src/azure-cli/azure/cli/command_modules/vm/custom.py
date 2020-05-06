@@ -990,7 +990,7 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
             }
             for ip_configuration in nic.ip_configurations:
                 network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
-                if ip_configuration.public_ip_address:
+                if ip_configuration.public_ip_address and ip_configuration.public_ip_address.id in ip_address_lookup:
                     public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
 
                     public_ip_addr_info = {
@@ -1268,7 +1268,7 @@ def list_av_sets(cmd, resource_group_name=None):
     op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
     if resource_group_name:
         return op_group.list(resource_group_name)
-    return op_group.list_by_subscription()
+    return op_group.list_by_subscription(expand='virtualMachines/$ref')
 # endregion
 
 
@@ -2163,7 +2163,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
-                automatic_repairs_grace_period=None, specialized=None):
+                automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2393,7 +2393,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
             data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
             data_disk_mbps=data_disk_mbps, automatic_repairs_grace_period=automatic_repairs_grace_period,
-            specialized=specialized)
+            specialized=specialized, os_disk_size_gb=os_disk_size_gb)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -3166,18 +3166,19 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
         log_client = _get_log_analytics_client(cmd)
         workspace_result = None
         try:
-            workspace_result = log_client.get(resource_group_name, workspace_name)
+            workspace_result = log_client.workspaces.get(resource_group_name, workspace_name)
         except CloudError:
-            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
-            sku = Sku(name=SkuNameEnum.per_gb2018.value)
+            from azure.mgmt.loganalytics.models import Workspace, WorkspaceSku, WorkspaceSkuNameEnum
+            sku = WorkspaceSku(name=WorkspaceSkuNameEnum.per_gb2018.value)
             retention_time = 30  # default value
             location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
             workspace_instance = Workspace(location=location,
                                            sku=sku,
                                            retention_in_days=retention_time)
-            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
-                                                                                             workspace_name,
-                                                                                             workspace_instance))
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.workspaces.create_or_update(
+                resource_group_name,
+                workspace_name,
+                workspace_instance))
         workspace_id = workspace_result.id
     else:
         workspace_id = workspace
@@ -3239,12 +3240,12 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
     log_client = _get_log_analytics_client(cmd)
-    customer_id = log_client.get(resource_group_name, workspace_name).customer_id
+    customer_id = log_client.workspaces.get(resource_group_name, workspace_name).customer_id
     settings = {
         'workspaceId': customer_id,
         'stopOnMultipleConnections': 'true'
     }
-    primary_shared_key = log_client.get_shared_keys(resource_group_name, workspace_name).primary_shared_key
+    primary_shared_key = log_client.shared_keys.get_shared_keys(resource_group_name, workspace_name).primary_shared_key
     protected_settings = {
         'workspaceKey': primary_shared_key,
     }

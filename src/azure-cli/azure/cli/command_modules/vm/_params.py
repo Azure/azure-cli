@@ -684,6 +684,7 @@ def load_arguments(self, _):
             c.argument('storage_container_name', help="Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds")
             c.ignore('os_publisher', 'os_offer', 'os_sku', 'os_version', 'storage_profile')
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')
+            c.argument('os_disk_size_gb', type=int, help='OS disk size in GB to create.')
             c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space-separated empty managed data disk sizes in GB to create')
             c.ignore('disk_info', 'storage_account_type', 'public_ip_address_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
             c.argument('os_caching', options_list=[self.deprecate(target='--storage-caching', redirect='--os-disk-caching', hide=True), '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
@@ -848,7 +849,7 @@ def load_arguments(self, _):
         c.argument('storage_account_type', help="The default storage account type to be used per region. To set regional storage account types, use --target-regions",
                    arg_type=get_enum_type(["Standard_LRS", "Standard_ZRS", "Premium_LRS"]), min_api='2019-03-01')
         c.argument('target_region_encryption', nargs='+',
-                   help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. Format for one region: "<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>". Use "null" as a placeholder.')
+                   help='Space-separated list of customer managed keys for encrypting the OS and data disks in the gallery artifact for each region. Format for each region: `<os_des>,<lun1>,<lun1_des>,<lun2>,<lun2_des>`. Use "null" as a placeholder.')
 
     with self.argument_context('sig image-version show') as c:
         c.argument('expand', help="The expand expression to apply on the operation, e.g. 'ReplicationStatus'")

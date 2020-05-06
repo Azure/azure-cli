@@ -956,16 +956,16 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         result = self.cmd('vm list-skus -l eastus2 -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Capabilities', 'Restrictions'])
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Zones', 'Restrictions'])
         # spot check the first 4 entries
         fd_found, ud_found, size_found, zone_found = False, False, False, False
         for l in lines[2:]:
             parts = l.split()
-            if not fd_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Aligned', 'MaximumPlatformFaultDomainCount=3']):
+            if not fd_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Classic', 'None']):
                 fd_found = True
-            elif not ud_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Classic', 'MaximumPlatformFaultDomainCount=3']):
+            elif not ud_found and (parts[:4] == ['availabilitySets', 'eastus2', 'Aligned', 'None']):
                 ud_found = True
-            elif not size_found and parts[:3] == ['virtualMachines', 'eastus2', 'Standard_DS1_v2']:
+            elif not size_found and parts[:3] == ['disks', 'eastus2', 'Standard_LRS']:
                 size_found = True
             elif not zone_found and parts[3] == '1,2,3':
                 zone_found = True
@@ -1307,7 +1307,7 @@ class VMMonitorTestCreateLinux(ScenarioTest):
             self.cmd('vm create -n {vm} -g {rg} --image UbuntuLTS --workspace {workspace} --nsg {nsg}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'LinuxPerformanceCollection')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1346,7 +1346,7 @@ class VMMonitorTestCreateWindows(ScenarioTest):
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace} -g {rg}').get_output_in_json()[
             'id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'WindowsEvent')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1376,7 +1376,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace1}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace1} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'LinuxPerformanceCollection')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1404,7 +1404,7 @@ class VMMonitorTestUpdateLinux(ScenarioTest):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace2}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace2} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'LinuxPerformanceCollection')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1447,7 +1447,7 @@ class VMMonitorTestUpdateWindows(ScenarioTest):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace1}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace1} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'WindowsEvent')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -1465,7 +1465,7 @@ class VMMonitorTestUpdateWindows(ScenarioTest):
             self.cmd('vm update -n {vm} -g {rg} --workspace {workspace2}')
 
         workspace_id = self.cmd('monitor log-analytics workspace show -n {workspace2} -g {rg}').get_output_in_json()['id']
-        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2015-11-01-preview"
+        uri_template = "https://management.azure.com{0}/dataSources?$filter=kind eq '{1}'&api-version=2020-03-01-preview"
         uri = uri_template.format(workspace_id, 'WindowsEvent')
         self.cmd("az rest --method get --uri \"{}\"".format(uri), checks=[
             self.check('length(value)', 1)
@@ -2156,7 +2156,7 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('network public-ip create --name {ip} -g {rg}')
 
-        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1')
+        self.cmd('vmss create --image Debian --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
                  checks=self.check('frontendIpConfigurations[0].publicIpAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -2164,7 +2164,8 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.caching', '{caching}'),
             self.check('upgradePolicy.mode', self.kwargs['update'].title()),
             self.check('singlePlacementGroup', True),
-            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'vmss1')
+            self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'vmss1'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diskSizeGb', 40)
         ])
         self.kwargs['id'] = self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()[0]
         self.cmd('vmss show -g {rg} -n {vmss} --instance-id {id}',
