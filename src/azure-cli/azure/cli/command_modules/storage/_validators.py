@@ -117,7 +117,9 @@ def validate_client_parameters(cmd, namespace):
         if not n.account_name:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
-            n.token_credential = _create_token_credential(cmd.cli_ctx)
+            from azure.cli.core._profile import Profile
+            profile = Profile(cli_ctx=cmd.cli_ctx)
+            n.token_credential, _, _ = profile.get_login_credentials(resource="https://storage.azure.com")
 
     if hasattr(n, 'token_credential') and n.token_credential:
         # give warning if there are account key args being ignored
