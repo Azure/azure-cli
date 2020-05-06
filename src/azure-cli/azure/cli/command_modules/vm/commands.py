@@ -222,10 +222,11 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_image_templates')
         g.command('show', 'get')
         g.command('delete', 'delete')
-        g.generic_update_command('update', 'create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
+        # g.generic_update_command('update', 'create_or_update', supports_local_cache=True)  # todo Update fails for now as service does not support updates
         g.wait_command('wait')
         g.command('run', 'run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
+        # g.command('cancel', 'cancel')
 
     with self.command_group('image builder customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)

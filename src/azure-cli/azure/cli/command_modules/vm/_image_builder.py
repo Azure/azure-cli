@@ -50,6 +50,7 @@ class ScriptType(Enum):
     SHELL = "shell"
     POWERSHELL = "powershell"
     WINDOWS_RESTART = "windows-restart"
+    WINDOWS_UPDATE = "windows-update"
     FILE = "file"
 
 
@@ -577,11 +578,12 @@ def clear_template_output(cmd, client, resource_group_name, image_template_name)
 def add_template_customizer(cmd, client, resource_group_name, image_template_name, customizer_name, customizer_type,
                             script_url=None, inline_script=None, valid_exit_codes=None,
                             restart_command=None, restart_check_command=None, restart_timeout=None,
-                            file_source=None, dest_path=None):
+                            file_source=None, dest_path=None, search_criteria=None, filters=None, update_limit=None):
     _require_defer(cmd)
 
     from azure.mgmt.imagebuilder.models import (ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
-                                                ImageTemplateRestartCustomizer, ImageTemplateFileCustomizer)
+                                                ImageTemplateRestartCustomizer, ImageTemplateFileCustomizer,
+                                                ImageTemplateWindowsUpdateCustomizer)
 
     existing_image_template = cached_get(cmd, client.virtual_machine_image_templates.get,
                                          resource_group_name=resource_group_name,
@@ -609,6 +611,9 @@ def add_template_customizer(cmd, client, resource_group_name, image_template_nam
     elif customizer_type.lower() == ScriptType.FILE.value.lower():  # pylint:disable=no-member
         new_customizer = ImageTemplateFileCustomizer(name=customizer_name, source_uri=file_source,
                                                      destination=dest_path)
+    elif customizer_type.lower() == ScriptType.WINDOWS_UPDATE.value.lower():
+        new_customizer = ImageTemplateWindowsUpdateCustomizer(name=customizer_name, search_criteria=search_criteria,
+                                                              filters=filters, update_limit=update_limit)
 
     if not new_customizer:
         raise CLIError("Cannot determine customizer from type {}.".format(customizer_type))
