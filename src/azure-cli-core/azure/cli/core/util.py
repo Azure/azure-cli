@@ -278,9 +278,9 @@ def get_az_version_json():
 
 def show_updates_available(new_line_before=False, new_line_after=False):
     if should_show_updates_available():
+        import os
         _, updates_available = get_az_version_string(use_cache=True)
         if updates_available > 0:
-            import os
             from azure.cli.core._environment import get_config_dir
             if new_line_before:
                 logger.warning("")
