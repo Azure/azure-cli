@@ -134,13 +134,14 @@ class WheelExtension(Extension):
 
     def get_metadata(self):
         from glob import glob
-        if not extension_exists(self.name):
-            return None
+
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
 
         # include *.egg-info and *.dist-info
         info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '*.*-info'))
+        if not info_dirs:
+            return None
 
         azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
@@ -207,12 +208,13 @@ class DevExtension(Extension):
         return self.metadata.get('version')
 
     def get_metadata(self):
-
-        if not extension_exists(self.name):
-            return None
         metadata = {}
         ext_dir = self.path
+
         egg_info_dirs = [f for f in os.listdir(ext_dir) if f.endswith('.egg-info')]
+        if not egg_info_dirs:
+            return None
+
         azext_metadata = DevExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
             metadata.update(azext_metadata)
