@@ -160,7 +160,8 @@ def _update_latest_from_pypi(versions):
     return versions, success
 
 
-def _get_latest_versions(versions):
+def _get_cached_latest_versions(versions):
+    """ Get the latest versions from a cached file"""
     import os
     import datetime
     from azure.cli.core._environment import get_config_dir
@@ -171,6 +172,7 @@ def _get_latest_versions(versions):
             file_json = get_file_json(az_versions_file, throw_on_empty=False) or []
             cache_versions = file_json['versions']
             if cache_versions['azure-cli']['local'] == versions['azure-cli']['local']:
+                # If cached version is still greater than local version, no need to refresh cache
                 if LooseVersion(versions['azure-cli']['local']) < LooseVersion(cache_versions['azure-cli']['pypi']):
                     return cache_versions, True
                 time_now = datetime.datetime.now()
@@ -192,7 +194,7 @@ def _get_latest_versions(versions):
     return versions, success
 
 
-def get_az_version_string():
+def get_az_version_string(use_cache=False):
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
 
     output = six.StringIO()
@@ -207,7 +209,7 @@ def get_az_version_string():
             versions[comp_name] = {'local': dist.version}
 
     # get the versions from pypi
-    versions, success = _get_latest_versions(versions)
+    versions, success = _get_cached_latest_versions(versions) if use_cache else _update_latest_from_pypi(versions)
     updates_available = 0
 
     def _print(val=''):
@@ -276,7 +278,7 @@ def get_az_version_json():
 
 def show_updates_available(new_line_before=False, new_line_after=False):
     if should_show_updates_available():
-        _, updates_available = get_az_version_string()
+        _, updates_available = get_az_version_string(use_cache=True)
         if updates_available > 0:
             import os
             from azure.cli.core._environment import get_config_dir
@@ -297,7 +299,7 @@ def show_updates_available(new_line_before=False, new_line_after=False):
 
 
 def should_show_updates_available():
-    """Only show once in a wait period"""
+    """ Should only show once in a wait period """
     import datetime
     import os
     import stat
@@ -316,12 +318,6 @@ def should_show_updates_available():
         return True
 
     return False
-
-
-def show_version():
-    ver_string, updates_available = get_az_version_string()
-    print(ver_string)
-    show_updates(updates_available)
 
 
 def show_updates(updates_available):
