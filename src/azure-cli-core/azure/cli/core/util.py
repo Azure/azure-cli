@@ -417,7 +417,9 @@ def open_page_in_browser(url):
 
     if is_wsl():   # windows 10 linux subsystem
         try:
-            return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
+            # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+            # Ampersand (&) should be quoted
+            return subprocess.call(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
