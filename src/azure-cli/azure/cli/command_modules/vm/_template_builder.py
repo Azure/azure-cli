@@ -253,7 +253,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
-        enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None):
+        enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
+        guest_provision_signal=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -298,6 +299,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
 
         if secrets:
             os_profile['secrets'] = secrets
+
+        if guest_provision_signal:
+            os_profile['requireGuestProvisionSignal'] = guest_provision_signal
 
         return os_profile
 
