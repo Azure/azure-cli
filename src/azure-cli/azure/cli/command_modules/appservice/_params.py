@@ -447,7 +447,7 @@ def load_arguments(self, _):
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
-        c.argument('vnet', help="Vnet name", validator=validate_add_vnet)
+        c.argument('vnet', help="Vnet name")
         c.argument('subnet', help="Subnet name")
 
     with self.argument_context('functionapp vnet-integration') as c:
