@@ -474,7 +474,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     if recovery_point.properties.is_managed_virtual_machine:
         if target_resource_group is not None:
             target_rg_id = '/'.join(_source_resource_id.split('/')[:4]) + "/" + target_resource_group
-        if not restore_as_unmanaged_disks:
+        if not restore_as_unmanaged_disks and target_resource_group is None:
             logger.warning(
                 """
                 The disks of the managed VM will be restored as unmanaged since targetRG parameter is not provided.
