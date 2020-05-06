@@ -1238,7 +1238,7 @@ def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_dat
 
     if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
-        return str(_gen_guid()), None, None, None, None
+        return _random_password(32), None, None, None, None
 
     if password:
         # 2 - Password supplied -- no certs
@@ -1739,6 +1739,24 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
 # for injecting test seems to produce predicatable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
+
+
+def _random_password(length):
+    import random
+    import string
+    random_source = string.ascii_letters + string.digits + string.punctuation
+    password = random.choice(string.ascii_lowercase)
+    password += random.choice(string.ascii_uppercase)
+    password += random.choice(string.digits)
+    password += random.choice(string.punctuation)
+
+    for i in range(length - 4):
+        password += random.choice(random_source)
+
+    password_list = list(password)
+    random.SystemRandom().shuffle(password_list)
+    password = ''.join(password_list)
+    return password
 
 
 def list_user_assigned_identities(cmd, resource_group_name=None):
