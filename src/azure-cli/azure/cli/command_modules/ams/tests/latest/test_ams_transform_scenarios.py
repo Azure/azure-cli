@@ -181,6 +181,6 @@ class AmsTransformTests(ScenarioTest):
             self.check('outputs[3].preset.insightsToExtract', '{insightsToExtract}')
         ])
 
-        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName3} --resolution', checks=[
-            self.check('outputs[3].preset.resolution', '{resolution}')
+        self.cmd('az ams transform output add -a {amsname} -n {transformName} -g {rg} --preset {presetName3} --resolution {resolution}', checks=[
+            self.check('outputs[4].preset.resolution', '{resolution}')
         ])
