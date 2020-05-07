@@ -2,12 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 import os
 import traceback
 import json
 import re
-import sys
 import pkginfo
 
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
@@ -18,10 +18,11 @@ from knack.log import get_logger
 az_config = CLIConfig(config_dir=GLOBAL_CONFIG_DIR, config_env_var_prefix=ENV_VAR_PREFIX)
 _CUSTOM_EXT_DIR = az_config.get('extension', 'dir', None)
 _DEV_EXTENSION_SOURCES = az_config.get('extension', 'dev_sources', None)
+_CUSTOM_EXT_SYS_DIR = az_config.get('extension', 'sys_dir', None)
 EXTENSIONS_DIR = os.path.expanduser(_CUSTOM_EXT_DIR) if _CUSTOM_EXT_DIR else os.path.join(GLOBAL_CONFIG_DIR,
                                                                                           'cliextensions')
 DEV_EXTENSION_SOURCES = _DEV_EXTENSION_SOURCES.split(',') if _DEV_EXTENSION_SOURCES else []
-EXTENSIONS_SYS_DIR = os.path.join(get_python_lib(), 'azure-cli-extensions') if sys.platform.startswith('linux') else ""
+EXTENSIONS_SYS_DIR = os.path.expanduser(_CUSTOM_EXT_SYS_DIR) if _CUSTOM_EXT_SYS_DIR else os.path.join(get_python_lib(), 'azure-cli-extensions')
 
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
@@ -137,6 +138,8 @@ class WheelExtension(Extension):
 
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
+        if not ext_dir or not os.path.isdir(ext_dir):
+            return None
 
         # include *.egg-info and *.dist-info
         info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '*.*-info'))
@@ -210,6 +213,8 @@ class DevExtension(Extension):
     def get_metadata(self):
         metadata = {}
         ext_dir = self.path
+        if not ext_dir or not os.path.isdir(ext_dir):
+            return None
 
         egg_info_dirs = [f for f in os.listdir(ext_dir) if f.endswith('.egg-info')]
         if not egg_info_dirs:
@@ -294,8 +299,16 @@ def get_extension_modname(ext_name=None, ext_dir=None):
 
 
 def get_extension_path(ext_name):
+    # This will return the path for a WHEEL extension if exists.
+    ext_sys_path = os.path.join(EXTENSIONS_SYS_DIR, ext_name)
+    ext_path = os.path.join(EXTENSIONS_DIR, ext_name)
+    return ext_path if os.path.isdir(ext_path) else (
+        ext_sys_path if os.path.isdir(ext_sys_path) else None)
+
+
+def build_extension_path(ext_name, system=None):
     # This will simply form the path for a WHEEL extension.
-    return os.path.join(EXTENSIONS_DIR, ext_name)
+    return os.path.join(EXTENSIONS_SYS_DIR, ext_name) if system else os.path.join(EXTENSIONS_DIR, ext_name)
 
 
 def get_extensions(ext_type=None):

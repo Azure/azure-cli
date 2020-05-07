@@ -132,7 +132,7 @@ def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
                   if protectable_item.name.lower() == afs_name.lower()]
     else:
         result = [protectable_item for protectable_item in result
-                  if protectable_item.name.split(';')[-1].lower() == afs_name.lower()]
+                  if protectable_item.properties.friendly_name.lower() == afs_name.lower()]
     if len(result) > 1:
         raise CLIError("Could not find a unique resource, Please pass native names instead")
     if len(result) == 1:

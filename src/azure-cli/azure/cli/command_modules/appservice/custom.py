@@ -2549,11 +2549,12 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
                                                   value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION',
                                                   value=_get_website_node_version_functionapp(functions_version,
                                                                                               runtime,
                                                                                               runtime_version)))
+    if disable_app_insights:
+        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
 
     # If plan is not consumption or elastic premium, we need to set always on
     if consumption_plan_location is None and not is_plan_elastic_premium(cmd, plan_info):
@@ -2595,6 +2596,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
+            update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                ['AzureWebJobsDashboard={}'.format(con_string)])
 
     if deployment_container_image_name:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
@@ -3252,14 +3255,14 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
 
     if _create_new_rg:
         logger.warning("Creating Resource group '%s' ...", rg_name)
-        create_resource_group(cmd, rg_name, location)
+        create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
         # create ASP
         logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
     create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
-                            number_of_workers=1 if _is_linux else None, location=location)
+                            number_of_workers=1 if _is_linux else None, location=loc)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
