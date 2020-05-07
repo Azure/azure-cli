@@ -314,11 +314,68 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
     return results
 
 
+def transform_blob_type(cmd, blob_type):
+    """
+    get_blob_types() will get ['block', 'page', 'append']
+    transform it to BlobType in track2
+    """
+    BlobType = cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB)
+    if blob_type == 'block':
+        return BlobType.BlockBlob
+    if blob_type == 'page':
+        return BlobType.PageBlob
+    if blob_type == 'append':
+        return BlobType.AppendBlob
+    return None
+
+
+# pylint: disable=too-many-locals
 def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=None, content_settings=None, metadata=None,
                 validate_content=False, maxsize_condition=None, max_connections=2, lease_id=None, tier=None,
                 if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=None,
-                progress_callback=None):
+                progress_callback=None, encryption_scope=None):
     """Upload a blob to a container."""
+
+    if encryption_scope:
+        count = os.path.getsize(file_path)
+        with open(file_path, 'rb') as stream:
+            data = stream.read(count)
+        from azure.core import MatchConditions
+        upload_args = {
+            'content_settings': content_settings,
+            'metadata': metadata,
+            'timeout': timeout,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'blob_type': transform_blob_type(cmd, blob_type),
+            'validate_content': validate_content,
+            'lease': lease_id,
+            'max_concurrency': max_connections,
+        }
+
+        if cmd.supported_api_version(min_api='2017-04-17') and tier:
+            upload_args['premium_page_blob_tier'] = tier
+        if maxsize_condition:
+            upload_args['maxsize_condition'] = maxsize_condition
+        if cmd.supported_api_version(min_api='2016-05-31'):
+            upload_args['validate_content'] = validate_content
+
+        # Precondition Check
+        if if_match:
+            if if_match == '*':
+                upload_args['match_condition'] = MatchConditions.IfPresent
+            else:
+                upload_args['etag'] = if_match
+                upload_args['match_condition'] = MatchConditions.IfNotModified
+
+        if if_none_match:
+            upload_args['etag'] = if_none_match
+            upload_args['match_condition'] = MatchConditions.IfModified
+        response = client.upload_blob(data=data, length=count, encryption_scope=encryption_scope, **upload_args)
+        if response['content_md5'] is not None:
+            from msrest import Serializer
+            response['content_md5'] = Serializer.serialize_bytearray(response['content_md5'])
+        return response
 
     t_content_settings = cmd.get_models('blob.models#ContentSettings')
     content_settings = guess_content_type(file_path, content_settings, t_content_settings)
