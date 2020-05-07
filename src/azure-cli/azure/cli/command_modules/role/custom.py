@@ -1751,7 +1751,7 @@ def _random_password(length):
     password += random.choice(string.digits)
     password += random.choice(string.punctuation)
 
-    for i in range(length - 4):
+    for i in range(length - 4):    # pylint: disable=unused-variable
         password += random.choice(random_source)
 
     password_list = list(password)
