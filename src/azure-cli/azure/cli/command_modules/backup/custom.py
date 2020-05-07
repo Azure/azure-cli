@@ -588,6 +588,12 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
+def resume_protection(cmd, client, resource_group_name, vault_name, item, policy):
+    if item.properties.protection_state == "Protected":
+        raise CLIError("Azure Virtual Machine is already protected")
+    return update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
+
+
 def list_jobs(client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None):
     query_end_date, query_start_date = _get_query_dates(end_date, start_date)
 
