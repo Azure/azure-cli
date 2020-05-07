@@ -479,7 +479,7 @@ class AcrCommandsTests(ScenarioTest):
         })
         self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium',
                  checks=self.check('publicNetworkAccess', 'Enabled'))
-        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-access-enabled false',
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-enabled false',
                  checks=self.check('publicNetworkAccess', 'Disabled'))
 
     @ResourceGroupPreparer(location='centraluseuap')

@@ -332,7 +332,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
         if challenge.status_code == 403:
             raise CLIError("Looks like you don't have access to registry '{}'. "
                            "To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. "
-                           "To see public network access, run 'az acr show --query publicNetworkAccess'."
+                           "To see if public network access is enabled, run 'az acr show --query publicNetworkAccess'."
                            "Please refer to https://aka.ms/acr/errors#connectivity_forbidden_error for more information."  # pylint: disable=line-too-long
                            .format(login_server, registry_name))
     except RequestException as e:
