@@ -1433,7 +1433,7 @@ parameters:
         https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
 examples:
     - name: Set the access control list of a path.
-      text: az storage fs access set -a "user::rwx,group::r--,other::---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
+      text: az storage fs access set --acl "user::rwx,group::r--,other::---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
     - name: Set permissions of a path.
       text: az storage fs access set --permissions "rwxrwx---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
     - name: Set owner of a path.
@@ -1443,7 +1443,7 @@ examples:
 """
 
 helps['storage fs access show'] = """
-type: group
+type: command
 short-summary: Show the access control properties of a path (directory or file) in Azure Data Lake Storage Gen2 account.
 examples:
     - name: Show the access control properties of a path.
@@ -1459,7 +1459,7 @@ examples:
         az storage fs create -n fsname --account-name mystorageaccount --account-key 0000-0000
   - name: Create file system for Azure Data Lake Storage Gen2 account and enable public access.
     text: |
-        az storage fs create -n fsname --public-access --account-name mystorageaccount --account-key 0000-0000
+        az storage fs create -n fsname --public-access file --account-name mystorageaccount --account-key 0000-0000
 """
 
 helps['storage fs delete'] = """

@@ -1210,8 +1210,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_unmodified_since', arg_group='Precondition',
                    help="A Commence only if unmodified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
         c.argument('permissions', permissions_type)
-        #TODO: need fixed by sdk
-        #c.argument('umask', umask_type)
+        c.argument('umask', umask_type)
 
     for item in ['set', 'show']:
         with self.argument_context('storage fs access {}'.format(item)) as c:

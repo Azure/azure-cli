@@ -103,6 +103,8 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
         'timeout': timeout,
         'if_modified_since': if_modified_since,
         'if_unmodified_since': if_unmodified_since,
+        'permissions': permissions,
+        'umask': umask
     }
 
     # Precondition Check

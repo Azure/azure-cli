@@ -23,7 +23,7 @@ def exists(cmd, client):
         return False
 
 
-def list_fs_directories(client, path=None, recursive=True, num_results=None, upn=None, timeout=None):
+def list_fs_directories(client, path=None, recursive=True, num_results=None, timeout=None):
     generator = client.get_paths(path=path, recursive=recursive, timeout=timeout, max_results=num_results)
 
     return list(f for f in generator if f.is_directory)
