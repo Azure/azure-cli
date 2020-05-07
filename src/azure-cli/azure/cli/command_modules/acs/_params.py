@@ -10,7 +10,7 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
-    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type)
+    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type, zones_type, get_three_state_flag)
 from azure.cli.core.commands.validators import validate_file_or_dict
 from knack.arguments import CLIArgumentType
 
@@ -165,7 +165,7 @@ def load_arguments(self, _):
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('nodepool_name', type=str, default='nodepool1',
-                   help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
+                   help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('aad_client_app_id')
@@ -187,6 +187,7 @@ def load_arguments(self, _):
         c.argument('max_count', type=int, validator=validate_nodes_count)
         c.argument('vm_set_type', type=str, validator=validate_vm_set_type)
         c.argument('zones', zones_type, options_list=['--zones', '-z'], help='Space-separated list of availability zones where agent nodes will be placed.')
+        c.argument('uptime_sla', action='store_true')
         c.argument('enable_addons', options_list=['--enable-addons', '-a'])
         c.argument('disable_rbac', action='store_true')
         c.argument('enable_rbac', action='store_true', options_list=['--enable-rbac', '-r'],
@@ -206,6 +207,9 @@ def load_arguments(self, _):
         c.argument('nodepool_tags', nargs='*', validator=validate_nodepool_tags, help='space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.')
         c.argument('enable_managed_identity', action='store_true')
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels, help='space-separated labels: key[=value] [key[=value] ...]. You can not change the node labels through CLI after creation. See https://aka.ms/node-labels for syntax of labels.')
+        c.argument('enable_node_public_ip', action='store_true', is_preview=True)
+        c.argument('windows_admin_username', options_list=['--windows-admin-username'])
+        c.argument('windows_admin_password', options_list=['--windows-admin-password'])
 
     with self.argument_context('aks update') as c:
         c.argument('attach_acr', acr_arg_type, validator=validate_acr)
@@ -279,7 +283,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks scale') as c:
         c.argument('nodepool_name', type=str,
-                   help='Node pool name, upto 12 alphanumeric characters', validator=validate_nodepool_name)
+                   help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
 
     with self.argument_context('aks nodepool') as c:
         c.argument('cluster_name', type=str, help='The cluster name.')
@@ -296,6 +300,7 @@ def load_arguments(self, _):
             c.argument('tags', tags_type)
             c.argument('labels', nargs='*', validator=validate_nodepool_labels)
             c.argument('mode', get_enum_type(nodepool_mode_type))
+            c.argument('enable_node_public_ip', action='store_true', is_preview=True)
 
     for scope in ['aks nodepool show', 'aks nodepool delete', 'aks nodepool scale', 'aks nodepool upgrade', 'aks nodepool update']:
         with self.argument_context(scope) as c:
@@ -338,9 +343,25 @@ def load_arguments(self, _):
 
     with self.argument_context('openshift create') as c:
         c.argument('name', validator=validate_linux_host_name)
-        c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'])
-        c.argument('customer_admin_group_id', options_list=['--customer-admin-group-id'])
-        c.argument('workspace_id')
+        c.argument('aad_client_app_id', help='The ID of an Azure Active Directory client application. If not specified, a new Azure Active Directory client is created.')
+        c.argument('aad_client_app_secret', help='The secret of an Azure Active Directory client application.')
+        c.argument('aad_tenant_id', help='The ID of an Azure Active Directory tenant.')
+        c.argument('compute_count', options_list=['--compute-count', '-c'], help='Number of nodes in the OpenShift node pool.')
+        c.argument('compute_vm_size', options_list=['--compute-vm-size', '-s'], help='Size of Virtual Machines to create as OpenShift nodes.')
+        c.argument('customer_admin_group_id',
+                   help='The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins".'
+                        'If not specified, no cluster admin access will be granted.')
+        c.argument('management_subnet_cidr', help='CIDR of subnet used to create PLS needed for management of the cluster. If provided, also set --private-cluster flag.')
+        c.argument('private_cluster', arg_type=get_three_state_flag(), help='Create private Openshift cluster. If this flag is set, also supply --management-subnet-cidr.')
+        c.argument('subnet_prefix', help='The CIDR used on the Subnet into which to deploy the cluster.')
+        c.argument('vnet_peer',
+                   help='Vnet peering is no longer supported during cluster creation, instead it is possible to edit vnet properties after cluster creation')
+        c.argument('vnet_prefix', help='The CIDR used on the VNet into which to deploy the cluster.')
+        c.argument('workspace_id', help='The resource id of an existing Log Analytics Workspace to use for storing monitoring data.')
+
+    with self.argument_context('openshift update') as c:
+        c.argument('refresh_cluster', arg_type=get_three_state_flag(),
+                   help='Allow nodes to be rotated. Use this flag to trigger nodes rotation after DNS settings change.')
 
     with self.argument_context('openshift monitor enable') as c:
         c.argument('workspace_id', help='The resource ID of an existing Log Analytics Workspace to use for storing monitoring data.')

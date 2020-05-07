@@ -149,7 +149,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys']:  # pylint: disable=line-too-long
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys', 'failover']:  # pylint: disable=line-too-long
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
             c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -244,14 +244,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
-        c.extra('encryption_key_name', help='The name of the KeyVault key', )
-        c.extra('encryption_key_vault', help='The Uri of the KeyVault')
-        c.extra('encryption_key_version', help='The version of the KeyVault key')
+        t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('encryption_key_name', help='The name of the KeyVault key.', )
+        c.argument('encryption_key_vault', help='The Uri of the KeyVault.')
+        c.argument('encryption_key_version',
+                   help='The version of the KeyVault key to use, which will opt out of implicit key rotation. '
+                   'Please use "" to opt in key auto-rotation again.')
         c.argument('encryption_key_source',
-                   arg_type=get_enum_type(['Microsoft.Storage', 'Microsoft.Keyvault']),
-                   help='The default encryption service',
+                   arg_type=get_enum_type(t_key_source),
+                   help='The default encryption key source',
                    validator=validate_encryption_source)
-        c.ignore('encryption_key_vault_properties')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
@@ -271,6 +273,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
+
+    with self.argument_context('storage account encryption-scope') as c:
+        c.argument('account_name', help='The storage account name.')
+        c.argument('resource_group_name', validator=process_resource_group, required=False)
+        c.argument('encryption_scope_name', options_list=['--name', '-n'],
+                   help='The name of the encryption scope within the specified storage account.')
+
+    for scope in ['storage account encryption-scope create', 'storage account encryption-scope update']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE) as c:
+            from ._validators import validate_encryption_key
+            t_encryption_key_source = self.get_models('EncryptionScopeSource', resource_type=ResourceType.MGMT_STORAGE)
+            c.argument('key_source', options_list=['-s', '--key-source'],
+                       arg_type=get_enum_type(t_encryption_key_source, default="Microsoft.Storage"),
+                       help='The provider for the encryption scope.', validator=validate_encryption_key)
+            c.argument('key_uri', options_list=['-u', '--key-uri'],
+                       help='The object identifier for a key vault key object. When applied, the encryption scope will '
+                       'use the key referenced by the identifier to enable customer-managed key support on this '
+                       'encryption scope.')
+
+    with self.argument_context('storage account encryption-scope update') as c:
+        t_state = self.get_models("EncryptionScopeState", resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('key_source', options_list=['-s', '--key-source'],
+                   arg_type=get_enum_type(t_encryption_key_source),
+                   help='The provider for the encryption scope.', validator=validate_encryption_key)
+        c.argument('state', arg_type=get_enum_type(t_state),
+                   help='Change the state the encryption scope. When disabled, '
+                   'all blob read/write operations using this encryption scope will fail.')
 
     with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_expand_key_type = self.get_models('ListKeyExpand', resource_type=ResourceType.MGMT_STORAGE)
@@ -341,8 +370,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=get_permission_validator(t_account_permissions))
         c.ignore('sas_token')
 
-    with self.argument_context('storage logging show') as c:
-        c.extra('services', validator=get_char_options_validator('bqt', 'services'), default='bqt')
+    for item in ['show', 'off']:
+        with self.argument_context('storage logging {}'.format(item)) as c:
+            c.extra('services', validator=get_char_options_validator('bqt', 'services'), default='bqt')
 
     with self.argument_context('storage logging update') as c:
         c.extra('services', validator=get_char_options_validator('bqt', 'services'), options_list='--services',
@@ -449,7 +479,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         ' in other words, when a browser requests a page that does not exist.')
 
     with self.argument_context('storage blob upload') as c:
-        from ._validators import page_blob_tier_validator
+        from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
         from .sdkutil import get_blob_types, get_blob_tier_names
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
@@ -468,6 +498,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tier', validator=page_blob_tier_validator,
                    arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
                    min_api='2017-04-17')
+        c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
+                   help='A predefined encryption scope used to encrypt the data on the service.')
 
     with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types
@@ -625,6 +657,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container create') as c:
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
+        c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
+        c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
+                   arg_group='Encryption Policy', is_preview=True,
+                   help='Default the container to use specified encryption scope for all writes.')
+        c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
+                   arg_type=get_three_state_flag(), arg_group='Encryption Policy', is_preview=True,
+                   help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage container delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the container does not exist.')

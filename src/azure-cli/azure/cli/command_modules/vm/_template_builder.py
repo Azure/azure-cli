@@ -253,7 +253,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
         attach_os_disk=None, os_disk_size_gb=None, custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None, boot_diagnostics_storage_uri=None, ultra_ssd_enabled=None, proximity_placement_group=None,
         computer_name=None, dedicated_host=None, priority=None, max_price=None, eviction_policy=None,
-        enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None):
+        enable_agent=None, vmss=None, os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -412,7 +412,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements
     if vmss is not None:
         vm_properties['virtualMachineScaleSet'] = {'id': vmss}
 
-    if not attach_os_disk:
+    if not attach_os_disk and not specialized:
         vm_properties['osProfile'] = _build_os_profile()
 
     if license_type:
@@ -674,7 +674,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         application_security_groups=None, ultra_ssd_enabled=None, proximity_placement_group=None,
                         terminate_notification_time=None, max_price=None, scale_in_policy=None,
                         os_disk_encryption_set=None, data_disk_encryption_sets=None,
-                        data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None):
+                        data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None,
+                        specialized=None, os_disk_size_gb=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -732,6 +733,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             })
         else:
             storage_properties['osDisk']['vhdContainers'] = "[variables('vhdContainers')]"
+
+        if os_disk_size_gb is not None:
+            storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
     elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedCustomImage]:
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
@@ -744,6 +748,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             }
         if disk_info['os'].get('diffDiskSettings'):
             storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
+
+        if os_disk_size_gb is not None:
+            storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:
         storage_properties['imageReference'] = {
@@ -830,12 +837,14 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         },
         'virtualMachineProfile': {
             'storageProfile': storage_properties,
-            'osProfile': os_profile,
             'networkProfile': {
                 'networkInterfaceConfigurations': [nic_config]
             }
         }
     }
+
+    if not specialized:
+        vmss_properties['virtualMachineProfile']['osProfile'] = os_profile
 
     if license_type:
         vmss_properties['virtualMachineProfile']['licenseType'] = license_type

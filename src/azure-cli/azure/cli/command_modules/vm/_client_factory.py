@@ -124,7 +124,7 @@ def _log_analytics_client_factory(cli_ctx, subscription_id, *_):
 
 
 def cf_log_analytics(cli_ctx, subscription_id, *_):
-    return _log_analytics_client_factory(cli_ctx, subscription_id).workspaces
+    return _log_analytics_client_factory(cli_ctx, subscription_id)
 
 
 def cf_log_analytics_data_sources(cli_ctx, subscription_id, *_):

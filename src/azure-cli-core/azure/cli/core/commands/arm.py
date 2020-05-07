@@ -566,7 +566,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         if setter_arg_name == 'parameters':
             result = cached_put(cmd, setter, **setterargs)
         else:
-            result = cached_put(cmd, setter, setterargs[setter_arg_name], **setterargs)
+            result = cached_put(cmd, setter, setterargs[setter_arg_name], setter_arg_name=setter_arg_name, **setterargs)
 
         if supports_no_wait and no_wait_enabled:
             return None
@@ -925,6 +925,8 @@ def remove_properties(instance, argument_values):
         except IndexError:
             raise CLIError('index {} doesn\'t exist on {}'
                            .format(list_index, list_attribute_path[-1]))
+        except AttributeError:
+            raise CLIError('{} doesn\'t exist'.format(list_attribute_path[-1]))
 
 
 def throw_and_show_options(instance, part, path):
