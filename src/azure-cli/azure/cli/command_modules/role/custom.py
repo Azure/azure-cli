@@ -1741,6 +1741,7 @@ def _gen_guid():
     return uuid.uuid4()
 
 
+# reference: https://pynative.com/python-generate-random-string/
 def _random_password(length):
     import random
     import string
