@@ -697,4 +697,3 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._transformers import transform_fs_access_output
         g.storage_command('set', 'set_access_control')
         g.storage_command('show', 'get_access_control', transform=transform_fs_access_output)
-

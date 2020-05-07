@@ -126,7 +126,7 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
 
         # For non-existing file path, create one
         if not exists(cmd, client):
-            client.create_file()
+            client.create_file(permissions=permissions, umask=umask)
 
         upload_file_args['match_condition'] = MatchConditions.IfPresent
         try:
