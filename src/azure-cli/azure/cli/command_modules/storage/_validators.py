@@ -17,6 +17,7 @@ from azure.cli.command_modules.storage._client_factory import (get_storage_data_
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
+from azure.cli.command_modules.storage.oauth_token_util import TokenUpdater
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -51,6 +52,20 @@ def _query_account_rg(cli_ctx, account_name):
         from msrestazure.tools import parse_resource_id
         return parse_resource_id(acc.id)['resource_group'], scf
     raise ValueError("Storage account '{}' not found.".format(account_name))
+
+
+def _create_token_credential(cli_ctx):
+    from knack.cli import EVENT_CLI_POST_EXECUTE
+
+    TokenCredential = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'common#TokenCredential')
+
+    token_credential = TokenCredential()
+    updater = TokenUpdater(token_credential, cli_ctx)
+
+    def _cancel_timer_event_handler(_, **__):
+        updater.cancel()
+    cli_ctx.register_event(EVENT_CLI_POST_EXECUTE, _cancel_timer_event_handler)
+    return token_credential
 
 
 # region PARAMETER VALIDATORS
@@ -102,9 +117,12 @@ def validate_client_parameters(cmd, namespace):
         if not n.account_name:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
-            from azure.cli.core._profile import Profile
-            profile = Profile(cli_ctx=cmd.cli_ctx)
-            n.token_credential, _, _ = profile.get_login_credentials(resource="https://storage.azure.com")
+            if cmd.supported_api_version(min_api='2019-02-02'):
+                from azure.cli.core._profile import Profile
+                profile = Profile(cli_ctx=cmd.cli_ctx)
+                n.token_credential, _, _ = profile.get_login_credentials(resource="https://storage.azure.com")
+            else:
+                n.token_credential = _create_token_credential(cmd.cli_ctx)
 
     if hasattr(n, 'token_credential') and n.token_credential:
         # give warning if there are account key args being ignored
