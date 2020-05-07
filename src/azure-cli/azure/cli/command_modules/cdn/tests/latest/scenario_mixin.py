@@ -250,7 +250,7 @@ class CdnScenarioMixin(object):
 
         self.cmd(f'keyvault create --location westus2 --name {key_vault_name} -g {group_name}')
         return self.cmd(f'keyvault certificate create --vault-name {key_vault_name} '
-                 f'-n {cert_name} --policy "@{default_cert_policy}"')
+                        f'-n {cert_name} --policy "@{default_cert_policy}"')
 
     def byoc_get_keyvault_cert_versions(self, key_vault_name, cert_name):
         return self.cmd(f'keyvault certificate list-versions --vault-name {key_vault_name} -n {cert_name}')

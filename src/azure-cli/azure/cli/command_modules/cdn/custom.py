@@ -531,7 +531,7 @@ def enable_custom_https(client, resource_group_name, profile_name, endpoint_name
             raise CLIError("--user-cert-group-name, --user-cert-vault-name, --user-cert-secret-version, ",
                            "--user-cert-secret-version, and --user-cert-protocol-type are all required "
                            "for user managed certificates.")
-                           
+
         if user_cert_subscription_id is None:
             user_cert_subscription_id = client.config.subscription_id
 

@@ -209,7 +209,6 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
         # We've adjusted the hostname for dogfood, so the BYOC custom domain should be created the same in either case
         self.custom_domain_create_cmd(resource_group, profile_name, endpoint_name, byoc_custom_domain_name, byoc_hostname)
 
-
         # Verify the created custom domains don't have custom HTTPS enabled
         checks = [JMESPathCheck('name', custom_domain_name),
                   JMESPathCheck('hostName', hostname),
@@ -247,7 +246,7 @@ class CdnCustomDomainScenarioTest(CdnScenarioMixin, ScenarioTest):
                   JMESPathCheck('customHttpsParameters.certificateSource', 'AzureKeyVault'),
                   JMESPathCheck('customHttpsParameters.protocolType', 'ServerNameIndication'),
                   JMESPathCheck('customHttpsParameters.minimumTlsVersion', 'TLS12'),
-                  JMESPathCheck('customHttpsParameters.certificateSourceParameters.resourceGroupName', 
+                  JMESPathCheck('customHttpsParameters.certificateSourceParameters.resourceGroupName',
                                 resource_group),
                   JMESPathCheck('customHttpsParameters.certificateSourceParameters.vaultName', vault_name),
                   JMESPathCheck('customHttpsParameters.certificateSourceParameters.secretName', cert_name),
