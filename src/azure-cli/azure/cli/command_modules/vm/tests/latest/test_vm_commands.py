@@ -4499,5 +4499,20 @@ class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
         ])
 
 
+class VMCreateGuestProvisionSignal(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_create_nsg_rule_')
+    def test_vm_create_guest_provision_signal(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+
+        # Can't run it yet
+        self.cmd('vm create -g {rg} -n {vm} --image centos --nsg-rule NONE --guest-provision-signal')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('', '')
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
