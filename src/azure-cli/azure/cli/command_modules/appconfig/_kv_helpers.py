@@ -267,18 +267,20 @@ def __read_kv_from_config_store(cmd,
         keyvault_client = __get_keyvault_client(cmd.cli_ctx) if resolve_keyvault else None
 
         for kv in keyvalue_iterable:
-            # remove prefix if specified
-            if kv.key.startswith(prefix_to_remove):
-                kv.key = kv.key[len(prefix_to_remove):]
+            if kv.key:
+                # remove prefix if specified
+                if kv.key.startswith(prefix_to_remove):
+                    kv.key = kv.key[len(prefix_to_remove):]
 
-            # add prefix if specified
-            kv.key = prefix_to_add + kv.key
+                # add prefix if specified
+                kv.key = prefix_to_add + kv.key
 
-            # resolve key vault reference
-            if keyvault_client and kv.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
-                __resolve_secret(keyvault_client, kv)
+                if kv.content_type and kv.value:
+                    # resolve key vault reference
+                    if keyvault_client and kv.content_type == KeyVaultConstants.KEYVAULT_CONTENT_TYPE:
+                        __resolve_secret(keyvault_client, kv)
 
-            # select fields
+            # trim unwanted fields from kv object instead of leaving them as null.
             if fields:
                 partial_kv = {}
                 for field in fields:
