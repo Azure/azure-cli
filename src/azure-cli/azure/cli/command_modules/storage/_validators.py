@@ -106,6 +106,10 @@ def get_config_value(cmd, section, key, default):
     return cmd.cli_ctx.config.get(section, key, default)
 
 
+def is_storagev2(import_prefix):
+    return import_prefix.startswith('azure.multiapi.storagev2.')
+
+
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
@@ -117,7 +121,9 @@ def validate_client_parameters(cmd, namespace):
         if not n.account_name:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
-            if cmd.supported_api_version(min_api='2019-02-02'):
+            prefix = cmd.command_kwargs['resource_type'].value[0]
+
+            if is_storagev2(prefix):
                 from azure.cli.core._profile import Profile
                 profile = Profile(cli_ctx=cmd.cli_ctx)
                 n.token_credential, _, _ = profile.get_login_credentials(resource="https://storage.azure.com")
