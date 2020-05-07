@@ -26,8 +26,6 @@ EXTENSIONS_SYS_DIR = os.path.expanduser(_CUSTOM_EXT_SYS_DIR) if _CUSTOM_EXT_SYS_
 
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
-WHL_METADATA_FILENAME = 'metadata.json'
-EGG_INFO_METADATA_FILE_NAME = 'PKG-INFO'  # used for dev packages
 AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 
 EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
