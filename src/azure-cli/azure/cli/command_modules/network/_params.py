@@ -566,7 +566,7 @@ def load_arguments(self, _):
 
     for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
         with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
-            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('record_set_name',
                        options_list=['--record-set-name', '-n'],
                        help='The name of the record set relative to the zone. '
