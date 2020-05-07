@@ -26,8 +26,6 @@ EXTENSIONS_SYS_DIR = os.path.expanduser(_CUSTOM_EXT_SYS_DIR) if _CUSTOM_EXT_SYS_
 
 EXTENSIONS_MOD_PREFIX = 'azext_'
 
-WHL_METADATA_FILENAME = 'metadata.json'
-EGG_INFO_METADATA_FILE_NAME = 'PKG-INFO'  # used for dev packages
 AZEXT_METADATA_FILENAME = 'azext_metadata.json'
 
 EXT_METADATA_MINCLICOREVERSION = 'azext.minCliCoreVersion'
@@ -135,12 +133,16 @@ class WheelExtension(Extension):
 
     def get_metadata(self):
         from glob import glob
+
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
-
         if not ext_dir or not os.path.isdir(ext_dir):
             return None
-        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '-' + '*.dist-info'))
+
+        # include *.egg-info and *.dist-info
+        info_dirs = glob(os.path.join(ext_dir, self.name.replace('-', '_') + '*.*-info'))
+        if not info_dirs:
+            return None
 
         azext_metadata = WheelExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
@@ -148,11 +150,17 @@ class WheelExtension(Extension):
 
         for dist_info_dirname in info_dirs:
             try:
-                ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
+                if dist_info_dirname.endswith('.egg-info'):
+                    ext_whl_metadata = pkginfo.Develop(dist_info_dirname)
+                elif dist_info_dirname.endswith('.dist-info'):
+                    ext_whl_metadata = pkginfo.Wheel(dist_info_dirname)
+                else:
+                    raise ValueError()
+
                 if self.name == ext_whl_metadata.name:
                     metadata.update(vars(ext_whl_metadata))
             except ValueError:
-                logger.warning('extension % contains invalid metadata for Python Package', self.name)
+                logger.warning('extension %s contains invalid metadata for Python Package', self.name)
 
         return metadata
 
@@ -179,13 +187,13 @@ class WheelExtension(Extension):
         if os.path.isdir(EXTENSIONS_DIR):
             for ext_name in os.listdir(EXTENSIONS_DIR):
                 ext_path = os.path.join(EXTENSIONS_DIR, ext_name)
-                pattern = os.path.join(ext_path, '*.dist-info')
+                pattern = os.path.join(ext_path, '*.*-info')    # include *.egg-info and *.dist-info
                 if os.path.isdir(ext_path) and glob(pattern):
                     exts.append(WheelExtension(ext_name, ext_path))
         if os.path.isdir(EXTENSIONS_SYS_DIR):
             for ext_name in os.listdir(EXTENSIONS_SYS_DIR):
                 ext_path = os.path.join(EXTENSIONS_SYS_DIR, ext_name)
-                pattern = os.path.join(ext_path, '*.dist-info')
+                pattern = os.path.join(ext_path, '*.*-info')    # include *.egg-info and *.dist-info
                 if os.path.isdir(ext_path) and glob(pattern):
                     ext = WheelExtension(ext_name, ext_path)
                     if ext not in exts:
@@ -205,7 +213,11 @@ class DevExtension(Extension):
         ext_dir = self.path
         if not ext_dir or not os.path.isdir(ext_dir):
             return None
+
         egg_info_dirs = [f for f in os.listdir(ext_dir) if f.endswith('.egg-info')]
+        if not egg_info_dirs:
+            return None
+
         azext_metadata = DevExtension.get_azext_metadata(ext_dir)
         if azext_metadata:
             metadata.update(azext_metadata)
