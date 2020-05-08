@@ -641,6 +641,16 @@ type: group
 short-summary: Manage Linux or Windows virtual machines.
 """
 
+helps['vm auto-shutdown'] = """
+type: command
+short-summary: Manage auto-shutdown for VM.
+examples:
+  - name: Create auto-shutdown schedule for a VM.
+    text: az vm auto-shutdown -g MyResourceGroup -n MyVm --time 1730 --email "foo@bar.com" --webhook "https://example.com/"
+  - name: Delete auto-shutdown schedule for a VM.
+    text: az vm auto-shutdown -g MyResourceGroup -n MyVm --off
+"""
+
 helps['vm availability-set'] = """
 type: group
 short-summary: Group resources into availability sets.
@@ -2044,9 +2054,9 @@ parameters:
   - name: --ssh-key-values
     short-summary: Space-separated list of SSH public keys or public key file paths.
 examples:
-  - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, and a 2GB data disk.
+  - name: Create a Windows VM scale set with 5 instances, a load balancer, a public IP address, a 2GB data disk and 40GB OS disk.
     text: >
-        az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2
+        az vmss create -n MyVmss -g MyResourceGroup --instance-count 5 --image Win2016Datacenter --data-disk-sizes-gb 2 --os-disk-size-gb 40
   - name: Create a Linux VM scale set with an auto-generated ssh key pair, a public IP address, a DNS entry, an existing load balancer, and an existing virtual network.
     text: |
         az vmss create -n MyVmss -g MyResourceGroup --public-ip-address-dns-name my-globally-dns-name \\
