@@ -140,7 +140,7 @@ def load_arguments(self, _):
         c.argument('restore_content_only', action='store_true', help='restore only deleted files without web app settings')
 
     with self.argument_context('webapp traffic-routing') as c:
-        c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space-separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
+        c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space-separated slot routings in a format of `<slot-name>=<percentage>` e.g. staging=50. Unused traffic percentage will go to the Production slot')
 
     with self.argument_context('webapp update') as c:
         c.argument('client_affinity_enabled', help="Enables sending session affinity cookies.", arg_type=get_three_state_flag(return_label=True))
@@ -182,7 +182,7 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
         with self.argument_context(scope + ' config appsettings') as c:
-            c.argument('settings', nargs='+', help="space-separated app settings in a format of <name>=<value>")
+            c.argument('settings', nargs='+', help="space-separated app settings in a format of `<name>=<value>`")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
         with self.argument_context(scope + ' config ssl import') as c:
             c.argument('key_vault', help='The name or resource ID of the Key Vault')
@@ -205,7 +205,7 @@ def load_arguments(self, _):
             c.argument('nodejs_task_runner', arg_group='VSTS CD Provider', help='Task runner for nodejs. Default is None', arg_type=get_enum_type(['None', 'Gulp', 'Grunt']))
             c.argument('python_framework', arg_group='VSTS CD Provider', help='Framework used for Python application. Default is Django', arg_type=get_enum_type(['Bottle', 'Django', 'Flask']))
             c.argument('python_version', arg_group='VSTS CD Provider', help='Python version used for application. Default is Python 3.5.3 x86', arg_type=get_enum_type(['Python 2.7.12 x64', 'Python 2.7.12 x86', 'Python 2.7.13 x64', 'Python 2.7.13 x86', 'Python 3.5.3 x64', 'Python 3.5.3 x86', 'Python 3.6.0 x64', 'Python 3.6.0 x86', 'Python 3.6.2 x64', 'Python 3.6.1 x86']))
-            c.argument('cd_project_url', arg_group='VSTS CD Provider', help='URL of the Visual Studio Team Services (VSTS) project to use for continuous delivery. URL should be in format https://<accountname>.visualstudio.com/<projectname>')
+            c.argument('cd_project_url', arg_group='VSTS CD Provider', help='URL of the Visual Studio Team Services (VSTS) project to use for continuous delivery. URL should be in format `https://<accountname>.visualstudio.com/<projectname>`')
             c.argument('cd_account_create', arg_group='VSTS CD Provider', help="To create a new Visual Studio Team Services (VSTS) account if it doesn't exist already", action='store_true')
             c.argument('test', arg_group='VSTS CD Provider', help='Name of the web app to be used for load testing. If web app is not available, it will be created. Default: Disable')
             c.argument('slot_swap', arg_group='VSTS CD Provider', help='Name of the slot to be used for deployment and later promote to production. If slot is not available, it will be created. Default: Not configured')
@@ -254,7 +254,7 @@ def load_arguments(self, _):
             c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
             c.argument('ftps_state', help="Set the Ftps state value for an app. Default value is 'AllAllowed'.", arg_type=get_enum_type(FTPS_STATE_TYPES))
             c.argument('generic_configurations', nargs='+',
-                       help='provide site configuration list in a format of either "key=value" pair or "@<json_file>"')
+                       help='provide site configuration list in a format of either `key=value` pair or `@<json_file>`')
 
         with self.argument_context(scope + ' config container') as c:
             c.argument('docker_registry_server_url', options_list=['--docker-registry-server-url', '-r'],
@@ -316,8 +316,8 @@ def load_arguments(self, _):
 
     for scope in ['appsettings', 'connection-string']:
         with self.argument_context('webapp config ' + scope) as c:
-            c.argument('settings', nargs='+', help="space-separated {} in a format of <name>=<value>".format(scope))
-            c.argument('slot_settings', nargs='+', help="space-separated slot {} in a format of either <name>=<value> or @<json_file>".format(scope))
+            c.argument('settings', nargs='+', help="space-separated {} in a format of `<name>=<value>`".format(scope))
+            c.argument('slot_settings', nargs='+', help="space-separated slot {} in a format of either `<name>=<value>` or `@<json_file>`".format(scope))
             c.argument('setting_names', nargs='+', help="space-separated {} names".format(scope))
 
     with self.argument_context('webapp config connection-string') as c:
@@ -447,7 +447,7 @@ def load_arguments(self, _):
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
-        c.argument('vnet', help="Vnet name", validator=validate_add_vnet)
+        c.argument('vnet', help="Vnet name")
         c.argument('subnet', help="Subnet name")
 
     with self.argument_context('functionapp vnet-integration') as c:
@@ -487,7 +487,7 @@ def load_arguments(self, _):
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=name_arg_type)
     with self.argument_context('functionapp config appsettings') as c:
-        c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of <name>=<value>")
+        c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of `<name>=<value>`")
 
     with self.argument_context('functionapp plan') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
