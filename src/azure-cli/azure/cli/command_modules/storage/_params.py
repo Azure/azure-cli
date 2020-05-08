@@ -16,7 +16,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
-                          validate_delete_retention_days)
+                          validator_delete_retention_days, validate_delete_retention_days)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -347,7 +347,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
                    min_api='2018-07-01')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
-                   validator=validate_delete_retention_days, min_api='2018-07-01')
+                   validator=validator_delete_retention_days, min_api='2018-07-01')
         c.argument('enable_restore_policy', arg_type=get_three_state_flag(), arg_group='Restore Policy',
                    min_api='2019-06-01', help="Enable blob restore policy when it set to true.")
         c.argument('restore_days', type=int, arg_group='Restore Policy',
