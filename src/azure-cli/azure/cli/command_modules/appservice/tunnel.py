@@ -37,7 +37,7 @@ class TunnelWebSocket(WebSocket):
 
 # pylint: disable=no-member,too-many-instance-attributes,bare-except,no-self-use
 class TunnelServer:
-    def __init__(self, local_addr, local_port, remote_addr, remote_user_name, remote_password):
+    def __init__(self, local_addr, local_port, remote_addr, remote_user_name, remote_password, instance):
         self.local_addr = local_addr
         self.local_port = local_port
         if self.local_port != 0 and not self.is_port_open():
@@ -48,6 +48,7 @@ class TunnelServer:
             self.remote_addr = remote_addr
         self.remote_user_name = remote_user_name
         self.remote_password = remote_password
+        self.instance = instance
         self.client = None
         self.ws = None
         logger.info('Creating a socket on port: %s', self.local_port)
@@ -93,6 +94,8 @@ class TunnelServer:
             http = urllib3.PoolManager(cert_reqs='CERT_NONE')
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
+        if not self.instance is None:
+            headers['Cookie'] = 'ARRAffinity='+self.instance
         r = http.request(
             'GET',
             url,
@@ -137,7 +140,9 @@ class TunnelServer:
             self.client, _address = self.sock.accept()
             self.client.settimeout(60 * 60)
             host = 'wss://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx')
-            basic_auth_header = 'Authorization: Basic {}'.format(basic_auth_string)
+            basic_auth_header = ['Authorization: Basic {}'.format(basic_auth_string)]
+            if not self.instance is None:
+                basic_auth_header.append('Cookie: ARRAffinity='+self.instance)
             cli_logger = get_logger()  # get CLI logger which has the level set through command lines
             is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
             if is_verbose:
