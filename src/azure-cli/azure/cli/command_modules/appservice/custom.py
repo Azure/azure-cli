@@ -590,7 +590,6 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
         raise CLIError("'{}' app doesn't exist".format(name))
     _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
-    _fill_instances(cmd, webapp, resource_group_name, name, slot)
     return webapp
 
 
