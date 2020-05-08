@@ -21,12 +21,15 @@ def acr_token_create(cmd,
                      repository_actions_list=None,
                      status=None,
                      resource_group_name=None,
-                     no_passwords=None):
+                     no_passwords=None,
+                     days=None):
     from knack.log import get_logger
     from ._utils import get_resource_id_by_registry_name
 
     if bool(repository_actions_list) == bool(scope_map_name):
         raise CLIError("usage error: --repository | --scope-map-name")
+    if no_passwords and days is not None:
+        raise CLIError("usage error: --no-passwords and --days are mutually exclusive.")
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
@@ -54,7 +57,7 @@ def acr_token_create(cmd,
         return poller
 
     token = LongRunningOperation(cmd.cli_ctx)(poller)
-    _create_default_passwords(cmd, resource_group_name, registry_name, token, logger)
+    _create_default_passwords(cmd, resource_group_name, registry_name, token, logger, days)
     return token
 
 
@@ -80,11 +83,11 @@ def _create_default_scope_map(cmd, resource_group_name, registry_name, token_nam
     return scope_map.id
 
 
-def _create_default_passwords(cmd, resource_group_name, registry_name, token, logger):
+def _create_default_passwords(cmd, resource_group_name, registry_name, token, logger, days):
     from ._client_factory import cf_acr_token_credentials, cf_acr_registries
     cred_client = cf_acr_token_credentials(cmd.cli_ctx)
     poller = acr_token_credential_generate(cmd, cred_client, registry_name, token.name,
-                                           password1=True, password2=True, days=None,
+                                           password1=True, password2=True, days=days,
                                            resource_group_name=resource_group_name)
     credentials = LongRunningOperation(cmd.cli_ctx)(poller)
     setattr(token.credentials, 'username', credentials.username)

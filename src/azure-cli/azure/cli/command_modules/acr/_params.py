@@ -324,10 +324,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr token update') as c:
         c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token. If not specified, running this command will disassociate the current scope map related to the token.', required=False)
 
+    for scope in ['acr token create', 'acr token credential generate']:
+        with self.argument_context(scope) as c:
+            c.argument('days', options_list=['--days'], help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
+
     with self.argument_context('acr token credential generate') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if password1 should be generated.', action='store_true', required=False)
         c.argument('password2', options_list=['--password2'], help='Flag indicating if password2 should be generated.', action='store_true', required=False)
-        c.argument('days', options_list=['--days'], help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
 
     with self.argument_context('acr token credential delete') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)
