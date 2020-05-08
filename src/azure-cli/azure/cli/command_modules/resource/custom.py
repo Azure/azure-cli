@@ -291,8 +291,7 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
     template_content = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_content = _urlretrieve(template_uri).decode('utf-8')
-        template_obj = _remove_comments_from_json(template_content)
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'))
     else:
         template_content = read_file_content(template_file)
         template_obj = _remove_comments_from_json(template_content)
@@ -317,30 +316,32 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
 
     deployment_client = smc.deployments  # This solves the multi-api for you
 
-    # pylint: disable=protected-access
-    deployment_client._serialize = JSONSerializer(
-        deployment_client._serialize.dependencies
-    )
+    if not template_uri:
 
-    # Plug this as default HTTP pipeline
-    from msrest.pipeline import Pipeline
-    from msrest.pipeline.requests import (
-        RequestsCredentialsPolicy,
-        RequestsPatchSession,
-        PipelineRequestsHTTPSender
-    )
-    from msrest.universal_http.requests import RequestsHTTPSender
+        # pylint: disable=protected-access
+        deployment_client._serialize = JSONSerializer(
+            deployment_client._serialize.dependencies
+        )
 
-    smc.config.pipeline = Pipeline(
-        policies=[
-            JsonCTemplatePolicy(),
-            smc.config.user_agent_policy,
-            RequestsPatchSession(),
-            smc.config.http_logger_policy,
-            RequestsCredentialsPolicy(smc.config.credentials)
-        ],
-        sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
-    )
+        # Plug this as default HTTP pipeline
+        from msrest.pipeline import Pipeline
+        from msrest.pipeline.requests import (
+            RequestsCredentialsPolicy,
+            RequestsPatchSession,
+            PipelineRequestsHTTPSender
+        )
+        from msrest.universal_http.requests import RequestsHTTPSender
+
+        smc.config.pipeline = Pipeline(
+            policies=[
+                JsonCTemplatePolicy(),
+                smc.config.user_agent_policy,
+                RequestsPatchSession(),
+                smc.config.http_logger_policy,
+                RequestsCredentialsPolicy(smc.config.credentials)
+            ],
+            sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
+        )
 
     validation_result = deployment_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=properties)
 
@@ -431,7 +432,7 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
                                                                       mode='Incremental',
                                                                       no_prompt=no_prompt)
 
-    mgmt_client = _get_deployment_management_client(cli_ctx)
+    mgmt_client = _get_deployment_management_client(cli_ctx, plug_pipeline=(template_uri is None))
 
     validation_result = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
@@ -496,7 +497,7 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
                                                                       no_prompt=no_prompt)
 
     mgmt_client = _get_deployment_management_client(cli_ctx, aux_subscriptions=aux_subscriptions,
-                                                    aux_tenants=aux_tenants)
+                                                    aux_tenants=aux_tenants, plug_pipeline=(template_uri is None))
 
     validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
 
@@ -548,7 +549,7 @@ def _deploy_arm_template_at_management_group(cli_ctx,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt)
 
-    mgmt_client = _get_deployment_management_client(cli_ctx)
+    mgmt_client = _get_deployment_management_client(cli_ctx, plug_pipeline=(template_uri is None))
 
     validation_result = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
@@ -594,7 +595,7 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
                                                                       parameters=parameters, mode='Incremental',
                                                                       no_prompt=no_prompt)
 
-    mgmt_client = _get_deployment_management_client(cli_ctx)
+    mgmt_client = _get_deployment_management_client(cli_ctx, plug_pipeline=(template_uri is None))
 
     validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
@@ -614,7 +615,8 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   no_pretty_print=None, no_prompt=False):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri,
                                                                 parameters, mode, result_format, no_prompt)
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants)
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants,
+                                                    plug_pipeline=(template_uri is None))
     what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties)
 
     return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print)
@@ -626,7 +628,7 @@ def what_if_deploy_arm_template_at_subscription_scope(cmd,
                                                       result_format=None, no_pretty_print=None, no_prompt=False):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt)
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx)
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
     what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location)
 
     return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print)
@@ -670,8 +672,7 @@ def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, templ
     template_content = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_content = _urlretrieve(template_uri).decode('utf-8')
-        template_obj = _remove_comments_from_json(template_content)
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'))
     else:
         template_content = read_file_content(template_file)
         template_obj = _remove_comments_from_json(template_content)
@@ -709,36 +710,37 @@ def _prepare_deployment_what_if_properties(cli_ctx, template_file, template_uri,
     return deployment_what_if_properties
 
 
-def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenants=None):
+def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenants=None, plug_pipeline=True):
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions,
                                   aux_tenants=aux_tenants)
 
     deployment_client = smc.deployments  # This solves the multi-api for you
 
-    # pylint: disable=protected-access
-    deployment_client._serialize = JSONSerializer(
-        deployment_client._serialize.dependencies
-    )
+    if plug_pipeline:
+        # pylint: disable=protected-access
+        deployment_client._serialize = JSONSerializer(
+            deployment_client._serialize.dependencies
+        )
 
-    # Plug this as default HTTP pipeline
-    from msrest.pipeline import Pipeline
-    from msrest.pipeline.requests import (
-        RequestsCredentialsPolicy,
-        RequestsPatchSession,
-        PipelineRequestsHTTPSender
-    )
-    from msrest.universal_http.requests import RequestsHTTPSender
+        # Plug this as default HTTP pipeline
+        from msrest.pipeline import Pipeline
+        from msrest.pipeline.requests import (
+            RequestsCredentialsPolicy,
+            RequestsPatchSession,
+            PipelineRequestsHTTPSender
+        )
+        from msrest.universal_http.requests import RequestsHTTPSender
 
-    smc.config.pipeline = Pipeline(
-        policies=[
-            JsonCTemplatePolicy(),
-            smc.config.user_agent_policy,
-            RequestsPatchSession(),
-            smc.config.http_logger_policy,
-            RequestsCredentialsPolicy(smc.config.credentials)
-        ],
-        sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
-    )
+        smc.config.pipeline = Pipeline(
+            policies=[
+                JsonCTemplatePolicy(),
+                smc.config.user_agent_policy,
+                RequestsPatchSession(),
+                smc.config.http_logger_policy,
+                RequestsCredentialsPolicy(smc.config.credentials)
+            ],
+            sender=PipelineRequestsHTTPSender(RequestsHTTPSender(smc.config))
+        )
 
     return deployment_client
 
