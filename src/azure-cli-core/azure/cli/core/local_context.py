@@ -114,9 +114,12 @@ class AzCLILocalContext(object):  # pylint: disable=too-many-instance-attributes
 
     def turn_on(self):
         self.config.set_value(LOCAL_CONTEXT_CONFIG_SECTION, self.username, 'on')
+        self.is_on = self.config.getboolean(LOCAL_CONTEXT_CONFIG_SECTION, self.username, False)
+        self._load_local_context_file()
 
     def turn_off(self):
         self.config.remove_option(LOCAL_CONTEXT_CONFIG_SECTION, self.username)
+        self.is_on = self.config.getboolean(LOCAL_CONTEXT_CONFIG_SECTION, self.username, False)
 
     def delete_file(self):
         try:

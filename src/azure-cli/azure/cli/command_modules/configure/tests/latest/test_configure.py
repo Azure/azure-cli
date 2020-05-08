@@ -6,7 +6,7 @@ import os
 import tempfile
 import unittest
 
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, LocalContextScenarioTest
 
 
 class TestConfigure(unittest.TestCase):
@@ -53,6 +53,16 @@ class ConfigureGlobalDefaultsTest(ScenarioTest):
         actual = set([(x['name'], x['value']) for x in res])
         expected = set([('global', 'global1'), ('global2', 'global2')])
         self.assertTrue(actual == expected)
+
+
+class LocalContextCommandsScenarioTest(LocalContextScenarioTest):
+
+    def test_local_context_commands(self):
+        self.cmd('local-context list')
+        self.cmd('local-context show --scope ALL')
+        self.cmd('local-context delete --scope ALL')
+        self.cmd('local-context clear -y')
+        self.cmd('local-context clear --purge -y')
 
 
 if __name__ == '__main__':

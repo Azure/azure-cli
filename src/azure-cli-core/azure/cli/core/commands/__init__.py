@@ -304,7 +304,7 @@ class AzCliCommand(CLICommand):
                     logger.debug("local context '%s' for arg %s", value, arg.name)
                     overrides.settings['default'] = DefaultStr(value)
                     overrides.settings['required'] = False
-                    overrides.settings['default_from'] = 'Local Context'
+                    overrides.settings['default_value_source'] = 'Local Context'
 
     def load_arguments(self):
         super(AzCliCommand, self).load_arguments()
@@ -586,10 +586,10 @@ class AzCliCommandInvoker(CommandInvoker):
             specified_arguments = self.parser.subparser_map[command].specified_arguments \
                 if command in self.parser.subparser_map else []
             for name, argument in arguments.items():
-                default_from = argument.type.settings.get('default_from', None)
+                default_value_source = argument.type.settings.get('default_value_source', None)
                 dest_name = argument.type.settings.get('dest', None)
                 options = argument.type.settings.get('options_list', None)
-                if default_from == 'Local Context' and dest_name not in specified_arguments and options:
+                if default_value_source == 'Local Context' and dest_name not in specified_arguments and options:
                     value = getattr(parsed_args, name)
                     local_context_args.append((options[0], value))
             if local_context_args:
