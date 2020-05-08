@@ -22,7 +22,7 @@ jobs:
   steps:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
-        title=$(curl https://api.github.com/repos/Azure/azure-cli/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+        title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
         if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix; then
           echo "Hotfix PR should target release branch."
           exit 1
