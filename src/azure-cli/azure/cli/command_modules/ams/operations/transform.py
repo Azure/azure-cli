@@ -76,6 +76,7 @@ def validate_arguments(preset, insights_to_extract, audio_language, resolution):
     if resolution and preset != 'FaceDetector':
         raise CLIError("resolution argument only works with FaceDetector preset type.")
 
+
 def remove_transform_output(client, account_name, resource_group_name, transform_name, output_index):
     transform = client.get(resource_group_name, account_name, transform_name)
 

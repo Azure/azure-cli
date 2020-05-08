@@ -24,8 +24,9 @@ from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyCle
                                      ContentKeyPolicyRsaTokenKey, ContentKeyPolicyX509CertificateTokenKey,
                                      ContentKeyPolicyTokenRestriction, ContentKeyPolicyTokenClaim,
                                      ContentKeyPolicyWidevineConfiguration, ContentKeyPolicyFairPlayConfiguration,
-                                     ContentKeyPolicyFairPlayOfflineRentalConfiguration, ContentKeyPolicyPlayReadyConfiguration, 
-                                     ContentKeyPolicyPlayReadyLicense, ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader,
+                                     ContentKeyPolicyFairPlayOfflineRentalConfiguration,
+                                     ContentKeyPolicyPlayReadyConfiguration, ContentKeyPolicyPlayReadyLicense,
+                                     ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader,
                                      ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier,
                                      ContentKeyPolicyPlayReadyPlayRight,
                                      ContentKeyPolicyPlayReadyExplicitAnalogTelevisionRestriction)
@@ -251,7 +252,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
                                         alt_symmetric_token_keys, alt_rsa_token_keys, alt_x509_token_keys,
                                         token_claims, token_type, open_id_connect_discovery_document,
                                         widevine_template, ask, fair_play_pfx_password, fair_play_pfx,
-                                        rental_and_lease_key_type, rental_duration, play_ready_template, 
+                                        rental_and_lease_key_type, rental_duration, play_ready_template,
                                         fp_playback_duration_seconds, fp_storage_duration_seconds):
 
     configuration = None
@@ -262,7 +263,7 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
 
     valid_fairplay_configuration = _valid_fairplay_configuration(ask, fair_play_pfx_password,
                                                                  fair_play_pfx, rental_and_lease_key_type,
-                                                                 rental_duration, fp_playback_duration_seconds, fp_storage_duration_seconds)
+                                                                 rental_duration)
 
     valid_playready_configuration = _valid_playready_configuration(play_ready_template)
 
@@ -282,11 +283,13 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
     if valid_fairplay_configuration:
         offline_configuration = None
         if rental_and_lease_key_type == 'DualExpiry':
-            offline_configuration = ContentKeyPolicyFairPlayOfflineRentalConfiguration(playback_duration_seconds=fp_playback_duration_seconds, storage_duration_seconds=fp_storage_duration_seconds)
-        if (ask is not None):
-            ask=bytearray.fromhex(ask)
+            offline_configuration = ContentKeyPolicyFairPlayOfflineRentalConfiguration(
+                playback_duration_seconds=fp_playback_duration_seconds,
+                storage_duration_seconds=fp_storage_duration_seconds)
+        if ask is not None:
+            ask = bytearray.fromhex(ask)
         configuration = ContentKeyPolicyFairPlayConfiguration(
-            ask=ask, 
+            ask=ask,
             fair_play_pfx_password=fair_play_pfx_password,
             fair_play_pfx=_b64_to_str(_read_binary(fair_play_pfx)).decode('ascii'),
             rental_and_lease_key_type=rental_and_lease_key_type,
@@ -483,8 +486,9 @@ def _valid_token_restriction(token_key, token_key_type, token_type, issuer, audi
 
 
 def _valid_fairplay_configuration(ask, fair_play_pfx_password, fair_play_pfx,
-                                  rental_and_lease_key_type, rental_duration, fp_playback_duration_seconds, fp_storage_duration_seconds):
+                                  rental_and_lease_key_type, rental_duration):
     return any([ask, fair_play_pfx_password, fair_play_pfx, rental_and_lease_key_type, rental_duration])
+
 
 def _valid_playready_configuration(play_ready_template):
     if play_ready_template is None:
