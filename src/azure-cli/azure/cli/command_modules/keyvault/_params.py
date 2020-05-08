@@ -95,7 +95,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,
                    help='Network ACLs. It accepts a JSON filename or a JSON string. JSON format: '
-                        '{\\"ip\\":[<ip1>, <ip2>...],\\"vnet\\":[<vnet_name_1>/<subnet_name_1>,<subnet_id2>...]}')
+                        '`{\\"ip\\":[<ip1>, <ip2>...],\\"vnet\\":[<vnet_name_1>/<subnet_name_1>,<subnet_id2>...]}`')
         c.argument('network_acls_ips', nargs='*', help='Network ACLs IP rules. Space-separated list of IP addresses.')
         c.argument('network_acls_vnets', nargs='*', help='Network ACLS VNet rules. Space-separated list of '
                                                          'Vnet/subnet pairs or subnet resource ids.')
