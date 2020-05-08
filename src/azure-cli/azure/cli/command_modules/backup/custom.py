@@ -589,7 +589,7 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
 
 
 def resume_protection(cmd, client, resource_group_name, vault_name, item, policy):
-    if item.properties.protection_state == "Protected":
+    if item.properties.protection_state != "ProtectionStopped":
         raise CLIError("Azure Virtual Machine is already protected")
     return update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
 
