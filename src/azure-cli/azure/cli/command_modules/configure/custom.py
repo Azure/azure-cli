@@ -7,7 +7,7 @@ from __future__ import print_function
 import json
 import os
 
-from knack.config import get_config_parser
+import configparser
 from knack.log import get_logger
 from knack.prompting import prompt, prompt_y_n, prompt_choice_list, prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -101,7 +101,7 @@ def _handle_global_configuration(config, cloud_forbid_telemetry):
     # print location of global configuration
     print(MSG_GLOBAL_SETTINGS_LOCATION.format(config.config_path))
     # set up the config parsers
-    file_config = get_config_parser()
+    file_config = configparser.ConfigParser()
     config_exists = file_config.read([config.config_path])
     should_modify_global_config = False
     if config_exists:
