@@ -154,7 +154,7 @@ class TunnelServer:
             self.ws = create_connection(host,
                                         sockopt=((socket.IPPROTO_TCP, socket.TCP_NODELAY, 1),),
                                         class_=TunnelWebSocket,
-                                        header=[basic_auth_header],
+                                        header=basic_auth_header,
                                         sslopt={'cert_reqs': ssl.CERT_NONE},
                                         timeout=60 * 60,
                                         enable_multithread=True)
