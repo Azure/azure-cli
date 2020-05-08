@@ -412,6 +412,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('list', 'list')
         g.show_command('show', 'get')
         g.command('update', 'update')
+        g.command('restore', 'restore', min_api='2019-06-01')
 
     with self.command_group('storage share', command_type=file_sdk,
                             custom_command_type=get_custom_sdk('file', file_data_service_factory)) as g:
