@@ -56,7 +56,7 @@ DEPENDENCIES = [
     'colorama>=0.3.9',
     'humanfriendly>=4.7,<9.0',
     'jmespath',
-    'knack==0.7.0rc4',
+    'knack==0.7.0',
     'msal~=1.0.0',
     'msal-extensions~=0.1.3',
     'msrest>=0.4.4',
