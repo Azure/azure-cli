@@ -1,3 +1,5 @@
+# Some content of this file is generated.
+
 trigger:
   branches:
     exclude:
@@ -18,126 +20,189 @@ jobs:
   strategy:
     maxParallel: 20
     matrix:
-      acr:
-        Target: acr
-      acs:
-        Target: acs
-      advisor:
-        Target: advisor
-      ams:
-        Target: ams
-      apim:
-        Target: apim
-      appconfig:
-        Target: appconfig
-      appservice:
-        Target: appservice
-      backup:
-        Target: backup
-      batch:
-        Target: batch
-      batchai:
-        Target: batchai
-      billing:
-        Target: billing
-      botservice:
-        Target: botservice
-      cdn:
-        Target: cdn
-      cloud:
-        Target: cloud
-      cognitiveservices:
-        Target: cognitiveservices
-      configure:
-        Target: configure
-      consumption:
-        Target: consumption
-      container:
-        Target: container
-      cosmosdb:
-        Target: cosmosdb
-      deploymentmanager:
-        Target: deploymentmanager
-      dla:
-        Target: dla
-      dls:
-        Target: dls
-      dms:
-        Target: dms
-      eventgrid:
-        Target: eventgrid
-      eventhubs:
-        Target: eventhubs
-      extension:
-        Target: extension
-      feedback:
-        Target: feedback
-      find:
-        Target: find
-      hdinsight:
-        Target: hdinsight
-      interactive:
-        Target: interactive
-      iot:
-        Target: iot
-      iotcentral:
-        Target: iotcentral
-      keyvault:
-        Target: keyvault
-      kusto:
-        Target: kusto
-      lab:
-        Target: lab
-      managedservices:
-        Target: managedservices
-      maps:
-        Target: maps
-      monitor:
-        Target: monitor
-      natgateway:
-        Target: natgateway
-      netappfiles:
-        Target: netappfiles
-      network:
-        Target: network
-      policyinsights:
-        Target: policyinsights
-      privatedns:
-        Target: privatedns
+    
       profile:
         Target: profile
-      rdbms:
-        Target: rdbms
-      redis:
-        Target: redis
+    
+      billing:
+        Target: billing
+    
+      batch:
+        Target: batch
+    
+      eventhubs:
+        Target: eventhubs
+    
+      kusto:
+        Target: kusto
+    
       relay:
         Target: relay
+    
+      consumption:
+        Target: consumption
+    
+      find:
+        Target: find
+    
       reservations:
         Target: reservations
-      resource:
-        Target: resource
-      role:
-        Target: role
-      search:
-        Target: search
-      security:
-        Target: security
-      servicebus:
-        Target: servicebus
-      servicefabric:
-        Target: servicefabric
-      signalr:
-        Target: signalr
+    
+      botservice:
+        Target: botservice
+    
+      feedback:
+        Target: feedback
+    
+      redis:
+        Target: redis
+    
       sql:
         Target: sql
+    
+      lab:
+        Target: lab
+    
+      natgateway:
+        Target: natgateway
+    
+      iotcentral:
+        Target: iotcentral
+    
+      signalr:
+        Target: signalr
+    
+      dms:
+        Target: dms
+    
+      role:
+        Target: role
+    
+      aro:
+        Target: aro
+    
+      resource:
+        Target: resource
+    
+      cdn:
+        Target: cdn
+    
+      appservice:
+        Target: appservice
+    
+      servicefabric:
+        Target: servicefabric
+    
+      policyinsights:
+        Target: policyinsights
+    
+      acr:
+        Target: acr
+    
+      rdbms:
+        Target: rdbms
+    
+      deploymentmanager:
+        Target: deploymentmanager
+    
+      interactive:
+        Target: interactive
+    
+      extension:
+        Target: extension
+    
+      search:
+        Target: search
+    
+      privatedns:
+        Target: privatedns
+    
+      advisor:
+        Target: advisor
+    
+      cognitiveservices:
+        Target: cognitiveservices
+    
+      ams:
+        Target: ams
+    
       sqlvm:
         Target: sqlvm
+    
+      dla:
+        Target: dla
+    
+      monitor:
+        Target: monitor
+    
+      container:
+        Target: container
+    
+      iot:
+        Target: iot
+    
+      configure:
+        Target: configure
+    
+      hdinsight:
+        Target: hdinsight
+    
+      appconfig:
+        Target: appconfig
+    
+      batchai:
+        Target: batchai
+    
+      eventgrid:
+        Target: eventgrid
+    
+      cloud:
+        Target: cloud
+    
+      backup:
+        Target: backup
+    
+      security:
+        Target: security
+    
+      keyvault:
+        Target: keyvault
+    
+      managedservices:
+        Target: managedservices
+    
+      netappfiles:
+        Target: netappfiles
+    
+      dls:
+        Target: dls
+    
       storage:
         Target: storage
+    
+      acs:
+        Target: acs
+    
+      apim:
+        Target: apim
+    
+      servicebus:
+        Target: servicebus
+    
+      maps:
+        Target: maps
+    
+      cosmosdb:
+        Target: cosmosdb
+    
+      network:
+        Target: network
+    
       vm:
         Target: vm
+    
   pool:
-    vmImage: 'Ubuntu-16.04'  
+    vmImage: 'Ubuntu-16.04'
   steps:
     - task: UsePythonVersion@0
       inputs:
@@ -161,7 +226,7 @@ jobs:
         pip install azdev
         azdev setup -c azure-cli
         az login --service-principal --username $(APP_ID) --password $(PASSWORD) --tenant $(TENANT_ID)
-        azdev test $(Target) $(USER_LIVE) -a "-n 8" 
+        azdev test $(Target) $(USER_LIVE) -a "-n 8"
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
