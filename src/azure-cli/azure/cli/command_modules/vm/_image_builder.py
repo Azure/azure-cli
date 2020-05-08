@@ -383,7 +383,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
         source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
         shared_image_destinations=None, no_wait=False, image_template=None, identity=None):  # pylint: disable=unused-argument, too-many-locals
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
-                                                ImageTemplatePlatformImageSource, ImageTemplateIsoSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
+                                                ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  # pylint: disable=line-too-long
 
@@ -425,7 +425,8 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
     if source_dict['type'] == _SourceType.PLATFORM_IMAGE:
         template_source = ImageTemplatePlatformImageSource(**source_dict)
     elif source_dict['type'] == _SourceType.ISO_URI:
-        template_source = ImageTemplateIsoSource(**source_dict)
+        raise CLIError('usage error: Source type ISO URI is not supported.')
+        # template_source = ImageTemplateIsoSource(**source_dict)
     elif source_dict['type'] == _SourceType.MANAGED_IMAGE:
         template_source = ImageTemplateManagedImageSource(**source_dict)
     elif source_dict['type'] == _SourceType.SIG_VERSION:

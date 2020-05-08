@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import time
 import unittest
 from knack.util import CLIError
 
@@ -44,6 +44,52 @@ class ImageTemplateTest(ScenarioTest):
             if self.is_live:
                 raise ex
             pass
+
+    def _identity_role(self, rg):
+        subscription_id = self.get_subscription_id()
+        self.kwargs.update({
+            'ide': 'ide1'
+        })
+        identity_id = self.cmd('identity create -g {rg} -n {ide}').get_output_in_json()['clientId']
+        self.kwargs.update({
+            'identity_id': identity_id
+        })
+        role_definition = """\
+{{
+    "Name": "{0}",
+    "IsCustom": true,
+    "Description": "Image Builder access to create resources for the image build, you should delete or split out as appropriate",
+    "Actions": [
+        "Microsoft.Compute/galleries/read",
+        "Microsoft.Compute/galleries/images/read",
+        "Microsoft.Compute/galleries/images/versions/read",
+        "Microsoft.Compute/galleries/images/versions/write",
+
+        "Microsoft.Compute/images/write",
+        "Microsoft.Compute/images/read",
+        "Microsoft.Compute/images/delete"
+    ],
+    "NotActions": [
+  
+    ],
+    "AssignableScopes": [
+      "/subscriptions/{1}/resourceGroups/{2}"
+    ]
+}}\
+        """
+        role_name = 'Azure Image Builder Service Image Creation Role ' + self.create_random_name(prefix='', length=10)
+        role_definition = role_definition.format(role_name, subscription_id, rg)
+        self.kwargs.update({
+            'role_name': role_name,
+            'role_definition': role_definition
+        })
+        out = self.cmd('role definition create --role-definition \'{role_definition}\'').get_output_in_json()
+        scope = '/subscriptions/{0}/resourceGroups/{1}'.format(subscription_id, rg)
+        self.kwargs.update({
+            'scope': scope
+        })
+        time.sleep(15)
+        self.cmd('role assignment create --assignee {identity_id} --role "{role_name}" --scope {scope}')
 
     # Test framework has problem, hence, live only.
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_file_')
@@ -204,7 +250,8 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_managed')
     def test_image_build_managed_image(self, resource_group, resource_group_location):
-        self._assign_ib_permissions(resource_group)
+        # self._assign_ib_permissions(resource_group)
+        self._identity_role(resource_group)
 
         self.kwargs.update({
             'tmpl_1': 'template01',
@@ -218,7 +265,8 @@ class ImageTemplateTest(ScenarioTest):
         })
 
         # create and build image template
-        self.cmd('image builder create -n {tmpl_1} -g {rg} --image-source {img_src} --managed-image-destinations {img_1}={loc} --scripts {script}')
+        self.cmd('image builder create -n {tmpl_1} -g {rg} --image-source {img_src} --managed-image-destinations '
+                 '{img_1}={loc} --scripts {script} --identity {ide}')
         self.cmd('image builder run -n {tmpl_1} -g {rg}')
 
         # get the run output
