@@ -8,10 +8,7 @@
 import os
 
 from azure.core.exceptions import HttpResponseError
-from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
-from azure.cli.core.profiles import ResourceType, get_sdk
-from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
-from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.storage.util import mkdir_p
 from knack.log import get_logger
 from knack.util import CLIError
@@ -45,7 +42,6 @@ def download_file(client, destination_path=None, overwrite=True):
         download = client.download_file()
         download_content = download.readall()
         stream.write(download_content)
-    return None
 
 
 def exists(cmd, client):
@@ -135,11 +131,9 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
             StorageErrorCode = cmd.get_models("_shared.models#StorageErrorCode",
                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
 
-            if ex.error_code == StorageErrorCode.invalid_flush_position:
+            if ex.error_code == StorageErrorCode.invalid_flush_position:  # pylint: disable=no-member
                 raise CLIError("You cannot upload to an existing non-empty file with overwrite=false. "
                                "Please set --overwrite to overwrite the existing file.")
-            else:
-                raise ex
+            raise ex
 
     return client.upload_data(data=data, length=count, overwrite=overwrite, **upload_file_args)
-

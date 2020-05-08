@@ -101,5 +101,4 @@ def _dont_fail_on_exist(ex, error_code):
     """
     if ex.error_code == error_code:
         return False
-    else:
-        raise ex
+    raise ex

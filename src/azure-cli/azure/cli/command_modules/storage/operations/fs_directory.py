@@ -5,8 +5,6 @@
 
 """Custom operations for storage file datalake"""
 
-import os
-
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.profiles import ResourceType
 

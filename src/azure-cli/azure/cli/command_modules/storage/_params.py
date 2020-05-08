@@ -1125,7 +1125,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('directory_path', options_list=['--name', '-n'],
                     help="The name of directory.", required=True)
 
-    with self.argument_context('storage fs directory create'.format(item)) as c:
+    with self.argument_context('storage fs directory create') as c:
         c.extra('permissions', permissions_type)
         c.extra('umask', umask_type)
         c.extra('timeout', timeout_type)
@@ -1186,7 +1186,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_content_settings_argument(t_file_content_settings, update=False)
         c.extra('file_system_name', options_list=['-f', '--file-system'],
                 help='File system name.', required=True)
-        c.extra('path', options_list=['-p', '--path'],  required=True,
+        c.extra('path', options_list=['-p', '--path'], required=True,
                 help="The original file path users want to move in a file system.")
         c.argument('new_name', options_list=['--new-path'],
                    help='The new path the users want to move to. The value must have the following format: '

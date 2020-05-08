@@ -234,80 +234,17 @@ def cf_adls_service(cli_ctx, kwargs):
 
     if account_url and credential:
         return t_adls_service(account_url=account_url, credential=credential)
+    return None
 
 
 def cf_adls_file_system(cli_ctx, kwargs):
     return cf_adls_service(cli_ctx, kwargs).get_file_system_client(file_system=kwargs.pop('file_system_name'))
-    """
-   
-    t_adls_file_system = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
-                                 '_file_system_client#FileSystemClient')
-
-    connection_string = kwargs.pop('connection_string', None)
-    if connection_string:
-        return t_adls_file_system.from_connection_string(connection_string=connection_string,
-                                                         file_system_name=kwargs.pop('file_system_name'))
-
-    account_url = get_account_url(account_name=kwargs.pop('account_name', None), service='dfs')
-    credential = kwargs.pop('sas_token', None) \
-                 or kwargs.pop('account_key', None) \
-                 or kwargs.pop('token_credential', None)
-
-    if account_url and credential:
-        return t_adls_file_system(account_url=account_url,
-                                  credential=credential,
-                                  file_system_name=kwargs.pop('file_system_name'))
- 
-    """
 
 
 def cf_adls_directory(cli_ctx, kwargs):
     return cf_adls_file_system(cli_ctx, kwargs).get_directory_client(directory=kwargs.pop('directory_path'))
-    """
-    t_adls_directory = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
-                               '_data_lake_directory_client#DataLakeDirectoryClient')
-
-    connection_string = kwargs.pop('connection_string', None)
-    if connection_string:
-        return t_adls_directory.from_connection_string(connection_string=connection_string,
-                                                        file_system_name=kwargs.pop('file_system_name'),
-                                                        directory_name=kwargs.pop('directory_name'))
-
-    account_url = get_account_url(account_name=kwargs.pop('account_name', None), service='dfs')
-    credential = kwargs.pop('sas_token', None) \
-                 or kwargs.pop('account_key', None) \
-                 or kwargs.pop('token_credential', None)
-
-    if account_url and credential:
-        return t_adls_directory(account_url=account_url,
-                                credential=credential,
-                                file_system_name=kwargs.pop('file_system_name'),
-                                directory_name=kwargs.pop('directory_name'))
-    """
 
 
 def cf_adls_file(cli_ctx, kwargs):
-
     return cf_adls_service(cli_ctx, kwargs).get_file_client(file_system=kwargs.pop('file_system_name', None),
                                                             file_path=kwargs.pop('path', None))
-    """
-    t_adls_file = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE,
-                          '_data_lake_file_client#DataLakeFileClient')
-
-    connection_string = kwargs.pop('connection_string', None)
-    if connection_string:
-        return t_adls_file.from_connection_string(connection_string=connection_string,
-                                                  file_system_name=kwargs.pop('file_system_name'),
-                                                  file_path=kwargs.pop('file_path'))
-
-    account_url = get_account_url(account_name=kwargs.pop('account_name', None), service='dfs')
-    credential = kwargs.pop('sas_token', None) \
-                 or kwargs.pop('account_key', None) \
-                 or kwargs.pop('token_credential', None)
-
-    if account_url and credential:
-        return t_adls_file(account_url=account_url,
-                           credential=credential,
-                           file_system_name=kwargs.pop('file_system_name'),
-                           file_path=kwargs.pop('file_path'))
-"""
