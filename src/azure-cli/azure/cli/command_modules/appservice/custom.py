@@ -590,6 +590,7 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
         raise CLIError("'{}' app doesn't exist".format(name))
     _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
+    _fill_instances(cmd, webapp, resource_group_name, name, slot)
     return webapp
 
 
@@ -877,6 +878,10 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
             setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_auth_settings', slot, auth_settings)
+
+
+def list_instances(cmd, resource_group_name, name, slot=None):
+    return  _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
 # Currently using hardcoded values instead of this function. This function calls the stacks API;
