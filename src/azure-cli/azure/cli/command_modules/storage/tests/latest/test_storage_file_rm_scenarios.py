@@ -143,8 +143,8 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['exists'], False)
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @ResourceGroupPreparer(name_prefix="cli_nfs", location="eastus2euap")
+    @StorageAccountPreparer(name_prefix="nfs", location="eastus2euap")
     def test_storage_share_rm_with_NFS(self):
 
         self.kwargs.update({
@@ -173,4 +173,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('[0].rootSquash', 'NoRootSquash')
         })
 
-        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share}')
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('length(@)', 0)
+        })
