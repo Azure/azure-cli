@@ -493,7 +493,8 @@ def request_data_from_registry(http_method,
                                file_payload=None,
                                params=None,
                                retry_times=3,
-                               retry_interval=5):
+                               retry_interval=5,
+                               timeout=300):
     if http_method not in ALLOWED_HTTP_METHOD:
         raise ValueError("Allowed http method: {}".format(ALLOWED_HTTP_METHOD))
 
@@ -520,6 +521,7 @@ def request_data_from_registry(http_method,
                         headers=headers,
                         params=params,
                         data=data_payload,
+                        timeout=timeout,
                         verify=(not should_disable_connection_verify())
                     )
             else:
@@ -529,6 +531,7 @@ def request_data_from_registry(http_method,
                     headers=headers,
                     params=params,
                     json=json_payload,
+                    timeout=timeout,
                     verify=(not should_disable_connection_verify())
                 )
 
