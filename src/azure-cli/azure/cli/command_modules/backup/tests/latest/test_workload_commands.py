@@ -140,8 +140,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 0)])
 
-    @record_only()
-    def test_backup_wl_sql_policy(self):
+        @record_only()
+        def test_backup_wl_sql_policy(self):
 
         self.kwargs.update({
             'vault': vault_sql,
@@ -182,6 +182,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy1_json'] = json.dumps(self.kwargs['policy1_json'], separators=(',', ':')).replace('\'', '\\\'').replace('"', '\\"')
 
         self.cmd("backup policy set -g {rg} -v {vault} --policy {policy1_json} -n {policy_new}", checks=[
+            self.check('name', '{policy_new}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd("backup policy set -g {rg} -v {vault} --backup-management-type AzureWorkload --fix-for-inconsistent-items -n {policy_new}", checks=[
             self.check('name', '{policy_new}'),
             self.check('resourceGroup', '{rg}')
         ])
