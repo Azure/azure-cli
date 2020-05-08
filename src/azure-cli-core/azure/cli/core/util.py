@@ -643,7 +643,6 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             token_subscription = match.groups()[0]
             logger.debug('Retrieve token from subscription %s', token_subscription)
 
-
     if not skip_authorization_header and url.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints

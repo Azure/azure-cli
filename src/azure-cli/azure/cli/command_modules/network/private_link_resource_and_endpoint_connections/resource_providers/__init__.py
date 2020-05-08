@@ -9,7 +9,8 @@ from knack.log import get_logger
 from azure.cli.core.util import send_raw_request
 
 logger = get_logger(__name__)
-RETRY_MAX = 10
+RETRY_MAX = 20
+RETRY_INTERVAL = 10
 
 
 class PrivateEndpointClient(object):
@@ -66,7 +67,7 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
         r = send_raw_request(cmd.cli_ctx, 'put', url, body=json.dumps(private_endpoint_connection))
         query_counts = RETRY_MAX
         while query_counts:
-            time.sleep(30)
+            time.sleep(RETRY_INTERVAL)
             query_counts -= 1
             private_endpoint_connection = self.show_private_endpoint_connection(cmd,
                                                                                 resource_group_name,
@@ -109,7 +110,7 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
     def remove_private_endpoint_connection(self, cmd, resource_group_name, service_name, name):
         url = _build_connection_url_endpoint(resource_group_name, self.rp, service_name, name, self.api_version)
         r = send_raw_request(cmd.cli_ctx, 'delete', url)
-        if r.status_code != 200:
+        if r.status_code in [201, 202, 204]:
             logger.warning('Deleting operation is asynchronous. '
                            'Please use `az network private-endpoint-connection show to query the status.')
 
