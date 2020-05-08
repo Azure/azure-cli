@@ -881,7 +881,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
 
 
 def list_instances(cmd, resource_group_name, name, slot=None):
-    # TODO: API Version 2019-08-01 does not return slot instances, however 2018-02-01 does
+    # API Version 2019-08-01 does not return slot instances, however 2018-02-01 does
     return  _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
