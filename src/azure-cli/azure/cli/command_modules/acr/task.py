@@ -828,7 +828,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(client, run_id, registry_name, resource_group_name, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, True)
 
 
 def acr_task_show_run(cmd,
@@ -920,7 +920,7 @@ def acr_task_logs(cmd,
                                                   task_name=task_name,
                                                   image=image))
 
-    return stream_logs(client, run_id, registry_name, resource_group_name)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name)
 
 
 def _get_list_runs_message(base_message, task_name=None, image=None):
