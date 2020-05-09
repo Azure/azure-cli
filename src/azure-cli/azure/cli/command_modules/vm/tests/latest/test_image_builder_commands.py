@@ -88,7 +88,7 @@ class ImageTemplateTest(ScenarioTest):
         self.kwargs.update({
             'scope': scope
         })
-        time.sleep(30az )
+        time.sleep(30)
         # self.cmd('role assignment create --assignee {identity_id} --role "{role_name}" --scope {scope}')
         self.cmd('role assignment create --assignee {identity_id} --role Contributor --scope {scope}')
 
@@ -288,7 +288,6 @@ class ImageTemplateTest(ScenarioTest):
         self.assertEqual(img_tmpl['source']['imageId'].lower(), self.kwargs['image_id'].lower())
         self.assertEqual(img_tmpl['source']['type'].lower(), 'managedimage')
 
-    @unittest.skip('It has an error')
     @ResourceGroupPreparer(name_prefix='img_tmpl_sig')
     def test_image_build_shared_image(self, resource_group, resource_group_location):
         self._assign_ib_permissions(resource_group)
