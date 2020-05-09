@@ -56,8 +56,9 @@ def acr_import(cmd,
                 # trim away redundant login server name, a common error
                 prefix = registry.login_server + '/'
                 if source_image.lower().startswith(prefix.lower()):
-                    logger.warning('%s will be removed as it is redundant with "--registry" already supplied',
-                                   prefix[:-1])
+                    warning = ('The login server name of "%s" in the "--source" argument will be ignored as '
+                               '"--registry" already supplies the same information')
+                    logger.warning(warning, prefix[:-1])
                     source_image = source_image[len(prefix):]
                 # For Azure container registry
                 source = ImportSource(resource_id=registry.id, source_image=source_image)
