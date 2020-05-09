@@ -34,7 +34,7 @@ def get_content():
     build_id = sys.argv[2]
     repo = sys.argv[3]
     branch = sys.argv[4]
-    link = 'https://dev.azure.com/azure-sdk/public/_build/results?buildId={}&view=ms.vss-test-web.build-test-results-tab'.format(build_id)
+    link = 'https://dev.azure.com/azure-sdk/internal/_build/results?buildId={}&view=ms.vss-test-web.build-test-results-tab'.format(build_id)
     content = 'Hi Azure CLI team,<br>Test results of Azure CLI.<br>Repository: {}<br>Branch: {}<br>{}'.format(repo, branch, link)
     return content
 
