@@ -3687,7 +3687,10 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
         instances = list_instances(cmd, resource_group_name, name, slot=slot)
         instance_names = set(i.name for i in instances)
         if instance not in instance_names:
-            raise CLIError("The provided instance '{}' is not valid for this webapp.".format(instance))
+            if not slot is None:
+                raise CLIError("The provided instance '{}' is not valid for this webapp and slot.".format(instance))
+            else
+                raise CLIError("The provided instance '{}' is not valid for this webapp.".format(instance))
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
