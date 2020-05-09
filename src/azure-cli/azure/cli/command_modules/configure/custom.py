@@ -282,6 +282,10 @@ def delete_local_context(cmd, scope, name=None):
 
 
 def clear_local_context(cmd, yes=False, purge=False):
+    if not cmd.cli_ctx.local_context.local_context_file:
+        logger.warning('The working directory has no local context data to clear.')
+        return
+
     from azure.cli.core.util import user_confirmation
     user_confirmation('You are going to clear local context in {}. '
                       'Local context data will be lost and can\'t be recovered. '

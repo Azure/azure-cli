@@ -179,8 +179,10 @@ class LocalContextScenarioTest(ScenarioTest):
                  replay_processors=None, recording_patches=None, replay_patches=None, working_dir=None):
         super(LocalContextScenarioTest, self).__init__(method_name, config_file, recording_name, recording_processors,
                                                        replay_processors, recording_patches, replay_patches)
-
-        self.replay_patches.append(patch_get_current_username_for_local_context)
+        if self.in_recording:
+            self.recording_patches.append(patch_get_current_username_for_local_context)
+        else:
+            self.replay_patches.append(patch_get_current_username_for_local_context)
         self.original_working_dir = os.getcwd()
         if working_dir:
             self.working_dir = working_dir

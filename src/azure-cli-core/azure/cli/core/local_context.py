@@ -61,7 +61,7 @@ class AzCLILocalContext(object):
         except FileNotFoundError:
             logger.debug('The working directory has been deleted or recreated. Local context is ignored.')
 
-        self._local_context_file = None
+        self.local_context_file = None
         if self.is_on and self.current_dir:
             self._load_local_context_file()
 
@@ -72,25 +72,25 @@ class AzCLILocalContext(object):
             file_path = os.path.join(dir_path, self.file_name)
             if os.path.isfile(file_path) and os.access(file_path, os.R_OK) and os.access(file_path, os.W_OK):
                 logger.debug('Current effective local context working directory is %s', current_dir)
-                self._local_context_file = _ConfigFile(dir_path, file_path, LOCAL_CONTEXT_NOTICE)
+                self.local_context_file = _ConfigFile(dir_path, file_path, LOCAL_CONTEXT_NOTICE)
                 break   # load only one local context
             # Stop if already in root drive
             if current_dir == os.path.dirname(current_dir):
-                if self._local_context_file is None:
+                if self.local_context_file is None:
                     logger.debug('No effective local context found')
                 break
             current_dir = os.path.dirname(current_dir)
 
     def effective_working_directory(self):
-        return os.path.dirname(self._local_context_file.config_dir)
+        return os.path.dirname(self.local_context_file.config_dir) if self.local_context_file else ''
 
     def get(self, command, argument):
-        if self.is_on and self.current_dir and self._local_context_file:
+        if self.is_on and self.current_dir and self.local_context_file:
             command_parts = command.split()
             while True:
                 section = ' '.join(command_parts) if command_parts else ALL
                 try:
-                    return self._local_context_file.get(section, argument)
+                    return self.local_context_file.get(section, argument)
                 except (configparser.NoSectionError, configparser.NoOptionError):
                     pass
                 if not command_parts:
@@ -100,7 +100,7 @@ class AzCLILocalContext(object):
 
     def set(self, scopes, argument, value):
         if self.is_on and self.current_dir:
-            if self._local_context_file is None:
+            if self.local_context_file is None:
                 file_path = os.path.join(self.current_dir, self.dir_name, self.file_name)
                 if not os.path.isfile(file_path):
                     try:
@@ -112,9 +112,9 @@ class AzCLILocalContext(object):
                         logger.warning('Initiate local context in %s', self.current_dir)
                     except Exception:  # pylint: disable=broad-except
                         logger.warning('fail to set value to local context')
-            if self._local_context_file:
+            if self.local_context_file:
                 for scope in scopes:
-                    self._local_context_file.set_value(scope, argument, value)
+                    self.local_context_file.set_value(scope, argument, value)
 
     def turn_on(self):
         self.config.set_value(LOCAL_CONTEXT_CONFIG_SECTION, self.username, 'on')
@@ -126,9 +126,11 @@ class AzCLILocalContext(object):
         self.is_on = self.config.getboolean(LOCAL_CONTEXT_CONFIG_SECTION, self.username, False)
 
     def delete_file(self):
+        if not self.local_context_file:
+            False
         try:
-            os.remove(self._local_context_file.config_path)
-            parent_dir = os.path.dirname(self._local_context_file.config_path)
+            os.remove(self.local_context_file.config_path)
+            parent_dir = os.path.dirname(self.local_context_file.config_path)
             if not os.listdir(parent_dir):
                 shutil.rmtree(parent_dir)
         except Exception:  # pylint: disable=broad-except
@@ -136,31 +138,36 @@ class AzCLILocalContext(object):
         return True
 
     def clear(self):
-        self._local_context_file.clear()
+        if self.local_context_file:
+            self.local_context_file.clear()
 
     def delete(self, scopes, names=None):
-        for scope in scopes:
-            if names is None:
-                self._local_context_file.remove_section(scope)
-            else:
-                for name in names:
-                    self._local_context_file.remove_option(scope, name)
+        if self.local_context_file:
+            for scope in scopes:
+                if names is None:
+                    self.local_context_file.remove_section(scope)
+                else:
+                    for name in names:
+                        self.local_context_file.remove_option(scope, name)
 
     def get_value(self, scopes=None, names=None):
-        if scopes is None:
-            scopes = self._local_context_file.sections()
-
         result = {}
+
+        if not self.local_context_file:
+            return result
+
+        if scopes is None:
+            scopes = self.local_context_file.sections()
         for scope in scopes:
             try:
                 if names is None:
-                    for name, value in self._local_context_file.items(scope):  # may raise NoSectionError
+                    for name, value in self.local_context_file.items(scope):  # may raise NoSectionError
                         if scope not in result:
                             result[scope] = {}
                         result[scope][name] = value
                 else:
                     for name in names:
-                        value = self._local_context_file.get(scope, name)  # may raise NoOptionError
+                        value = self.local_context_file.get(scope, name)  # may raise NoOptionError
                         if scope not in result:
                             result[scope] = {}
                         result[scope][name] = value
