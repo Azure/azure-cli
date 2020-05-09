@@ -127,7 +127,7 @@ class AzCLILocalContext(object):
 
     def delete_file(self):
         if not self.local_context_file:
-            False
+            return False
         try:
             os.remove(self.local_context_file.config_path)
             parent_dir = os.path.dirname(self.local_context_file.config_path)
