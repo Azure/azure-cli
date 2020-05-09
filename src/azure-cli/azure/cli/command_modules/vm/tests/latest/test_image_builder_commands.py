@@ -83,13 +83,14 @@ class ImageTemplateTest(ScenarioTest):
             'role_name': role_name,
             'role_definition': role_definition
         })
-        out = self.cmd('role definition create --role-definition \'{role_definition}\'').get_output_in_json()
+        # self.cmd('role definition create --role-definition \'{role_definition}\'').get_output_in_json()
         scope = '/subscriptions/{0}/resourceGroups/{1}'.format(subscription_id, rg)
         self.kwargs.update({
             'scope': scope
         })
-        time.sleep(15)
-        self.cmd('role assignment create --assignee {identity_id} --role "{role_name}" --scope {scope}')
+        time.sleep(30az )
+        # self.cmd('role assignment create --assignee {identity_id} --role "{role_name}" --scope {scope}')
+        self.cmd('role assignment create --assignee {identity_id} --role Contributor --scope {scope}')
 
     # Test framework has problem, hence, live only.
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_file_')
