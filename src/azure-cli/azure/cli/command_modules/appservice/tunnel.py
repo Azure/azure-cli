@@ -95,7 +95,7 @@ class TunnelServer:
         headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(self.remote_user_name, self.remote_password))
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')
         if not self.instance is None:
-            headers['Cookie'] = 'ARRAffinity='+self.instance
+            headers['Cookie'] = 'ARRAffinity=' + self.instance
         r = http.request(
             'GET',
             url,
@@ -141,8 +141,8 @@ class TunnelServer:
             self.client.settimeout(60 * 60)
             host = 'wss://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx')
             basic_auth_header = ['Authorization: Basic {}'.format(basic_auth_string)]
-            if not self.instance is None:
-                basic_auth_header.append('Cookie: ARRAffinity='+self.instance)
+            if self.instance is not None:
+                basic_auth_header.append('Cookie: ARRAffinity=' + self.instance)
             cli_logger = get_logger()  # get CLI logger which has the level set through command lines
             is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
             if is_verbose:

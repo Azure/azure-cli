@@ -881,7 +881,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
 
 def list_instances(cmd, resource_group_name, name, slot=None):
     # API Version 2019-08-01 does not return slot instances, however 2018-02-01 does
-    return  _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
 # Currently using hardcoded values instead of this function. This function calls the stacks API;
@@ -3659,9 +3659,10 @@ def _ping_scm_site(cmd, resource_group, name, instance=None):
     import urllib3
     authorization = urllib3.util.make_headers(basic_auth='{}:{}'.format(user_name, password))
     cookies = {}
-    if not instance is None:
+    if instance is not None:
         cookies['ARRAffinity'] = instance
-    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify(), cookies=cookies)
+    requests.get(scm_url + '/api/settings', headers=authorization, verify=not should_disable_connection_verify(),
+                 cookies=cookies)
 
 
 def is_webapp_up(tunnel_server):
@@ -3681,16 +3682,15 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
     if port is None:
         port = 0  # Will auto-select a free port from 1024-65535
         logger.info('No port defined, creating on random free port')
-    
+
     # Validate that we have a known instance (case-sensitive)
-    if not instance is None:
+    if instance is not None:
         instances = list_instances(cmd, resource_group_name, name, slot=slot)
         instance_names = set(i.name for i in instances)
         if instance not in instance_names:
-            if not slot is None:
+            if slot is not None:
                 raise CLIError("The provided instance '{}' is not valid for this webapp and slot.".format(instance))
-            else:
-                raise CLIError("The provided instance '{}' is not valid for this webapp.".format(instance))
+            raise CLIError("The provided instance '{}' is not valid for this webapp.".format(instance))
 
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
 
