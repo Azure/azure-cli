@@ -50,6 +50,6 @@ class AcrTokenCommandsTests(ScenarioTest):
             self.check('passwords[1].name', 'password2')
         ])
 
-        output = self.cmd('acr token create -r {registry} -n {token_short_lived} --repository foo content/read --days 1').get_output_in_json()
+        output = self.cmd('acr token create -r {registry} -n {token_short_lived} --repository foo content/read --expiration-in-days 1').get_output_in_json()
         tomorrow = datetime.datetime.strptime(output['credentials']['passwords'][0]['expiry'].split('T')[0], "%Y-%m-%d")
-        self.assertEqual(tomorrow-today, datetime.timedelta(1))
+        self.assertEqual(tomorrow - today, datetime.timedelta(1))

@@ -22,14 +22,14 @@ def acr_token_create(cmd,
                      status=None,
                      resource_group_name=None,
                      no_passwords=None,
-                     days=None):
+                     expiration_in_days=None):
     from knack.log import get_logger
     from ._utils import get_resource_id_by_registry_name
 
     if bool(repository_actions_list) == bool(scope_map_name):
         raise CLIError("usage error: --repository | --scope-map-name")
-    if no_passwords and days is not None:
-        raise CLIError("usage error: --no-passwords and --days are mutually exclusive.")
+    if no_passwords and expiration_in_days is not None:
+        raise CLIError("usage error: --no-passwords and --expiration-in-days are mutually exclusive.")
 
     resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
 
@@ -57,7 +57,7 @@ def acr_token_create(cmd,
         return poller
 
     token = LongRunningOperation(cmd.cli_ctx)(poller)
-    _create_default_passwords(cmd, resource_group_name, registry_name, token, logger, days)
+    _create_default_passwords(cmd, resource_group_name, registry_name, token, logger, expiration_in_days)
     return token
 
 
@@ -83,11 +83,11 @@ def _create_default_scope_map(cmd, resource_group_name, registry_name, token_nam
     return scope_map.id
 
 
-def _create_default_passwords(cmd, resource_group_name, registry_name, token, logger, days):
+def _create_default_passwords(cmd, resource_group_name, registry_name, token, logger, expiration_in_days):
     from ._client_factory import cf_acr_token_credentials, cf_acr_registries
     cred_client = cf_acr_token_credentials(cmd.cli_ctx)
     poller = acr_token_credential_generate(cmd, cred_client, registry_name, token.name,
-                                           password1=True, password2=True, days=days,
+                                           password1=True, password2=True, expiration_in_days=expiration_in_days,
                                            resource_group_name=resource_group_name)
     credentials = LongRunningOperation(cmd.cli_ctx)(poller)
     setattr(token.credentials, 'username', credentials.username)
@@ -183,7 +183,7 @@ def acr_token_credential_generate(cmd,
                                   token_name,
                                   password1=False,
                                   password2=False,
-                                  days=None,
+                                  expiration_in_days=None,
                                   resource_group_name=None):
 
     from ._utils import get_resource_id_by_registry_name
@@ -195,9 +195,9 @@ def acr_token_credential_generate(cmd,
     # We only want to specify a password if only one was passed.
     name = ("password1" if password1 else "password2") if password1 ^ password2 else None
     expiry = None
-    if days:
+    if expiration_in_days:
         from ._utils import add_days_to_now
-        expiry = add_days_to_now(days)
+        expiry = add_days_to_now(expiration_in_days)
 
     GenerateCredentialsParameters = cmd.get_models('GenerateCredentialsParameters')
 
