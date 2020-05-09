@@ -900,14 +900,12 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
                         namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
     if off:
         if email is not None or webhook is not None or time is not None:
-            # I don't want to disturb users. So I warn instead of raising an error.
+            # I don't want to disrupt users. So I warn instead of raising an error.
             logger.warning('If --off, other parameters will be ignored.')
         return client.global_schedules.delete(resource_group_name, name)
 
     if time is None:
         raise CLIError('usage error: --time is a required parameter')
-    if email is not None and webhook is None:
-        raise CLIError('usage error: --webhook is missing')
     daily_recurrence = {'time': time}
     notification_settings = None
     if webhook:
