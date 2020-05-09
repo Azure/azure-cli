@@ -876,7 +876,6 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
                 JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
                 JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
 
-
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
     @StorageAccountPreparer(location="eastus2euap", kind="StorageV2")
