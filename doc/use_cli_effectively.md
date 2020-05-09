@@ -105,7 +105,7 @@ There may be cases where a service you are interested in does not have CLI comma
 
 If neither generic update arguments nor `az resource` meets your needs, you can use `az rest` command to call the REST API. It automatically authenticates using the credential logged in and sets header `Content-Type: application/json`.
 
-This is extremely useful for calling [Microsoft Graph API](https://docs.microsoft.com/en-us/graph/api/overview?toc=./ref/toc.json&view=graph-rest-1.0) which is not supported by CLI commands yet ([#12946](https://github.com/Azure/azure-cli/issues/12946)). 
+This is extremely useful for calling [Microsoft Graph API](https://docs.microsoft.com/en-us/graph/api/overview?toc=./ref/toc.json&view=graph-rest-1.0) which is not supported by CLI commands yet ([#12946](https://github.com/Azure/azure-cli/issues/12946)).
 
 For example, to update `redirectUris` for an [Application](https://docs.microsoft.com/en-us/graph/api/resources/application?view=graph-rest-1.0), we call the [Update application](https://docs.microsoft.com/en-us/graph/api/application-update?view=graph-rest-1.0&tabs=http) REST API with:
 
@@ -113,7 +113,7 @@ For example, to update `redirectUris` for an [Application](https://docs.microsof
 # Line breaks for legibility only
 
 # Get the application
-az rest --method GET 
+az rest --method GET
         --url 'https://graph.microsoft.com/v1.0/applications/b4e4d2ab-e2cb-45d5-a31a-98eb3f364001'
 
 # Update `redirectUris` for `web` property
@@ -121,7 +121,7 @@ az rest --method PATCH
         --url 'https://graph.microsoft.com/v1.0/applications/b4e4d2ab-e2cb-45d5-a31a-98eb3f364001'
         --body '{"web":{"redirectUris":["https://myapp.com"]}}'
 ```
- 
+
 ## Quoting issues
 
 This becomes an issue because when the command shell (Bash, Zsh, Windows Command Prompt, PowerShell, etc) parses the CLI command, it will interpret the quotes and spaces. Always refer to the documents when you are uncertain about the usage of a shell:
@@ -149,17 +149,8 @@ To avoid surprises, here are a few suggestions:
     - `--arg foo bar`: OK. Unquoted, space-separated list
     - `--arg "foo" "bar"`: OK: Quoted, space-separated list
     - `--arg "foo bar"`: BAD. This is a string with a space in it, not a space-separated list.
-9. When running Azure CLI commands in PowerShell, parsing errors will occur when the arguments contain special characters of PowerShell, such as at `@`. You can solve this problem by adding `` ` `` before the special character to escape it, or by enclosing the argument with single or double quotes `'`/`"`. For example, `az group deployment create --parameters @parameters.json` doesn't work in PowerShell because `@` is parsed as a [splatting symbol](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting). To fix this, you may change the argument to `` `@parameters.json`` or `'@parameters.json'`. 
-10. On Windows, `az` is a batch script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`). When there is no space in an argument, PowerShell will strip the quotes and pass the argument to Command Prompt. This causes the argument to be parsed again by Command Prompt. For example, when running `az "a&b"` in PowerShell, `b` is treated as a separate command instead of part of the argument like Command Prompt does, because quotes are removed by PowerShell and the ampersand `&` is parsed again by Command Prompt as a [command separator](https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-xp/bb490954(v=technet.10)#using-multiple-commands-and-conditional-processing-symbols). 
-     
-    To prevent this, you may use [stop-parsing symbol](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) `--%` between `az` and arguments like `az --% vm create ...`. This can also solve the above-mentioned special character issue and is recommended whenever any issue happens when invoking a batch script from PowerShell.
-     
-    > The stop-parsing symbol (--%), introduced in PowerShell 3.0, directs PowerShell to refrain from interpreting input as PowerShell commands or expressions.
-    >
-    > When it encounters a stop-parsing symbol, PowerShell treats the remaining characters in the line as a literal.
-     
-    This issue is tracked at https://github.com/PowerShell/PowerShell/issues/1995
-11. When using `--query` with a command, some characters of [JMESPath](https://jmespath.org/specification.html) need to be escaped in the shell:
+9. When running Azure CLI commands in PowerShell, parsing errors will occur when the arguments contain special characters of PowerShell, such as at `@`. You can solve this problem by adding `` ` `` before the special character to escape it, or by enclosing the argument with single or double quotes `'`/`"`. For example, `az group deployment create --parameters @parameters.json` doesn't work in PowerShell because `@` is parsed as a [splatting symbol](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_splatting). To fix this, you may change the argument to `` `@parameters.json`` or `'@parameters.json'`.
+10. When using `--query` with a command, some characters of [JMESPath](https://jmespath.org/specification.html) need to be escaped in the shell:
     ```sh
     # Wrong, as the dash needs to be quoted in a JMESPath query
     $ az version --query azure-cli
@@ -173,25 +164,26 @@ To avoid surprises, here are a few suggestions:
     $ az version --query '"azure-cli"'
     "2.4.0"
     ```
-12. The best way to troubleshoot a quoting issue is to run the command with `--debug` flag. It reveals the actual arguments received by CLI in [Python's syntax](https://docs.python.org/3/tutorial/introduction.html#strings). For example, in Bash: 
+11. The best way to troubleshoot a quoting issue is to run the command with `--debug` flag. It reveals the actual arguments received by CLI in [Python's syntax](https://docs.python.org/3/tutorial/introduction.html#strings). For example, in Bash:
 
     ```sh
     # Wrong, as quotes and spaces are interpreted by Bash
     $ az {"key": "value"} --debug
     Command arguments: ['{key:', 'value}', '--debug']
-    
+
     # Wrong, as quotes are interpreted by Bash
     $ az {"key":"value"} --debug
     Command arguments: ['{key:value}', '--debug']
-    
+
     # Correct
     $ az '{"key":"value"}' --debug
     Command arguments: ['{"key":"value"}', '--debug']
-    
+
     # Correct
     $ az "{\"key\":\"value\"}" --debug
     Command arguments: ['{"key":"value"}', '--debug']
     ```
+12. Due to a known issue of PowerShell, some extra escaping rules apply, see [Quoting issues with PowerShell](quoting-issues-with-powershell.md) for more information
 
 ## Work behind a proxy
 
