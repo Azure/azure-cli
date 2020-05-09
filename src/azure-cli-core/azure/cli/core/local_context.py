@@ -37,13 +37,18 @@ def _get_current_username(cli_ctx):
     return username
 
 
-class AzCLILocalContext(object):  # pylint: disable=too-many-instance-attributes
+class AzCLILocalContext(object):
+    # pylint: disable=too-many-instance-attributes
+    # pylint: disable=attribute-defined-outside-init
 
     def __init__(self, cli_ctx):
         self.cli_ctx = cli_ctx
         self.config = cli_ctx.config
         self.dir_name = os.path.basename(self.config.config_dir)
-        self.username = _get_current_username(cli_ctx)
+        self.initialize()
+
+    def initialize(self):
+        self.username = _get_current_username(self.cli_ctx)
         if self.username is not None:
             self.file_name = LOCAL_CONTEXT_FILE.format(self.username)
             self.is_on = self.config.getboolean(LOCAL_CONTEXT_CONFIG_SECTION, self.username, False)
@@ -103,7 +108,6 @@ class AzCLILocalContext(object):  # pylint: disable=too-many-instance-attributes
                         with open(file_path, 'w'):
                             pass
                         os.chmod(file_path, stat.S_IRUSR | stat.S_IWUSR)
-                        self._local_context_file = None
                         self._load_local_context_file()
                         logger.warning('Initiate local context in %s', self.current_dir)
                     except Exception:  # pylint: disable=broad-except

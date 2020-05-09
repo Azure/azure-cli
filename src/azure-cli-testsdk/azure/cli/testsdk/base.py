@@ -189,6 +189,7 @@ class LocalContextScenarioTest(ScenarioTest):
 
     def setUp(self):
         super(LocalContextScenarioTest, self).setUp()
+        self.cli_ctx.local_context.initialize()
         os.chdir(self.working_dir)
         self.cmd('local-context on')
 
