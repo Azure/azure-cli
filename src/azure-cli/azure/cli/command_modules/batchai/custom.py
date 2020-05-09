@@ -764,8 +764,6 @@ def _get_files_from_bfs(cli_ctx, bfs, path, expiry):
     :param str path: path to list files from.
     :param int expiry: SAS expiration time in minutes.
     """
-    from azure.storage.blob import BlockBlobService
-    from azure.storage.blob.models import Blob, BlobPermissions
     BlockBlobService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
     Blob = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob#Blob')
     BlobPermissions = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlobPermissions')
