@@ -96,7 +96,8 @@ class ImageTemplateTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_file_')
     @live_only()
     def test_image_builder_template_file(self, resource_group):
-        self._assign_ib_permissions(resource_group)
+        # self._assign_ib_permissions(resource_group)
+        self._identity_role(resource_group)
 
         # URL
         self.cmd('image builder create -g {rg} -n tmp1 --image-template "https://raw.githubusercontent.com/qwordy/azvmimagebuilder/master/quickquickstarts/0_Creating_a_Custom_Linux_Managed_Image/example.json"',
@@ -124,7 +125,8 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic')
     def test_image_builder_basic(self, resource_group):
-        self._assign_ib_permissions(resource_group)
+        # self._assign_ib_permissions(resource_group)
+        self._identity_role(resource_group)
 
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
@@ -137,7 +139,7 @@ class ImageTemplateTest(ScenarioTest):
         })
 
         # test template creation works. use cache
-        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --defer',
+        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} {script} --image-source {img_src} --identity {ide} --defer',
                  checks=[
                      self.check('properties.source.offer', 'UbuntuServer'), self.check('properties.source.publisher', 'Canonical'),
                      self.check('properties.source.sku', '18.04-LTS'), self.check('properties.source.version', '18.04.201808140'),
@@ -197,7 +199,7 @@ class ImageTemplateTest(ScenarioTest):
 
         # test that outputs can be set through create command.
         out_3 = "/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/images/img_2=centralus"
-        self.cmd('image builder create -n {tmpl_02} -g {rg} --scripts {script} --image-source {img_src} --build-timeout 22'
+        self.cmd('image builder create -n {tmpl_02} -g {rg} --identity {ide} --scripts {script} --image-source {img_src} --build-timeout 22'
                  ' --managed-image-destinations img_1=westus ' + out_3,
                  checks=[
                      self.check('name', '{tmpl_02}'), self.check('provisioningState', 'Succeeded'),
