@@ -557,10 +557,15 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             'extra_param_tf': os.path.join(curr_dir, 'simple_extra_param_deploy.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60),
-            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60)
+            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
+            'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\')
         })
 
         self.cmd('deployment group validate --resource-group {rg} --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group validate --resource-group {rg} --template-file {Japanese-characters-tf}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
