@@ -472,6 +472,16 @@ class AcrCommandsTests(ScenarioTest):
             self.check('dataEndpoints[1].endpoint', '*.blob.core.windows.net'),
         ])
 
+    @ResourceGroupPreparer()
+    def test_acr_with_public_network_access(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20),
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium',
+                 checks=self.check('publicNetworkAccess', 'Enabled'))
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --public-network-enabled false',
+                 checks=self.check('publicNetworkAccess', 'Disabled'))
+
     @ResourceGroupPreparer(location='centraluseuap')
     def test_acr_with_private_endpoint(self, resource_group):
         self.kwargs.update({

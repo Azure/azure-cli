@@ -940,6 +940,7 @@ class DeploymentThruUriTest(ScenarioTest):
         self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
+            self.check('properties.templateLink.uri', '{tf}'),
         ]).get_output_in_json()['name']
 
         self.cmd('group deployment show -g {rg} -n {dn}',
@@ -947,6 +948,19 @@ class DeploymentThruUriTest(ScenarioTest):
 
         self.cmd('group deployment delete -g {rg} -n {dn}')
         self.cmd('group deployment list -g {rg}',
+                 checks=self.is_empty())
+
+        self.kwargs['dn'] = self.cmd('deployment group create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('properties.templateLink.uri', '{tf}'),
+        ]).get_output_in_json()['name']
+
+        self.cmd('deployment group show -g {rg} -n {dn}',
+                 checks=self.check('name', '{dn}'))
+
+        self.cmd('deployment group delete -g {rg} -n {dn}')
+        self.cmd('deployment group list -g {rg}',
                  checks=self.is_empty())
 
 
