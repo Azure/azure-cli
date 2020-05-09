@@ -416,6 +416,8 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
             content['location'] = obj['location']
         if 'tags' in obj:
             content['tags'] = obj['tags']
+        if 'identity' in obj:
+            content['identity'] = obj['identity']
         return client.virtual_machine_image_templates.create_or_update(
             parameters=content, resource_group_name=resource_group_name, image_template_name=image_template_name)
 

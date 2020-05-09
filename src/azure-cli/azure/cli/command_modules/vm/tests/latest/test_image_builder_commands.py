@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import time
 import unittest
+import mock
 from knack.util import CLIError
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
@@ -89,8 +90,9 @@ class ImageTemplateTest(ScenarioTest):
             'scope': scope
         })
         time.sleep(30)
-        # self.cmd('role assignment create --assignee {identity_id} --role "{role_name}" --scope {scope}')
-        self.cmd('role assignment create --assignee {identity_id} --role Contributor --scope {scope}')
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            # self.cmd('role assignment create --assignee {identity_id} --role "{role_name}" --scope {scope}')
+            self.cmd('role assignment create --assignee {identity_id} --role Contributor --scope {scope}')
 
     # Test framework has problem, hence, live only.
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_file_')
@@ -217,7 +219,8 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
     def test_image_builder_basic_sig(self, resource_group):
-        self._assign_ib_permissions(resource_group)
+        # self._assign_ib_permissions(resource_group)
+        self._identity_role(resource_group)
 
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
@@ -239,7 +242,7 @@ class ImageTemplateTest(ScenarioTest):
 
         self.kwargs['sig_out'] = "{}/{}=westus,eastus".format(self.kwargs['gallery'], self.kwargs['sig1'])
         output = self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} '
-                          '--shared-image-destinations {sig_out}',
+                          '--shared-image-destinations {sig_out} --identity {ide}',
                           checks=[
                               self.check('distribute[0].replicationRegions[0]', 'westus'),
                               self.check('distribute[0].replicationRegions[1]', 'eastus'),
@@ -285,14 +288,15 @@ class ImageTemplateTest(ScenarioTest):
 
         # test template creation from managed image
         img_tmpl = self.cmd('image builder create -n {tmpl_2} -g {rg} --image-source {image_id} '
-                            '--managed-image-destinations {img_2}={loc} --scripts {script}').get_output_in_json()
+                            '--managed-image-destinations {img_2}={loc} --scripts {script} --identity {ide}').get_output_in_json()
 
         self.assertEqual(img_tmpl['source']['imageId'].lower(), self.kwargs['image_id'].lower())
         self.assertEqual(img_tmpl['source']['type'].lower(), 'managedimage')
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_sig')
     def test_image_build_shared_image(self, resource_group, resource_group_location):
-        self._assign_ib_permissions(resource_group)
+        # self._assign_ib_permissions(resource_group)
+        self._identity_role(resource_group)
 
         self.kwargs.update({
             'loc': resource_group_location,
@@ -309,7 +313,7 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1')
 
-        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --defer')
+        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
         self.cmd('image builder output add -n {tmpl} -g {rg} --gallery-name {gallery} --gallery-image-definition {sig1}'
                  ' --gallery-replication-regions westus --defer',
                  checks=[
@@ -337,7 +341,7 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
         # test template creation from sig image
-        img_tmpl = self.cmd('image builder create -n {tmpl_2} -g {rg} --image-source {image_id} '
+        img_tmpl = self.cmd('image builder create -n {tmpl_2} -g {rg} --image-source {image_id} --identity {ide}'
                             '--shared-image-destinations "{gallery}/{sig1}={loc}" --scripts {script}').get_output_in_json()
 
         self.assertEqual(img_tmpl['source']['imageVersionId'].lower(), self.kwargs['image_id'].lower())
@@ -345,7 +349,8 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_customizers')
     def test_image_builder_customizers(self, resource_group, resource_group_location):
-        self._assign_ib_permissions(resource_group)
+        # self._assign_ib_permissions(resource_group)
+        self._identity_role(resource_group)
 
         self.kwargs.update({
             'tmpl': 'template01',
@@ -369,7 +374,7 @@ class ImageTemplateTest(ScenarioTest):
         })
 
         # create and build image template
-        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script_url} --image-source {img_src} --managed-image-destinations {img}={loc} --defer',
+        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script_url} --image-source {img_src} --managed-image-destinations {img}={loc} --identity {ide} --defer',
                  checks=[
                      self.check('properties.customize[0].name', self.kwargs['script_url'].rsplit("/", 1)[1]),
                      self.check('properties.customize[0].scriptUri', '{script_url}'),
@@ -437,7 +442,8 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_customizers', location='westus2')
     def test_image_template_outputs(self, resource_group, resource_group_location):
-        self._assign_ib_permissions(resource_group)
+        # self._assign_ib_permissions(resource_group)
+        self._identity_role(resource_group)
 
         self.kwargs.update({
             'tmpl_01': 'template01',
@@ -449,7 +455,7 @@ class ImageTemplateTest(ScenarioTest):
             'vhd_out': 'vhd_1',
         })
 
-        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} --defer')
+        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} identity {ide} --defer')
 
         self.cmd('image builder output add -n {tmpl_01} -g {rg} --managed-image {img_1} --managed-image-location {loc} --defer',
                  checks=[
@@ -495,7 +501,8 @@ class ImageTemplateTest(ScenarioTest):
                 with self.assertRaisesRegexp(CLIError, "This command requires --defer"):
                     self.cmd(cmd)
 
-        self._assign_ib_permissions(resource_group)
+        # self._assign_ib_permissions(resource_group)
+        self._identity_role(resource_group)
 
         self.kwargs.update({
             'tmpl': 'template01',
