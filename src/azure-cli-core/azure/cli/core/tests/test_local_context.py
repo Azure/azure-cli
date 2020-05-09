@@ -8,14 +8,13 @@ import unittest
 
 from azure.cli.core.local_context import AzCLILocalContext, ALL
 from azure.cli.core.mock import DummyCli
-from azure.cli.testsdk import create_random_name
 
 
 class TestLocalContext(unittest.TestCase):
 
     @mock.patch('azure.cli.core.local_context._get_current_username')
     def test_local_context(self, get_username):
-        get_username.return_value = '{}@example.com'.format(create_random_name('example_', 24))
+        get_username.return_value = 'example_core_user@example.com'
         local_context = AzCLILocalContext(DummyCli())
         self.assertFalse(local_context.is_on)
         local_context.turn_on()

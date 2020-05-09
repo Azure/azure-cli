@@ -6,7 +6,7 @@
 from knack.util import CLIError
 
 
-def validate_local_context(cmd, namespace):
+def validate_local_context(cmd, namespace):  # pylint: disable=unused-argument
     if not cmd.cli_ctx.local_context.is_on:
         raise CLIError('Local context is off, this command can only be run when local context is on.')
     if not cmd.cli_ctx.local_context.current_dir:

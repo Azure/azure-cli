@@ -291,7 +291,8 @@ def clear_local_context(cmd, yes=False, purge=False):
         if cmd.cli_ctx.local_context.delete_file():
             logger.warning('Local context in %s is purged.', cmd.cli_ctx.local_context.effective_working_directory())
         else:
-            logger.warning('Fail to purge local context in %s.', cmd.cli_ctx.local_context.effective_working_directory())
+            logger.warning(
+                'Fail to purge local context in %s.', cmd.cli_ctx.local_context.effective_working_directory())
     else:
         cmd.cli_ctx.local_context.clear()
         logger.warning('Local context in %s is cleared.', cmd.cli_ctx.local_context.effective_working_directory())
