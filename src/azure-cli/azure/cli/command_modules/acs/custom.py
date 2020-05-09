@@ -3234,7 +3234,7 @@ def _remove_osa_nulls(managed_clusters):
     attrs = ['tags', 'plan', 'type', 'id']
     for managed_cluster in managed_clusters:
         for attr in attrs:
-            if getattr(managed_cluster, attr, None) is None:
+            if hasattr(managed_cluster, attr) and getattr(managed_cluster, attr) is None:
                 delattr(managed_cluster, attr)
     return managed_clusters
 
