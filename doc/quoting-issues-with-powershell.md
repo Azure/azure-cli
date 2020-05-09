@@ -63,6 +63,15 @@ az: 'a' is not in the 'az' command group.
 operable program or batch file.
 ```
 
+This is what `cmd.exe` or Windows system sees:
+
+```cmd
+>az a&b --debug
+az: 'a' is not in the 'az' command group. 
+'b' is not recognized as an internal or external command,
+operable program or batch file.
+```
+
 To solve it:
 
 ```powershell
@@ -88,7 +97,18 @@ This typically happens when passing a JSON to `az`. This is because double quote
 # Wrong! Note that the double quotes (") are lost
 > python.exe -c "import sys; print(sys.argv)" '{"key": "value"}'
 ['-c', '{key: value}']
+```
 
+This is what `cmd.exe` or Windows system sees:
+
+```cmd
+>python.exe -c "import sys; print(sys.argv)" "{"key": "value"}"
+['-c', '{key: value}']
+```
+
+To solve it:
+
+```powershell
 # Escape double quotes (") with backward-slashes (\) as required by Command Prompt,
 # then quote the string with single quotes (') as required by PowerShell
 > python.exe -c "import sys; print(sys.argv)" '{\"key\": \"value\"}'
