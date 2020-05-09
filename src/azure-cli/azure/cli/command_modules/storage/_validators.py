@@ -1170,6 +1170,17 @@ def validator_delete_retention_days(namespace):
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
 
 
+def validate_delete_retention_days(namespace):
+    if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
+        raise ValueError(
+            "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
+            "is set to true")
+
+    if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
+        raise ValueError(
+            "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
+
+
 # pylint: disable=too-few-public-methods
 class BlobRangeAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
