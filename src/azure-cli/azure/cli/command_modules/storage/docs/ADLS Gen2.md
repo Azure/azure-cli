@@ -196,7 +196,7 @@ az storage fs directory list \
     -f myfilesystem
 ```
 
-#### Move a directory to a new path in ADLS Gen2 account
+##### Move a directory to a new path in ADLS Gen2 account
 - Move a directory "mydir" to "mynewdir" in the same file system "myfilesystem"
 ```
 az storage fs directory move \
@@ -213,7 +213,7 @@ az storage fs directory move \
     -new-directory "mymewfilesystem/mydir"
 ```
 
-#### Delete a directory in ADLS Gen2 file system
+##### Delete a directory in ADLS Gen2 file system
 - Delete a directory with prompt message
 ```
 az storage fs directory delete \
@@ -377,7 +377,7 @@ az storage fs file move \
     -new-path "mymewfilesystem/mynewfile"
 ```
 
-#### Delete a file in ADLS Gen2 file system
+##### Delete a file in ADLS Gen2 file system
 - Delete a file with prompt message
 ```
 az storage fs file delete \
