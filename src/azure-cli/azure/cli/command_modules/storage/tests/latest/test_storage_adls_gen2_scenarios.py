@@ -55,7 +55,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         filesystem1 = self.create_random_name(prefix='filesystem', length=24)
         self.storage_cmd('storage fs create -n {} --public-access file', account_info, filesystem1)
-
+        self.storage_cmd('storage fs exists -n {}', account_info, filesystem1) \
+            .assert_with_checks(JMESPathCheck('exists', True))
         self.storage_cmd('storage fs show -n {}', account_info, filesystem1)\
             .assert_with_checks(JMESPathCheck('name', filesystem1)) \
             .assert_with_checks(JMESPathCheck('publicAccess', 'file'))

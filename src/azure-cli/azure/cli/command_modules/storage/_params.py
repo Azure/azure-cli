@@ -1102,11 +1102,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies how much metadata to include in the response payload.')
         c.argument('marker', validator=validate_marker, nargs='+')
 
-    for item in ['create', 'show', 'delete', 'metadata update', 'metadata show']:
+    for item in ['create', 'show', 'delete', 'exists', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['--name', '-n'],
                     help="File system name.", required=True)
-            c.extra('timeout', help='The timeout parameter is expressed in seconds.')
+            c.extra('timeout', timeout_type)
 
     with self.argument_context('storage fs create') as c:
         from .sdkutil import get_fs_access_type_names
@@ -1125,11 +1125,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
             c.extra('directory_path', options_list=['--name', '-n'],
                     help="The name of directory.", required=True)
+            c.extra('timeout', timeout_type)
 
     with self.argument_context('storage fs directory create') as c:
         c.extra('permissions', permissions_type)
         c.extra('umask', umask_type)
-        c.extra('timeout', timeout_type)
 
     with self.argument_context('storage fs directory list') as c:
         c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
@@ -1165,6 +1165,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                     help='File system name.', required=True)
             c.extra('path', options_list=['-p', '--path'], help="The file path in a file system.",
                     required=True)
+            c.extra('timeout', timeout_type)
             c.argument('content', help='Content to be appended to file.')
 
     with self.argument_context('storage fs file create') as c:

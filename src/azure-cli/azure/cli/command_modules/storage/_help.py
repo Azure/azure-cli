@@ -1466,8 +1466,16 @@ helps['storage fs delete'] = """
 type: command
 short-summary: Delete a file system in ADLS Gen2 account.
 examples:
-    - name: Delete a a file system in ADLS Gen2 account.
+    - name: Delete a file system in ADLS Gen2 account.
       text: az storage fs delete -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs exists'] = """
+type: command
+short-summary:Check for the existence of a file system in ADLS Gen2 account.
+examples:
+    - name: Check for the existence of a file system in ADLS Gen2 account.
+      text: az storage fs exists -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
 """
 
 helps['storage fs list'] = """

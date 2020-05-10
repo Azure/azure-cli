@@ -16,21 +16,21 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 
-def append_file(client, content):
-    file = client.get_file_properties()
+def append_file(client, content, timeout=None):
+    file = client.get_file_properties(timeout=timeout)
     # START append data
-    client.append_data(data=content, offset=file.size, length=len(content))
+    client.append_data(data=content, offset=file.size, length=len(content), timeout=timeout)
     # END append data
-    return client.flush_data(offset=file.size + len(content))
+    return client.flush_data(offset=file.size + len(content), timeout=timeout)
 
 
-def download_file(client, destination_path=None, overwrite=True):
+def download_file(client, destination_path=None, overwrite=True, timeout=None):
     destination_folder = os.path.dirname(destination_path) if destination_path else ""
     if destination_folder and not os.path.exists(destination_folder):
         mkdir_p(destination_folder)
 
     if not destination_folder or os.path.isdir(destination_path):
-        file = client.get_file_properties()
+        file = client.get_file_properties(timeout=timeout)
         file_name = file.name.split("/")[-1]
         destination_path = os.path.join(destination_path, file_name) \
             if destination_path else file_name
@@ -39,32 +39,32 @@ def download_file(client, destination_path=None, overwrite=True):
         raise CLIError('The specified path already exists. Please change to a valid path. ')
 
     with open(destination_path, 'wb') as stream:
-        download = client.download_file()
+        download = client.download_file(timeout=timeout)
         download_content = download.readall()
         stream.write(download_content)
 
 
-def exists(cmd, client):
+def exists(cmd, client, timeout=None):
     try:
-        client.get_file_properties()
+        client.get_file_properties(timeout=timeout)
         return True
     except HttpResponseError as ex:
-        from azure.cli.command_modules.storage.sdkutil import _dont_fail_on_exist
+        from azure.cli.command_modules.storage.track2_util import _dont_fail_on_exist
         StorageErrorCode = cmd.get_models("_shared.models#StorageErrorCode",
                                           resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
         _dont_fail_on_exist(ex, StorageErrorCode.blob_not_found)
         return False
 
 
-def get_file_properties(client):
+def get_file_properties(client, timeout=None):
     from .._transformers import transform_fs_access_output
 
-    prop = client.get_file_properties()
+    prop = client.get_file_properties(timeout=timeout)
     if prop.content_settings.content_md5 is not None:
         from msrest import Serializer
         prop.content_settings.content_md5 = Serializer.serialize_bytearray(prop.content_settings.content_md5)
 
-    acl = transform_fs_access_output(client.get_access_control())
+    acl = transform_fs_access_output(client.get_access_control(timeout=timeout))
     result = dict(prop, **acl)
     return result
 

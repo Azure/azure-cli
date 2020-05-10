@@ -89,16 +89,3 @@ def get_fs_access_type(cli_ctx, name):
     if name == 'filesystem':
         return get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILEDATALAKE, 'PublicAccess', mod='_models').FileSystem
     raise KeyError
-
-
-def _dont_fail_on_exist(ex, error_code):
-    """
-    don't throw exception if the resource doesn't exist.
-    This is called by create_* APIs with fail_on_exist=False
-    :param error:
-    :param resource:
-    :return:
-    """
-    if ex.error_code == error_code:
-        return False
-    raise ex
