@@ -1107,9 +1107,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.extra('file_system_name', options_list=['--name', '-n'],
                     help="File system name.", required=True)
             c.extra('timeout', help='The timeout parameter is expressed in seconds.')
-            c.extra('lease', options_list=['--lease-id'],
-                    help="If specified, operation only succeeds if the file system's lease is active and matches "
-                         "this ID.")
 
     with self.argument_context('storage fs create') as c:
         from .sdkutil import get_fs_access_type_names

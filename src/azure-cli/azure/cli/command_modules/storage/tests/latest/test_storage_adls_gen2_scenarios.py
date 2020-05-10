@@ -240,3 +240,16 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         self.storage_cmd('storage fs file exists -p {} -f {}', account_info, file, new_filesystem) \
             .assert_with_checks(JMESPathCheck('exists', False))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True)
+    def test_adls_metadata_scenarios(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        filesystem = self.create_file_system(account_info)
+        directory = self.create_random_name(prefix="dir", length=12)
+        file = self.create_random_name(prefix="file", length=12)
+
+        self.storage_cmd('storage fs metadata update -n {} --metadata a=b c=d',
+                         account_info, filesystem)
+        self.storage_cmd('storage fs metadata show -n {}', account_info, filesystem) \
+            .assert_with_checks(JMESPathCheck('a', 'b'), JMESPathCheck('c', 'd'))
