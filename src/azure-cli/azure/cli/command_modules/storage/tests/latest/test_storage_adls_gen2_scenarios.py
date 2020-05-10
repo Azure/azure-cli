@@ -253,3 +253,17 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                          account_info, filesystem)
         self.storage_cmd('storage fs metadata show -n {}', account_info, filesystem) \
             .assert_with_checks(JMESPathCheck('a', 'b'), JMESPathCheck('c', 'd'))
+
+        self.storage_cmd('storage fs directory create -n {} -f {}',
+                         account_info, directory, filesystem)
+        self.storage_cmd('storage fs directory metadata update -n {} -f {} --metadata foo=bar moo=bak',
+                         account_info, directory, filesystem)
+        self.storage_cmd('storage fs directory metadata show -n {} -f {}', account_info, directory, filesystem) \
+            .assert_with_checks(JMESPathCheck('foo', 'bar'), JMESPathCheck('moo', 'bak'))
+
+        self.storage_cmd('storage fs file create -p {} -f {}',
+                         account_info, file, filesystem)
+        self.storage_cmd('storage fs file metadata update -p {} -f {} --metadata test=beta cat=file',
+                         account_info, file, filesystem)
+        self.storage_cmd('storage fs file metadata show -p {} -f {}', account_info, file, filesystem) \
+            .assert_with_checks(JMESPathCheck('test', 'beta'), JMESPathCheck('cat', 'file'))

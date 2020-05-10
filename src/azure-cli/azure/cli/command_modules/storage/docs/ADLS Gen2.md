@@ -123,6 +123,19 @@ az storage fs delete -n myfilesystem
 az storage fs delete -n myfilesystem -y
 ```
 
+##### Manage metadata for file system in ADLS Gen2
+- Set user-defined metadata for the specified filesystem as one or more name-value pairs.
+```
+az storage fs metadata uptdate \
+    --metdata tag1=value1 tag2=value2 \
+    -n myfilesystem
+```
+
+- Show all user-defined metadata for the specified filesystem.
+```
+az storage fs metadata show -n myfilesystem
+```
+
 #### Manage Directories in Azure Data Lake Storage Gen2 file system
 ```
 ❯ az storage fs directory -h
@@ -215,6 +228,21 @@ az storage fs directory delete \
     -f myfilesystem \
     -y
 ```
+
+##### Manage metadata for directory in ADLS Gen2
+- Set user-defined metadata for the specified directory as one or more name-value pairs.
+```
+az storage fs directory metadata uptdate \
+    --metdata tag1=value1 tag2=value2 \
+    -n mydir \
+    -f myfilesystem
+```
+
+- Show all user-defined metadata for the specified directory.
+```
+az storage fs directory metadata show -n mydir -f myfilesystem
+```
+
 #### Manage Files in Azure Data Lake Storage Gen2 file system.
 ```
 ❯ az storage fs file -h
@@ -364,7 +392,21 @@ az storage fs file delete \
     -f myfilesystem \
     -y
 ```
-    
+
+##### Manage metadata for file in ADLS Gen2
+- Set user-defined metadata for the specified file as one or more name-value pairs.
+```
+az storage fs file metadata uptdate \
+    --metdata tag1=value1 tag2=value2 \
+    -p myfile \
+    -f myfilesystem
+```
+
+- Show all user-defined metadata for the specified file.
+```
+az storage fs directory metadata show -p myfile -f myfilesystem
+```
+  
 #### Manage Access in Azure Data Lake Storage Gen2 file system.
 ```
 ❯ az storage fs access -h

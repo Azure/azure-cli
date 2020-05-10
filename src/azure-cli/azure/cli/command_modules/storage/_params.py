@@ -1120,7 +1120,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('name_starts_with', options_list=['--prefix'],
                    help='Filter the results to return only file systems whose names begin with the specified prefix.')
 
-    for item in ['create', 'show', 'delete', 'exists', 'move']:
+    for item in ['create', 'show', 'delete', 'exists', 'move', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs directory {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
             c.extra('directory_path', options_list=['--name', '-n'],
@@ -1158,7 +1158,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'previous generator object. If specified, this generator will begin returning results from this '
                    'point.')
 
-    for item in ['create', 'show', 'delete', 'exists', 'upload', 'append', 'download', 'show']:
+    for item in ['create', 'show', 'delete', 'exists', 'upload', 'append', 'download', 'show', 'metadata update',
+                 'metadata show']:
         with self.argument_context('storage fs file {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['-f', '--file-system'],
                     help='File system name.', required=True)

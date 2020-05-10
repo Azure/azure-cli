@@ -673,7 +673,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage fs directory', adls_directory_sdk,
                             custom_command_type=get_custom_sdk('fs_directory', cf_adls_directory)) as g:
-        from ._transformers import transform_storage_list_output
+        from ._transformers import transform_storage_list_output, transform_metadata
         g.storage_command_oauth('create', 'create_directory')
         g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
         g.storage_custom_command_oauth('show', 'get_directory_properties', exception_handler=show_exception_handler)
@@ -681,6 +681,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('move', 'rename_directory')
         g.storage_custom_command_oauth('list', 'list_fs_directories', client_factory=cf_adls_file_system,
                                        transform=transform_storage_list_output)
+        g.storage_command_oauth('metadata update', 'set_metadata')
+        g.storage_command_oauth('metadata show', 'get_directory_properties', exception_handler=show_exception_handler,
+                                transform=transform_metadata)
 
     with self.command_group('storage fs file', adls_file_sdk,
                             custom_command_type=get_custom_sdk('fs_file', cf_adls_file)) as g:
@@ -696,6 +699,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        transform=transform_storage_list_output)
         g.storage_command('move', 'rename_file')
         g.storage_command('delete', 'delete_file', confirmation=True)
+        g.storage_command_oauth('metadata update', 'set_metadata')
+        g.storage_command_oauth('metadata show', 'get_file_properties', exception_handler=show_exception_handler,
+                                transform=transform_metadata)
 
     with self.command_group('storage fs access', adls_directory_sdk, custom_command_type=custom_adls_sdk) as g:
         from ._transformers import transform_fs_access_output
