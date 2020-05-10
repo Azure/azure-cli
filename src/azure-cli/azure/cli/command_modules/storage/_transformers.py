@@ -163,3 +163,7 @@ def transform_fs_list_public_access_output(result):
     for i, item in enumerate(new_result):
         new_result[i] = transform_fs_public_access_output(item)
     return new_result
+
+
+def transform_metadata(result):
+    return result.metadata

@@ -659,7 +659,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage fs', adls_fs_sdk, custom_command_type=get_custom_sdk(
             'filesystem', cf_adls_file_system), is_preview=True, min_api='2018-11-09') as g:
-        from ._transformers import transform_fs_list_public_access_output, transform_fs_public_access_output
+        from ._transformers import transform_fs_list_public_access_output, transform_fs_public_access_output, \
+            transform_metadata
         g.storage_command_oauth('create', 'create_file_system')
         g.storage_command_oauth('list', 'list_file_systems', command_type=adls_service_sdk,
                                 transform=transform_fs_list_public_access_output)
@@ -667,7 +668,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=transform_fs_public_access_output)
         g.storage_command_oauth('delete', 'delete_file_system', confirmation=True)
         g.storage_command_oauth('metadata update', 'set_file_system_metadata')
-        #g.storage_command('metadata show', 'get_file_system_metadata', exception_handler=show_exception_handler)
+        g.storage_command_oauth('metadata show', 'get_file_system_properties', exception_handler=show_exception_handler,
+                                transform=transform_metadata)
 
     with self.command_group('storage fs directory', adls_directory_sdk,
                             custom_command_type=get_custom_sdk('fs_directory', cf_adls_directory)) as g:

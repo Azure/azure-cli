@@ -1102,7 +1102,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies how much metadata to include in the response payload.')
         c.argument('marker', validator=validate_marker, nargs='+')
 
-    for item in ['create', 'show', 'delete', 'metadata update']:
+    for item in ['create', 'show', 'delete', 'metadata update', 'metadata show']:
         with self.argument_context('storage fs {}'.format(item)) as c:
             c.extra('file_system_name', options_list=['--name', '-n'],
                     help="File system name.", required=True)
