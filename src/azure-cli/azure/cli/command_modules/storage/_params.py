@@ -774,7 +774,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
 
     with self.argument_context('storage share-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
-        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('resource_group_name', required=False)
         c.argument('account_name', storage_account_type)
         c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
         c.ignore('filter', 'maxpagesize')

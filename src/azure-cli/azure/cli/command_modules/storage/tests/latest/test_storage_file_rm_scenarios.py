@@ -10,10 +10,10 @@ from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
 class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus2euap")
+    @StorageAccountPreparer(name_prefix="sharerm", location="eastus2euap")
     def test_storage_file_using_rm_main_scenario(self):
         # 1. Test create command.
 
