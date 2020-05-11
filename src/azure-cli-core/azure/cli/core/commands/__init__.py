@@ -427,8 +427,6 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
     In track2, unknown kwargs will raise, so we should not pass 'parameters" for operation when the name of the argument
     in the setter which corresponds to the object being updated is not 'parameters'.
     """
-    import pickle
-
     def _put_operation():
         result = None
         if args:
