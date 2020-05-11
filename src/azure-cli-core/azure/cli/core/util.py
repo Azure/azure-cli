@@ -150,8 +150,8 @@ def _update_latest_from_pypi(versions):
     return versions, success
 
 
-def get_az_version_string():
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
+def get_az_version_string():  # pylint: disable=too-many-statements
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
 
     output = six.StringIO()
     versions = {}
@@ -201,6 +201,9 @@ def get_az_version_string():
         _print()
     _print("Python location '{}'".format(sys.executable))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
+    import os
+    if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
+        _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))
     if DEV_EXTENSION_SOURCES:
         _print("Development extension sources:")
         for source in DEV_EXTENSION_SOURCES:
@@ -414,7 +417,9 @@ def open_page_in_browser(url):
 
     if is_wsl():   # windows 10 linux subsystem
         try:
-            return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
+            # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+            # Ampersand (&) should be quoted
+            return subprocess.call(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':

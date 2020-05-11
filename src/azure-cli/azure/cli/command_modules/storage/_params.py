@@ -15,7 +15,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
-                          validate_azcopy_remove_arguments, as_user_validator, parse_storage_account)
+                          validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
+                          validator_delete_retention_days, validate_delete_retention_days)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -340,7 +341,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account blob-service-properties update',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
-        from ._validators import validator_delete_retention_days
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
@@ -355,6 +355,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    "than zero and less than Delete Retention Days.")
         c.argument('enable_versioning', arg_type=get_three_state_flag(), help='Versioning is enabled if set to true.',
                    min_api='2019-06-01')
+
+    with self.argument_context('storage account file-service-properties show',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+
+    with self.argument_context('storage account file-service-properties update',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
+                   min_api='2019-06-01', help='Enable file service properties for share soft delete.')
+        c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
+                   validator=validate_delete_retention_days, min_api='2019-06-01',
+                   help=' Indicate the number of days that the deleted item should be retained. The minimum specified '
+                   'value can be 1 and the maximum value can be 365.')
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')

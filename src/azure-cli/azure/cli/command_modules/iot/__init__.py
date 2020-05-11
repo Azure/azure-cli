@@ -14,13 +14,13 @@ from azure.cli.core.extension import extension_exists
 def handler(ctx, **kwargs):
     cmd = kwargs.get('command', None)
     if cmd and cmd.startswith('iot'):
-        if not extension_exists('azure-cli-iot-ext'):
+        if not extension_exists('azure-iot'):
             ran_before = ctx.config.getboolean('iot', 'first_run', fallback=False)
             if not ran_before:
                 extension_text = """
-Comprehensive IoT data-plane functionality is available in the Azure IoT CLI Extension.
+Comprehensive IoT functionality is available in the Azure IoT CLI Extension.
 
-To install the extension, run: "az extension add --name azure-cli-iot-ext"
+To install the extension, run: "az extension add --name azure-iot"
 
 For more info and install guide go to: https://github.com/Azure/azure-iot-cli-extension
 """

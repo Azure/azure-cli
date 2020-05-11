@@ -115,29 +115,16 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
             "storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption} --prevent-encryption-scope-override false",
             checks=[JMESPathCheck("created", True)])
 
-    @live_only()
-    @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-07-07')
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_encryption')
-    @StorageAccountPreparer(name_prefix='encryption', kind="StorageV2")
-    def test_storage_blob_encryption_scope(self, resource_group, storage_account):
-        self.kwargs.update({
-            "encryption": self.create_random_name(prefix="encryption", length=24),
-        })
         account_info = self.get_account_info(resource_group, storage_account)
-        container = self.create_container(account_info)
-
-        # Create with default Microsoft.Storage key source
-        self.cmd("storage account encryption-scope create --account-name {sa} -g {rg} -n {encryption}", checks=[
-            JMESPathCheck("name", self.kwargs["encryption"]),
-            JMESPathCheck("resourceGroup", self.kwargs["rg"]),
-            JMESPathCheck("source", "Microsoft.Storage"),
-            JMESPathCheck("state", "Enabled")
-        ])
 
         # Specify encryption scope for blob
         blob = self.create_random_name(prefix='blob', length=12)
         file = self.create_temp_file(size_kb=1024)
 
         self.storage_cmd('storage blob upload -c {} -n {} -f "{}" --encryption-scope {}',
-                         account_info, container, blob, file, self.kwargs['encryption'])\
-            .assert_with_checks(JMESPathCheck("encryption_scope", self.kwargs['encryption']))
+                         account_info, self.kwargs['con'], blob, file, self.kwargs['encryption'])
+
+        result = self.cmd('storage account show-connection-string -n {sa} -g {rg}').get_output_in_json()
+        blob2 = self.create_random_name(prefix='blob', length=12)
+        self.cmd('storage blob upload -c {} -n {} -f "{}" --encryption-scope {} --connection-string "{}"'.format(
+            self.kwargs['con'], blob2, file, self.kwargs['encryption'], result['connectionString']))

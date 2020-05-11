@@ -706,10 +706,15 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             'extra_param_tf': os.path.join(curr_dir, 'simple_extra_param_deploy.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60),
-            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60)
+            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
+            'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\')
         })
 
         self.cmd('deployment group validate --resource-group {rg} --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group validate --resource-group {rg} --template-file {Japanese-characters-tf}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -1089,6 +1094,7 @@ class DeploymentThruUriTest(ScenarioTest):
         self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
+            self.check('properties.templateLink.uri', '{tf}'),
         ]).get_output_in_json()['name']
 
         self.cmd('group deployment show -g {rg} -n {dn}',
@@ -1096,6 +1102,19 @@ class DeploymentThruUriTest(ScenarioTest):
 
         self.cmd('group deployment delete -g {rg} -n {dn}')
         self.cmd('group deployment list -g {rg}',
+                 checks=self.is_empty())
+
+        self.kwargs['dn'] = self.cmd('deployment group create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('properties.templateLink.uri', '{tf}'),
+        ]).get_output_in_json()['name']
+
+        self.cmd('deployment group show -g {rg} -n {dn}',
+                 checks=self.check('name', '{dn}'))
+
+        self.cmd('deployment group delete -g {rg} -n {dn}')
+        self.cmd('deployment group list -g {rg}',
                  checks=self.is_empty())
 
 

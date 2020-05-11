@@ -106,6 +106,10 @@ def get_config_value(cmd, section, key, default):
     return cmd.cli_ctx.config.get(section, key, default)
 
 
+def is_storagev2(import_prefix):
+    return import_prefix.startswith('azure.multiapi.storagev2.')
+
+
 def validate_client_parameters(cmd, namespace):
     """ Retrieves storage connection parameters from environment variables and parses out connection string into
     account name and key """
@@ -117,7 +121,16 @@ def validate_client_parameters(cmd, namespace):
         if not n.account_name:
             n.account_name = get_config_value(cmd, 'storage', 'account', None)
         if auth_mode == 'login':
-            n.token_credential = _create_token_credential(cmd.cli_ctx)
+            prefix = cmd.command_kwargs['resource_type'].value[0]
+            # is_storagv2() is used to distinguish if the command is in track2 SDK
+            # If yes, we will use get_login_credentials() as token credential
+            if is_storagev2(prefix):
+                from azure.cli.core._profile import Profile
+                profile = Profile(cli_ctx=cmd.cli_ctx)
+                n.token_credential, _, _ = profile.get_login_credentials(resource="https://storage.azure.com")
+            # Otherwise, we will assume it is in track1 and keep previous token updater
+            else:
+                n.token_credential = _create_token_credential(cmd.cli_ctx)
 
     if hasattr(n, 'token_credential') and n.token_credential:
         # give warning if there are account key args being ignored
@@ -1155,6 +1168,17 @@ def validator_delete_retention_days(namespace):
         if namespace.delete_retention_days > 365:
             raise ValueError(
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
+
+
+def validate_delete_retention_days(namespace):
+    if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
+        raise ValueError(
+            "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
+            "is set to true")
+
+    if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
+        raise ValueError(
+            "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
 
 
 # pylint: disable=too-few-public-methods
