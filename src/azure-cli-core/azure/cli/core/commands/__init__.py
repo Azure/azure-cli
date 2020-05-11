@@ -449,9 +449,6 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
     # allow overriding model path, e.g. for extensions
     model_path = cmd_obj.command_kwargs.get('model_path', None)
 
-    # parameters = func(parameters)
-    # parameters_str = pickle.dumps(parameters)
-    # cache_obj = CacheObject(cmd_obj, parameters_str, operation, model_path=model_path)
     if serialize is None:
         parameters_dict = parameters.serialize()
     else:
