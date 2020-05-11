@@ -4,7 +4,9 @@
 
 On Windows, there is a known issue of PowerShell when calling native `.exe` executables or `.bat`, `.cmd` Command Prompt scripts: https://github.com/PowerShell/PowerShell/issues/1995.
 
-In short, **Windows native command invoked from PowerShell will be parsed by Command Prompt again**. As `az` is a Command Prompt script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`), it will have issues when invoked from PowerShell. These issues don't happen when invoking a PowerShell cmdlet:
+In short, **Windows native command invoked from PowerShell will be parsed by Command Prompt again**. This behavior contradicts the doc [About Quoting Rules](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_quoting_rules).
+
+As `az` is a Command Prompt script (at `C:\Program Files (x86)\Microsoft SDKs\Azure\CLI2\wbin\az.cmd`), it will have issues when invoked from PowerShell. These issues don't happen when invoking a PowerShell cmdlet:
 
 ```powershell
 # Double quotes are preserved
@@ -120,6 +122,12 @@ To solve it:
 > python.exe -c "import sys; print(sys.argv)" "{\`"key\`": \`"value\`"}"
 ['-c', '{"key": "value"}']
 
+# First escape double quotes by repeating it as required by PowerShell,
+# then escape double quotes with backward-slash (\) as required by Command Prompt,
+# then quote the string with double quotes (") as required by PowerShell
+> python.exe -c "import sys; print(sys.argv)" "{\""key\"": \""value\""}"
+['-c', '{"key": "value"}']
+
 # Stop PowerShell parsing
 > python.exe --% -c "import sys; print(sys.argv)" "{\"key\": \"value\"}"
 ['-c', '{"key": "value"}']
@@ -132,10 +140,14 @@ The same applies to `az`:
 > az '{"key": "value"}' --debug
 Command arguments: ['{key: value}', '--debug']
 
+# Correct
 > az '{\"key\": \"value\"}' --debug
 Command arguments: ['{"key": "value"}', '--debug']
 
 > az "{\`"key\`": \`"value\`"}" --debug
+Command arguments: ['{"key": "value"}', '--debug']
+
+> az "{\""key\"": \""value\""}" --debug
 Command arguments: ['{"key": "value"}', '--debug']
 
 > az --% "{\"key\": \"value\"}" --debug
