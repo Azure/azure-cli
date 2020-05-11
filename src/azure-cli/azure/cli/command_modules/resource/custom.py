@@ -2490,7 +2490,7 @@ def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=Non
     if resource_id is not None:
         if tags is None or len(tags) == 0:
             raise IncorrectUsageError("Tags could not be empty.")
-        Tags = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Tags', mod='models')
+        Tags = cmd.get_models('Tags')
         tag_obj = Tags(tags=tags)
         return rcf.tags.create_or_update_at_scope(scope=resource_id, properties=tag_obj)
     else:
@@ -2507,7 +2507,7 @@ def delete_tag_at_scope(cmd, resource_id=None, tag_name=None):
 
 def update_tag_at_scope(cmd, resource_id, tags, operation):
     rcf = _resource_client_factory(cmd.cli_ctx)
-    Tags = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Tags', mod='models')
+    Tags = cmd.get_models('Tags')
     tag_obj = Tags(tags=tags)
     return rcf.tags.update_at_scope(scope=resource_id, properties=tag_obj, operation=operation)
 
