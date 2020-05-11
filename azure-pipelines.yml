@@ -149,8 +149,8 @@ jobs:
       pip install virtualenv
       python -m virtualenv venv/
       . ./venv/bin/activate
-      pip install azdev
-      azdev setup -c $(pwd)
+      pip install git+https://github.com/fengzhou-msft/azure-cli-dev-tools.git@dependency_choice
+      azdev setup -c $(pwd) -d requirements
     displayName: 'Install azdev'
 
   - bash: |
