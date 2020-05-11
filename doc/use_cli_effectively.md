@@ -188,6 +188,9 @@ To avoid surprises, here are a few suggestions:
     > az version --query "\`"azure-cli\`""
     "2.5.1"
 
+    > az version --query "\""azure-cli\"""
+    "2.5.1"
+
     > az --% version --query "\"azure-cli\""
     "2.5.1"
 
