@@ -177,6 +177,7 @@ def validate_visibility(key):
     def _validate_visibility(namespace):
         visibility = getattr(namespace, key)
         if visibility is not None:
+            visibility = visibility.capitalize()
             if visibility not in ['Private', 'Public']:
                 raise CLIError("Invalid --%s '%s'." %
                                (key.replace('_', '-'), visibility))
