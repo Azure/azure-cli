@@ -41,10 +41,12 @@ class PrivateEndpointClient(object):
 
 class GeneralPrivateEndpointClient(PrivateEndpointClient):
 
-    def __init__(self, rp, api_version, support_list):
+    def __init__(self, rp, api_version, support_list, resource_get_api_version=None):
         self.rp = rp
         self.api_version = api_version
         self.support_list = support_list
+        # same with api_version or using specific api version to get resource
+        self.resource_get_api_version = resource_get_api_version or api_version
 
     def _update_private_endpoint_connection_status(self, cmd, resource_group_name,
                                                    service_name, private_endpoint_connection_name,
@@ -74,7 +76,7 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
                                                                                 service_name,
                                                                                 private_endpoint_connection_name)
             if private_endpoint_connection['properties'].get('provisioningState'):
-                if private_endpoint_connection['properties']['provisioningState'] == "Succeeded":
+                if private_endpoint_connection['properties']['provisioningState'] in ["Succeeded", "Ready"]:
                     return private_endpoint_connection
         logger.warning("Cannot query the state of private endpoint connection. "
                        "Please use `az network private-endpoint-connection show` command to check the status.")
@@ -128,7 +130,7 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
             except KeyError:
                 pass
             return r.json()
-        url = _build_resource_url_endpoint(resource_group_name, self.rp, service_name, self.api_version)
+        url = _build_resource_url_endpoint(resource_group_name, self.rp, service_name, self.resource_get_api_version)
         r = send_raw_request(cmd.cli_ctx, 'get', url)
         return r.json()['properties']['privateEndpointConnections']
 

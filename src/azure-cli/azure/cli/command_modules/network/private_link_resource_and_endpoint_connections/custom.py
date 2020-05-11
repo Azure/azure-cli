@@ -16,12 +16,22 @@ def register_providers():
     _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
     _register_one_provider('Microsoft.ContainerRegistry/registries', '2019-12-01-preview', True)
     _register_one_provider('microsoft.insights/privateLinkScopes', '2019-10-17-preview', True)
+    _register_one_provider('Microsoft.DBforMySQL/servers', '2018-06-01', False, '2017-12-01-preview')
+    _register_one_provider('Microsoft.DBforMariaDB/servers', '2018-06-01', False)
+    _register_one_provider('Microsoft.DBforPostgreSQL/servers', '2018-06-01', False, '2017-12-01-preview')
 
 
-def _register_one_provider(provider, api_version, has_list_or_not):
+def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None):
+    """
+    :param provider: namespace + type.
+    :param api_version: API version for private link scenarios.
+    :param support_list_or_not: support list rest call or not.
+    :param resource_get_api_version: API version to get the service resource.
+    """
     general_client_settings = {
         "api_version": api_version,
-        "support_list_or_not": has_list_or_not
+        "support_list_or_not": support_list_or_not,
+        "resource_get_api_version": resource_get_api_version
     }
 
     TYPE_CLIENT_MAPPING[provider] = general_client_settings
@@ -31,7 +41,10 @@ def _get_client(rp_mapping, resource_provider):
     for key, value in rp_mapping.items():
         if str.lower(key) == str.lower(resource_provider):
             if isinstance(value, dict):
-                return GeneralPrivateEndpointClient(key, value['api_version'], value['support_list_or_not'])
+                return GeneralPrivateEndpointClient(key,
+                                                    value['api_version'],
+                                                    value['support_list_or_not'],
+                                                    value['resource_get_api_version'])
             return value()
     raise CLIError("Resource type must be one of {}".format(", ".join(rp_mapping.keys())))
 

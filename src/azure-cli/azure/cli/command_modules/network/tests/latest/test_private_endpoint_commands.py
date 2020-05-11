@@ -6,11 +6,12 @@
 import unittest
 import time
 
-
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
+from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
+from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
 
 
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
@@ -401,6 +402,198 @@ class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
         self.cmd('monitor private-link-scope delete -n {scope} -g {rg} -y')
         with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('monitor private-link-scope show -n {scope} -g {rg}')
+
+
+class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @ServerPreparer(engine_type='mariadb')
+    def test_mariadb_private_link_scenario(self, resource_group, server, database_engine):
+        print(server)
+        self._test_private_link_resource(resource_group, server, 'Microsoft.DBforMariaDB/servers', 'mariadbServer')
+        self._test_private_endpoint_connection(resource_group, server, database_engine, 'Microsoft.DBforMariaDB/servers')
+
+    @ResourceGroupPreparer()
+    @ServerPreparer(engine_type='mysql')
+    def test_mysql_private_link_scenario(self, resource_group, server, database_engine):
+        self._test_private_link_resource(resource_group, server, 'Microsoft.DBforMySQL/servers', 'mysqlServer')
+        self._test_private_endpoint_connection(resource_group, server, database_engine, 'Microsoft.DBforMySQL/servers')
+
+    @ResourceGroupPreparer()
+    @ServerPreparer(engine_type='postgres')
+    def test_postgres_private_link_scenario(self, resource_group, server, database_engine):
+        self._test_private_link_resource(resource_group, server, 'Microsoft.DBforPostgreSQL/servers', 'postgresqlServer')
+        self._test_private_endpoint_connection(resource_group, server, database_engine, 'Microsoft.DBforPostgreSQL/servers')
+
+    def _test_private_link_resource(self, resource_group, server, database_engine, group_id):
+        result = self.cmd('network private-link-resource list -g {} --name {} --type {}'
+                          .format(resource_group, server, database_engine)).get_output_in_json()
+        self.assertEqual(result[0]['properties']['groupId'], group_id)
+
+    def _test_private_endpoint_connection(self, resource_group, server, database_engine, rp_type):
+        loc = 'westus'
+        vnet = self.create_random_name('cli-vnet-', 24)
+        subnet = self.create_random_name('cli-subnet-', 24)
+        pe_name_auto = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_approve = self.create_random_name('cli-pe-', 24)
+        pe_name_manual_reject = self.create_random_name('cli-pe-', 24)
+        pe_connection_name_auto = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_approve = self.create_random_name('cli-pec-', 24)
+        pe_connection_name_manual_reject = self.create_random_name('cli-pec-', 24)
+
+        # Prepare network and disable network policies
+        self.cmd('network vnet create -n {} -g {} -l {} --subnet-name {}'
+                 .format(vnet, resource_group, loc, subnet),
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {} --vnet-name {} -g {} '
+                 '--disable-private-endpoint-network-policies true'
+                 .format(subnet, vnet, resource_group),
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Get Server Id and Group Id
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        server_id = result['id']
+        result = self.cmd('network private-link-resource list -g {} -n {} --type {}'
+                          .format(resource_group, server, rp_type)).get_output_in_json()
+        group_id = result[0]['properties']['groupId']
+
+        approval_description = 'You are approved!'
+        rejection_description = 'You are rejected!'
+        expectedError = 'Private Endpoint Connection Status is not Pending'
+
+        # Testing Auto-Approval workflow
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-ids {}'
+                                    .format(resource_group, pe_name_auto, vnet, subnet, loc, pe_connection_name_auto, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_auto)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], pe_connection_name_auto)
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+                         'Approved')
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('network private-endpoint-connection show --service-name {} -g {} --name {} --type {}'
+                 .format(server, resource_group, server_pec_name, rp_type),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('properties.provisioningState', 'Ready')
+                 ])
+
+        with self.assertRaisesRegexp(CLIError, expectedError):
+            self.cmd('network private-endpoint-connection approve --service-name {} -g {} --name {} --description "{}" --type {}'
+                     .format(server, resource_group, server_pec_name, approval_description, rp_type))
+
+        with self.assertRaisesRegexp(CLIError, expectedError):
+            self.cmd('network private-endpoint-connection reject --service-name {} -g {} --name {} --description "{}" --type {}'
+                     .format(server, resource_group, server_pec_name, rejection_description, rp_type))
+
+        self.cmd('network private-endpoint-connection delete --id {} -y'
+                 .format(server_pec_id))
+
+        # Testing Manual-Approval workflow [Approval]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-ids {} --manual-request'
+                                    .format(resource_group, pe_name_manual_approve, vnet, subnet, loc, pe_connection_name_manual_approve, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_approve)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_approve)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+                         'Pending')
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('network private-endpoint-connection show --service-name {} -g {} --name {} --type {}'
+                 .format(server, resource_group, server_pec_name, rp_type),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('properties.provisioningState', 'Ready')
+                 ])
+
+        self.cmd('network private-endpoint-connection approve --service-name {} -g {} --name {} --description "{}" --type {}'
+                 .format(server, resource_group, server_pec_name, approval_description, rp_type),
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                     self.check('properties.privateLinkServiceConnectionState.description', approval_description),
+                     self.check('properties.provisioningState', 'Ready')
+                 ])
+
+        with self.assertRaisesRegexp(CLIError, expectedError):
+            self.cmd('network private-endpoint-connection reject --service-name {} -g {} --name {} --description "{}" --type {}'
+                     .format(server, resource_group, server_pec_name, rejection_description, rp_type))
+
+        self.cmd('network private-endpoint-connection delete --id {} -y'
+                 .format(server_pec_id))
+
+        # Testing Manual-Approval workflow [Rejection]
+        # Create a private endpoint connection
+        private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
+                                    '--connection-name {} --private-connection-resource-id {} '
+                                    '--group-ids {} --manual-request true'
+                                    .format(resource_group, pe_name_manual_reject, vnet, subnet, loc, pe_connection_name_manual_reject, server_id, group_id)).get_output_in_json()
+        self.assertEqual(private_endpoint['name'], pe_name_manual_reject)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_reject)
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Pending')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
+
+        # Get Private Endpoint Connection Name and Id
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+                         'Pending')
+        server_pec_id = result['privateEndpointConnections'][0]['id']
+        result = parse_proxy_resource_id(server_pec_id)
+        server_pec_name = result['child_name_1']
+
+        self.cmd('network private-endpoint-connection show --service-name {} -g {} --name {} --type {}'
+                 .format(server, resource_group, server_pec_name, rp_type),
+                 checks=[
+                     self.check('id', server_pec_id),
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Pending'),
+                     self.check('properties.provisioningState', 'Ready')
+                 ])
+
+        self.cmd('network private-endpoint-connection reject --service-name {} -g {} --name {} --description "{}" --type {}'
+                 .format(server, resource_group, server_pec_name, rejection_description, rp_type),
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('properties.privateLinkServiceConnectionState.description', rejection_description),
+                     self.check('properties.provisioningState', 'Ready')
+                 ])
+
+        with self.assertRaisesRegexp(CLIError, expectedError):
+            self.cmd('network private-endpoint-connection approve --service-name {} -g {} --name {} --description "{}" --type {}'
+                     .format(server, resource_group, server_pec_name, approval_description, rp_type))
+
+        self.cmd('network private-endpoint-connection list --name {} -g {} --type {}'
+                 .format(server, resource_group, rp_type))
+
+        self.cmd('network private-endpoint-connection delete --id {} -y'
+                 .format(server_pec_id))
 
 
 if __name__ == '__main__':
