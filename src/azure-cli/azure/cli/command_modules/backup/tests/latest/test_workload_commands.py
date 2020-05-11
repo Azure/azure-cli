@@ -140,8 +140,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup container list -v {vault} -g {rg} --backup-management-type AzureWorkload', checks=[
             self.check("length([?name == '{name}'])", 0)])
 
-        @record_only()
-        def test_backup_wl_sql_policy(self):
+    @record_only()
+    def test_backup_wl_sql_policy(self):
 
         self.kwargs.update({
             'vault': vault_sql,
