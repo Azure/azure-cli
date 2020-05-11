@@ -162,8 +162,39 @@ To avoid surprises, here are a few suggestions:
 
     # Correct
     $ az version --query '"azure-cli"'
-    "2.4.0"
+    "2.5.1"
+
+    $ az version --query \"azure-cli\"
+    "2.5.1"
+
+    $ az version --query "\"azure-cli\""
+    "2.5.1"
     ```
+
+    In Command Prompt:
+    ```cmd
+    > az version --query "\"azure-cli\""
+    "2.5.1"
+
+    > az version --query \"azure-cli\"
+    "2.5.1"
+    ```
+
+    In PowerShell (see item 12 for why extra escaping is needed):
+    ```powershell
+    > az version --query '\"azure-cli\"'
+    "2.5.1"
+
+    > az version --query "\`"azure-cli\`""
+    "2.5.1"
+
+    > az --% version --query "\"azure-cli\""
+    "2.5.1"
+
+    > az --% version --query \"azure-cli\"
+    "2.5.1"
+    ```
+
 11. The best way to troubleshoot a quoting issue is to run the command with `--debug` flag. It reveals the actual arguments received by CLI in [Python's syntax](https://docs.python.org/3/tutorial/introduction.html#strings). For example, in Bash:
 
     ```sh
