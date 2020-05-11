@@ -421,12 +421,14 @@ def cached_get(cmd_obj, operation, *args, **kwargs):
         return _get_operation()
 
 
-def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameters', **kwargs):
+def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameters', serialize=None, **kwargs):
     """
     setter_arg_name: The name of the argument in the setter which corresponds to the object being updated.
     In track2, unknown kwargs will raise, so we should not pass 'parameters" for operation when the name of the argument
     in the setter which corresponds to the object being updated is not 'parameters'.
     """
+    import pickle
+
     def _put_operation():
         result = None
         if args:
@@ -449,7 +451,14 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
     # allow overriding model path, e.g. for extensions
     model_path = cmd_obj.command_kwargs.get('model_path', None)
 
-    cache_obj = CacheObject(cmd_obj, parameters.serialize(), operation, model_path=model_path)
+    # parameters = func(parameters)
+    # parameters_str = pickle.dumps(parameters)
+    # cache_obj = CacheObject(cmd_obj, parameters_str, operation, model_path=model_path)
+    if serialize is None:
+        parameters_dict = parameters.serialize()
+    else:
+        parameters_dict = serialize(parameters)
+    cache_obj = CacheObject(cmd_obj, parameters_dict, operation, model_path=model_path)
     if use_cache:
         cache_obj.save(args, kwargs)
         return cache_obj

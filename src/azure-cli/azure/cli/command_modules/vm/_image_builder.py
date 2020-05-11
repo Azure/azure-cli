@@ -479,7 +479,68 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
                                    identity=identity_body)
 
     return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=image_template,
-                      resource_group_name=resource_group_name, image_template_name=image_template_name)
+                      resource_group_name=resource_group_name, image_template_name=image_template_name,
+                      serialize=serialize_image_template)
+
+
+def _underscore_camel(name):
+    """
+    Transform underscore style to camel style
+    :param name:
+    :return:
+    """
+    terms = name.split('_')
+    if len(terms) == 1:
+        return name
+    return terms[0] + ''.join(map(lambda x: x.title(), terms[1:]))
+
+
+def _serialize(body):
+    """
+    Serialize.
+    :param body:
+    :return:
+    """
+    if type(body) == dict:
+        body2 = {}
+        for k in body:
+            if k not in ['additional_properties'] and body[k] is not None:
+                body2[_underscore_camel(k)] = _serialize(body[k])
+        body = body2
+    elif type(body) == list:
+        for i, v in enumerate(body):
+            body[i] = _serialize(v)
+    elif hasattr(body, '__dict__'):
+        body = _serialize(vars(body))
+    return body
+
+
+def serialize_image_template(parameters):
+    """
+    A customized serializer for image template.
+    :param parameters:
+    :return:
+    """
+    body = {}
+    if parameters.location is not None:
+        body['location'] = parameters.location
+    if parameters.tags is not None:
+        body['tags'] = parameters.tags
+    if parameters.identity is not None:
+        body['identity'] = parameters.identity
+    body['properties'] = {}
+    if parameters.source is not None:
+        body['properties']['source'] = parameters.source
+    if parameters.customize is not None:
+        body['properties']['customize'] = parameters.customize
+    if parameters.distribute is not None:
+        body['properties']['distribute'] = parameters.distribute
+    if parameters.build_timeout_in_minutes is not None:
+        body['properties']['buildTimeoutInMinutes'] = parameters.build_timeout_in_minutes
+    if parameters.vm_profile is not None:
+        body['properties']['vmProfile'] = parameters.vm_profile
+    body = _serialize(body)
+    return body
 
 
 def list_image_templates(client, resource_group_name=None):
