@@ -93,12 +93,12 @@ def set_active_subscription(cmd, subscription):
     profile.set_active_subscription(subscription)
 
 
-def account_clear(cmd):
+def account_clear(cmd, clear_credential=False):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
     profile = Profile(cli_ctx=cmd.cli_ctx)
-    profile.logout_all()
+    profile.logout_all(clear_credential)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -175,7 +175,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     return all_subscriptions
 
 
-def logout(cmd, username=None):
+def logout(cmd, username=None, clear_credential=False):
     """Log out to remove access to Azure subscriptions"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
@@ -183,7 +183,7 @@ def logout(cmd, username=None):
     profile = Profile(cli_ctx=cmd.cli_ctx)
     if not username:
         username = profile.get_current_account_user()
-    profile.logout(username)
+    profile.logout(username, clear_credential)
 
 
 def list_locations(cmd):
