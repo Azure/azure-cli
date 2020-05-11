@@ -220,7 +220,8 @@ AZURE_API_PROFILES = {
         # API versions
         ResourceType.MGMT_APPSERVICE: '2018-02-01',
         ResourceType.MGMT_EVENTHUB: '2017-04-01',
-        ResourceType.MGMT_IOTHUB: '2019-03-22'
+        ResourceType.MGMT_IOTHUB: '2019-03-22',
+        ResourceType.MGMT_CONTAINERREGISTRY: '2019-05-01'
     },
     '2018-03-01-hybrid': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
