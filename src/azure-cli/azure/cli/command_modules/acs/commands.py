@@ -6,6 +6,7 @@
 # pylint: disable=no-name-in-module,import-error
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
+from azure.cli.core.profiles import ResourceType
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_managed_clusters
@@ -27,6 +28,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_container_services_operations#ContainerServicesOperations.{}',
         operation_group='container_services',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_container_services
     )
 
@@ -34,12 +36,14 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_managed_clusters_operations#ManagedClustersOperations.{}',
         operation_group='managed_clusters',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
     )
 
     agent_pools_sdk = CliCommandType(
         operations_tmpl='azext_aks_preview.vendored_sdks.azure_mgmt_preview_aks.'
                         'operations._agent_pools_operations#AgentPoolsOperations.{}',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
     )
 
@@ -47,6 +51,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.containerservice.operations.'
                         '_open_shift_managed_clusters_operations#OpenShiftManagedClustersOperations.{}',
         operation_group='open_shift_managed_clusters',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_openshift_managed_clusters
     )
 
