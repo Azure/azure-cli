@@ -6,14 +6,12 @@
 import unittest
 import time
 
-from msrestazure.azure_exceptions import CloudError
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
-
 
 
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):

@@ -23,12 +23,10 @@ def register_providers():
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None):
     """
-    
     :param provider: namespace + type.
     :param api_version: API version for private link scenarios.
     :param support_list_or_not: support list rest call or not.
     :param resource_get_api_version: API version to get the service resource.
-    :return: 
     """
     general_client_settings = {
         "api_version": api_version,
