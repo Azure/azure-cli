@@ -80,10 +80,14 @@ class PolicyInsightsTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_triggerscan')
     def test_policy_insights_triggerscan(self):
         # trigger a subscription scan and do not wait for it to complete
-        self.cmd('policy state trigger-scan --no-wait')
+        self.cmd('policy state trigger-scan --no-wait', checks=[
+            self.is_empty()
+        ])
 
         # trigger a resource group scan and wait for it to complete
-        self.cmd('policy state trigger-scan -g {rg}')
+        self.cmd('policy state trigger-scan -g {rg}', checks=[
+            self.is_empty()
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_remediation')
     @StorageAccountPreparer(name_prefix='cliremediation')
