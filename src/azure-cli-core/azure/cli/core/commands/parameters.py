@@ -312,7 +312,7 @@ vnet_name_type = CLIArgumentType(
 )
 
 subnet_name_type = CLIArgumentType(
-    options_list='--subnet-name',
+    options_list='--subnet',
     metavar='NAME',
     help='The subnet name.',
     local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
