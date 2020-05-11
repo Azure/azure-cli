@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "ukwest"}'
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "StorageV2", "location": "ukwest"}'
     headers:
       Accept:
       - application/json
@@ -11,14 +11,14 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '74'
+      - '76'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -l --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: PUT
@@ -34,11 +34,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:00:42 GMT
+      - Mon, 04 May 2020 22:17:07 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/e816cd21-25f5-4bae-97f9-ec068dcb168f?monitor=true&api-version=2019-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/b2a47e32-6c42-4e9c-8ead-145113242923?monitor=true&api-version=2019-06-01
       pragma:
       - no-cache
       server:
@@ -48,7 +48,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1194'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -66,22 +66,22 @@ interactions:
       ParameterSetName:
       - -g -n -l --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/e816cd21-25f5-4bae-97f9-ec068dcb168f?monitor=true&api-version=2019-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/ukwest/asyncoperations/b2a47e32-6c42-4e9c-8ead-145113242923?monitor=true&api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","name":"clibatchteststorage7","type":"Microsoft.Storage/storageAccounts","location":"ukwest","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-12-27T14:00:42.0497286Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-12-27T14:00:42.0497286Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-12-27T14:00:42.0184633Z","primaryEndpoints":{"blob":"https://clibatchteststorage7.blob.core.windows.net/","queue":"https://clibatchteststorage7.queue.core.windows.net/","table":"https://clibatchteststorage7.table.core.windows.net/","file":"https://clibatchteststorage7.file.core.windows.net/"},"primaryLocation":"ukwest","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","name":"clibatchteststorage7","type":"Microsoft.Storage/storageAccounts","location":"ukwest","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-04T22:17:07.5769033Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-04T22:17:07.5769033Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-05-04T22:17:07.5300164Z","primaryEndpoints":{"dfs":"https://clibatchteststorage7.dfs.core.windows.net/","web":"https://clibatchteststorage7.z35.web.core.windows.net/","blob":"https://clibatchteststorage7.blob.core.windows.net/","queue":"https://clibatchteststorage7.queue.core.windows.net/","table":"https://clibatchteststorage7.table.core.windows.net/","file":"https://clibatchteststorage7.file.core.windows.net/"},"primaryLocation":"ukwest","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1176'
+      - '1359'
       content-type:
       - application/json
       date:
-      - Fri, 27 Dec 2019 14:00:59 GMT
+      - Mon, 04 May 2020 22:17:24 GMT
       expires:
       - '-1'
       pragma:
@@ -113,24 +113,24 @@ interactions:
       ParameterSetName:
       - -g -n -l --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7?api-version=2019-06-01
   response:
     body:
-      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","name":"clibatchteststorage7","type":"Microsoft.Storage/storageAccounts","location":"ukwest","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2019-12-27T14:00:42.0497286Z"},"blob":{"enabled":true,"lastEnabledTime":"2019-12-27T14:00:42.0497286Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2019-12-27T14:00:42.0184633Z","primaryEndpoints":{"blob":"https://clibatchteststorage7.blob.core.windows.net/","queue":"https://clibatchteststorage7.queue.core.windows.net/","table":"https://clibatchteststorage7.table.core.windows.net/","file":"https://clibatchteststorage7.file.core.windows.net/"},"primaryLocation":"ukwest","statusOfPrimary":"available"}}'
+      string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","name":"clibatchteststorage7","type":"Microsoft.Storage/storageAccounts","location":"ukwest","tags":{},"properties":{"privateEndpointConnections":[],"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-04T22:17:07.5769033Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2020-05-04T22:17:07.5769033Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2020-05-04T22:17:07.5300164Z","primaryEndpoints":{"dfs":"https://clibatchteststorage7.dfs.core.windows.net/","web":"https://clibatchteststorage7.z35.web.core.windows.net/","blob":"https://clibatchteststorage7.blob.core.windows.net/","queue":"https://clibatchteststorage7.queue.core.windows.net/","table":"https://clibatchteststorage7.table.core.windows.net/","file":"https://clibatchteststorage7.file.core.windows.net/"},"primaryLocation":"ukwest","statusOfPrimary":"available"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1176'
+      - '1359'
       content-type:
       - application/json
       date:
-      - Fri, 27 Dec 2019 14:01:02 GMT
+      - Mon, 04 May 2020 22:17:27 GMT
       expires:
       - '-1'
       pragma:
@@ -150,7 +150,8 @@ interactions:
       message: OK
 - request:
     body: 'b''{"location": "ukwest", "properties": {"autoStorage": {"storageAccountId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7"}}}'''
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7"},
+      "publicNetworkAccess": "Enabled"}}'''
     headers:
       Accept:
       - application/json
@@ -161,18 +162,18 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '286'
+      - '320'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - -g -n -l --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
       string: ''
@@ -182,11 +183,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 27 Dec 2019 14:01:09 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/operationResults/ec86be1e-0ee5-4b33-9a4e-98e5b3bb25da?api-version=2019-08-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/operationResults/15a6036d-22b3-49df-a4a6-e343a04951ea?api-version=2020-03-01
       pragma:
       - no-cache
       server:
@@ -196,7 +197,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '1199'
     status:
       code: 202
       message: Accepted
@@ -214,28 +215,28 @@ interactions:
       ParameterSetName:
       - -g -n -l --storage-account
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/operationResults/ec86be1e-0ee5-4b33-9a4e-98e5b3bb25da?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/operationResults/15a6036d-22b3-49df-a4a6-e343a04951ea?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:26 GMT
+      - Mon, 04 May 2020 22:17:49 GMT
       etag:
-      - '"0x8D78AD543C234E4"'
+      - '"0x8D7F078FB2B8D8D"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:26 GMT
+      - Mon, 04 May 2020 22:17:49 GMT
       pragma:
       - no-cache
       server:
@@ -265,30 +266,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:28 GMT
+      - Mon, 04 May 2020 22:17:50 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -322,15 +323,15 @@ interactions:
       ParameterSetName:
       - -g -n --application-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2020-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D78AD546173E13\"","properties":{"allowUpdates":true}}'
+      string: '{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D7F078FC6BE9BB\"","properties":{"allowUpdates":true}}'
     headers:
       cache-control:
       - no-cache
@@ -339,13 +340,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:30 GMT
+      - Mon, 04 May 2020 22:17:51 GMT
       etag:
-      - W/"0x8D78AD546173E13"
+      - W/"0x8D7F078FC6BE9BB"
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:30 GMT
+      - Mon, 04 May 2020 22:17:51 GMT
       pragma:
       - no-cache
       server:
@@ -359,7 +360,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1186'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -377,30 +378,30 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:31 GMT
+      - Mon, 04 May 2020 22:17:52 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -430,15 +431,15 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications?api-version=2020-03-01
   response:
     body:
-      string: '{"value":[{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D78AD546173E13\"","properties":{"allowUpdates":true}}]}'
+      string: '{"value":[{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D7F078FC6BE9BB\"","properties":{"allowUpdates":true}}]}'
     headers:
       cache-control:
       - no-cache
@@ -447,7 +448,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:32 GMT
+      - Mon, 04 May 2020 22:17:53 GMT
       expires:
       - '-1'
       pragma:
@@ -479,30 +480,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version --package-file
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:33 GMT
+      - Mon, 04 May 2020 22:17:54 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -532,15 +533,15 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version --package-file
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2020-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D78AD546173E13\"","properties":{"allowUpdates":true}}'
+      string: '{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D7F078FC6BE9BB\"","properties":{"allowUpdates":true}}'
     headers:
       cache-control:
       - no-cache
@@ -549,13 +550,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:34 GMT
+      - Mon, 04 May 2020 22:17:55 GMT
       etag:
-      - W/"0x8D78AD546173E13"
+      - W/"0x8D7F078FC6BE9BB"
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:30 GMT
+      - Mon, 04 May 2020 22:17:51 GMT
       pragma:
       - no-cache
       server:
@@ -589,15 +590,15 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version --package-file
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2020-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D78AD54979F15E\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-6aac53233ce241ddbf8cb094dd786353/1.0?sv=2018-03-28&sr=b&sig=9rpSRf%2Bk1HPTEpZblL6eEz2uAAZjm62lIwBPJAarqIw%3D&st=2019-12-27T13%3A56%3A36Z&se=2019-12-27T18%3A01%3A36Z&sp=rw","storageUrlExpiry":"2019-12-27T18:01:36.1837836Z","state":"Pending"}}'
+      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D7F078FF628275\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-04c5bf2e12aa4559a6084bcf4b90ae6c/1.0?sv=2018-03-28&sr=b&sig=CkYncMEBfmIkXE2ir0eNps0Pc5nZDXMEoap%2F1dLcR50%3D&st=2020-05-04T22%3A12%3A56Z&se=2020-05-05T02%3A17%3A56Z&sp=rw","storageUrlExpiry":"2020-05-05T02:17:56.7667505Z","state":"Pending"}}'
     headers:
       cache-control:
       - no-cache
@@ -606,13 +607,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:35 GMT
+      - Mon, 04 May 2020 22:17:56 GMT
       etag:
-      - W/"0x8D78AD54979F15E"
+      - W/"0x8D7F078FF628275"
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:36 GMT
+      - Mon, 04 May 2020 22:17:56 GMT
       pragma:
       - no-cache
       server:
@@ -626,7 +627,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1187'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -638,15 +639,15 @@ interactions:
       Content-Length:
       - '29'
       User-Agent:
-      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.4; Windows 10)
+      - Azure-Storage/2.0.0-2.0.1 (Python CPython 3.7.5; Windows 10)
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Fri, 27 Dec 2019 14:01:36 GMT
+      - Mon, 04 May 2020 22:17:56 GMT
       x-ms-version:
       - '2018-11-09'
     method: PUT
-    uri: https://clibatchteststorage7.blob.core.windows.net/app-testapp-6aac53233ce241ddbf8cb094dd786353/1.0?sv=2018-03-28&sr=b&sig=9rpSRf%2Bk1HPTEpZblL6eEz2uAAZjm62lIwBPJAarqIw%3D&st=2019-12-27T13%3A56%3A36Z&se=2019-12-27T18%3A01%3A36Z&sp=rw
+    uri: https://clibatchteststorage7.blob.core.windows.net/app-testapp-04c5bf2e12aa4559a6084bcf4b90ae6c/1.0?sv=2018-03-28&sr=b&sig=CkYncMEBfmIkXE2ir0eNps0Pc5nZDXMEoap%2F1dLcR50%3D&st=2020-05-04T22%3A12%3A56Z&se=2020-05-05T02%3A17%3A56Z&sp=rw
   response:
     body:
       string: ''
@@ -656,11 +657,11 @@ interactions:
       content-md5:
       - JeBon6PeparxrbCKMR+6hw==
       date:
-      - Fri, 27 Dec 2019 14:01:38 GMT
+      - Mon, 04 May 2020 22:17:57 GMT
       etag:
-      - '"0x8D78AD54B4366D8"'
+      - '"0x8D7F079006903AF"'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:39 GMT
+      - Mon, 04 May 2020 22:17:58 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -688,30 +689,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version --package-file
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0/activate?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0/activate?api-version=2020-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D78AD54B8B56A3\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-6aac53233ce241ddbf8cb094dd786353/1.0?sv=2018-03-28&sr=b&sig=BHBZ6MrFJUvVWQvXZFCba5Zj%2Fqliv%2F1o74XVdUCwZ4E%3D&st=2019-12-27T13%3A56%3A39Z&se=2019-12-27T18%3A01%3A39Z&sp=rw","storageUrlExpiry":"2019-12-27T18:01:39.6868596Z","state":"Active","format":"zip","lastActivationTime":"2019-12-27T14:01:39.5923185Z"}}'
+      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D7F07900951FB6\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-04c5bf2e12aa4559a6084bcf4b90ae6c/1.0?sv=2018-03-28&sr=b&sig=U%2FF6Mido5p6A066U9G96uaSeYqliFqD9qPOjyFbfcGU%3D&st=2020-05-04T22%3A12%3A58Z&se=2020-05-05T02%3A17%3A58Z&sp=rw","storageUrlExpiry":"2020-05-05T02:17:58.7974253Z","state":"Active","format":"zip","lastActivationTime":"2020-05-04T22:17:58.7627821Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '746'
+      - '744'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:39 GMT
+      - Mon, 04 May 2020 22:17:58 GMT
       etag:
-      - W/"0x8D78AD54B8B56A3"
+      - W/"0x8D7F07900951FB6"
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:39 GMT
+      - Mon, 04 May 2020 22:17:58 GMT
       pragma:
       - no-cache
       server:
@@ -725,7 +726,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -743,30 +744,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version --package-file
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2020-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D78AD54B8B56A3\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-6aac53233ce241ddbf8cb094dd786353/1.0?sv=2018-03-28&sr=b&sig=bMewYgId6QPpnjlh1%2Fo7o7khwObzRJElkdlQe500Uj8%3D&st=2019-12-27T13%3A56%3A40Z&se=2019-12-27T18%3A01%3A40Z&sp=rw","storageUrlExpiry":"2019-12-27T18:01:40.0340227Z","state":"Active","format":"zip","lastActivationTime":"2019-12-27T14:01:39.5923185Z"}}'
+      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D7F07900951FB6\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-04c5bf2e12aa4559a6084bcf4b90ae6c/1.0?sv=2018-03-28&sr=b&sig=iDjcJr2YErP92h6gTUt3urYdlr%2Bal75GmHjt2j%2BRzjM%3D&st=2020-05-04T22%3A12%3A59Z&se=2020-05-05T02%3A17%3A59Z&sp=rw","storageUrlExpiry":"2020-05-05T02:17:59.0294786Z","state":"Active","format":"zip","lastActivationTime":"2020-05-04T22:17:58.7627821Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '744'
+      - '746'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:39 GMT
+      - Mon, 04 May 2020 22:17:58 GMT
       etag:
-      - W/"0x8D78AD54B8B56A3"
+      - W/"0x8D7F07900951FB6"
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:39 GMT
+      - Mon, 04 May 2020 22:17:58 GMT
       pragma:
       - no-cache
       server:
@@ -796,30 +797,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version --format
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:41 GMT
+      - Mon, 04 May 2020 22:17:59 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -853,30 +854,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version --format
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0/activate?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0/activate?api-version=2020-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D78AD54D47D61A\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-6aac53233ce241ddbf8cb094dd786353/1.0?sv=2018-03-28&sr=b&sig=JZ0TDHywJBEcNVHHpp8UZnJek2MVPECNd9xoiOMzwHY%3D&st=2019-12-27T13%3A56%3A42Z&se=2019-12-27T18%3A01%3A42Z&sp=rw","storageUrlExpiry":"2019-12-27T18:01:42.6683687Z","state":"Active","format":"zip","lastActivationTime":"2019-12-27T14:01:42.4663623Z"}}'
+      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D7F07901DFDD49\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-04c5bf2e12aa4559a6084bcf4b90ae6c/1.0?sv=2018-03-28&sr=b&sig=TO7HQ0JUh3OiJbqbM1S%2F2zxBX0%2BKw9Di8uGibLpwOr4%3D&st=2020-05-04T22%3A13%3A00Z&se=2020-05-05T02%3A18%3A00Z&sp=rw","storageUrlExpiry":"2020-05-05T02:18:00.9745257Z","state":"Active","format":"zip","lastActivationTime":"2020-05-04T22:18:00.9303351Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '742'
+      - '746'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:42 GMT
+      - Mon, 04 May 2020 22:18:00 GMT
       etag:
-      - W/"0x8D78AD54D47D61A"
+      - W/"0x8D7F07901DFDD49"
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:42 GMT
+      - Mon, 04 May 2020 22:18:00 GMT
       pragma:
       - no-cache
       server:
@@ -890,7 +891,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -908,30 +909,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:43 GMT
+      - Mon, 04 May 2020 22:18:01 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -961,30 +962,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2020-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D78AD54D47D61A\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-6aac53233ce241ddbf8cb094dd786353/1.0?sv=2018-03-28&sr=b&sig=5JQ5qOIq%2BnGUBvSF6oqk11yuBjBf0HdMHDVnsPLvMws%3D&st=2019-12-27T13%3A56%3A45Z&se=2019-12-27T18%3A01%3A45Z&sp=rw","storageUrlExpiry":"2019-12-27T18:01:45.3995409Z","state":"Active","format":"zip","lastActivationTime":"2019-12-27T14:01:42.4663623Z"}}'
+      string: '{"type":"Microsoft.Batch/batchAccounts/applications/versions","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0","name":"1.0","etag":"W/\"0x8D7F07901DFDD49\"","properties":{"storageUrl":"https://clibatchteststorage7.blob.core.windows.net/app-testapp-04c5bf2e12aa4559a6084bcf4b90ae6c/1.0?sv=2018-03-28&sr=b&sig=STa9i319PGgWOfWMf2EKhnuVMjFypqGhoaJkdNvBon0%3D&st=2020-05-04T22%3A13%3A03Z&se=2020-05-05T02%3A18%3A03Z&sp=rw","storageUrlExpiry":"2020-05-05T02:18:03.0974187Z","state":"Active","format":"zip","lastActivationTime":"2020-05-04T22:18:00.9303351Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '744'
+      - '742'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:45 GMT
+      - Mon, 04 May 2020 22:18:02 GMT
       etag:
-      - W/"0x8D78AD54D47D61A"
+      - W/"0x8D7F07901DFDD49"
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:42 GMT
+      - Mon, 04 May 2020 22:18:00 GMT
       pragma:
       - no-cache
       server:
@@ -1014,30 +1015,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --default-version
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:45 GMT
+      - Mon, 04 May 2020 22:18:03 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -1071,15 +1072,15 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --default-version
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2020-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D78AD5505B2289\"","properties":{"allowUpdates":true,"defaultVersion":"1.0"}}'
+      string: '{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D7F07904692162\"","properties":{"allowUpdates":true,"defaultVersion":"1.0"}}'
     headers:
       cache-control:
       - no-cache
@@ -1088,13 +1089,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:47 GMT
+      - Mon, 04 May 2020 22:18:04 GMT
       etag:
-      - W/"0x8D78AD5505B2289"
+      - W/"0x8D7F07904692162"
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:47 GMT
+      - Mon, 04 May 2020 22:18:05 GMT
       pragma:
       - no-cache
       server:
@@ -1108,7 +1109,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1188'
+      - '1199'
     status:
       code: 200
       message: OK
@@ -1126,30 +1127,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:48 GMT
+      - Mon, 04 May 2020 22:18:05 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -1179,15 +1180,15 @@ interactions:
       ParameterSetName:
       - -g -n --application-name
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2020-03-01
   response:
     body:
-      string: '{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D78AD5505B2289\"","properties":{"allowUpdates":true,"defaultVersion":"1.0"}}'
+      string: '{"type":"Microsoft.Batch/batchAccounts/applications","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp","name":"testapp","etag":"W/\"0x8D7F07904692162\"","properties":{"allowUpdates":true,"defaultVersion":"1.0"}}'
     headers:
       cache-control:
       - no-cache
@@ -1196,13 +1197,13 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:49 GMT
+      - Mon, 04 May 2020 22:18:06 GMT
       etag:
-      - W/"0x8D78AD5505B2289"
+      - W/"0x8D7F07904692162"
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:47 GMT
+      - Mon, 04 May 2020 22:18:05 GMT
       pragma:
       - no-cache
       server:
@@ -1232,30 +1233,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version --yes
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:50 GMT
+      - Mon, 04 May 2020 22:18:07 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -1287,12 +1288,12 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --version --yes
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp/versions/1.0?api-version=2020-03-01
   response:
     body:
       string: ''
@@ -1302,7 +1303,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 27 Dec 2019 14:01:52 GMT
+      - Mon, 04 May 2020 22:18:08 GMT
       expires:
       - '-1'
       pragma:
@@ -1314,7 +1315,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14996'
+      - '14999'
     status:
       code: 200
       message: OK
@@ -1332,30 +1333,30 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --yes
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:52 GMT
+      - Mon, 04 May 2020 22:18:09 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -1387,12 +1388,12 @@ interactions:
       ParameterSetName:
       - -g -n --application-name --yes
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications/testapp?api-version=2020-03-01
   response:
     body:
       string: ''
@@ -1402,7 +1403,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 27 Dec 2019 14:01:53 GMT
+      - Mon, 04 May 2020 22:18:10 GMT
       expires:
       - '-1'
       pragma:
@@ -1414,7 +1415,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14995'
+      - '14999'
     status:
       code: 200
       message: OK
@@ -1432,30 +1433,30 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7?api-version=2020-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":700,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":100},{"name":"standardDv2Family","coreQuota":100},{"name":"standardDv3Family","coreQuota":100},{"name":"standardEv3Family","coreQuota":50},{"name":"standardDSv2Family","coreQuota":100},{"name":"standardDSv3Family","coreQuota":100},{"name":"standardESv3Family","coreQuota":50},{"name":"standardFFamily","coreQuota":50},{"name":"standardFSFamily","coreQuota":50},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":500,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2019-12-27T14:01:10.1925711Z"},"poolAllocationMode":"BatchService"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7","name":"clibatchtest7","type":"Microsoft.Batch/batchAccounts","location":"ukwest","properties":{"accountEndpoint":"clibatchtest7.ukwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":0,"dedicatedCoreQuotaPerVMFamily":[{"name":"standardAv2Family","coreQuota":0},{"name":"standardDv2Family","coreQuota":0},{"name":"standardDv3Family","coreQuota":0},{"name":"standardEv3Family","coreQuota":0},{"name":"standardDSv2Family","coreQuota":0},{"name":"standardDSv3Family","coreQuota":0},{"name":"standardESv3Family","coreQuota":0},{"name":"standardFFamily","coreQuota":0},{"name":"standardFSFamily","coreQuota":0},{"name":"standardA0_A7Family","coreQuota":0},{"name":"standardA8_A11Family","coreQuota":0},{"name":"standardDFamily","coreQuota":0},{"name":"standardGFamily","coreQuota":0},{"name":"basicAFamily","coreQuota":0},{"name":"standardNVFamily","coreQuota":0},{"name":"standardNVPromoFamily","coreQuota":0},{"name":"standardNCFamily","coreQuota":0},{"name":"standardNCPromoFamily","coreQuota":0},{"name":"standardHFamily","coreQuota":0},{"name":"standardHPromoFamily","coreQuota":0},{"name":"standardMSFamily","coreQuota":0},{"name":"standardDSFamily","coreQuota":0},{"name":"standardGSFamily","coreQuota":0},{"name":"standardLSFamily","coreQuota":0},{"name":"standardLSv2Family","coreQuota":0},{"name":"standardNCSv2Family","coreQuota":0},{"name":"standardNDSFamily","coreQuota":0},{"name":"standardNCSv3Family","coreQuota":0},{"name":"standardFSv2Family","coreQuota":0},{"name":"standardHBSFamily","coreQuota":0},{"name":"standardHCSFamily","coreQuota":0},{"name":"standardNVSv3Family","coreQuota":0},{"name":"standardHBrsv2Family","coreQuota":0},{"name":"standardDASv4Family","coreQuota":0},{"name":"standardEAv4Family","coreQuota":0},{"name":"standardEASv4Family","coreQuota":0}],"dedicatedCoreQuotaPerVMFamilyEnforced":false,"lowPriorityCoreQuota":0,"poolQuota":100,"activeJobAndJobScheduleQuota":300,"autoStorage":{"storageAccountId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clibatchteststorage7","lastKeySync":"2020-05-04T22:17:33.4236958Z"},"poolAllocationMode":"BatchService","publicNetworkAccess":"Enabled","encryption":{"keySource":"Microsoft.Batch"}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2299'
+      - '2536'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:54 GMT
+      - Mon, 04 May 2020 22:18:11 GMT
       etag:
-      - '"0x8D78AD539FF794F"'
+      - '"0x8D7F078F179A31E"'
       expires:
       - '-1'
       last-modified:
-      - Fri, 27 Dec 2019 14:01:10 GMT
+      - Mon, 04 May 2020 22:17:33 GMT
       pragma:
       - no-cache
       server:
@@ -1485,12 +1486,12 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-batch/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-batch/8.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications?api-version=2019-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatchtest7/applications?api-version=2020-03-01
   response:
     body:
       string: '{"value":[]}'
@@ -1502,7 +1503,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:01:54 GMT
+      - Mon, 04 May 2020 22:18:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1536,8 +1537,8 @@ interactions:
       ParameterSetName:
       - -g -n --yes
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
-        azure-mgmt-storage/7.0.0 Azure-SDK-For-Python AZURECLI/2.0.78
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
+        azure-mgmt-storage/9.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: DELETE
@@ -1553,7 +1554,7 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 27 Dec 2019 14:02:00 GMT
+      - Mon, 04 May 2020 22:18:18 GMT
       expires:
       - '-1'
       pragma:
@@ -1565,7 +1566,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14998'
+      - '14999'
     status:
       code: 200
       message: OK

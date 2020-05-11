@@ -569,6 +569,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertTrue('certificate_references' in [a for a, _ in args])
         self.assertTrue('metadata' in [a for a, _ in args])
         handler = operations._job_operations.JobOperations.add
+        handler = operations._job_operations.JobOperations.add
         args = list(self.command_job._load_transformed_arguments(handler))
         self.assertEqual(len(args), 16)
         self.assertFalse('yes' in [a for a, _ in args])

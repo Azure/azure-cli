@@ -14,13 +14,14 @@ from msrest.exceptions import DeserializationError
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
-                                     Application)
+                                     Application, EncryptionProperties, KeyVaultProperties)
 from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
                                 PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
                                 TaskAddParameter, TaskAddCollectionParameter, TaskConstraints,
-                                PoolUpdatePropertiesParameter, StartTask, AffinityInformation)
+                                PoolUpdatePropertiesParameter, StartTask, AffinityInformation,
+                                )
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
@@ -73,12 +74,29 @@ def get_account(cmd, client, resource_group_name=None, account_name=None):
 @transfer_doc(AutoStorageBaseProperties)
 def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
-                   keyvault=None, keyvault_url=None, no_wait=False):
+                   keyvault=None, keyvault_url=None, no_wait=False, public_network_access=None,
+                   encryption_key_source=None, encryption_key_identifier=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
+    if public_network_access and public_network_access != "Enabled" and public_network_access != "Disabled":
+        raise ValueError("The --public-network-access must be either Enabled or Disabled")
+    if (encryption_key_source and
+            encryption_key_source != "Microsoft.Batch" and
+            encryption_key_source != "Microsoft.KeyVault"):
+        raise ValueError("The --encryption-key-source must be either Microsoft.Batch or Microsoft.KeyVault")
+    if encryption_key_source == "Microsoft.KeyVault" and not encryption_key_identifier:
+        raise ValueError("The --encryption-key-identifier property is required when "
+                         "--encryption-key-source is set to Microsoft.KeyVault")
+    encryption_key_identifier = KeyVaultProperties(key_identifier=encryption_key_identifier) \
+        if encryption_key_identifier else None
+    encryption = EncryptionProperties(
+        key_source=encryption_key_source,
+        encryption_key_identifier=encryption_key_identifier) if encryption_key_source else None
     parameters = BatchAccountCreateParameters(location=location,
                                               tags=tags,
-                                              auto_storage=properties)
+                                              auto_storage=properties,
+                                              public_network_access=public_network_access,
+                                              encryption=encryption)
     if keyvault:
         parameters.key_vault_reference = {'id': keyvault, 'url': keyvault_url}
         parameters.pool_allocation_mode = 'UserSubscription'
