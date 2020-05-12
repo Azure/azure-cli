@@ -1400,6 +1400,7 @@ class WebappSSLImportCertTest(ScenarioTest):
                 webapp_name), cert_thumbprint)
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='kv_resource_group', location='westeurope')
     @ResourceGroupPreparer(location='westeurope')
     def test_webapp_ssl_import_resource_id(self, resource_group, kv_resource_group):
