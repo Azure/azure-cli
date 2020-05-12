@@ -216,6 +216,53 @@ class Identity:
 
         return credential, managed_identity_info
 
+    def get_user(self, user_or_sp=None):
+        from msal import PublicClientApplication
+        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:122
+        from azure.identity._internal.msal_credentials import _load_cache
+        cache = _load_cache()
+        authority = "https://{}/organizations".format(self.authority)
+        app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
+        return app.get_accounts(user_or_sp)
+
+    def logout_user(self, user_or_sp):
+        from msal import PublicClientApplication
+        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:122
+        from azure.identity._internal.msal_credentials import _load_cache
+        cache = _load_cache()
+        authority = "https://{}/organizations".format(self.authority)
+        app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
+
+        accounts = app.get_accounts(user_or_sp)
+        logger.info('Before account removal:')
+        logger.info(json.dumps(accounts))
+
+        for account in accounts:
+            app.remove_account(account)
+
+        accounts = app.get_accounts(user_or_sp)
+        logger.info('After account removal:')
+        logger.info(json.dumps(accounts))
+
+    def logout_all(self):
+        from msal import PublicClientApplication
+        from azure.identity._internal.msal_credentials import _load_cache
+        cache = _load_cache()
+        # TODO: Support multi-authority logout
+        authority = "https://{}/organizations".format(self.authority)
+        app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
+
+        accounts = app.get_accounts()
+        logger.info('Before account removal:')
+        logger.info(json.dumps(accounts))
+
+        for account in accounts:
+            app.remove_account(account)
+
+        accounts = app.get_accounts()
+        logger.info('After account removal:')
+        logger.info(json.dumps(accounts))
+
     def get_user_credential(self, home_account_id, username):
         auth_profile = AuthProfile(self.authority, home_account_id, self.tenant_id, username)
         return InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True)

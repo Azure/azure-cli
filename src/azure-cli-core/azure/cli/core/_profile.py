@@ -109,6 +109,7 @@ class Profile(object):
 
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        self._authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
 
@@ -126,8 +127,7 @@ class Profile(object):
 
         credential=None
         auth_profile=None
-        authority = self.cli_ctx.cloud.endpoints.active_directory.replace('https://', '')
-        identity = Identity(authority, tenant, cred_cache=self._adal_cache)
+        identity = Identity(self._authority, tenant, cred_cache=self._adal_cache)
 
         if not subscription_finder:
             subscription_finder = SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
@@ -289,8 +289,8 @@ class Profile(object):
                 subscription_dict[_USER_ENTITY]['clientId'] = managed_identity_client_id
 
             # This will be deprecated and client_id will be the only persisted ID
-            logger.warning("assignedIdentityInfo will be deprecated in the future. Only client ID should be used.")
             if user_assigned_identity_id:
+                logger.warning("assignedIdentityInfo will be deprecated in the future. Only client ID should be used.")
                 subscription_dict[_USER_ENTITY][_ASSIGNED_IDENTITY_INFO] = user_assigned_identity_id
 
             consolidated.append(subscription_dict)
@@ -416,18 +416,68 @@ class Profile(object):
         set_cloud_subscription(self.cli_ctx, active_cloud.name, result[0][_SUBSCRIPTION_ID])
         self._storage[_SUBSCRIPTIONS] = subscriptions
 
-    def logout(self, user_or_sp):
+    def logout(self, user_or_sp, clear_credential):
         subscriptions = self.load_cached_subscriptions(all_clouds=True)
         result = [x for x in subscriptions
                   if user_or_sp.lower() == x[_USER_ENTITY][_USER_NAME].lower()]
-        subscriptions = [x for x in subscriptions if x not in result]
 
-        self._storage[_SUBSCRIPTIONS] = subscriptions
-        self._creds_cache.remove_cached_creds(user_or_sp)
+        if result:
+            # Remove the account from the profile
+            subscriptions = [x for x in subscriptions if x not in result]
+            self._storage[_SUBSCRIPTIONS] = subscriptions
 
-    def logout_all(self):
+            # Always remove credential from the legacy cred cache, regardless of MSAL cache
+            adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+            adal_cache.remove_cached_creds(user_or_sp)
+
+            logger.warning('Account %s was logged out from Azure CLI', user_or_sp)
+        else:
+            # https://english.stackexchange.com/questions/5302/log-in-to-or-log-into-or-login-to
+            logger.warning("Account %s was not logged in to Azure CLI.", user_or_sp)
+
+        # Deal with MSAL cache
+        identity = Identity(self._authority)
+        accounts = identity.get_user(user_or_sp)
+        if accounts:
+            logger.info("The credential of %s were found from MSAL encrypted cache: %s", user_or_sp, accounts)
+            if clear_credential:
+                identity.logout_user(user_or_sp)
+                logger.warning("The credential of %s were cleared from MSAL encrypted cache. This account is "
+                               "also logged out from other SDK tools which use Azure CLI's credential "
+                               "via Single Sign-On.", user_or_sp)
+            else:
+                logger.warning('The credential of %s is still stored in MSAL encrypted cached. Other SDK tools may use '
+                               'Azure CLI\'s credential via Single Sign-On. '
+                               'To clear the credential, run `az logout --username %s --clear-credential`.',
+                               user_or_sp, user_or_sp)
+        else:
+            logger.warning("The credential of %s was not found from MSAL encrypted cache.", user_or_sp)
+
+    def logout_all(self, clear_credential):
         self._storage[_SUBSCRIPTIONS] = []
-        self._creds_cache.remove_all_cached_creds()
+
+        # Always remove credentials from the legacy cred cache, regardless of MSAL cache
+        adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
+        adal_cache.remove_all_cached_creds()
+        logger.warning('All accounts were logged out.')
+
+        # Deal with MSAL cache
+        identity = Identity(self._authority)
+        accounts = identity.get_user()
+        if accounts:
+            logger.info("These credentials were found from MSAL encrypted cache: %s", accounts)
+            if clear_credential:
+                identity.logout_all()
+                logger.warning('All credentials store in MSAL encrypted cache were cleared.')
+            else:
+                logger.warning('These credentials are still stored in MSAL encrypted cached:')
+                for account in identity.get_user():
+                    logger.warning(account['username'])
+                logger.warning('Other SDK tools may use Azure CLI\'s credential via Single Sign-On. '
+                               'To clear all credentials, run `az account clear --clear-credential`. '
+                               'To clear one of them, run `az logout --username USERNAME` --clear-credential.')
+        else:
+            logger.warning('No credential was not found from MSAL encrypted cache.')
 
     def load_cached_subscriptions(self, all_clouds=False):
         subscriptions = self._storage.get(_SUBSCRIPTIONS) or []

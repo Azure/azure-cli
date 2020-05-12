@@ -43,6 +43,14 @@ class ProfileCommandsLoader(AzCommandsLoader):
     # pylint: disable=line-too-long
     def load_arguments(self, command):
         from azure.cli.core.api import get_subscription_id_list
+        from azure.cli.core.commands.parameters import get_three_state_flag
+        from knack.arguments import CLIArgumentType
+
+        clear_credential_type = CLIArgumentType(options_list=['--clear-credential', '-c'],
+                                                arg_type=get_three_state_flag(),
+                                                help="Clear the credential stored in MSAL encrypted cache. "
+                                                     "The user will also be logged out from other SDK tools "
+                                                     "which uses Azure CLI's credential via Single Sign-On.")
 
         with self.argument_context('login') as c:
             c.argument('password', options_list=['--password', '-p'], help="Credentials like user password, or for a service principal, provide client secret or a pem file with key and public certificate. Will prompt if not given.")
@@ -58,7 +66,8 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('use_cert_sn_issuer', action='store_true', help='used with a service principal configured with Subject Name and Issuer Authentication in order to support automatic certificate rolls')
 
         with self.argument_context('logout') as c:
-            c.argument('username', help='account user, if missing, logout the current active account')
+            c.argument('username', options_list=['--username', '-u'], help='account user, if missing, logout the current active account')
+            c.argument('clear_credential', clear_credential_type)
             c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account') as c:
@@ -77,5 +86,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('resource_type', get_enum_type(cloud_resource_types), options_list=['--resource-type'], arg_group='', help='Type of well-known resource.')
             c.argument('tenant', options_list=['--tenant', '-t'], is_preview=True, help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
 
+        with self.argument_context('account logout') as c:
+            c.argument('clear_credential', clear_credential_type)
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader
