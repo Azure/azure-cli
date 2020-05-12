@@ -261,7 +261,7 @@ def load_arguments(self, _):
 
         # Windows Update Specific Args
         c.argument('search_criteria', arg_type=ib_win_update_type, help='Criteria to search updates. Omit or specify empty string to use the default (search all). Refer to above link for examples and detailed description of this field.')
-        c.argument('filters', arg_type=ib_win_update_type, help='Space delimited filters to select updates to apply. Omit or specify empty array to use the default (no filter)')
+        c.argument('filters', arg_type=ib_win_update_type, nargs='+', help='Space delimited filters to select updates to apply. Omit or specify empty array to use the default (no filter)')
         c.argument('update_limit', arg_type=ib_win_update_type, help='Maximum number of updates to apply at a time. Omit or specify 0 to use the default (1000)')
 
         # File Args

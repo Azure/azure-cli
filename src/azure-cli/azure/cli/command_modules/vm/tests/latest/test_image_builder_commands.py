@@ -98,7 +98,6 @@ class ImageTemplateTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_image_builder_template_file_')
     @live_only()
     def test_image_builder_template_file(self, resource_group):
-        # self._assign_ib_permissions(resource_group)
         self._identity_role(resource_group)
 
         # URL
@@ -127,7 +126,6 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic')
     def test_image_builder_basic(self, resource_group):
-        # self._assign_ib_permissions(resource_group)
         self._identity_role(resource_group)
 
         subscription_id = self.get_subscription_id()
@@ -219,7 +217,6 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_basic_2', location="westus2")
     def test_image_builder_basic_sig(self, resource_group):
-        # self._assign_ib_permissions(resource_group)
         self._identity_role(resource_group)
 
         subscription_id = self.get_subscription_id()
@@ -256,7 +253,6 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_managed')
     def test_image_build_managed_image(self, resource_group, resource_group_location):
-        # self._assign_ib_permissions(resource_group)
         self._identity_role(resource_group)
 
         self.kwargs.update({
@@ -295,7 +291,6 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_sig')
     def test_image_build_shared_image(self, resource_group, resource_group_location):
-        # self._assign_ib_permissions(resource_group)
         self._identity_role(resource_group)
 
         self.kwargs.update({
@@ -349,7 +344,6 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_customizers')
     def test_image_builder_customizers(self, resource_group, resource_group_location):
-        # self._assign_ib_permissions(resource_group)
         self._identity_role(resource_group)
 
         self.kwargs.update({
@@ -364,6 +358,7 @@ class ImageTemplateTest(ScenarioTest):
             'shell_name': 'shell_script',
             'win_restart_name': 'windows_restart_name',
             'file_name': 'file_customizer_name',
+            'win_update_name': 'win_update_name',
 
             'script_url': TEST_PWSH_SCRIPT_URL,
             'inline_script': " ".join(TEST_PWSH_SCRIPT_INLINE),
@@ -426,13 +421,24 @@ class ImageTemplateTest(ScenarioTest):
                      self.check('properties.customize[5].type', 'Shell')
                  ])
 
+        self.cmd('image builder customizer add -n {tmpl} -g {rg} --customizer-name {win_update_name} '
+                 '--type windows-update --search-criteria IsInstalled=0 '
+                 '--filters "exclude:$_.Title -like \'*Preview*\'" "include:$true" --update-limit 20 --defer',
+                 checks=[
+                     self.check('properties.customize[6].name', '{win_update_name}'),
+                     self.check('properties.customize[6].searchCriteria', 'IsInstalled=0'),
+                     self.check('properties.customize[6].filters[0]', 'exclude:$_.Title -like \'*Preview*\''),
+                     self.check('properties.customize[6].filters[1]', 'include:$true'),
+                     self.check('properties.customize[6].updateLimit', '20')
+                 ])
+
         self.cmd('image builder customizer remove -n {tmpl} -g {rg} --customizer-name {shell_name} --defer', checks=[
-            self.check('length(properties.customize)', 5)
+            self.check('length(properties.customize)', 6)
         ])
 
         # create image template from cache
         self.cmd('image builder update -n {tmpl} -g {rg}', checks=[
-            self.check('length(customize)', 5)
+            self.check('length(customize)', 6)
         ])
 
         # test clear using object cache
@@ -442,7 +448,6 @@ class ImageTemplateTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='img_tmpl_customizers', location='westus2')
     def test_image_template_outputs(self, resource_group, resource_group_location):
-        # self._assign_ib_permissions(resource_group)
         self._identity_role(resource_group)
 
         self.kwargs.update({
@@ -501,7 +506,6 @@ class ImageTemplateTest(ScenarioTest):
                 with self.assertRaisesRegexp(CLIError, "This command requires --defer"):
                     self.cmd(cmd)
 
-        # self._assign_ib_permissions(resource_group)
         self._identity_role(resource_group)
 
         self.kwargs.update({
