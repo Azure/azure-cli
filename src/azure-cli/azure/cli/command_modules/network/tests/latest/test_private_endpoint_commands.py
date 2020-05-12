@@ -661,10 +661,11 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
                 self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}')
             ])
         self.cmd('network private-endpoint-connection reject --id {pec_id} '
-                 '--description "{rejection_desc}"', checks=[
-            self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
-            self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')
-        ])
+                 '--description "{rejection_desc}"',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')
+                 ])
         self.cmd('network private-endpoint-connection list --name {acc} --resource-group {rg} --type Microsoft.DocumentDB/databaseAccounts', checks=[
             self.check('length(@)', 1)
         ])
