@@ -530,6 +530,26 @@ class ImageTemplateTest(ScenarioTest):
         ]
         _ensure_cmd_raises_defer_error(self, output_commands)
 
+    @ResourceGroupPreparer(name_prefix='img_tmpl_cancel_')
+    def test_image_builder_cancel(self, resource_group, resource_group_location):
+        self._identity_role(resource_group)
+
+        self.kwargs.update({
+            'tmpl': 'template1',
+            'img_src': LINUX_IMAGE_SOURCE,
+            'loc': resource_group_location,
+            'img': 'img1',
+        })
+
+        self.cmd('image builder create -g {rg} -n {tmpl} --image-source {img_src} --managed-image-destinations '
+                 '{img}={loc} --identity {ide}')
+        self.cmd('image builder run -g {rg} -n {tmpl} --no-wait')
+        self.cmd('image builder show -g {rg} -n {tmpl}')
+        self.cmd('image builder cancel -g {rg} -n {tmpl}')
+        self.cmd('image builder show -g {rg} -n {tmpl}', checks=[
+            self.check_pattern('lastRunStatus.runState', 'Canceling|Canceled')
+        ])
+
 
 if __name__ == '__main__':
     unittest.main()
