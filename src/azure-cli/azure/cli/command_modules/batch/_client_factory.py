@@ -22,14 +22,6 @@ def mgmt_location_client_factory(cli_ctx, _):
     return batch_client_factory(cli_ctx).location
 
 
-def mgmt_private_link_resource_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).private_link_resource
-
-
-def mgmt_private_endpoint_connection_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).private_endpoint_connection
-
-
 def application_client_factory(cli_ctx, kwargs):
     return batch_data_service_factory(cli_ctx, kwargs).application
 
