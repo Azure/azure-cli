@@ -415,7 +415,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
             ),
         ]
 
-        expected = f"""
+        expected = """
 Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 
   - p1/foo [2020-04-01]
@@ -424,7 +424,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
       numberValue:  1.2
       booleanValue: true
       stringValue:  "The quick brown fox jumps over the lazy dog."
-"""  # noqa: F541
+"""
 
         result = format_what_if_operation_result(WhatIfOperationResult(changes=changes), False)
 
