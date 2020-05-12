@@ -184,7 +184,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         import inspect
 
         def is_loader_cls(cls):
-            return inspect.isclass(cls) and cls.__name__ != 'BaseHelpLoader'and issubclass(cls, help_loaders.BaseHelpLoader)  # pylint: disable=line-too-long
+            return inspect.isclass(cls) and cls.__name__ != 'BaseHelpLoader' and issubclass(cls, help_loaders.BaseHelpLoader)  # pylint: disable=line-too-long
 
         versioned_loaders = {}
         for cls_name, loader_cls in inspect.getmembers(help_loaders, is_loader_cls):

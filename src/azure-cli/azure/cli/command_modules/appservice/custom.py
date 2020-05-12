@@ -2464,7 +2464,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
-        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)
+        location = next((loc for loc in locations if loc['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location

@@ -31,7 +31,7 @@ def get_subscription_locations(cli_ctx):
 @Completer
 def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_subscription_locations(cmd.cli_ctx)
-    return [l.name for l in result]
+    return [item.name for item in result]
 
 
 # pylint: disable=redefined-builtin
@@ -95,8 +95,8 @@ def get_location_name_type(cli_ctx):
     def location_name_type(name):
         if ' ' in name:
             # if display name is provided, attempt to convert to short form name
-            name = next((l.name for l in get_subscription_locations(cli_ctx)
-                         if l.display_name.lower() == name.lower()), name)
+            name = next((location.name for location in get_subscription_locations(cli_ctx)
+                         if location.display_name.lower() == name.lower()), name)
         return name
     return location_name_type
 
@@ -117,7 +117,7 @@ def get_resource_groups(cli_ctx):
 @Completer
 def get_resource_group_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_resource_groups(cmd.cli_ctx)
-    return [l.name for l in result]
+    return [item.name for item in result]
 
 
 def get_resources_in_resource_group(cli_ctx, resource_group_name, resource_type=None):
