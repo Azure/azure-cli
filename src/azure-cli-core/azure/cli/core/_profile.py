@@ -127,7 +127,6 @@ class Profile(object):
 
         credential=None
         auth_profile=None
-        adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
         identity = Identity(self._authority, tenant, cred_cache=self._adal_cache)
 
         if not subscription_finder:
