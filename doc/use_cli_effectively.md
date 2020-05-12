@@ -97,15 +97,15 @@ Most update commands in the CLI feature the three generic arguments: `--add`, `-
 
 ## Generic resource commands - `az resource`
 
-There may be cases where a service you are interested in does not have CLI command coverage. You can use the `az resource create/show/list/delete/update/invoke-action` commands to work with these resources. A few suggestions here:
+There may be cases where a service you are interested in does not have CLI command coverage. You can use the `az resource create/show/list/delete/update/invoke-action` commands to work with these resources. Here are a few suggestions:
 1. If only `create/update` are involved, consider using `az group deployment create`. Leverage [Azure Quickstart Templates](https://github.com/Azure/azure-quickstart-templates) for working examples.
 2. Check out the Rest API reference for the request payload, URL and API version. As an example, check out the community's comments on [how to create AppInsights](https://github.com/Azure/azure-cli/issues/5543).
 
 ## REST API command - `az rest`
 
-If neither generic update arguments nor `az resource` meets your needs, you can use `az rest` command to call the REST API. It automatically authenticates using the credential logged in and sets header `Content-Type: application/json`.
+If neither generic update arguments nor `az resource` meets your needs, you can use `az rest` command to call the REST API. It automatically authenticates using the logged-in credential and sets header `Content-Type: application/json`.
 
-This is extremely useful for calling [Microsoft Graph API](https://docs.microsoft.com/en-us/graph/api/overview?toc=./ref/toc.json&view=graph-rest-1.0) which is not supported by CLI commands yet ([#12946](https://github.com/Azure/azure-cli/issues/12946)).
+This is extremely useful for calling [Microsoft Graph API](https://docs.microsoft.com/en-us/graph/api/overview?toc=./ref/toc.json&view=graph-rest-1.0) which is not currently supported by CLI commands ([#12946](https://github.com/Azure/azure-cli/issues/12946)).
 
 For example, to update `redirectUris` for an [Application](https://docs.microsoft.com/en-us/graph/api/resources/application?view=graph-rest-1.0), we call the [Update application](https://docs.microsoft.com/en-us/graph/api/application-update?view=graph-rest-1.0&tabs=http) REST API with:
 
@@ -130,7 +130,7 @@ This becomes an issue because when the command shell (Bash, Zsh, Windows Command
 - PowerShell: [About Quoting Rules](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_quoting_rules)
 - Windows Command Prompt: [How-to: Escape Characters, Delimiters and Quotes at the Windows command line](https://ss64.com/nt/syntax-esc.html)
 
-To avoid surprises, here are a few suggestions:
+To avoid unanticipated results, here are a few suggestions:
 
 1. If the value contains whitespace, you must wrap it in quotes.
 2. In bash or Windows PowerShell, both single and double quotes will be interpreted, while in Windows Command Prompt, only double quotes are handled which means single quotes will be interpreted as a part of the value.
