@@ -4,7 +4,7 @@ parameters:
     default: '.'
   - name: CLIExtensionRepoPath
     type: string
-    default: ''
+    default: 'None'
 
 steps:
   - bash: |
@@ -17,10 +17,10 @@ steps:
       pip install -q azdev
       azdev --version
 
-      if [[ -z "$CLI_EXT_REPO_PATH" }} ]]; then
-        azdev setup -c $CLI_REPO_PATH
-      else:
+      if [[ "$CLI_EXT_REPO_PATH" != "None" }} ]]; then
         azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH
+      else:
+        azdev setup -c $CLI_REPO_PATH
       fi
     displayName: 'Azdev Setup'
     env:
