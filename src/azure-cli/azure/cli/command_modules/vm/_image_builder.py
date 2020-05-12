@@ -385,7 +385,9 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
-                                                ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  # pylint: disable=line-too-long
+                                                ImageTemplateManagedImageDistributor,
+                                                ImageTemplateSharedImageDistributor, ImageTemplateIdentity,
+                                                ImageTemplateIdentityUserAssignedIdentitiesValue)  # pylint: disable=line-too-long
 
     if image_template is not None:
         logger.warning('You are using --image-template. All other parameters will be ignored.')
@@ -464,23 +466,20 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
     identity_body = None
     if identity is not None:
         subscription_id = get_subscription_id(cmd.cli_ctx)
-        identity_body = {
-            'type': 'UserAssigned',
-            'userAssignedIdentities': {}
-        }
+        user_assigned_identities = {}
         for ide in identity:
             if not is_valid_resource_id(ide):
                 ide = resource_id(subscription=subscription_id, resource_group=resource_group_name,
                                   namespace='Microsoft.ManagedIdentity', type='userAssignedIdentities', name=ide)
-            identity_body['userAssignedIdentities'][ide] = {}
+            user_assigned_identities[ide] = ImageTemplateIdentityUserAssignedIdentitiesValue()
+        identity_body = ImageTemplateIdentity(type='UserAssigned', user_assigned_identities=user_assigned_identities)
 
     image_template = ImageTemplate(source=template_source, customize=template_scripts, distribute=template_destinations,
                                    location=location, build_timeout_in_minutes=build_timeout, tags=(tags or {}),
                                    identity=identity_body)
 
     return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=image_template,
-                      resource_group_name=resource_group_name, image_template_name=image_template_name,
-                      serialize=serialize_image_template)
+                      resource_group_name=resource_group_name, image_template_name=image_template_name)
 
 
 def _underscore_camel(name):

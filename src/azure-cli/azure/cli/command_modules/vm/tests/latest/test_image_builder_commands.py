@@ -89,7 +89,7 @@ class ImageTemplateTest(ScenarioTest):
         self.kwargs.update({
             'scope': scope
         })
-        time.sleep(30)
+        time.sleep(45)
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             # self.cmd('role assignment create --assignee {identity_id} --role "{role_name}" --scope {scope}')
             self.cmd('role assignment create --assignee {identity_id} --role Contributor --scope {scope}')
@@ -341,7 +341,7 @@ class ImageTemplateTest(ScenarioTest):
         self.cmd('vm show -n {vm} -g {rg}', checks=self.check('provisioningState', 'Succeeded'))
 
         # test template creation from sig image
-        img_tmpl = self.cmd('image builder create -n {tmpl_2} -g {rg} --image-source {image_id} --identity {ide}'
+        img_tmpl = self.cmd('image builder create -n {tmpl_2} -g {rg} --image-source {image_id} --identity {ide} '
                             '--shared-image-destinations "{gallery}/{sig1}={loc}" --scripts {script}').get_output_in_json()
 
         self.assertEqual(img_tmpl['source']['imageVersionId'].lower(), self.kwargs['image_id'].lower())
@@ -455,7 +455,7 @@ class ImageTemplateTest(ScenarioTest):
             'vhd_out': 'vhd_1',
         })
 
-        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} identity {ide} --defer')
+        self.cmd('image builder create -n {tmpl_01} -g {rg} --scripts {script} --image-source {img_src} --identity {ide} --defer')
 
         self.cmd('image builder output add -n {tmpl_01} -g {rg} --managed-image {img_1} --managed-image-location {loc} --defer',
                  checks=[
@@ -512,7 +512,7 @@ class ImageTemplateTest(ScenarioTest):
             'vhd_name': 'example.vhd',
         })
 
-        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script_url} --image-source {img_src} --defer')
+        self.cmd('image builder create -n {tmpl} -g {rg} --scripts {script_url} --image-source {img_src} --identity {ide} --defer')
 
         # test that customizer commands require defer
         customizer_commands = [
