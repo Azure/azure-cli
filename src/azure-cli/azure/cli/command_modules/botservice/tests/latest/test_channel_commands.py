@@ -131,8 +131,8 @@ class DirectLineSitesTests(ScenarioTest):
             self.check('properties.properties.sites[0].isSecureSiteEnabled', False)
         ])
 
-        origin_url = 'https://mybotsite1.azurewebsites.net'
-        site_name = 'MyBotSite1'
+        site_name = 'mybotsite1'
+        origin_url = 'https://{}.azurewebsites.net'.format(site_name)
         self.kwargs.update({'origin_url': origin_url})
         self.kwargs.update({'site_name': site_name})
 
@@ -143,7 +143,7 @@ class DirectLineSitesTests(ScenarioTest):
         self.assertTrue(response['properties']['properties']['sites'] is not None)
         sites = response['properties']['properties']['sites']
 
-        self.assertTrue(len(sites) == 2)
+        self.assertEqual(len(sites), 2)
 
         def find_site(site):
             self.assertIsNotNone(site)
@@ -159,3 +159,34 @@ class DirectLineSitesTests(ScenarioTest):
         self.assertTrue(site['trustedOrigins'][0] == origin_url)
         self.assertFalse(site['isEnabled'])
         self.assertTrue(site['isSecureSiteEnabled'])
+        self.assertTrue(site['isV3Enabled'])
+
+        # Add a third site with different parameters
+        site_name = 'mybotsite2'
+        origin_url = 'https://{}.azurewebsites.net'.format(site_name)
+        self.kwargs.update({'origin_url': origin_url})
+        self.kwargs.update({'site_name': site_name})
+
+        response = self.cmd('az bot directline site create -g {rg} -n {botname} --trusted-origins {origin_url} --site-name {site_name}').get_output_in_json()
+        
+        self.assertTrue(response['properties'] is not None)
+        self.assertTrue(response['properties']['properties'] is not None)
+        self.assertTrue(response['properties']['properties']['sites'] is not None)
+        sites = response['properties']['properties']['sites']
+
+        self.assertEqual(len(sites), 3)
+
+        def find_site(site):
+            self.assertIsNotNone(site)
+            self.assertIsNotNone(site['siteName'])
+            if site['siteName'] == site_name:
+                return True
+        
+        
+        selected_sites = [site for site in sites if site['siteName'] == site_name]
+        self.assertTrue(len(selected_sites) > 0, 'site not found')
+        site = selected_sites[0]
+        self.assertTrue(len(site['trustedOrigins']) > 0)
+        self.assertTrue(site['trustedOrigins'][0] == origin_url)
+        self.assertTrue(site['isEnabled'])
+        self.assertFalse(site['isSecureSiteEnabled'])

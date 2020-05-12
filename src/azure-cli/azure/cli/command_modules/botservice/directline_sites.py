@@ -17,24 +17,20 @@ class DirectlineSites:
     """
     @staticmethod
     def create(client, resource_group_name, resource_name, site_name, is_enabled=None,
-               support_v3=None, enable_enhanced_auth=None, trusted_origins=None):
-
-        channel = DirectLineChannel(
-            properties=DirectLineChannelProperties(
-                sites=[DirectLineSite(
-                    site_name=site_name,
-                    is_enabled=True,
-                    is_v1_enabled=True,
-                    is_v3_enabled=True,
-                    )]
-                )
-            )
-
+               support_v3=None, enable_enhanced_auth=None, trusted_origins=None, show_secrets=None):
+        bot = DirectlineSites._get_directline_instance(client, resource_group_name, resource_name, show_secrets)
+        
+        bot.properties.properties.sites.append(DirectLineSite(
+            site_name=site_name,
+            is_enabled=True,
+            is_v1_enabled=True,
+            is_v3_enabled=True,
+        ))
         response = client.update(
             resource_group_name=resource_group_name,
             resource_name=resource_name,
             channel_name='DirectLineChannel',
-            properties=channel
+            properties=bot.properties
         )
 
         # If any parameter other than site_name is provided, a separate call to update the newly
@@ -57,19 +53,11 @@ class DirectlineSites:
                 site.trusted_origins=trusted_origins or site.trusted_origins
                 break
 
-        if not trusted_origins:
-            trusted_origins = []
-        channel = DirectLineChannel(
-            properties=DirectLineChannelProperties(
-                sites=bot.properties.properties.sites
-            )
-        )
-
         return client.update(
             resource_group_name=resource_group_name,
             resource_name=resource_name,
             channel_name='DirectLineChannel',
-            properties=channel
+            properties=bot.properties
         )
 
     @staticmethod
@@ -91,7 +79,7 @@ class DirectlineSites:
         return channel.properties.sites
 
     @staticmethod
-    def _get_directline_instance(client, resource_group_name, resource_name, how_secrets):
+    def _get_directline_instance(client, resource_group_name, resource_name, show_secrets):
         if show_secrets:
             return client.list_with_keys(
                 resource_group_name,
