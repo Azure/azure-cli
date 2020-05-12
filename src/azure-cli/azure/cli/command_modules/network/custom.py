@@ -3532,7 +3532,7 @@ def _delete_network_watchers(cmd, client, watchers):
 def configure_network_watcher(cmd, client, locations, resource_group_name=None, enabled=None, tags=None):
     watcher_list = list(client.list_all())
     existing_watchers = [w for w in watcher_list if w.location in locations]
-    nonenabled_regions = list(set(locations) - set(l.location for l in existing_watchers))
+    nonenabled_regions = list(set(locations) - set(watcher.location for watcher in existing_watchers))
 
     if enabled is None:
         if resource_group_name is not None:
