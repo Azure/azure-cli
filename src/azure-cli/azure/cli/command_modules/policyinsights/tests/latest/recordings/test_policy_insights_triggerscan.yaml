@@ -7,6 +7,152 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
+      - policy assignment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --policy -n --resource-group -p
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025?api-version=2019-09-01
+  response:
+    body:
+      string: '{"error":{"code":"PolicyDefinitionNotFound","message":"The policy definition
+        ''96670d01-0a4d-4649-9c89-2d3abc0a5025'' could not be found."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '138'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 12 May 2020 17:57:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy assignment create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --policy -n --resource-group -p
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025?api-version=2019-09-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"Require a tag on resource groups","policyType":"BuiltIn","mode":"All","description":"Enforces
+        existence of a tag on resource groups.","metadata":{"version":"1.0.0","category":"Tags"},"parameters":{"tagName":{"type":"String","metadata":{"displayName":"Tag
+        Name","description":"Name of the tag, such as ''environment''"}}},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Resources/subscriptions/resourceGroups"},{"field":"[concat(''tags['',
+        parameters(''tagName''), '']'')]","exists":"false"}]},"then":{"effect":"deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025","type":"Microsoft.Authorization/policyDefinitions","name":"96670d01-0a4d-4649-9c89-2d3abc0a5025"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '753'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 12 May 2020 17:57:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"properties": {"policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025",
+      "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscan000001",
+      "parameters": {"tagName": {"value": "notThere"}}, "enforcementMode": "Default"},
+      "sku": {"name": "A0", "tier": "Free"}}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy assignment create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '405'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --policy -n --resource-group -p
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-resource/9.0.0 Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscan000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000002?api-version=2019-09-01
+  response:
+    body:
+      string: '{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscan000001","parameters":{"tagName":{"value":"notThere"}},"metadata":{"createdBy":"36e2f355-d2e2-4fbc-88ab-4281639dff94","createdOn":"2020-05-12T17:57:55.0204179Z","updatedBy":null,"updatedOn":null},"enforcementMode":"Default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscan000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000002","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000002"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '875'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 12 May 2020 17:57:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
       - policy state trigger-scan
       Connection:
       - keep-alive
@@ -16,7 +162,7 @@ interactions:
       - --no-wait
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: POST
@@ -30,11 +176,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:20:31 GMT
+      - Tue, 12 May 2020 17:57:56 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQxNjEyN0JDOSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkRFNTE1NjZGNiIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -67,7 +213,7 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: POST
@@ -81,11 +227,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:20:33 GMT
+      - Tue, 12 May 2020 17:57:58 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -116,9 +262,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: ''
@@ -128,146 +274,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:21:04 GMT
+      - Tue, 12 May 2020 17:58:29 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:21:34 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:22:04 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '596'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:22:35 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -296,9 +307,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: ''
@@ -308,11 +319,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:23:05 GMT
+      - Tue, 12 May 2020 17:58:59 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -341,9 +352,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: ''
@@ -353,11 +364,101 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:23:34 GMT
+      - Tue, 12 May 2020 17:59:29 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '598'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy state trigger-scan
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 12 May 2020 17:59:59 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '598'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy state trigger-scan
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 12 May 2020 18:00:30 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -386,9 +487,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: ''
@@ -398,11 +499,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:24:05 GMT
+      - Tue, 12 May 2020 18:01:00 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -412,7 +513,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '599'
+      - '597'
     status:
       code: 202
       message: Accepted
@@ -431,9 +532,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: ''
@@ -443,11 +544,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:24:36 GMT
+      - Tue, 12 May 2020 18:01:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -457,7 +558,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
+      - '597'
     status:
       code: 202
       message: Accepted
@@ -476,9 +577,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: ''
@@ -488,11 +589,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:25:06 GMT
+      - Tue, 12 May 2020 18:02:00 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -521,9 +622,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: ''
@@ -533,11 +634,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:25:36 GMT
+      - Tue, 12 May 2020 18:02:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -566,9 +667,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: ''
@@ -578,11 +679,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:26:06 GMT
+      - Tue, 12 May 2020 18:03:00 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -611,9 +712,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: ''
@@ -623,11 +724,146 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 07 Apr 2020 23:26:36 GMT
+      - Tue, 12 May 2020 18:03:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '597'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy state trigger-scan
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 12 May 2020 18:04:01 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '597'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy state trigger-scan
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 12 May 2020 18:04:31 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '597'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy state trigger-scan
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Tue, 12 May 2020 18:05:01 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
       pragma:
       - no-cache
       server:
@@ -656,909 +892,9 @@ interactions:
       - -g
       User-Agent:
       - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:27:07 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '596'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:27:37 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:28:07 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:28:37 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:29:07 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:29:37 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:30:08 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '599'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:30:38 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:31:07 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:31:39 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:32:08 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:32:38 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:33:08 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '599'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:33:38 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:34:09 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:34:39 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:35:09 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:35:39 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '599'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:36:10 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '598'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-  response:
-    body:
-      string: ''
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '0'
-      date:
-      - Tue, 07 Apr 2020 23:36:40 GMT
-      expires:
-      - '-1'
-      location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
-      - '597'
-    status:
-      code: 202
-      message: Accepted
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - policy state trigger-scan
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g
-      User-Agent:
-      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
-        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.3.1
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3NzVCQTI5OSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.PolicyInsights/asyncOperationResults/eyJpZCI6IlBTUkFKb2I6MkQ3OUQ1NERCMSIsImxvY2F0aW9uIjoiIn0?api-version=2019-10-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -1570,7 +906,60 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 07 Apr 2020 23:37:11 GMT
+      - Tue, 12 May 2020 18:05:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-policy-insights-requests:
+      - '596'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy state list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -a --filter
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.3
+        azure-mgmt-policyinsights/0.5.0 Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_triggerscan000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000002/providers/Microsoft.PolicyInsights/policyStates/latest/queryResults?api-version=2019-10-01&$filter=isCompliant%20eq%20false
+  response:
+    body:
+      string: '{"@odata.nextLink":null,"@odata.context":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_triggerscan000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000002/providers/Microsoft.PolicyInsights/policyStates/$metadata#latest","@odata.count":1,"value":[{"@odata.id":null,"@odata.context":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_triggerscan000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000002/providers/Microsoft.PolicyInsights/policyStates/$metadata#latest/$entity","timestamp":"2020-05-12T17:59:11.3431797Z","resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_triggerscan000001","policyAssignmentId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_triggerscan000001/providers/microsoft.authorization/policyassignments/azurecli-test-policy-assignment000002","policyDefinitionId":"/providers/microsoft.authorization/policydefinitions/96670d01-0a4d-4649-9c89-2d3abc0a5025","effectiveParameters":"","isCompliant":false,"subscriptionId":"e78961ba-36fe-4739-9212-e3031b4c8db7","resourceType":"Microsoft.Resources/subscriptions/resourceGroups","resourceLocation":"westus","resourceGroup":"cli_test_triggerscan000001","resourceTags":"tbd","policyAssignmentName":"azurecli-test-policy-assignment000002","policyAssignmentOwner":"tbd","policyAssignmentParameters":"","policyAssignmentScope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_triggerscan000001","policyDefinitionName":"96670d01-0a4d-4649-9c89-2d3abc0a5025","policyDefinitionAction":"deny","policyDefinitionCategory":"tbd","policySetDefinitionId":"","policySetDefinitionName":"","policySetDefinitionOwner":"","policySetDefinitionCategory":"","policySetDefinitionParameters":"","managementGroupIds":"PolicyUIMG,AzGovTest5,72f988bf-86f1-41af-91ab-2d7cd011db47","policyDefinitionReferenceId":"","complianceState":"NonCompliant","policyDefinitionGroupNames":[""],"policyDefinitionVersion":"","policySetDefinitionVersion":"","policyAssignmentVersion":""}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2507'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 12 May 2020 18:05:34 GMT
       expires:
       - '-1'
       pragma:
