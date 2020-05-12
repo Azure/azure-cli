@@ -480,8 +480,8 @@ class DeploymentLiveTest(LiveScenarioTest):
 
         # very the progress
         lines = test_io.getvalue().splitlines()
-        for l in lines:
-            self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
+        for line in lines:
+            self.assertTrue(line.split(':')[0] in ['Accepted', 'Succeeded'])
         self.assertTrue('Succeeded: {} (Microsoft.Resources/deployments)'.format(self.kwargs['dn']), lines)
 
 
