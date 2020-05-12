@@ -18,9 +18,9 @@ steps:
       azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then
-        azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH
-      else:
         azdev setup -c $CLI_REPO_PATH
+      else:
+        azdev setup -c $CLI_REPO_PATH -r $CLI_EXT_REPO_PATH
       fi
     displayName: 'Azdev Setup'
     env:
