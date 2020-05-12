@@ -3795,9 +3795,9 @@ type: command
 short-summary: Approve a private endpoint connection.
 examples:
   - name: Approve a private endpoint connection for a storage account.
-    text: az network private-endpoint-connection approve -g MyResourceGroup -n MyPrivateEndpoint --service-name MySA --type Microsoft.Storage/storageAccounts --description "Approved"
+    text: az network private-endpoint-connection approve -g MyResourceGroup -n MyPrivateEndpoint --resource-name MySA --type Microsoft.Storage/storageAccounts --description "Approved"
   - name: Approve a private endpoint connection for a keyvault.
-    text: az network private-endpoint-connection approve -g MyResourceGroup -n MyPrivateEndpoint --service-name MyKV --type Microsoft.Keyvault/vaults --description "Approved"
+    text: az network private-endpoint-connection approve -g MyResourceGroup -n MyPrivateEndpoint --resource-name MyKV --type Microsoft.Keyvault/vaults --description "Approved"
   - name: Approve a private endpoint connection for an ACR.
     text: az network private-endpoint-connection approve --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.6e6bf72bc59d41cc89c698d4cc5ee79d --description "Approved"
 """
@@ -3807,9 +3807,9 @@ type: command
 short-summary: Reject a private endpoint connection.
 examples:
   - name: Reject a private endpoint connection for a storage account.
-    text: az network private-endpoint-connection reject -g MyResourceGroup -n MyPrivateEndpoint --service-name MySA --type Microsoft.Storage/storageAccounts --description "Rejected"
+    text: az network private-endpoint-connection reject -g MyResourceGroup -n MyPrivateEndpoint --resource-name MySA --type Microsoft.Storage/storageAccounts --description "Rejected"
   - name: Reject a private endpoint connection for a keyvault.
-    text: az network private-endpoint-connection reject -g MyResourceGroup -n MyPrivateEndpoint --service-name MyKV --type Microsoft.Keyvault/vaults --description "Rejected"
+    text: az network private-endpoint-connection reject -g MyResourceGroup -n MyPrivateEndpoint --resource-name MyKV --type Microsoft.Keyvault/vaults --description "Rejected"
   - name: Reject a private endpoint connection for an ACR.
     text: az network private-endpoint-connection reject --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.6e6bf72bc59d41cc89c698d4cc5ee79d --description "Rejected"
 """
@@ -3819,9 +3819,9 @@ type: command
 short-summary: Delete a private endpoint connection.
 examples:
   - name: Delete a private endpoint connection for a storage account.
-    text: az network private-endpoint-connection delete -g MyResourceGroup -n MyPrivateEndpoint --service-name MySA --type Microsoft.Storage/storageAccounts
+    text: az network private-endpoint-connection delete -g MyResourceGroup -n MyPrivateEndpoint --resource-name MySA --type Microsoft.Storage/storageAccounts
   - name: Delete a private endpoint connection for a keyvault.
-    text: az network private-endpoint-connection delete -g MyResourceGroup -n MyPrivateEndpoint --service-name MyKV --type Microsoft.Keyvault/vaults
+    text: az network private-endpoint-connection delete -g MyResourceGroup -n MyPrivateEndpoint --resource-name MyKV --type Microsoft.Keyvault/vaults
   - name: Delete a private endpoint connection for an ACR.
     text: az network private-endpoint-connection delete --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.6e6bf72bc59d41cc89c698d4cc5ee79d
 """
@@ -3831,9 +3831,9 @@ type: command
 short-summary: Show a private endpoint connection.
 examples:
   - name: Show a private endpoint connection for a storage account.
-    text: az network private-endpoint-connection show -g MyResourceGroup -n MyPrivateEndpoint --service-name MySA --type Microsoft.Storage/storageAccounts
+    text: az network private-endpoint-connection show -g MyResourceGroup -n MyPrivateEndpoint --resource-name MySA --type Microsoft.Storage/storageAccounts
   - name: Show a private endpoint connection for a keyvault.
-    text: az network private-endpoint-connection show -g MyResourceGroup -n MyPrivateEndpoint --service-name MyKV --type Microsoft.Keyvault/vaults
+    text: az network private-endpoint-connection show -g MyResourceGroup -n MyPrivateEndpoint --resource-name MyKV --type Microsoft.Keyvault/vaults
   - name: Show a private endpoint connection for an ACR.
     text: az network private-endpoint-connection show --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.6e6bf72bc59d41cc89c698d4cc5ee79d
 """
