@@ -29,7 +29,7 @@ class TestParseResourceId(unittest.TestCase):
         )
 
         self.assertEqual(scope, f"/subscriptions/{subscription_id}/resourceGroups/test-what-if-rg")
-        self.assertEqual(relative_resource_id, f"Microsoft.Sql/servers/dbserver")
+        self.assertEqual(relative_resource_id, f"Microsoft.Sql/servers/dbserver")   # noqa: F541
 
     def test_resource_group_id(self):
         subscription_id = uuid4()
