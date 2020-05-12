@@ -7,27 +7,27 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 import uuid
 
 
+def create_bot(test_class, resource_group):
+    test_class.kwargs.update({
+        'botname': test_class.create_random_name(prefix='cli', length=10),
+        'endpoint': 'https://www.google.com/api/messages',
+        'app_id': str(uuid.uuid4()),
+        'setting_name': test_class.create_random_name(prefix='auth', length=10),
+        'clientid': 'clientid',
+        'password': str(uuid.uuid4())
+    })
+
+    test_class.cmd('az bot create -k registration -g {rg} -n {botname} -e {endpoint} --appid {app_id} -p {password}', checks=[
+        test_class.check('name', '{botname}'),
+        test_class.check('resourceGroup', '{rg}'),
+        test_class.check('location', 'global')
+    ])
+
 class ChannelTests(ScenarioTest):
-
-    def create_bot(self, resource_group):
-        self.kwargs.update({
-            'botname': self.create_random_name(prefix='cli', length=10),
-            'endpoint': 'https://www.google.com/api/messages',
-            'app_id': str(uuid.uuid4()),
-            'setting_name': self.create_random_name(prefix='auth', length=10),
-            'clientid': 'clientid',
-            'password': str(uuid.uuid4())
-        })
-
-        self.cmd('az bot create -k registration -g {rg} -n {botname} -e {endpoint} --appid {app_id} -p {password}', checks=[
-            self.check('name', '{botname}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('location', 'global')
-        ])
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_webchat_channel(self, resource_group):
-        self.create_bot(resource_group)
+        create_bot(self, resource_group)
 
         # We verify that webchat exists for the bot.
         # We cannot make guarantees on the number of webchat sites, but yes on it being enabled.
@@ -41,7 +41,7 @@ class ChannelTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_skype_channel(self, resource_group):
-        self.create_bot(resource_group)
+        create_bot(self, resource_group)
         self.cmd('az bot skype create -g {rg} -n {botname} --enable-calling true --enable-media-cards true --enable-messaging true --enable-video true --calling-web-hook https://www.google.com', checks=[
             self.check('properties.properties.enableMessaging', True),
             self.check('properties.properties.enableMediaCards', True),
@@ -64,7 +64,7 @@ class ChannelTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_msteams_channel(self, resource_group):
-        self.create_bot(resource_group)
+        create_bot(self, resource_group)
         self.cmd('az bot msteams create -g {rg} -n {botname} --enable-calling true --calling-web-hook https://www.google.com', checks=[
             self.check('properties.properties.enableCalling', True),
             self.check('properties.properties.isEnabled', True)
@@ -84,7 +84,7 @@ class ChannelTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_directline_channel(self, resource_group):
-        self.create_bot(resource_group)
+        create_bot(self, resource_group)
         self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
             self.check('properties.properties.sites[0].siteName', 'Default Site'),
             self.check('properties.properties.sites[0].isEnabled', True)
@@ -105,7 +105,7 @@ class ChannelTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
     def test_botservice_update_directline(self, resource_group):
-        self.create_bot(resource_group)
+        create_bot(self, resource_group)
         self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
             self.check('properties.properties.sites[0].siteName', 'Default Site'),
             self.check('properties.properties.sites[0].isEnabled', True),
@@ -119,3 +119,43 @@ class ChannelTests(ScenarioTest):
             self.check('properties.properties.sites[0].trustedOrigins[0]', 'https://mybotsite1.azurewebsites.net'),
             self.check('properties.properties.sites[0].isSecureSiteEnabled', True)
         ])
+
+
+class DirectLineSitesTests(ScenarioTest):
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_directline_site_create(self, resource_group):
+        create_bot(self, resource_group)
+        self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
+            self.check('properties.properties.sites[0].siteName', 'Default Site'),
+            self.check('properties.properties.sites[0].isEnabled', True),
+            self.check('properties.properties.sites[0].isSecureSiteEnabled', False)
+        ])
+
+        origin_url = 'https://mybotsite1.azurewebsites.net'
+        site_name = 'MyBotSite1'
+        self.kwargs.update({'origin_url': origin_url})
+        self.kwargs.update({'site_name': site_name})
+
+        response = self.cmd('az bot directline site create -g {rg} -n {botname} --is-enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name {site_name}').get_output_in_json()
+        
+        self.assertTrue(response['properties'] is not None)
+        self.assertTrue(response['properties']['properties'] is not None)
+        self.assertTrue(response['properties']['properties']['sites'] is not None)
+        sites = response['properties']['properties']['sites']
+
+        self.assertTrue(len(sites) == 2)
+
+        def find_site(site):
+            self.assertIsNotNone(site)
+            self.assertIsNotNone(site['siteName'])
+            if site['siteName'] == site_name:
+                return True
+        
+        
+        selected_sites = [site for site in sites if site['siteName'] == site_name]
+        self.assertTrue(len(selected_sites) > 0, 'site not found')
+        site = selected_sites[0]
+        self.assertTrue(len(site['trustedOrigins']) > 0)
+        self.assertTrue(site['trustedOrigins'][0] == origin_url)
+        self.assertFalse(site['isEnabled'])
+        self.assertTrue(site['isSecureSiteEnabled'])

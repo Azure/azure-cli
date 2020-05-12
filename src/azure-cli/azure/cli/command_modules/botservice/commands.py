@@ -43,6 +43,12 @@ def load_command_table(self, _):
         exception_handler=bot_exception_handler
     )
 
+    directLineSitesOperations_commandType = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.botservice.directline_sites#DirectlineSites.{}',
+        client_factory=get_botChannels_client,
+        exception_handler=bot_exception_handler
+    )
+
     with self.command_group('bot', botOperations_commandType) as g:
         g.custom_command('create', 'create')
         g.custom_command('publish', 'publish_app', is_preview=True)
@@ -79,6 +85,9 @@ def load_command_table(self, _):
 
     with self.command_group('bot webchat', channelOperations_commandType) as g:
         g.command('show', 'webchat_get')
+
+    with self.command_group('bot directline site', directLineSitesOperations_commandType, is_preview=True) as g:
+        g.command('create', 'create')
 
     with self.command_group('bot'):
         pass

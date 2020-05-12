@@ -68,7 +68,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 May 2020 06:51:19 GMT
+      - Tue, 12 May 2020 07:40:30 GMT
       expires:
       - '-1'
       pragma:
@@ -117,7 +117,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 May 2020 06:51:20 GMT
+      - Tue, 12 May 2020 07:40:31 GMT
       expires:
       - '-1'
       pragma:
@@ -138,7 +138,7 @@ interactions:
 - request:
     body: '{"location": "global", "sku": {"name": "F0"}, "kind": "bot", "properties":
       {"displayName": "cli000002", "endpoint": "https://www.google.com/api/messages",
-      "msaAppId": "62251544-de79-4052-aee8-f50cf0446ba3"}}'
+      "msaAppId": "636e6204-5450-45f4-b80b-1cac40981158"}}'
     headers:
       Accept:
       - application/json
@@ -163,7 +163,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2018-07-12
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"0000cd15-0000-0200-0000-5eba476a0000\"","location":"global","sku":{"name":"F0"},"kind":"bot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"62251544-de79-4052-aee8-f50cf0446ba3","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"migrationToken":null,"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"0000b71a-0000-0200-0000-5eba52f10000\"","location":"global","sku":{"name":"F0"},"kind":"bot","tags":{},"properties":{"displayName":"cli000002","description":null,"iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"636e6204-5450-45f4-b80b-1cac40981158","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"migrationToken":null,"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -172,9 +172,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 May 2020 06:51:22 GMT
+      - Tue, 12 May 2020 07:40:33 GMT
       etag:
-      - '"0000cd15-0000-0200-0000-5eba476a0000"'
+      - '"0000b71a-0000-0200-0000-5eba52f10000"'
       expires:
       - '-1'
       pragma:
@@ -189,96 +189,48 @@ interactions:
       code: 201
       message: Created
 - request:
-    body: '{"location": "global", "properties": {"channelName": "MsTeamsChannel",
-      "properties": {"enableCalling": true, "callingWebHook": "https://www.google.com",
-      "isEnabled": true}}}'
+    body: '{"location": "global", "properties": {"channelName": "DirectLineChannel",
+      "properties": {"sites": [{"siteName": "Default Site", "isEnabled": true, "isV1Enabled":
+      true, "isV3Enabled": true, "isSecureSiteEnabled": false, "trustedOrigins": []}]}}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - bot msteams create
+      - bot directline create
       Connection:
       - keep-alive
       Content-Length:
-      - '173'
+      - '244'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n --enable-calling --calling-web-hook
+      - -g -n
       User-Agent:
       - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.3 azure-mgmt-botservice/0.2.0
         Azure-SDK-For-Python AZURECLI/2.4.0
       accept-language:
       - en-US
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel?api-version=2018-07-12
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/DirectLineChannel?api-version=2018-07-12
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel","name":"cli000002/MsTeamsChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"be848d390e4777ff567a79088fcff5485/12/2020
-        6:51:25 AM\"","location":"global","properties":{"properties":{"enableCalling":true,"incomingCallRoute":null,"callingWebhook":"https://www.google.com","isEnabled":true,"deploymentEnvironment":0},"etag":"W/\"be848d390e4777ff567a79088fcff5485/12/2020
-        6:51:25 AM\"","channelName":"MsTeamsChannel","location":"global","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/DirectLineChannel","name":"cli000002/DirectLineChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"55ec587cd214423a2092ceddb1387b025/12/2020
+        7:40:35 AM\"","location":"global","properties":{"properties":{"DirectLineEmbedCode":null,"sites":[{"siteId":"6MvVZkil_0w","siteName":"Default
+        Site","key":"6MvVZkil_0w.7AYVpBeyJMMSjkOLMAesPOYFe4Qv7dyubfxJt6rMYq0","key2":"6MvVZkil_0w.b1_YQ-cS9OfNVRqN2GGwSGRjDUgadToTb7IJo30cy1s","isEnabled":true,"isV1Enabled":true,"isV3Enabled":true,"isSecureSiteEnabled":false,"isBlockUserUploadEnabled":false,"trustedOrigins":null}]},"etag":"W/\"55ec587cd214423a2092ceddb1387b025/12/2020
+        7:40:35 AM\"","channelName":"DirectLineChannel","location":"global","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '660'
+      - '893'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 May 2020 06:51:25 GMT
+      - Tue, 12 May 2020 07:40:35 GMT
       etag:
-      - W/"be848d390e4777ff567a79088fcff5485/12/2020 6:51:25 AM"
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
-    status:
-      code: 201
-      message: Created
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - bot msteams show
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n
-      User-Agent:
-      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.3 azure-mgmt-botservice/0.2.0
-        Azure-SDK-For-Python AZURECLI/2.4.0
-      accept-language:
-      - en-US
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel?api-version=2018-07-12
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel","name":"cli000002/MsTeamsChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"0f7bc781a9510a75a6bd7a1e07fb31145/12/2020
-        6:51:26 AM\"","location":"global","properties":{"properties":{"enableCalling":true,"incomingCallRoute":null,"callingWebhook":"https://www.google.com/","isEnabled":true,"deploymentEnvironment":0},"etag":"W/\"0f7bc781a9510a75a6bd7a1e07fb31145/12/2020
-        6:51:26 AM\"","channelName":"MsTeamsChannel","location":"global","provisioningState":"Succeeded"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '661'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 12 May 2020 06:51:26 GMT
-      etag:
-      - W/"0f7bc781a9510a75a6bd7a1e07fb31145/12/2020 6:51:26 AM"
+      - W/"55ec587cd214423a2092ceddb1387b025/12/2020 7:40:35 AM"
       expires:
       - '-1'
       pragma:
@@ -291,47 +243,54 @@ interactions:
       - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
     status:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"properties": {"channelName": "DirectLineChannel", "properties": {"sites":
+      [{"siteName": "MyBotSite1", "isEnabled": true, "isV1Enabled": true, "isV3Enabled":
+      true}]}}}'
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - bot msteams show
+      - bot directline site create
       Connection:
       - keep-alive
       Content-Length:
-      - '0'
+      - '168'
+      Content-Type:
+      - application/json; charset=utf-8
       ParameterSetName:
-      - -g -n --with-secrets
+      - -g -n --is-enabled --enable-enhanced-auth --trusted-origins --site-name
       User-Agent:
       - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.3 azure-mgmt-botservice/0.2.0
         Azure-SDK-For-Python AZURECLI/2.4.0
       accept-language:
       - en-US
-    method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel/listChannelWithKeys?api-version=2018-07-12
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/DirectLineChannel?api-version=2018-07-12
   response:
     body:
-      string: '{"resource":{"properties":{"enableCalling":true,"callingWebhook":"https://www.google.com/","isEnabled":true,"deploymentEnvironment":"CommercialDeployment"},"etag":"W/\"0f7bc781a9510a75a6bd7a1e07fb31145/12/2020
-        6:51:27 AM\"","channelName":"MsTeamsChannel","location":"global"},"setting":{"enableCalling":true,"callingWebhook":"https://www.google.com/","isAgentNull":false,"deploymentEnvironment":"CommercialDeployment","channelId":"msteams","channelDisplayName":"Microsoft
-        Teams","botId":"cli000002","botIconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","isEnabled":true,"requireTermsAgreement":true,"hasConfiguration":true},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel","location":"global","properties":{"properties":{"enableCalling":true,"incomingCallRoute":null,"callingWebhook":"https://www.google.com/","isEnabled":true,"deploymentEnvironment":0},"etag":"W/\"0f7bc781a9510a75a6bd7a1e07fb31145/12/2020
-        6:51:27 AM\"","channelName":"MsTeamsChannel","location":"global"},"provisioningState":"Accepted","entityTag":"W/\"0f7bc781a9510a75a6bd7a1e07fb31145/12/2020
-        6:51:27 AM\"","changedTime":"0001-01-01T00:00:00Z"}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/DirectLineChannel","name":"cli000002/DirectLineChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"50228aedeb69ddbe36960f6284721eaf5/12/2020
+        7:40:37 AM\"","location":"global","properties":{"properties":{"DirectLineEmbedCode":null,"sites":[{"siteId":"T1EPlQMmddA","siteName":"Default
+        Site","key":"T1EPlQMmddA.6fyK8__Pc_YlBToeiKBqI0LVy1il4DmogB12M9QHyCY","key2":"T1EPlQMmddA.zGtoTEtsNlKSmVWflcjt2OO-P-fEPEZk4FFSd92tKuk","isEnabled":true,"isV1Enabled":true,"isV3Enabled":true,"isSecureSiteEnabled":false,"isBlockUserUploadEnabled":false,"trustedOrigins":null},{"siteId":"xzwxcBBFWsU","siteName":"MyBotSite1","key":"xzwxcBBFWsU.2YgmEVdEZLQ1mb4Os3D59GC8MhZj0emp7nOy-28YIno","key2":"xzwxcBBFWsU.61fvi8RSipi8s2DLWm-HVIG0CFxkXWUal8_psCtdWn4","isEnabled":true,"isV1Enabled":true,"isV3Enabled":true,"isSecureSiteEnabled":false,"isBlockUserUploadEnabled":false,"trustedOrigins":null}]},"etag":"W/\"50228aedeb69ddbe36960f6284721eaf5/12/2020
+        7:40:37 AM\"","channelName":"DirectLineChannel","location":"global","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1288'
+      - '1209'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 12 May 2020 06:51:26 GMT
+      - Tue, 12 May 2020 07:40:36 GMT
+      etag:
+      - W/"50228aedeb69ddbe36960f6284721eaf5/12/2020 7:40:37 AM"
       expires:
       - '-1'
       pragma:
@@ -357,40 +316,109 @@ interactions:
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - bot msteams delete
+      - bot directline site create
       Connection:
       - keep-alive
-      Content-Length:
-      - '0'
       ParameterSetName:
-      - -g -n
+      - -g -n --is-enabled --enable-enhanced-auth --trusted-origins --site-name
       User-Agent:
       - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.3 azure-mgmt-botservice/0.2.0
         Azure-SDK-For-Python AZURECLI/2.4.0
       accept-language:
       - en-US
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/MsTeamsChannel?api-version=2018-07-12
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/DirectLineChannel?api-version=2018-07-12
   response:
     body:
-      string: ''
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/DirectLineChannel","name":"cli000002/DirectLineChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"282163392254623a9362fcfc48af45155/12/2020
+        7:40:38 AM\"","location":"global","properties":{"properties":{"DirectLineEmbedCode":null,"sites":[{"siteId":"T1EPlQMmddA","siteName":"Default
+        Site","key":"","key2":"","isEnabled":true,"isV1Enabled":true,"isV3Enabled":true,"isSecureSiteEnabled":false,"isBlockUserUploadEnabled":false,"trustedOrigins":null},{"siteId":"xzwxcBBFWsU","siteName":"MyBotSite1","key":"","key2":"","isEnabled":true,"isV1Enabled":true,"isV3Enabled":true,"isSecureSiteEnabled":false,"isBlockUserUploadEnabled":false,"trustedOrigins":null}]},"etag":"W/\"282163392254623a9362fcfc48af45155/12/2020
+        7:40:38 AM\"","channelName":"DirectLineChannel","location":"global","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '0'
+      - '989'
+      content-type:
+      - application/json; charset=utf-8
       date:
-      - Tue, 12 May 2020 06:51:28 GMT
+      - Tue, 12 May 2020 07:40:37 GMT
+      etag:
+      - W/"282163392254623a9362fcfc48af45155/12/2020 7:40:38 AM"
       expires:
       - '-1'
       pragma:
       - no-cache
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"channelName": "DirectLineChannel", "properties": {"sites":
+      [{"siteName": "Default Site", "isEnabled": true, "isV1Enabled": true, "isV3Enabled":
+      true, "isSecureSiteEnabled": false}, {"siteName": "MyBotSite1", "isEnabled":
+      false, "isV1Enabled": true, "isV3Enabled": true, "isSecureSiteEnabled": true,
+      "trustedOrigins": ["https://mybotsite1.azurewebsites.net"]}]}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - bot directline site create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '379'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --is-enabled --enable-enhanced-auth --trusted-origins --site-name
+      User-Agent:
+      - python/3.7.0 (Windows-10-10.0.18362-SP0) msrest/0.6.8 msrest_azure/0.6.3 azure-mgmt-botservice/0.2.0
+        Azure-SDK-For-Python AZURECLI/2.4.0
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/DirectLineChannel?api-version=2018-07-12
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002/channels/DirectLineChannel","name":"cli000002/DirectLineChannel","type":"Microsoft.BotService/botServices/channels","etag":"W/\"abe8fceb4490fed76e135db2ff4b7d305/12/2020
+        7:40:39 AM\"","location":"global","properties":{"properties":{"DirectLineEmbedCode":null,"sites":[{"siteId":"T1EPlQMmddA","siteName":"Default
+        Site","key":"T1EPlQMmddA.6fyK8__Pc_YlBToeiKBqI0LVy1il4DmogB12M9QHyCY","key2":"T1EPlQMmddA.zGtoTEtsNlKSmVWflcjt2OO-P-fEPEZk4FFSd92tKuk","isEnabled":true,"isV1Enabled":true,"isV3Enabled":true,"isSecureSiteEnabled":false,"isBlockUserUploadEnabled":false,"trustedOrigins":null},{"siteId":"xzwxcBBFWsU","siteName":"MyBotSite1","key":"xzwxcBBFWsU.2YgmEVdEZLQ1mb4Os3D59GC8MhZj0emp7nOy-28YIno","key2":"xzwxcBBFWsU.61fvi8RSipi8s2DLWm-HVIG0CFxkXWUal8_psCtdWn4","isEnabled":false,"isV1Enabled":true,"isV3Enabled":true,"isSecureSiteEnabled":true,"isBlockUserUploadEnabled":false,"trustedOrigins":["https://mybotsite1.azurewebsites.net"]}]},"etag":"W/\"abe8fceb4490fed76e135db2ff4b7d305/12/2020
+        7:40:39 AM\"","channelName":"DirectLineChannel","location":"global","provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1245'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 12 May 2020 07:40:39 GMT
+      etag:
+      - W/"abe8fceb4490fed76e135db2ff4b7d305/12/2020 7:40:39 AM"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
     status:
       code: 200
       message: OK

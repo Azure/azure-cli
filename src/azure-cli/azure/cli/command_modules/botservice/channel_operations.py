@@ -198,35 +198,36 @@ def slack_create(client, resource_group_name, resource_name, client_id, client_s
 
 class ChannelOperations(object):  # pylint: disable=too-few-public-methods
     def __init__(self):
-        for channel in ['facebook', 'email', 'msTeams', 'skype', 'kik', 'webChat', 'directLine', 'telegram', 'sms', 'slack']:  # pylint: disable=line-too-long
+        # Create the channels' get and delete operations
+        for channel in ['Facebook', 'Email', 'MsTeams', 'Skype', 'Kik', 'WebChat', 'DirectLine', 'Telegram', 'Sms', 'Slack']:  # pylint: disable=line-too-long
             channelName = '{}Channel'.format(channel)
-            channelName = channelName[:1].upper() + channelName[1:]
 
-            def get_wrapper(channel_name):
-                def get(client, resource_group_name, resource_name, show_secrets=None):
-                    if show_secrets:
-                        return client.list_with_keys(
-                            resource_group_name=resource_group_name,
-                            resource_name=resource_name,
-                            channel_name=channel_name,
-                        )
-                    return client.get(
-                        resource_group_name=resource_group_name,
-                        resource_name=resource_name,
-                        channel_name=channel_name
-                    )
-                return get
+            setattr(self, '{}_get'.format(channel.lower()), self.__create_channel_get_operation(channelName))
+            setattr(self, '{}_delete'.format(channel.lower()), self.__create_channel_delete_operation(channelName))
+    
+    def __create_channel_get_operation(self, channel_name):
+        def get(client, resource_group_name, resource_name, show_secrets=None):
+            if show_secrets:
+                return client.list_with_keys(
+                    resource_group_name=resource_group_name,
+                    resource_name=resource_name,
+                    channel_name=channel_name,
+                )
+            return client.get(
+                resource_group_name=resource_group_name,
+                resource_name=resource_name,
+                channel_name=channel_name
+            )
+        return get
 
-            def delete_wrapper(channel_name):
-                def delete(client, resource_group_name, resource_name):
-                    return client.delete(
-                        resource_group_name=resource_group_name,
-                        resource_name=resource_name,
-                        channel_name=channel_name
-                    )
-                return delete
-            setattr(self, '{}_get'.format(channel.lower()), get_wrapper(channelName))
-            setattr(self, '{}_delete'.format(channel.lower()), delete_wrapper(channelName))
+    def __create_channel_delete_operation(self, channel_name):
+        def delete(client, resource_group_name, resource_name):
+            return client.delete(
+                resource_group_name=resource_group_name,
+                resource_name=resource_name,
+                channel_name=channel_name
+            )
+        return delete
 
 
 channelOperationsInstance = ChannelOperations()
