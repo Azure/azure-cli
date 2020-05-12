@@ -75,8 +75,8 @@ class GeneralPrivateEndpointClient(PrivateEndpointClient):
                                                                                 resource_group_name,
                                                                                 resource_name,
                                                                                 private_endpoint_connection_name)
-            if private_endpoint_connection['properties'].get('provisioningState'):
-                if private_endpoint_connection['properties']['provisioningState'] in ["Succeeded", "Ready"]:
+            if private_endpoint_connection['properties'].get('provisioningState', None) in ["Succeeded", "Ready"]:
+                if private_endpoint_connection['properties'].get('privateLinkServiceConnectionState', {}).get('status', None) in [new_status]:
                     return private_endpoint_connection
         logger.warning("Cannot query the state of private endpoint connection. "
                        "Please use `az network private-endpoint-connection show` command to check the status.")
