@@ -20,7 +20,7 @@ from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
-                      patch_progress_controller, patch_get_current_username_for_local_context)
+                      patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
 from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
 from .reverse_dependency import get_dummy_cli
@@ -180,9 +180,9 @@ class LocalContextScenarioTest(ScenarioTest):
         super(LocalContextScenarioTest, self).__init__(method_name, config_file, recording_name, recording_processors,
                                                        replay_processors, recording_patches, replay_patches)
         if self.in_recording:
-            self.recording_patches.append(patch_get_current_username_for_local_context)
+            self.recording_patches.append(patch_get_current_system_username)
         else:
-            self.replay_patches.append(patch_get_current_username_for_local_context)
+            self.replay_patches.append(patch_get_current_system_username)
         self.original_working_dir = os.getcwd()
         if working_dir:
             self.working_dir = working_dir
@@ -197,7 +197,7 @@ class LocalContextScenarioTest(ScenarioTest):
 
     def tearDown(self):
         super(LocalContextScenarioTest, self).tearDown()
-        self.cmd('local-context off -y')
+        self.cmd('local-context off')
         os.chdir(self.original_working_dir)
         if os.path.exists(self.working_dir):
             import shutil

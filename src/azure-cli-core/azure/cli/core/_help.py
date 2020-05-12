@@ -69,13 +69,13 @@ class CLIPrintMixin(CLIHelp):
 
     @staticmethod
     def _get_choices_defaults_sources_str(p):
-        choice_str = u'  Allowed values: {}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
+        choice_str = '  Allowed values: {}.'.format(', '.join(sorted([str(x) for x in p.choices]))) \
             if p.choices else ''
-        default_value_source = p.default_value_source if p.default_value_source else u'Default'
-        default_str = u'  {}: {}.'.format(default_value_source, p.default) \
+        default_value_source = p.default_value_source if p.default_value_source else 'Default'
+        default_str = '  {}: {}.'.format(default_value_source, p.default) \
             if p.default and p.default != argparse.SUPPRESS else ''
         value_sources_str = CLIPrintMixin._process_value_sources(p) if p.value_sources else ''
-        return u'{}{}{}'.format(choice_str, default_str, value_sources_str)
+        return '{}{}{}'.format(choice_str, default_str, value_sources_str)
 
     @staticmethod
     def _print_examples(help_file):
@@ -83,11 +83,11 @@ class CLIPrintMixin(CLIHelp):
         _print_indent('Examples', indent)
         for e in help_file.examples:
             indent = 1
-            _print_indent(u'{0}'.format(e.short_summary), indent)
+            _print_indent('{0}'.format(e.short_summary), indent)
             indent = 2
             if e.long_summary:
-                _print_indent(u'{0}'.format(e.long_summary), indent)
-            _print_indent(u'{0}'.format(e.command), indent)
+                _print_indent('{0}'.format(e.long_summary), indent)
+            _print_indent('{0}'.format(e.command), indent)
             print('')
 
     @staticmethod
@@ -111,11 +111,11 @@ class CLIPrintMixin(CLIHelp):
             elif "link" in item and "url" in item["link"]:
                 urls.append(item["link"]["url"])
 
-        command_str = u'  Values from: {}.'.format(", ".join(commands)) if commands else ''
-        string_str = u'  {}'.format(", ".join(strings)) if strings else ''
+        command_str = '  Values from: {}.'.format(", ".join(commands)) if commands else ''
+        string_str = '  {}'.format(", ".join(strings)) if strings else ''
         string_str = string_str + "." if string_str and not string_str.endswith(".") else string_str
-        urls_str = u'  For more info, go to: {}.'.format(", ".join(urls)) if urls else ''
-        return u'{}{}{}'.format(command_str, string_str, urls_str)
+        urls_str = '  For more info, go to: {}.'.format(", ".join(urls)) if urls else ''
+        return '{}{}{}'.format(command_str, string_str, urls_str)
 
     @staticmethod
     def _print_extensions_msg(help_file):

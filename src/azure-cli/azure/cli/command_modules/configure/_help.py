@@ -61,22 +61,26 @@ type: command
 short-summary: Turn off local context
 """
 
-helps['local-context list'] = """
-type: command
-short-summary: List all local context data
-"""
-
 helps['local-context show'] = """
 type: command
 short-summary: Show local context data
-"""
-
-helps['local-context clear'] = """
-type: command
-short-summary: Clear local context data
+examples:
+  - name: Show all local context value
+    text: az local-context show
+  - name: Show resource_group_name local context value
+    text: az local-context show --name resource_group_name
 """
 
 helps['local-context delete'] = """
 type: command
 short-summary: Delete local context data
+examples:
+  - name: Delete resource_group_name from local context
+    text: az local-context delete --name resource_group_name
+  - name: Clear all local context data
+    text: az local-context delete --all
+  - name: Delete local context persistence file 
+    text: az local-context delete --all --purge
+  - name: Delete local context persistence file recursively
+    text: az local-context delete --all --purge --recursive
 """

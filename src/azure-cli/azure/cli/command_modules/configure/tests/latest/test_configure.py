@@ -58,11 +58,16 @@ class ConfigureGlobalDefaultsTest(ScenarioTest):
 class LocalContextCommandsScenarioTest(LocalContextScenarioTest):
 
     def test_local_context_commands(self):
-        self.cmd('local-context list')
-        self.cmd('local-context show --scope ALL')
-        self.cmd('local-context delete --scope ALL')
-        self.cmd('local-context clear -y')
-        self.cmd('local-context clear --purge -y')
+        self.cmd('local-context show')
+        self.cmd('local-context show --name resource_group_name vnet_name')
+        self.cmd('local-context delete --name resource_group_name vnet_name')
+        self.cmd('local-context delete --all -y')
+        self.cmd('local-context delete --all --purge -y')
+        self.cmd('local-context delete --all --purge -y --recursive')
+
+        from knack.util import CLIError
+        with self.assertRaises(CLIError):
+            self.cmd('local-context delete --name resource_group_name --all')
 
 
 if __name__ == '__main__':

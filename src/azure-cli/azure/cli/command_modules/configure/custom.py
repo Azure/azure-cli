@@ -250,53 +250,36 @@ def purge_cache_contents():
 
 
 def turn_local_context_on(cmd):
-    if cmd.cli_ctx.local_context.is_on:
-        logger.warning('Local context is currently on')
-    else:
-        cmd.cli_ctx.local_context.turn_on()
-        logger.warning('Local context is on, you can run `az local-context off` to turn it off')
-
-
-def turn_local_context_off(cmd, yes=False):
     if not cmd.cli_ctx.local_context.is_on:
-        logger.warning('Local context is currently off')
+        cmd.cli_ctx.local_context.turn_on()
+        logger.warning('Local context is turned on, you can run `az local-context off` to turn it off.')
     else:
-        from azure.cli.core.util import user_confirmation
-        user_confirmation('You are going to turn local context off. '
-                          'Parameters saved will not apply to following commands. '
-                          'Are you sure you want to continue this operation ?', yes)
+        raise CLIError('Local context is on already.')
+
+
+def turn_local_context_off(cmd):
+    if cmd.cli_ctx.local_context.is_on:
         cmd.cli_ctx.local_context.turn_off()
-        logger.warning('Local context is off')
-
-
-def list_local_context(cmd):
-    return cmd.cli_ctx.local_context.get_value()
-
-
-def show_local_context(cmd, scope, name=None):
-    return cmd.cli_ctx.local_context.get_value(scope, name)
-
-
-def delete_local_context(cmd, scope, name=None):
-    return cmd.cli_ctx.local_context.delete(scope, name)
-
-
-def clear_local_context(cmd, yes=False, purge=False):
-    if not cmd.cli_ctx.local_context.local_context_file:
-        logger.warning('The working directory has no local context data to clear.')
-        return
-
-    from azure.cli.core.util import user_confirmation
-    user_confirmation('You are going to clear local context in {}. '
-                      'Local context data will be lost and can\'t be recovered. '
-                      'Are you sure you want to continue this operation ?'
-                      .format(cmd.cli_ctx.local_context.effective_working_directory()), yes)
-    if purge:
-        if cmd.cli_ctx.local_context.delete_file():
-            logger.warning('Local context in %s is purged.', cmd.cli_ctx.local_context.effective_working_directory())
-        else:
-            logger.warning(
-                'Fail to purge local context in %s.', cmd.cli_ctx.local_context.effective_working_directory())
+        logger.warning('Local context is turned off, you can run `az local-context on` to turn it on.')
     else:
-        cmd.cli_ctx.local_context.clear()
-        logger.warning('Local context in %s is cleared.', cmd.cli_ctx.local_context.effective_working_directory())
+        raise CLIError('Local context is off already.')
+
+
+def show_local_context(cmd, name=None):
+    return cmd.cli_ctx.local_context.get_value(name)
+
+
+def delete_local_context(cmd, name=None, all=False, yes=False, purge=False, recursive=False):  # pylint: disable=redefined-builtin
+    if name:
+        return cmd.cli_ctx.local_context.delete(name)
+
+    if all:
+        from azure.cli.core.util import user_confirmation
+        if purge:
+            user_confirmation('You are going to delete local context persistence file. '
+                              'Are you sure you want to continue this operation ?', yes)
+            cmd.cli_ctx.local_context.delete_file(recursive)
+        else:
+            user_confirmation('You are going to clear all local context value. '
+                              'Are you sure you want to continue this operation ?', yes)
+            cmd.cli_ctx.local_context.clear(recursive)

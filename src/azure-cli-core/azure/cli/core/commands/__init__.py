@@ -593,8 +593,9 @@ class AzCliCommandInvoker(CommandInvoker):
                     value = getattr(parsed_args, name)
                     local_context_args.append((options[0], value))
             if local_context_args:
-                logger.warning('Please note that local context is currently on for your working directory, you can run'
-                               ' `az local-context off` to turn it off.')
+                logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
+                               'run `az local-context off` to turn it off.',
+                               self.cli_ctx.local_context.effective_working_directory())
                 args_str = []
                 for name, value in local_context_args:
                     args_str.append('{}: {}'.format(name, value))
