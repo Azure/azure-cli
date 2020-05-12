@@ -1,10 +1,10 @@
 parameters:
   - name: CLIRepoPath
     type: string
-    default: ''
+    default: '.'
   - name: CLIExtensionRepoPath
     type: string
-    default: ''
+    default: 'None'
 
 steps:
   - bash: |
@@ -17,7 +17,7 @@ steps:
       pip install -q azdev
       azdev --version
 
-      if [[ ${{ parameters.CLIExtensionRepoPath }} != '' ]]; then
+      if [[ ${{ parameters.CLIExtensionRepoPath }} != 'None' ]]; then
         azdev setup -c ${{ parameters.CLIRepoPath }} -r ${{ parameters.CLIExtensionRepoPath }}
       else:
         azdev setup -c ${{ parameters.CLIRepoPath }}
