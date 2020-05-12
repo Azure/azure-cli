@@ -21,8 +21,8 @@ from ._completers import (
 from ._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, get_hsm_base_url_type,
-    process_hsm_base_url, process_vault_and_hsm_name, validate_key_import_source,
-    validate_key_type, validate_policy_permissions, validate_principal,
+    process_hsm_base_url, process_vault_and_hsm_name, process_storage_uri, process_sas_token_parameter,
+    validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_and_hsm_id, validate_sas_definition_id, validate_storage_account_id,
@@ -242,7 +242,7 @@ def load_arguments(self, _):
         'import': hsm_base_url_desc2
     }
 
-    # custom funtions
+    # custom functions
     for item in ['backup', 'create', 'download', 'import', 'restore']:
         with self.argument_context('keyvault key {}'.format(item), arg_group='Id') as c:
             c.argument('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
@@ -339,6 +339,44 @@ def load_arguments(self, _):
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
+
+    # endregion
+
+    # region keyvault backup/restore
+    for item in ['backup', 'restore']:
+        for scope in ['start', 'status']:
+            with self.argument_context('keyvault {} {}'.format(item, scope), arg_group='HSM Id') as c:
+                c.ignore('cls')
+                c.ignore('sas_token_parameters')
+                c.ignore('vault_base_url')
+                c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
+                        validator=process_vault_and_hsm_name, help='Name of the HSM')
+                c.extra('identifier', options_list=['--id'],
+                        help='Id of the HSM. If specified all other \'Id\' arguments should be omitted.',
+                        validator=process_hsm_base_url)
+
+    with self.argument_context('keyvault backup start', arg_group='Storage Id') as c:
+        c.argument('storage_resource_uri', required=False, validator=process_storage_uri,
+                   help='Azure Blob storage container Uri. If specified all other \'Storage Id\' arguments '
+                        'should be omitted')
+        c.extra('storage_account_name', help='Name of Azure Storage Account.')
+        c.extra('blob_container_name', help='Name of Blob Container.')
+
+    with self.argument_context('keyvault backup start'.format(item)) as c:
+        c.argument('token', options_list=['--storage-blob-SAS-token'], required=True)
+
+    with self.argument_context('keyvault restore start') as c:
+        c.argument('folder_to_restore', options_list=['--backup-folder'])
+        c.extra('token', options_list=['--storage-blob-SAS-token'], required=True,
+                validator=process_sas_token_parameter,
+                help='The SAS token pointing to an Azure Blob storage container.')
+
+    with self.argument_context('keyvault restore start', arg_group='Storage Id') as c:
+        c.extra('storage_resource_uri', required=False, validator=process_storage_uri,
+                help='Azure Blob storage container Uri. If specified all other \'Storage Id\' '
+                     'arguments should be omitted')
+        c.extra('storage_account_name', help='Name of Azure Storage Account.')
+        c.extra('blob_container_name', help='Name of Blob Container.')
 
     # endregion
 

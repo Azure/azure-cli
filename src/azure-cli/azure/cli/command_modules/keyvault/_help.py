@@ -12,6 +12,16 @@ type: group
 short-summary: Manage KeyVault keys, secrets, and certificates.
 """
 
+helps['keyvault backup'] = """
+type: group
+short-summary: Manage full HSM backup
+"""
+
+helps['keyvault restore'] = """
+type: group
+short-summary: Manage full HSM restore
+"""
+
 helps['keyvault certificate'] = """
 type: group
 short-summary: Manage certificates.

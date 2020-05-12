@@ -156,7 +156,7 @@ AZURE_API_PROFILES = {
             'provider_operations_metadata': '2018-01-01-preview'
         }),
         ResourceType.MGMT_CONTAINERREGISTRY: '2019-12-01-preview',
-        ResourceType.DATA_KEYVAULT: '7.0',
+        ResourceType.DATA_KEYVAULT: '7.2-preview',
         ResourceType.DATA_STORAGE: '2018-11-09',
         ResourceType.DATA_STORAGE_BLOB: '2019-07-07',
         ResourceType.DATA_STORAGE_FILEDATALAKE: '2018-11-09',

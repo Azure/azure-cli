@@ -116,6 +116,27 @@ def process_hsm_base_url(ns):
         ns.hsm_base_url = ns.identifier
 
 
+def process_storage_uri(ns):
+    if not ns.storage_resource_uri:
+        if ns.storage_account_name and ns.blob_container_name:
+            ns.storage_resource_uri = 'https://{}.blob.core.windows.net/{}'.format(
+                ns.storage_account_name, ns.blob_container_name
+            )
+        else:
+            raise CLIError('Incorrect usage: [--storage-account-uri URI | '
+                           '--storage-account-name NAME --blob-container-name NAME]')
+    else:
+        raise CLIError('Please do not specify --storage-account-name or --blob-container_name '
+                       'if --storage-account-uri is specified.')
+
+
+def process_sas_token_parameter(cmd, ns):
+    from azure.cli.core.profiles import ResourceType
+
+    SASTokenParameter = cmd.get_models('SASTokenParameter', resource_type=ResourceType.DATA_KEYVAULT)
+    return SASTokenParameter(storage_resource_uri=ns.storage_resource_uri, token=ns.token)
+
+
 def process_vault_and_hsm_name(ns):
     try:
         if ns.identifier:
