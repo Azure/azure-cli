@@ -145,7 +145,7 @@ def _validate_location(location, location_names, location_display_names):
 
     if ' ' in location:
         # if display name is provided, attempt to convert to short form name
-        location = next((loc for loc in location_display_names if loc.lower() == location.lower()), location)
+        location = next((name for name in location_display_names if name.lower() == location.lower()), location)
 
     if location.lower() not in [location_name.lower() for location_name in location_names]:
         raise CLIError("Location {} is not a valid subscription location. "
