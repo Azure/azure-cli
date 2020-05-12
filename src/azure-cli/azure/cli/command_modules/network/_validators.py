@@ -1893,7 +1893,7 @@ def process_private_endpoint_connection_id_argument(cmd, namespace):
     if all([namespace.resource_group_name,
             namespace.name,
             namespace.resource_provider,
-            namespace.service_name]):
+            namespace.resource_name]):
         logger.warning("Resource ID will be ignored since other three arguments have been provided.")
         del namespace.connection_id
         return
@@ -1901,13 +1901,13 @@ def process_private_endpoint_connection_id_argument(cmd, namespace):
     if not (namespace.connection_id or all([namespace.resource_group_name,
                                             namespace.name,
                                             namespace.resource_provider,
-                                            namespace.service_name])):
+                                            namespace.resource_name])):
         raise CLIError("usage error: --connection-id / -g -n --type --service-name")
 
     result = parse_proxy_resource_id(namespace.connection_id)
     cmd.cli_ctx.data['subscription_id'] = result['subscription']
     namespace.resource_group_name = result['resource_group']
-    namespace.service_name = result['name']
+    namespace.resource_name = result['name']
     namespace.resource_provider = '{}/{}'.format(result['namespace'], result['type'])
     namespace.name = result['child_name_1']
     del namespace.connection_id

@@ -80,13 +80,13 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  checks=self.check('id', '{kv_pe_id}'))
         self.kwargs['kv_pe_name'] = self.kwargs['kv_pe_id'].split('/')[-1]
         self.cmd('network private-endpoint-connection show  '
-                 '--service-name {kv} '
+                 '--resource-name {kv} '
                  '-g {rg} '
                  '--name {kv_pe_name} '
                  '--type microsoft.keyvault/vaults',
                  checks=self.check('name', '{kv_pe_name}'))
         self.cmd('network private-endpoint-connection show  '
-                 '--service-name {kv} '
+                 '--resource-name {kv} '
                  '-g {rg} '
                  '-n {kv_pe_name} '
                  '--type microsoft.keyvault/vaults',
@@ -119,7 +119,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                  checks=self.check('properties.provisioningState', 'Succeeded'))
 
         self.cmd('network private-endpoint-connection approve '
-                 '--service-name {kv} '
+                 '--resource-name {kv} '
                  '--name {kv_pe_name} '
                  '-g {rg} '
                  '--type microsoft.keyvault/vaults '
@@ -196,13 +196,13 @@ class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
         self.kwargs['sa_pec_id'] = storage['privateEndpointConnections'][0]['id']
         self.kwargs['sa_pec_name'] = storage['privateEndpointConnections'][0]['name']
 
-        self.cmd('network private-endpoint-connection show --name {sa_pec_name} -g {rg} --service-name {sa} --type Microsoft.Storage/storageAccounts',
+        self.cmd('network private-endpoint-connection show --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
                  checks=self.check('id', '{sa_pec_id}'))
 
-        self.cmd('network private-endpoint-connection approve --name {sa_pec_name} -g {rg} --service-name {sa} --type Microsoft.Storage/storageAccounts',
+        self.cmd('network private-endpoint-connection approve --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
-        self.cmd('network private-endpoint-connection reject --name {sa_pec_name} -g {rg} --service-name {sa} --type Microsoft.Storage/storageAccounts',
+        self.cmd('network private-endpoint-connection reject --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
 
         self.cmd('network private-endpoint-connection list --id {sa_pec_id}',
@@ -253,7 +253,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
         self.kwargs['endpoint_request'] = result[0]['name']
 
         self.cmd(
-            'network private-endpoint-connection approve -g {rg} --service-name {registry_name} -n {endpoint_request} --description {description_msg} --type Microsoft.ContainerRegistry/registries',
+            'network private-endpoint-connection approve -g {rg} --resource-name {registry_name} -n {endpoint_request} --description {description_msg} --type Microsoft.ContainerRegistry/registries',
             checks=[
                 self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
                 self.check('properties.privateLinkServiceConnectionState.description', '{description_msg}')
@@ -270,7 +270,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
                                                   conn['properties']['privateEndpoint']['id'].lower()][0]
 
         self.cmd(
-            'network private-endpoint-connection reject -g {rg} --service-name {registry_name} -n {second_endpoint_request} --description {description_msg} --type Microsoft.ContainerRegistry/registries',
+            'network private-endpoint-connection reject -g {rg} --resource-name {registry_name} -n {second_endpoint_request} --description {description_msg} --type Microsoft.ContainerRegistry/registries',
             checks=[
                 self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
                 self.check('properties.privateLinkServiceConnectionState.description', '{description_msg}')
@@ -283,18 +283,18 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
 
         # remove endpoints
         self.cmd(
-            'network private-endpoint-connection delete -g {rg} --service-name {registry_name} -n {second_endpoint_request} --type Microsoft.ContainerRegistry/registries -y')
+            'network private-endpoint-connection delete -g {rg} --resource-name {registry_name} -n {second_endpoint_request} --type Microsoft.ContainerRegistry/registries -y')
         time.sleep(30)
         self.cmd('network private-endpoint-connection list -g {rg} -n {registry_name} --type Microsoft.ContainerRegistry/registries', checks=[
             self.check('length(@)', '1'),
         ])
-        self.cmd('network private-endpoint-connection show -g {rg} --service-name {registry_name} -n {endpoint_request} --type Microsoft.ContainerRegistry/registries', checks=[
+        self.cmd('network private-endpoint-connection show -g {rg} --resource-name {registry_name} -n {endpoint_request} --type Microsoft.ContainerRegistry/registries', checks=[
             self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
             self.check('properties.privateLinkServiceConnectionState.description', '{description_msg}'),
             self.check('name', '{endpoint_request}')
         ])
 
-        self.cmd('network private-endpoint-connection delete -g {rg} --service-name {registry_name} -n {endpoint_request} --type Microsoft.ContainerRegistry/registries -y')
+        self.cmd('network private-endpoint-connection delete -g {rg} --resource-name {registry_name} -n {endpoint_request} --type Microsoft.ContainerRegistry/registries -y')
 
 
 class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
@@ -382,10 +382,10 @@ class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
         self.kwargs['scope_pec_id'] = private_endpoint_connections[0]['id']
         self.kwargs['scope_pec_name'] = private_endpoint_connections[0]['name']
 
-        self.cmd('network private-endpoint-connection show --service-name {scope} -g {rg} --name {scope_pec_name} --type microsoft.insights/privateLinkScopes',
+        self.cmd('network private-endpoint-connection show --resource-name {scope} -g {rg} --name {scope_pec_name} --type microsoft.insights/privateLinkScopes',
                  checks=self.check('id', '{scope_pec_id}'))
 
-        self.cmd('network private-endpoint-connection reject --service-name {scope} -g {rg} --name {scope_pec_name} --type microsoft.insights/privateLinkScopes',
+        self.cmd('network private-endpoint-connection reject --resource-name {scope} -g {rg} --name {scope_pec_name} --type microsoft.insights/privateLinkScopes',
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
 
         self.cmd('network private-endpoint-connection list --name {scope} -g {rg} --type microsoft.insights/privateLinkScopes',
@@ -483,7 +483,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
-        self.cmd('network private-endpoint-connection show --service-name {} -g {} --name {} --type {}'
+        self.cmd('network private-endpoint-connection show --resource-name {} -g {} --name {} --type {}'
                  .format(server, resource_group, server_pec_name, rp_type),
                  checks=[
                      self.check('id', server_pec_id),
@@ -492,11 +492,11 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                  ])
 
         with self.assertRaisesRegexp(CLIError, expectedError):
-            self.cmd('network private-endpoint-connection approve --service-name {} -g {} --name {} --description "{}" --type {}'
+            self.cmd('network private-endpoint-connection approve --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, approval_description, rp_type))
 
         with self.assertRaisesRegexp(CLIError, expectedError):
-            self.cmd('network private-endpoint-connection reject --service-name {} -g {} --name {} --description "{}" --type {}'
+            self.cmd('network private-endpoint-connection reject --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, rejection_description, rp_type))
 
         self.cmd('network private-endpoint-connection delete --id {} -y'
@@ -524,7 +524,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
-        self.cmd('network private-endpoint-connection show --service-name {} -g {} --name {} --type {}'
+        self.cmd('network private-endpoint-connection show --resource-name {} -g {} --name {} --type {}'
                  .format(server, resource_group, server_pec_name, rp_type),
                  checks=[
                      self.check('id', server_pec_id),
@@ -532,7 +532,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Ready')
                  ])
 
-        self.cmd('network private-endpoint-connection approve --service-name {} -g {} --name {} --description "{}" --type {}'
+        self.cmd('network private-endpoint-connection approve --resource-name {} -g {} --name {} --description "{}" --type {}'
                  .format(server, resource_group, server_pec_name, approval_description, rp_type),
                  checks=[
                      self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
@@ -541,7 +541,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                  ])
 
         with self.assertRaisesRegexp(CLIError, expectedError):
-            self.cmd('network private-endpoint-connection reject --service-name {} -g {} --name {} --description "{}" --type {}'
+            self.cmd('network private-endpoint-connection reject --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, rejection_description, rp_type))
 
         self.cmd('network private-endpoint-connection delete --id {} -y'
@@ -569,7 +569,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
-        self.cmd('network private-endpoint-connection show --service-name {} -g {} --name {} --type {}'
+        self.cmd('network private-endpoint-connection show --resource-name {} -g {} --name {} --type {}'
                  .format(server, resource_group, server_pec_name, rp_type),
                  checks=[
                      self.check('id', server_pec_id),
@@ -577,7 +577,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                      self.check('properties.provisioningState', 'Ready')
                  ])
 
-        self.cmd('network private-endpoint-connection reject --service-name {} -g {} --name {} --description "{}" --type {}'
+        self.cmd('network private-endpoint-connection reject --resource-name {} -g {} --name {} --description "{}" --type {}'
                  .format(server, resource_group, server_pec_name, rejection_description, rp_type),
                  checks=[
                      self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
@@ -586,7 +586,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                  ])
 
         with self.assertRaisesRegexp(CLIError, expectedError):
-            self.cmd('network private-endpoint-connection approve --service-name {} -g {} --name {} --description "{}" --type {}'
+            self.cmd('network private-endpoint-connection approve --resource-name {} -g {} --name {} --description "{}" --type {}'
                      .format(server, resource_group, server_pec_name, approval_description, rp_type))
 
         self.cmd('network private-endpoint-connection list --name {} -g {} --type {}'
