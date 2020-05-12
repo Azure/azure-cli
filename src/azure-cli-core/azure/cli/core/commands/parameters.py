@@ -95,8 +95,8 @@ def get_location_name_type(cli_ctx):
     def location_name_type(name):
         if ' ' in name:
             # if display name is provided, attempt to convert to short form name
-            name = next((sub.name for sub in get_subscription_locations(cli_ctx)
-                        if sub.display_name.lower() == name.lower()), name)
+            name = next((location.name for location in get_subscription_locations(cli_ctx)
+                        if location.display_name.lower() == name.lower()), name)
         return name
     return location_name_type
 
