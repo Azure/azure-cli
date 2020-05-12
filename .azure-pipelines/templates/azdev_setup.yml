@@ -1,6 +1,10 @@
 parameters:
-  CLIRepoPath: '.'
-  CLIExtensionRepoPath: ''
+  - name: CLIRepoPath
+    type: string
+    default: ''
+  - name: CLIExtensionRepoPath
+    type: string
+    default: ''
 
 steps:
   - bash: |
@@ -18,3 +22,4 @@ steps:
       else:
         azdev setup -c ${{ parameters.CLIRepoPath }}
       fi
+    displayName: 'Azdev Setup'
