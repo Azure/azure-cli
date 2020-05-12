@@ -243,11 +243,11 @@ def update_disk_caching(model, caching_settings):
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
-            for lun in luns:
-                if lun not in model:
+            for lun_item in luns:
+                if lun_item not in model:
                     raise CLIError("Data disk with lun of '{}' doesn't exist. Existing luns: {}."
-                                   .format(lun, list(model.keys())))
-                model[lun]['caching'] = value
+                                   .format(lun_item, list(model.keys())))
+                model[lun_item]['caching'] = value
         else:
             if lun is None:
                 disks = [model.os_disk] + (model.data_disks or [])
@@ -278,10 +278,10 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
-            for lun in luns:
-                if lun not in model:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
-                model[lun]['writeAcceleratorEnabled'] = value
+            for lun_item in luns:
+                if lun_item not in model:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun_item))
+                model[lun_item]['writeAcceleratorEnabled'] = value
         else:
             if lun is None:
                 disks = [model.os_disk] + (model.data_disks or [])
