@@ -13,7 +13,7 @@ steps:
       pip install -q azdev
       azdev --version
 
-      if [[ ${{ parameters.CLIExtensionRepoPath != '') }} ]]; then
+      if [[ ${{ parameters.CLIExtensionRepoPath }} != '' ]]; then
         azdev setup -c ${{ parameters.CLIRepoPath }} -r ${{ parameters.CLIExtensionRepoPath }}
       else:
         azdev setup -c ${{ parameters.CLIRepoPath }}
