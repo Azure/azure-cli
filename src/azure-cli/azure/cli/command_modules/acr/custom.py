@@ -173,6 +173,8 @@ def acr_show_endpoints(cmd,
                 'endpoint': host,
             })
     else:
+        logger.warning('To configure client firewall w/o using wildcard storage blob urls, '
+                       'use "az acr update --data-endpoint-enabled" to enable dedicated data endpoints.')
         from ._client_factory import cf_acr_replications
         replicate_client = cf_acr_replications(cmd.cli_ctx)
         replicates = list(replicate_client.list(resource_group_name, registry_name))
