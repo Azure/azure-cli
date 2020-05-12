@@ -970,9 +970,11 @@ jobs:
     displayName: 'Use Python 3.7'
     inputs:
       versionSpec: 3.7
+  - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
-      . scripts/ci/install_azdev.sh
-      pip list
+      set -ev
+
+      . env/bin/activate
       azdev style
 
 - job: CheckHeaders

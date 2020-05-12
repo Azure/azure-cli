@@ -1,0 +1,19 @@
+parameters:
+  CLIRepoPath: '.'
+  CLIExtensionRepoPath: ''
+
+steps:
+  - bash: |
+      set -ev
+
+      python -m venv env
+      chmod +x env/bin/activate
+      . env/bin/activate
+
+      pip install -q azdev
+      azdev --version
+
+      ${{ if ne(parameters.CLIExtensionRepoPath, '') }}:
+        azdev setup -c ${{ parameters.CLIRepoPath }} -r ${{ parameters.CLIExtensionRepoPath }}
+      ${{ else }}:
+        azdev setup -c ${{ parameters.CLIRepoPath }}
