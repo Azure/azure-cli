@@ -1310,6 +1310,9 @@ examples:
     text: |
         az monitor metrics alert update --enabled true --name MyAlertRule --resource-group MyResourceGroup
     crafted: true
+  - name: Disable/Enable a metric-based alert rule.
+    text: |
+        az monitor metrics alert update --enabled false --name MyAlertRule --resource-group MyResourceGroup
 """
 
 helps['monitor metrics list'] = """
