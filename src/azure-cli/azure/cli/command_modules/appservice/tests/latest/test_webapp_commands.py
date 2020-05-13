@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 import unittest
-import jmespath
 import mock
-import uuid
 import os
 import time
 import tempfile
@@ -14,7 +12,7 @@ import requests
 import datetime
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
-from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -2367,7 +2365,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
 
 
-class WebappLocalContextTests(ScenarioTest):
+class WebappLocalContextScenarioTest(LocalContextScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     def test_webapp_local_context(self, resource_group):
         from knack.util import CLIError
@@ -2375,10 +2373,6 @@ class WebappLocalContextTests(ScenarioTest):
             'plan_name': self.create_random_name(prefix='webapp-plan-', length=24),
             'webapp_name': self.create_random_name(prefix='webapp-', length=24)
         })
-        original_working_dir = os.getcwd()
-        working_dir = tempfile.mkdtemp()
-        os.chdir(working_dir)
-        self.cmd('local-context on')
 
         self.cmd('appservice plan create -g {rg} -n {plan_name}')
         self.cmd('appservice plan show')
@@ -2393,11 +2387,8 @@ class WebappLocalContextTests(ScenarioTest):
         self.cmd('webapp delete -n {webapp_name}')
         self.cmd('appservice plan delete -n {plan_name} -y')
 
-        self.cmd('local-context off --yes')
-        os.chdir(original_working_dir)
 
-
-class FunctionappLocalContextTests(ScenarioTest):
+class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     @StorageAccountPreparer()
     def test_functionapp_local_context(self, resource_group, storage_account):
@@ -2407,10 +2398,6 @@ class FunctionappLocalContextTests(ScenarioTest):
             'functionapp_name': self.create_random_name(prefix='functionapp-', length=24),
             'storage_account': storage_account
         })
-        original_working_dir = os.getcwd()
-        working_dir = tempfile.mkdtemp()
-        os.chdir(working_dir)
-        self.cmd('local-context on')
 
         self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku B2')
         self.cmd('functionapp plan show')
@@ -2424,9 +2411,6 @@ class FunctionappLocalContextTests(ScenarioTest):
 
         self.cmd('functionapp delete -n {functionapp_name}')
         self.cmd('functionapp plan delete -n {plan_name} -y')
-
-        self.cmd('local-context off --yes')
-        os.chdir(original_working_dir)
 
 
 if __name__ == '__main__':
