@@ -22,7 +22,7 @@ jobs:
   steps:
     - bash: |
         echo "Check Title of Pull Request: #$(System.PullRequest.PullRequestNumber)"
-        title=$(curl https://api.github.com/repos/Azure/azure-cli/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
+        title=$(curl https://api.github.com/repos/$(Build.Repository.Name)/pulls/$(System.PullRequest.PullRequestNumber) | jq -r '.title')
         if [ "$(System.PullRequest.TargetBranch)" != "release" ] && echo $title | grep -iqF hotfix; then
           echo "Hotfix PR should target release branch."
           exit 1
@@ -42,25 +42,25 @@ jobs:
         echo "Reject pull request directly to master branch"
         exit 1
 
-- job: CredScan
-  displayName: "Credential Scan"
-  pool:
-    vmImage: "windows-2019"
-  steps:
-    - task: ms-codeanalysis.vss-microsoft-security-code-analysis.build-task-credscan.CredScan@2
-      displayName: 'CredScan'
-      inputs:
-        toolVersion: 'Latest'
-        suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
-    - task: ms-codeanalysis.vss-microsoft-security-code-analysis.build-task-postanalysis.PostAnalysis@1
-      displayName: 'Post Analysis'
-      inputs:
-        AllTools: false
-        BinSkim: false
-        CredScan: true
-        RoslynAnalyzers: false
-        TSLint: false
-        ToolLogsNotFoundAction: 'Standard'
+# - job: CredScan
+#   displayName: "Credential Scan"
+#   pool:
+#     vmImage: "windows-2019"
+#   steps:
+#     - task: ms-codeanalysis.vss-microsoft-security-code-analysis.build-task-credscan.CredScan@2
+#       displayName: 'CredScan'
+#       inputs:
+#         toolVersion: 'Latest'
+#         suppressionsFile: './scripts/ci/credscan/CredScanSuppressions.json'
+#     - task: ms-codeanalysis.vss-microsoft-security-code-analysis.build-task-postanalysis.PostAnalysis@1
+#       displayName: 'Post Analysis'
+#       inputs:
+#         AllTools: false
+#         BinSkim: false
+#         CredScan: true
+#         RoslynAnalyzers: false
+#         TSLint: false
+#         ToolLogsNotFoundAction: 'Standard'
 
 - job: ExtractMetadata
   displayName: Extract Metadata
@@ -510,13 +510,6 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
 
-
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download PyPI Packages'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
   - bash: |
        #!/bin/bash
 
@@ -528,11 +521,11 @@ jobs:
        HOMEBREW_UPSTREAM_URL=`curl -Ls -o /dev/null -w %{url_effective} https://api.github.com/repos/Azure/azure-cli/tarball/$BUILD_SOURCEVERSION`
 
        docker_files=$(cd $BUILD_SOURCESDIRECTORY/scripts/release/homebrew/docker; pwd)
-       pypi_files=$(cd $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi; pwd)
+       src_files=$(cd $BUILD_SOURCESDIRECTORY/src; pwd)
 
        echo "Generating formula in docker container ... "
        docker run -v $docker_files:/mnt/scripts \
-                  -v $pypi_files:/mnt/pypi \
+                  -v $src_files:/mnt/src \
                   -e CLI_VERSION=$CLI_VERSION \
                   -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
                   --name azurecli \
@@ -541,7 +534,6 @@ jobs:
 
        # clean up
        rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/metadata
-       rm -rf $BUILD_ARTIFACTSTAGINGDIRECTORY/pypi
 
        docker cp azurecli:azure-cli.rb $BUILD_ARTIFACTSTAGINGDIRECTORY/azure-cli.rb
        docker rm --force azurecli

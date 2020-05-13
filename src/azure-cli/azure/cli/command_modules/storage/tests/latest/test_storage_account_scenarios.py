@@ -838,6 +838,44 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['deleteRetentionPolicy']['days'], None)
 
+    class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
+        @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
+        @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
+        def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
+            self.kwargs.update({
+                'sa': storage_account,
+                'rg': resource_group,
+                'cmd': 'storage account file-service-properties'
+            })
+            self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy', None))
+
+            with self.assertRaises(SystemExit):
+                self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
+
+            with self.assertRaisesRegexp(CLIError, "Delete Retention Policy hasn't been enabled,"):
+                self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
+
+            with self.assertRaises(SystemExit):
+                self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1')
+
+            self.cmd(
+                '{cmd} update --enable-delete-retention true --delete-retention-days 10 -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', 10))
+
+            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', 1))
+
+            self.cmd('{cmd} update --enable-delete-retention false -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+
+            self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
     @StorageAccountPreparer(location="eastus2euap", kind="StorageV2")
@@ -964,3 +1002,31 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
         ])
 
         self.cmd('az storage account delete -n {gzrs_sa} -g {rg} -y')
+
+
+class StorageAccountFailoverScenarioTest(ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    def test_storage_account_failover(self, resource_group):
+        self.kwargs = {
+            'sa': self.create_random_name(prefix="storagegrzs", length=24),
+            'rg': resource_group
+        }
+        self.cmd('storage account create -n {sa} -g {rg} -l westus2 --kind StorageV2 --sku Standard_GZRS --https-only',
+                 checks=[self.check('name', '{sa}'),
+                         self.check('sku.name', 'Standard_GZRS'),
+                         self.check('failoverInProgress', None)])
+
+        self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa}'),
+            self.check('sku.name', 'Standard_GZRS'),
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
+
+        self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa}'),
+            self.check('failoverInProgress', True)
+        ])

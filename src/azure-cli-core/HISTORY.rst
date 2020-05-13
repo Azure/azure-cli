@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.5.1
+++++++
+* Minor fixes
+
 2.5.0
 ++++++
 * Fix logging file fd leaking (#13102)

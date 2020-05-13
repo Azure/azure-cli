@@ -23,7 +23,8 @@ from azure.cli.command_modules.ams._completers import (get_role_definition_name_
                                                        get_fairplay_rentalandlease_completion_list,
                                                        get_token_completion_list,
                                                        get_mru_type_completion_list,
-                                                       get_encoding_types_list)
+                                                       get_encoding_types_list,
+                                                       get_allowed_resolutions_completion_list)
 
 from azure.cli.command_modules.ams._validators import (validate_storage_account_id,
                                                        datetime_format,
@@ -99,6 +100,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('insights_to_extract', arg_group='Video Analyzer', arg_type=get_enum_type(InsightsType), help='The type of insights to be extracted. If not set then the type will be selected based on the content type. If the content is audio only then only audio insights will be extracted and if it is video only video insights will be extracted.')
         c.argument('audio_language', arg_group='Audio/Video Analyzer', help='The language for the audio payload in the input using the BCP-47 format of \"language tag-region\" (e.g: en-US). If not specified, automatic language detection would be employed. This feature currently supports English, Chinese, French, German, Italian, Japanese, Spanish, Russian, and Portuguese. The automatic detection works best with audio recordings with clearly discernable speech. If automatic detection fails to find the language, transcription would fallback to English. Allowed values: {}.'
                    .format(", ".join(get_allowed_languages_for_preset_completion_list())))
+        c.argument('resolution', arg_group='Face Detector', help='Specifies the maximum resolution at which your video is analyzed. The default behavior is "SourceResolution," which will keep the input video at its original resolution when analyzed. Using StandardDefinition will resize input videos to standard definition while preserving the appropriate aspect ratio. It will only resize if the video is of higher resolution. For example, a 1920x1080 input would be scaled to 640x360 before processing. Switching to "StandardDefinition" will reduce the time it takes to process high resolution video. It may also reduce the cost of using this component (see https://azure.microsoft.com/en-us/pricing/details/media-services/#analytics for details). However, faces that end up being too small in the resized video may not be detected. Allowed values: {}.'
+                   .format(", ".join(get_allowed_resolutions_completion_list())))
         c.argument('relative_priority', arg_type=get_enum_type(Priority), help='Sets the relative priority of the transform outputs within a transform. This sets the priority that the service uses for processing TransformOutputs. The default priority is Normal.')
         c.argument('on_error', arg_type=get_enum_type(OnErrorType), help="A Transform can define more than one output. This property defines what the service should do when one output fails - either continue to produce other outputs, or, stop the other outputs. The overall Job state will not reflect failures of outputs that are specified with 'ContinueJob'. The default is 'StopProcessingJob'.")
         c.argument('description', help='The description of the transform.')
@@ -217,6 +220,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The type of token. Allowed values: {}.'.format(", ".join(get_token_type_completion_list())))
         c.argument('open_id_connect_discovery_document', arg_group='Token Restriction', help='The OpenID connect discovery document.')
         c.argument('widevine_template', arg_group='Widevine Configuration', help='JSON Widevine license template. Use @{file} to load from a file.')
+        c.argument('fp_playback_duration_seconds', arg_group='FairPlay Configuration', help='Playback duration')
+        c.argument('fp_storage_duration_seconds', arg_group='FairPlay Configuration', help='Storage duration')
         c.argument('ask', arg_group='FairPlay Configuration', help='The key that must be used as FairPlay Application Secret Key, which is a 32 character hex string.')
         c.argument('fair_play_pfx_password', arg_group='FairPlay Configuration', help='The password encrypting FairPlay certificate in PKCS 12 (pfx) format.')
         c.argument('fair_play_pfx', arg_group='FairPlay Configuration', help='The filepath to a FairPlay certificate file in PKCS 12 (pfx) format (including private key).')

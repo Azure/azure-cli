@@ -136,6 +136,23 @@ examples:
         az storage account encryption-scope update --name myencryption --state Enabled --account-name mystorageaccount -g MyResourceGroup
 """
 
+helps['storage account failover'] = """
+type: command
+short-summary: Failover request can be triggered for a storage account in case of availability issues.
+long-summary: |
+    The failover occurs from the storage account's primary cluster to secondary cluster for (RA-)GRS/GZRS accounts. The secondary
+    cluster will become primary after failover. For more information, please refer to
+    https://docs.microsoft.com/en-us/azure/storage/common/storage-disaster-recovery-guidance.
+examples:
+  - name: Failover a storage account.
+    text: |
+        az storage account failover -n mystorageaccount -g MyResourceGroup
+  - name: Failover a storage account without waiting for complete.
+    text: |
+        az storage account failover -n mystorageaccount -g MyResourceGroup --no-wait
+        az storage account show -n mystorageaccount --expand geoReplicationStats
+"""
+
 helps['storage account generate-sas'] = """
 type: command
 parameters:
@@ -162,6 +179,33 @@ examples:
     text: |
         az storage account generate-sas --account-key 00000000 --account-name MyStorageAccount --expiry 2020-01-01 --https-only --permissions acuw --resource-types co --services bfqt
     crafted: true
+"""
+
+helps['storage account file-service-properties'] = """
+type: group
+short-summary: Manage the properties of file service in storage account.
+"""
+
+helps['storage account file-service-properties show'] = """
+type: command
+short-summary: Show the properties of file service in storage account.
+long-summary: >
+    Show the properties of file service in storage account.
+examples:
+  - name: Show the properties of file service in storage account.
+    text: az storage account file-service-properties show -n mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account file-service-properties update'] = """
+type: command
+short-summary: Update the properties of file service in storage account.
+long-summary: >
+    Update the properties of file service in storage account.
+examples:
+  - name: Enable soft delete policy and set delete retention days to 100 for file service in storage account.
+    text: az storage account file-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g MyResourceGroup
+  - name: Disable soft delete policy for file service.
+    text: az storage account file-service-properties update --enable-delete-retention false -n mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account keys'] = """

@@ -32,7 +32,8 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
-from ._client_factory import _compute_client_factory, cf_public_ip_addresses, cf_vm_image_term
+from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
+                              _dev_test_labs_client_factory)
 
 logger = get_logger(__name__)
 
@@ -885,6 +886,43 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
     return vm
+
+
+def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
+                     location=None):
+    from msrestazure.tools import resource_id
+    from azure.mgmt.devtestlabs.models import Schedule
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    client = _dev_test_labs_client_factory(cmd.cli_ctx, subscription_id)
+    name = 'shutdown-computevm-' + vm_name
+    vm_id = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                        namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
+    if off:
+        if email is not None or webhook is not None or time is not None:
+            # I don't want to disrupt users. So I warn instead of raising an error.
+            logger.warning('If --off, other parameters will be ignored.')
+        return client.global_schedules.delete(resource_group_name, name)
+
+    if time is None:
+        raise CLIError('usage error: --time is a required parameter')
+    daily_recurrence = {'time': time}
+    notification_settings = None
+    if webhook:
+        notification_settings = {
+            'emailRecipient': email,
+            'webhookUrl': webhook,
+            'timeInMinutes': 30,
+            'status': 'Enabled'
+        }
+    schedule = Schedule(status='Enabled',
+                        target_resource_id=vm_id,
+                        daily_recurrence=daily_recurrence,
+                        notification_settings=notification_settings,
+                        time_zone_id='UTC',
+                        task_type='ComputeVmShutdownTask',
+                        location=location)
+    return client.global_schedules.create_or_update(resource_group_name, name, schedule)
 
 
 def get_instance_view(cmd, resource_group_name, vm_name):
@@ -2163,7 +2201,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
-                automatic_repairs_grace_period=None, specialized=None):
+                automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2393,7 +2431,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
             data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
             data_disk_mbps=data_disk_mbps, automatic_repairs_grace_period=automatic_repairs_grace_period,
-            specialized=specialized)
+            specialized=specialized, os_disk_size_gb=os_disk_size_gb)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
