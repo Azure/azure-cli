@@ -1251,9 +1251,14 @@ examples:
             --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"
   - name: Create a metric-based alert rule that monitors a custom metric.
     text: |
-        az monitor metrics alert create -n "metric alert rule on a custom metric" -g "Demos" --scopes {VirtualMachineID}
-            --condition "max Azure.VM.Windows.GuestMetrics.Memory\Available Bytes > 90"
+        az monitor metrics alert create -n "metric alert rule on a custom metric" -g "Demos" --scopes {VirtualMachineID} \\
+            --condition "max Azure.VM.Windows.GuestMetrics.Memory\Available Bytes > 90" \\
             --window-size 5m --evaluation-frequency 1m
+  - name: Create a high CPU usage alert on several VMs with no actions.
+    text: |
+        az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID1} {VirtualMachineID2} {VirtualMachineID3} \\
+            --condition "avg Percentage CPU > 90" --description "High CPU"
+  
 
 """
 

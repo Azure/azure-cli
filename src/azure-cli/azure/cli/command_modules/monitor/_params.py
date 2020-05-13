@@ -120,7 +120,8 @@ def load_arguments(self, _):
         c.argument('auto_mitigate', arg_type=get_three_state_flag(), help='Automatically resolve the alert.')
         c.argument('condition', options_list=['--condition'], action=MetricAlertConditionAction, nargs='+')
         c.argument('description', help='Free-text description of the rule.')
-        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to.')
+        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to. '
+                                             'The resources specified in this parameter must be of the same type and exist in the same location.')
         c.argument('disabled', arg_type=get_three_state_flag())
         c.argument('enabled', arg_type=get_three_state_flag(), help='Whether the metric alert rule is enabled.')
 
