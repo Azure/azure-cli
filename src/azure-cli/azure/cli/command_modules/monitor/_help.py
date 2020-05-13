@@ -1229,6 +1229,8 @@ parameters:
         Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
+        
+        Due to server limitation, when an alert rule contains multiple criteria, the use of dimensions is limited to one value per dimension within each criterion.
 
         Multiple conditions can be specified by using more than one `--condition` argument.
 examples:
@@ -1246,7 +1248,7 @@ examples:
         az monitor metrics alert create -g {ResourceGroup} -n alert1 --scopes {StorageAccountId} \\
             --description "Storage Slow Transactions" \\
             --condition "total transactions > 5 where ResponseType includes Success" \\
-            --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob"
+            --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"
   - name: Create a metric-based alert rule that monitors a custom metric.
     text: |
         az monitor metrics alert create -n "metric alert rule on a custom metric" -g "Demos" --scopes {VirtualMachineID}
@@ -1299,6 +1301,8 @@ parameters:
         Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
+
+        Due to server limitation, when an alert rule contains multiple criteria, the use of dimensions is limited to one value per dimension within each criterion.
 
         Multiple conditions can be specified by using more than one `--condition` argument.
   - name: --remove-conditions
