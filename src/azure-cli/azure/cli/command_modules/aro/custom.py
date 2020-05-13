@@ -144,7 +144,9 @@ def aro_update(client, resource_group_name, resource_name, no_wait=False):
 def rp_mode_development():
     return os.environ.get('RP_MODE', '').lower() == 'development'
 
+
 def generate_random_id():
-    random_id = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz'))  \
-    + ''.join(random.choice('abcdefghijklmnopqrstuvwxyz1234567890') for _ in range(7))
+    random_id = (''.join(random.choice('abcdefghijklmnopqrstuvwxyz')) +
+                 ''.join(random.choice('abcdefghijklmnopqrstuvwxyz1234567890')
+                         for _ in range(7)))
     return random_id
