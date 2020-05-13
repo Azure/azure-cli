@@ -59,7 +59,8 @@ class AzCLILocalContext(object):  # pylint: disable=too-many-instance-attributes
             if self.is_on:
                 logger.warning('The working directory has been deleted or recreated. Local context is ignored.')
 
-        self._local_context_file = self._get_local_context_file()
+        if self.is_on:
+            self._local_context_file = self._get_local_context_file()
 
     def _get_local_context_file_name(self):
         return LOCAL_CONTEXT_FILE.format(self.username)
@@ -124,6 +125,7 @@ class AzCLILocalContext(object):  # pylint: disable=too-many-instance-attributes
     def turn_off(self):
         self.config.remove_option(LOCAL_CONTEXT_ON_OFF_CONFIG_SECTION, self.username)
         self.is_on = self.config.getboolean(LOCAL_CONTEXT_ON_OFF_CONFIG_SECTION, self.username, False)
+        self._local_context_file = None
 
     def delete_file(self, recursive=False):
         local_context_files = self._load_local_context_files(recursive=recursive)
