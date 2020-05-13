@@ -134,6 +134,10 @@ helps['bot directline update'] = """
           text: |-
             az bot directline update -n botName -g MyResourceGroup --disablev1
 """
+helps['bot directline site'] = """
+    type: group
+    short-summary: Manage the Direct Line Channel's sites on a bot.
+"""
 helps['bot directline site create'] = """
     type: command
     short-summary: Create a registered site on the bot's Direct Line Channel.
