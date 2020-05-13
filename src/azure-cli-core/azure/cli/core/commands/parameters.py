@@ -12,7 +12,7 @@ from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_P
 from azure.cli.core.commands.validators import validate_tag, validate_tags, generate_deployment_name
 from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.local_context import LocalContextAttribute, SET, GET, ALL
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
@@ -242,7 +242,7 @@ resource_group_name_type = CLIArgumentType(
     configured_default='group',
     local_context_attribute=LocalContextAttribute(
         name='resource_group_name',
-        actions=[SET, GET],
+        actions=[LocalContextAction.SET, LocalContextAction.GET],
         scopes=[ALL]
     ))
 
@@ -302,6 +302,20 @@ zone_type = CLIArgumentType(
     choices=['1', '2', '3'],
     nargs=1
 )
+
+vnet_name_type = CLIArgumentType(
+    options_list='--vnet-name',
+    metavar='NAME',
+    help='The virtual network (VNet) name.',
+    completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'),
+    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET])
+)
+
+subnet_name_type = CLIArgumentType(
+    options_list='--subnet',
+    metavar='NAME',
+    help='The subnet name.',
+    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
 
 def patch_arg_make_required(argument):

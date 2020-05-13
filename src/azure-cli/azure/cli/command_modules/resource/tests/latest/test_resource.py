@@ -12,7 +12,8 @@ import unittest
 from azure.cli.core.parser import IncorrectUsageError
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
+                               create_random_name, live_only, record_only)
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
 
@@ -2189,6 +2190,20 @@ class GlobalIdsScenarioTest(ScenarioTest):
         self.kwargs['vnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet}').get_output_in_json()['newVNet']['id']
         # command will fail if the other parameters were actually used
         self.cmd('network vnet show --subscription fakesub --resource-group fakerg -n fakevnet --ids {vnet_id}')
+
+
+class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
+
+    def test_resource_group_local_context(self):
+        self.kwargs.update({
+            'group': 'test_local_context_group',
+            'location': 'eastasia'
+        })
+        self.cmd('group create -n {group} -l {location}', checks=[self.check('name', self.kwargs['group'])])
+        self.cmd('group show', checks=[
+            self.check('name', self.kwargs['group']),
+            self.check('location', self.kwargs['location'])
+        ])
 
 
 if __name__ == '__main__':

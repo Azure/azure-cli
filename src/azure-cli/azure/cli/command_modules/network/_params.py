@@ -16,7 +16,7 @@ from azure.cli.core.commands.parameters import (get_location_type, get_resource_
                                                 get_three_state_flag, get_enum_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
-from azure.cli.core.local_context import LocalContextAttribute, SET, GET, ALL
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 from azure.cli.command_modules.network._validators import (
     dns_zone_name_type,
     validate_ssl_cert, validate_cert, validate_inbound_nat_rule_id_list,
@@ -90,9 +90,9 @@ def load_arguments(self, _):
     nsg_name_type = CLIArgumentType(options_list='--nsg-name', metavar='NAME', help='Name of the network security group.')
     circuit_name_type = CLIArgumentType(options_list='--circuit-name', metavar='NAME', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
     virtual_network_name_type = CLIArgumentType(options_list='--vnet-name', metavar='NAME', help='The virtual network (VNet) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'),
-                                                local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[GET]))
+                                                local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
     subnet_name_type = CLIArgumentType(options_list='--subnet-name', metavar='NAME', help='The subnet name.',
-                                       local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[GET]))
+                                       local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
     load_balancer_name_type = CLIArgumentType(options_list='--lb-name', metavar='NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
     private_ip_address_type = CLIArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
     cookie_based_affinity_type = CLIArgumentType(arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True))
@@ -1595,11 +1595,11 @@ def load_arguments(self, _):
     with self.argument_context('network vnet create') as c:
         c.argument('location', get_location_type(self.cli_ctx))
         c.argument('vnet_name', virtual_network_name_type, options_list=['--name', '-n'], completer=None,
-                   local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[SET], scopes=[ALL]))
+                   local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
 
     with self.argument_context('network vnet create', arg_group='Subnet') as c:
         c.argument('subnet_name', help='Name of a new subnet to create within the VNet.',
-                   local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[SET], scopes=[ALL]))
+                   local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX', max_api='2018-07-01')
         c.argument('subnet_prefix', options_list='--subnet-prefixes', nargs='+', min_api='2018-08-01', help='Space-separated list of address prefixes in CIDR format for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIXES')
 
@@ -1636,7 +1636,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network vnet subnet create') as c:
         c.argument('subnet_name', arg_type=subnet_name_type, options_list=['--name', '-n'], id_part='child_name_1',
-                   local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[SET], scopes=[ALL]))
+                   local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
 
     with self.argument_context('network vnet subnet update') as c:
         c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG). Use empty string "" to detach it.')
