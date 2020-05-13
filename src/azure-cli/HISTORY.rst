@@ -313,7 +313,7 @@ Release History
 * Fix IcM179210086: unable to create custom metric alert for their Application Insights metric
 
 **NetAppFiles**
-
+* az volume create: Adds snapshot-id as a parameter to create volume this will allow users to create a volume from existing snapshot.
 * az volume create: Allow data protection volumes adding replication operations: approve, suspend, resume, status, remove
 
 **Network**
