@@ -143,7 +143,7 @@ def _validate_expiration_date(namespace):
     if namespace.expiration_date:
         import datetime
         import dateutil.parser
-        if datetime.datetime.utcnow().date() >= dateutil.parser.parse(namespace.expiration_date).date():
+        if datetime.datetime.utcnow() >= dateutil.parser.parse(namespace.expiration_date):
             raise CLIError("Expiration date '{}' must be in future.".format(namespace.expiration_date))
 
 
