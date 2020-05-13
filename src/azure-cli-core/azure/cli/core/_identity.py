@@ -22,10 +22,6 @@ from azure.identity import (
     ManagedIdentityCredential
 )
 
-from msal import PublicClientApplication
-# sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
-from azure.identity._internal.persistent_cache import load_persistent_cache
-
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 logger = get_logger(__name__)
 
@@ -63,13 +59,21 @@ class Identity:
         self.tenant_id = tenant_id
         self.client_id = client_id
         self._cred_cache = kwargs.pop('cred_cache', None)
+        # todo: MSAL support force encryption
+        self.allow_unencrypted = True
 
-        cache = load_persistent_cache(allow_unencrypted=False)
+        # Initialize _msal_app for logout, since Azure Identity doesn't provide the functionality for logout
+        from msal import PublicClientApplication
+        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
+        from azure.identity._internal.persistent_cache import load_persistent_cache
+
+        # Store for user token persistence
+        cache = load_persistent_cache(self.allow_unencrypted)
         authority = "https://{}/organizations".format(self.authority)
         self._msal_app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
 
-        # todo: MSAL support force encryption
-        self._msal_store = MSALSecretStore(True)
+        # Store for Service principal credential persistence
+        self._msal_store = MSALSecretStore(fallback_to_plaintext=self.allow_unencrypted)
 
         # TODO: Allow disabling SSL verification
         # The underlying requests lib of MSAL has been patched with Azure Core by MsalTransportAdapter
