@@ -199,6 +199,37 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
     return client
 
 
+def get_account_url(cli_ctx, account_name, service_type):
+    from knack.util import CLIError
+    if account_name is None:
+        raise CLIError("Please provide storage account name or connection string.")
+    storage_endpoint = cli_ctx.cloud.suffixes.storage_endpoint
+
+    return "https://{}.{}.{}".format(account_name, service, storage_endpoint)
+
+
+# Here is the common client entry for storage data plane track2 SDK
+def get_data_service_client_track2(cli_ctx, service_type, account_name, account_key, connection_string=None,
+                                   sas_token=None, token_credential=None):
+    logger.debug('Getting data service client service_type=%s', service_type.__name__)
+    try:
+        if connection_string:
+            client = service_type(**client_kwargs).from_connection_string(conn_str=connection_string)
+
+        account_url = get_account_url(cli_ctx, account_name=account_name, service_type=service_type)
+        credential = account_key or sas_token or token_credential
+
+    except ValueError as exc:
+        _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
+                                              'common._error#_ERROR_STORAGE_MISSING_INFO')
+        if _ERROR_STORAGE_MISSING_INFO in str(exc):
+            raise ValueError(exc)
+        raise CLIError('Unable to obtain data client. Check your connection parameters.')
+    # TODO: enable Fiddler
+    client.request_callback = _get_add_headers_callback(cli_ctx)
+    return client
+
+
 def get_subscription_id(cli_ctx):
     from azure.cli.core._profile import Profile
     if not cli_ctx.data.get('subscription_id'):

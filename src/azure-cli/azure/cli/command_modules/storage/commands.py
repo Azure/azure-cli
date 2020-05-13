@@ -655,7 +655,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage fs', adls_fs_sdk, resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
                             custom_command_type=get_custom_sdk('filesystem', cf_adls_file_system),
-                            is_preview=True, min_api='2018-11-09') as g:
+                            min_api='2018-11-09') as g:
         from ._transformers import transform_fs_list_public_access_output, transform_fs_public_access_output, \
             transform_metadata
         g.storage_command_oauth('create', 'create_file_system')
@@ -671,7 +671,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage fs directory', adls_directory_sdk,
                             custom_command_type=get_custom_sdk('fs_directory', cf_adls_directory),
-                            resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE) as g:
+                            resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09') as g:
         from ._transformers import transform_storage_list_output, transform_metadata
         g.storage_command_oauth('create', 'create_directory')
         g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
@@ -685,7 +685,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 transform=transform_metadata)
 
     with self.command_group('storage fs file', adls_file_sdk, resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
-                            custom_command_type=get_custom_sdk('fs_file', cf_adls_file)) as g:
+                            custom_command_type=get_custom_sdk('fs_file', cf_adls_file), min_api='2018-11-09') as g:
         from ._transformers import transform_storage_list_output, create_boolean_result_output_transformer
         g.storage_command_oauth('create', 'create_file')
         g.storage_custom_command_oauth('upload', 'upload_file')
@@ -702,7 +702,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('metadata show', 'get_file_properties', exception_handler=show_exception_handler,
                                 transform=transform_metadata)
 
-    with self.command_group('storage fs access', adls_directory_sdk) as g:
+    with self.command_group('storage fs access', adls_directory_sdk,
+                            resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09') as g:
         from ._transformers import transform_fs_access_output
         g.storage_command('set', 'set_access_control')
         g.storage_command('show', 'get_access_control', transform=transform_fs_access_output)
