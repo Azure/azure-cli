@@ -48,12 +48,12 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         # python isn't good at do-while loops but loop until we get the target state
         attempts = 0
         replication_status = self.cmd("az netappfiles volume replication status -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r)).get_output_in_json()
-                
+
         while attempts < 10:
             attempts += 1
             replication_status = self.cmd("az netappfiles volume replication status -g %s -a %s -p %s -v %s" % (rg_r, account_name_r, pool_name_r, volume_name_r)).get_output_in_json()
-            if (replication_status['mirrorState'] == target_state ):
-                break            
+            if(replication_status['mirrorState'] == target_state):
+                break
             if self.is_live or self.in_recording:
                 time.sleep(60)
 

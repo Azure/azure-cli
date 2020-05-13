@@ -1,8 +1,7 @@
-33# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 POOL_DEFAULT = "--service-level 'Premium' --size 4"
@@ -26,7 +25,7 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         vnet_name = self.create_random_name(prefix='cli-vnet-', length=24)
         file_path = volume_name1  # creation_token
         vnet_name = "cli-vnet-lefr-02"
-        subnet_name = "cli-subnet-lefr-02"        
+        subnet_name = "cli-subnet-lefr-02"
         tag = "--tags %s" % tags if tags is not None else ""
 
         if not volume_only:
@@ -85,7 +84,6 @@ class AzureNetAppFilesSnapshotServiceScenarioTest(ScenarioTest):
         volume_only = True
         restored_volume = self.create_volume(account_name, pool_name, restored_volume_name, rg, snapshot_id=snapshot["snapshotId"], volume_only=volume_only)
         assert restored_volume['name'] == account_name + '/' + pool_name + '/' + restored_volume_name
-
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_snapshot_')
     def test_list_snapshots(self):

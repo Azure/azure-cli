@@ -149,7 +149,7 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         volume_type=volume_type,
         data_protection=data_protection,
         tags=tags,
-        snapshot_id = snapshot_id)
+        snapshot_id=snapshot_id)
 
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
 
