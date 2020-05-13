@@ -134,6 +134,38 @@ helps['bot directline update'] = """
           text: |-
             az bot directline update -n botName -g MyResourceGroup --disablev1
 """
+helps['bot directline site create'] = """
+    type: command
+    short-summary: Create a registered site on the bot's Direct Line Channel.
+    examples:
+        - name: Create a site for the Direct Line Channel.
+          text: |-
+            az bot directline site create -n botName -g MyResourceGroup --site-name MySite
+"""
+helps['bot directline site update'] = """
+    type: command
+    short-summary: Update a registered site on the bot's Direct Line Channel.
+    examples:
+        - name: Update a site for the Direct Line Channel.
+          text: |-
+            az bot directline site update -n botName -g MyResourceGroup --site-name MySite --enable-enhanced-auth
+"""
+helps['bot directline site list'] = """
+    type: command
+    short-summary: List all registered sites on the bot's Direct Line Channel.
+    examples:
+        - name: List sites for the Direct Line Channel.
+          text: |-
+            az bot directline site list -n botName -g MyResourceGroup --with-secrets
+"""
+helps['bot directline site delete'] = """
+    type: command
+    short-summary: Delete a registered site on the bot's Direct Line Channel.
+    examples:
+        - name: Delete a site for the Direct Line Channel.
+          text: |-
+            az bot directline site delete -n botName -g MyResourceGroup --site-name MySite
+"""
 helps['bot telegram create'] = """
     type: command
     short-summary: Create the Telegram Channel on a bot.
