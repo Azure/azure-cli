@@ -160,7 +160,7 @@ class AzCli(CLI):
         :param specified_arguments: Arguments which user specify in this command
         :type specified_arguments: list
         """
-
+        local_context_args = []
         for argument_name in specified_arguments:
             # make sure SET is defined
             if argument_name not in argument_definitions:
@@ -174,6 +174,19 @@ class AzCli(CLI):
             # save when name and scopes have value
             if lca.name and lca.scopes:
                 self.local_context.set(lca.scopes, lca.name, value)
+            options = argtype.settings.get('options_list', None)
+            if options:
+                local_context_args.append((options[0], value))
+
+        # print warning if there are values saved to local context
+        if local_context_args:
+            logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
+                           'run `az local-context off` to turn it off.',
+                           self.local_context.effective_working_directory())
+            args_str = []
+            for name, value in local_context_args:
+                args_str.append('{}: {}'.format(name, value))
+            logger.warning('Command argument values saved to local context: %s', ', '.join(args_str))
 
 
 class MainCommandsLoader(CLICommandsLoader):

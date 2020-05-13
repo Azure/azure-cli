@@ -111,8 +111,6 @@ class AzCLILocalContext(object):  # pylint: disable=too-many-instance-attributes
                 file_path = os.path.join(self.current_dir, self.dir_name, self._get_local_context_file_name())
                 dir_path = os.path.join(self.current_dir, self.dir_name)
                 self._local_context_file = _ConfigFile(dir_path, file_path, LOCAL_CONTEXT_NOTICE)
-                logger.warning('Local context is turned on. Its information is saved in current working directory %s. '
-                               'You can run `az local-context off` to turn it off.', self.current_dir)
 
             for scope in scopes:
                 self._local_context_file.set_value(scope.lower(), argument, value)
@@ -154,7 +152,7 @@ class AzCLILocalContext(object):  # pylint: disable=too-many-instance-attributes
             for scope in local_context_file.sections():
                 for name in names:
                     local_context_file.remove_option(scope, name)
-        logger.warning('Local context value is deleted. You can run `az local-context list` to show all available '
+        logger.warning('Local context value is deleted. You can run `az local-context show` to show all available '
                        'values.')
 
     def get_value(self, names=None):
