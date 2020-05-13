@@ -12,6 +12,7 @@ from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
+from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
@@ -595,6 +596,25 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
 
         self.cmd('network private-endpoint-connection delete --id {} -y'
                  .format(server_pec_id))
+
+
+class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest, BatchScenarioMixin):
+    # Currently private-link-resource and private-endpoint-connection are whitelist only features so scenario tests are limited
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer(location='northcentralus')
+    def test_private_link_resource_batch_account(self, resource_group, batch_account_name):
+        self.kwargs.update({
+            'ba': batch_account_name,
+            'rg': resource_group})
+        self.cmd('network private-link-resource list --name {ba} -g {rg} --type Microsoft.Batch/batchAccounts')
+
+    @ResourceGroupPreparer()
+    @BatchAccountPreparer(location='southcentralus')
+    def test_private_endpoint_connection_batch_account(self, resource_group, batch_account_name):
+        self.kwargs.update({
+            'ba': batch_account_name,
+            'rg': resource_group})
+        self.cmd('network private-endpoint-connection list --name {ba} -g {rg} --type Microsoft.Batch/batchAccounts')
 
 
 class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
