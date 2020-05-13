@@ -88,7 +88,7 @@ Command arguments: ['a&b', '--debug']
 > az "`"a&b`"" --debug
 Command arguments: ['a&b', '--debug']
 
-# Escape double quotes (") by repeating then
+# Escape double quotes (") by repeating them
 > az """a&b""" --debug
 Command arguments: ['a&b', '--debug']
 
