@@ -1247,6 +1247,12 @@ examples:
             --description "Storage Slow Transactions" \\
             --condition "total transactions > 5 where ResponseType includes Success" \\
             --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob"
+  - name: Create a metric-based alert rule that monitors a custom metric.
+    text: |
+        az monitor metrics alert create -n "metric alert rule on a custom metric" -g "Demos" --scopes {VirtualMachineID}
+            --condition "max Azure.VM.Windows.GuestMetrics.Memory\Available Bytes > 90"
+            --window-size 5m --evaluation-frequency 1m
+
 """
 
 helps['monitor metrics alert delete'] = """
