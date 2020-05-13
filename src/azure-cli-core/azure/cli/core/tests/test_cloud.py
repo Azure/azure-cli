@@ -7,6 +7,7 @@ import tempfile
 import unittest
 import mock
 import multiprocessing
+import configparser
 
 from azure.cli.core.cloud import (Cloud,
                                   CloudEndpoints,
@@ -31,8 +32,6 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.mock import DummyCli
 
 from knack.util import CLIError
-
-from knack.config import get_config_parser
 
 
 def _helper_get_clouds(_):
@@ -63,7 +62,7 @@ class TestCloud(unittest.TestCase):
                 config_file:
             with mock.patch('azure.cli.core.cloud.get_custom_clouds', lambda: []):
                 add_cloud(cli, c)
-                config = get_config_parser()
+                config = configparser.ConfigParser()
                 config.read(config_file)
                 self.assertTrue(c.name in config.sections())
                 self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
@@ -92,7 +91,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(cli, c)
-            config = get_config_parser()
+            config = configparser.ConfigParser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
@@ -112,7 +111,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(cli, c)
-            config = get_config_parser()
+            config = configparser.ConfigParser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'endpoint_resource_manager'), endpoint_rm)
@@ -131,7 +130,7 @@ class TestCloud(unittest.TestCase):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as\
                 config_file:
             add_cloud(cli, c)
-            config = get_config_parser()
+            config = configparser.ConfigParser()
             config.read(config_file)
             self.assertTrue(c.name in config.sections())
             self.assertEqual(config.get(c.name, 'profile'), profile)
@@ -196,7 +195,7 @@ class TestCloud(unittest.TestCase):
     def test_modify_known_cloud(self):
         with mock.patch('azure.cli.core.cloud.CLOUD_CONFIG_FILE', tempfile.mkstemp()[1]) as config_file:
             cli = DummyCli()
-            config = get_config_parser()
+            config = configparser.ConfigParser()
             cloud_name = AZURE_PUBLIC_CLOUD.name
             cloud = get_cloud(cli, cloud_name)
             self.assertEqual(cloud.name, cloud_name)
@@ -230,7 +229,7 @@ class TestCloud(unittest.TestCase):
             p.join()
             # Check we can read the file with no exceptions
             cli = DummyCli()
-            get_config_parser().read(config_file)
+            configparser.ConfigParser().read(config_file)
             for kc in KNOWN_CLOUDS:
                 get_cloud(cli, kc.name)
 
