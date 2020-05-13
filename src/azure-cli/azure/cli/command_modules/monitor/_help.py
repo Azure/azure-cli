@@ -1239,7 +1239,8 @@ examples:
     text: |
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} \\
             --condition "avg Percentage CPU > 90" --window-size 5m --evaluation-frequency 1m \\
-            --action {actionGroupId} apiKey={APIKey} type=HighCPU --description "High CPU"
+            --action "/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.Insights/actionGroups/<actionGroupName>" apiKey={APIKey} type=HighCPU \\
+            --description "High CPU"
   - name: Create an alert when a storage account shows a high number of slow transactions, using multi-dimensional filters.
     text: |
         az monitor metrics alert create -g {ResourceGroup} -n alert1 --scopes {StorageAccountId} \\
