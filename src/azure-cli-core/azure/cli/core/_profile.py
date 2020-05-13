@@ -426,9 +426,12 @@ class Profile(object):
             subscriptions = [x for x in subscriptions if x not in result]
             self._storage[_SUBSCRIPTIONS] = subscriptions
 
-            # Always remove credential from the legacy cred cache, regardless of MSAL cache
+            # Always remove credential from the legacy cred cache, regardless of MSAL cache, to be deprecated
             adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
             adal_cache.remove_cached_creds(user_or_sp)
+            # remove service principle secret
+            msal_cache = MSALSecretStore()
+            msal_cache.remove_cached_creds(user_or_sp)
 
             logger.warning('Account %s was logged out from Azure CLI', user_or_sp)
         else:
@@ -681,7 +684,8 @@ class Profile(object):
             user_type = account[_USER_ENTITY].get(_USER_TYPE)
             if user_type == _SERVICE_PRINCIPAL:
                 result['clientId'] = account[_USER_ENTITY][_USER_NAME]
-                sp_auth = ServicePrincipalAuth(self._creds_cache.retrieve_secret_of_service_principal(
+                msal_cache = MSALSecretStore(True)
+                sp_auth = ServicePrincipalAuth(msal_cache.retrieve_secret_of_service_principal(
                     account[_USER_ENTITY][_USER_NAME]))
                 secret = getattr(sp_auth, 'secret', None)
                 if secret:

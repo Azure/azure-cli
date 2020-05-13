@@ -68,6 +68,9 @@ class Identity:
         authority = "https://{}/organizations".format(self.authority)
         self._msal_app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
 
+        # todo: MSAL support force encryption
+        self._msal_store = MSALSecretStore(True)
+
         # TODO: Allow disabling SSL verification
         # The underlying requests lib of MSAL has been patched with Azure Core by MsalTransportAdapter
         # connection_verify will be received by azure.core.configuration.ConnectionConfiguration
@@ -123,6 +126,8 @@ class Identity:
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
         sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, secret=client_secret)
         entry = sp_auth.get_entry_to_persist()
+        self._msal_store.save_service_principal_cred(entry)
+        # backward compatible with ADAL, to be deprecated
         self._cred_cache.save_service_principal_cred(entry)
 
         credential = ClientSecretCredential(self.tenant_id, client_id, client_secret, authority=self.authority)
@@ -134,6 +139,8 @@ class Identity:
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/pull/44
         sp_auth = ServicePrincipalAuth(client_id, self.tenant_id, certificate_file=certificate_path)
         entry = sp_auth.get_entry_to_persist()
+        self._msal_store.save_service_principal_cred(entry)
+        # backward compatible with ADAL, to be deprecated
         self._cred_cache.save_service_principal_cred(entry)
 
         # TODO: support use_cert_sn_issuer in CertificateCredential
@@ -232,6 +239,8 @@ class Identity:
         accounts = self._msal_app.get_accounts(user_or_sp)
         logger.info('After account removal:')
         logger.info(json.dumps(accounts))
+        # remove service principal secrets
+        self._msal_store.remove_cached_creds(user_or_sp)
 
     def logout_all(self):
         accounts = self._msal_app.get_accounts()
@@ -244,6 +253,8 @@ class Identity:
         accounts = self._msal_app.get_accounts()
         logger.info('After account removal:')
         logger.info(json.dumps(accounts))
+        # remove service principal secrets
+        self._msal_store.remove_all_cached_creds()
 
     def get_user_credential(self, home_account_id, username):
         auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
@@ -252,7 +263,7 @@ class Identity:
                                             enable_persistent_cache=True)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
-        client_secret, certificate_path = self._cred_cache.retrieve_secret_of_service_principal(client_id, self.tenant_id)
+        client_secret, certificate_path = self._msal_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
         if client_secret:
             return ClientSecretCredential(self.tenant_id, client_id, client_secret)
@@ -465,3 +476,119 @@ class ServicePrincipalAuth(object):
             entry[_SERVICE_PRINCIPAL_CERT_THUMBPRINT] = self.thumbprint
 
         return entry
+
+
+class MSALSecretStore:
+    """Caches secrets in MSAL custom secret store
+    """
+    def __init__(self, fallback_to_plaintext=True):
+        self._token_file = (os.environ.get('AZURE_MSAL_TOKEN_FILE', None) or
+                            os.path.join(get_config_dir(), 'msalCustomToken.bin'))
+        self._lock_file = self._token_file + '.lock'
+        self._service_principal_creds = []
+        self._fallback_to_plaintext = fallback_to_plaintext
+
+    def retrieve_secret_of_service_principal(self, sp_id, tenant):
+        self._load_cached_creds()
+        matched = [x for x in self._service_principal_creds if sp_id == x[_SERVICE_PRINCIPAL_ID]]
+        if not matched:
+            raise CLIError("Could not retrieve credential from local cache for service principal {}. "
+                           "Please run 'az login' for this service principal."
+                           .format(sp_id))
+        matched_with_tenant = [x for x in matched if tenant == x[_SERVICE_PRINCIPAL_TENANT]]
+        if matched_with_tenant:
+            cred = matched_with_tenant[0]
+        else:
+            logger.warning("Could not retrieve credential from local cache for service principal %s under tenant %s. "
+                           "Trying credential under tenant %s, assuming that is an app credential.",
+                           sp_id, tenant, matched[0][_SERVICE_PRINCIPAL_TENANT])
+            cred = matched[0]
+        return cred.get(_ACCESS_TOKEN, None), cred.get(_SERVICE_PRINCIPAL_CERT_FILE, None)
+
+    def save_service_principal_cred(self, sp_entry):
+        self._load_cached_creds()
+        matched = [x for x in self._service_principal_creds
+                   if sp_entry[_SERVICE_PRINCIPAL_ID] == x[_SERVICE_PRINCIPAL_ID] and
+                   sp_entry[_SERVICE_PRINCIPAL_TENANT] == x[_SERVICE_PRINCIPAL_TENANT]]
+        state_changed = False
+        if matched:
+            # pylint: disable=line-too-long
+            if (sp_entry.get(_ACCESS_TOKEN, None) != matched[0].get(_ACCESS_TOKEN, None) or
+                    sp_entry.get(_SERVICE_PRINCIPAL_CERT_FILE, None) != matched[0].get(_SERVICE_PRINCIPAL_CERT_FILE,
+                                                                                       None)):
+                self._service_principal_creds.remove(matched[0])
+                self._service_principal_creds.append(sp_entry)
+                state_changed = True
+        else:
+            self._service_principal_creds.append(sp_entry)
+            state_changed = True
+
+        if state_changed:
+            self._persist_cached_creds()
+
+    def remove_cached_creds(self, user_or_sp):
+        self._load_cached_creds()
+        state_changed = False
+
+        # clear service principal creds
+        matched = [x for x in self._service_principal_creds
+                   if x[_SERVICE_PRINCIPAL_ID] == user_or_sp]
+        if matched:
+            state_changed = True
+            self._service_principal_creds = [x for x in self._service_principal_creds
+                                             if x not in matched]
+
+        if state_changed:
+            self._persist_cached_creds()
+
+    def remove_all_cached_creds(self):
+        _delete_file(self._token_file)
+
+    def _persist_cached_creds(self):
+        persistence = self._build_persistence()
+        from msal_extensions import CrossPlatLock
+        with CrossPlatLock(self._lock_file):
+            persistence.save(json.dumps(self._service_principal_creds))
+
+    def _load_cached_creds(self):
+        persistence = self._build_persistence()
+        from msal_extensions import CrossPlatLock
+        with CrossPlatLock(self._lock_file):
+            try:
+                self._service_principal_creds = json.loads(persistence.load())
+            except FileNotFoundError:
+                pass
+
+    def _build_persistence(self):
+        # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/blob/0.2.2/sample/persistence_sample.py
+        from msal_extensions import FilePersistenceWithDataProtection,\
+            KeychainPersistence,\
+            LibsecretPersistence,\
+            FilePersistence
+
+        import sys
+        """Build a suitable persistence instance based your current OS"""
+        if sys.platform.startswith('win'):
+            return FilePersistenceWithDataProtection(self._token_file)
+        if sys.platform.startswith('darwin'):
+            #todo: support darwin
+            return KeychainPersistence(self._token_file, "my_service_name", "my_account_name")
+        if sys.platform.startswith('linux'):
+            try:
+                return LibsecretPersistence(
+                    # By using same location as the fall back option below,
+                    # this would override the unencrypted data stored by the
+                    # fall back option.  It is probably OK, or even desirable
+                    # (in order to aggressively wipe out plain-text persisted data),
+                    # unless there would frequently be a desktop session and
+                    # a remote ssh session being active simultaneously.
+                    self._token_file,
+                    schema_name="my_schema_name",
+                    attributes={"my_attr1": "foo", "my_attr2": "bar"},
+                )
+            except:  # pylint: disable=bare-except
+                if not self._fallback_to_plaintext:
+                    raise
+                #todo: add missing lib in message
+                logger.warning("Encryption unavailable. Opting in to plain text.")
+        return FilePersistence(self._token_file)
