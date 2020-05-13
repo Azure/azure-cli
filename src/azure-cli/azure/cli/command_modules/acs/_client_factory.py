@@ -58,9 +58,7 @@ def get_auth_management_client(cli_ctx, scope=None, **_):
 
 
 def get_container_service_client(cli_ctx, **_):
-    from azure.mgmt.containerservice import ContainerServiceClient
-
-    return get_mgmt_service_client(cli_ctx, ContainerServiceClient)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERSERVICE)
 
 
 def get_osa_container_service_client(cli_ctx, **_):
