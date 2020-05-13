@@ -126,7 +126,7 @@ class Profile(object):
               find_subscriptions=True):
 
         credential=None
-        auth_profile=None
+        auth_record=None
         identity = Identity(self._authority, tenant, cred_cache=self._adal_cache)
 
         if not subscription_finder:
@@ -139,13 +139,13 @@ class Profile(object):
             if not use_device_code:
                 from azure.identity import CredentialUnavailableError
                 try:
-                    credential, auth_profile = identity.login_with_interactive_browser()
+                    credential, auth_record = identity.login_with_interactive_browser()
                 except CredentialUnavailableError:
                     use_device_code = True
                     logger.warning('Not able to launch a browser to log you in, falling back to device code...')
 
             if use_device_code:
-                credential, auth_profile = identity.login_with_device_code()
+                credential, auth_record = identity.login_with_device_code()
         else:
             if is_service_principal:
                 if not tenant:
@@ -155,15 +155,15 @@ class Profile(object):
                 else:
                     credential = identity.login_with_service_principal_secret(username, password)
             else:
-                credential, auth_profile = identity.login_with_username_password(username, password)
+                credential, auth_record = identity.login_with_username_password(username, password)
 
         # List tenants and find subscriptions by calling ARM
         subscriptions = []
         if find_subscriptions:
             if tenant and credential:
                 subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
-            elif credential and auth_profile:
-                subscriptions = subscription_finder.find_using_common_tenant(auth_profile, credential)
+            elif credential and auth_record:
+                subscriptions = subscription_finder.find_using_common_tenant(auth_record, credential)
             if not allow_no_subscriptions and not subscriptions:
                 if username:
                     msg = "No subscriptions found for {}.".format(username)
@@ -181,13 +181,13 @@ class Profile(object):
                 if not subscriptions:
                     return []
         else:
-            bare_tenant = tenant or auth_profile.tenant_id
+            bare_tenant = tenant or auth_record.tenant_id
             subscriptions = self._build_tenant_level_accounts([bare_tenant])
 
         home_account_id = None
-        if auth_profile:
-            username = auth_profile.username
-            home_account_id = auth_profile.home_account_id
+        if auth_record:
+            username = auth_record.username
+            home_account_id = auth_record.home_account_id
 
         consolidated = self._normalize_properties(username, subscriptions,
                                                   is_service_principal, bool(use_cert_sn_issuer),
@@ -777,7 +777,7 @@ class SubscriptionFinder(object):
         self.tenants = [tenant]
         return result
 
-    def find_using_common_tenant(self, auth_profile, credential=None):
+    def find_using_common_tenant(self, auth_record, credential=None):
         import adal
         all_subscriptions = []
         empty_tenants = []
@@ -799,7 +799,7 @@ class SubscriptionFinder(object):
 
             identity = Identity(self.authority, tenant_id)
             try:
-                specific_tenant_credential = identity.get_user_credential(auth_profile.home_account_id, auth_profile.username)
+                specific_tenant_credential = identity.get_user_credential(auth_record.home_account_id, auth_record.username)
                 # todo: remove after ADAL deprecation
                 if self.adal_cache:
                     self.adal_cache.add_credential(specific_tenant_credential)

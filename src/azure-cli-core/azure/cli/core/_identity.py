@@ -13,7 +13,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from azure.identity import (
-    AuthProfile,
+    AuthenticationRecord,
     InteractiveBrowserCredential,
     DeviceCodeCredential,
     UsernamePasswordCredential,
@@ -21,6 +21,10 @@ from azure.identity import (
     CertificateCredential,
     ManagedIdentityCredential
 )
+
+from msal import PublicClientApplication
+# sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
+from azure.identity._internal.persistent_cache import load_persistent_cache
 
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 logger = get_logger(__name__)
@@ -54,10 +58,15 @@ class Identity:
     """Class to interact with Azure Identity.
     """
 
-    def __init__(self, authority=None, tenant_id=None, **kwargs):
+    def __init__(self, authority=None, tenant_id=None, client_id=_CLIENT_ID, **kwargs):
         self.authority = authority
         self.tenant_id = tenant_id
+        self.client_id = client_id
         self._cred_cache = kwargs.pop('cred_cache', None)
+
+        cache = load_persistent_cache(allow_unencrypted=False)
+        authority = "https://{}/organizations".format(self.authority)
+        self._msal_app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
 
         # TODO: Allow disabling SSL verification
         # The underlying requests lib of MSAL has been patched with Azure Core by MsalTransportAdapter
@@ -69,51 +78,44 @@ class Identity:
 
     def login_with_interactive_browser(self):
         # Use InteractiveBrowserCredential
-        if self.tenant_id:
-            credential, auth_profile = InteractiveBrowserCredential.authenticate(
-                client_id=_CLIENT_ID,
-                authority=self.authority,
-                tenant_id=self.tenant_id
-            )
-        else:
-            credential, auth_profile = InteractiveBrowserCredential.authenticate(
-                authority=self.authority,
-                client_id=_CLIENT_ID
-            )
+        credential = InteractiveBrowserCredential(authority=self.authority,
+                                                  tenant_id=self.tenant_id,
+                                                  client_id=self.client_id,
+                                                  enable_persistent_cache=True)
+        auth_record = credential.authenticate()
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
-        return credential, auth_profile
+        return credential, auth_record
 
     def login_with_device_code(self):
         # Use DeviceCodeCredential
-        message = 'To sign in, use a web browser to open the page {} and enter the code {} to authenticate.'
-        prompt_callback = lambda verification_uri, user_code, expires_on: \
+        def prompt_callback(verification_uri, user_code, _):
+            # expires_on is discarded
+            message = 'To sign in, use a web browser to open the page {} and enter the code {} to authenticate.'
             logger.warning(message.format(verification_uri, user_code))
-        if self.tenant_id:
-            cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
-                                                                   authority=self.authority,
-                                                                   tenant_id=self.tenant_id,
-                                                                   prompt_callback=prompt_callback)
-        else:
-            cred, auth_profile = DeviceCodeCredential.authenticate(client_id=_CLIENT_ID,
-                                                                   authority=self.authority,
-                                                                   prompt_callback=prompt_callback)
+
+        credential = DeviceCodeCredential(authority=self.authority,
+                                          tenant_id=self.tenant_id,
+                                          client_id=self.client_id,
+                                          enable_persistent_cache=True,
+                                          prompt_callback=prompt_callback)
+        auth_record = credential.authenticate()
         # todo: remove after ADAL token deprecation
-        self._cred_cache.add_credential(cred)
-        return cred, auth_profile
+        self._cred_cache.add_credential(credential)
+        return credential, auth_record
 
     def login_with_username_password(self, username, password):
         # Use UsernamePasswordCredential
-        if self.tenant_id:
-            credential, auth_profile = UsernamePasswordCredential.authenticate(
-                _CLIENT_ID, username, password, authority=self.authority, tenant_id=self.tenant_id,
-                **self.ssl_kwargs)
-        else:
-            credential, auth_profile = UsernamePasswordCredential.authenticate(
-                _CLIENT_ID, username, password, authority=self.authority, **self.ssl_kwargs)
+        credential = UsernamePasswordCredential(authority=self.authority,
+                                                tenant_id=self.tenant_id,
+                                                client_id=self.client_id,
+                                                username=username,
+                                                password=password)
+        auth_record = credential.au
+
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
-        return credential, auth_profile
+        return credential, auth_record
 
     def login_with_service_principal_secret(self, client_id, client_secret):
         # Use ClientSecretCredential
@@ -217,55 +219,37 @@ class Identity:
         return credential, managed_identity_info
 
     def get_user(self, user_or_sp=None):
-        from msal import PublicClientApplication
-        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:122
-        from azure.identity._internal.msal_credentials import _load_cache
-        cache = _load_cache()
-        authority = "https://{}/organizations".format(self.authority)
-        app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
-        return app.get_accounts(user_or_sp)
+        return self._msal_app.get_accounts(user_or_sp)
 
     def logout_user(self, user_or_sp):
-        from msal import PublicClientApplication
-        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:122
-        from azure.identity._internal.msal_credentials import _load_cache
-        cache = _load_cache()
-        authority = "https://{}/organizations".format(self.authority)
-        app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
-
-        accounts = app.get_accounts(user_or_sp)
+        accounts = self._msal_app.get_accounts(user_or_sp)
         logger.info('Before account removal:')
         logger.info(json.dumps(accounts))
 
         for account in accounts:
-            app.remove_account(account)
+            self._msal_app.remove_account(account)
 
-        accounts = app.get_accounts(user_or_sp)
+        accounts = self._msal_app.get_accounts(user_or_sp)
         logger.info('After account removal:')
         logger.info(json.dumps(accounts))
 
     def logout_all(self):
-        from msal import PublicClientApplication
-        from azure.identity._internal.msal_credentials import _load_cache
-        cache = _load_cache()
-        # TODO: Support multi-authority logout
-        authority = "https://{}/organizations".format(self.authority)
-        app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
-
-        accounts = app.get_accounts()
+        accounts = self._msal_app.get_accounts()
         logger.info('Before account removal:')
         logger.info(json.dumps(accounts))
 
         for account in accounts:
-            app.remove_account(account)
+            self._msal_app.remove_account(account)
 
-        accounts = app.get_accounts()
+        accounts = self._msal_app.get_accounts()
         logger.info('After account removal:')
         logger.info(json.dumps(accounts))
 
     def get_user_credential(self, home_account_id, username):
-        auth_profile = AuthProfile(self.authority, home_account_id, self.tenant_id, username)
-        return InteractiveBrowserCredential(profile=auth_profile, silent_auth_only=True)
+        auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
+                                           home_account_id, username)
+        return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
+                                            enable_persistent_cache=True)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
         client_secret, certificate_path = self._cred_cache.retrieve_secret_of_service_principal(client_id, self.tenant_id)
