@@ -1073,9 +1073,9 @@ def _ssh_exec(ip, port, cmdline, username, password, ssh_private_key):
     output_lock = threading.Lock()
 
     def _worker(s):
-        for l in s:
+        for item in s:
             with output_lock:
-                print(l, end='')
+                print(item, end='')
 
     threads = [threading.Thread(target=_worker, args=(s,)) for s in [out, err]]
     for t in threads:

@@ -217,16 +217,16 @@ def _create_service_principal(
         graph_client, name, app_id):
     _RETRY_TIMES = 36
     # retry till server replication is done
-    for l in range(0, _RETRY_TIMES):
+    for retry_time in range(0, _RETRY_TIMES):
         try:
             aad_sp = graph_client.service_principals.create(ServicePrincipalCreateParameters(app_id=app_id,
                                                                                              account_enabled=True))
             break
         except Exception as ex:  # pylint: disable=broad-except
-            if l < _RETRY_TIMES and (
+            if retry_time < _RETRY_TIMES and (
                     ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
                 time.sleep(5)
-                logger.warning('Retrying service principal creation: %s/%s', l + 1, _RETRY_TIMES)
+                logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
             else:
                 logger.warning(
                     "Creating service principal failed for appid '%s'. Trace followed:\n%s",
@@ -270,14 +270,14 @@ def _assign_role(cmd, role, sp_oid, scope):
         return
 
     _RETRY_TIMES = 36
-    for l in range(0, _RETRY_TIMES):
+    for retry_time in range(0, _RETRY_TIMES):
         try:
             _create_role_assignment(cmd.cli_ctx, role, sp_oid, scope)
             break
         except Exception as ex:  # pylint: disable=broad-except
-            if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
+            if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                 time.sleep(5)
-                logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
                                _RETRY_TIMES)
                 continue
             else:

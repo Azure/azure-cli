@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.4.0"
+__version__ = "2.5.1"
 
 import os
 import sys
@@ -23,7 +23,7 @@ from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
-from .local_context import AzCLILocalContext, SET
+from .local_context import AzCLILocalContext, LocalContextAction
 
 logger = get_logger(__name__)
 
@@ -69,9 +69,7 @@ class AzCli(CLI):
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
-        self.local_context = AzCLILocalContext(
-            dir_name=os.path.basename(self.config.config_dir), file_name='local_context'
-        )
+        self.local_context = AzCLILocalContext(self)
         register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
@@ -162,20 +160,33 @@ class AzCli(CLI):
         :param specified_arguments: Arguments which user specify in this command
         :type specified_arguments: list
         """
-
+        local_context_args = []
         for argument_name in specified_arguments:
             # make sure SET is defined
             if argument_name not in argument_definitions:
                 continue
             argtype = argument_definitions[argument_name].type
             lca = argtype.settings.get('local_context_attribute', None)
-            if not lca or not lca.actions or SET not in lca.actions:
+            if not lca or not lca.actions or LocalContextAction.SET not in lca.actions:
                 continue
             # get the specified value
             value = getattr(parsed_args, argument_name)
             # save when name and scopes have value
             if lca.name and lca.scopes:
                 self.local_context.set(lca.scopes, lca.name, value)
+            options = argtype.settings.get('options_list', None)
+            if options:
+                local_context_args.append((options[0], value))
+
+        # print warning if there are values saved to local context
+        if local_context_args:
+            logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
+                           'run `az local-context off` to turn it off.',
+                           self.local_context.effective_working_directory())
+            args_str = []
+            for name, value in local_context_args:
+                args_str.append('{}: {}'.format(name, value))
+            logger.warning('Command argument values saved to local context: %s', ', '.join(args_str))
 
 
 class MainCommandsLoader(CLICommandsLoader):

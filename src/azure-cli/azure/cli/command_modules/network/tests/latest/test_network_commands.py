@@ -14,7 +14,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
 
 from knack.util import CLIError
 
@@ -3585,7 +3585,7 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
         self.cmd('network bastion delete -g {rg} -n {bastion}')
 
 
-class NetworkVnetLocalContextScenarioTest(ScenarioTest):
+class NetworkVnetLocalContextScenarioTest(LocalContextScenarioTest):
 
     @ResourceGroupPreparer()
     def test_network_vnet_local_context(self):
@@ -3593,10 +3593,6 @@ class NetworkVnetLocalContextScenarioTest(ScenarioTest):
             'vnet': self.create_random_name(prefix='vnet-', length=12),
             'subnet': self.create_random_name(prefix='subnet-', length=12)
         })
-        original_working_dir = os.getcwd()
-        working_dir = tempfile.mkdtemp()
-        os.chdir(working_dir)
-        self.cmd('local-context on')
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}',
                  checks=[self.check('newVNet.name', self.kwargs['vnet'])])
@@ -3614,8 +3610,45 @@ class NetworkVnetLocalContextScenarioTest(ScenarioTest):
         self.cmd('network vnet subnet delete -n {subnet}')
         self.cmd('network vnet delete -n {vnet}')
 
-        self.cmd('local-context off --yes')
-        os.chdir(original_working_dir)
+
+class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
+                 replay_processors=None, recording_patches=None, replay_patches=None):
+        super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
+        self.cmd('extension add -n virtual-wan')
+
+    @ResourceGroupPreparer()
+    def test_network_security_partner_provider(self, resource_group):
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clitestvhub',
+            'gateway': 'cligateway',
+            'name': 'clisecuritypartnerprovider',
+            'rg': resource_group
+        })
+
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 -l westus --sku Standard')
+        self.cmd('network vpn-gateway create -g {rg} -n {gateway} --vhub {vhub}')
+
+        self.cmd('network security-partner-provider create -n {name} -g {rg} --vhub {vhub} --provider Checkpoint', checks=[
+            self.check('name', '{name}'),
+            self.check('securityProviderName', 'Checkpoint')
+        ])
+        self.cmd('network security-partner-provider show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('securityProviderName', 'Checkpoint')
+        ])
+        self.cmd('network security-partner-provider update -n {name} -g {rg} --tag a=b', checks=[
+            self.check('tags.a', 'b')
+        ])
+        self.cmd('network security-partner-provider list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network security-partner-provider list', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network security-partner-provider delete -n {name} -g {rg}')
 
 
 if __name__ == '__main__':

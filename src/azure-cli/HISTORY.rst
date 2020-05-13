@@ -3,6 +3,95 @@
 Release History
 ===============
 
+2.5.1
+++++++
+
+**ACR**
+
+* `az acr check-health`: Fix "DOCKER_PULL_ERROR" on Windows (#13158)
+
+**Compute**
+
+* `az vm list-ip-addresses`: Error handling (#13186)
+* Fix a bug of vm create if endpoint_vm_image_alias_doc is not set in cloud profile (#13022)
+* `az vmss create`: Add --os-disk-size-gb (#13180)
+
+**Cosmos DB**
+
+* `az cosmosdb create/update`: add --enable-public-network support (#13109)
+
+**Extension**
+
+* Fix loading wrong metadata for wheel type extension (#13222)
+
+**Packaging**
+
+* Add az script for Git Bash/Cygwin on Windows (#13197)
+
+**SQL**
+
+* `az sql instance-pool`: Add instance pools command group (#11721)
+
+**Storage**
+
+* Upgrade package azure-multiapi-storage to 0.3.0 (#13183)
+* Support GZRS for storage account creation and update (#13196)
+* `az storage account failover`: Add support for grs/gzrs storage account failover (#13201)
+* `az storage blob upload`: Add --encryption-scope parameter to support specifying encryption scope information (#13246)
+
+2.5.0
+++++++
+
+**ACS**
+
+* [BREAKING CHANGE] az openshift create: remove --vnet-peer parameter. (#12240)
+* `az openshift create`: add flags to support private cluster. (#12240)
+* `az openshift`: upgrade to `2019-10-27-preview` API version. (#12240)
+* `az openshift`: add `update` command. (#12240)
+
+**AKS**
+
+* `az aks create`: Add support for Windows (#13084)
+
+**AppService**
+
+* `az webapp deployment source config-zip`: remove sleep after request.get() (#12609)
+
+**ARM**
+
+* Add template deployment What-If commands (#12942)
+
+**ARO**
+
+* `az aro`: Fix table output (#13066)
+
+**CI**
+
+* Onboard pytest and deprecate nose for Automation Test (#13153)
+
+**Compute**
+
+* `az vmss disk detach`: fix data disk NoneType issue (#13069)
+* `az vm availability-set list`: Support showing VM list (#13090)
+* `az vm list-skus`: Fix display problem of table format (#13184)
+
+**KeyVault**
+
+* Add new parameter `--enable-rbac-authorization` during creating or updating (#12074)
+
+**Monitor**
+
+* Support LA cluster CMK features (#13133)
+* `az monitor log-analytics workspace linked-storage`: supports BYOS features (#13187)
+
+**Network**
+
+* `az network security-partner`: support security partner provider (#13118)
+
+**Privatedns**
+
+* Add feature in private DNS zone to import export zone file (#13062)
+
 2.4.0
 ++++++
 

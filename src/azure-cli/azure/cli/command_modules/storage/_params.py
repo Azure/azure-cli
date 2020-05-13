@@ -15,7 +15,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
-                          validate_azcopy_remove_arguments, as_user_validator, parse_storage_account)
+                          validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
+                          validator_delete_retention_days, validate_delete_retention_days)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -149,7 +150,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys']:  # pylint: disable=line-too-long
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys', 'failover']:  # pylint: disable=line-too-long
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
             c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -340,7 +341,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account blob-service-properties update',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
-        from ._validators import validator_delete_retention_days
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
@@ -355,6 +355,22 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    "than zero and less than Delete Retention Days.")
         c.argument('enable_versioning', arg_type=get_three_state_flag(), help='Versioning is enabled if set to true.',
                    min_api='2019-06-01')
+
+    with self.argument_context('storage account file-service-properties show',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+
+    with self.argument_context('storage account file-service-properties update',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
+                   min_api='2019-06-01', help='Enable file service properties for share soft delete.')
+        c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
+                   validator=validate_delete_retention_days, min_api='2019-06-01',
+                   help=' Indicate the number of days that the deleted item should be retained. The minimum specified '
+                   'value can be 1 and the maximum value can be 365.')
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
@@ -479,7 +495,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         ' in other words, when a browser requests a page that does not exist.')
 
     with self.argument_context('storage blob upload') as c:
-        from ._validators import page_blob_tier_validator
+        from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
         from .sdkutil import get_blob_types, get_blob_tier_names
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
@@ -498,6 +514,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tier', validator=page_blob_tier_validator,
                    arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
                    min_api='2017-04-17')
+        c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
+                   help='A predefined encryption scope used to encrypt the data on the service.')
 
     with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types
