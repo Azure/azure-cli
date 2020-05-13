@@ -418,7 +418,7 @@ class IoTHubTest(ScenarioTest):
 
         # identity hub creation
         import os
-        templateFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'template.json')
+        templateFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir, 'templates', 'identity.json')
         self.cmd('deployment group create --name {0} -g {1} --template-file "{2}" --parameters name={3} --parameters location={4}'.format("identity-hub-deployment", resource_group, templateFile, identity_hub, location))
         self.cmd('iot hub show --name {0}'.format(identity_hub), checks=[
                  self.check('properties.minTlsVersion', '1.2'),
