@@ -79,7 +79,7 @@ examples:
     text: az local-context delete --name resource_group_name
   - name: Clear all local context data
     text: az local-context delete --all
-  - name: Delete local context persistence file 
+  - name: Delete local context persistence file
     text: az local-context delete --all --purge
   - name: Delete local context persistence file recursively
     text: az local-context delete --all --purge --recursive
