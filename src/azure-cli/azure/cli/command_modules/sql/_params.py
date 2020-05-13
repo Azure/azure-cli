@@ -1322,7 +1322,7 @@ def load_arguments(self, _):
         c.argument('family',
                    arg_type=family_param_type,
                    help='The compute generation component of the sku. '
-                   'Allowed values include: Gen4, Gen5.')
+                   'Allowed values include: Gen5.')
 
         c.argument('storage_size_in_gb',
                    options_list=['--storage'],
@@ -1358,6 +1358,8 @@ def load_arguments(self, _):
                    help='The time zone id for the instance to set. '
                    'A list of time zone ids is exposed through the sys.time_zone_info (Transact-SQL) view.')
 
+        c.argument('tags', arg_type=tags_type)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1376,6 +1378,7 @@ def load_arguments(self, _):
                 'proxy_override',
                 'public_data_endpoint_enabled',
                 'timezone_id',
+                'tags',
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -1417,6 +1420,7 @@ def load_arguments(self, _):
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
                 'administrator_login_password',
+                'tags',
             ])
 
         c.argument('administrator_login_password',
