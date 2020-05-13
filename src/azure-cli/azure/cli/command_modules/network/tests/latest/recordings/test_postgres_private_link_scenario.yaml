@@ -1,0 +1,3401 @@
+interactions:
+- request:
+    body: '{"sku": {"name": "GP_Gen5_2"}, "properties": {"storageProfile": {"storageAutogrow":
+      "Enabled"}, "createMode": "Default", "administratorLogin": "cloudsa", "administratorLoginPassword":
+      "SecretPassword123"}, "location": "eastus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '227'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body:
+      string: '{"error":{"code":"MissingSubscriptionRegistration","message":"The subscription
+        is not registered to use namespace ''Microsoft.DBforPostgreSQL''. See https://aka.ms/rps-not-found
+        for how to register subscriptions.","details":[{"code":"MissingSubscriptionRegistration","target":"Microsoft.DBforPostgreSQL","message":"The
+        subscription is not registered to use namespace ''Microsoft.DBforPostgreSQL''.
+        See https://aka.ms/rps-not-found for how to register subscriptions."}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '466'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:48:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 409
+      message: Conflict
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.22.0
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/register?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL","namespace":"Microsoft.DBforPostgreSQL","authorization":{"applicationId":"76cd24bf-a9fc-4344-b1dc-908275de6d6d","roleDefinitionId":"c13b7b9c-2ed1-4901-b8a8-16f35468da29"},"resourceTypes":[{"resourceType":"operations","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","Norway
+        East","South Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Switzerland North","UAE North","UK South","UK West","West Central US","West
+        Europe","West India","West US","West US 2","Central US EUAP","East US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"servers","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"serversv2","locations":["East
+        US 2","East US","North Central US","Canada Central","UK South","Southeast
+        Asia","West US 2","East US 2 EUAP"],"apiVersions":["2018-03-29-privatepreview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"serverGroups","locations":["East
+        US 2","East US","North Central US","Canada Central","UK South","Southeast
+        Asia","West US 2","East US 2 EUAP"],"apiVersions":["2018-03-29-privatepreview"],"capabilities":"None"},{"resourceType":"singleServers","locations":["West
+        US 2","North Central US","East US","East US 2 EUAP"],"apiVersions":["2020-02-14-privatepreview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"servers/recoverableServers","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"servers/virtualNetworkRules","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"checkNameAvailability","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","Norway
+        East","South Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Switzerland North","UAE North","UK South","UK West","West Central US","West
+        Europe","West India","West US","West US 2","Central US EUAP","East US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","Norway
+        East","South Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Switzerland North","UAE North","UK South","UK West","West Central US","West
+        Europe","West India","West US","West US 2","Central US EUAP","East US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/operationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/azureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/administratorOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/administratorAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/privateEndpointConnectionProxyOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/privateEndpointConnectionProxyAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/privateEndpointConnectionOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/privateEndpointConnectionAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/performanceTiers","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/securityAlertPoliciesAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01"]},{"resourceType":"locations/securityAlertPoliciesOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01"]},{"resourceType":"locations/recommendedActionSessionsAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/recommendedActionSessionsOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/topQueryStatistics","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/queryTexts","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/waitStatistics","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/advisors","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/privateLinkResources","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/privateEndpointConnections","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/privateEndpointConnectionProxies","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/keys","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2020-01-01-privatepreview","2020-01-01-preview","2020-01-01"]},{"resourceType":"locations/serverKeyAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2020-01-01-privatepreview","2020-01-01-preview","2020-01-01"]},{"resourceType":"locations/serverKeyOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2020-01-01-privatepreview","2020-01-01-preview","2020-01-01"]}],"registrationState":"Registering"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21781'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:48:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.22.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL?api-version=2016-02-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL","namespace":"Microsoft.DBforPostgreSQL","authorization":{"applicationId":"76cd24bf-a9fc-4344-b1dc-908275de6d6d","roleDefinitionId":"c13b7b9c-2ed1-4901-b8a8-16f35468da29"},"resourceTypes":[{"resourceType":"operations","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","Norway
+        East","South Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Switzerland North","UAE North","UK South","UK West","West Central US","West
+        Europe","West India","West US","West US 2","Central US EUAP","East US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"servers","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove, SystemAssignedResourceIdentity"},{"resourceType":"serversv2","locations":["East
+        US 2","East US","North Central US","Canada Central","UK South","Southeast
+        Asia","West US 2","East US 2 EUAP"],"apiVersions":["2018-03-29-privatepreview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"serverGroups","locations":["East
+        US 2","East US","North Central US","Canada Central","UK South","Southeast
+        Asia","West US 2","East US 2 EUAP"],"apiVersions":["2018-03-29-privatepreview"],"capabilities":"None"},{"resourceType":"singleServers","locations":["West
+        US 2","North Central US","East US","East US 2 EUAP"],"apiVersions":["2020-02-14-privatepreview"],"capabilities":"CrossResourceGroupResourceMove,
+        CrossSubscriptionResourceMove"},{"resourceType":"servers/recoverableServers","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"servers/virtualNetworkRules","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"checkNameAvailability","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","Norway
+        East","South Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Switzerland North","UAE North","UK South","UK West","West Central US","West
+        Europe","West India","West US","West US 2","Central US EUAP","East US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","Norway
+        East","South Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Switzerland North","UAE North","UK South","UK West","West Central US","West
+        Europe","West India","West US","West US 2","Central US EUAP","East US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/operationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/azureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/administratorOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/administratorAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/privateEndpointConnectionProxyOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/privateEndpointConnectionProxyAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/privateEndpointConnectionOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/privateEndpointConnectionAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/performanceTiers","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01-preview","2017-12-01"]},{"resourceType":"locations/securityAlertPoliciesAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01"]},{"resourceType":"locations/securityAlertPoliciesOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2017-12-01"]},{"resourceType":"locations/recommendedActionSessionsAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"locations/recommendedActionSessionsOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/topQueryStatistics","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/queryTexts","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/waitStatistics","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/advisors","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/privateLinkResources","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/privateEndpointConnections","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/privateEndpointConnectionProxies","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2018-06-01-privatepreview","2018-06-01-preview","2018-06-01"]},{"resourceType":"servers/keys","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2020-01-01-privatepreview","2020-01-01-preview","2020-01-01"]},{"resourceType":"locations/serverKeyAzureAsyncOperation","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2020-01-01-privatepreview","2020-01-01-preview","2020-01-01"]},{"resourceType":"locations/serverKeyOperationResults","locations":["Australia
+        Central","Australia Central 2","Australia East","Australia Southeast","Brazil
+        South","Canada Central","Canada East","Central India","Central US","East Asia","East
+        US 2","East US","France Central","Germany West Central","Japan East","Japan
+        West","Korea Central","Korea South","North Central US","North Europe","South
+        Africa North","South Africa West","South Central US","South India","Southeast
+        Asia","Norway East","Switzerland North","UAE North","UK South","UK West","West
+        Central US","West Europe","West India","West US","West US 2","Central US EUAP","East
+        US 2 EUAP"],"apiVersions":["2020-01-01-privatepreview","2020-01-01-preview","2020-01-01"]}],"registrationState":"Registered"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21780'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:48:22 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"sku": {"name": "GP_Gen5_2"}, "properties": {"storageProfile": {"storageAutogrow":
+      "Enabled"}, "createMode": "Default", "administratorLogin": "cloudsa", "administratorLoginPassword":
+      "SecretPassword123"}, "location": "eastus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres server create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '227'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body:
+      string: '{"operation":"UpsertElasticServer","startTime":"2020-05-11T07:48:27.343Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/2f161156-64d5-40ea-ad45-2c24d4dfe3fb?api-version=2017-12-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '74'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:48:28 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/operationResults/2f161156-64d5-40ea-ad45-2c24d4dfe3fb?api-version=2017-12-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/2f161156-64d5-40ea-ad45-2c24d4dfe3fb?api-version=2017-12-01
+  response:
+    body:
+      string: '{"name":"2f161156-64d5-40ea-ad45-2c24d4dfe3fb","status":"InProgress","startTime":"2020-05-11T07:48:27.343Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:49:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/eastus/azureAsyncOperation/2f161156-64d5-40ea-ad45-2c24d4dfe3fb?api-version=2017-12-01
+  response:
+    body:
+      string: '{"name":"2f161156-64d5-40ea-ad45-2c24d4dfe3fb","status":"Succeeded","startTime":"2020-05-11T07:48:27.343Z"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '107'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres server create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -l -g -n -u -p --sku-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"9.6","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.postgres.database.azure.com","earliestRestoreDate":"2020-05-11T07:58:27.95+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1126'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --name --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateLinkResources?api-version=2018-06-01
+  response:
+    body:
+      string: '{"value":[{"properties":{"groupId":"postgresqlServer","requiredMembers":["postgresqlServer"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateLinkResources/plr","name":"plr","type":"Microsoft.DBforPostgreSQL/servers/privateLinkResources"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '456'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties": {"addressPrefix":
+      "10.0.0.0/24"}, "name": "cli-subnet-000004"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '222'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"4161594d-210f-4c43-917e-5b8d0c2f4e86\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n
+        \   \"resourceGuid\": \"936e6add-086c-436d-977f-f1938b5bedbb\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"4161594d-210f-4c43-917e-5b8d0c2f4e86\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Updating\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/375f1155-eeaf-4f86-b222-f9b60ca06462?api-version=2020-03-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '1528'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0efb31c2-93c4-4d1a-a400-aeb20b76899d
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/375f1155-eeaf-4f86-b222-f9b60ca06462?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c422e52a-f530-4185-a48e-44a305af30a1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g -l --subnet-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-vnet-000003\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003\",\r\n
+        \ \"etag\": \"W/\\\"2eeede69-6b38-46ef-ba96-0a73fb1b0fd2\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"resourceGuid\": \"936e6add-086c-436d-977f-f1938b5bedbb\",\r\n    \"addressSpace\":
+        {\r\n      \"addressPrefixes\": [\r\n        \"10.0.0.0/16\"\r\n      ]\r\n
+        \   },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\": []\r\n    },\r\n
+        \   \"subnets\": [\r\n      {\r\n        \"name\": \"cli-subnet-000004\",\r\n
+        \       \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \       \"etag\": \"W/\\\"2eeede69-6b38-46ef-ba96-0a73fb1b0fd2\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"addressPrefix\": \"10.0.0.0/24\",\r\n          \"delegations\":
+        [],\r\n          \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n          \"privateLinkServiceNetworkPolicies\":
+        \"Enabled\"\r\n        },\r\n        \"type\": \"Microsoft.Network/virtualNetworks/subnets\"\r\n
+        \     }\r\n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\":
+        false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1530'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:42 GMT
+      etag:
+      - W/"2eeede69-6b38-46ef-ba96-0a73fb1b0fd2"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - a48c7a68-7c1b-49a6-b349-f6eb96572da9
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"2eeede69-6b38-46ef-ba96-0a73fb1b0fd2\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Enabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:43 GMT
+      etag:
+      - W/"2eeede69-6b38-46ef-ba96-0a73fb1b0fd2"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 49bf3f86-e200-4fdf-b1aa-763d6c8a189c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004",
+      "properties": {"addressPrefix": "10.0.0.0/24", "delegations": [], "privateEndpointNetworkPolicies":
+      "Disabled", "privateLinkServiceNetworkPolicies": "Enabled"}, "name": "cli-subnet-000004"}'''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '451'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"8c87e5fb-e846-4bc5-a4bf-81ff8932b918\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Updating\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b4b07da3-04a7-4551-bb0e-331f6f53358e?api-version=2020-03-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '639'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2204ea43-85a3-4fcd-abde-7a60fbbe47e4
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/b4b07da3-04a7-4551-bb0e-331f6f53358e?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 48d09f2d-8c2f-4797-a6bf-39c2b2aa3f41
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-subnet-000004\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\",\r\n
+        \ \"etag\": \"W/\\\"522a196f-61e1-43f5-8b95-08a7c3ec3053\\\"\",\r\n  \"properties\":
+        {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"addressPrefix\": \"10.0.0.0/24\",\r\n
+        \   \"delegations\": [],\r\n    \"privateEndpointNetworkPolicies\": \"Disabled\",\r\n
+        \   \"privateLinkServiceNetworkPolicies\": \"Enabled\"\r\n  },\r\n  \"type\":
+        \"Microsoft.Network/virtualNetworks/subnets\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '640'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:48 GMT
+      etag:
+      - W/"522a196f-61e1-43f5-8b95-08a7c3ec3053"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 78da41a3-fdd0-4eed-a416-97b4523b9459
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres server show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"9.6","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.postgres.database.azure.com","earliestRestoreDate":"2020-05-11T07:58:27.95+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1126'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateLinkResources?api-version=2018-06-01
+  response:
+    body:
+      string: '{"value":[{"properties":{"groupId":"postgresqlServer","requiredMembers":["postgresqlServer"]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateLinkResources/plr","name":"plr","type":"Microsoft.DBforPostgreSQL/servers/privateLinkResources"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '456'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
+      "privateLinkServiceConnections": [{"properties": {"privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002",
+      "groupIds": ["postgresqlServer"]}, "name": "cli-pec-000008"}]}}\'''''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '705'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"3d1c838a-3df8-45bf-83c1-bca74b1390be\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"d77e9beb-9d17-46ae-9a17-5b79d0c4c64e\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008\",\r\n
+        \       \"etag\": \"W/\\\"3d1c838a-3df8-45bf-83c1-bca74b1390be\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"postgresqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.956aafd8-a88f-46f6-b490-6ba19b1bce7f\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f7701da8-4373-4dbc-82dd-8570bb2cccbc?api-version=2020-03-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2364'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:50:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 2b1f97e7-33b5-41a3-8e22-068ac8fac3b4
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f7701da8-4373-4dbc-82dd-8570bb2cccbc?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:10 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3636b135-4ed6-4681-b66d-e6fe5fe7e792
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f7701da8-4373-4dbc-82dd-8570bb2cccbc?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b0689b35-67a5-40c9-9019-847b5e82b223
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f7701da8-4373-4dbc-82dd-8570bb2cccbc?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - df2f5d82-8b71-47f0-899e-3cd5ddc8481f
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000005\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005\",\r\n
+        \ \"etag\": \"W/\\\"2792d8f8-bdb6-4773-91ef-78473c2494c3\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"d77e9beb-9d17-46ae-9a17-5b79d0c4c64e\",\r\n    \"privateLinkServiceConnections\":
+        [\r\n      {\r\n        \"name\": \"cli-pec-000008\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008\",\r\n
+        \       \"etag\": \"W/\\\"2792d8f8-bdb6-4773-91ef-78473c2494c3\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"postgresqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Approved\",\r\n            \"description\": \"Auto-approved\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/privateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"manualPrivateLinkServiceConnections\": [],\r\n
+        \   \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000005.nic.956aafd8-a88f-46f6-b490-6ba19b1bce7f\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": [\r\n      {\r\n        \"fqdn\":
+        \"azuredbclitest000002.postgres.database.azure.com\",\r\n        \"ipAddresses\":
+        [\r\n          \"10.0.0.4\"\r\n        ]\r\n      }\r\n    ]\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2573'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:31 GMT
+      etag:
+      - W/"2792d8f8-bdb6-4773-91ef-78473c2494c3"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3745ee95-89f2-4206-bcb7-e60cdf5bba5b
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres server show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"9.6","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.postgres.database.azure.com","earliestRestoreDate":"2020-05-11T07:58:27.95+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1925'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94","name":"cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '940'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94","name":"cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '940'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},
+      "privateLinkServiceConnectionState": {"status": "Approved", "description": "You
+      are approved!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94",
+      "name": "cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94", "type": "Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}\'''''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '962'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94?api-version=2018-06-01
+  response:
+    body:
+      string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
+        Endpoint Connection Status is not Pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '124'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},"privateLinkServiceConnectionState":{"status":"Approved","description":"Auto-approved","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94","name":"cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '940'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000005/privateLinkServiceConnections/cli-pec-000008"},
+      "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
+      are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94",
+      "name": "cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94", "type": "Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}\'''''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '962'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94?api-version=2018-06-01
+  response:
+    body:
+      string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
+        Endpoint Connection Status is not Pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '124'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000005-2ae723f5-4ccd-480e-ad20-8371b8439a94?api-version=2018-06-01
+  response:
+    body:
+      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2020-05-11T07:51:43.387Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/139d445d-b04f-44e5-b2f5-c4eeb953f7b4?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '97'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:43 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionOperationResults/139d445d-b04f-44e5-b2f5-c4eeb953f7b4?api-version=2018-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: 'b''b\''{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
+      "manualPrivateLinkServiceConnections": [{"properties": {"privateLinkServiceId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002",
+      "groupIds": ["postgresqlServer"]}, "name": "cli-pec-000009"}]}}\'''''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '711'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids --manual-request
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006\",\r\n
+        \ \"etag\": \"W/\\\"3881f73c-f7fd-4e6a-8227-9b3bbc51a304\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"5054adf5-3958-48b0-bb32-9d2539d80701\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000009\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/manualPrivateLinkServiceConnections/cli-pec-000009\",\r\n
+        \       \"etag\": \"W/\\\"3881f73c-f7fd-4e6a-8227-9b3bbc51a304\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"postgresqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.6ad5ef64-e9d8-445a-9209-47b5f74c29ca\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f43246d2-2564-442c-aade-4b72323145e1?api-version=2020-03-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2392'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:51:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 17f6b288-1990-49eb-9f53-41e22551e046
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1194'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids --manual-request
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f43246d2-2564-442c-aade-4b72323145e1?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 344d7a0f-ea02-445b-874d-b705239c8aeb
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids --manual-request
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f43246d2-2564-442c-aade-4b72323145e1?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"InProgress\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '30'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:13 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0d6a1dd8-a493-428a-9d63-58df6d1974ef
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids --manual-request
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f43246d2-2564-442c-aade-4b72323145e1?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1c2c3fea-676d-4177-bd2d-77ef3c77f081
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids --manual-request
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000006\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006\",\r\n
+        \ \"etag\": \"W/\\\"394cc565-8962-4a92-a808-efcdee366d56\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"5054adf5-3958-48b0-bb32-9d2539d80701\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000009\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/manualPrivateLinkServiceConnections/cli-pec-000009\",\r\n
+        \       \"etag\": \"W/\\\"394cc565-8962-4a92-a808-efcdee366d56\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"postgresqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000006.nic.6ad5ef64-e9d8-445a-9209-47b5f74c29ca\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2376'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:23 GMT
+      etag:
+      - W/"394cc565-8962-4a92-a808-efcdee366d56"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - cb390c58-4209-47d0-a7dd-8d20263ac10c
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres server show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"9.6","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.postgres.database.azure.com","earliestRestoreDate":"2020-05-11T07:58:27.95+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1911'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","name":"cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '926'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","name":"cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '926'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},
+      "privateLinkServiceConnectionState": {"status": "Approved", "description": "You
+      are approved!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7",
+      "name": "cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7", "type": "Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}\'''''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '962'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7?api-version=2018-06-01
+  response:
+    body:
+      string: '{"operation":"ApproveElasticServerPrivateEndpointConnection","startTime":"2020-05-11T07:52:31.317Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/36cc49c6-88ef-4686-88b6-1f6ec3aa4838?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '100'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:32 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionOperationResults/36cc49c6-88ef-4686-88b6-1f6ec3aa4838?api-version=2018-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+        are approved!","actionsRequired":"None"},"provisioningState":"Approving"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","name":"cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '948'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","name":"cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '944'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},"privateLinkServiceConnectionState":{"status":"Approved","description":"You
+        are approved!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","name":"cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '944'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000006/privateLinkServiceConnections/cli-pec-000009"},
+      "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
+      are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7",
+      "name": "cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7", "type": "Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}\'''''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '962'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7?api-version=2018-06-01
+  response:
+    body:
+      string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
+        Endpoint Connection Status is not Pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '124'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:52:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1196'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000006-947f9482-6ba1-4fcb-890b-0f9da51759e7?api-version=2018-06-01
+  response:
+    body:
+      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2020-05-11T07:52:59.66Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/a6fd9481-ac05-4810-a28b-fcb023d6c824?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:00 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionOperationResults/a6fd9481-ac05-4810-a28b-fcb023d6c824?api-version=2018-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14997'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: 'b''b\''{"location": "westus", "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004"},
+      "manualPrivateLinkServiceConnections": [{"properties": {"privateLinkServiceId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002",
+      "groupIds": ["postgresqlServer"]}, "name": "cli-pec-000010"}]}}\'''''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '711'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids --manual-request
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\",\r\n
+        \ \"etag\": \"W/\\\"3cd80f12-3daf-40de-94b8-6a0196a87e94\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"resourceGuid\":
+        \"fafbb9f0-eb7b-4ef0-a10a-1e6ceacbf909\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000010\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\",\r\n
+        \       \"etag\": \"W/\\\"3cd80f12-3daf-40de-94b8-6a0196a87e94\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"postgresqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"Awaiting Approval\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.4ddf716a-db1f-4760-8477-f2eaed7b8e92\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ff887e53-dee9-43c2-b0d3-146d88aa340d?api-version=2020-03-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '2392'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 6275c890-4371-4527-a84a-bf64e1087a13
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1192'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids --manual-request
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ff887e53-dee9-43c2-b0d3-146d88aa340d?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"status\": \"Succeeded\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '29'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ec48cdc7-8930-4cdc-ab91-ff4a9d853e29
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet -l --connection-name --private-connection-resource-id
+        --group-ids --manual-request
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-network/10.1.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007?api-version=2020-03-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"cli-pe-000007\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007\",\r\n
+        \ \"etag\": \"W/\\\"36098da2-ed19-4068-8c74-5392bcb2ebaf\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/privateEndpoints\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":
+        \"fafbb9f0-eb7b-4ef0-a10a-1e6ceacbf909\",\r\n    \"privateLinkServiceConnections\":
+        [],\r\n    \"manualPrivateLinkServiceConnections\": [\r\n      {\r\n        \"name\":
+        \"cli-pec-000010\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/manualPrivateLinkServiceConnections/cli-pec-000010\",\r\n
+        \       \"etag\": \"W/\\\"36098da2-ed19-4068-8c74-5392bcb2ebaf\\\"\",\r\n
+        \       \"properties\": {\r\n          \"provisioningState\": \"Succeeded\",\r\n
+        \         \"privateLinkServiceId\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002\",\r\n
+        \         \"groupIds\": [\r\n            \"postgresqlServer\"\r\n          ],\r\n
+        \         \"privateLinkServiceConnectionState\": {\r\n            \"status\":
+        \"Pending\",\r\n            \"description\": \"\",\r\n            \"actionsRequired\":
+        \"None\"\r\n          }\r\n        },\r\n        \"type\": \"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections\"\r\n
+        \     }\r\n    ],\r\n    \"subnet\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/virtualNetworks/cli-vnet-000003/subnets/cli-subnet-000004\"\r\n
+        \   },\r\n    \"networkInterfaces\": [\r\n      {\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/networkInterfaces/cli-pe-000007.nic.4ddf716a-db1f-4760-8477-f2eaed7b8e92\"\r\n
+        \     }\r\n    ],\r\n    \"customDnsConfigs\": []\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2376'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:19 GMT
+      etag:
+      - W/"36098da2-ed19-4068-8c74-5392bcb2ebaf"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 075f7118-dc68-447b-a05d-060b9a9af349
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - postgres server show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-rdbms/2017-12-01
+        Azure-SDK-For-Python AZURECLI/2.5.1
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"9.6","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.postgres.database.azure.com","earliestRestoreDate":"2020-05-11T07:58:27.95+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1911'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","name":"cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '926'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","name":"cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '926'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},
+      "privateLinkServiceConnectionState": {"status": "Rejected", "description": "You
+      are rejected!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5",
+      "name": "cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5", "type": "Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}\'''''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '962'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5?api-version=2018-06-01
+  response:
+    body:
+      string: '{"operation":"RejectElasticServerPrivateEndpointConnection","startTime":"2020-05-11T07:53:24.703Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/b367b222-b2db-4a77-86e9-19bca328fb43?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '99'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:25 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionOperationResults/b367b222-b2db-4a77-86e9-19bca328fb43?api-version=2018-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1195'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","name":"cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '944'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","name":"cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","type":"Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '944'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: 'b''b\''{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},
+      "privateLinkServiceConnectionState": {"status": "Approved", "description": "You
+      are approved!", "actionsRequired": "None"}, "provisioningState": "Ready"}, "id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5",
+      "name": "cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5", "type": "Microsoft.DBforPostgreSQL/servers/privateEndpointConnections"}\'''''
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '962'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --service-name -g --name --description --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5?api-version=2018-06-01
+  response:
+    body:
+      string: '{"error":{"code":"PrivateEndpointConnectionStatusNotPending","message":"Private
+        Endpoint Connection Status is not Pending"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '124'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name -g --type
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01-preview
+  response:
+    body:
+      string: '{"sku":{"name":"GP_Gen5_2","tier":"GeneralPurpose","family":"Gen5","capacity":2},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled","storageAutogrow":"Enabled"},"version":"9.6","sslEnforcement":"Enabled","minimalTlsVersion":"TLSEnforcementDisabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.postgres.database.azure.com","earliestRestoreDate":"2020-05-11T07:58:27.95+00:00","replicationRole":"None","masterServerId":"","replicaCapacity":5,"byokEnforcement":"Disabled","privateEndpointConnections":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5","properties":{"privateEndpoint":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Network/privateEndpoints/cli-pe-000007/privateLinkServiceConnections/cli-pec-000010"},"privateLinkServiceConnectionState":{"status":"Rejected","description":"You
+        are rejected!","actionsRequired":"None"},"provisioningState":"Ready"}}],"infrastructureEncryption":"Disabled","publicNetworkAccess":"Enabled"},"location":"eastus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1929'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --id -y
+      User-Agent:
+      - AZURECLI/2.5.1
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/privateEndpointConnections/cli-pe-000007-383d32e4-c266-4e2c-b128-06a00ef8b9b5?api-version=2018-06-01
+  response:
+    body:
+      string: '{"operation":"DropElasticServerPrivateEndpointConnection","startTime":"2020-05-11T07:53:43.85Z"}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionAzureAsyncOperation/b4bef8cf-fae0-4b56-a3b2-4d8def00c2db?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '96'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 11 May 2020 07:53:44 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/locations/eastus/privateEndpointConnectionOperationResults/b4bef8cf-fae0-4b56-a3b2-4d8def00c2db?api-version=2018-06-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 202
+      message: Accepted
+version: 1

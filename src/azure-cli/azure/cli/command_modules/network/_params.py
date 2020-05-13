@@ -35,7 +35,8 @@ from azure.cli.command_modules.network._validators import (
     get_header_configuration_validator, validate_nat_gateway, validate_match_variables,
     validate_waf_policy, get_subscription_list_validator, validate_frontend_ip_configs,
     validate_application_gateway_identity, validate_virtul_network_gateway, validate_private_dns_zone,
-    NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction)
+    NWConnectionMonitorEndpointFilterItemAction, NWConnectionMonitorTestConfigurationHTTPRequestHeaderAction,
+    process_private_link_resource_id_argument, process_private_endpoint_connection_id_argument)
 from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
@@ -566,7 +567,7 @@ def load_arguments(self, _):
 
     for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
         with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
-            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('ttl', type=int, help='Record set TTL (time-to-live)')
             c.argument('record_set_name',
                        options_list=['--record-set-name', '-n'],
                        help='The name of the record set relative to the zone. '
@@ -766,7 +767,8 @@ def load_arguments(self, _):
     with self.argument_context('network private-endpoint') as c:
         c.argument('private_endpoint_name', private_endpoint_name, options_list=['--name', '-n'])
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.', id_part=None)
+        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name')
+        c.argument('subnet', validator=get_subnet_validator(), help=subnet_help, id_part=None)
         c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', metavar='', id_part=None)
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
         c.argument('group_ids', nargs='+', help='The ID(s) of the group(s) obtained from the remote resource that this private endpoint should connect to. You can use "az keyvault(storage/etc) private-link-resource list" to obtain the list of group ids.')
@@ -1469,7 +1471,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip prefix') as c:
         c.argument('public_ip_prefix_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPPrefixes'), id_part='name', help='The name of the public IP prefix.')
-        c.argument('prefix_length', options_list='--length', help='Length of the prefix (i.e. XX.XX.XX.XX/<Length>)')
+        c.argument('prefix_length', options_list='--length', help='Length of the prefix (i.e. `XX.XX.XX.XX/<Length>`)')
         c.argument('zone', zone_type)
 
     with self.argument_context('network public-ip prefix create') as c:
@@ -1791,4 +1793,26 @@ def load_arguments(self, _):
         c.argument('security_provider_name', arg_type=get_enum_type(SecurityProviderName), help='The security provider name', options_list=['--provider'])
         c.argument('security_partner_provider_name', options_list=['--name', '-n'], help='Name of the Security Partner Provider.')
         c.argument('virtual_hub', options_list=['--vhub'], help='Name or ID of the virtual hub to which the Security Partner Provider belongs.', validator=validate_virtual_hub)
+
+    # region PrivateLinkResource and PrivateEndpointConnection
+    from azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom import TYPE_CLIENT_MAPPING, register_providers
+    register_providers()
+    for scope in ['private-link-resource', 'private-endpoint-connection']:
+        with self.argument_context('network {} list'.format(scope)) as c:
+            c.argument('name', required=False, help='Name of the resource', options_list=['--name', '-n'])
+            c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type', arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
+            c.argument('resource_group_name', required=False)
+            c.extra('id', help='ID of the resource', validator=process_private_link_resource_id_argument)
+    for scope in ['show', 'approve', 'reject', 'delete']:
+        with self.argument_context('network private-endpoint-connection {}'.format(scope)) as c:
+            c.extra('connection_id', options_list=['--id'], help='ID of the private endpoint connection', validator=process_private_endpoint_connection_id_argument)
+            c.argument('approval_description', options_list=['--description', '-d'], help='Comments for the approval.')
+            c.argument('rejection_description', options_list=['--description', '-d'],
+                       help='Comments for the rejection.')
+            c.argument('name', required=False, help='Name of the private endpoint connection',
+                       options_list=['--name', '-n'])
+            c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type',
+                       arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
+            c.argument('resource_group_name', required=False)
+            c.argument('resource_name', required=False, help='Name of the resource')
     # endregion

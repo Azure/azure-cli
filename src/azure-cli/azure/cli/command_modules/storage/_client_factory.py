@@ -161,6 +161,10 @@ def cf_mgmt_blob_services(cli_ctx, _):
     return storage_client_factory(cli_ctx).blob_services
 
 
+def cf_mgmt_file_services(cli_ctx, _):
+    return storage_client_factory(cli_ctx).file_services
+
+
 def cf_mgmt_file_shares(cli_ctx, _):
     return storage_client_factory(cli_ctx).file_shares
 
