@@ -70,9 +70,7 @@ class ImageTemplateTest(ScenarioTest):
         "Microsoft.Compute/images/read",
         "Microsoft.Compute/images/delete"
     ],
-    "NotActions": [
-  
-    ],
+    "NotActions": [],
     "AssignableScopes": [
       "/subscriptions/{1}/resourceGroups/{2}"
     ]

@@ -500,13 +500,13 @@ def _serialize(body):
     :param body:
     :return:
     """
-    if type(body) == dict:
+    if isinstance(body, dict):
         body2 = {}
         for k in body:
             if k not in ['additional_properties'] and body[k] is not None:
                 body2[_underscore_camel(k)] = _serialize(body[k])
         body = body2
-    elif type(body) == list:
+    elif isinstance(body, list):
         for i, v in enumerate(body):
             body[i] = _serialize(v)
     elif hasattr(body, '__dict__'):
