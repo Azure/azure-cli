@@ -88,6 +88,9 @@ def load_command_table(self, _):
 
     with self.command_group('bot directline site', directLineSitesOperations_commandType, is_preview=True) as g:
         g.command('create', 'create')
+        g.command('delete', 'delete')
+        g.command('list', 'list')
+        g.command('update', 'update')
 
     with self.command_group('bot'):
         pass

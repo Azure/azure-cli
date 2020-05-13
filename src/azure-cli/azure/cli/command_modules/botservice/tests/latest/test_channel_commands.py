@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from knack.util import CLIError
 import uuid
 
 
@@ -144,18 +145,11 @@ class DirectLineSitesTests(ScenarioTest):
         sites = response['properties']['properties']['sites']
 
         self.assertEqual(len(sites), 2)
-
-        def find_site(site):
-            self.assertIsNotNone(site)
-            self.assertIsNotNone(site['siteName'])
-            if site['siteName'] == site_name:
-                return True
-        
         
         selected_sites = [site for site in sites if site['siteName'] == site_name]
-        self.assertTrue(len(selected_sites) > 0, 'site not found')
+        self.assertTrue(selected_sites, 'site not found')
         site = selected_sites[0]
-        self.assertTrue(len(site['trustedOrigins']) > 0)
+        self.assertTrue(site['trustedOrigins'])
         self.assertTrue(site['trustedOrigins'][0] == origin_url)
         self.assertFalse(site['isEnabled'])
         self.assertTrue(site['isSecureSiteEnabled'])
@@ -175,18 +169,67 @@ class DirectLineSitesTests(ScenarioTest):
         sites = response['properties']['properties']['sites']
 
         self.assertEqual(len(sites), 3)
-
-        def find_site(site):
-            self.assertIsNotNone(site)
-            self.assertIsNotNone(site['siteName'])
-            if site['siteName'] == site_name:
-                return True
-        
         
         selected_sites = [site for site in sites if site['siteName'] == site_name]
-        self.assertTrue(len(selected_sites) > 0, 'site not found')
+        self.assertTrue(selected_sites, 'site not found')
         site = selected_sites[0]
-        self.assertTrue(len(site['trustedOrigins']) > 0)
+        self.assertTrue(site['trustedOrigins'])
         self.assertTrue(site['trustedOrigins'][0] == origin_url)
         self.assertTrue(site['isEnabled'])
         self.assertFalse(site['isSecureSiteEnabled'])
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_directline_site_update(self, resource_group):
+        create_bot(self, resource_group)
+        self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
+            self.check('properties.properties.sites[0].siteName', 'Default Site'),
+            self.check('properties.properties.sites[0].isEnabled', True),
+            self.check('properties.properties.sites[0].isSecureSiteEnabled', False)
+        ])
+
+        site_name = 'Default Site'
+        origin_url = 'https://{}.azurewebsites.net'.format(site_name.replace(' ', ''))
+        self.kwargs.update({'origin_url': origin_url})
+        self.kwargs.update({'site_name': site_name})
+
+        response = self.cmd('az bot directline site update -g {rg} -n {botname} --is-enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name "{site_name}"').get_output_in_json()
+        
+        self.assertTrue(response['properties'] is not None)
+        self.assertTrue(response['properties']['properties'] is not None)
+        self.assertTrue(response['properties']['properties']['sites'] is not None)
+        sites = response['properties']['properties']['sites']
+
+        self.assertEqual(len(sites), 1)
+        selected_sites = [site for site in sites if site['siteName'] == site_name]
+        self.assertTrue(selected_sites, 'site not found')
+        site = selected_sites[0]
+        self.assertTrue(site['trustedOrigins'])
+        self.assertTrue(site['trustedOrigins'][0] == origin_url)
+        self.assertFalse(site['isEnabled'])
+        self.assertTrue(site['isSecureSiteEnabled'])
+        self.assertTrue(site['isV3Enabled'])
+
+    @ResourceGroupPreparer(random_name_length=20)
+    def test_botservice_directline_site_update_should_raise_error_for_missing_site(self,
+                                                                                   resource_group):
+        create_bot(self, resource_group)
+        self.cmd('az bot directline create -g {rg} -n {botname}', checks=[
+            self.check('properties.properties.sites[0].siteName', 'Default Site'),
+            self.check('properties.properties.sites[0].isEnabled', True),
+            self.check('properties.properties.sites[0].isSecureSiteEnabled', False)
+        ])
+
+        site_name = 'mybotsite1'
+        origin_url = 'https://{}.azurewebsites.net'.format(site_name)
+        self.kwargs.update({'origin_url': origin_url})
+        self.kwargs.update({'site_name': site_name})
+        
+        try:
+            self.cmd('az bot directline site update -g {rg} -n {botname} --is-enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name {site_name}')
+            raise AssertionError('should have thrown an error.')
+        except CLIError as cli_error:
+            expected_error = "Direct Line site \"{}\" not found. First create Direct Line site via " \
+                             "\"bot directline site create\"".format(site_name)
+            self.assertEqual(cli_error.__str__(), expected_error)
+        except AssertionError:
+            raise AssertionError('should have thrown a CLIError for updating missing site.')

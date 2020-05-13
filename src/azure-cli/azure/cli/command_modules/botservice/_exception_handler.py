@@ -10,6 +10,12 @@ def bot_exception_handler(ex):
     from azure.mgmt.botservice.models import ErrorException
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import ClientRequestError  # pylint: disable=import-error
+
+    # All CLIError instances should be thrown from the code in the command module,
+    # not from any underlying or other dependency. Therefore, re-raise the error to
+    # the user.
+    if isinstance(ex, CLIError):
+        raise ex
     if isinstance(ex, ErrorException):
         message = 'An error occurred. {0}: {1}'.format(
             ex.error.error.code,
