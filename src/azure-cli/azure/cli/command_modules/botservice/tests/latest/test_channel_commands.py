@@ -24,6 +24,7 @@ def create_bot(test_class, resource_group):
         test_class.check('location', 'global')
     ])
 
+
 class ChannelTests(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=20)
@@ -138,14 +139,14 @@ class DirectLineSitesTests(ScenarioTest):
         self.kwargs.update({'site_name': site_name})
 
         response = self.cmd('az bot directline site create -g {rg} -n {botname} --is-enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name {site_name}').get_output_in_json()
-        
+
         self.assertTrue(response['properties'] is not None)
         self.assertTrue(response['properties']['properties'] is not None)
         self.assertTrue(response['properties']['properties']['sites'] is not None)
         sites = response['properties']['properties']['sites']
 
         self.assertEqual(len(sites), 2)
-        
+
         selected_sites = [site for site in sites if site['siteName'] == site_name]
         self.assertTrue(selected_sites, 'site not found')
         site = selected_sites[0]
@@ -162,14 +163,14 @@ class DirectLineSitesTests(ScenarioTest):
         self.kwargs.update({'site_name': site_name})
 
         response = self.cmd('az bot directline site create -g {rg} -n {botname} --trusted-origins {origin_url} --site-name {site_name}').get_output_in_json()
-        
+
         self.assertTrue(response['properties'] is not None)
         self.assertTrue(response['properties']['properties'] is not None)
         self.assertTrue(response['properties']['properties']['sites'] is not None)
         sites = response['properties']['properties']['sites']
 
         self.assertEqual(len(sites), 3)
-        
+
         selected_sites = [site for site in sites if site['siteName'] == site_name]
         self.assertTrue(selected_sites, 'site not found')
         site = selected_sites[0]
@@ -193,7 +194,7 @@ class DirectLineSitesTests(ScenarioTest):
         self.kwargs.update({'site_name': site_name})
 
         response = self.cmd('az bot directline site update -g {rg} -n {botname} --is-enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name "{site_name}"').get_output_in_json()
-        
+
         self.assertTrue(response['properties'] is not None)
         self.assertTrue(response['properties']['properties'] is not None)
         self.assertTrue(response['properties']['properties']['sites'] is not None)
@@ -223,7 +224,7 @@ class DirectLineSitesTests(ScenarioTest):
         origin_url = 'https://{}.azurewebsites.net'.format(site_name)
         self.kwargs.update({'origin_url': origin_url})
         self.kwargs.update({'site_name': site_name})
-        
+
         try:
             self.cmd('az bot directline site update -g {rg} -n {botname} --is-enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name {site_name}')
             raise AssertionError('should have thrown an error.')

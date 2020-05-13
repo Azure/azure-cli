@@ -8,6 +8,7 @@ from knack.util import CLIError
 
 DIRECT_LINE_CHANNEL = 'DirectLineChannel'
 
+
 class DirectlineSites:
     """
     Helper class with static methods to manipulate Direct Line Sites
@@ -87,6 +88,7 @@ class DirectlineSites:
                                                   resource_name,
                                                   show_secrets)
         site_updated = {'complete': False}
+
         def update_site(site):
             if site.site_name == site_name:
                 site.is_enabled = site.is_enabled if is_enabled is None else is_enabled
@@ -102,7 +104,7 @@ class DirectlineSites:
                                                site in
                                                channel.properties.properties.sites]
         if not site_updated['complete']:
-            raise CLIError("Direct Line site \"{}\" not found. First create Direct Line site via "\
+            raise CLIError("Direct Line site \"{}\" not found. First create Direct Line site via "
                            "\"bot directline site create\"".format(site_name))
         return client.update(
             resource_group_name=resource_group_name,

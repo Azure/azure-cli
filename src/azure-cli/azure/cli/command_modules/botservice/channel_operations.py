@@ -202,10 +202,17 @@ class ChannelOperations(object):  # pylint: disable=too-few-public-methods
         for channel in ['Facebook', 'Email', 'MsTeams', 'Skype', 'Kik', 'WebChat', 'DirectLine', 'Telegram', 'Sms', 'Slack']:  # pylint: disable=line-too-long
             channelName = '{}Channel'.format(channel)
 
-            setattr(self, '{}_get'.format(channel.lower()), self.__create_channel_get_operation(channelName))
-            setattr(self, '{}_delete'.format(channel.lower()), self.__create_channel_delete_operation(channelName))
-    
-    def __create_channel_get_operation(self, channel_name):
+            setattr(
+                self,
+                '{}_get'.format(channel.lower()),
+                ChannelOperations.__create_channel_get_operation(channelName))
+            setattr(
+                self,
+                '{}_delete'.format(channel.lower()),
+                ChannelOperations.__create_channel_delete_operation(channelName))
+
+    @staticmethod
+    def __create_channel_get_operation(channel_name):
         def get(client, resource_group_name, resource_name, show_secrets=None):
             if show_secrets:
                 return client.list_with_keys(
@@ -220,7 +227,8 @@ class ChannelOperations(object):  # pylint: disable=too-few-public-methods
             )
         return get
 
-    def __create_channel_delete_operation(self, channel_name):
+    @staticmethod
+    def __create_channel_delete_operation(channel_name):
         def delete(client, resource_group_name, resource_name):
             return client.delete(
                 resource_group_name=resource_group_name,
