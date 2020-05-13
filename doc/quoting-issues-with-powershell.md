@@ -18,6 +18,8 @@ As `az` is a Command Prompt script (at `C:\Program Files (x86)\Microsoft SDKs\Az
 some quoted text
 ```
 
+In order for a symbol to be received by Azure CLI, you will have to take both PowerShell and Command Prompt's parsing into consideration. If a symbol still exists after 2 rounds of parsing, Azure CLI will receive it. 
+
 ## Workaround: the stop-parsing symbol
 To prevent this, you may use [stop-parsing symbol](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_parsing) `--%` between `az` and arguments.
 
@@ -77,8 +79,17 @@ operable program or batch file.
 To solve it:
 
 ```powershell
-# Double quotes are parsed by Command Prompt to treat ampersand (&) as a literal character
+# When quoted by single quotes ('), double quotes (") are preserved by PowerShell and sent 
+# to Command Prompt, so that ampersand (&) is treated as a literal character
 > az '"a&b"' --debug
+Command arguments: ['a&b', '--debug']
+
+# Escape double quotes (") with backticks (`) as required by PowerShell
+> az "`"a&b`"" --debug
+Command arguments: ['a&b', '--debug']
+
+# Escape double quotes (") by repeating then
+> az """a&b""" --debug
 Command arguments: ['a&b', '--debug']
 
 # With a whitespace in the argument, double quotes (") are preserved by PowerShell and
