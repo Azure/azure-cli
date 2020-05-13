@@ -78,12 +78,6 @@ def create_account(client,
                    encryption_key_source=None, encryption_key_identifier=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
-    if public_network_access and public_network_access != "Enabled" and public_network_access != "Disabled":
-        raise ValueError("The --public-network-access must be either Enabled or Disabled")
-    if (encryption_key_source and
-            encryption_key_source != "Microsoft.Batch" and
-            encryption_key_source != "Microsoft.KeyVault"):
-        raise ValueError("The --encryption-key-source must be either Microsoft.Batch or Microsoft.KeyVault")
     if encryption_key_source == "Microsoft.KeyVault" and not encryption_key_identifier:
         raise ValueError("The --encryption-key-identifier property is required when "
                          "--encryption-key-source is set to Microsoft.KeyVault")

@@ -7,7 +7,7 @@ from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.batch.models import AccountKeyType
+from azure.mgmt.batch.models import AccountKeyType, KeySource, PublicNetworkAccessType
 from azure.batch.models import ComputeNodeDeallocationOption
 
 from azure.cli.core.commands.parameters import \
@@ -51,8 +51,8 @@ def load_arguments(self, _):
         c.argument('tags', tags_type, help="Space-separated tags in 'key[=value]' format.")
         c.argument('storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
         c.argument('keyvault', help='The KeyVault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
-        c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.")
-        c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault')
+        c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.", arg_type=get_enum_type(PublicNetworkAccessType))
+        c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault', arg_type=get_enum_type(KeySource))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. '
                                                      'Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
         c.ignore('keyvault_url')
