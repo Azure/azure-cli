@@ -1229,7 +1229,7 @@ parameters:
         Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
-        
+
         Due to server limitation, when an alert rule contains multiple criteria, the use of dimensions is limited to one value per dimension within each criterion.
 
         Multiple conditions can be specified by using more than one `--condition` argument.
@@ -1252,13 +1252,12 @@ examples:
   - name: Create a metric-based alert rule that monitors a custom metric.
     text: |
         az monitor metrics alert create -n "metric alert rule on a custom metric" -g "Demos" --scopes {VirtualMachineID} \\
-            --condition "max Azure.VM.Windows.GuestMetrics.Memory\Available Bytes > 90" \\
+            --condition "max Azure.VM.Windows.GuestMetrics.Memory\\Available Bytes > 90" \\
             --window-size 5m --evaluation-frequency 1m
   - name: Create a high CPU usage alert on several VMs with no actions.
     text: |
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID1} {VirtualMachineID2} {VirtualMachineID3} \\
             --condition "avg Percentage CPU > 90" --description "High CPU"
-  
 
 """
 
