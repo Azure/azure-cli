@@ -20,6 +20,7 @@ from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType,
                                                   EncodingFormat,
                                                   RenewKeyType,
+                                                  AuthenticationType,
                                                   UserRole)
 from .custom import KeyType, SimpleAccessRights
 from ._validators import (validate_policy_permissions,
@@ -160,6 +161,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('fileupload_storage_connectionstring',
                    options_list=['--fileupload-storage-connectionstring', '--fcs'],
                    help='The connection string for the Azure Storage account to which files are uploaded.')
+        c.argument('fileupload_storage_authentication_type',
+                   options_list=['--fileupload-storage-auth-type', '--fsa'],
+                   help='The authentication type for the Azure Storage account to which files are uploaded.'
+                        'Possible values are keyBased and identityBased')
+        c.argument('fileupload_storage_container_uri',
+                   options_list=['--fileupload-storage-container-uri', '--fcu'],
+                   help='The container URI for the Azure Storage account to which files are uploaded.')
         c.argument('fileupload_storage_container_name',
                    options_list=['--fileupload-storage-container-name', '--fc'],
                    help='The name of the root container where you upload files. The container need not exist but'
@@ -207,6 +215,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('encoding', options_list=['--encoding'], arg_type=get_enum_type(EncodingFormat),
                    help='Encoding format for the container. The default is AVRO. '
                         'Note that this field is applicable only for blob container endpoints.')
+        c.argument('endpoint_uri', options_list=['--endpoint-uri'],
+                   help='The uri of the endpoint resource.')
+        c.argument('entity_path', options_list=['--entity-path'],
+                   help='The entity path of the endpoint resource.')
 
     with self.argument_context('iot hub routing-endpoint create') as c:
         c.argument('batch_frequency', options_list=['--batch-frequency', '-b'], type=int,
@@ -218,6 +230,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='File name format for the blob. The file name format must contain {iothub},'
                         ' {partition}, {YYYY}, {MM}, {DD}, {HH} and {mm} fields. All parameters are'
                         ' mandatory but can be reordered with or without delimiters.')
+        c.argument('authentication_type', options_list=['--auth-type'], arg_type=get_enum_type(AuthenticationType),
+                   help='Authentication type for the endpoint. The default is keyBased.')
 
     with self.argument_context('iot hub certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
@@ -295,3 +309,25 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='IoT Central application template name. Default is a custom application.')
         c.argument('display_name',
                    help='Custom display name for the IoT Central application. Default is resource name.')
+
+    with self.argument_context('iot hub private-link-resource list') as c:
+        c.argument('hub_name', options_list=['--hub-name', '--name', '-n'], help='The name of the IoT hub.')
+
+    with self.argument_context('iot hub private-endpoint-connection') as c:
+        c.argument('hub_name', options_list=['--hub-name'], help='The name of the IoT hub.', required=False)
+        c.argument('private_endpoint_connection_name', options_list=['-n', '--name'], required=False,
+                   help='The name of the private endpoint connection.')
+        c.argument('resource_group_name', help='The resource group name of specified IoT hub.',
+                   required=False)
+
+    for command in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('iot hub private-endpoint-connection {}'.format(command)) as c:
+            c.extra(
+                'connection_id',
+                options_list=['--id'],
+                help='The ID of the private endpoint connection associated with the IoT hub. You can get '
+                'it using `az iot hub show`.'
+            )
+            c.argument(
+                'description', options_list=['--description', '-d'], help='Comments for {} operation.'.format(command)
+            )
