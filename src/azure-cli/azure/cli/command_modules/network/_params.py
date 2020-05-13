@@ -1814,5 +1814,5 @@ def load_arguments(self, _):
             c.argument('resource_provider', required=False, help='Type of the resource.', options_list='--type',
                        arg_type=get_enum_type(TYPE_CLIENT_MAPPING.keys()))
             c.argument('resource_group_name', required=False)
-            c.argument('service_name', required=False, help='Name of the resource')
+            c.argument('resource_name', required=False, help='Name of the resource')
     # endregion
