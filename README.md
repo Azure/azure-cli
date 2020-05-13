@@ -16,7 +16,7 @@ Please refer to the [install guide](https://docs.microsoft.com/cli/azure/install
 
 A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/Azure/azure-cli/blob/dev/doc/install_troubleshooting.md).
 
-### Developer Installation (see below)
+### Developer installation (see below)
 
 - [Docker](#docker)
 - [Edge Builds](#edge-builds)
@@ -47,7 +47,7 @@ Here are a few features and concepts that can help you get the most out of the A
 
 The following examples are showing using the `--output table` format, you can change your default using the `az configure` command.
 
-#### Tab Completion
+#### Tab completion
 
 We support tab-completion for groups, commands, and some parameters
 
@@ -76,7 +76,8 @@ demo32111vm             Windows
 dcos-master-39DB807E-0  Linux
 ```
 
-#### Exit Codes
+#### Exit codes
+
 For scripting purposes, we output certain exit codes for differing scenarios.
 
 |Exit Code   |Scenario   |
@@ -86,10 +87,23 @@ For scripting purposes, we output certain exit codes for differing scenarios.
 |2   |Parser error; check input to command line.   |
 |3   |Missing ARM resource; used for existence check from `show` commands.   |
 
-#### More Samples and Snippets
-For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
+### Common scenarios and use Azure CLI effectively
 
-For how to use CLI effectively, check out [tips](./doc/use_cli_effectively.md).
+Please check [Tips for using Azure CLI effectively](doc/use_cli_effectively.md). It describes some common scenarios:
+
+- [Output formatting (json, table, or tsv)](doc/use_cli_effectively.md#output-formatting-json-table-or-tsv)
+- [Pass values from one command to another](doc/use_cli_effectively.md#pass-values-from-one-command-to-another)
+- [Async operations](doc/use_cli_effectively.md#async-operations)
+- [Generic update arguments](doc/use_cli_effectively.md#generic-update-arguments)
+- [Generic resource commands - `az resource`](doc/use_cli_effectively.md#generic-resource-commands---az-resource)
+- [REST API command - `az rest`](doc/use_cli_effectively.md#rest-api-command---az-rest)
+- [Quoting issues](doc/use_cli_effectively.md#quoting-issues)
+- [Work behind a proxy](doc/use_cli_effectively.md#work-behind-a-proxy)
+- [Concurrent builds](doc/use_cli_effectively.md#concurrent-builds)
+
+### More samples and snippets
+
+For more usage examples, take a look at our [GitHub samples repo](http://github.com/Azure/azure-cli-samples) or [https://docs.microsoft.com/cli/azure/overview](https://docs.microsoft.com/cli/azure/overview).
 
 ## Reporting issues and feedback
 
@@ -97,7 +111,7 @@ If you encounter any bugs with the tool please file an issue in the [Issues](htt
 
 To provide feedback from the command line, try the `az feedback` command.
 
-## Developer Installation
+## Developer installation
 
 ### Docker
 
@@ -114,7 +128,7 @@ For example:
 $ docker run -u $(id -u):$(id -g) -v ${HOME}:/home/az -e HOME=/home/az --rm -it azuresdk/azure-cli-python:dev
 ```
 
-### Edge Builds
+### Edge builds
 
 If you want to get the latest build from the `dev` branch, you can use our "edge" builds.
 
@@ -154,7 +168,7 @@ If you would like to get builds of arbitrary commit or PR, see:
 
 [Try new features before release](doc/try_new_features_before_release.md)
 
-## Developer Setup
+## Developer setup
 
 If you would like to setup a development environment and contribute to the CLI, see:
 
@@ -162,7 +176,7 @@ If you would like to setup a development environment and contribute to the CLI, 
 
 [Authoring Command Modules](https://github.com/Azure/azure-cli/tree/dev/doc/authoring_command_modules)
 
-## Contribute Code
+## Contribute code
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 
