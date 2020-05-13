@@ -304,10 +304,7 @@ class AzCliCommand(CLICommand):
                     logger.debug("local context '%s' for arg %s", value, arg.name)
                     overrides.settings['default'] = DefaultStr(value)
                     overrides.settings['required'] = False
-<<<<<<< HEAD
                     overrides.settings['default_value_source'] = 'Local Context'
-=======
->>>>>>> Revert "print warning when local context is on and take effect"
 
     def load_arguments(self):
         super(AzCliCommand, self).load_arguments()
