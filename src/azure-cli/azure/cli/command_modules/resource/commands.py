@@ -216,6 +216,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('register', 'register_feature')
+        g.custom_command('unregister', 'unregister_feature')
 
     # Tag commands
     with self.command_group('tag', resource_tag_sdk) as g:
