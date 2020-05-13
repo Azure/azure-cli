@@ -198,6 +198,7 @@ class LocalContextScenarioTest(ScenarioTest):
     def tearDown(self):
         super(LocalContextScenarioTest, self).tearDown()
         self.cmd('local-context off')
+        self.cmd('local-context delete --all --purge -y')
         os.chdir(self.original_working_dir)
         if os.path.exists(self.working_dir):
             import shutil
