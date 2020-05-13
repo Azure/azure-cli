@@ -983,8 +983,7 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     if size:
         result = [x for x in result if x.resource_type == 'virtualMachines' and size.lower() in x.name.lower()]
     if zone:
-        result = [x for x in result if x.resource_type == 'virtualMachines' and
-                  x.location_info and x.location_info[0].zones]
+        result = [x for x in result if x.location_info and x.location_info[0].zones]
     return result
 
 

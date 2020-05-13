@@ -442,7 +442,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm list-skus') as c:
         c.argument('size', options_list=['--size', '-s'], help="size name, partial name is accepted")
-        c.argument('zone', options_list=['--zone', '-z'], arg_type=get_three_state_flag(), help="show all vm size supporting availability zones")
+        c.argument('zone', options_list=['--zone', '-z'], arg_type=get_three_state_flag(), help="show skus supporting availability zones")
         c.argument('show_all', options_list=['--all'], arg_type=get_three_state_flag(),
                    help="show all information including vm sizes not available under the current subscription")
         c.argument('resource_type', options_list=['--resource-type', '-r'], help='resource types e.g. "availabilitySets", "snapshots", "disks", etc')
