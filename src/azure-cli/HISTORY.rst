@@ -75,6 +75,14 @@ Release History
 * `az vm availability-set list`: Support showing VM list (#13090)
 * `az vm list-skus`: Fix display problem of table format (#13184)
 
+**IoT**
+
+* Updated azure-mgmt-iot SDK package to version 0.12.0
+* Added authentication-type support to `az iot hub routing-endpoint create`
+* Added `az iot hub private-endpoint-connection` command group
+* Added `az iot hub private-link-resources list` command
+* Added authentication-type support for identity-based file upload
+
 **KeyVault**
 
 * Add new parameter `--enable-rbac-authorization` during creating or updating (#12074)
