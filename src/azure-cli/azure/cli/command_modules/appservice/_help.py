@@ -326,6 +326,8 @@ short-summary: Import an SSL certificate to a function app from Key Vault.
 examples:
   - name: Import an SSL certificate to a function app from Key Vault.
     text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
+  - name: Import an SSL certificate to a function app from Key Vault using resource id (typically if Key Vault is in another subscription).
+    text: az functionapp config ssl import --resource-group MyResourceGroup --name MyFunctionApp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
 """
 
 helps['functionapp config ssl create'] = """
@@ -1186,6 +1188,8 @@ short-summary: Import an SSL certificate to a web app from Key Vault.
 examples:
   - name: Import an SSL certificate to a web app from Key Vault.
     text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault MyKeyVault --key-vault-certificate-name MyCertificateName
+  - name: Import an SSL certificate to a web app from Key Vault using resource id (typically if Key Vault is in another subscription).
+    text: az webapp config ssl import --resource-group MyResourceGroup --name MyWebapp --key-vault '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/vaults/[vault name]' --key-vault-certificate-name MyCertificateName
 """
 
 helps['webapp config ssl create'] = """

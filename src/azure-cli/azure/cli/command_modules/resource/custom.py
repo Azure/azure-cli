@@ -638,6 +638,13 @@ def what_if_deploy_arm_template_at_subscription_scope(cmd,
 def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
     what_if_result = LongRunningOperation(cli_ctx)(what_if_poller)
 
+    if what_if_result.error:
+        # The status code is 200 even when there's an error, because
+        # it is technically a successful What-If operation. The error
+        # is on the ARM template but not the operation.
+        err_message = _build_what_if_error_message(what_if_result.error)
+        raise CLIError(err_message)
+
     if no_pretty_print:
         return what_if_result
 
@@ -660,6 +667,13 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
             init()
 
     return None
+
+
+def _build_what_if_error_message(what_if_error):
+    err_messages = [f'{what_if_error.code} - {what_if_error.message}']
+    for detail in what_if_error.details or []:
+        err_messages.append(_build_what_if_error_message(detail))
+    return '\n'.join(err_messages)
 
 
 def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, template_uri=None, parameters=None,
