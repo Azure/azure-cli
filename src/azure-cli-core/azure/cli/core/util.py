@@ -238,7 +238,7 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
         _print('Extensions:')
         for ext in extensions:
             if ext.ext_type == 'dev':
-                _print(ext.name.ljust(20) + ext.version.rjust(20) + ' (dev) ' + ext.path)
+                _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20) + ' (dev) ' + ext.path)
             else:
                 _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
         _print()
