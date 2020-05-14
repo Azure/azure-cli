@@ -170,6 +170,11 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
             policy_object.properties.instant_rp_retention_range_in_days = 2
     if policy_name is None:
         policy_name = policy_object.name
+
+    additional_properties = policy_object.properties.additional_properties
+    if 'instantRpDetails' in additional_properties:
+        policy_object.properties.instant_rp_details = additional_properties['instantRpDetails']
+
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
