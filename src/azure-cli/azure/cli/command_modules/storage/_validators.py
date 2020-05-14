@@ -1224,6 +1224,7 @@ def pop_data_client_auth(ns):
 
 
 def validate_client_auth_parameter(cmd, ns):
+    validate_container_public_access(cmd, ns)
     if ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None:
         # simply try to retrieve the remaining variables from environment variables
         if not ns.account_name:
