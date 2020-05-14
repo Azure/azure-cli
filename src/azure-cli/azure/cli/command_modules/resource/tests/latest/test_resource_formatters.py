@@ -428,7 +428,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
       booleanValue: true
       stringValue:  "The quick brown fox jumps over the lazy dog."
       emptyArray:   []
-      emptyObject:  {{}}
+      emptyObject:  {}
       arrayContaingValues: [
         0: "foo"
         1: "bar"
@@ -460,11 +460,11 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
             ),
         ]
 
-        expected = f"""
+        expected = """
 Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 
   ~ p1/foo
-    - path:      {{}}
+    - path:      {}
     + long.path: []
     ~ long.nested.path: [
       - 5: 12345
