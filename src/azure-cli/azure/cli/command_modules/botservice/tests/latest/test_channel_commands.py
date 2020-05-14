@@ -138,7 +138,7 @@ class DirectLineSitesTests(ScenarioTest):
         self.kwargs.update({'origin_url': origin_url})
         self.kwargs.update({'site_name': site_name})
 
-        response = self.cmd('az bot directline site create -g {rg} -n {botname} --is-enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name {site_name}').get_output_in_json()
+        response = self.cmd('az bot directline site create -g {rg} -n {botname} --enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name {site_name}').get_output_in_json()
 
         self.assertTrue(response['properties'] is not None)
         self.assertTrue(response['properties']['properties'] is not None)
@@ -193,7 +193,7 @@ class DirectLineSitesTests(ScenarioTest):
         self.kwargs.update({'origin_url': origin_url})
         self.kwargs.update({'site_name': site_name})
 
-        response = self.cmd('az bot directline site update -g {rg} -n {botname} --is-enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name "{site_name}"').get_output_in_json()
+        response = self.cmd('az bot directline site update -g {rg} -n {botname} --enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name "{site_name}"').get_output_in_json()
 
         self.assertTrue(response['properties'] is not None)
         self.assertTrue(response['properties']['properties'] is not None)
@@ -226,7 +226,7 @@ class DirectLineSitesTests(ScenarioTest):
         self.kwargs.update({'site_name': site_name})
 
         try:
-            self.cmd('az bot directline site update -g {rg} -n {botname} --is-enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name {site_name}')
+            self.cmd('az bot directline site update -g {rg} -n {botname} --enabled false --enable-enhanced-auth --trusted-origins {origin_url} --site-name {site_name}')
             raise AssertionError('should have thrown an error.')
         except CLIError as cli_error:
             expected_error = "Direct Line site \"{}\" not found. First create Direct Line site via " \

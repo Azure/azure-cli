@@ -168,7 +168,7 @@ def load_arguments(self, _):
 
     with self.argument_context('bot directline site create') as c:
         c.argument('enable_enhanced_auth', help='If true, enables enhanced authentication features. Must be true for --trusted-origins parameters to work.', arg_type=get_three_state_flag())
-        c.argument('is_enabled', options_list=['--is-enabled'], arg_type=get_three_state_flag(), help='Add the Direct Line Site in an enabled state.')
+        c.argument('is_enabled', options_list=['--enabled'], arg_type=get_three_state_flag(), help='Add the Direct Line Site in an enabled state.')
         c.argument('support_v3', help='If true, v3 protocol will be enabled on the channel.', arg_type=get_three_state_flag())
         c.argument('show_secrets', options_list=['--with-secrets'], help='Show secrets in response for the channel.', arg_type=get_three_state_flag())
         c.argument('site_name', options_list=['-s', '--site-name'], help='Name of the Directline channel site.')
@@ -183,7 +183,7 @@ def load_arguments(self, _):
 
     with self.argument_context('bot directline site update') as c:
         c.argument('enable_enhanced_auth', help='If true, enables enhanced authentication features. Must be true for --trusted-origins parameters to work.', arg_type=get_three_state_flag())
-        c.argument('is_enabled', options_list=['--is-enabled'], arg_type=get_three_state_flag(), help='Add the Direct Line Site in an enabled state.')
+        c.argument('is_enabled', options_list=['--enabled'], arg_type=get_three_state_flag(), help='Add the Direct Line Site in an enabled state.')
         c.argument('support_v3', help='If true, v3 protocol will be enabled on the channel.', arg_type=get_three_state_flag())
         c.argument('show_secrets', options_list=['--with-secrets'], help='Show secrets in response for the channel.', arg_type=get_three_state_flag())
         c.argument('site_name', options_list=['-s', '--site-name'], help='Name of the Directline channel site.')
