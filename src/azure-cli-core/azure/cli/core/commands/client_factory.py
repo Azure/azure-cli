@@ -22,6 +22,11 @@ def resolve_client_arg_name(operation, kwargs):
         logger.info("Keyword 'client_arg_name' is deprecated and should be removed.")
         return kwargs['client_arg_name']
     path, op_path = operation.split('#', 1)
+
+    # Add special case support
+    if path.startswith('azure.cli.command_modules.keyvault.vendored_sdks'):
+        return 'self'
+
     path_comps = path.split('.')
     if path_comps[0] == 'azure':
         # for CLI command modules

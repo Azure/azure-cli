@@ -98,6 +98,11 @@ class KeyVaultCommandGroup(AzCommandGroup):
             if 'cmd' not in op_args:
                 command_args.pop('cmd')
             try:
+                abandoned_args = ['identifier', 'hsm_base_url', 'storage_account_name', 'blob_container_name']
+                for arg in abandoned_args:
+                    if arg in command_args:
+                        command_args.pop(arg)
+
                 result = op(**command_args)
                 # apply results transform if specified
                 transform_result = merged_kwargs.get('transform', None)
