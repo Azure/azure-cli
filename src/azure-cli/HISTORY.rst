@@ -313,7 +313,7 @@ Release History
 * Fix IcM179210086: unable to create custom metric alert for their Application Insights metric
 
 **NetAppFiles**
-* az volume create: Adds snapshot-id as a parameter to create volume this will allow users to create a volume from existing snapshot.
+
 * az volume create: Allow data protection volumes adding replication operations: approve, suspend, resume, status, remove
 
 **Network**
@@ -639,7 +639,7 @@ Release History
 * Update error details, update default application template and prompt message.
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
-**Key Vault**
+**Key Vault**   
 
 * Add a new command `az keyvault key download` for downloading keys.
 
