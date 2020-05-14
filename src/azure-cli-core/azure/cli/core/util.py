@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=too-many-lines
 
 from __future__ import print_function
 import sys
@@ -49,6 +50,9 @@ _PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https:
                                  "DOCKER": ("docker pull mcr.microsoft.com/azure-cli", "https://aka.ms/doc/UpdateAzureCliDocker")}
 
 _GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://aka.ms/doc/InstallAzureCli'
+
+_VERSION_CHECK_TIME = 'check_time'
+_VERSION_UPDATE_TIME = 'update_time'
 
 
 def handle_exception(ex):  # pylint: disable=too-many-return-statements
@@ -160,56 +164,50 @@ def _update_latest_from_pypi(versions):
     return versions, success
 
 
-def _get_cached_latest_versions(versions):
+def get_cached_latest_versions(versions=None):
     """ Get the latest versions from a cached file"""
     import os
     import datetime
     from azure.cli.core._environment import get_config_dir
-    from distutils.version import LooseVersion
-    az_versions_file = os.path.join(get_config_dir(), 'version', 'azVersions.json')
-    if os.path.exists(az_versions_file):
-        try:
-            file_json = get_file_json(az_versions_file, throw_on_empty=False) or []
-            cache_versions = file_json['versions']
-            if cache_versions['azure-cli']['local'] == versions['azure-cli']['local']:
-                # If cached version is still greater than local version, no need to refresh cache
-                if LooseVersion(versions['azure-cli']['local']) < LooseVersion(cache_versions['azure-cli']['pypi']):
-                    return cache_versions, True
-                time_now = datetime.datetime.now()
-                update_time = datetime.datetime.strptime(file_json['update_time'], '%Y-%m-%d %H:%M:%S.%f')
-                if time_now - update_time < datetime.timedelta(days=1):
-                    return cache_versions, True
-        except (CLIError, ValueError) as ex:
-            logger.info(ex)
-            os.remove(az_versions_file)
+    from azure.cli.core._session import VERSIONS
+
+    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
+    if VERSIONS[_VERSION_UPDATE_TIME]:
+        version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')
+        if datetime.datetime.now() < version_update_time + datetime.timedelta(days=1):
+            cache_versions = VERSIONS['versions']
+            if cache_versions and cache_versions['azure-cli']['local'] == versions['azure-cli']['local']:
+                return cache_versions.copy(), True
+
+    if not versions:
+        versions = _get_local_versions()
     versions, success = _update_latest_from_pypi(versions)
     if success:
-        dir_path = os.path.join(get_config_dir(), 'version')
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-        with os.fdopen(os.open(az_versions_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
-                       'w+') as version_file:
-            file_json = {'versions': versions, 'update_time': str(datetime.datetime.now())}
-            version_file.write(json.dumps(file_json))
-    return versions, success
+        VERSIONS['versions'] = versions
+        VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
+    return versions.copy(), success
 
 
-def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statements
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
-
-    output = six.StringIO()
-    versions = {}
-
+def _get_local_versions():
     # get locally installed versions
+    versions = {}
     for dist in get_installed_cli_distributions():
         if dist.key == CLI_PACKAGE_NAME:
             versions[CLI_PACKAGE_NAME] = {'local': dist.version}
         elif dist.key.startswith(COMPONENT_PREFIX):
             comp_name = dist.key.replace(COMPONENT_PREFIX, '')
             versions[comp_name] = {'local': dist.version}
+    return versions
+
+
+def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statements
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
+
+    output = six.StringIO()
+    versions = _get_local_versions()
 
     # get the versions from pypi
-    versions, success = _get_cached_latest_versions(versions) if use_cache else _update_latest_from_pypi(versions)
+    versions, success = get_cached_latest_versions(versions) if use_cache else _update_latest_from_pypi(versions)
     updates_available = 0
 
     def _print(val=''):
@@ -280,47 +278,25 @@ def get_az_version_json():
 
 
 def show_updates_available(new_line_before=False, new_line_after=False):
-    if should_show_updates_available():
-        import os
-        _, updates_available = get_az_version_string(use_cache=True)
-        if updates_available > 0:
-            if new_line_before:
-                logger.warning("")
-            show_updates(updates_available)
-            if new_line_after:
-                logger.warning("")
-        # Cache the last time that should show updates available
-        from azure.cli.core._environment import get_config_dir
-        dir_path = os.path.join(get_config_dir(), 'version')
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-        version_time_file = os.path.join(dir_path, 'showUpdatesAvailable.txt')
-        with os.fdopen(os.open(version_time_file, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
-                       'w+') as time_file:
-            from datetime import datetime
-            time_file.write(str(datetime.now()))
-
-
-def should_show_updates_available():
-    """ Should only show once in a wait period """
-    import datetime
     import os
-    import stat
+    from azure.cli.core._session import VERSIONS
+    import datetime
     from azure.cli.core._environment import get_config_dir
-    wait_period = datetime.timedelta(days=7)
-    file_path = os.path.join(get_config_dir(), 'version', 'showUpdatesAvailable.txt')
-    if not os.path.exists(file_path):
-        return True
 
-    file_stat = os.stat(file_path)
-    if not stat.S_ISREG(file_stat.st_mode):
-        return False
+    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
+    if VERSIONS[_VERSION_CHECK_TIME]:
+        version_check_time = datetime.datetime.strptime(VERSIONS[_VERSION_CHECK_TIME], '%Y-%m-%d %H:%M:%S.%f')
+        if datetime.datetime.now() < version_check_time + datetime.timedelta(days=7):
+            return
 
-    modify_time = datetime.datetime.fromtimestamp(file_stat.st_mtime)
-    if datetime.datetime.now() - modify_time > wait_period:
-        return True
-
-    return False
+    _, updates_available = get_az_version_string(use_cache=True)
+    if updates_available > 0:
+        if new_line_before:
+            logger.warning("")
+        show_updates(updates_available)
+        if new_line_after:
+            logger.warning("")
+    VERSIONS[_VERSION_CHECK_TIME] = str(datetime.datetime.now())
 
 
 def show_updates(updates_available):
