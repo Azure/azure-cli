@@ -460,7 +460,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
             ),
         ]
 
-        expected = f"""
+        expected = """
 Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 
   ~ p1/foo
