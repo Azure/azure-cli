@@ -49,7 +49,7 @@ from .tunnel import TunnelServer
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
-from ._client_factory import web_client_factory, ex_handler_factory
+from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
@@ -2753,9 +2753,18 @@ def list_consumption_locations(cmd):
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
-    client = web_client_factory(cmd.cli_ctx)
+    web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_name(sku)
-    return client.list_geo_regions(full_sku, linux_workers_enabled)
+    web_client_geo_regions = web_client.list_geo_regions(full_sku, linux_workers_enabled)
+
+    providers_client = providers_client_factory(cmd.cli_ctx)
+    providers_client_locations_list = getattr(providers_client.get('Microsoft.Web'), 'resource_types', [])
+    for resource_type in providers_client_locations_list:
+        if resource_type.resource_type == 'sites':
+            providers_client_locations_list = resource_type.locations
+            break
+
+    return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
 def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):
