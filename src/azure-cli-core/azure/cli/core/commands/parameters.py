@@ -304,17 +304,10 @@ zone_type = CLIArgumentType(
 )
 
 vnet_name_type = CLIArgumentType(
-    options_list='--vnet-name',
-    metavar='NAME',
-    help='The virtual network (VNet) name.',
-    completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'),
     local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET])
 )
 
 subnet_name_type = CLIArgumentType(
-    options_list='--subnet',
-    metavar='NAME',
-    help='The subnet name.',
     local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
 
