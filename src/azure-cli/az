@@ -13,4 +13,7 @@ else:
         os.environ.get('PYTHONPATH'),
     ])
 
-os.execl(sys.executable, sys.executable , '-m', 'azure.cli', *sys.argv[1:])
+if os.environ.get('AZ_INSTALLER') is None:
+    os.environ['AZ_INSTALLER'] = 'PIP'
+
+os.execl(sys.executable, sys.executable, '-m', 'azure.cli', *sys.argv[1:])

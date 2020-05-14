@@ -12,11 +12,16 @@ import binascii
 import platform
 import ssl
 import six
+import re
+import logging
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
+
+from azure.common import AzureException
+from azure.core.exceptions import AzureError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
-from azure.common import AzureException
+from inspect import getfullargspec as get_arg_spec
 
 logger = get_logger(__name__)
 
@@ -26,8 +31,14 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#working-behind-a-proxy. '
+                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#work-behind-a-proxy. '
                      'Error detail: {}')
+
+_PROXYID_RE = re.compile(
+    '(?i)/subscriptions/(?P<subscription>[^/]*)(/resourceGroups/(?P<resource_group>[^/]*))?'
+    '(/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.*))?')
+
+_CHILDREN_RE = re.compile('(?i)/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
 
 
 def handle_exception(ex):  # pylint: disable=too-many-return-statements
@@ -43,8 +54,15 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
             logger.error("To learn more about --query, please visit: "
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
-        if isinstance(ex, (CLIError, CloudError, AzureException)):
+        if isinstance(ex, (CLIError, CloudError, AzureException, AzureError)):
             logger.error(ex.args[0])
+            try:
+                for detail in ex.args[0].error.details:
+                    logger.error(detail)
+            except (AttributeError, TypeError):
+                pass
+            except:  # pylint: disable=bare-except
+                pass
             return ex.args[1] if len(ex.args) >= 2 else 1
         if isinstance(ex, ValidationError):
             logger.error('validation error: %s', ex)
@@ -132,8 +150,8 @@ def _update_latest_from_pypi(versions):
     return versions, success
 
 
-def get_az_version_string():
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
+def get_az_version_string():  # pylint: disable=too-many-statements
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
 
     output = six.StringIO()
     versions = {}
@@ -183,6 +201,9 @@ def get_az_version_string():
         _print()
     _print("Python location '{}'".format(sys.executable))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
+    import os
+    if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
+        _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))
     if DEV_EXTENSION_SOURCES:
         _print("Development extension sources:")
         for source in DEV_EXTENSION_SOURCES:
@@ -191,9 +212,6 @@ def get_az_version_string():
     _print('Python ({}) {}'.format(platform.system(), sys.version))
     _print()
     _print('Legal docs and information: aka.ms/AzureCliLegal')
-    _print()
-    if sys.version.startswith('2.7'):
-        _print("* DEPRECATION: Python 2.7 will reach the end of its life on January 1st, 2020. \nA future version of Azure CLI will drop support for Python 2.7.")
     _print()
     version_string = output.getvalue()
 
@@ -350,6 +368,14 @@ def get_arg_list(op):
         return sig.args
 
 
+def is_track2(client_class):
+    """ IS this client a autorestv3/track2 one?.
+    Could be refined later if necessary.
+    """
+    args = get_arg_spec(client_class.__init__).args
+    return "credential" in args
+
+
 DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 
 
@@ -361,7 +387,8 @@ def should_disable_connection_verify():
 def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
-    return (AzureOperationPoller, LROPoller)
+    from azure.core.polling import LROPoller as AzureCoreLROPoller
+    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
@@ -379,7 +406,7 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
 
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
-        kwargs.update({'raw': True, 'polling': False})
+        kwargs.update({'polling': False})
     return func(*args, **kwargs)
 
 
@@ -390,7 +417,9 @@ def open_page_in_browser(url):
 
     if is_wsl():   # windows 10 linux subsystem
         try:
-            return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
+            # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+            # Ampersand (&) should be quoted
+            return subprocess.call(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
         except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
@@ -529,14 +558,14 @@ def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
     return success
 
 
-def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
                      body=None, skip_authorization_header=False, resource=None, output_file=None,
                      generated_client_request_id_name='x-ms-client-request-id'):
     import uuid
-    import requests
-    from azure.cli.core.commands.client_factory import UA_AGENT
+    from requests import Session, Request
+    from requests.structures import CaseInsensitiveDict
 
-    result = {}
+    result = CaseInsensitiveDict()
     for s in headers or []:
         try:
             temp = shell_safe_json_parse(s)
@@ -545,9 +574,26 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             key, value = s.split('=', 1)
             result[key] = value
     headers = result
-    headers.update({
-        'User-Agent': UA_AGENT,
-    })
+
+    # If Authorization header is already provided, don't bother with the token
+    if 'Authorization' in headers:
+        skip_authorization_header = True
+
+    # Handle User-Agent
+    agents = [get_az_user_agent()]
+
+    # Borrow AZURE_HTTP_USER_AGENT from msrest
+    # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
+    _ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
+    import os
+    if _ENV_ADDITIONAL_USER_AGENT in os.environ:
+        agents.append(os.environ[_ENV_ADDITIONAL_USER_AGENT])
+
+    # Custom User-Agent provided as command argument
+    if 'User-Agent' in headers:
+        agents.append(headers['User-Agent'])
+    headers['User-Agent'] = ' '.join(agents)
+
     if generated_client_request_id_name:
         headers[generated_client_request_id_name] = str(uuid.uuid4())
 
@@ -575,29 +621,48 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             result[key] = value
     uri_parameters = result or None
 
-    if '://' not in uri:
-        uri = cli_ctx.cloud.endpoints.resource_manager + uri.lstrip('/')
+    # If url is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
+    # default to Azure Resource Manager.
+    # https://management.azure.com/ + subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
+    if '://' not in url:
+        url = cli_ctx.cloud.endpoints.resource_manager + url.lstrip('/')
+
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
     from azure.cli.core._profile import Profile
     profile = Profile()
-    if '{subscriptionId}' in uri:
-        uri = uri.replace('{subscriptionId}', profile.get_subscription_id())
+    if '{subscriptionId}' in url:
+        url = url.replace('{subscriptionId}', cli_ctx.data['subscription_id'] or profile.get_subscription_id())
 
-    if not skip_authorization_header and uri.lower().startswith('https://'):
+    token_subscription = None
+    _subscription_regexes = [re.compile('https://management.azure.com/subscriptions/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'),
+                             re.compile('https://graph.windows.net/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})')]
+    for regex in _subscription_regexes:
+        match = regex.match(url)
+        if match:
+            token_subscription = match.groups()[0]
+            logger.debug('Retrieve token from subscription %s', token_subscription)
+
+    if not skip_authorization_header and url.lower().startswith('https://'):
         if not resource:
             endpoints = cli_ctx.cloud.endpoints
-            from azure.cli.core.cloud import CloudEndpointNotSetException
-            for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                try:
-                    value = getattr(endpoints, p)
-                except CloudEndpointNotSetException:
-                    continue
-                if isinstance(value, six.string_types) and uri.lower().startswith(value.lower()):
-                    resource = value
-                    break
+            # If url starts with ARM endpoint, like https://management.azure.com/,
+            # use active_directory_resource_id for resource.
+            # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
+            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+                resource = endpoints.active_directory_resource_id
+            else:
+                from azure.cli.core.cloud import CloudEndpointNotSetException
+                for p in [x for x in dir(endpoints) if not x.startswith('_')]:
+                    try:
+                        value = getattr(endpoints, p)
+                    except CloudEndpointNotSetException:
+                        continue
+                    if isinstance(value, six.string_types) and url.lower().startswith(value.lower()):
+                        resource = value
+                        break
         if resource:
-            token_info, _, _ = profile.get_raw_token(resource)
+            token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
             logger.debug('Retrievd AAD token for resource: %s', resource or 'ARM')
             token_type, token, _ = token_info
             headers = headers or {}
@@ -606,9 +671,16 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
                            "If access token is required, use --resource to specify the resource")
     try:
-        r = requests.request(method, uri, params=uri_parameters, data=body, headers=headers,
-                             verify=not should_disable_connection_verify())
-        logger.debug("Response Header : %s", r.headers if r else '')
+        # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
+        s = Session()
+        req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
+        prepped = s.prepare_request(req)
+
+        # Merge environment settings into session
+        settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
+        _log_request(prepped)
+        r = s.send(prepped, **settings)
+        _log_response(r)
     except Exception as ex:  # pylint: disable=broad-except
         raise CLIError(ex)
 
@@ -622,6 +694,71 @@ def send_raw_request(cli_ctx, method, uri, headers=None, uri_parameters=None,  #
             for chunk in r.iter_content(chunk_size=128):
                 fd.write(chunk)
     return r
+
+
+def _log_request(request):
+    """Log a client request. Copied from msrest
+    https://github.com/Azure/msrest-for-python/blob/3653d29fc44da408898b07c710290a83d196b777/msrest/http_logger.py#L39
+    """
+    if not logger.isEnabledFor(logging.DEBUG):
+        return
+
+    try:
+        logger.info("Request URL: %r", request.url)
+        logger.info("Request method: %r", request.method)
+        logger.info("Request headers:")
+        for header, value in request.headers.items():
+            if header.lower() == 'authorization':
+                # Trim at least half of the token but keep at most 20 characters
+                preserve_length = min(int(len(value) * 0.5), 20)
+                value = value[:preserve_length] + '...'
+            logger.info("    %r: %r", header, value)
+        logger.info("Request body:")
+
+        # We don't want to log the binary data of a file upload.
+        import types
+        if isinstance(request.body, types.GeneratorType):
+            logger.info("File upload")
+        else:
+            logger.info(str(request.body))
+    except Exception as err:  # pylint: disable=broad-except
+        logger.info("Failed to log request: %r", err)
+
+
+def _log_response(response, **kwargs):
+    """Log a server response. Copied from msrest
+    https://github.com/Azure/msrest-for-python/blob/3653d29fc44da408898b07c710290a83d196b777/msrest/http_logger.py#L68
+    """
+    if not logger.isEnabledFor(logging.DEBUG):
+        return None
+
+    try:
+        logger.info("Response status: %r", response.status_code)
+        logger.info("Response headers:")
+        for res_header, value in response.headers.items():
+            logger.info("    %r: %r", res_header, value)
+
+        # We don't want to log binary data if the response is a file.
+        logger.info("Response content:")
+        pattern = re.compile(r'attachment; ?filename=["\w.]+', re.IGNORECASE)
+        header = response.headers.get('content-disposition')
+
+        if header and pattern.match(header):
+            filename = header.partition('=')[2]
+            logger.info("File attachments: %s", filename)
+        elif response.headers.get("content-type", "").endswith("octet-stream"):
+            logger.info("Body contains binary data.")
+        elif response.headers.get("content-type", "").startswith("image"):
+            logger.info("Body contains image data.")
+        else:
+            if kwargs.get('stream', False):
+                logger.info("Body is streamable")
+            else:
+                logger.info(response.content.decode("utf-8-sig"))
+        return response
+    except Exception as err:  # pylint: disable=broad-except
+        logger.info("Failed to log response: %s", repr(err))
+        return response
 
 
 class ConfiguredDefaultSetter(object):
@@ -654,3 +791,89 @@ def _ssl_context():
 def urlretrieve(url):
     req = urlopen(url, context=_ssl_context())
     return req.read()
+
+
+def parse_proxy_resource_id(rid):
+    """Parses a resource_id into its various parts.
+
+    Return an empty dictionary, if invalid resource id.
+
+    :param rid: The resource id being parsed
+    :type rid: str
+    :returns: A dictionary with with following key/value pairs (if found):
+
+        - subscription:            Subscription id
+        - resource_group:          Name of resource group
+        - namespace:               Namespace for the resource provider (i.e. Microsoft.Compute)
+        - type:                    Type of the root resource (i.e. virtualMachines)
+        - name:                    Name of the root resource
+        - child_type_{level}:      Type of the child resource of that level
+        - child_name_{level}:      Name of the child resource of that level
+        - last_child_num:          Level of the last child
+
+    :rtype: dict[str,str]
+    """
+    if not rid:
+        return {}
+    match = _PROXYID_RE.match(rid)
+    if match:
+        result = match.groupdict()
+        children = _CHILDREN_RE.finditer(result['children'] or '')
+        count = None
+        for count, child in enumerate(children):
+            result.update({
+                key + '_%d' % (count + 1): group for key, group in child.groupdict().items()})
+        result['last_child_num'] = count + 1 if isinstance(count, int) else None
+        result.pop('children', None)
+        return {key: value for key, value in result.items() if value is not None}
+    return None
+
+
+def get_az_user_agent():
+    # Dynamically load the core version
+    from azure.cli.core import __version__ as core_version
+
+    agents = ["AZURECLI/{}".format(core_version)]
+
+    import os
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+    if _ENV_AZ_INSTALLER in os.environ:
+        agents.append('({})'.format(os.environ[_ENV_AZ_INSTALLER]))
+
+    # msrest already has this
+    # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
+    # if ENV_ADDITIONAL_USER_AGENT in os.environ:
+    #     agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
+
+    return ' '.join(agents)
+
+
+def user_confirmation(message, yes=False):
+    if yes:
+        return
+    from knack.prompting import prompt_y_n, NoTTYException
+    try:
+        if not prompt_y_n(message):
+            raise CLIError('Operation cancelled.')
+    except NoTTYException:
+        raise CLIError(
+            'Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+def get_linux_distro():
+    if platform.system() != 'Linux':
+        return None, None
+
+    try:
+        with open('/etc/os-release') as lines:
+            tokens = [line.strip() for line in lines]
+    except Exception:  # pylint: disable=broad-except
+        return None, None
+
+    release_info = {}
+    for token in tokens:
+        if '=' in token:
+            k, v = token.split('=', 1)
+            release_info[k.lower()] = v.strip('"')
+
+    return release_info.get('name', None), release_info.get('version_id', None)

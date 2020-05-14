@@ -219,6 +219,64 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('encryption.services.table.keyType', 'Account'),
         ])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_routing')
+    def test_storage_account_with_routing_preference(self, resource_group):
+        # Create Storage Account with Publish MicrosoftEndpoint, choose MicrosoftRouting
+        name1 = self.create_random_name(prefix='clirouting', length=24)
+        create_cmd1 = 'az storage account create -n {} -g {} --routing-choice MicrosoftRouting --publish-microsoft-endpoint true'.format(
+            name1, resource_group)
+        self.cmd(create_cmd1, checks=[
+            JMESPathCheck('routingPreference.publishInternetEndpoints', None),
+            JMESPathCheck('routingPreference.publishMicrosoftEndpoints', True),
+            JMESPathCheck('routingPreference.routingChoice', 'MicrosoftRouting'),
+        ])
+
+        # Update Storage Account with Publish InternetEndpoint
+        update_cmd1 = 'az storage account update -n {} -g {} --routing-choice InternetRouting --publish-microsoft-endpoint false --publish-internet-endpoint true'.format(
+            name1, resource_group)
+        self.cmd(update_cmd1, checks=[
+            JMESPathCheck('routingPreference.publishInternetEndpoints', True),
+            JMESPathCheck('routingPreference.publishMicrosoftEndpoints', False),
+            JMESPathCheck('routingPreference.routingChoice', 'InternetRouting'),
+        ])
+
+        # Create Storage Account with Publish InternetEndpoint, choose InternetRouting
+        name2 = self.create_random_name(prefix='clirouting', length=24)
+        create_cmd2 = 'az storage account create -n {} -g {} --routing-choice InternetRouting --publish-internet-endpoints true --publish-microsoft-endpoints false'.format(
+            name2, resource_group)
+        self.cmd(create_cmd2, checks=[
+            JMESPathCheck('routingPreference.publishInternetEndpoints', True),
+            JMESPathCheck('routingPreference.publishMicrosoftEndpoints', False),
+            JMESPathCheck('routingPreference.routingChoice', 'InternetRouting'),
+        ])
+
+        # Update Storage Account with MicrosoftRouting routing choice
+        update_cmd2 = 'az storage account update -n {} -g {} --routing-choice MicrosoftRouting'\
+            .format(name2, resource_group)
+
+        self.cmd(update_cmd2, checks=[
+            JMESPathCheck('routingPreference.routingChoice', 'MicrosoftRouting'),
+        ])
+
+        # Create without any routing preference
+        name3 = self.create_random_name(prefix='clirouting', length=24)
+        create_cmd3 = 'az storage account create -n {} -g {}'.format(
+            name3, resource_group)
+        self.cmd(create_cmd3, checks=[
+            JMESPathCheck('routingPreference', None),
+        ])
+
+        # Update Storage Account with Publish MicrosoftEndpoint, choose MicrosoftRouting
+        update_cmd3 = 'az storage account update -n {} -g {} --routing-choice MicrosoftRouting --publish-internet-endpoints false --publish-microsoft-endpoints true'\
+            .format(name3, resource_group)
+
+        self.cmd(update_cmd3, checks=[
+            JMESPathCheck('routingPreference.publishInternetEndpoints', False),
+            JMESPathCheck('routingPreference.publishMicrosoftEndpoints', True),
+            JMESPathCheck('routingPreference.routingChoice', 'MicrosoftRouting'),
+        ])
+
     def test_show_usage(self):
         self.cmd('storage account show-usage -l westus', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
@@ -244,6 +302,26 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('blob.read', True),
             JMESPathCheck('blob.retentionPolicy.enabled', True),
             JMESPathCheck('blob.retentionPolicy.days', 1)
+        ])
+
+        self.cmd('storage logging off --connection-string {}'.format(connection_string))
+
+        self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
+            JMESPathCheck('blob.delete', False),
+            JMESPathCheck('blob.write', False),
+            JMESPathCheck('blob.read', False),
+            JMESPathCheck('blob.retentionPolicy.enabled', False),
+            JMESPathCheck('blob.retentionPolicy.days', None),
+            JMESPathCheck('queue.delete', False),
+            JMESPathCheck('queue.write', False),
+            JMESPathCheck('queue.read', False),
+            JMESPathCheck('queue.retentionPolicy.enabled', False),
+            JMESPathCheck('queue.retentionPolicy.days', None),
+            JMESPathCheck('table.delete', False),
+            JMESPathCheck('table.write', False),
+            JMESPathCheck('table.read', False),
+            JMESPathCheck('table.retentionPolicy.enabled', False),
+            JMESPathCheck('table.retentionPolicy.days', None)
         ])
 
     @ResourceGroupPreparer()
@@ -340,11 +418,56 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  '--key-permissions get wrapKey unwrapKey recover')
         self.cmd('az keyvault update -n {vt} -g {rg} --set properties.enableSoftDelete=true')
         self.cmd('az resource update --id {vid} --set properties.enablePurgeProtection=true')
-        self.cmd('az storage account update -n {sa} -g {rg} '
-                 '--encryption-key-source Microsoft.Keyvault '
-                 '--encryption-key-vault {vtn} '
-                 '--encryption-key-name testkey '
-                 '--encryption-key-version {ver} ')
+
+        # Enable key auto-rotation
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-source Microsoft.Keyvault '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name testkey ').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], None)
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Pin to a version and opt out for key auto-rotation
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-version {ver}').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], self.kwargs['ver'])
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Enable key auto-rotation again
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-version ""').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'testkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], "")
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Change Key name
+        self.cmd("az keyvault key create -n newkey -p software --vault-name {vt} ")
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-vault {vtn} '
+                          '--encryption-key-name "newkey"').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Keyvault")
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyName'], 'newkey')
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVaultUri'], self.kwargs['vtn'])
+        self.assertEqual(result['encryption']['keyVaultProperties']['keyVersion'], "")
+        self.assertIn('lastKeyRotationTimestamp', result['encryption']['keyVaultProperties'])
+
+        # Change Key source
+        result = self.cmd('az storage account update -n {sa} -g {rg} '
+                          '--encryption-key-source Microsoft.Storage').get_output_in_json()
+
+        self.assertEqual(result['encryption']['keySource'], "Microsoft.Storage")
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -368,7 +491,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     def test_management_policy(self, resource_group):
         import os
-        from msrestazure.azure_exceptions import CloudError
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         policy_file = os.path.join(curr_dir, 'mgmt_policy.json').replace('\\', '\\\\')
 
@@ -715,3 +837,196 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('{cmd} --enable-delete-retention false -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['deleteRetentionPolicy']['days'], None)
+
+    class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
+        @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
+        @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
+        def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
+            self.kwargs.update({
+                'sa': storage_account,
+                'rg': resource_group,
+                'cmd': 'storage account file-service-properties'
+            })
+            self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy', None))
+
+            with self.assertRaises(SystemExit):
+                self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
+
+            with self.assertRaisesRegexp(CLIError, "Delete Retention Policy hasn't been enabled,"):
+                self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
+
+            with self.assertRaises(SystemExit):
+                self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1')
+
+            self.cmd(
+                '{cmd} update --enable-delete-retention true --delete-retention-days 10 -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', 10))
+
+            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', 1))
+
+            self.cmd('{cmd} update --enable-delete-retention false -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+
+            self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
+    @StorageAccountPreparer(location="eastus2euap", kind="StorageV2")
+    def test_storage_account_update_versioning(self):
+        result = self.cmd('storage account blob-service-properties update --enable-versioning true -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], True)
+
+        result = self.cmd('storage account blob-service-properties update --enable-versioning false -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], False)
+
+        result = self.cmd('storage account blob-service-properties update --enable-versioning -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], True)
+
+        result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(result['isVersioningEnabled'], True)
+
+
+class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')
+    @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2', sku='Standard_LRS')
+    def test_storage_account_private_link(self, storage_account):
+        self.kwargs.update({
+            'sa': storage_account
+        })
+        self.cmd('storage account private-link-resource list --account-name {sa} -g {rg}', checks=[
+            self.check('length(@)', 6)])
+
+
+class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_sa_pe')
+    @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
+    def test_storage_account_private_endpoint(self, storage_account):
+        from msrestazure.azure_exceptions import CloudError
+        self.kwargs.update({
+            'sa': storage_account,
+            'loc': 'eastus',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+        })
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pr = self.cmd('storage account private-link-resource list --account-name {sa} -g {rg}').get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+
+        storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+        self.kwargs['sa_id'] = storage['id']
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {sa_id} '
+            '--group-ids blob').get_output_in_json()
+        self.assertEqual(private_endpoint['name'], self.kwargs['pe'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], self.kwargs['pe_connection'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], self.kwargs['group_id'])
+        self.kwargs['pe_id'] = private_endpoint['privateLinkServiceConnections'][0]['id']
+
+        # Show the connection at storage account
+        storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+        self.assertIn('privateEndpointConnections', storage)
+        self.assertEqual(len(storage['privateEndpointConnections']), 1)
+        self.assertEqual(storage['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+                         'Approved')
+
+        self.kwargs['sa_pec_id'] = storage['privateEndpointConnections'][0]['id']
+        self.kwargs['sa_pec_name'] = storage['privateEndpointConnections'][0]['name']
+
+        self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
+                 checks=self.check('id', '{sa_pec_id}'))
+
+        self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}',
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
+
+        self.cmd('storage account private-endpoint-connection reject --account-name {sa} -g {rg} --name {sa_pec_name}',
+                 checks=[self.check('privateLinkServiceConnectionState.status', 'Rejected')])
+
+        with self.assertRaisesRegexp(CloudError, 'You cannot approve the connection request after rejection.'):
+            self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}')
+
+        self.cmd('storage account private-endpoint-connection delete --id {sa_pec_id} -y')
+
+
+class StorageAccountSkuScenarioTest(ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    @StorageAccountPreparer(name_prefix='clistoragesku', location='westus2', kind='StorageV2', sku='Standard_ZRS')
+    def test_storage_account_sku(self, resource_group, storage_account):
+        self.kwargs = {
+            'gzrs_sa': self.create_random_name(prefix='cligzrs', length=24),
+            'GZRS': 'Standard_GZRS',
+            'rg': resource_group,
+            'sa': storage_account
+        }
+
+        # Create storage account with GZRS
+        self.cmd('az storage account create -n {gzrs_sa} -g {rg} --sku {GZRS} --https-only', checks=[
+            self.check('sku.name', '{GZRS}'),
+            self.check('name', '{gzrs_sa}')
+        ])
+
+        # Convert RS to GZRS
+        self.cmd('az storage account show -n {sa} -g {rg}', checks=[
+            self.check('sku.name', 'Standard_ZRS'),
+            self.check('name', '{sa}')
+        ])
+
+        self.cmd('az storage account update -n {sa} -g {rg} --sku {GZRS}', checks=[
+            self.check('sku.name', '{GZRS}'),
+            self.check('name', '{sa}'),
+        ])
+
+        self.cmd('az storage account show -n {sa} -g {rg}', checks=[
+            self.check('sku.name', '{GZRS}'),
+            self.check('name', '{sa}')
+        ])
+
+        self.cmd('az storage account delete -n {gzrs_sa} -g {rg} -y')
+
+
+class StorageAccountFailoverScenarioTest(ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    def test_storage_account_failover(self, resource_group):
+        self.kwargs = {
+            'sa': self.create_random_name(prefix="storagegrzs", length=24),
+            'rg': resource_group
+        }
+        self.cmd('storage account create -n {sa} -g {rg} -l westus2 --kind StorageV2 --sku Standard_GZRS --https-only',
+                 checks=[self.check('name', '{sa}'),
+                         self.check('sku.name', 'Standard_GZRS'),
+                         self.check('failoverInProgress', None)])
+
+        self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa}'),
+            self.check('sku.name', 'Standard_GZRS'),
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
+
+        self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa}'),
+            self.check('failoverInProgress', True)
+        ])

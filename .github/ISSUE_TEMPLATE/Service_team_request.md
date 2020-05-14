@@ -9,17 +9,17 @@ assignees: ''
 ---
 
 **Resource Provider**
-What is the Azure resource provider your feature is part of?
+<!--- What is the Azure resource provider your feature is part of? --->
 
 **Description of Feature or Work Requested**
-Provide a brief description of the feature or work requested. A link to conceptual documentation may be helpful too.
+<!--- Provide a brief description of the feature or work requested. A link to conceptual documentation may be helpful too. --->
 
 **Minimum API Version Required**
-What is the minimum API version of your service required to implement your feature?
+<!--- What is the minimum API version of your service required to implement your feature? --->
 
 **Swagger Link**
-Provide a link to the location of your feature(s) in the REST API specs repo. If your feature(s) has corresponding commit or pull request in the REST API specs repo, provide them. This should be on the master branch of the REST API specs repo.
+<!--- Provide a link to the location of your feature(s) in the REST API specs repo. If your feature(s) has corresponding commit or pull request in the REST API specs repo, provide them. This should be on the master branch of the REST API specs repo. --->
 
 **Target Date**
-If you have a target date for release of this feature/work, please provide it. While we can't guarantee these dates,
-it will help us prioritize your request against other requests.
+<!--- If you have a target date for release of this feature/work, please provide it. While we can't guarantee these dates,
+it will help us prioritize your request against other requests. --->

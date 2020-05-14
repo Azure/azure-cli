@@ -224,6 +224,7 @@ def register_ids_argument(cli_ctx):
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
                 'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
+                'is_experimental': id_arg.settings.get('is_experimental', None) if id_arg else None,
                 'nargs': '+',
                 'arg_group': group_name
             }
@@ -565,7 +566,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         if setter_arg_name == 'parameters':
             result = cached_put(cmd, setter, **setterargs)
         else:
-            result = cached_put(cmd, setter, setterargs[setter_arg_name], **setterargs)
+            result = cached_put(cmd, setter, setterargs[setter_arg_name], setter_arg_name=setter_arg_name, **setterargs)
 
         if supports_no_wait and no_wait_enabled:
             return None
@@ -681,10 +682,12 @@ def _cli_wait_command(context, name, getter_op, custom_command=False, **kwargs):
                     return None
                 provisioning_state = get_provisioning_state(instance)
                 # until we have any needs to wait for 'Failed', let us bail out on this
-                if provisioning_state.casefold() == 'failed':
+                if provisioning_state:
+                    provisioning_state = provisioning_state.lower()
+                if provisioning_state == 'failed':
                     progress_indicator.stop()
                     raise CLIError('The operation failed')
-                if ((wait_for_created or wait_for_updated) and provisioning_state.casefold() == 'succeeded') or \
+                if ((wait_for_created or wait_for_updated) and provisioning_state == 'succeeded') or \
                         custom_condition and bool(verify_property(instance, custom_condition)):
                     progress_indicator.end()
                     return None
@@ -922,6 +925,8 @@ def remove_properties(instance, argument_values):
         except IndexError:
             raise CLIError('index {} doesn\'t exist on {}'
                            .format(list_index, list_attribute_path[-1]))
+        except AttributeError:
+            raise CLIError('{} doesn\'t exist'.format(list_attribute_path[-1]))
 
 
 def throw_and_show_options(instance, part, path):
@@ -1061,7 +1066,7 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
         retry_times = 36
         assignment_name = _gen_guid()
-        for l in range(0, retry_times):
+        for retry_time in range(0, retry_times):
             try:
                 assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
                                           parameters=parameters)
@@ -1070,9 +1075,9 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
                 if 'role assignment already exists' in ex.message:
                     logger.info('Role assignment already exists')
                     break
-                elif l < retry_times and ' does not exist in the directory ' in ex.message:
+                elif retry_time < retry_times and ' does not exist in the directory ' in ex.message:
                     time.sleep(5)
-                    logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                    logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
                                    retry_times)
                     continue
                 else:

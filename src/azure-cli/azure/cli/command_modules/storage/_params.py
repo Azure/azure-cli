@@ -15,10 +15,11 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
-                          validate_azcopy_remove_arguments, as_user_validator, parse_storage_account)
+                          validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
+                          validator_delete_retention_days, validate_delete_retention_days)
 
 
-def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
+def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
     from argcomplete.completers import FilesCompleter
     from six import u as unicode_string
 
@@ -115,6 +116,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                      help='Look into sub-directories recursively.')
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
+    t_routing_choice = self.get_models('RoutingChoice', resource_type=ResourceType.MGMT_STORAGE)
+    routing_choice_type = CLIArgumentType(
+        arg_group='Routing Preference', arg_type=get_enum_type(t_routing_choice),
+        help='Routing Choice defines the kind of network routing opted by the user.',
+        is_preview=True, min_api='2019-06-01')
+    publish_microsoft_endpoints_type = CLIArgumentType(
+        arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
+        help='A boolean flag which indicates whether microsoft routing storage endpoints are to be published.')
+    publish_internet_endpoints_type = CLIArgumentType(
+        arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
+        help='A boolean flag which indicates whether internet routing storage endpoints are to be published.')
 
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
@@ -138,7 +150,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys']:  # pylint: disable=line-too-long
+    for item in ['delete', 'show', 'update', 'show-connection-string', 'keys', 'network-rule', 'revoke-delegation-keys', 'failover']:  # pylint: disable=line-too-long
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
             c.argument('resource_group_name', required=False, validator=process_resource_group)
@@ -189,6 +201,26 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         'with account-scoped encryption key. "Service": Queue will always be encrypted with '
                         'service-scoped keys. Currently the default encryption key type is "Service".',
                    min_api='2019-06-01', options_list=['--encryption-key-type-for-queue', '-q'])
+        c.argument('routing_choice', routing_choice_type)
+        c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
+        c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
+
+    with self.argument_context('storage account private-endpoint-connection',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'],
+                   help='The name of the private endpoint connection associated with the Storage Account.')
+    for item in ['approve', 'reject', 'show', 'delete']:
+        with self.argument_context('storage account private-endpoint-connection {}'.format(item),
+                                   resource_type=ResourceType.MGMT_STORAGE) as c:
+            c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                       help='The name of the private endpoint connection associated with the Storage Account.')
+            c.extra('connection_id', options_list=['--id'],
+                    help='The ID of the private endpoint connection associated with the Storage Account. You can get '
+                    'it using `az storage account show`.')
+            c.argument('account_name', help='The storage account name.', required=False)
+            c.argument('resource_group_name', help='The resource group name of specified storage account.',
+                       required=False)
+            c.argument('description', help='Comments for {} operation.'.format(item))
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.register_common_storage_account_options()
@@ -208,16 +240,21 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('domain_guid', domain_guid_type)
         c.argument('domain_sid', domain_sid_type)
         c.argument('azure_storage_sid', azure_storage_sid_type)
+        c.argument('routing_choice', routing_choice_type)
+        c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
+        c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
-        c.extra('encryption_key_name', help='The name of the KeyVault key', )
-        c.extra('encryption_key_vault', help='The Uri of the KeyVault')
-        c.extra('encryption_key_version', help='The version of the KeyVault key')
+        t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('encryption_key_name', help='The name of the KeyVault key.', )
+        c.argument('encryption_key_vault', help='The Uri of the KeyVault.')
+        c.argument('encryption_key_version',
+                   help='The version of the KeyVault key to use, which will opt out of implicit key rotation. '
+                   'Please use "" to opt in key auto-rotation again.')
         c.argument('encryption_key_source',
-                   arg_type=get_enum_type(['Microsoft.Storage', 'Microsoft.Keyvault']),
-                   help='The default encryption service',
+                   arg_type=get_enum_type(t_key_source),
+                   help='The default encryption key source',
                    validator=validate_encryption_source)
-        c.ignore('encryption_key_vault_properties')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
@@ -237,6 +274,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
+
+    with self.argument_context('storage account encryption-scope') as c:
+        c.argument('account_name', help='The storage account name.')
+        c.argument('resource_group_name', validator=process_resource_group, required=False)
+        c.argument('encryption_scope_name', options_list=['--name', '-n'],
+                   help='The name of the encryption scope within the specified storage account.')
+
+    for scope in ['storage account encryption-scope create', 'storage account encryption-scope update']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE) as c:
+            from ._validators import validate_encryption_key
+            t_encryption_key_source = self.get_models('EncryptionScopeSource', resource_type=ResourceType.MGMT_STORAGE)
+            c.argument('key_source', options_list=['-s', '--key-source'],
+                       arg_type=get_enum_type(t_encryption_key_source, default="Microsoft.Storage"),
+                       help='The provider for the encryption scope.', validator=validate_encryption_key)
+            c.argument('key_uri', options_list=['-u', '--key-uri'],
+                       help='The object identifier for a key vault key object. When applied, the encryption scope will '
+                       'use the key referenced by the identifier to enable customer-managed key support on this '
+                       'encryption scope.')
+
+    with self.argument_context('storage account encryption-scope update') as c:
+        t_state = self.get_models("EncryptionScopeState", resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('key_source', options_list=['-s', '--key-source'],
+                   arg_type=get_enum_type(t_encryption_key_source),
+                   help='The provider for the encryption scope.', validator=validate_encryption_key)
+        c.argument('state', arg_type=get_enum_type(t_state),
+                   help='Change the state the encryption scope. When disabled, '
+                   'all blob read/write operations using this encryption scope will fail.')
 
     with self.argument_context('storage account keys list', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_expand_key_type = self.get_models('ListKeyExpand', resource_type=ResourceType.MGMT_STORAGE)
@@ -277,7 +341,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage account blob-service-properties update',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
-        from ._validators import validator_delete_retention_days
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('resource_group_name', required=False, validator=process_resource_group)
         c.argument('enable_change_feed', arg_type=get_three_state_flag(), min_api='2019-04-01')
@@ -285,6 +348,29 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    min_api='2018-07-01')
         c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
                    validator=validator_delete_retention_days, min_api='2018-07-01')
+        c.argument('enable_restore_policy', arg_type=get_three_state_flag(), arg_group='Restore Policy',
+                   min_api='2019-06-01', help="Enable blob restore policy when it set to true.")
+        c.argument('restore_days', type=int, arg_group='Restore Policy',
+                   min_api='2019-06-01', help="The number of days for the blob can be restored. It should be greater "
+                   "than zero and less than Delete Retention Days.")
+        c.argument('enable_versioning', arg_type=get_three_state_flag(), help='Versioning is enabled if set to true.',
+                   min_api='2019-06-01')
+
+    with self.argument_context('storage account file-service-properties show',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+
+    with self.argument_context('storage account file-service-properties update',
+                               resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('enable_delete_retention', arg_type=get_three_state_flag(), arg_group='Delete Retention Policy',
+                   min_api='2019-06-01', help='Enable file service properties for share soft delete.')
+        c.argument('delete_retention_days', type=int, arg_group='Delete Retention Policy',
+                   validator=validate_delete_retention_days, min_api='2019-06-01',
+                   help=' Indicate the number of days that the deleted item should be retained. The minimum specified '
+                   'value can be 1 and the maximum value can be 365.')
 
     with self.argument_context('storage account generate-sas') as c:
         t_account_permissions = self.get_sdk('common.models#AccountPermissions')
@@ -300,8 +386,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=get_permission_validator(t_account_permissions))
         c.ignore('sas_token')
 
-    with self.argument_context('storage logging show') as c:
-        c.extra('services', validator=get_char_options_validator('bqt', 'services'), default='bqt')
+    for item in ['show', 'off']:
+        with self.argument_context('storage logging {}'.format(item)) as c:
+            c.extra('services', validator=get_char_options_validator('bqt', 'services'), default='bqt')
 
     with self.argument_context('storage logging update') as c:
         c.extra('services', validator=get_char_options_validator('bqt', 'services'), options_list='--services',
@@ -359,6 +446,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
 
+    with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
+        from ._validators import BlobRangeAddAction
+        c.argument('blob_ranges', options_list=['--blob-range', '-r'], action=BlobRangeAddAction, nargs='+',
+                   help='Blob ranges to restore. You need to two values to specify start_range and end_range for each '
+                        'blob range, e.g. -r blob1 blob2. Note: Empty means account start as start range value, and '
+                        'means account end for end range.')
+        c.argument('account_name', acct_name_type, id_part=None)
+        c.argument('resource_group_name', required=False, validator=process_resource_group)
+        c.argument('time_to_restore', type=get_datetime_type(True), options_list=['--time-to-restore', '-t'],
+                   help='Restore blob to the specified time, which should be UTC datetime in (Y-m-d\'T\'H:M:S\'Z\').')
+
     with self.argument_context('storage blob update') as c:
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
         c.register_content_settings_argument(t_blob_content_settings, update=True)
@@ -397,7 +495,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         ' in other words, when a browser requests a page that does not exist.')
 
     with self.argument_context('storage blob upload') as c:
-        from ._validators import page_blob_tier_validator
+        from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
         from .sdkutil import get_blob_types, get_blob_tier_names
 
         t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
@@ -416,6 +514,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tier', validator=page_blob_tier_validator,
                    arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
                    min_api='2017-04-17')
+        c.argument('encryption_scope', validator=validate_encryption_scope_client_params,
+                   help='A predefined encryption scope used to encrypt the data on the service.')
 
     with self.argument_context('storage blob upload-batch') as c:
         from .sdkutil import get_blob_types
@@ -507,6 +607,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('exclude_path', exclude_path_type)
         c.argument('include_path', include_path_type)
         c.argument('recursive', recursive_type)
+        c.argument('content_type', arg_group='Additional Flags', help="Specify content type of the file. ")
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
@@ -572,6 +673,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container create') as c:
         c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
         c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
+        c.argument('account_name', help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
+        c.argument('default_encryption_scope', options_list=['--default-encryption-scope', '-d'],
+                   arg_group='Encryption Policy', is_preview=True,
+                   help='Default the container to use specified encryption scope for all writes.')
+        c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
+                   arg_type=get_three_state_flag(), arg_group='Encryption Policy', is_preview=True,
+                   help='Block override of encryption scope from the container default.')
 
     with self.argument_context('storage container delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the container does not exist.')
@@ -586,6 +694,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage container exists') as c:
         c.ignore('blob_name', 'snapshot')
+
+    with self.argument_context('storage container immutability-policy') as c:
+        c.argument('allow_protected_append_writes', options_list=['--allow-protected-append-writes', '-w'],
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('storage container list') as c:
         c.argument('num_results', arg_type=num_results_type)

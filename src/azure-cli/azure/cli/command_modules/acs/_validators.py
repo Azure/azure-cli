@@ -259,3 +259,75 @@ def validate_vnet_subnet_id(namespace):
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.vnet_subnet_id):
             raise CLIError("--vnet-subnet-id is not a valid Azure resource ID.")
+
+
+def validate_nodepool_labels(namespace):
+    """Validates that provided node labels is a valid format"""
+
+    if hasattr(namespace, 'nodepool_labels'):
+        labels = namespace.nodepool_labels
+    else:
+        labels = namespace.labels
+
+    if labels is None:
+        return
+
+    if isinstance(labels, list):
+        labels_dict = {}
+        for item in labels:
+            labels_dict.update(validate_label(item))
+        after_validation_labels = labels_dict
+    else:
+        after_validation_labels = validate_label(labels)
+
+    if hasattr(namespace, 'nodepool_labels'):
+        namespace.nodepool_labels = after_validation_labels
+    else:
+        namespace.labels = after_validation_labels
+
+
+def validate_label(label):
+    """Validates that provided label is a valid format"""
+    prefix_regex = re.compile(r"^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$")
+    name_regex = re.compile(r"^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$")
+    value_regex = re.compile(r"^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$")
+
+    if label == "":
+        return {}
+    kv = label.split('=')
+    if len(kv) != 2:
+        raise CLIError("Invalid label: %s. Label definition must be of format name=value." % label)
+    name_parts = kv[0].split('/')
+    if len(name_parts) == 1:
+        name = name_parts[0]
+    elif len(name_parts) == 2:
+        prefix = name_parts[0]
+        if not prefix or len(prefix) > 253:
+            raise CLIError("Invalid label: %s. Label prefix can't be empty or more than 253 chars." % label)
+        if not prefix_regex.match(prefix):
+            raise CLIError("Invalid label: %s. Prefix part a DNS-1123 label must consist of lower case alphanumeric "
+                           "characters or '-', and must start and end with an alphanumeric character" % label)
+        name = name_parts[1]
+    else:
+        raise CLIError("Invalid label: %s. A qualified name must consist of alphanumeric characters, '-', '_' "
+                       "or '.', and must start and end with an alphanumeric character (e.g. 'MyName',  or "
+                       "'my.name',  or '123-abc') with an optional DNS subdomain prefix and '/' "
+                       "(e.g. 'example.com/MyName')" % label)
+
+    # validate label name
+    if not name or len(name) > 63:
+        raise CLIError("Invalid label: %s. Label name can't be empty or more than 63 chars." % label)
+    if not name_regex.match(name):
+        raise CLIError("Invalid label: %s. A qualified name must consist of alphanumeric characters, '-', '_' "
+                       "or '.', and must start and end with an alphanumeric character (e.g. 'MyName',  or "
+                       "'my.name',  or '123-abc') with an optional DNS subdomain prefix and '/' (e.g. "
+                       "'example.com/MyName')" % label)
+
+    # validate label value
+    if len(kv[1]) > 63:
+        raise CLIError("Invalid label: %s. Label must be more than 63 chars." % label)
+    if not value_regex.match(kv[1]):
+        raise CLIError("Invalid label: %s. A valid label must be an empty string or consist of alphanumeric "
+                       "characters, '-', '_' or '.', and must start and end with an alphanumeric character" % label)
+
+    return {kv[0]: kv[1]}

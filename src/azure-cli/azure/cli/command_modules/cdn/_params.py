@@ -2,44 +2,22 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-import argparse
-
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.cdn.models import QueryStringCachingBehavior, SkuName
+from azure.mgmt.cdn.models import QueryStringCachingBehavior, SkuName, ActionType
 
 from azure.cli.core.commands.parameters import get_three_state_flag, tags_type, get_enum_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
-from ._validators import validate_origin
-
-
-# pylint:disable=protected-access
-# pylint:disable=too-few-public-methods
-class OriginType(argparse._AppendAction):
-    def __call__(self, parser, namespace, values, option_string=None):
-        deep_created_origin = self.get_origin(values, option_string)
-        super(OriginType, self).__call__(parser, namespace, deep_created_origin, option_string)
-
-    def get_origin(self, values, option_string):
-        from azure.mgmt.cdn.models import DeepCreatedOrigin
-
-        if not 1 <= len(values) <= 3:
-            msg = '%s takes 1, 2 or 3 values, %d given'
-            raise argparse.ArgumentError(self, msg % (option_string, len(values)))
-
-        deep_created_origin = DeepCreatedOrigin(name='origin', host_name=values[0], http_port=80, https_port=443)
-        if len(values) > 1:
-            deep_created_origin.http_port = int(values[1])
-        if len(values) > 2:
-            deep_created_origin.https_port = int(values[2])
-        return deep_created_origin
+from ._validators import (validate_origin, validate_priority)
+from ._actions import (OriginType, MatchConditionAction, ManagedRuleOverrideAction)
 
 
 # pylint:disable=too-many-statements
 def load_arguments(self, _):
 
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
+    endpoint_name_type = CLIArgumentType(options_list=('--endpoint-name'), metavar='ENDPOINT_NAME')
     profile_name_help = 'Name of the CDN profile which is unique within the resource group.'
 
     with self.argument_context('cdn') as c:
@@ -76,12 +54,13 @@ def load_arguments(self, _):
                         'user requests for a compressed version. Content won\'t be compressed '
                         'on CDN when requested content is smaller than 1 byte or larger than 1 '
                         'MB.')
+        c.argument('profile_name', help=profile_name_help, id_part='name')
 
+    with self.argument_context('cdn endpoint update') as c:
         caching_behavior = [item.value for item in list(QueryStringCachingBehavior)]
         c.argument('query_string_caching_behavior', options_list='--query-string-caching',
                    arg_type=get_enum_type(caching_behavior))
         c.argument('content_types_to_compress', nargs='+')
-        c.argument('profile_name', help=profile_name_help, id_part='name')
 
     with self.argument_context('cdn endpoint rule') as c:
         c.argument('rule_name', help='Name of the rule.')
@@ -139,9 +118,14 @@ def load_arguments(self, _):
 
     with self.argument_context('cdn endpoint create') as c:
         c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
+    with self.argument_context('cdn endpoint set') as c:
+        c.argument('name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
 
     with self.argument_context('cdn endpoint list') as c:
         c.argument('profile_name', id_part=None)
+
+    with self.argument_context('cdn endpoint waf') as c:
+        c.argument('endpoint_name', endpoint_name_type, help='Name of the CDN endpoint.')
 
     # Custom Domain #
 
@@ -154,3 +138,60 @@ def load_arguments(self, _):
     # Origin #
     with self.argument_context('cdn origin') as c:
         c.argument('origin_name', name_arg_type, id_part='name')
+
+    # WAF #
+
+    with self.argument_context('cdn waf policy set') as c:
+        c.argument('disabled', arg_type=get_three_state_flag())
+        c.argument('block_response_status_code', type=int)
+        c.argument('name', name_arg_type, id_part='name', help='The name of the CDN WAF policy.')
+    with self.argument_context('cdn waf policy show') as c:
+        c.argument('policy_name', name_arg_type, id_part='name', help='The name of the CDN WAF policy.')
+    with self.argument_context('cdn waf policy delete') as c:
+        c.argument('policy_name', name_arg_type, id_part='name', help='The name of the CDN WAF policy.')
+
+    with self.argument_context('cdn waf policy managed-rule-set') as c:
+        c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')
+        c.argument('rule_set_type', help='The type of the managed rule set.')
+        c.argument('rule_set_version', help='The version of the managed rule set.')
+    with self.argument_context('cdn waf policy managed-rule-set list') as c:
+        # List commands cannot use --ids flag
+        c.argument('policy_name', id_part=None)
+    with self.argument_context('cdn waf policy managed-rule-set add') as c:
+        c.argument('enabled', arg_type=get_three_state_flag())
+
+    with self.argument_context('cdn waf policy managed-rule-set rule-group-override') as c:
+        c.argument('name', name_arg_type, id_part=None, help='The name of the rule group.')
+    with self.argument_context('cdn waf policy managed-rule-set rule-group-override list') as c:
+        # List commands cannot use --ids flag
+        c.argument('policy_name', id_part=None)
+    with self.argument_context('cdn waf policy managed-rule-set rule-group-override set') as c:
+        c.argument('rule_overrides',
+                   options_list=['-r', '--rule-override'],
+                   action=ManagedRuleOverrideAction,
+                   nargs='+')
+
+    with self.argument_context('cdn waf policy custom-rule') as c:
+        c.argument('name', name_arg_type, id_part=None, help='The name of the custom rule.')
+        c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')
+    with self.argument_context('cdn waf policy custom-rule list') as c:
+        # List commands cannot use --ids flag
+        c.argument('policy_name', id_part=None)
+    with self.argument_context('cdn waf policy rate-limit-rule') as c:
+        c.argument('name', name_arg_type, id_part=None, help='The name of the rate limit rule.')
+        c.argument('policy_name', id_part='name', help='Name of the CDN WAF policy.')
+    with self.argument_context('cdn waf policy rate-limit-rule list') as c:
+        # List commands cannot use --ids flag
+        c.argument('policy_name', id_part=None)
+
+    with self.argument_context('cdn waf policy custom-rule set') as c:
+        c.argument('match_conditions', options_list=['-m', '--match-condition'], action=MatchConditionAction, nargs='+')
+        c.argument('priority', type=int, validator=validate_priority)
+        c.argument('action', arg_type=get_enum_type([item.value for item in list(ActionType)]))
+
+    with self.argument_context('cdn waf policy rate-limit-rule set') as c:
+        c.argument('match_conditions', options_list=['-m', '--match-condition'], action=MatchConditionAction, nargs='+')
+        c.argument('priority', type=int, validator=validate_priority)
+        c.argument('action', arg_type=get_enum_type([item.value for item in list(ActionType)]))
+        c.argument('request_threshold', type=int)
+        c.argument('duration', type=int)

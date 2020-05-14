@@ -53,6 +53,8 @@ examples:
     text: az storage account blob-service-properties update --enable-change-feed true -n MyStorageAccount -g MyResourceGroup
   - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
     text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n MyStorageAccount -g MyResourceGroup
+  - name: Enable versioning for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-versioning -n MyStorageAccount -g MyResourceGroup
 """
 
 helps['storage account create'] = """
@@ -81,6 +83,76 @@ examples:
     text: az storage account delete -n MyStorageAccount -g MyResourceGroup
 """
 
+helps['storage account encryption-scope'] = """
+type: group
+short-summary: Manage encryption scope for a storage account.
+"""
+
+helps['storage account encryption-scope create'] = """
+type: command
+short-summary: Create an encryption scope within storage account.
+examples:
+  - name: Create an encryption scope within storage account based on Micosoft.Storage key source.
+    text: |
+        az storage account encryption-scope create --name myencryption -s Microsoft.Storage --account-name mystorageaccount -g MyResourceGroup
+  - name: Create an encryption scope within storage account based on Micosoft.KeyVault key source.
+    text: |
+        az storage account encryption-scope create --name myencryption -s Microsoft.KeyVault -u "https://vaultname.vault.azure.net/keys/keyname/1f7fa7edc99f4cdf82b5b5f32f2a50a7" --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope list'] = """
+type: command
+short-summary: List encryption scopes within storage account.
+examples:
+  - name: List encryption scopes within storage account.
+    text: |
+        az storage account encryption-scope list --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope show'] = """
+type: command
+short-summary: Show properties for specified encryption scope within storage account.
+examples:
+  - name: Show properties for specified encryption scope within storage account.
+    text: |
+        az storage account encryption-scope show --name myencryption --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope update'] = """
+type: command
+short-summary: Update properties for specified encryption scope within storage account.
+examples:
+  - name: Update an encryption scope key source to Micosoft.Storage.
+    text: |
+        az storage account encryption-scope update --name myencryption -s Microsoft.Storage --account-name mystorageaccount -g MyResourceGroup
+  - name: Create an encryption scope within storage account based on Micosoft.KeyVault key source.
+    text: |
+        az storage account encryption-scope update --name myencryption -s Microsoft.KeyVault -u "https://vaultname.vault.azure.net/keys/keyname/1f7fa7edc99f4cdf82b5b5f32f2a50a7" --account-name mystorageaccount -g MyResourceGroup
+  - name: Disable an encryption scope within storage account.
+    text: |
+        az storage account encryption-scope update --name myencryption --state Disabled --account-name mystorageaccount -g MyResourceGroup
+  - name: Enable an encryption scope within storage account.
+    text: |
+        az storage account encryption-scope update --name myencryption --state Enabled --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account failover'] = """
+type: command
+short-summary: Failover request can be triggered for a storage account in case of availability issues.
+long-summary: |
+    The failover occurs from the storage account's primary cluster to secondary cluster for (RA-)GRS/GZRS accounts. The secondary
+    cluster will become primary after failover. For more information, please refer to
+    https://docs.microsoft.com/en-us/azure/storage/common/storage-disaster-recovery-guidance.
+examples:
+  - name: Failover a storage account.
+    text: |
+        az storage account failover -n mystorageaccount -g MyResourceGroup
+  - name: Failover a storage account without waiting for complete.
+    text: |
+        az storage account failover -n mystorageaccount -g MyResourceGroup --no-wait
+        az storage account show -n mystorageaccount --expand geoReplicationStats
+"""
+
 helps['storage account generate-sas'] = """
 type: command
 parameters:
@@ -107,6 +179,33 @@ examples:
     text: |
         az storage account generate-sas --account-key 00000000 --account-name MyStorageAccount --expiry 2020-01-01 --https-only --permissions acuw --resource-types co --services bfqt
     crafted: true
+"""
+
+helps['storage account file-service-properties'] = """
+type: group
+short-summary: Manage the properties of file service in storage account.
+"""
+
+helps['storage account file-service-properties show'] = """
+type: command
+short-summary: Show the properties of file service in storage account.
+long-summary: >
+    Show the properties of file service in storage account.
+examples:
+  - name: Show the properties of file service in storage account.
+    text: az storage account file-service-properties show -n mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account file-service-properties update'] = """
+type: command
+short-summary: Update the properties of file service in storage account.
+long-summary: >
+    Update the properties of file service in storage account.
+examples:
+  - name: Enable soft delete policy and set delete retention days to 100 for file service in storage account.
+    text: az storage account file-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g MyResourceGroup
+  - name: Disable soft delete policy for file service.
+    text: az storage account file-service-properties update --enable-delete-retention false -n mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account keys'] = """
@@ -204,6 +303,105 @@ examples:
     text: |
         az storage account network-rule remove --account-name MyAccount --ip-address 23.45.1.0/24 --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['storage account private-endpoint-connection'] = """
+type: group
+short-summary: Manage storage account private endpoint connection.
+"""
+
+helps['storage account private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection request for storage account.
+examples:
+  - name: Approve a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection approve --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Approve a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection approve --id $id
+  - name: Approve a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection approve -g myRg --account-name mystorageaccount --name myconnection
+  - name: Approve a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection approve -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection request for storage account.
+examples:
+  - name: Delete a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection delete --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Delete a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection delete --id $id
+  - name: Delete a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection delete -g myRg --account-name mystorageaccount --name myconnection
+  - name: Delete a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection delete -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection request for storage account.
+examples:
+  - name: Reject a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection reject --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Reject a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection reject --id $id
+  - name: Reject a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection reject -g myRg --account-name mystorageaccount --name myconnection
+  - name: Reject a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection reject -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection request for storage account.
+examples:
+  - name: Show details of a private endpoint connection request for storage account by ID.
+    text: |
+        az storage account private-endpoint-connection show --id "/subscriptions/0000-0000-0000-0000/resourceGroups/MyResourceGroup/providers/Microsoft.Storage/storageAccounts/mystorageaccount/privateEndpointConnections/mystorageaccount.b56b5a95-0588-4f8b-b348-15db61590a6c"
+  - name: Show details of a private endpoint connection request for storage account by ID.
+    text: |
+        id = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].id")
+        az storage account private-endpoint-connection show --id $id
+  - name: Show details of a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        az storage account private-endpoint-connection show -g myRg --account-name mystorageaccount --name myconnection
+  - name: Show details of a private endpoint connection request for storage account using account name and connection name.
+    text: |
+        name = (az storage account show -n mystorageaccount --query "privateEndpointConnections[0].name")
+        az storage account private-endpoint-connection show -g myRg --account-name mystorageaccount --name $name
+"""
+
+helps['storage account private-link-resource'] = """
+type: group
+short-summary: Manage storage account private link resources.
+"""
+
+helps['storage account private-link-resource list'] = """
+type: command
+short-summary: Get the private link resources that need to be created for a storage account.
+examples:
+  - name: Get the private link resources that need to be created for a storage account.
+    text: |
+        az storage account private-link-resource list --account-name mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account revoke-delegation-keys'] = """
@@ -477,6 +675,24 @@ type: group
 short-summary: Manage blob metadata.
 """
 
+helps['storage blob restore'] = """
+type: command
+short-summary: Restore blobs in the specified blob ranges.
+examples:
+  - name: Restore blobs in two specified blob ranges. For examples, (container1/blob1, container2/blob2) and (container2/blob3..container2/blob4).
+    text: az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t 2020-02-27T03:59:59Z -r container1/blob1 container2/blob2 -r container2/blob3 container2/blob4
+  - name: Restore blobs in the specified blob ranges from account start to account end.
+    text: az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t 2020-02-27T03:59:59Z -r "" ""
+  - name: Restore blobs in the specified blob range.
+    text: |
+        time=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2
+  - name: Restore blobs in the specified blob range without wait and query blob restore status with 'az storage account show'.
+    text: |
+        time=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage blob restore --account-name mystorageaccount -g MyResourceGroup -t $time -r container0/blob1 container0/blob2 --no-wait
+"""
+
 helps['storage blob service-properties'] = """
 type: group
 short-summary: Manage storage blob service properties.
@@ -695,7 +911,7 @@ examples:
         end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
         sas=`az storage container generate-sas -n mycontainer --https-only --permissions dlrw --expiry $end -o tsv`
         az storage blob upload -n MyBlob -c mycontainer -f file.txt --sas-token $sas
-  - name: Generates a shared access signature for the container (autogenerated)
+  - name: Generate a shared access signature for the container (autogenerated)
     text: |
         az storage container generate-sas --account-key 00000000 --account-name mystorageaccount --expiry 2020-01-01 --name mycontainer --permissions dlrw
     crafted: true
@@ -881,7 +1097,7 @@ short-summary: List directories in a share.
 examples:
   - name: List directories in a share. (autogenerated)
     text: |
-        az storage directory list --account-name MyAccount --share-name MyShare
+        az storage directory list --account-key 00000000 --account-name MyAccount --share-name MyShare
     crafted: true
 """
 
@@ -953,6 +1169,9 @@ examples:
     - name: Copy a file asynchronously from source uri to destination storage account with sas token.
       text: |
         az storage file copy start --source-uri "https://srcaccount.file.core.windows.net/myshare/mydir/myfile?<sastoken>" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
+    - name: Copy a file asynchronously from file snapshot to destination storage account with sas token.
+      text: |
+        az storage file copy start --source-account-name srcaccount --source-account-key 00000000 --source-path <srcpath-to-file> --source-share srcshare --file-snapshot "2020-03-02T13:51:54.0000000Z" --destination-path <destpath-to-file> --destination-share destshare --account-name destaccount --sas-token <destinaition-sas>
 """
 
 helps['storage file copy start-batch'] = """
@@ -1058,10 +1277,6 @@ examples:
   - name: Download files from an Azure Storage File Share to a local directory in a batch operation. (autogenerated)
     text: |
         az storage file download-batch --account-key 00000000 --account-name MyAccount --destination . --no-progress --source /path/to/file
-    crafted: true
-  - name: Download files from an Azure Storage File Share to a local directory in a batch operation. (autogenerated)
-    text: |
-        az storage file download-batch --destination . --pattern *.py --source /path/to/file
     crafted: true
 """
 
@@ -1174,6 +1389,18 @@ examples:
 helps['storage logging'] = """
 type: group
 short-summary: Manage storage service logging information.
+"""
+
+helps['storage logging off'] = """
+type: command
+short-summary: Turn off logging for a storage account.
+parameters:
+  - name: --services
+    short-summary: 'The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.'
+examples:
+  - name: Turn off logging for a storage account.
+    text: |
+        az storage logging off --account-name MyAccount
 """
 
 helps['storage logging show'] = """
@@ -1443,10 +1670,6 @@ examples:
   - name: Create a URI to access a file share. (autogenerated)
     text: |
         az storage share url --account-key 00000000 --account-name MyAccount --name MyFileShare
-    crafted: true
-  - name: Create a URI to access a file share. (autogenerated)
-    text: |
-        az storage share url --connection-string $connectionString --name MyFileShare
     crafted: true
 """
 

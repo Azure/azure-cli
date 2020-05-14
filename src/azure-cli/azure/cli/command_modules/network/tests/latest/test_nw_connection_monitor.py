@@ -17,7 +17,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                             '--authentication-type password ' \
                             '--admin-username deploy ' \
                             '--admin-password PassPass10!) ' \
-                            '--nsg {vm} '
+                            '--nsg {vm} ' \
+                            '--nsg-rule None '
         vm_info = self.cmd(vm_create_cmd_tpl.format(rg=resource_group, vm=vm)).get_output_in_json()
 
         vm_enable_ext_tpl = 'vm extension set -g {rg} ' \
@@ -77,7 +78,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--authentication-type password '
                  '--admin-username deploy '
                  '--admin-password PassPass10!) '
-                 '--nsg {vm2} ')
+                 '--nsg {vm2} '
+                 '--nsg-rule None')
         self.cmd('vm extension set -g {rg} '
                  '--vm-name {vm2} '
                  '-n NetworkWatcherAgentLinux '
@@ -87,7 +89,8 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
                  '--authentication-type password '
                  '--admin-username deploy '
                  '--admin-password PassPass10!) '
-                 '--nsg {vm3}')
+                 '--nsg {vm3} '
+                 '--nsg-rule None')
         self.cmd('vm extension set -g {rg} '
                  '--vm-name {vm3} '
                  '-n NetworkWatcherAgentLinux '
@@ -309,30 +312,19 @@ class NWConnectionMonitorScenarioTest(ScenarioTest):
     def test_nw_connection_monitor_output(self, resource_group, resource_group_location):
         self._prepare_connection_monitor_v2_env(resource_group, resource_group_location)
 
+        self.kwargs.update({
+            'workspace_name': self.create_random_name('clitest', 20)
+        })
+
         workspace = self.cmd('monitor log-analytics workspace create '
                              '-g {rg} '
                              '--location {location} '
-                             '--workspace-name MyLogAnalytics4321 ').get_output_in_json()
+                             '--workspace-name {workspace_name} ').get_output_in_json()
 
         self.kwargs.update({
             'workspace_id': workspace['id']
         })
 
-        self.cmd('network watcher connection-monitor output add '
-                 '--location {location} '
-                 '--connection-monitor {cmv2} '
-                 '--type Workspace '
-                 '--workspace-id {workspace_id} ')
-
         self.cmd('network watcher connection-monitor output list '
                  '--location {location} '
                  '--connection-monitor {cmv2} ')
-
-        self.cmd('network watcher connection-monitor output remove '
-                 '--location {location} '
-                 '--connection-monitor {cmv2} ')
-
-        self.cmd('network watcher connection-monitor output list '
-                 '--location {location} '
-                 '--connection-monitor {cmv2} ',
-                 checks=self.check('length(@)', 0))
