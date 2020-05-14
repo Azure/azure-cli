@@ -309,25 +309,3 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='IoT Central application template name. Default is a custom application.')
         c.argument('display_name',
                    help='Custom display name for the IoT Central application. Default is resource name.')
-
-    with self.argument_context('iot hub private-link-resource list') as c:
-        c.argument('hub_name', options_list=['--hub-name', '--name', '-n'], help='The name of the IoT hub.')
-
-    with self.argument_context('iot hub private-endpoint-connection') as c:
-        c.argument('hub_name', options_list=['--hub-name'], help='The name of the IoT hub.', required=False)
-        c.argument('private_endpoint_connection_name', options_list=['-n', '--name'], required=False,
-                   help='The name of the private endpoint connection.')
-        c.argument('resource_group_name', help='The resource group name of specified IoT hub.',
-                   required=False)
-
-    for command in ['approve', 'reject', 'show', 'delete']:
-        with self.argument_context('iot hub private-endpoint-connection {}'.format(command)) as c:
-            c.extra(
-                'connection_id',
-                options_list=['--id'],
-                help='The ID of the private endpoint connection associated with the IoT hub. You can get '
-                'it using `az iot hub show`.'
-            )
-            c.argument(
-                'description', options_list=['--description', '-d'], help='Comments for {} operation.'.format(command)
-            )

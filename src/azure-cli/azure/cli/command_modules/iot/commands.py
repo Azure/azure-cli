@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import LongRunningOperation, CliCommandType
-from azure.cli.core.commands.transform import gen_dict_to_list_transform
 from ._client_factory import iot_hub_service_factory
 from ._client_factory import iot_service_provisioning_factory
 from ._client_factory import iot_pnp_service_factory
@@ -188,15 +187,3 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.generic_update_command('update', getter_name='iot_central_app_get',
                                  setter_name='iot_central_app_update', command_type=update_custom_util)
         g.custom_command('delete', 'iot_central_app_delete', confirmation=True)
-
-    # iot private-endpoint commands
-    from ._validators import validate_private_endpoint_connection_id
-    with self.command_group('iot hub private-endpoint-connection', client_factory=iot_hub_service_factory) as g:
-        g.custom_command('approve', 'iot_private_endpoint_approve', validator=validate_private_endpoint_connection_id)
-        g.custom_command('reject', 'iot_private_endpoint_reject', validator=validate_private_endpoint_connection_id)
-        g.custom_command('show', 'iot_private_endpoint_show', validator=validate_private_endpoint_connection_id)
-        g.custom_command('delete', 'iot_private_endpoint_delete', confirmation=True,
-                         validator=validate_private_endpoint_connection_id)
-
-    with self.command_group('iot hub private-link-resource', client_factory=iot_hub_service_factory) as g:
-        g.custom_command('list', 'iot_private_link_list', transform=gen_dict_to_list_transform(key='value'))

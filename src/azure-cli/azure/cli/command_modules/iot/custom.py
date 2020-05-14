@@ -400,10 +400,10 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         raise CLIError('Please mention storage container name.')
     if fileupload_storage_container_name and not fileupload_storage_connectionstring:
         raise CLIError('Please mention storage connection string.')
-    identityBased_fileUpload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
-    if not identityBased_fileUpload and not fileupload_storage_connectionstring and fileupload_storage_container_name:
+    identity_based_file_upload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
+    if not identity_based_file_upload and not fileupload_storage_connectionstring and fileupload_storage_container_name:
         raise CLIError('Key-based authentication requires a connection string.')
-    if identityBased_fileUpload and not fileupload_storage_container_uri:
+    if identity_based_file_upload and not fileupload_storage_container_uri:
         raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
     _check_name_availability(client.iot_hub_resource, hub_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
@@ -511,11 +511,11 @@ def update_iot_hub_custom(instance,
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
 
-    identityBased_fileUpload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
-    if identityBased_fileUpload:
+    identity_based_file_upload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
+    if identity_based_file_upload:
         instance.properties.storage_endpoints['$default'].authentication_type = AuthenticationType.IdentityBased
         instance.properties.storage_endpoints['$default'].container_uri = fileupload_storage_container_uri
-    else:
+    elif fileupload_storage_authentication_type is not None:
         instance.properties.storage_endpoints['$default'].authentication_type = None
         instance.properties.storage_endpoints['$default'].container_uri = None
     # TODO - remove connection string and set containerURI once fileUpload SAS URL is enabled
@@ -1190,91 +1190,6 @@ def iot_central_app_list(client, resource_group_name=None):
 def iot_central_app_update(client, app_name, parameters, resource_group_name):
     etag = parameters.additional_properties['etag']
     return client.apps.update(resource_group_name, app_name, parameters, {'IF-MATCH': etag})
-
-
-def iot_private_link_list(client, hub_name, resource_group_name):
-    return client.private_link_resources.list(resource_group_name=resource_group_name, resource_name=hub_name)
-
-
-def iot_private_endpoint_approve(cmd, client, hub_name, private_endpoint_connection_name, description, resource_group_name):
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, hub_name=hub_name,
-        private_endpoint_connection_name=private_endpoint_connection_name, is_approved=True, description=description
-    )
-
-
-def iot_private_endpoint_reject(cmd, client, hub_name, private_endpoint_connection_name, description, resource_group_name):
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, hub_name=hub_name,
-        private_endpoint_connection_name=private_endpoint_connection_name, is_approved=False, description=description
-    )
-
-
-def iot_private_endpoint_delete(client, hub_name, private_endpoint_connection_name, resource_group_name):
-    private_endpoint_connection = client.private_endpoint_connections.get(
-        resource_group_name,
-        hub_name,
-        private_endpoint_connection_name
-    )
-    if not private_endpoint_connection:
-        raise CLIError(
-            "No private endpoint connection named '{0}' found in hub {1}"
-            .format(private_endpoint_connection_name, hub_name)
-        )
-    return client.private_endpoint_connections.delete(
-        resource_group_name=resource_group_name,
-        resource_name=hub_name,
-        private_endpoint_connection_name=private_endpoint_connection.name,
-        properties=private_endpoint_connection
-    )
-
-
-def iot_private_endpoint_show(client, hub_name, private_endpoint_connection_name, resource_group_name):
-    private_endpoint_connection = client.private_endpoint_connections.get(
-        resource_group_name,
-        hub_name,
-        private_endpoint_connection_name
-    )
-    if not private_endpoint_connection:
-        raise CLIError(
-            "No private endpoint connection named '{0}' found in hub {1}"
-            .format(private_endpoint_connection_name, hub_name)
-        )
-    return private_endpoint_connection
-
-
-def _update_private_endpoint_connection_status(cmd, client, resource_group_name, hub_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None):
-
-    PrivateLinkServiceConnectionStatus, ErrorDetailsException = cmd.get_models('PrivateLinkServiceConnectionStatus', 'ErrorDetailsException')
-    private_endpoint_connection = client.private_endpoint_connections.get(
-        resource_group_name,
-        hub_name,
-        private_endpoint_connection_name
-    )
-    if not private_endpoint_connection:
-        raise CLIError(
-            "No private endpoint connection named '{0}' found in hub {1}"
-            .format(private_endpoint_connection_name, hub_name)
-        )
-    old_status = private_endpoint_connection.properties.private_link_service_connection_state.status
-    new_status = PrivateLinkServiceConnectionStatus.approved if is_approved else PrivateLinkServiceConnectionStatus.rejected
-    private_endpoint_connection.properties.private_link_service_connection_state.status = new_status
-    private_endpoint_connection.properties.private_link_service_connection_state.description = description
-    try:
-        return client.private_endpoint_connections.update(
-            resource_group_name=resource_group_name,
-            resource_name=hub_name,
-            private_endpoint_connection_name=private_endpoint_connection_name,
-            properties=private_endpoint_connection.properties
-        )
-    except ErrorDetailsException as ex:
-        if ex.response.status_code == 400:
-            from msrestazure.azure_exceptions import CloudError
-            if new_status == "Approved" and old_status == "Rejected":
-                raise CloudError(ex.response, "You cannot approve the connection request after rejection. "
-                                 "Please create a new connection for approval.")
-        raise ex
 
 
 def _ensure_location(cli_ctx, resource_group_name, location):

@@ -404,7 +404,8 @@ class IoTHubTest(ScenarioTest):
         rg = resource_group
         location = resource_group_location
 
-        identity_hub = 'iot-cli-identity-enabled-hub-test'
+        private_endpoint_type = 'Microsoft.Devices/IoTHubs'
+        identity_hub = 'cli-identity-enabled-hub'
         identity_based_auth = 'identityBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
@@ -460,8 +461,8 @@ class IoTHubTest(ScenarioTest):
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
         # Create a private endpoint connection
-        pr = self.cmd('iot hub private-link-resource list --hub-name {0} -g {1}'
-                      .format(identity_hub, rg)).get_output_in_json()
+        pr = self.cmd('network private-link-resource list --type {0} -n {1} -g {2}'
+                      .format(private_endpoint_type, identity_hub, rg)).get_output_in_json()
         group_id = pr[0]['properties']['groupId']
 
         hub = self.cmd('iot hub show -n {0} -g {1}'.format(identity_hub, rg)).get_output_in_json()
@@ -484,32 +485,29 @@ class IoTHubTest(ScenarioTest):
         private_endpoint_name = hub['properties']['privateEndpointConnections'][0]['name']
         # endpoint connection approve by name
         approve_desc = 'Approving endpoint connection'
-        self.cmd('iot hub private-endpoint-connection approve -n {0} --hub-name {1} -g {2} --description "{3}"'
-                 .format(private_endpoint_name, identity_hub, rg, approve_desc),
+        self.cmd('network private-endpoint-connection approve --type {0} -n {1} --resource-name {2} -g {3} --description "{4}"'
+                 .format(private_endpoint_type, private_endpoint_name, identity_hub, rg, approve_desc),
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
         # endpoint approve by id
-        self.cmd('iot hub private-endpoint-connection approve --id {0} --description "{1}"'
+        self.cmd('network private-endpoint-connection approve --id {0} --description "{1}"'
                  .format(endpoint_id, approve_desc),
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
         # endpoint connection reject by name
         reject_desc = 'Rejecting endpoint connection'
-        self.cmd('iot hub private-endpoint-connection reject -n {0} --hub-name {1} -g {2} --description "{3}"'
-                 .format(private_endpoint_name, identity_hub, rg, reject_desc),
+        self.cmd('network private-endpoint-connection reject --type {0} -n {1} --resource-name {2} -g {3} --description "{4}"'
+                 .format(private_endpoint_type, private_endpoint_name, identity_hub, rg, reject_desc),
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
 
         # endpoint show
-        self.cmd('iot hub private-endpoint-connection show -n {0} --hub-name {1} -g {2}'
-                 .format(private_endpoint_name, identity_hub, rg),
+        self.cmd('network private-endpoint-connection show --type {0} -n {1} --resource-name {2} -g {3}'
+                 .format(private_endpoint_type, private_endpoint_name, identity_hub, rg),
                  checks=self.check('id', endpoint_id))
 
         # endpoint delete
-        self.cmd('iot hub private-endpoint-connection delete -n {0} --hub-name {1} -g {2} -y'
-                 .format(private_endpoint_name, identity_hub, rg),
-                 checks=self.check('status', 'Succeeded'))
-
-        self.cmd('iot hub delete -n {0}'.format(identity_hub), checks=self.is_empty())
+        self.cmd('network private-endpoint-connection delete --type {0} -n {1} --resource-name {2} -g {3} -y'
+                 .format(private_endpoint_type, private_endpoint_name, identity_hub, rg))
 
     def _get_eventhub_connectionstring(self, rg):
         ehNamespace = 'ehNamespaceiothubfortest1'
