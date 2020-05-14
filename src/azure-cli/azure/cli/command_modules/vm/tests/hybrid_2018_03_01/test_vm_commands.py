@@ -1864,12 +1864,12 @@ class VMLiveScenarioTest(LiveScenarioTest):
         content = test_io.getvalue()
         # check log has okay format
         lines = content.splitlines()
-        for l in lines:
-            self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
+        for line in lines:
+            self.assertTrue(line.split(':')[0] in ['Accepted', 'Succeeded'])
         # spot check we do have some relevant progress messages coming out
         # (Note, CLI's progress controller does routine "sleep" before sample the LRO response.
         # This has the consequence that it can't promise each resource's result wil be displayed)
-        self.assertTrue(any(l.startswith('Succeeded:') or l.startswith('Accepted:') for l in lines))
+        self.assertTrue(any(line.startswith('Succeeded:') or line.startswith('Accepted:') for line in lines))
 
 
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')

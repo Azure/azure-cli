@@ -2136,8 +2136,7 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('There are more than one node pool in the cluster. Please use "az aks nodepool" command '
                        'to update per node pool auto scaler settings')
 
-    node_count = instance.agent_pool_profiles[0].count
-    _validate_autoscaler_update_counts(min_count, max_count, node_count, enable_cluster_autoscaler or
+    _validate_autoscaler_update_counts(min_count, max_count, enable_cluster_autoscaler or
                                        update_cluster_autoscaler)
 
     if enable_cluster_autoscaler:
@@ -2904,9 +2903,8 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                        '"--tags" or "--mode"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    node_count = instance.count
 
-    _validate_autoscaler_update_counts(min_count, max_count, node_count, enable_cluster_autoscaler or
+    _validate_autoscaler_update_counts(min_count, max_count, enable_cluster_autoscaler or
                                        update_cluster_autoscaler)
 
     if enable_cluster_autoscaler:
@@ -3147,7 +3145,7 @@ def _check_cluster_autoscaler_flag(enable_cluster_autoscaler,
             raise CLIError('min-count and max-count are required for --enable-cluster-autoscaler, please use the flag')
 
 
-def _validate_autoscaler_update_counts(min_count, max_count, node_count, is_enable_or_update):
+def _validate_autoscaler_update_counts(min_count, max_count, is_enable_or_update):
     """
     Validates the min, max, and node count when performing an update
     """
@@ -3158,8 +3156,6 @@ def _validate_autoscaler_update_counts(min_count, max_count, node_count, is_enab
     if min_count is not None and max_count is not None:
         if int(min_count) > int(max_count):
             raise CLIError('Value of min-count should be less than or equal to value of max-count.')
-        if int(node_count) < int(min_count) or int(node_count) > int(max_count):
-            raise CLIError("Current node count '{}' is not in the range of min-count and max-count.".format(node_count))
 
 
 def _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_name):
@@ -3232,14 +3228,10 @@ def _remove_osa_nulls(managed_clusters):
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
     attrs = ['tags', 'plan', 'type', 'id']
-    ap_master_attrs = ['name', 'os_type']
     for managed_cluster in managed_clusters:
         for attr in attrs:
-            if getattr(managed_cluster, attr, None) is None:
+            if hasattr(managed_cluster, attr) and getattr(managed_cluster, attr) is None:
                 delattr(managed_cluster, attr)
-        for attr in ap_master_attrs:
-            if getattr(managed_cluster.master_pool_profile, attr, None) is None:
-                delattr(managed_cluster.master_pool_profile, attr)
     return managed_clusters
 
 

@@ -133,6 +133,7 @@ class AzCliCommandParser(CLICommandParser):
                 param.deprecate_info = arg.deprecate_info
                 param.preview_info = arg.preview_info
                 param.experimental_info = arg.experimental_info
+                param.default_value_source = arg.default_value_source
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,

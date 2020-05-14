@@ -31,7 +31,7 @@ COMPONENT_PREFIX = 'azure-cli-'
 SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
                      'that intercepts traffic with a self-signed certificate. '
                      # pylint: disable=line-too-long
-                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#working-behind-a-proxy. '
+                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#work-behind-a-proxy. '
                      'Error detail: {}')
 
 _PROXYID_RE = re.compile(
@@ -150,8 +150,8 @@ def _update_latest_from_pypi(versions):
     return versions, success
 
 
-def get_az_version_string():
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES
+def get_az_version_string():  # pylint: disable=too-many-statements
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
 
     output = six.StringIO()
     versions = {}
@@ -201,6 +201,9 @@ def get_az_version_string():
         _print()
     _print("Python location '{}'".format(sys.executable))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
+    import os
+    if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
+        _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))
     if DEV_EXTENSION_SOURCES:
         _print("Development extension sources:")
         for source in DEV_EXTENSION_SOURCES:
@@ -629,7 +632,16 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     from azure.cli.core._profile import Profile
     profile = Profile()
     if '{subscriptionId}' in url:
-        url = url.replace('{subscriptionId}', profile.get_subscription_id())
+        url = url.replace('{subscriptionId}', cli_ctx.data['subscription_id'] or profile.get_subscription_id())
+
+    token_subscription = None
+    _subscription_regexes = [re.compile('https://management.azure.com/subscriptions/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'),
+                             re.compile('https://graph.windows.net/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})')]
+    for regex in _subscription_regexes:
+        match = regex.match(url)
+        if match:
+            token_subscription = match.groups()[0]
+            logger.debug('Retrieve token from subscription %s', token_subscription)
 
     if not skip_authorization_header and url.lower().startswith('https://'):
         if not resource:
@@ -650,7 +662,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                         resource = value
                         break
         if resource:
-            token_info, _, _ = profile.get_raw_token(resource)
+            token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
             logger.debug('Retrievd AAD token for resource: %s', resource or 'ARM')
             token_type, token, _ = token_info
             headers = headers or {}

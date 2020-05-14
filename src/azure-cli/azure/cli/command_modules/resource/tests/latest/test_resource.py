@@ -12,7 +12,8 @@ import unittest
 from azure.cli.core.parser import IncorrectUsageError
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only, record_only
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
+                               create_random_name, live_only, record_only)
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
 
@@ -557,10 +558,15 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             'extra_param_tf': os.path.join(curr_dir, 'simple_extra_param_deploy.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60),
-            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60)
+            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
+            'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\')
         })
 
         self.cmd('deployment group validate --resource-group {rg} --template-file {tf} --parameters @"{params}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group validate --resource-group {rg} --template-file {Japanese-characters-tf}', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -899,8 +905,8 @@ class DeploymentLiveTest(LiveScenarioTest):
 
         # very the progress
         lines = test_io.getvalue().splitlines()
-        for l in lines:
-            self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
+        for line in lines:
+            self.assertTrue(line.split(':')[0] in ['Accepted', 'Succeeded'])
         self.assertTrue('Succeeded: {} (Microsoft.Resources/deployments)'.format(self.kwargs['dn']), lines)
 
 
@@ -940,6 +946,7 @@ class DeploymentThruUriTest(ScenarioTest):
         self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
             self.check('properties.provisioningState', 'Succeeded'),
             self.check('resourceGroup', '{rg}'),
+            self.check('properties.templateLink.uri', '{tf}'),
         ]).get_output_in_json()['name']
 
         self.cmd('group deployment show -g {rg} -n {dn}',
@@ -947,6 +954,19 @@ class DeploymentThruUriTest(ScenarioTest):
 
         self.cmd('group deployment delete -g {rg} -n {dn}')
         self.cmd('group deployment list -g {rg}',
+                 checks=self.is_empty())
+
+        self.kwargs['dn'] = self.cmd('deployment group create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('properties.templateLink.uri', '{tf}'),
+        ]).get_output_in_json()['name']
+
+        self.cmd('deployment group show -g {rg} -n {dn}',
+                 checks=self.check('name', '{dn}'))
+
+        self.cmd('deployment group delete -g {rg} -n {dn}')
+        self.cmd('deployment group list -g {rg}',
                  checks=self.is_empty())
 
 
@@ -2170,6 +2190,20 @@ class GlobalIdsScenarioTest(ScenarioTest):
         self.kwargs['vnet_id'] = self.cmd('network vnet create -g {rg} -n {vnet}').get_output_in_json()['newVNet']['id']
         # command will fail if the other parameters were actually used
         self.cmd('network vnet show --subscription fakesub --resource-group fakerg -n fakevnet --ids {vnet_id}')
+
+
+class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
+
+    def test_resource_group_local_context(self):
+        self.kwargs.update({
+            'group': 'test_local_context_group',
+            'location': 'eastasia'
+        })
+        self.cmd('group create -n {group} -l {location}', checks=[self.check('name', self.kwargs['group'])])
+        self.cmd('group show', checks=[
+            self.check('name', self.kwargs['group']),
+            self.check('location', self.kwargs['location'])
+        ])
 
 
 if __name__ == '__main__':
