@@ -171,6 +171,9 @@ def get_cached_latest_versions(versions=None):
     from azure.cli.core._environment import get_config_dir
     from azure.cli.core._session import VERSIONS
 
+    if not versions:
+        versions = _get_local_versions()
+
     VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
     if VERSIONS[_VERSION_UPDATE_TIME]:
         version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')
@@ -179,8 +182,6 @@ def get_cached_latest_versions(versions=None):
             if cache_versions and cache_versions['azure-cli']['local'] == versions['azure-cli']['local']:
                 return cache_versions.copy(), True
 
-    if not versions:
-        versions = _get_local_versions()
     versions, success = _update_latest_from_pypi(versions)
     if success:
         VERSIONS['versions'] = versions
