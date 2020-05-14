@@ -15,7 +15,6 @@ import six
 import re
 import logging
 
-from azure.core.exceptions import AzureError, HttpResponseError
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from azure.common import AzureException
