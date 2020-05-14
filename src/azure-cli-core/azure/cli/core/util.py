@@ -284,13 +284,13 @@ def show_updates_available(new_line_before=False, new_line_after=False):
         import os
         _, updates_available = get_az_version_string(use_cache=True)
         if updates_available > 0:
-            from azure.cli.core._environment import get_config_dir
             if new_line_before:
                 logger.warning("")
             show_updates(updates_available)
             if new_line_after:
                 logger.warning("")
         # Cache the last time that should show updates available
+        from azure.cli.core._environment import get_config_dir
         dir_path = os.path.join(get_config_dir(), 'version')
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
