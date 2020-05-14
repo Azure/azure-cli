@@ -175,6 +175,8 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         else:
             AzCliHelp.update_examples(help_file)
         self._print_detailed_help(cli_name, help_file)
+        from azure.cli.core.util import show_updates_available
+        show_updates_available(new_line_after=True)
         show_link = self.cli_ctx.config.getboolean('output', 'show_survey_link', True)
         if show_link:
             print(SURVEY_PROMPT_COLOR if self.cli_ctx.enable_color else SURVEY_PROMPT)
