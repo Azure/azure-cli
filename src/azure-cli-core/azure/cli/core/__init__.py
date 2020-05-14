@@ -351,7 +351,8 @@ class MainCommandsLoader(CLICommandsLoader):
         return self.command_table
 
     def load_arguments(self, command=None):
-        from azure.cli.core.commands.parameters import resource_group_name_type, get_location_type, deployment_name_type
+        from azure.cli.core.commands.parameters import (
+            resource_group_name_type, get_location_type, deployment_name_type, vnet_name_type, subnet_name_type)
         from knack.arguments import ignore_type
 
         # omit specific command to load everything
@@ -370,6 +371,8 @@ class MainCommandsLoader(CLICommandsLoader):
                 with loader.argument_context('') as c:
                     c.argument('resource_group_name', resource_group_name_type)
                     c.argument('location', get_location_type(self.cli_ctx))
+                    c.argument('vnet_name', vnet_name_type)
+                    c.argument('subnet', subnet_name_type)
                     c.argument('deployment_name', deployment_name_type)
                     c.argument('cmd', ignore_type)
 
