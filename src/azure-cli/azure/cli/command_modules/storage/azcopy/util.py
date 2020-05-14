@@ -184,8 +184,8 @@ def _get_default_install_location():
     elif system in ('Linux', 'Darwin'):
         install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy'))
     else:
-        raise CLIError('The {} platform is not currently supported. '
-                       'If you want to know which platforms are supported, please refer to the document for supported platforms: '
+        raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
+                       'please refer to the document for supported platforms: '
                        'https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
                        .format(system))
     return install_location
