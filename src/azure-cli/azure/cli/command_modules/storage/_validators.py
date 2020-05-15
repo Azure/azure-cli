@@ -638,6 +638,13 @@ def validate_container_public_access(cmd, namespace):
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
 
 
+def validate_fs_public_access(cmd, namespace):
+    from .sdkutil import get_fs_access_type
+
+    if namespace.public_access:
+        namespace.public_access = get_fs_access_type(cmd.cli_ctx, namespace.public_access.lower())
+
+
 def validate_select(namespace):
     if namespace.select:
         namespace.select = ','.join(namespace.select)
@@ -1247,3 +1254,8 @@ def validate_encryption_scope_client_params(ns):
     if ns.encryption_scope:
         # will use track2 client and socket_timeout is unused
         del ns.socket_timeout
+
+
+def validate_access_control(namespace):
+    if namespace.acl and namespace.permissions:
+        raise CLIError('usage error: invalid when specifying both --acl and --permissions.')
