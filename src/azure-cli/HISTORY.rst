@@ -639,7 +639,7 @@ Release History
 * Update error details, update default application template and prompt message.
 * Support app creation/update with the new sku name ST0, ST1, ST2.
 
-**Key Vault**   
+**Key Vault**
 
 * Add a new command `az keyvault key download` for downloading keys.
 
