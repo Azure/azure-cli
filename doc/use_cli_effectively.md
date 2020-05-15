@@ -64,7 +64,7 @@ Some parameters are able to receive complex value like JSON, array or combinatio
 
 Their format varies in different parameters. For array, both `--parameter '("value1", "value2")'` or `--parameter '["value1", "value2"]'` could be valid.
 
-Most important, we should take care of the quoting issue if you are a across different platforms user. Some quoting rules apply in different shells, please see [Quoting issues](#https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues).
+Most important, we should take care of the quoting issue if you are a across different platforms user. Some quoting rules apply in different shells, please see [Quoting issues](https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues).
 
 ## Async operations
 
