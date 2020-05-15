@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 import unittest
-import jmespath
 import mock
-import uuid
 import os
 import time
 import tempfile
@@ -14,7 +12,7 @@ import requests
 import datetime
 
 from azure_devtools.scenario_tests import AllowLargeResponse, record_only
-from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck, live_only)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -2400,6 +2398,54 @@ class WebappNetworkConnectionTests(ScenarioTest):
         self.cmd('webapp vnet-integration list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 0)
         ])
+
+
+class WebappLocalContextScenarioTest(LocalContextScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    def test_webapp_local_context(self, resource_group):
+        from knack.util import CLIError
+        self.kwargs.update({
+            'plan_name': self.create_random_name(prefix='webapp-plan-', length=24),
+            'webapp_name': self.create_random_name(prefix='webapp-', length=24)
+        })
+
+        self.cmd('appservice plan create -g {rg} -n {plan_name}')
+        self.cmd('appservice plan show')
+        with self.assertRaises(CLIError):
+            self.cmd('appservice plan delete')
+
+        self.cmd('webapp create -n {webapp_name}')
+        self.cmd('webapp show')
+        with self.assertRaises(CLIError):
+            self.cmd('webapp delete')
+
+        self.cmd('webapp delete -n {webapp_name}')
+        self.cmd('appservice plan delete -n {plan_name} -y')
+
+
+class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
+    @ResourceGroupPreparer(location='westus2')
+    @StorageAccountPreparer()
+    def test_functionapp_local_context(self, resource_group, storage_account):
+        from knack.util import CLIError
+        self.kwargs.update({
+            'plan_name': self.create_random_name(prefix='functionapp-plan-', length=24),
+            'functionapp_name': self.create_random_name(prefix='functionapp-', length=24),
+            'storage_account': storage_account
+        })
+
+        self.cmd('functionapp plan create -g {rg} -n {plan_name} --sku B2')
+        self.cmd('functionapp plan show')
+        with self.assertRaises(CLIError):
+            self.cmd('functionapp plan delete')
+
+        self.cmd('functionapp create -n {functionapp_name} --storage-account {storage_account}')
+        self.cmd('functionapp show')
+        with self.assertRaises(CLIError):
+            self.cmd('functionapp delete')
+
+        self.cmd('functionapp delete -n {functionapp_name}')
+        self.cmd('functionapp plan delete -n {plan_name} -y')
 
 
 if __name__ == '__main__':
