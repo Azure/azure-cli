@@ -196,7 +196,7 @@ AZURE_API_PROFILES = {
             'private_endpoint_connections': '2019-10-17-preview'
         }),
         ResourceType.MGMT_APPSERVICE: '2019-08-01',
-        ResourceType.MGMT_IOTHUB: '2019-07-01-preview',
+        ResourceType.MGMT_IOTHUB: '2020-03-01',
         ResourceType.MGMT_ARO: '2020-04-30'
     },
     '2019-03-01-hybrid': {
