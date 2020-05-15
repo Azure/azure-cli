@@ -1078,7 +1078,7 @@ def blob_tier_validator(cmd, namespace):
 
 def validate_azcopy_upload_destination_url(cmd, namespace):
     client = blob_data_service_factory(cmd.cli_ctx, {
-        'account_name': namespace.account_name})
+        'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
     destination_path = namespace.destination_path
     if not destination_path:
         destination_path = ''
