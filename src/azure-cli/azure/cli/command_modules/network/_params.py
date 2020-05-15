@@ -938,7 +938,7 @@ def load_arguments(self, _):
         nsg_help = get_folded_parameter_help_string('network security group', allow_none=True, default_none=True)
         c.argument('network_security_group', help=nsg_help, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
 
-        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name')
+        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_cross_sub=False)
         c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
 
     with self.argument_context('network nic update') as c:
