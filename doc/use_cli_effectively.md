@@ -62,7 +62,7 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
 
 Some parameters are able to receive complex value like JSON, array or combination of them, even reading content from a file.
 
-Their format varies in different parameters. For array, both `--parameter '("value1", "value2")'` or `--parameter '["value1", "value2"]'` could be valid.
+Their format varies with parameters. For list/array, both `--parameter '("value1", "value2")'` or `--parameter '["value1", "value2"]'` could be valid.
 
 Most important, we should take care of the quoting issue if you are a across different platforms user. Some quoting rules apply in different shells, please see [Quoting issues](https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues).
 
