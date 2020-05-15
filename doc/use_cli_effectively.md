@@ -122,7 +122,7 @@ az rest --method PATCH
         --body '{"web":{"redirectUris":["https://myapp.com"]}}'
 ```
 
-## Quoting issues
+## Quoting issues - object/array parameter value
 
 This becomes an issue because when the command shell (Bash, Zsh, Windows Command Prompt, PowerShell, etc) parses the CLI command, it will interpret the quotes and spaces. Always refer to the documents when you are uncertain about the usage of a shell:
 
