@@ -58,18 +58,6 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
     az vm list -d -g my_rg --query "[?powerState=='VM stopped'].id" -o tsv | az vm start --ids @-
     ```
 
-## Pass complex parameter value (JSON/array/dict/file)
-
-Some parameters are able to receive complex value like JSON, array or combination of them, even reading content from a file.
-
-Their format varies with parameters.
-
-For list/array, both `--parameter '("value1", "value2")'` or `--parameter '["value1", "value2"]'` could be valid.
-
-For JSON, `--body '{"web":{"redirectUris":["https://myapp.com"]}}'` is valid.
-
-Most importantly, quoting rules apply in different shells. Please see [Quoting issues](#quoting-issues) for more information.
-
 ## Async operations
 
 Many commands and group expose `--no-wait` flags on their long-running operations as well as a dedicated `wait` command. These become handy for certain scenarios:
