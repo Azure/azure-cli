@@ -274,7 +274,11 @@ def autoscale_profile_list_timezones(cmd, client, offset=None, search_query=None
 
 def autoscale_profile_show(cmd, client, autoscale_name, resource_group_name, profile_name):
     autoscale_settings = client.get(resource_group_name, autoscale_name)
-    profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
+    try:
+        profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
+    except StopIteration:
+        logger.warning('Cannot file profile %s. Please double check the name of the autoscale profile.', profile_name)
+        return None
     return profile
 
 
