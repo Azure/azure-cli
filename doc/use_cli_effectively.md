@@ -58,6 +58,14 @@ For clarity, Bash scripts are used inline. Windows batch or PowerScript examples
     az vm list -d -g my_rg --query "[?powerState=='VM stopped'].id" -o tsv | az vm start --ids @-
     ```
 
+## Pass complex parameter value (JSON/array/dict/file)
+
+Some parameters are able to receive complex value like JSON, array or combination of them, even reading content from a file.
+
+Their format varies in different parameters. For array, both `--parameter '("value1", "value2")'` or `--parameter '["value1", "value2"]'` could be valid.
+
+Most important, we should take care of the quoting issue if you are a across different platforms user. Some quoting rules apply in different shells, please see [Quoting issues](#https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#quoting-issues).
+
 ## Async operations
 
 Many commands and group expose `--no-wait` flags on their long-running operations as well as a dedicated `wait` command. These become handy for certain scenarios:
@@ -122,7 +130,7 @@ az rest --method PATCH
         --body '{"web":{"redirectUris":["https://myapp.com"]}}'
 ```
 
-## Quoting issues - object/array parameter value
+## Quoting issues
 
 This becomes an issue because when the command shell (Bash, Zsh, Windows Command Prompt, PowerShell, etc) parses the CLI command, it will interpret the quotes and spaces. Always refer to the documents when you are uncertain about the usage of a shell:
 
