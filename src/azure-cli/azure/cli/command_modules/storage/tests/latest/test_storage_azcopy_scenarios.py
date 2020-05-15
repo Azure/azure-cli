@@ -19,8 +19,10 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         container = self.create_container(storage_account_info)
 
         # sync directory
-        self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
-            test_dir, container, storage_account))
+        connection_string = self.cmd('storage account show-connection-string -n {} -g {} -otsv'
+                                     .format(storage_account, resource_group)).output
+        self.cmd('storage blob sync -s "{}" -c {} --connection-string {}'.format(
+            test_dir, container, connection_string))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
