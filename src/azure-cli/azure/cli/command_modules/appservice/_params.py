@@ -442,7 +442,8 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('webapp up') as c:
-        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('name', arg_type=webapp_name_arg_type,
+                   local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=['webapp']))
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name of the appserviceplan associated with the webapp",
