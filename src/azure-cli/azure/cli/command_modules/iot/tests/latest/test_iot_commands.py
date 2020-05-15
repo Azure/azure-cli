@@ -6,9 +6,15 @@
 
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, StorageAccountPreparer
 from azure_devtools.scenario_tests import AllowLargeResponse
+from .recording_processors import KeyReplacer
 
 
 class IoTHubTest(ScenarioTest):
+
+    def __init__(self, method_name):
+        super(IoTHubTest, self).__init__(
+            method_name, recording_processors=[KeyReplacer()]
+        )
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location='westus2')
@@ -405,7 +411,7 @@ class IoTHubTest(ScenarioTest):
         location = resource_group_location
 
         private_endpoint_type = 'Microsoft.Devices/IoTHubs'
-        identity_hub = 'cli-identity-enabled-hub'
+        identity_hub = 'identity-test-hub-cli'
         identity_based_auth = 'identityBased'
         event_hub_identity_endpoint_name = 'EventHubIdentityEndpoint'
 
@@ -420,13 +426,16 @@ class IoTHubTest(ScenarioTest):
         # identity hub creation
         import os
         templateFile = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.path.pardir, 'templates', 'identity.json')
-        self.cmd('deployment group create --name {0} -g {1} --template-file "{2}" --parameters name={3} --parameters location={4}'.format("identity-hub-deployment", resource_group, templateFile, identity_hub, location))
+        self.cmd('deployment group create --name {0} -g {1} --template-file "{2}" --parameters name={3} --parameters location={4}'
+                 .format("identity-hub-deployment", resource_group, templateFile, identity_hub, location))
         self.cmd('iot hub show --name {0}'.format(identity_hub), checks=[
                  self.check('properties.minTlsVersion', '1.2'),
                  self.check('identity.type', 'SystemAssigned')])
 
         # Test 'az iot hub update' with Identity-based fileUpload
-        updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fcs {2} --fc {3}'.format(identity_hub, identity_based_auth, storageConnectionString, containerName)).get_output_in_json()
+        updated_hub = self.cmd('iot hub update -n {0} --fsa {1} --fcs {2} --fc {3} --fn true --fnt 32 --fnd 80 --rd 4 '
+                               '--ct 34 --cdd 46 --ft 43 --fld 10 --fd 76'
+                               .format(identity_hub, identity_based_auth, storageConnectionString, containerName)).get_output_in_json()
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == identity_based_auth
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         # TODO - implement file upload container URI instead of connectionString once implemented in service
@@ -483,6 +492,14 @@ class IoTHubTest(ScenarioTest):
         hub = self.cmd('iot hub show -n {0} -g {1}'.format(identity_hub, rg)).get_output_in_json()
         endpoint_id = hub['properties']['privateEndpointConnections'][0]['id']
         private_endpoint_name = hub['properties']['privateEndpointConnections'][0]['name']
+
+        # endpoint list
+        self.cmd('network private-endpoint-connection list --type {0} -n {1} -g {2}'
+                 .format(private_endpoint_type, identity_hub, rg),
+                 checks=[self.check('length(@)', 1),
+                         self.check('[0].id', endpoint_id),
+                         self.check('[0].name', private_endpoint_name)])
+
         # endpoint connection approve by name
         approve_desc = 'Approving endpoint connection'
         self.cmd('network private-endpoint-connection approve --type {0} -n {1} --resource-name {2} -g {3} --description "{4}"'
