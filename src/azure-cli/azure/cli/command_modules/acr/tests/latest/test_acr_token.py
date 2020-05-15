@@ -19,7 +19,8 @@ class AcrTokenCommandsTests(ScenarioTest):
             'scope_map': 'scope-map',
             'token': 'acr-token',
             'token2': 'token-2',
-            'token_short_lived': 'token-3'
+            'token_short_lived': 'token-3',
+            'token_long_lived': 'token-4'
         })
         self.cmd('acr create -g {rg} -n {registry} --sku premium')
 
@@ -53,3 +54,6 @@ class AcrTokenCommandsTests(ScenarioTest):
         output = self.cmd('acr token create -r {registry} -n {token_short_lived} --repository foo content/read --expiration-in-days 1').get_output_in_json()
         tomorrow = datetime.datetime.strptime(output['credentials']['passwords'][0]['expiry'].split('T')[0], "%Y-%m-%d")
         self.assertEqual(tomorrow - today, datetime.timedelta(1))
+
+        self.cmd('acr token create -r {registry} -n {token_long_lived} --repository foo content/read --expiration 2100-12-31T12:59:59Z',
+                 checks=self.check('credentials.passwords[0].expiry', '2100-12-31T12:59:59+00:00'))
