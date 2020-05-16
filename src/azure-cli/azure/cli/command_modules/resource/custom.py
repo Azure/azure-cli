@@ -1025,11 +1025,14 @@ def update_resource_group(instance, tags=None):
 
 
 def export_group_as_template(
-        cmd, resource_group_name, include_comments=False, include_parameter_default_value=False):
+        cmd, resource_group_name, ids=None, include_comments=False, include_parameter_default_value=False, skip_resource_name_parameterization=False, skip_all_parameterization=False):
     """Captures a resource group as a template.
-    :param str resource_group_name:the name of the resoruce group.
-    :param bool include_comments:export template with comments.
+    :param str resource_group_name: the name of the resource group.
+    :param str ids: the space-separated resource ids to filter the export by. To export all resources, supply '*'.
+    :param bool include_comments: export template with comments.
     :param bool include_parameter_default_value: export template parameter with default value.
+    :param bool skip_resource_name_parameterization: export template and skip resource name parameterization.
+    :param bool skip_all_parameterization: export template parameter and skip all parameterization.
     """
     rcf = _resource_client_factory(cmd.cli_ctx)
 
@@ -1038,10 +1041,24 @@ def export_group_as_template(
         export_options.append('IncludeComments')
     if include_parameter_default_value:
         export_options.append('IncludeParameterDefaultValue')
+    if skip_all_parameterization:
+        export_options.append('SkipResourceNameParameterization')
+    if skip_all_parameterization:
+        export_options.append('SkipAllParameterization')
+
+    resources = []
+    if ids is None or ids == "*":
+        resources = ["*"]
+    else:
+        for i in ids.split():
+            if is_valid_resource_id(i):
+                resources.append(i)
+            else:
+                raise CLIError('az resource: error: argument --ids: invalid ResourceId value: \'%s\'' % i)
 
     options = ','.join(export_options) if export_options else None
 
-    result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
+    result = rcf.resource_groups.export_template(resource_group_name, resources, options=options)
 
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
