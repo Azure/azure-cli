@@ -1041,7 +1041,7 @@ def export_group_as_template(
         export_options.append('IncludeComments')
     if include_parameter_default_value:
         export_options.append('IncludeParameterDefaultValue')
-    if skip_all_parameterization:
+    if skip_resource_name_parameterization:
         export_options.append('SkipResourceNameParameterization')
     if skip_all_parameterization:
         export_options.append('SkipAllParameterization')
