@@ -40,6 +40,9 @@ try:
 
     exit_code = cli_main(az_cli, sys.argv[1:])
 
+    if az_cli.result.error is not None and not telemetry.has_exceptions():
+        telemetry.set_exception(az_cli.result.error, fault_type='')
+
     if exit_code and exit_code != 0:
         telemetry.set_failure()
     else:
