@@ -15,7 +15,7 @@ Release History
 
 **ACS**
 
-* bug fix: remove fields cleanup for fields that no longer exist (#13315)
+* Bug fix: remove fields cleanup for fields that no longer exist (#13315)
 
 **AKS**
 
@@ -25,8 +25,8 @@ Release History
 
 **AMS**
 
-* Change: az ams transform create: Added ability to create a transform with a FaceDetector preset (#13260)
-* CHange: az ams content-key-policy create : Added ability to create a FairPlay content key policy with an offline rental configuration (#13260)
+* `az ams transform create`: Add ability to create a transform with a FaceDetector preset (#13260)
+* `az ams content-key-policy create` : Add ability to create a FairPlay content key policy with an offline rental configuration (#13260)
 
 **AppConfig**
 
@@ -68,6 +68,10 @@ Release History
 
 * New command az vm auto-shutdown (#13199)
 * `az vm list-skus`: Update --zone behavior, return all type skus now (#13470)
+
+**Core**
+
+* Update local context on/off status to global user level (#13277)
 
 **Extension**
 
