@@ -14,6 +14,7 @@ def create_diagnostics_settings(client, name, resource_uri,
                                 workspace=None,
                                 export_to_specific_resource=None):
     from azure.mgmt.monitor.models import DiagnosticSettingsResource
+    from knack.util import CLIError
     if export_to_specific_resource and workspace is None:
         raise CLIError('usage error: --workspace and --export-to-specific-resource')
     parameters = DiagnosticSettingsResource(storage_account_id=storage_account,
