@@ -644,13 +644,62 @@ jobs:
 
     displayName: 'Bash Script'
 
-- job: BuildUbuntuXenial
-  displayName: Build Ubuntu Xenial Package
+- job: BuildUbuntuPackages
+  displayName: Build Ubuntu Packages
 
   dependsOn: BuildPythonWheel
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Xenial:
+        distro: xenial
+      Trusty:
+        distro: trusty
+      Bionic:
+        distro: bionic
+      Eoan:
+        distro: eoan
+      Focal:
+        distro: focal
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
+      artifactName: pypi
+
+  - task: Bash@3
+    displayName: 'Build Ubuntu $(distro) Package'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/debian/pipeline.sh
+    env:
+      DISTRO: $(distro)
+      DISTRO_BASE_IMAGE: ubuntu:$(distro)
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: debian'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: ubuntu-$(distro)
+
+- job: BuildDebianPackages
+  displayName: Build Debian Packages
+
+  dependsOn: BuildPythonWheel
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Jessie:
+        distro: jessie
+      Stretch:
+        distro: stretch
+      Buster:
+        distro: buster
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Build Artifacts'
@@ -660,207 +709,26 @@ jobs:
 
 
   - task: Bash@3
-    displayName: 'Build Ubuntu Xenial Package'
+    displayName: 'Build Debian $(distro) Package'
     inputs:
       targetType: 'filePath'
       filePath: scripts/release/debian/pipeline.sh
     env:
-      DISTRO: xenial
-      DISTRO_BASE_IMAGE: ubuntu:xenial
+      DISTRO: $(distro)
+      DISTRO_BASE_IMAGE: debian:$(distro)
 
   - task: PublishPipelineArtifact@0
     displayName: 'Publish Artifact: debian'
     inputs:
       TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: ubuntu-xenial
+      ArtifactName: debian-$(distro)
 
-- job: BuildUbuntuTrusty
-  displayName: Build Ubuntu Trusty Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Ubuntu Trusty Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: trusty
-      DISTRO_BASE_IMAGE: ubuntu:trusty
-
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: ubuntu-trusty
-
-- job: BuildUbuntuBionic
-  displayName: Build Ubuntu Bionic Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Ubuntu Bionic Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: bionic
-      DISTRO_BASE_IMAGE: ubuntu:bionic
-
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: ubuntu-bionic
-
-- job: BuildUbuntuEoan
-  displayName: Build Ubuntu Eoan Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Build Artifacts'
-      inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-        artifactName: pypi
-
-    - bash: scripts/release/debian/pipeline.sh
-      displayName: 'Build Ubuntu Eoan Package'
-      env:
-        DISTRO: eoan
-        DISTRO_BASE_IMAGE: ubuntu:eoan
-
-    - task: PublishPipelineArtifact@0
-      displayName: 'Publish Artifact: debian'
-      inputs:
-        TargetPath: $(Build.ArtifactStagingDirectory)
-        ArtifactName: ubuntu-eoan
-
-- job: BuildDebianJessie
-  displayName: Build Debian Jessie Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Debian Jessie Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: jessie
-      DISTRO_BASE_IMAGE: debian:jessie
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian-jessie
-
-- job: BuildDebianStretch
-  displayName: Build Debian Stretch Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-
-  - task: Bash@3
-    displayName: 'Build Debian Stretch Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: stretch
-      DISTRO_BASE_IMAGE: debian:stretch
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian-stretch
-
-- job: BuildDebianBuster
-  displayName: Build Debian Buster Package
-
-  dependsOn: BuildPythonWheel
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
-  pool:
-    vmImage: 'ubuntu-16.04'
-  steps:
-  - task: DownloadPipelineArtifact@1
-    displayName: 'Download Build Artifacts'
-    inputs:
-      TargetPath: '$(Build.ArtifactStagingDirectory)/pypi'
-      artifactName: pypi
-
-  - task: Bash@3
-    displayName: 'Build Debian Buster Package'
-    inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/debian/pipeline.sh
-    env:
-      DISTRO: buster
-      DISTRO_BASE_IMAGE: debian:buster
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: debian'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: debian-buster
-
-- job: TestLinuxPackages
-  displayName: Test Linux Packages
+- job: TestDebPackages
+  displayName: Test Deb Packages
 
   dependsOn:
-   - BuildUbuntuXenial
-   - BuildUbuntuTrusty
-   - BuildUbuntuBionic
-   - BuildDebianJessie
-   - BuildDebianStretch
-   - BuildUbuntuEoan
+   - BuildUbuntuPackages
+   - BuildDebianPackages
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'))
   pool:
     vmImage: 'ubuntu-16.04'
@@ -870,7 +738,6 @@ jobs:
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
       artifactName: metadata
-
 
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Debian:Stretch Build'
@@ -896,13 +763,11 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
       artifactName: ubuntu-bionic
 
-
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Ubuntu:Xenial Builds'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
       artifactName: ubuntu-xenial
-
 
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Ubuntu:Trusty Builds'
@@ -910,13 +775,17 @@ jobs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
       artifactName: ubuntu-trusty
 
-
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Ubuntu:Eoan Builds'
     inputs:
       TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
       artifactName: ubuntu-eoan
 
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Ubuntu:Focal Builds'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/debian'
+      artifactName: ubuntu-focal
 
   - bash: |
        set -exv
@@ -938,8 +807,8 @@ jobs:
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic eoan buster)
-       BASE_IMAGES=(ubuntu:bionic ubuntu:eoan debian:buster)
+       DISTROS=(bionic buster eoan focal)
+       BASE_IMAGES=(ubuntu:bionic debian:buster ubuntu:eoan ubuntu:focal)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="
