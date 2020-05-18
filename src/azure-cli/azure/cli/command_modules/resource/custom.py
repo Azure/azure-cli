@@ -1025,10 +1025,10 @@ def update_resource_group(instance, tags=None):
 
 
 def export_group_as_template(
-        cmd, resource_group_name, ids=None, include_comments=False, include_parameter_default_value=False, skip_resource_name_parameterization=False, skip_all_parameterization=False):
+        cmd, resource_group_name, resource_ids=None, include_comments=False, include_parameter_default_value=False, skip_resource_name_parameterization=False, skip_all_parameterization=False):
     """Captures a resource group as a template.
     :param str resource_group_name: the name of the resource group.
-    :param str ids: the space-separated resource ids to filter the export by. To export all resources, supply '*'.
+    :param str resource_ids: a string containing space-separated resource ids to filter the export by. To export all resources, do not specify this argument or supply "*".
     :param bool include_comments: export template with comments.
     :param bool include_parameter_default_value: export template parameter with default value.
     :param bool skip_resource_name_parameterization: export template and skip resource name parameterization.
@@ -1047,14 +1047,14 @@ def export_group_as_template(
         export_options.append('SkipAllParameterization')
 
     resources = []
-    if ids is None or ids == "*":
+    if resource_ids is None or resource_ids == "*":
         resources = ["*"]
     else:
-        for i in ids.split():
+        for i in resource_ids.split():
             if is_valid_resource_id(i):
                 resources.append(i)
             else:
-                raise CLIError('az resource: error: argument --ids: invalid ResourceId value: \'%s\'' % i)
+                raise CLIError('az resource: error: argument --resource_ids: invalid ResourceId value: \'%s\'' % i)
 
     options = ','.join(export_options) if export_options else None
 
