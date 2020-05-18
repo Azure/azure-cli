@@ -792,8 +792,8 @@ jobs:
 
        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
 
-       DISTROS=(jessie stretch xenial trusty eoan focal)
-       BASE_IMAGES=(debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty ubuntu:eoan ubuntu:focal)
+       DISTROS=(jessie stretch xenial trusty)
+       BASE_IMAGES=(debian:jessie debian:stretch ubuntu:xenial ubuntu:trusty)
 
        # Distros that don't require libssl1.1
        for i in ${!DISTROS[@]}; do
@@ -807,8 +807,8 @@ jobs:
        done
 
        # Distros that do require libssl1.1
-       DISTROS=(bionic buster)
-       BASE_IMAGES=(ubuntu:bionic debian:buster)
+       DISTROS=(bionic buster eoan focal)
+       BASE_IMAGES=(ubuntu:bionic debian:buster ubuntu:eoan ubuntu:focal)
 
        for i in ${!DISTROS[@]}; do
            echo "== Test debian package on ${DISTROS[$i]} =="
