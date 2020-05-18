@@ -232,6 +232,11 @@ def load_arguments(self, _):
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
         c.argument('logs', type=get_json_object)
         c.argument('metrics', type=get_json_object)
+        c.argument('export_to_specific_resource', arg_type=get_three_state_flag(),
+                   help='Indicate that the export to LA must be done to a resource specific table, '
+                        'a.k.a. dedicated or fixed schema table, '
+                        'as opposed to the default dynamic schema table called AzureDiagnostics. '
+                        'This argument is effective only when the argument --workspace is also given.')
 
     with self.argument_context('monitor diagnostic-settings categories list') as c:
         c.resource_parameter('resource_uri', required=True)
