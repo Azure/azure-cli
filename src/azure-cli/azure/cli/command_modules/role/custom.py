@@ -812,12 +812,39 @@ def _get_grant_permissions(graph_client, client_sp_object_id=None, query_filter=
     return grant_info
 
 
-def list_required_permissions(cmd, identifier):
+def list_required_permissions(cmd, identifier, skip_grant_expiry_time=False):
     # Returns the required API permissions (requiredResourceAccess)
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
+    sp_client = graph_client.service_principals
+
     application = show_application(graph_client.applications, identifier)
-    permissions = application.required_resource_access
-    return permissions
+    required_permissions = application.required_resource_access
+
+    if not skip_grant_expiry_time:
+        # Retrieve any tenant-wide delegated permission grants where this app is the client app
+        granted_delegated_permissions = []
+        client = list(sp_client.list(filter="appId eq '{}'".format(application.app_id)))
+        if client:
+            granted_delegated_permissions = graph_client.oauth2_permission_grant.list(
+                filter="consentType eq 'AllPrincipals' and clientId eq '{}'".format(client[0].object_id))
+
+        for p in required_permissions:
+            expiry_time = 'N/A'
+            resource = list(sp_client.list(filter="appId eq '{}'".format(p.resource_app_id)))
+            if resource:
+                if any([x.resource_id == resource[0].object_id for x in granted_delegated_permissions]):
+                    # We use a date far in the future to signal that there does exist at least one
+                    # tenant-wide delegated permission grant for this resource app. The actual
+                    # values returned are not enforced by the service (i.e. even if the expiryTime
+                    # value is in the past, the permission is still considered granted). This does
+                    # not mean the granted delegated permissions corresponds to any or all of the
+                    # required permissions, and this does not mean anything at all about app-only
+                    # permissions.
+                    expiry_time = '9999-12-31T00:00:00Z'
+            setattr(p, 'expiryTime', expiry_time)
+
+    return required_permissions
 
 
 def list_permission_grants(cmd, identifier=None, query_filter=None, show_resource_name=None):

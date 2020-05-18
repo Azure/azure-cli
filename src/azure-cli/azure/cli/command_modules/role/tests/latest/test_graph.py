@@ -560,6 +560,7 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             'display_name': self.create_random_name('cli-app-', 15),
             'graph_resource': '00000002-0000-0000-c000-000000000000',
             'permission_1': '311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope',  # User.Read
+            'permission_1_scope': 'User.Read',
             'permission_2': '5778995a-e1bf-45b8-affa-663a9f3f4d04=Role',   # Directory.Read.All
             'permission_3': 'cba73afc-7f69-4d86-8450-4978e04ecd1a=Scope',  # User.ReadBasic.All
         }
@@ -573,7 +574,8 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
                 self.check('length([*])', 1),
                 self.check('length([*].resourceAccess[])', 1),
                 self.check("length([*].resourceAccess[?type == 'Scope'][])", 1),
-                self.check("length([*].resourceAccess[?type == 'Role'][])", 0)
+                self.check("length([*].resourceAccess[?type == 'Role'][])", 0),
+                self.check("length([?expiryTime == 'N/A'])", 1)
             ])
 
             self.cmd('ad app permission add --id {app_id} --api {graph_resource} --api-permissions {permission_2} {permission_3}')
@@ -581,7 +583,17 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
                 self.check('length([*])', 1),
                 self.check('length([*].resourceAccess[])', 3),
                 self.check("length([*].resourceAccess[?type == 'Scope'][])", 2),
-                self.check("length([*].resourceAccess[?type == 'Role'][])", 1)
+                self.check("length([*].resourceAccess[?type == 'Role'][])", 1),
+                self.check("length([?expiryTime == 'N/A'])", 1)
+            ])
+
+            self.cmd('ad app permission grant --id {app_id} --api {graph_resource} --consent-type AllPrincipals --scope "{permission_1_scope}"')
+            self.cmd('ad app permission list --id {app_id}', checks=[
+                self.check("length([*].expiryTime)", 1),
+                self.check("length([?expiryTime == 'N/A'])", 0)
+            ])
+            self.cmd('ad app permission list --id {app_id} --skip-grant-expiry-time', checks=[
+                self.check("length([*].expiryTime)", 0)
             ])
 
             self.cmd('ad app permission delete --id {app_id} --api {graph_resource} --api-permissions {permission_1} {permission_2}')
@@ -596,6 +608,7 @@ class GraphAppRequiredAccessScenarioTest(ScenarioTest):
             self.cmd('ad app permission list --id {app_id}', checks=[
                 self.check('length([*])', 0)
             ])
+
         finally:
             if self.kwargs['app_id']:
                 self.cmd('ad app delete --id {app_id}')

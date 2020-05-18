@@ -70,6 +70,8 @@ def load_arguments(self, _):
 
     with self.argument_context('ad app permission list') as c:
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the associated application')
+        c.argument('skip_grant_expiry_time', arg_type=get_three_state_flag(),
+                   help='Skip retrieving the expiry time of tenant-wide delegated permission grants (improves performance).')
 
     with self.argument_context('ad sp') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id')
