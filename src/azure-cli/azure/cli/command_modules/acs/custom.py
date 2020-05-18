@@ -1790,7 +1790,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
                                         service_principal_profile.client_id, scope=scope):
                 logger.warning('Could not create a role assignment for subnet. '
-                            'Are you an Owner on this subscription?')
+                               'Are you an Owner on this subscription?')
 
     load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
