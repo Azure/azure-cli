@@ -58,7 +58,7 @@ def load_arguments(self, _):
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id of the application')
 
     with self.argument_context('ad app permission') as c:
-        c.argument('api_permissions', nargs='+', help='space separated list of `<resource-access-id>=<type>`')
+        c.argument('api_permissions', nargs='+', help='Space-separated list of <permission-id>=<type>, where <type> is either \'Role\' (for application permsisions) or \'Scope\' (for delegated permissions), e.g. "e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope 9a5d68dd-52b0-4cc2-bd40-abcf44ac3a30=Role"')
         c.argument('expires', help='Expiry date for the permissions in years. e.g. 1, 2 or "never"')
         c.argument('scope', help='Specifies the value of the scope claim that the resource application should expect in the OAuth 2.0 access token, e.g. User.Read')
         c.argument('api', help='the target API to access')

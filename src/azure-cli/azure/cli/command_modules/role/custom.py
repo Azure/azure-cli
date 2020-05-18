@@ -894,9 +894,9 @@ def remove_required_permission(cmd, identifier, api, api_permissions=None):
 def _resolve_api_identifier_to_app_id(graph_client, api_identifier):
     """Resolves an API identifier to an app ID
 
-    The identifier can be an object ID or service principal name for an existing service principal
-    object. If no matching service principal object is found but the identifier is a Guid, it is
-    assumed to be the app ID of an API which is not instantiated in the tenant.
+    The identifier can be an object ID or service principal name (such as 'https://graph.microsoft.com'
+    for an existing service principal object. If no matching service principal object is found but the
+    identifier is a Guid, it is assumed to be the app ID of an API which is not instantiated in the tenant.
     """
     try:
         resource_sp = show_service_principal(graph_client.service_principals, api_identifier)
