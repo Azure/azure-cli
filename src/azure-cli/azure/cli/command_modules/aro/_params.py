@@ -70,11 +70,11 @@ def load_arguments(self, _):
                    validator=validate_worker_count)
 
         c.argument('apiserver_visibility',
-                   help='API server visibility.',
+                   help='API server visibility. Allowed Values: Private, Public',
                    validator=validate_visibility('apiserver_visibility'))
 
         c.argument('ingress_visibility',
-                   help='Ingress visibility.',
+                   help='Ingress visibility. Allowed Values: Private, Public',
                    validator=validate_visibility('ingress_visibility'))
 
         c.argument('vnet_resource_group_name',
