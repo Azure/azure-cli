@@ -72,7 +72,9 @@ def load_command_table(self, _):
         g.custom_command('delete-policy', 'delete_policy')
         g.command('list-deleted', 'list_deleted')
         g.generic_update_command('update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
-                                 custom_func_name='update_keyvault')
+                                 custom_func_name='update_keyvault',
+                                 doc_string_source='azure.mgmt.keyvault.v' +
+                                                   mgmt_api_version + '.models#VaultProperties')
 
     with self.command_group('keyvault network-rule',
                             kv_vaults_sdk,
