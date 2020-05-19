@@ -95,7 +95,7 @@ def patch_pool(cmd, instance, size=None, service_level=None, tags=None):
 
 # -- volume --
 # pylint: disable=too-many-locals
-def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None, endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None):
+def create_volume(cmd, client, account_name, pool_name, volume_name, resource_group_name, location, file_path, usage_threshold, vnet, subnet='default', service_level=None, protocol_types=None, volume_type=None, endpoint_type=None, replication_schedule=None, remote_volume_resource_id=None, tags=None, snapshot_id=None):
     subs_id = get_subscription_id(cmd.cli_ctx)
 
     # determine vnet - supplied value can be name or ARM resource Id
@@ -148,7 +148,8 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
         export_policy=volume_export_policy,
         volume_type=volume_type,
         data_protection=data_protection,
-        tags=tags)
+        tags=tags,
+        snapshot_id=snapshot_id)
 
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
 

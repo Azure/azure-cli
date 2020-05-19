@@ -2,6 +2,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
+
 from collections import OrderedDict
 import sys
 import os
@@ -17,7 +19,7 @@ import requests
 from pkg_resources import parse_version
 
 from azure.cli.core.util import CLIError, reload_module
-from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions, get_extension_modname,
+from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli,
                                       EXT_METADATA_ISPREVIEW, EXT_METADATA_ISEXPERIMENTAL,
                                       WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
@@ -37,13 +39,14 @@ OUT_KEY_TYPE = 'extensionType'
 OUT_KEY_METADATA = 'metadata'
 OUT_KEY_PREVIEW = 'preview'
 OUT_KEY_EXPERIMENTAL = 'experimental'
+OUT_KEY_PATH = 'path'
 
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli.list')
 LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
-def _run_pip(pip_exec_args):
+def _run_pip(pip_exec_args, extension_path):
     cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['-vv', '--disable-pip-version-check', '--no-cache-dir']
     logger.debug('Running: %s', cmd)
     try:
@@ -53,6 +56,8 @@ def _run_pip(pip_exec_args):
     except CalledProcessError as e:
         logger.debug(e.output)
         logger.debug(e)
+        if "PermissionError: [WinError 5]" in e.output:
+            logger.warning("You do not have the permission to add extensions in the target directory: %s. You may need to rerun on a shell as administrator.", os.path.split(extension_path)[0])
         returncode = e.returncode
     return returncode
 
@@ -79,7 +84,7 @@ def _validate_whl_extension(ext_file):
     check_version_compatibility(azext_metadata)
 
 
-def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
+def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
     cmd.cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
@@ -135,7 +140,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
     check_distro_consistency()
     cmd.cli_ctx.get_progress_controller().add(message='Installing')
     # Install with pip
-    extension_path = get_extension_path(extension_name)
+    extension_path = build_extension_path(extension_name, system)
     pip_args = ['install', '--target', extension_path, ext_file]
 
     if pip_proxy:
@@ -146,7 +151,7 @@ def _add_whl_ext(cmd, source, ext_sha256=None, pip_extra_index_urls=None, pip_pr
 
     logger.debug('Executing pip with args: %s', pip_args)
     with HomebrewPipPatch():
-        pip_status_code = _run_pip(pip_args)
+        pip_status_code = _run_pip(pip_args, extension_path)
     if pip_status_code > 0:
         logger.debug('Pip failed so deleting anything we might have installed at %s', extension_path)
         shutil.rmtree(extension_path, ignore_errors=True)
@@ -168,12 +173,12 @@ def is_valid_sha256sum(a_file, expected_sum):
     return expected_sum == computed_hash, computed_hash
 
 
-def _augment_telemetry_with_ext_info(extension_name):
+def _augment_telemetry_with_ext_info(extension_name, ext=None):
     # The extension must be available before calling this otherwise we can't get the version from metadata
     if not extension_name:
         return
     try:
-        ext = get_extension(extension_name)
+        ext = ext or get_extension(extension_name)
         ext_version = ext.version
         set_extension_management_detail(extension_name, ext_version)
     except Exception:  # nopa pylint: disable=broad-except
@@ -200,7 +205,7 @@ def check_version_compatibility(azext_metadata):
 
 
 def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
-                  pip_extra_index_urls=None, pip_proxy=None):
+                  pip_extra_index_urls=None, pip_proxy=None, system=None):
     ext_sha256 = None
     if extension_name:
         cmd.cli_ctx.get_progress_controller().add(message='Searching')
@@ -220,13 +225,14 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
             logger.debug(err)
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
     extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256,
-                                  pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
-    _augment_telemetry_with_ext_info(extension_name)
+                                  pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
     try:
-        if extension_name and get_extension(extension_name).experimental:
+        ext = get_extension(extension_name)
+        _augment_telemetry_with_ext_info(extension_name, ext)
+        if extension_name and ext.experimental:
             logger.warning("The installed extension '%s' is experimental and not covered by customer support. "
                            "Please use with discretion.", extension_name)
-        elif extension_name and get_extension(extension_name).preview:
+        elif extension_name and ext.preview:
             logger.warning("The installed extension '%s' is in preview.", extension_name)
     except ExtensionNotInstalledException:
         pass
@@ -245,15 +251,15 @@ def remove_extension(extension_name):
                 "Extension '{name}' was installed in development mode. Remove using "
                 "`azdev extension remove {name}`".format(name=extension_name))
         # We call this just before we remove the extension so we can get the metadata before it is gone
-        _augment_telemetry_with_ext_info(extension_name)
-        shutil.rmtree(get_extension_path(extension_name), onerror=log_err)
+        _augment_telemetry_with_ext_info(extension_name, ext)
+        shutil.rmtree(ext.path, onerror=log_err)
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
 
 def list_extensions():
     return [{OUT_KEY_NAME: ext.name, OUT_KEY_VERSION: ext.version, OUT_KEY_TYPE: ext.ext_type,
-             OUT_KEY_PREVIEW: ext.preview, OUT_KEY_EXPERIMENTAL: ext.experimental}
+             OUT_KEY_PREVIEW: ext.preview, OUT_KEY_EXPERIMENTAL: ext.experimental, OUT_KEY_PATH: ext.path}
             for ext in get_extensions()]
 
 
@@ -263,7 +269,8 @@ def show_extension(extension_name):
         return {OUT_KEY_NAME: extension.name,
                 OUT_KEY_VERSION: extension.version,
                 OUT_KEY_TYPE: extension.ext_type,
-                OUT_KEY_METADATA: extension.metadata}
+                OUT_KEY_METADATA: extension.metadata,
+                OUT_KEY_PATH: extension.path}
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -279,7 +286,7 @@ def update_extension(cmd, extension_name, index_url=None, pip_extra_index_urls=N
             raise CLIError("No updates available for '{}'. Use --debug for more information.".format(extension_name))
         # Copy current version of extension to tmp directory in case we need to restore it after a failed install.
         backup_dir = os.path.join(tempfile.mkdtemp(), extension_name)
-        extension_path = get_extension_path(extension_name)
+        extension_path = ext.path
         logger.debug('Backing up the current extension: %s to %s', extension_path, backup_dir)
         shutil.copytree(extension_path, backup_dir)
         # Remove current version of the extension

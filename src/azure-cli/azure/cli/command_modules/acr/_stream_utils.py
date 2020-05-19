@@ -9,8 +9,8 @@ import colorama
 from knack.util import CLIError
 from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
-from azure.storage.blob import AppendBlobService
 from azure.common import AzureHttpError
+from azure.cli.core.profiles import ResourceType, get_sdk
 from ._azure_utils import get_blob_info
 
 logger = get_logger(__name__)
@@ -19,7 +19,7 @@ DEFAULT_CHUNK_SIZE = 1024 * 4
 DEFAULT_LOG_TIMEOUT_IN_SEC = 60 * 30  # 30 minutes
 
 
-def stream_logs(client,
+def stream_logs(cmd, client,
                 run_id,
                 registry_name,
                 resource_group_name,
@@ -43,7 +43,7 @@ def stream_logs(client,
 
     account_name, endpoint_suffix, container_name, blob_name, sas_token = get_blob_info(
         log_file_sas)
-
+    AppendBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#AppendBlobService')
     _stream_logs(no_format,
                  DEFAULT_CHUNK_SIZE,
                  DEFAULT_LOG_TIMEOUT_IN_SEC,

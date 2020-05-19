@@ -36,7 +36,6 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
-from azure.storage.blob import BlockBlobService, BlobPermissions
 from azure.cli.command_modules.network._client_factory import network_client_factory
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -44,7 +43,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait
 from azure.cli.core.util import get_az_user_agent
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 from .tunnel import TunnelServer
 
@@ -502,7 +501,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
     container_name = "function-releases"
     blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
-
+    BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
     block_blob_service = BlockBlobService(connection_string=storage_connection)
     if not block_blob_service.exists(container_name):
         block_blob_service.create_container(container_name)
@@ -522,6 +521,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
     now = datetime.datetime.now()
     blob_start = now - datetime.timedelta(minutes=10)
     blob_end = now + datetime.timedelta(weeks=520)
+    BlobPermissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlobPermissions')
     blob_token = block_blob_service.generate_blob_shared_access_signature(container_name,
                                                                           blob_name,
                                                                           permission=BlobPermissions(read=True),
@@ -2136,7 +2136,26 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     server_farm_id = webapp.server_farm_id
     location = webapp.location
-    kv_id = _format_key_vault_id(cmd.cli_ctx, key_vault, resource_group_name)
+    kv_id = None
+    if not is_valid_resource_id(key_vault):
+        kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
+        key_vaults = kv_client.vaults.list_by_subscription()
+        for kv in key_vaults:
+            if key_vault == kv.name:
+                kv_id = kv.id
+                break
+    else:
+        kv_id = key_vault
+
+    if kv_id is None:
+        kv_msg = 'The Key Vault {0} was not found in the subscription in context. ' \
+                 'If your Key Vault is in a different subscription, please specify the full Resource ID: ' \
+                 '\naz .. ssl import -n {1} -g {2} --key-vault-certificate-name {3} ' \
+                 '--key-vault /subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/' \
+                 'vaults/{0}'.format(key_vault, name, resource_group_name, key_vault_certificate_name)
+        logger.warning(kv_msg)
+        return
+
     kv_id_parts = parse_resource_id(kv_id)
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
@@ -2464,7 +2483,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
-        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)
+        location = next((loc for loc in locations if loc['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
@@ -2549,11 +2568,12 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
                                                   value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
     site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION',
                                                   value=_get_website_node_version_functionapp(functions_version,
                                                                                               runtime,
                                                                                               runtime_version)))
+    if disable_app_insights:
+        site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
 
     # If plan is not consumption or elastic premium, we need to set always on
     if consumption_plan_location is None and not is_plan_elastic_premium(cmd, plan_info):
@@ -2595,6 +2615,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         except Exception:  # pylint: disable=broad-except
             logger.warning('Error while trying to create and configure an Application Insights for the Function App. '
                            'Please use the Azure Portal to create and configure the Application Insights, if needed.')
+            update_app_settings(cmd, functionapp.resource_group, functionapp.name,
+                                ['AzureWebJobsDashboard={}'.format(con_string)])
 
     if deployment_container_image_name:
         update_container_settings_functionapp(cmd, resource_group_name, name, docker_registry_server_url,
@@ -3252,14 +3274,14 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
 
     if _create_new_rg:
         logger.warning("Creating Resource group '%s' ...", rg_name)
-        create_resource_group(cmd, rg_name, location)
+        create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
         # create ASP
         logger.warning("Creating AppServicePlan '%s' ...", plan)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
     create_app_service_plan(cmd, rg_name, plan, _is_linux, hyper_v=False, per_site_scaling=False, sku=sku,
-                            number_of_workers=1 if _is_linux else None, location=location)
+                            number_of_workers=1 if _is_linux else None, location=loc)
 
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)

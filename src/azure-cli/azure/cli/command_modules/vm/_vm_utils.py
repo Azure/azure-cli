@@ -117,8 +117,8 @@ def get_key_vault_base_url(cli_ctx, vault_name):
 def list_sku_info(cli_ctx, location=None):
     from ._client_factory import _compute_client_factory
 
-    def _match_location(l, locations):
-        return next((x for x in locations if x.lower() == l.lower()), None)
+    def _match_location(loc, locations):
+        return next((x for x in locations if x.lower() == loc.lower()), None)
 
     client = _compute_client_factory(cli_ctx)
     result = client.resource_skus.list()
@@ -243,11 +243,11 @@ def update_disk_caching(model, caching_settings):
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
-            for l in luns:
-                if l not in model:
+            for lun_item in luns:
+                if lun_item not in model:
                     raise CLIError("Data disk with lun of '{}' doesn't exist. Existing luns: {}."
-                                   .format(lun, list(model.keys())))
-                model[l]['caching'] = value
+                                   .format(lun_item, list(model.keys())))
+                model[lun_item]['caching'] = value
         else:
             if lun is None:
                 disks = [model.os_disk] + (model.data_disks or [])
@@ -278,10 +278,10 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
     def _update(model, lun, value):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
-            for l in luns:
-                if l not in model:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
-                model[l]['writeAcceleratorEnabled'] = value
+            for lun_item in luns:
+                if lun_item not in model:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun_item))
+                model[lun_item]['writeAcceleratorEnabled'] = value
         else:
             if lun is None:
                 disks = [model.os_disk] + (model.data_disks or [])

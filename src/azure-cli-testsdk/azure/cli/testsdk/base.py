@@ -9,6 +9,7 @@ import shlex
 import logging
 import inspect
 import unittest
+import tempfile
 
 from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
                                            OAuthRequestResponsesFilter, LargeRequestBodyProcessor,
@@ -19,7 +20,7 @@ from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
-                      patch_progress_controller)
+                      patch_progress_controller, patch_get_current_system_username)
 from .exceptions import CliExecutionError
 from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
 from .reverse_dependency import get_dummy_cli
@@ -171,6 +172,37 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         else:
             subscription_id = MOCKED_SUBSCRIPTION_ID
         return subscription_id
+
+
+class LocalContextScenarioTest(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None,
+                 replay_processors=None, recording_patches=None, replay_patches=None, working_dir=None):
+        super(LocalContextScenarioTest, self).__init__(method_name, config_file, recording_name, recording_processors,
+                                                       replay_processors, recording_patches, replay_patches)
+        if self.in_recording:
+            self.recording_patches.append(patch_get_current_system_username)
+        else:
+            self.replay_patches.append(patch_get_current_system_username)
+        self.original_working_dir = os.getcwd()
+        if working_dir:
+            self.working_dir = working_dir
+        else:
+            self.working_dir = tempfile.mkdtemp()
+
+    def setUp(self):
+        super(LocalContextScenarioTest, self).setUp()
+        self.cli_ctx.local_context.initialize()
+        os.chdir(self.working_dir)
+        self.cmd('local-context on')
+
+    def tearDown(self):
+        super(LocalContextScenarioTest, self).tearDown()
+        self.cmd('local-context off')
+        self.cmd('local-context delete --all --purge -y')
+        os.chdir(self.original_working_dir)
+        if os.path.exists(self.working_dir):
+            import shutil
+            shutil.rmtree(self.working_dir)
 
 
 @live_only()
