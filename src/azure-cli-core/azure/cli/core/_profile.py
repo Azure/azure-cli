@@ -208,7 +208,7 @@ class Profile(object):
 
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         identity = Identity()
-        credential, mi_info = identity.login_with_managed_identity(identity_id, resource)
+        credential, mi_info = identity.login_with_managed_identity(resource, identity_id)
 
         tenant = mi_info[Identity.MANAGED_IDENTITY_TENANT_ID]
         if find_subscriptions:
@@ -244,12 +244,39 @@ class Profile(object):
 
         consolidated = self._normalize_properties(user_name, subscriptions, is_service_principal=True,
                                                   user_assigned_identity_id=legacy_base_name,
-                                                  managed_identity_client_id=client_id)
+                                                  managed_identity_info=mi_info)
+        self._set_subscriptions(consolidated)
+        return deepcopy(consolidated)
+
+    def login_in_cloud_shell(self, allow_no_subscriptions=None, find_subscriptions=True):
+        # TODO: deprecate allow_no_subscriptions
+        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        identity = Identity()
+        credential, identity_info = identity.login_in_cloud_shell(resource)
+
+        tenant = identity_info[Identity.MANAGED_IDENTITY_TENANT_ID]
+        if find_subscriptions:
+            logger.info('Finding subscriptions...')
+            subscription_finder = SubscriptionFinder(self.cli_ctx)
+            subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
+            if not subscriptions:
+                if allow_no_subscriptions:
+                    subscriptions = self._build_tenant_level_accounts([tenant])
+                else:
+                    raise CLIError('No access was configured for the VM, hence no subscriptions were found. '
+                                   "If this is expected, use '--allow-no-subscriptions' to have tenant level access.")
+        else:
+            subscriptions = self._build_tenant_level_accounts([tenant])
+
+        consolidated = self._normalize_properties(identity_info[Identity.CLOUD_SHELL_IDENTITY_UNIQUE_NAME],
+                                                  subscriptions, is_service_principal=False)
+        for s in consolidated:
+            s[_USER_ENTITY][_CLOUD_SHELL_ID] = True
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
     def _normalize_properties(self, user, subscriptions, is_service_principal, cert_sn_issuer_auth=None,
-                              user_assigned_identity_id=None, home_account_id=None, managed_identity_client_id=None):
+                              user_assigned_identity_id=None, home_account_id=None, managed_identity_info=None):
         import sys
         consolidated = []
         for s in subscriptions:
@@ -285,8 +312,10 @@ class Profile(object):
 
             if cert_sn_issuer_auth:
                 subscription_dict[_USER_ENTITY][_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH] = True
-            if managed_identity_client_id:
-                subscription_dict[_USER_ENTITY]['clientId'] = managed_identity_client_id
+            if managed_identity_info:
+                subscription_dict[_USER_ENTITY]['clientId'] = managed_identity_info[Identity.MANAGED_IDENTITY_CLIENT_ID]
+                subscription_dict[_USER_ENTITY]['objectId'] = managed_identity_info[Identity.MANAGED_IDENTITY_OBJECT_ID]
+                subscription_dict[_USER_ENTITY]['resourceId'] = managed_identity_info[Identity.MANAGED_IDENTITY_RESOURCE_ID]
 
             # This will be deprecated and client_id will be the only persisted ID
             if user_assigned_identity_id:
@@ -314,33 +343,6 @@ class Profile(object):
         s = SubscriptionType()
         s.state = StateType.enabled
         return s
-
-    def find_subscriptions_in_cloud_console(self):
-        import jwt
-
-        _, token, _ = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
-        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
-        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
-        tenant = decode['tid']
-
-        subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
-        subscriptions = subscription_finder.find_from_raw_token(tenant, token)
-        if not subscriptions:
-            raise CLIError('No subscriptions were found in the cloud shell')
-        user = decode.get('unique_name', 'N/A')
-
-        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=False)
-        for s in consolidated:
-            s[_USER_ENTITY][_CLOUD_SHELL_ID] = True
-        self._set_subscriptions(consolidated)
-        return deepcopy(consolidated)
-
-    def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
-        from msrestazure.azure_active_directory import MSIAuthentication
-        auth = MSIAuthentication(resource=resource)
-        auth.set_token()
-        token_entry = auth.token
-        return (token_entry['token_type'], token_entry['access_token'], token_entry)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
 

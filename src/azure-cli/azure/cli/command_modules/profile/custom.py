@@ -124,7 +124,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     if identity:
         if in_cloud_console():
-            return profile.find_subscriptions_in_cloud_console()
+            return profile.login_in_cloud_shell()
         return profile.login_with_managed_identity(username, allow_no_subscriptions)
     if in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
