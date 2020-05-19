@@ -1187,4 +1187,15 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_security_partner_provider')
         g.command('delete', 'delete')
+
+    # region PrivateLinkResource and PrivateEndpointConnection
+    plr_and_pec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom#{}')
+    with self.command_group('network private-link-resource', custom_command_type=plr_and_pec_custom) as g:
+        g.custom_show_command('list', 'list_private_link_resource')
+    with self.command_group('network private-endpoint-connection', custom_command_type=plr_and_pec_custom) as g:
+        g.custom_command('approve', 'approve_private_endpoint_connection')
+        g.custom_command('reject', 'reject_private_endpoint_connection')
+        g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
+        g.custom_show_command('show', 'show_private_endpoint_connection')
+        g.custom_command('list', 'list_private_endpoint_connection')
     # endregion

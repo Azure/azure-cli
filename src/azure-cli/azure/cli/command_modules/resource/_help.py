@@ -581,6 +581,9 @@ examples:
                     "value": "policy2"
                 }
             }'
+  - name: Create a deployment at resource group from a local template file, using parameters from an array string.
+    text: |
+      az deployment group create --resource-group testgroup --template-file demotemplate.json --parameters exampleString='inline string' exampleArray='("value1", "value2")'
   - name: Create a deployment at resource group from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
         az deployment group create --resource-group testrg --name rollout01 --template-file azuredeploy.json  \\

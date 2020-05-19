@@ -52,7 +52,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
     source_location = prepare_source_location(
-        source_location, client_registries, registry_name, resource_group_name)
+        cmd, source_location, client_registries, registry_name, resource_group_name)
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
@@ -114,4 +114,4 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, no_format, True)

@@ -348,6 +348,8 @@ parameters:
     short-summary: The replication schedule, e.g. "_10minutely, hourly, daily, weekly, monthly"
   - name: --tags
     short-summary: Space-separated tags in `key[=value]` format
+  - name: --snapshot-id
+    short-summary: Create a volume created from this snapshot. UUID v4 or resource identifier used to identify the Snapshot. example snapshot_id "9760acf5-4638-11e7-9bdb-020073ca3333"
 examples:
   - name: Create an ANF volume
     text: >

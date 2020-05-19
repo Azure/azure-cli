@@ -16,7 +16,7 @@ def load_arguments(self, _):
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
         get_enum_type, get_three_state_flag)
     from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.local_context import LocalContextAttribute, SET, ALL
+    from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
     from knack.arguments import ignore_type, CLIArgumentType
 
@@ -62,7 +62,7 @@ def load_arguments(self, _):
     deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
                                                               help='Disable pretty-print for What-If results. When set, the output format type will be used.')
     deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
-                                                           help='Instruct the command to run deployment What-If before excuting the deployment. It then prompts you to acknowledge resource changes before it continues.',
+                                                           help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.',
                                                            is_preview=True, min_api='2019-07-01')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
@@ -370,7 +370,7 @@ def load_arguments(self, _):
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
                    help='name of the new resource group', completer=None,
                    local_context_attribute=LocalContextAttribute(
-                       name='resource_group_name', actions=[SET], scopes=[ALL]))
+                       name='resource_group_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('managed_by', min_api='2016-09-01', help='The ID of the resource that manages this resource group.')
 
     with self.argument_context('tag') as c:
@@ -428,7 +428,7 @@ def load_arguments(self, _):
 
     with self.argument_context('managedapp definition create') as c:
         c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel), help='The type of lock restriction.')
-        c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
+        c.argument('authorizations', options_list=['--authorizations', '-a'], nargs='+', help="space-separated authorization pairs in a format of `<principalId>:<roleDefinitionId>`")
         c.argument('createUiDefinition', options_list=['--create-ui-definition', '-c'], help='JSON formatted string or a path to a file with such content', type=file_type)
         c.argument('mainTemplate', options_list=['--main-template', '-t'], help='JSON formatted string or a path to a file with such content', type=file_type)
 

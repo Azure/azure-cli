@@ -6,7 +6,7 @@
 
 from __future__ import print_function
 
-__version__ = "2.5.1"
+__version__ = "2.6.0"
 
 import os
 import sys
@@ -23,23 +23,13 @@ from knack.preview import PreviewItem
 from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
-from .local_context import AzCLILocalContext, SET
+from .local_context import AzCLILocalContext, LocalContextAction
 
 logger = get_logger(__name__)
 
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
-
-_PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliYum"),
-                                 "ZYPPER": ("sudo zypper refresh && sudo zypper update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliZypper"),
-                                 "DEB": ("sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli", "https://aka.ms/doc/UpdateAzureCliApt"),
-                                 "HOMEBREW": ("brew update && brew upgrade azure-cli", "https://aka.ms/doc/UpdateAzureCliHomebrew"),
-                                 "PIP": ("curl -L https://aka.ms/InstallAzureCli | bash", "https://aka.ms/doc/UpdateAzureCliLinux"),
-                                 "MSI": ("https://aka.ms/installazurecliwindows", "https://aka.ms/doc/UpdateAzureCliMsi"),
-                                 "DOCKER": ("docker pull mcr.microsoft.com/azure-cli", "https://aka.ms/doc/UpdateAzureCliDocker")}
-
-_GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://aka.ms/doc/InstallAzureCli'
 
 
 class AzCli(CLI):
@@ -69,9 +59,7 @@ class AzCli(CLI):
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
-        self.local_context = AzCLILocalContext(
-            dir_name=os.path.basename(self.config.config_dir), file_name='local_context'
-        )
+        self.local_context = AzCLILocalContext(self)
         register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
@@ -100,47 +88,14 @@ class AzCli(CLI):
         return __version__
 
     def show_version(self):
-        from azure.cli.core.util import get_az_version_string
+        from azure.cli.core.util import get_az_version_string, show_updates
         from azure.cli.core.commands.constants import (SURVEY_PROMPT, SURVEY_PROMPT_COLOR,
                                                        UX_SURVEY_PROMPT, UX_SURVEY_PROMPT_COLOR)
 
         ver_string, updates_available = get_az_version_string()
         print(ver_string)
-        if updates_available == -1:
-            logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
-        elif updates_available:
-            warning_msg = 'You have %i updates available. Consider updating your CLI installation'
-            from azure.cli.core._environment import _ENV_AZ_INSTALLER
-            installer = os.getenv(_ENV_AZ_INSTALLER)
-            instruction_msg = ''
-            if installer in _PACKAGE_UPGRADE_INSTRUCTIONS:
-                if installer == 'RPM':
-                    from azure.cli.core.util import get_linux_distro
-                    distname, _ = get_linux_distro()
-                    if not distname:
-                        instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
-                    else:
-                        distname = distname.lower().strip()
-                        if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
-                            installer = 'YUM'
-                        elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
-                            installer = 'ZYPPER'
-                        else:
-                            instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
-                elif installer == 'PIP':
-                    import platform
-                    system = platform.system()
-                    alternative_command = " or '{}' if you used our script for installation. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1]) if system != 'Windows' else ''
-                    instruction_msg = " with 'pip install --upgrade azure-cli'{}".format(alternative_command)
-                if instruction_msg:
-                    warning_msg += instruction_msg
-                else:
-                    warning_msg += " with '{}'. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1])
-            else:
-                warning_msg += '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
-            logger.warning(warning_msg, updates_available)
-        else:
-            print('Your CLI is up-to-date.')
+        show_updates(updates_available)
+
         show_link = self.config.getboolean('output', 'show_survey_link', True)
         if show_link:
             print('\n' + (SURVEY_PROMPT_COLOR if self.enable_color else SURVEY_PROMPT))
@@ -162,20 +117,33 @@ class AzCli(CLI):
         :param specified_arguments: Arguments which user specify in this command
         :type specified_arguments: list
         """
-
+        local_context_args = []
         for argument_name in specified_arguments:
             # make sure SET is defined
             if argument_name not in argument_definitions:
                 continue
             argtype = argument_definitions[argument_name].type
             lca = argtype.settings.get('local_context_attribute', None)
-            if not lca or not lca.actions or SET not in lca.actions:
+            if not lca or not lca.actions or LocalContextAction.SET not in lca.actions:
                 continue
             # get the specified value
             value = getattr(parsed_args, argument_name)
             # save when name and scopes have value
             if lca.name and lca.scopes:
                 self.local_context.set(lca.scopes, lca.name, value)
+            options = argtype.settings.get('options_list', None)
+            if options:
+                local_context_args.append((options[0], value))
+
+        # print warning if there are values saved to local context
+        if local_context_args:
+            logger.warning('Local context is turned on. Its information is saved in working directory %s. You can '
+                           'run `az local-context off` to turn it off.',
+                           self.local_context.effective_working_directory())
+            args_str = []
+            for name, value in local_context_args:
+                args_str.append('{}: {}'.format(name, value))
+            logger.warning('Command argument values saved to local context: %s', ', '.join(args_str))
 
 
 class MainCommandsLoader(CLICommandsLoader):
@@ -340,7 +308,8 @@ class MainCommandsLoader(CLICommandsLoader):
         return self.command_table
 
     def load_arguments(self, command=None):
-        from azure.cli.core.commands.parameters import resource_group_name_type, get_location_type, deployment_name_type
+        from azure.cli.core.commands.parameters import (
+            resource_group_name_type, get_location_type, deployment_name_type, vnet_name_type, subnet_name_type)
         from knack.arguments import ignore_type
 
         # omit specific command to load everything
@@ -359,6 +328,8 @@ class MainCommandsLoader(CLICommandsLoader):
                 with loader.argument_context('') as c:
                     c.argument('resource_group_name', resource_group_name_type)
                     c.argument('location', get_location_type(self.cli_ctx))
+                    c.argument('vnet_name', vnet_name_type)
+                    c.argument('subnet', subnet_name_type)
                     c.argument('deployment_name', deployment_name_type)
                     c.argument('cmd', ignore_type)
 

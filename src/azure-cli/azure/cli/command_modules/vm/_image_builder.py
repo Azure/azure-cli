@@ -145,9 +145,9 @@ def _validate_location(location, location_names, location_display_names):
 
     if ' ' in location:
         # if display name is provided, attempt to convert to short form name
-        location = next((l for l in location_display_names if l.lower() == location.lower()), location)
+        location = next((name for name in location_display_names if name.lower() == location.lower()), location)
 
-    if location.lower() not in [l.lower() for l in location_names]:
+    if location.lower() not in [location_name.lower() for location_name in location_names]:
         raise CLIError("Location {} is not a valid subscription location. "
                        "Use one from `az account list-locations`.".format(location))
 
@@ -178,8 +178,8 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
     # Validate and parse destination and locations
     destinations = []
     subscription_locations = get_subscription_locations(cmd.cli_ctx)
-    location_names = [l.name for l in subscription_locations]
-    location_display_names = [l.display_name for l in subscription_locations]
+    location_names = [location.name for location in subscription_locations]
+    location_display_names = [location.display_name for location in subscription_locations]
 
     if namespace.managed_image_destinations:
         for dest in namespace.managed_image_destinations:
@@ -190,7 +190,7 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
     if namespace.shared_image_destinations:
         for dest in namespace.shared_image_destinations:
             rid, locations = _parse_image_destination(cmd, namespace.resource_group_name, dest, is_shared_image=True)
-            locations = [_validate_location(l, location_names, location_display_names) for l in locations]
+            locations = [_validate_location(location, location_names, location_display_names) for location in locations]
             destinations.append((_DestType.SHARED_IMAGE_GALLERY, rid, locations))
 
     # Validate and parse source image
@@ -352,8 +352,8 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
         raise CLIError("Usage error: If --is-vhd is used, a run output name must be provided via --output-name.")
 
     subscription_locations = get_subscription_locations(cmd.cli_ctx)
-    location_names = [l.name for l in subscription_locations]
-    location_display_names = [l.display_name for l in subscription_locations]
+    location_names = [location.name for location in subscription_locations]
+    location_display_names = [location.display_name for location in subscription_locations]
 
     if namespace.managed_image_location:
         namespace.managed_image_location = _validate_location(namespace.managed_image_location,
