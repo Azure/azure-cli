@@ -40,7 +40,7 @@ def load_arguments(self, _):
         c.argument('sku', help='Type of Redis cache.', arg_type=get_enum_type(SkuName))
         c.argument('minimum_tls_version', help='Specifies the TLS version required by clients to connect to cache', arg_type=get_enum_type(TlsVersion))
         c.argument('vm_size', arg_type=get_enum_type(allowed_c_family_sizes + allowed_p_family_sizes), help='Size of Redis cache to deploy. Basic and Standard Cache sizes start with C. Premium Cache sizes start with P')
-        c.argument('enable_non_ssl_port', action='store_true', help='If the value is true, then the non-ssl redis server port (6379) will be enabled.')
+        c.argument('enable_non_ssl_port', action='store_true', help='If specified, then the non-ssl redis server port (6379) will be enabled.')
         c.argument('replicas_per_master', help='The number of replicas to be created per master.', is_preview=True)
 
     with self.argument_context('redis firewall-rules list') as c:
