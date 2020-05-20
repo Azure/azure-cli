@@ -53,6 +53,16 @@ def _delete_file(file_path):
 class Identity:
     """Class to interact with Azure Identity.
     """
+    MANAGED_IDENTITY_TENANT_ID = "tenant_id"
+    MANAGED_IDENTITY_CLIENT_ID = "client_id"
+    MANAGED_IDENTITY_OBJECT_ID = "object_id"
+    MANAGED_IDENTITY_RESOURCE_ID = "resource_id"
+    MANAGED_IDENTITY_SYSTEM_ASSIGNED = 'systemAssignedIdentity'
+    MANAGED_IDENTITY_USER_ASSIGNED = 'userAssignedIdentity'
+    MANAGED_IDENTITY_TYPE = 'type'
+    MANAGED_IDENTITY_ID_TYPE = "id_type"
+
+    CLOUD_SHELL_IDENTITY_UNIQUE_NAME = "unique_name"
 
     def __init__(self, authority=None, tenant_id=None, client_id=_CLIENT_ID, **kwargs):
         self.authority = authority
@@ -61,16 +71,6 @@ class Identity:
         self._cred_cache = kwargs.pop('cred_cache', None)
         # todo: MSAL support force encryption
         self.allow_unencrypted = True
-
-        # Initialize _msal_app for logout, since Azure Identity doesn't provide the functionality for logout
-        from msal import PublicClientApplication
-        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
-        from azure.identity._internal.persistent_cache import load_persistent_cache
-
-        # Store for user token persistence
-        cache = load_persistent_cache(self.allow_unencrypted)
-        authority = "https://{}/organizations".format(self.authority)
-        self._msal_app = PublicClientApplication(authority=authority, client_id=_CLIENT_ID, token_cache=cache)
 
         # Store for Service principal credential persistence
         self._msal_store = MSALSecretStore(fallback_to_plaintext=self.allow_unencrypted)
@@ -82,6 +82,17 @@ class Identity:
         # Still not work yet
         from azure.cli.core._debug import change_ssl_cert_verification_track2
         self.ssl_kwargs = change_ssl_cert_verification_track2()
+
+    @property
+    def _msal_app(self):
+        # Initialize _msal_app for logout, since Azure Identity doesn't provide the functionality for logout
+        from msal import PublicClientApplication
+        # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
+        from azure.identity._internal.persistent_cache import load_persistent_cache
+
+        # Store for user token persistence
+        cache = load_persistent_cache(self.allow_unencrypted)
+        return PublicClientApplication(authority=self.authority, client_id=self.client_id, token_cache=cache)
 
     def login_with_interactive_browser(self):
         # Use InteractiveBrowserCredential
@@ -151,16 +162,7 @@ class Identity:
         credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
         return credential
 
-    MANAGED_IDENTITY_TENANT_ID = "tenant_id"
-    MANAGED_IDENTITY_CLIENT_ID = "client_id"
-    MANAGED_IDENTITY_OBJECT_ID = "object_id"
-    MANAGED_IDENTITY_RESOURCE_ID = "resource_id"
-    MANAGED_IDENTITY_SYSTEM_ASSIGNED = 'systemAssignedIdentity'
-    MANAGED_IDENTITY_USER_ASSIGNED = 'userAssignedIdentity'
-    MANAGED_IDENTITY_TYPE = 'type'
-    MANAGED_IDENTITY_ID_TYPE = "id_type"
-
-    def login_with_managed_identity(self, identity_id, resource):
+    def login_with_managed_identity(self, resource, identity_id=None):
         from msrestazure.tools import is_valid_resource_id
         from requests import HTTPError
 
@@ -169,7 +171,8 @@ class Identity:
         if identity_id:
             # Try resource ID
             if is_valid_resource_id(identity_id):
-                credential = ManagedIdentityCredential(resource=resource, msi_res_id=identity_id)
+                # TODO: Support resource ID in Azure Identity
+                credential = ManagedIdentityCredential(resource_id=identity_id)
                 id_type = self.MANAGED_IDENTITY_RESOURCE_ID
             else:
                 authenticated = False
@@ -187,7 +190,8 @@ class Identity:
                 if not authenticated:
                     try:
                         # Try object ID
-                        credential = ManagedIdentityCredential(resource=resource, object_id=identity_id)
+                        # TODO: Support resource ID in Azure Identity
+                        credential = ManagedIdentityCredential(object_id=identity_id)
                         id_type = self.MANAGED_IDENTITY_OBJECT_ID
                         authenticated = True
                     except HTTPError as ex:
@@ -202,6 +206,41 @@ class Identity:
         else:
             credential = ManagedIdentityCredential()
 
+        decoded = self._decode_managed_identity_token(credential, resource)
+        resource_id = decoded.get('xms_mirid')
+        # User-assigned identity has resourceID as
+        # /subscriptions/xxx/resourcegroups/xxx/providers/Microsoft.ManagedIdentity/userAssignedIdentities/xxx
+        if resource_id and 'Microsoft.ManagedIdentity' in resource_id:
+            mi_type = self.MANAGED_IDENTITY_USER_ASSIGNED
+        else:
+            mi_type = self.MANAGED_IDENTITY_SYSTEM_ASSIGNED
+
+        managed_identity_info = {
+            self.MANAGED_IDENTITY_TYPE: mi_type,
+            # The type of the ID provided with --username, only valid for a user-assigned managed identity
+            self.MANAGED_IDENTITY_ID_TYPE: id_type,
+            self.MANAGED_IDENTITY_TENANT_ID: decoded['tid'],
+            self.MANAGED_IDENTITY_CLIENT_ID: decoded['appid'],
+            self.MANAGED_IDENTITY_OBJECT_ID: decoded['oid'],
+            self.MANAGED_IDENTITY_RESOURCE_ID: resource_id,
+        }
+        logger.warning('Using Managed Identity: %s', json.dumps(managed_identity_info))
+
+        return credential, managed_identity_info
+
+    def login_in_cloud_shell(self, resource):
+        credential = ManagedIdentityCredential()
+        decoded = self._decode_managed_identity_token(credential, resource)
+
+        cloud_shell_identity_info = {
+            self.MANAGED_IDENTITY_TENANT_ID: decoded['tid'],
+            # For getting the user email in Cloud Shell, maybe 'email' can also be used
+            self.CLOUD_SHELL_IDENTITY_UNIQUE_NAME: decoded.get('unique_name', 'N/A')
+        }
+        logger.warning('Using Cloud Shell Managed Identity: %s', json.dumps(cloud_shell_identity_info))
+        return credential, cloud_shell_identity_info
+
+    def _decode_managed_identity_token(self, credential, resource):
         # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
         # The resource is only used for acquiring the initial access token
         scope = resource.rstrip('/') + '/.default'
@@ -213,21 +252,7 @@ class Identity:
         decoded_str = decode_part(access_token.split('.')[1])
         logger.debug('MSI token retrieved: %s', decoded_str)
         decoded = json.loads(decoded_str)
-
-        resource_id = decoded['xms_mirid']
-        managed_identity_info = {
-            self.MANAGED_IDENTITY_TYPE: self.MANAGED_IDENTITY_USER_ASSIGNED
-            if 'Microsoft.ManagedIdentity' in resource_id else self.MANAGED_IDENTITY_SYSTEM_ASSIGNED,
-            # The type of the ID provided with --username, only valid for a user-assigned managed identity
-            self.MANAGED_IDENTITY_ID_TYPE: id_type,
-            self.MANAGED_IDENTITY_TENANT_ID: decoded['tid'],
-            self.MANAGED_IDENTITY_CLIENT_ID: decoded['appid'],
-            self.MANAGED_IDENTITY_OBJECT_ID: decoded['oid'],
-            self.MANAGED_IDENTITY_RESOURCE_ID: resource_id
-        }
-        logger.warning('Using Managed Identity: %s', json.dumps(managed_identity_info))
-
-        return credential, managed_identity_info
+        return decoded
 
     def get_user(self, user_or_sp=None):
         return self._msal_app.get_accounts(user_or_sp)
