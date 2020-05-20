@@ -220,7 +220,7 @@ def register_ids_argument(cli_ctx):
                 'metavar': 'ID',
                 'help': "One or more resource IDs (space-delimited). "
                         "It should be a complete resource ID containing all information of '{gname}' arguments. "
-                        "If provided, no other '{gname}' arguments should be specified.".format(gname=group_name),
+                        "You should provide either --ids or other '{gname}' arguments.".format(gname=group_name),
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
                 'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
