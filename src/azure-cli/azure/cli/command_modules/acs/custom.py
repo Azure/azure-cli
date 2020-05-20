@@ -1649,7 +1649,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                windows_admin_username=None,
                windows_admin_password=None,
                kubernetes_version='',
-               node_vm_size="Standard_DS2_v2",
+               node_vm_size="Standard_D2s_v3",
                node_osdisk_size=0,
                node_count=3,
                nodepool_name="nodepool1",
@@ -1738,7 +1738,17 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         linux_profile = ContainerServiceLinuxProfile(admin_username=admin_username, ssh=ssh_config)
 
     windows_profile = None
-    if windows_admin_username:
+    if windows_admin_username or windows_admin_password:
+        # To avoid that windows_admin_password is set but windows_admin_username is not
+        if windows_admin_username is None:
+            try:
+                from knack.prompting import prompt
+                windows_admin_username = prompt('windows_admin_username: ')
+                # The validation for admin_username in ManagedClusterWindowsProfile will fail even if
+                # users still set windows_admin_username to empty here
+            except NoTTYException:
+                raise CLIError('Please specify username for Windows in non-interactive mode.')
+
         if windows_admin_password is None:
             try:
                 windows_admin_password = prompt_pass(
@@ -2825,10 +2835,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                 raise CLIError('Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
 
     if node_vm_size is None:
-        if os_type.lower() == "windows":
-            node_vm_size = "Standard_D2s_v3"
-        else:
-            node_vm_size = "Standard_DS2_v2"
+        node_vm_size = "Standard_D2s_v3"
 
     agent_pool = AgentPool(
         name=nodepool_name,
