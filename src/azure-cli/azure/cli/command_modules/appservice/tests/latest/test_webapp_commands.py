@@ -2030,7 +2030,7 @@ class WebappAuthenticationTest(ScenarioTest):
 
         # update and verify
         result = self.cmd('webapp auth update -g {} -n {} --enabled true --action LoginWithFacebook '
-                          '--token-store false --token-refresh-extension-hours 7.2 '
+                          '--token-store false --token-refresh-extension-hours 7.2 --runtime-version 1.2.8'
                           '--aad-client-id aad_client_id --aad-client-secret aad_secret '
                           '--aad-allowed-token-audiences https://audience1 --aad-token-issuer-url https://issuer_url '
                           '--facebook-app-id facebook_id --facebook-app-secret facebook_secret '
@@ -2042,6 +2042,7 @@ class WebappAuthenticationTest(ScenarioTest):
                               JMESPathCheck('enabled', True),
                               JMESPathCheck('tokenStoreEnabled', False),
                               JMESPathCheck('tokenRefreshExtensionHours', 7.2),
+                              JMESPathCheck('runtimeVersion', '1.2.8'),
                               JMESPathCheck('clientId', 'aad_client_id'),
                               JMESPathCheck('clientSecret', 'aad_secret'),
                               JMESPathCheck('issuer', 'https://issuer_url'),
