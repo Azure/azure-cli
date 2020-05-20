@@ -49,7 +49,8 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
-                 random_name_length=75, key='rg'):
+                 random_name_length=75, key='rg',
+                 subscription=None):
         if ' ' in name_prefix:
             raise CliTestError('Error: Space character in resource group name prefix \'%s\'' % name_prefix)
         super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
@@ -58,6 +59,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
         self.key = key
+        self.subscription = subscription
 
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
         self.dev_setting_location = os.environ.get(dev_setting_location, location)
@@ -71,8 +73,12 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if 'ENV_JOB_NAME' in os.environ:
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
-        template = 'az group create --location {} --name {} --tag ' + tags
-        self.live_only_execute(self.cli_ctx, template.format(self.location, name))
+        cmd = 'az group create --location {} --name {} --tag {}'.format(
+            self.subscription, self.location, name, tags
+        )
+        if not self.subscription:
+            cmd += ' --subscription ' + self.subscription
+        self.live_only_execute(self.cli_ctx, cmd)
 
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name, self.parameter_name_for_location: self.location}
@@ -80,7 +86,10 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def remove_resource(self, name, **kwargs):
         # delete group if test is being recorded and if the group is not a dev rg
         if not self.dev_setting_name:
-            self.live_only_execute(self.cli_ctx, 'az group delete --name {} --yes --no-wait'.format(name))
+            cmd = 'az group delete --name {} --yes --no-wait'.format(name)
+            if not self.subscription:
+                cmd += ' --subscription ' + self.subscription
+            self.live_only_execute(self.cli_ctx, cmd)
 
 
 # Storage Account Preparer and its shorthand decorator
@@ -89,7 +98,8 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', kind='Storage', hns=False,
                  parameter_name='storage_account', resource_group_parameter_name='resource_group', skip_delete=True,
-                 dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
+                 dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa',
+                 subscription=None):
         super(StorageAccountPreparer, self).__init__(name_prefix, 24)
         self.cli_ctx = get_dummy_cli()
         self.location = location
@@ -101,21 +111,26 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         self.parameter_name = parameter_name
         self.key = key
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
+        self.subscription = subscription
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
 
         if not self.dev_setting_name:
-            template = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only --hns {}'
-            self.live_only_execute(self.cli_ctx, template.format(
-                name, group, self.location, self.sku, self.kind, self.hns))
+            cmd = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only --hns {}'.format(
+                name, group, self.location, self.sku, self.kind, self.hns
+            )
+            if not self.subscription:
+                cmd += ' --subscription ' + self.subscription
+            self.live_only_execute(self.cli_ctx, cmd)
         else:
             name = self.dev_setting_name
 
         try:
-            account_key = self.live_only_execute(self.cli_ctx,
-                                                 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
-                                                 .format(name, group)).output
+            cmd = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'.format(name, group)
+            if not self.subscription:
+                cmd += ' --subscription ' + self.subscription
+            account_key = self.live_only_execute(self.cli_ctx, cmd).output
         except AttributeError:  # live only execute returns None if playing from record
             account_key = None
 
@@ -126,7 +141,10 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            self.live_only_execute(self.cli_ctx, 'az storage account delete -n {} -g {} --yes'.format(name, group))
+            cmd = 'az storage account delete -n {} -g {} --yes'.format(name, group)
+            if not self.subscription:
+                cmd += ' --subscription ' + self.subscription
+            self.live_only_execute(self.cli_ctx, cmd)
 
     def _get_resource_group(self, **kwargs):
         try:
