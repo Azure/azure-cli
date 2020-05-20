@@ -372,6 +372,25 @@ examples:
         az netappfiles volume delete -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
 """
 
+helps['netappfiles volume revert'] = """
+type: command
+short-summary: Revert a volume to one of its snapshots.
+long-summary: Revert a volume to the snapshot specified in the body.
+parameters:
+  - name: --account-name -a
+    short-summary: The name of the ANF account
+  - name: --pool-name -p
+    short-summary: The name of the ANF pool
+  - name: --name --volume-name -n -v
+    short-summary: The name of the ANF volume
+  - name: --snapshot-id -s
+    short-summary: Snapshot_Id of the snapshot. UUID v4 used to identify the Snapshot, example "9760acf5-4638-11e7-9bdb-020073ca3333"
+examples:
+  - name: Revert a volume to one of its snapshots.
+    text: >
+        az netappfiles volume revert -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname --snapshot-id 9760acf5-4638-11e7-9bdb-020073ca3333
+"""
+
 helps['netappfiles volume replication'] = """
 type: group
 short-summary: Manage Azure NetApp Files (ANF) Volume replication operations.

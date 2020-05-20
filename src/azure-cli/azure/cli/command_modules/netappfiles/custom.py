@@ -154,6 +154,12 @@ def create_volume(cmd, client, account_name, pool_name, volume_name, resource_gr
     return client.create_or_update(body, resource_group_name, account_name, pool_name, volume_name)
 
 
+# volume revert
+def revert_snapshot(cmd, client, account_name, pool_name, volume_name, resource_group_name, snapshot_id):
+    #             revert(resource_group_name, account_name, pool_name, volume_name, snapshot_id=None, custom_headers=None, raw=False, polling=True, **operation_config)
+    return client.revert(resource_group_name, account_name, pool_name, volume_name, snapshot_id)
+
+
 # volume update
 def patch_volume(cmd, instance, usage_threshold=None, service_level=None, protocol_types=None, tags=None):
     params = VolumePatch(

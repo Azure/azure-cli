@@ -107,6 +107,10 @@ def load_command_table(self, _):
                                  setter_arg_name='body',
                                  doc_string_source='azure.mgmt.netapp.models#VolumePatch',
                                  exception_handler=netappfiles_exception_handler)
+        g.custom_command('revert', 'revert_snapshot',
+                         client_factory=volumes_mgmt_client_factory,
+                         doc_string_source='azure.mgmt.netapp.models#Volume',
+                         exception_handler=netappfiles_exception_handler)
 
     with self.command_group('netappfiles volume export-policy', netappfiles_volumes_sdk) as g:
         g.generic_update_command('add',
