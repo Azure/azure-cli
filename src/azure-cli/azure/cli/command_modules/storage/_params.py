@@ -624,6 +624,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('include_path', include_path_type)
         c.argument('recursive', recursive_type)
         c.argument('content_type', arg_group='Additional Flags', help="Specify content type of the file. ")
+        c.argument('follow_symlinks', arg_group='Additional Flags', action='store_true',
+                   help='Follow symbolic links when uploading from local file system.')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
