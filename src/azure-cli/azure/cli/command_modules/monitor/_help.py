@@ -1230,11 +1230,11 @@ parameters:
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
-        Due to server limitation, when an alert rule contains multiple criteria, the use of dimensions is limited to one value per dimension within each criterion.
+        Due to server limitation, when an alert rule contains multiple criterias, the use of dimensions is limited to one value per dimension within each criterion.
 
         Multiple conditions can be specified by using more than one `--condition` argument.
 examples:
-  - name: Create a high CPU usage alert on a VM with no actions.
+  - name: Create a high CPU usage alert on a VM with no action.
     text: >
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} --condition "avg Percentage CPU > 90" --description "High CPU"
   - name: Create a high CPU usage alert on a VM with email and webhook actions.
@@ -1306,7 +1306,7 @@ parameters:
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
-        Due to server limitation, when an alert rule contains multiple criteria, the use of dimensions is limited to one value per dimension within each criterion.
+        Due to server limitation, when an alert rule contains multiple criterias, the use of dimensions is limited to one value per dimension within each criterion.
 
         Multiple conditions can be specified by using more than one `--condition` argument.
   - name: --remove-conditions
