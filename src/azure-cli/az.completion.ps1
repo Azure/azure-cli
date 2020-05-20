@@ -30,7 +30,12 @@ $AzArgCompleteScriptBlock = {
     # Just call the script without any parameter
     # Since the environment variables are set, the argcomplete.autocomplete(...) function will be executed.
     # The result will be printed on the standard output (see the details in the Python file).
-    Invoke-Expression $AzCommand -OutVariable completionResult -ErrorVariable errorOut -ErrorAction SilentlyContinue | Out-Null
+    try {
+        Invoke-Expression $AzCommand -OutVariable completionResult -ErrorVariable errorOut -ErrorAction SilentlyContinue | Out-Null
+    }
+    catch {
+        # Hide all errors
+    }
 
     # Delete environment variables
     Remove-Item Env:\_ARGCOMPLETE | Out-Null
@@ -43,15 +48,18 @@ $AzArgCompleteScriptBlock = {
     
     Remove-Item Env:\_ARGCOMPLETE_POWERSHELL | Out-Null
     
-    # If there is only one completion item, it will be immediately used. In this case
-    # a trailing space is important to show the user that the complition for the current
-    # item is ready.
-    $items = $completionResult.Split()
-    if ($items -eq $completionResult) {
-        "$items "
-    }
-    else {
-        $items
+    # Splitting only works if there were any compiletion result
+    if ($completionResult.Count -gt 0) {
+        # If there is only one completion item, it will be immediately used. In this case
+        # a trailing space is important to show the user that the complition for the current
+        # item is ready.
+        $items = "$completionResult".Split()
+        if ($items -eq $completionResult) {
+            "$items "
+        }
+        else {
+            $items
+        }
     }
 }
 
