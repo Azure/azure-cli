@@ -148,13 +148,13 @@ You can easily install the latest Homebrew edge build with the following command
 brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
 ```
 
-You can install edge build on Ubuntu Xenial with the following command:
+You can install the edge build on Ubuntu Xenial with the following command:
 
 ```bash
 curl -Ls -o azure-cli_xenial_all.deb https://aka.ms/InstallAzureCliXenialEdge && dpkg -i azure-cli_xenial_all.deb
 ```
 
-And install edge build with rpm package on CentOS/RHEL/Fedora:
+And install the edge build with rpm package on CentOS/RHEL/Fedora:
 
 ```bash
 rpm -ivh --nodeps $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliRpmEdge)
