@@ -128,8 +128,9 @@ class Identity:
                                                 tenant_id=self.tenant_id,
                                                 client_id=self.client_id,
                                                 username=username,
-                                                password=password)
-        auth_record = credential.au
+                                                password=password,
+                                                enable_persistent_cache=True)
+        auth_record = credential.authenticate()
 
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
