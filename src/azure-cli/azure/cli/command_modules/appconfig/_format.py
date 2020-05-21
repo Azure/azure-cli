@@ -82,10 +82,10 @@ def _configstore_credential_format_group(item):
 
 def _keyvalue_entry_format_group(item):
     content_type = _get_value(item, 'contentType')
-    content_type = content_type if content_type is not ' ' else _get_value(item, 'content_type')
+    content_type = content_type if content_type != ' ' else _get_value(item, 'content_type')
 
     last_modified = _get_value(item, 'lastModified')
-    last_modified = last_modified if last_modified is not ' ' else _get_value(item, 'last_modified')
+    last_modified = last_modified if last_modified != ' ' else _get_value(item, 'last_modified')
 
     return OrderedDict([
         ('CONTENT TYPE', content_type),
@@ -100,7 +100,7 @@ def _keyvalue_entry_format_group(item):
 
 def _featureflag_entry_format_group(item):
     last_modified = _get_value(item, 'lastModified')
-    last_modified = last_modified if last_modified is not ' ' else _get_value(item, 'last_modified')
+    last_modified = last_modified if last_modified != ' ' else _get_value(item, 'last_modified')
 
     return OrderedDict([
         ('KEY', _get_value(item, 'key')),
