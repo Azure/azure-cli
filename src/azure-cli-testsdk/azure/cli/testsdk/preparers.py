@@ -74,7 +74,7 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             tags['job'] = os.environ['ENV_JOB_NAME']
         tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
         cmd = 'az group create --location {} --name {} --tag {}'.format(
-            self.subscription, self.location, name, tags
+            self.location, name, tags
         )
         if not self.subscription:
             cmd += ' --subscription ' + self.subscription
