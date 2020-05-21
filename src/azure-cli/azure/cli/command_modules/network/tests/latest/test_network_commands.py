@@ -191,9 +191,6 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=self.check('id', '{sa_pec_id}'))
 
-        self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}',
-                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
-
         self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
             self.check('length(customDnsConfigs)', 1)
         ])
