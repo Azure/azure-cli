@@ -15,15 +15,14 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_service_endpoints')
-    @StorageAccountPreparer()
-    def test_storage_account_service_endpoints(self, resource_group, storage_account):
+    def test_storage_account_service_endpoints(self, resource_group):
         kwargs = {
             'rg': resource_group,
-            'acc': storage_account,
+            'acc': self.create_random_name(prefix='cli', length=24),
             'vnet': 'vnet1',
             'subnet': 'subnet1'
         }
-        self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny'.format(**kwargs),
+        self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny --https-only'.format(**kwargs),
                  checks=[
                      JMESPathCheck('networkRuleSet.bypass', 'Metrics'),
                      JMESPathCheck('networkRuleSet.defaultAction', 'Deny')])

@@ -527,7 +527,7 @@ def load_arguments(self, _):
         c.argument('zone_name', name_arg_type)
         c.ignore('location')
 
-        c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
+        c.argument('zone_type', help='Type of DNS zone to create.', deprecate_info=c.deprecate(), arg_type=get_enum_type(ZoneType))
 
         c.argument('registration_vnets',
                    arg_group='Private Zone',
@@ -916,7 +916,7 @@ def load_arguments(self, _):
 
     for item in ['local-gateway', 'vnet-gateway']:
         with self.argument_context('network {}'.format(item)) as c:
-            c.argument('asn', arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
+            c.argument('asn', type=int, arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
             c.argument('peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
     # endregion
 
