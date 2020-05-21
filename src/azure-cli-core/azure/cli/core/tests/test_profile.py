@@ -1911,6 +1911,35 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(all_subscriptions[0].tenant_id, token_tenant)
         self.assertEqual(all_subscriptions[0].home_tenant_id, home_tenant)
 
+    @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
+    @mock.patch('azure.cli.core._msal.AdalRefreshTokenBasedClientApplication._acquire_token_silent_by_finding_specific_refresh_token', autospec=True)
+    def test_get_msal_token(self, mock_acquire_token, mock_retrieve_token_for_user):
+        """
+        This is added only for vmssh feature.
+        It is a temporary solution and will deprecate after MSAL adopted completely.
+        """
+        cli = DummyCli()
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+
+        consolidated = profile._normalize_properties(self.user1, [self.subscription1], False)
+        profile._set_subscriptions(consolidated)
+
+        some_token_type = 'Bearer'
+        mock_retrieve_token_for_user.return_value = (some_token_type, TestProfile.raw_token1, TestProfile.token_entry1)
+        mock_acquire_token.return_value = {
+            'access_token': 'fake_access_token'
+        }
+        scopes = ["https://pas.windows.net/CheckMyAccess/Linux/user_impersonation"]
+        data = {
+            "token_type": "ssh-cert",
+            "req_cnf": "fake_jwk",
+            "key_id": "fake_id"
+        }
+        username, access_token = profile.get_msal_token(scopes, data)
+        self.assertEqual(username, self.user1)
+        self.assertEqual(access_token, 'fake_access_token')
+
 
 class FileHandleStub(object):  # pylint: disable=too-few-public-methods
 

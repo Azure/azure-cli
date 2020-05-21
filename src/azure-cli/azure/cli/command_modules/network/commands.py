@@ -27,7 +27,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_circuit_connections, cf_express_route_gateways, cf_express_route_connections,
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
-    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs, cf_private_dns_zone_groups)
+    cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
+    cf_private_dns_zone_groups, cf_security_partner_providers)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -356,6 +357,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.network.operations#BastionHostsOperations.{}',
         client_factory=cf_bastion_hosts,
         min_api='2019-11-01'
+    )
+
+    network_security_partner_provider_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#SecurityPartnerProvidersOperations.{}',
+        client_factory=cf_security_partner_providers,
+        min_api='2020-03-01'
     )
 
     network_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.custom#{}')
@@ -1171,4 +1178,24 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_bastion_host')
         g.command('delete', 'delete')
+    # endregion
+
+    # region Security Partner Provider
+    with self.command_group('network security-partner-provider', network_security_partner_provider_sdk, is_preview=True) as g:
+        g.custom_command('create', 'create_security_partner_provider')
+        g.generic_update_command('update', custom_func_name='update_security_partner_provider')
+        g.show_command('show', 'get')
+        g.custom_command('list', 'list_security_partner_provider')
+        g.command('delete', 'delete')
+
+    # region PrivateLinkResource and PrivateEndpointConnection
+    plr_and_pec_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.network.private_link_resource_and_endpoint_connections.custom#{}')
+    with self.command_group('network private-link-resource', custom_command_type=plr_and_pec_custom) as g:
+        g.custom_show_command('list', 'list_private_link_resource')
+    with self.command_group('network private-endpoint-connection', custom_command_type=plr_and_pec_custom) as g:
+        g.custom_command('approve', 'approve_private_endpoint_connection')
+        g.custom_command('reject', 'reject_private_endpoint_connection')
+        g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
+        g.custom_show_command('show', 'show_private_endpoint_connection')
+        g.custom_command('list', 'list_private_endpoint_connection')
     # endregion

@@ -675,7 +675,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         terminate_notification_time=None, max_price=None, scale_in_policy=None,
                         os_disk_encryption_set=None, data_disk_encryption_sets=None,
                         data_disk_iops=None, data_disk_mbps=None, automatic_repairs_grace_period=None,
-                        specialized=None):
+                        specialized=None, os_disk_size_gb=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -733,6 +733,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             })
         else:
             storage_properties['osDisk']['vhdContainers'] = "[variables('vhdContainers')]"
+
+        if os_disk_size_gb is not None:
+            storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
     elif storage_profile in [StorageProfile.ManagedPirImage, StorageProfile.ManagedCustomImage]:
         storage_properties['osDisk'] = {
             'createOption': 'FromImage',
@@ -745,6 +748,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             }
         if disk_info['os'].get('diffDiskSettings'):
             storage_properties['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
+
+        if os_disk_size_gb is not None:
+            storage_properties['osDisk']['diskSizeGB'] = os_disk_size_gb
 
     if storage_profile in [StorageProfile.SAPirImage, StorageProfile.ManagedPirImage]:
         storage_properties['imageReference'] = {

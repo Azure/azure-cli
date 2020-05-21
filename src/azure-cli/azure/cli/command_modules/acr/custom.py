@@ -43,7 +43,8 @@ def acr_create(cmd,
                tags=None,
                workspace=None,
                identity=None,
-               key_encryption_key=None):
+               key_encryption_key=None,
+               public_network_enabled=None):
 
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
@@ -55,6 +56,9 @@ def acr_create(cmd,
     registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_enabled, tags=tags)
     if default_action:
         registry.network_rule_set = NetworkRuleSet(default_action=default_action)
+
+    if public_network_enabled is not None:
+        _configure_public_network_access(cmd, registry, public_network_enabled)
 
     if identity or key_encryption_key:
         _configure_cmk(cmd, registry, resource_group_name, identity, key_encryption_key)
@@ -95,6 +99,7 @@ def acr_update_custom(cmd,
                       admin_enabled=None,
                       default_action=None,
                       data_endpoint_enabled=None,
+                      public_network_enabled=None,
                       tags=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
@@ -113,7 +118,15 @@ def acr_update_custom(cmd,
     if data_endpoint_enabled is not None:
         instance.data_endpoint_enabled = data_endpoint_enabled
 
+    if public_network_enabled is not None:
+        _configure_public_network_access(cmd, instance, public_network_enabled)
+
     return instance
+
+
+def _configure_public_network_access(cmd, registry, enabled):
+    PublicNetworkAccess = cmd.get_models('PublicNetworkAccess')
+    registry.public_network_access = (PublicNetworkAccess.enabled if enabled else PublicNetworkAccess.disabled)
 
 
 def acr_update_get(cmd):
@@ -160,6 +173,9 @@ def acr_show_endpoints(cmd,
                 'endpoint': host,
             })
     else:
+        logger.warning('To configure client firewall w/o using wildcard storage blob urls, '
+                       'use "az acr update --name %s --data-endpoint-enabled" to enable dedicated '
+                       'data endpoints.', registry_name)
         from ._client_factory import cf_acr_replications
         replicate_client = cf_acr_replications(cmd.cli_ctx)
         replicates = list(replicate_client.list(resource_group_name, registry_name))

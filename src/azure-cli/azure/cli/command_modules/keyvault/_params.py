@@ -75,6 +75,8 @@ def load_arguments(self, _):
         c.argument('enabled_for_deployment', arg_type=get_three_state_flag(), help='Allow Virtual Machines to retrieve certificates stored as secrets from the vault.')
         c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(), help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.')
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(), help='Allow Resource Manager to retrieve secrets from the vault.')
+        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), help='Enable RBAC authorization for the vault, and all contained entities.')
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Prevents manual purging of deleted vault, and all contained entities')
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
@@ -93,7 +95,7 @@ def load_arguments(self, _):
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
         c.argument('network_acls', type=validate_file_or_dict,
                    help='Network ACLs. It accepts a JSON filename or a JSON string. JSON format: '
-                        '{\\"ip\\":[<ip1>, <ip2>...],\\"vnet\\":[<vnet_name_1>/<subnet_name_1>,<subnet_id2>...]}')
+                        '`{\\"ip\\":[<ip1>, <ip2>...],\\"vnet\\":[<vnet_name_1>/<subnet_name_1>,<subnet_id2>...]}`')
         c.argument('network_acls_ips', nargs='*', help='Network ACLs IP rules. Space-separated list of IP addresses.')
         c.argument('network_acls_vnets', nargs='*', help='Network ACLS VNet rules. Space-separated list of '
                                                          'Vnet/subnet pairs or subnet resource ids.')

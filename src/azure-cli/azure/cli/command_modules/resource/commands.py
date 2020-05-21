@@ -256,9 +256,11 @@ def load_command_table(self, _):
         g.custom_wait_command('wait', 'get_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub wait', hide=True))
         g.custom_command('cancel', 'cancel_deployment_at_subscription_scope', deprecate_info=g.deprecate(redirect='deployment sub cancel', hide=True))
 
-    with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, deprecate_info=self.deprecate(redirect='deployment operation sub', hide=True)) as g:
-        g.custom_command('list', 'list_deployment_operations_at_subscription_scope')
-        g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations)
+    with self.command_group('deployment operation', resource_deployment_operation_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+        g.custom_command('list', 'list_deployment_operations_at_subscription_scope',
+                         deprecate_info=self.deprecate(redirect='deployment operation sub list', hide=True))
+        g.custom_show_command('show', 'get_deployment_operations_at_subscription_scope', client_factory=cf_deployment_operations,
+                              deprecate_info=self.deprecate(redirect='deployment operation sub show', hide=True))
 
     # az deployment sub
     with self.command_group('deployment sub', resource_deployment_sdk, min_api='2018-05-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
@@ -269,6 +271,8 @@ def load_command_table(self, _):
                          table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_subscription_scope', supports_no_wait=True, validator=process_deployment_create_namespace,
                          table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
+        g.custom_command('what-if', 'what_if_deploy_arm_template_at_subscription_scope', validator=process_deployment_create_namespace,
+                         exception_handler=handle_template_based_exception, is_preview=True, min_api='2019-07-01')
         g.custom_command('export', 'export_template_at_subscription_scope')
         g.custom_wait_command('wait', 'get_deployment_at_subscription_scope')
         g.custom_command('cancel', 'cancel_deployment_at_subscription_scope')
@@ -292,6 +296,8 @@ def load_command_table(self, _):
                          table_transformer=deployment_validate_table_format, exception_handler=handle_template_based_exception)
         g.custom_command('create', 'deploy_arm_template_at_resource_group', supports_no_wait=True, validator=process_deployment_create_namespace,
                          table_transformer=transform_deployment, exception_handler=handle_template_based_exception)
+        g.custom_command('what-if', 'what_if_deploy_arm_template_at_resource_group', validator=process_deployment_create_namespace,
+                         exception_handler=handle_template_based_exception, is_preview=True, min_api='2019-07-01')
         g.custom_command('export', 'export_template_at_resource_group')
         g.custom_wait_command('wait', 'get_deployment_at_resource_group')
         g.custom_command('cancel', 'cancel_deployment_at_resource_group')
