@@ -486,6 +486,61 @@ type: group
 short-summary: Manage Azure Comsos DB network rules.
 """
 
+
+helps['cosmosdb private-endpoint-connection'] = """
+type: group
+short-summary: Manage Azure Comsos DB private endpoint connections.
+"""
+
+helps['cosmosdb private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve the specified private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Approve the specified private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection approve --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup --description "Approved"
+"""
+
+
+helps['cosmosdb private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete the specified private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Delete the specified private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection delete --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup
+
+"""
+
+helps['cosmosdb private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject the specified private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Reject the specified private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection reject --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup --description "Rejected"
+"""
+
+
+helps['cosmosdb private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection associated with Azure Comsos DB.
+examples:
+  - name: Show details of a private endpoint connection associated with Azure Comsos DB.
+    text: az cosmosdb private-endpoint-connection show --account-name MyAccount --name MyPrivateEndpoint --resource-group MyResourceGroup
+"""
+
+helps['cosmosdb private-link-resource'] = """
+type: group
+short-summary: Manage Azure Comsos DB private link resources.
+"""
+
+helps['cosmosdb private-link-resource list'] = """
+type: command
+short-summary: List the private link resources supported for Azure Comsos DB.
+example:
+  - name: List the private link resources supported for Azure Comsos DB.
+    text: cosmosdb private-link-resource list --account-name MyAccount --resource-group MyResourceGroup
+"""
+
+
 helps['cosmosdb regenerate-key'] = """
 type: command
 short-summary: Regenerate an access key for a Azure Cosmos DB database account.

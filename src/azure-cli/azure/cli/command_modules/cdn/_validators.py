@@ -17,3 +17,9 @@ def validate_origin(namespace):
             check_port_range(origin.http_port, msg.format('HTTP', origin.name))
             check_port_range(origin.https_port, msg.format('HTTPS', origin.name))
     return True
+
+
+def validate_priority(namespace):
+    if namespace.priority < 0 or namespace.priority > 1000:
+        raise CLIError('argument --priority must be in the range [0, 1000]')
+    return True

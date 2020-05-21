@@ -55,7 +55,18 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['job'] = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container} -i {item} -r {recovery_point} --storage-account {sa} --query name --restore-to-staging-storage-account').get_output_in_json()
         self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
 
-        # Disable Protection
+        # Disable protection with retain data
+        self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --yes')
+
+        # Resume protection
+        self.cmd('backup protection resume -g {rg} -v {vault} -c {container} -i {item} --policy-name DefaultPolicy --backup-management-type AzureIaasVM', checks=[
+            self.check("properties.entityFriendlyName", '{item}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+        # Disable Protection with delete data
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --delete-backup-data true --yes')
 
     @record_only()
@@ -188,6 +199,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vm2': vm2
         })
 
+        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
+
         self.kwargs['policy1_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy1}', checks=[
             self.check('name', '{policy1}'),
             self.check('resourceGroup', '{rg}')
@@ -207,6 +220,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.kwargs['policy1_json']['name'] = self.kwargs['policy3']
+        if 'instantRpDetails' in self.kwargs['policy1_json']['properties']:
+            self.kwargs['policy1_json']['properties']['instantRpDetails'] = {'azureBackupRgNamePrefix': 'RG_prefix', 'azureBackupRgNameSuffix': 'RG_suffix'}
         self.kwargs['policy1_json'] = json.dumps(self.kwargs['policy1_json'])
 
         self.cmd("backup policy set -g {rg} -v {vault} --policy '{policy1_json}'", checks=[
@@ -455,6 +470,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('storage blob exists --account-name {sa} -c {container} -n {blob}',
                  checks=self.check("exists", True))
 
+        # Trigger Restore As unmanaged disks
+        trigger_restore_job2_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} --restore-as-unmanaged-disks --storage-account {sa}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job2'] = trigger_restore_job2_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job2}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job2}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
     @record_only()
     @ResourceGroupPreparer()
     @VaultPreparer()
@@ -568,6 +600,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.protectionStatus', 'Healthy'),
             self.check('resourceGroup', '{rg}'),
             self.check('properties.extendedProperties.diskExclusionProperties.isInclusionList', True),
+        ])
+
+        self.cmd('backup protection update-for-vm -g {rg} -v {vault} -c {vm} -i {vm} --exclude-all-data-disks', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
         ])
 
         self.cmd('backup protection update-for-vm -g {rg} -v {vault} -c {vm} -i {vm} --disk-list-setting exclude --diskslist 1', checks=[

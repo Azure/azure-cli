@@ -19,8 +19,10 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         container = self.create_container(storage_account_info)
 
         # sync directory
-        self.cmd('storage blob sync -s "{}" -c {} --account-name {}'.format(
-            test_dir, container, storage_account))
+        connection_string = self.cmd('storage account show-connection-string -n {} -g {} -otsv'
+                                     .format(storage_account, resource_group)).output
+        self.cmd('storage blob sync -s "{}" -c {} --connection-string {}'.format(
+            test_dir, container, connection_string))
         self.cmd('storage blob list -c {} --account-name {}'.format(
             container, storage_account), checks=JMESPathCheck('length(@)', 41))
 
@@ -239,10 +241,14 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         import os
         # Upload a single file
-        self.cmd('storage copy -s "{}" -d "{}"'.format(
-            os.path.join(test_dir, 'readme'), first_container_url))
+        content_type = "application/json"
+        self.cmd('storage copy -s "{}" -d "{}" --content-type {}'.format(
+            os.path.join(test_dir, 'readme'), first_container_url, content_type))
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, first_account), checks=JMESPathCheck('length(@)', 1))
+        self.cmd('storage blob show -n {} -c {} --account-name {}'
+                 .format('readme', first_container, first_account),
+                 checks=[JMESPathCheck('properties.contentSettings.contentType', content_type)])
 
         # Upload entire directory
         self.cmd('storage copy -s "{}" -d "{}" --recursive'.format(

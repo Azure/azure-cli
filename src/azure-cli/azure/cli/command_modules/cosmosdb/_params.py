@@ -46,6 +46,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cosmosdb create') as c:
         c.argument('account_name', completer=None)
+        c.argument('key_uri', help="The URI of the key vault", is_preview=True)
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -63,6 +64,8 @@ def load_arguments(self, _):
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
             c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
             c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
+            c.argument('enable_public_network', options_list=['--enable-public-network', '-e'],
+                       arg_type=get_three_state_flag(), help="Enable or disable public network access to server.")
 
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:
         with self.argument_context(scope) as c:
@@ -100,6 +103,25 @@ def load_arguments(self, _):
     account_name_type = CLIArgumentType(options_list=['--account-name', '-a'], help="Cosmosdb account name.")
     database_name_type = CLIArgumentType(options_list=['--database-name', '-d'], help='Database name.')
     container_name_type = CLIArgumentType(options_list=['--container-name', '-c'], help='Container name.')
+
+    with self.argument_context('cosmosdb private-endpoint-connection') as c:
+        c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
+                   help='The name of the private endpoint connection associated with Azure Cosmos DB. '
+                        'Required if --connection-id is not specified')
+        c.argument('account_name', account_name_type, required=False,
+                   help='Name of the Cosmos DB database account. Required if --connection-id is not specified')
+        c.argument('resource_group_name', required=False,
+                   help='The resource group name of specified Cosmos DB account. Required if --connection-id is not specified')
+
+    for item in ['approve', 'reject', 'delete', 'show']:
+        with self.argument_context('cosmosdb private-endpoint-connection {}'.format(item)) as c:
+            c.extra('connection_id', options_list=['--id'], required=False,
+                    help='The ID of the private endpoint connection associated with Azure Cosmos DB. '
+                         'If specified --account-name --resource-group/-g and --name/-n, this should be omitted.')
+            c.argument('description', options_list=['--description'], required=False, help='Comments for the {} operation.'.format(item))
+
+    with self.argument_context('cosmosdb private-link-resource') as c:
+        c.argument('account_name', account_name_type, required=True, help="Cosmosdb account name", id_part=None)
 
 # SQL database
     with self.argument_context('cosmosdb sql database') as c:

@@ -30,6 +30,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    cluster_admin_account=None, cluster_admin_password=None,
                    cluster_users_group_dns=None,
                    assign_identity=None,
+                   minimal_tls_version=None,
                    encryption_vault_uri=None, encryption_key_name=None, encryption_key_version=None,
                    encryption_algorithm='RSA-OAEP', esp=False, no_validation_timeout=False):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
@@ -300,7 +301,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
             ),
             security_profile=security_profile,
             disk_encryption_properties=disk_encryption_properties,
-            kafka_rest_properties=kafka_rest_properties
+            kafka_rest_properties=kafka_rest_properties,
+            min_supported_tls_version=minimal_tls_version
         ),
         identity=cluster_identity
     )
@@ -443,7 +445,8 @@ def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, worksp
 
         # Only retrieve primary key when not provided
         if not primary_key:
-            shared_keys = log_analytics_client.workspaces.get_shared_keys(workspace_resource_group_name, workspace_name)
+            shared_keys = log_analytics_client.shared_keys.get_shared_keys(workspace_resource_group_name,
+                                                                           workspace_name)
             if not shared_keys:
                 raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
 

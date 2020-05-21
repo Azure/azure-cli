@@ -5,6 +5,9 @@
 
 import os
 from knack.util import CLIError
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 def validate_headers(namespace):
@@ -85,3 +88,27 @@ def validate_retention_days(namespace):
     days = namespace.days
     if days and (days < 0 or days > 365):
         raise CLIError("Invalid value for days: should be from 0 to 365")
+
+
+def validate_registry_name(cmd, namespace):
+    """Omit login server endpoint suffix."""
+    registry = namespace.registry_name
+    suffixes = cmd.cli_ctx.cloud.suffixes
+    # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
+    if registry and hasattr(suffixes, 'acr_login_server_endpoint'):
+        acr_suffix = suffixes.acr_login_server_endpoint
+        pos = registry.find(acr_suffix)
+        if pos > 0:
+            logger.warning("The login server endpoint suffix '%s' is automatically omitted.", acr_suffix)
+            namespace.registry_name = registry[:pos]
+
+
+def validate_expiration_time(namespace):
+    import datetime
+    DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+    if namespace.expiration:
+        try:
+            namespace.expiration = datetime.datetime.strptime(namespace.expiration, DATE_TIME_FORMAT)
+        except ValueError:
+            raise CLIError("Input '{}' is not valid datetime. Valid example: 2025-12-31T12:59:59Z".format(
+                namespace.expiration))

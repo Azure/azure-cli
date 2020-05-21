@@ -167,24 +167,20 @@ def validate_policy_permissions(ns):
 
 
 def validate_private_endpoint_connection_id(cmd, ns):
-    connection_id = ns.connection_id
-    connection_name = ns.private_endpoint_connection_name
-    vault_name = ns.vault_name
+    if ns.connection_id:
+        from azure.cli.core.util import parse_proxy_resource_id
+        result = parse_proxy_resource_id(ns.connection_id)
+        ns.resource_group_name = result['resource_group']
+        ns.vault_name = result['name']
+        ns.private_endpoint_connection_name = result['child_name_1']
 
-    if not connection_id:
-        if not all([connection_name, vault_name]):
-            raise argparse.ArgumentError(
-                None, 'specify both: --name/-n and --vault-name')
-        ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
-    else:
-        if any([connection_name, vault_name]):
-            raise argparse.ArgumentError(
-                None, 'you don\'t need to specify --name/-n or --vault-name if --id is specified')
+    if ns.vault_name and not ns.resource_group_name:
+        ns.resource_group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, ns.vault_name)
 
-        id_parts = connection_id.split('/')
-        ns.private_endpoint_connection_name = id_parts[-1]
-        ns.vault_name = id_parts[-3]
-        ns.resource_group_name = id_parts[-7]
+    if not all([ns.vault_name, ns.resource_group_name, ns.private_endpoint_connection_name]):
+        raise CLIError('incorrect usage: [--id ID | --name NAME --vault-name NAME]')
+
+    del ns.connection_id
 
 
 def validate_principal(ns):
@@ -297,9 +293,22 @@ def get_vault_base_url_type(cli_ctx):
     return vault_base_url_type
 
 
-def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
+    from msrestazure.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
+
+    return resource_id(
+        subscription=get_subscription_id(cmd.cli_ctx),
+        resource_group=resource_group_name,
+        namespace='Microsoft.Network',
+        type='virtualNetworks',
+        name=vnet_name,
+        child_type_1='subnets',
+        child_name_1=subnet_name)
+
+
+def validate_subnet(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id
 
     subnet = namespace.subnet
     subnet_is_id = is_valid_resource_id(subnet)
@@ -309,14 +318,7 @@ def validate_subnet(cmd, namespace):
         return
 
     if subnet and not subnet_is_id and vnet:
-        namespace.subnet = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=vnet,
-            child_type_1='subnets',
-            child_name_1=subnet)
+        namespace.subnet = _construct_vnet(cmd, namespace.resource_group_name, vnet, subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 

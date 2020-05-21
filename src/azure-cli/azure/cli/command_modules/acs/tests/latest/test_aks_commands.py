@@ -21,7 +21,7 @@ from azure.cli.command_modules.acs._format import version_to_tuple
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -29,6 +29,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
         tags = "key1=value1"
+        nodepool_labels = "label1=value1 label2=value2"
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -38,13 +39,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'service_principal': sp_name,
             'client_secret': sp_password,
             'tags': tags,
+            'nodepool_labels': nodepool_labels,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters'
         })
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} --tags {tags}'
+                     '--service-principal={service_principal} --client-secret={client_secret} --tags {tags} ' \
+                     '--nodepool-labels {nodepool_labels}'
         self.cmd(create_cmd, checks=[
             self.exists('fqdn'),
             self.exists('nodeResourceGroup'),
@@ -73,8 +76,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('agentPoolProfiles[0].nodeLabels.label1','value1'),
+            self.check('agentPoolProfiles[0].nodeLabels.label2','value2'),
             self.exists('kubernetesVersion')
         ])
 
@@ -83,21 +88,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
-
-        # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
-            self.assertGreater(os.path.getsize(temp_path), 0)
-        finally:
-            os.remove(temp_path)
 
         # scale up
         self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
@@ -114,7 +111,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     # TODO: Remove when issue #9392 is addressed.
     @live_only()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_service_no_wait(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -131,7 +128,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'service_principal': sp_name,
             'client_secret': sp_password,
             'k8s_version': create_version,
-            'vm_size': 'Standard_DS1_v2'
+            'vm_size': 'Standard_D2s_v3'
         })
 
         # create --no-wait
@@ -149,7 +146,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles', None)
@@ -186,7 +183,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.httpApplicationRouting.enabled', True)
@@ -200,7 +197,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     # TODO: remove when issue #9392 is addressed.
     @live_only()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='southcentralus')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_scale_with_custom_nodepool_name(self, resource_group, resource_group_location, sp_name, sp_password):
         create_version, _ = self._get_versions(resource_group_location)
@@ -283,7 +280,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     # TODO: Remove when issue #9392 is addressed.
     @live_only()
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_without_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
@@ -328,7 +325,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     # TODO: Remove when issue #9392 is addressed.
     @live_only()
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_skip_role_assignment(self, resource_group, resource_group_location, sp_name, sp_password):
         aks_name = self.create_random_name('cliakstest', 16)
@@ -357,7 +354,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     # TODO: Remove when issue #9392 is addressed.
     @live_only()
     @AllowLargeResponse(8192)
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default_service_without_SP_and_with_role_assignment(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         self.kwargs.update({
@@ -381,7 +378,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     # TODO: Remove when issue #9392 is addressed.
     @live_only()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_default_service_with_monitoring_addon(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
@@ -418,7 +415,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
             self.check('addonProfiles.omsagent.enabled', True),
@@ -458,7 +455,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
             self.check('addonProfiles.omsagent.enabled', True),
@@ -473,7 +470,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_blb_vmas(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -523,7 +520,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'AvailabilitySet'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -535,20 +532,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
-        finally:
-            os.close(fd)
-            os.remove(temp_path)
-
-        # get-credentials to stdout
-        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
-
-        # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         #delete
@@ -605,7 +591,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -627,7 +613,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
 
         # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
+        temp_path = self.create_random_name('kubeconfig', 24) + '.tmp'
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
@@ -639,7 +625,187 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_private_cluster_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets ' \
+                     '--enable-private-cluster --no-wait'
+
+        self.cmd(create_cmd, checks=[self.is_empty()])
+
+        # wait
+        self.cmd('aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
+            self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('apiServerAccessProfile.enablePrivateCluster', True),
+            self.check('networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+            self.exists('networkProfile.loadBalancerProfile.effectiveOutboundIps')
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # update api-server-authorized-ip-ranges is not supported
+        with self.assertRaises(CLIError) as err:
+            self.cmd('aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=1.2.3.4/32')
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        #delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_cluster_with_apiserver_authorized_ranges_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets ' \
+                     '--api-server-authorized-ip-ranges=1.2.3.4/32 --no-wait'
+
+        self.cmd(create_cmd, checks=[self.is_empty()])
+
+        # wait
+        self.cmd('aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
+            self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.check('networkProfile.loadBalancerSku', 'Standard'),
+            self.check('apiServerAccessProfile.enablePrivateCluster', None),
+            self.check('apiServerAccessProfile.authorizedIpRanges', ['1.2.3.4/32']),
+            self.check('networkProfile.loadBalancerProfile.managedOutboundIps.count', 1),
+            self.exists('networkProfile.loadBalancerProfile.effectiveOutboundIps')
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # update api-server-authorized-ip-ranges
+        self.cmd('aks update -g {resource_group} -n {name} --api-server-authorized-ip-ranges=""', checks=[
+            self.check('apiServerAccessProfile.authorizedIpRanges', None)
+        ])
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        #delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_slb_vmss_with_default_mgd_outbound_ip_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -689,7 +855,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -703,20 +869,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
-        finally:
-            os.close(fd)
-            os.remove(temp_path)
-
-        # get-credentials to stdout
-        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
-
-        # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # update managed outbound IP
@@ -743,7 +898,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_slb_vmss_with_outbound_ip_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -810,7 +965,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -825,20 +980,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
-        finally:
-            os.close(fd)
-            os.remove(temp_path)
-
-        # get-credentials to stdout
-        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
-
-        # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # update outbound IP
@@ -857,7 +1001,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_create_slb_vmss_with_outbound_ip_prefixes_then_update(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -925,7 +1069,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -940,20 +1084,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
-        finally:
-            os.close(fd)
-            os.remove(temp_path)
-
-        # get-credentials to stdout
-        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
-
-        # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # update outbound IP
@@ -972,7 +1105,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_nodepool_create_scale_delete(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -983,6 +1116,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         nodepool2_name = "nodepool2"
         tags = "key1=value1"
         new_tags = "key2=value2"
+        labels="label1=value1"
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
@@ -994,6 +1128,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'tags': tags,
             'new_tags': new_tags,
+            'labels': labels,
             'nodepool1_name': nodepool1_name,
             'nodepool2_name': nodepool2_name
         })
@@ -1016,7 +1151,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
+            self.check('agentPoolProfiles[0].mode', 'System'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion')
         ])
@@ -1026,24 +1162,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.close(fd)
             os.remove(temp_path)
 
-        # get-credentials to stdout
-        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
-
-        # get-credentials without directory in path
-        temp_path = 'kubeconfig.tmp'
-        self.kwargs.update({'file': temp_path})
-        try:
-            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
-            self.assertGreater(os.path.getsize(temp_path), 0)
-        finally:
-            os.remove(temp_path)
-
         # nodepool add
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=1 --tags {tags}',checks=[
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --node-count=1 --tags {tags}',checks=[
             self.check('provisioningState', 'Succeeded')
             ])
 
@@ -1053,7 +1178,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             StringContainCheck(resource_group),
             StringContainCheck(nodepool1_name),
             StringContainCheck(nodepool2_name),
-            self.check('[1].tags.key1','value1')
+            self.check('[1].tags.key1','value1'),
+            self.check('[1].nodeLabels.label1','value1'),
+            self.check('[1].mode', 'User')
         ])
         #nodepool list in tabular format
         self.cmd('aks nodepool list --resource-group={resource_group} --cluster-name={name} -o table', checks=[
@@ -1082,7 +1209,122 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_nodepool_system_pool(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        nodepool1_name = "nodepool1"
+        nodepool2_name = "nodepool2"
+        nodepool3_name = "nodepool3"
+        tags = "key1=value1"
+        new_tags = "key2=value2"
+        labels="label1=value1"
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'tags': tags,
+            'new_tags': new_tags,
+            'labels': labels,
+            'nodepool1_name': nodepool1_name,
+            'nodepool2_name': nodepool2_name,
+            'nodepool3_name': nodepool3_name
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret}'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
+            self.check('agentPoolProfiles[0].mode', 'System'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion')
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # nodepool add user mode pool
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --labels {labels} --node-count=1 --tags {tags}',checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('mode', 'User')
+            ])
+
+        #nodepool list
+        self.cmd('aks nodepool list --resource-group={resource_group} --cluster-name={name}', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group),
+            StringContainCheck(nodepool1_name),
+            StringContainCheck(nodepool2_name),
+            self.check('[0].mode', 'System'),
+            self.check('[1].tags.key1','value1'),
+            self.check('[1].nodeLabels.label1','value1'),
+            self.check('[1].mode', 'User')
+        ])
+
+        #nodepool list in tabular format
+        self.cmd('aks nodepool list --resource-group={resource_group} --cluster-name={name} -o table', checks=[
+            StringContainCheck(nodepool1_name),
+            StringContainCheck(nodepool2_name)
+        ])
+
+         # nodepool add another system mode pool
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool3_name} --labels {labels} --node-count=1 --tags {tags} --mode system',checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        #nodepool show
+        self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool3_name}', checks=[
+            self.check('mode', 'System')
+        ])
+
+        #nodepool delete the first system pool
+        self.cmd('aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --no-wait', checks=[self.is_empty()])
+
+        #nodepool update nodepool2 to system pool
+        self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --mode System', checks=[
+            self.check('mode', 'System')
+        ])
+
+        #nodepool show
+        self.cmd('aks nodepool show --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name}', checks=[
+            self.check('mode', 'System')
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
     def test_aks_availability_zones(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
@@ -1126,12 +1368,254 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 3),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].availabilityZones[0]', '1'),
             self.check('agentPoolProfiles[0].availabilityZones[1]', '2'),
             self.check('agentPoolProfiles[0].availabilityZones[2]', '3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion')
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # nodepool add
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=3 --zones {zones}',checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('availabilityZones[0]', '1'),
+            self.check('availabilityZones[1]', '2'),
+            self.check('availabilityZones[2]', '3'),
+            ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_managed_identity_with_service_principal(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} --enable-managed-identity'
+
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.exists('identity'),
+            self.exists('identityProfile'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.exists('identity'),
+            self.exists('identityProfile')
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_paid_sku(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} --uptime-sla '
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.tier', 'Paid')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_windows(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'windows_admin_username': 'azureuser1',
+            'windows_admin_password': 'replacePassword1234$',
+            'nodepool2_name': 'npwin',
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--windows-admin-username={windows_admin_username} --windows-admin-password={windows_admin_password} ' \
+                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets --network-plugin=azure'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('windowsProfile.adminUsername', 'azureuser1')
+        ])
+
+        # nodepool add
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --os-type Windows --node-count=1',checks=[
+            self.check('provisioningState', 'Succeeded')
+            ])
+
+        # #nodepool delete
+        self.cmd('aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --no-wait', checks=[self.is_empty()])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    def test_aks_managed_identity_without_service_principal(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--enable-managed-identity'
+
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.exists('identity'),
+            self.exists('identityProfile'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.exists('identity'),
+            self.exists('identityProfile')
         ])
 
         # get-credentials
@@ -1155,13 +1639,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         finally:
             os.remove(temp_path)
 
-        # nodepool add
-        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --node-count=3 --zones {zones}',checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('availabilityZones[0]', '1'),
-            self.check('availabilityZones[1]', '2'),
-            self.check('availabilityZones[2]', '3'),
-            ])
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
 
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
@@ -1185,7 +1671,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     def _get_versions(self, location):
         """Return the previous and current Kubernetes minor release versions, such as ("1.11.6", "1.12.4")."""
-        versions = self.cmd("az aks get-versions -l eastus --query 'orchestrators[].orchestratorVersion'").get_output_in_json()
+        versions = self.cmd("az aks get-versions -l westus2 --query 'orchestrators[].orchestratorVersion'").get_output_in_json()
         # sort by semantic version, from newest to oldest
         versions = sorted(versions, key=version_to_tuple, reverse=True)
         upgrade_version = versions[0]

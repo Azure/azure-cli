@@ -36,6 +36,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
                    source_location,
                    builder,
                    pack_image_tag='stable',
+                   agent_pool_name=None,
                    pull=False,
                    no_format=False,
                    no_logs=False,
@@ -48,7 +49,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
 
     client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
     source_location = prepare_source_location(
-        source_location, client_registries, registry_name, resource_group_name)
+        cmd, source_location, client_registries, registry_name, resource_group_name)
     if not source_location:
         raise CLIError('Building with Buildpacks requires a valid source location.')
 
@@ -87,7 +88,8 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         credentials=get_custom_registry_credentials(
             cmd=cmd,
             auth_mode=auth_mode
-        )
+        ),
+        agent_pool_name=agent_pool_name
     )
 
     queued = LongRunningOperation(cmd.cli_ctx)(client_registries.schedule_run(
@@ -107,4 +109,4 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         from ._run_polling import get_run_with_polling
         return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
 
-    return stream_logs(client, run_id, registry_name, resource_group_name, no_format, True)
+    return stream_logs(cmd, client, run_id, registry_name, resource_group_name, no_format, True)

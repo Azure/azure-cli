@@ -5,10 +5,13 @@
 
 # TODO refactor out _image_builder commands.
 # i.e something like image_builder/_client_factory image_builder/commands.py image_builder/_params.py
-
+import os
 import re
+import json
+import traceback
 from enum import Enum
 
+import requests
 
 try:
     from urllib.parse import urlparse
@@ -142,9 +145,9 @@ def _validate_location(location, location_names, location_display_names):
 
     if ' ' in location:
         # if display name is provided, attempt to convert to short form name
-        location = next((l for l in location_display_names if l.lower() == location.lower()), location)
+        location = next((name for name in location_display_names if name.lower() == location.lower()), location)
 
-    if location.lower() not in [l.lower() for l in location_names]:
+    if location.lower() not in [location_name.lower() for location_name in location_names]:
         raise CLIError("Location {} is not a valid subscription location. "
                        "Use one from `az account list-locations`.".format(location))
 
@@ -152,6 +155,9 @@ def _validate_location(location, location_names, location_display_names):
 
 
 def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+    if namespace.image_template is not None:
+        return
+
     from azure.cli.core.commands.parameters import get_subscription_locations
 
     source = None
@@ -172,8 +178,8 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
     # Validate and parse destination and locations
     destinations = []
     subscription_locations = get_subscription_locations(cmd.cli_ctx)
-    location_names = [l.name for l in subscription_locations]
-    location_display_names = [l.display_name for l in subscription_locations]
+    location_names = [location.name for location in subscription_locations]
+    location_display_names = [location.display_name for location in subscription_locations]
 
     if namespace.managed_image_destinations:
         for dest in namespace.managed_image_destinations:
@@ -184,7 +190,7 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
     if namespace.shared_image_destinations:
         for dest in namespace.shared_image_destinations:
             rid, locations = _parse_image_destination(cmd, namespace.resource_group_name, dest, is_shared_image=True)
-            locations = [_validate_location(l, location_names, location_display_names) for l in locations]
+            locations = [_validate_location(location, location_names, location_display_names) for location in locations]
             destinations.append((_DestType.SHARED_IMAGE_GALLERY, rid, locations))
 
     # Validate and parse source image
@@ -346,8 +352,8 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
         raise CLIError("Usage error: If --is-vhd is used, a run output name must be provided via --output-name.")
 
     subscription_locations = get_subscription_locations(cmd.cli_ctx)
-    location_names = [l.name for l in subscription_locations]
-    location_display_names = [l.display_name for l in subscription_locations]
+    location_names = [location.name for location in subscription_locations]
+    location_display_names = [location.display_name for location in subscription_locations]
 
     if namespace.managed_image_location:
         namespace.managed_image_location = _validate_location(namespace.managed_image_location,
@@ -370,15 +376,46 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
 
 # region Custom Commands
 
-def create_image_template(  # pylint: disable=too-many-locals
+def create_image_template(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
         cmd, client, resource_group_name, image_template_name, location=None,
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
         source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
-        shared_image_destinations=None, no_wait=False):  # pylint: disable=unused-argument, too-many-locals
+        shared_image_destinations=None, no_wait=False, image_template=None):  # pylint: disable=unused-argument, too-many-locals
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateIsoSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
                                                 ImageTemplateManagedImageDistributor, ImageTemplateSharedImageDistributor)  # pylint: disable=line-too-long
+
+    if image_template is not None:
+        if os.path.exists(image_template):
+            # Local file
+            with open(image_template) as f:
+                content = f.read()
+        else:
+            # It should be an URL
+            msg = '\nusage error: --image-template is not a correct local path or URL'
+            try:
+                r = requests.get(image_template)
+            except Exception:
+                raise CLIError(traceback.format_exc() + msg)
+            if r.status_code != 200:
+                raise CLIError(traceback.format_exc() + msg)
+            content = r.content
+
+        try:
+            obj = json.loads(content)
+        except json.JSONDecodeError:
+            raise CLIError(traceback.format_exc() +
+                           '\nusage error: Content of --image-template is not a valid JSON string')
+        content = {}
+        if 'properties' in obj:
+            content = obj['properties']
+        if 'location' in obj:
+            content['location'] = obj['location']
+        if 'tags' in obj:
+            content['tags'] = obj['tags']
+        return client.virtual_machine_image_templates.create_or_update(
+            parameters=content, resource_group_name=resource_group_name, image_template_name=image_template_name)
 
     template_source, template_scripts, template_destinations = None, [], []
 

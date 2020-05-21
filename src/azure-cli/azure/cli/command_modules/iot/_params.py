@@ -11,6 +11,7 @@ from azure.cli.core.commands.parameters import (get_location_type,
                                                 get_resource_name_completion_list,
                                                 get_enum_type,
                                                 get_three_state_flag)
+from azure.mgmt.iotcentral.models import AppSku
 from azure.mgmt.iothub.models import IotHubSku
 from azure.mgmt.iothubprovisioningservices.models import (IotDpsSku,
                                                           AllocationPolicy,
@@ -19,6 +20,7 @@ from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType,
                                                   EncodingFormat,
                                                   RenewKeyType,
+                                                  AuthenticationType,
                                                   UserRole)
 from .custom import KeyType, SimpleAccessRights
 from ._validators import (validate_policy_permissions,
@@ -41,6 +43,10 @@ dps_name_type = CLIArgumentType(
     options_list=['--dps-name'],
     completer=get_resource_name_completion_list('Microsoft.Devices/ProvisioningServices'),
     help='IoT Provisioning Service name')
+
+app_name_type = CLIArgumentType(
+    completer=get_resource_name_completion_list('Microsoft.IoTCentral/IoTApps'),
+    help='IoT Central application name.')
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-statements
@@ -111,8 +117,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('hub_name', hub_name_type, options_list=['--name', '-n'], id_part='name')
         c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
         c.argument('sku', arg_type=get_enum_type(IotHubSku),
-                   help='Pricing tier for Azure IoT Hub. Default value is F1, which is free. '
-                        'Note that only one free IoT hub instance is allowed in each '
+                   help='Pricing tier for Azure IoT Hub. '
+                        'Note that only one free IoT hub instance (F1) is allowed in each '
                         'subscription. Exception will be thrown if free instances exceed one.')
         c.argument('unit', help='Units in your IoT Hub.', type=int)
         c.argument('partition_count',
@@ -155,6 +161,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('fileupload_storage_connectionstring',
                    options_list=['--fileupload-storage-connectionstring', '--fcs'],
                    help='The connection string for the Azure Storage account to which files are uploaded.')
+        c.argument('fileupload_storage_authentication_type',
+                   options_list=['--fileupload-storage-auth-type', '--fsa'],
+                   help='The authentication type for the Azure Storage account to which files are uploaded.'
+                        'Possible values are keyBased and identityBased')
+        c.argument('fileupload_storage_container_uri',
+                   options_list=['--fileupload-storage-container-uri', '--fcu'],
+                   help='The container URI for the Azure Storage account to which files are uploaded.')
         c.argument('fileupload_storage_container_name',
                    options_list=['--fileupload-storage-container-name', '--fc'],
                    help='The name of the root container where you upload files. The container need not exist but'
@@ -202,6 +215,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('encoding', options_list=['--encoding'], arg_type=get_enum_type(EncodingFormat),
                    help='Encoding format for the container. The default is AVRO. '
                         'Note that this field is applicable only for blob container endpoints.')
+        c.argument('endpoint_uri', options_list=['--endpoint-uri'],
+                   help='The uri of the endpoint resource.')
+        c.argument('entity_path', options_list=['--entity-path'],
+                   help='The entity path of the endpoint resource.')
 
     with self.argument_context('iot hub routing-endpoint create') as c:
         c.argument('batch_frequency', options_list=['--batch-frequency', '-b'], type=int,
@@ -213,6 +230,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='File name format for the blob. The file name format must contain {iothub},'
                         ' {partition}, {YYYY}, {MM}, {DD}, {HH} and {mm} fields. All parameters are'
                         ' mandatory but can be reordered with or without delimiters.')
+        c.argument('authentication_type', options_list=['--auth-type'], arg_type=get_enum_type(AuthenticationType),
+                   help='Authentication type for the endpoint. The default is keyBased.')
 
     with self.argument_context('iot hub certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
@@ -274,3 +293,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Access key for the given IoT Plug and Play repository.')
         c.argument('user_role', options_list=['--role'], arg_type=get_enum_type(UserRole),
                    help='User role of the access key for the given IoT Plug and Play repository.')
+
+    with self.argument_context('iot central app') as c:
+        c.argument('app_name', app_name_type, options_list=['--name', '-n'])
+
+    with self.argument_context('iot central app create') as c:
+        c.argument('app_name', completer=None)
+        c.argument('location', get_location_type(self.cli_ctx),
+                   help='Location of your IoT Central application. Default is the location of target resource group.')
+        c.argument('sku', arg_type=get_enum_type(AppSku),
+                   help='Pricing tier for IoT Central applications. Default value is ST2.')
+        c.argument('subdomain',
+                   help='Subdomain for the IoT Central URL. Each application must have a unique subdomain.')
+        c.argument('template',
+                   help='IoT Central application template name. Default is a custom application.')
+        c.argument('display_name',
+                   help='Custom display name for the IoT Central application. Default is resource name.')

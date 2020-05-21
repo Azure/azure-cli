@@ -83,7 +83,7 @@ class AzureNetAppFilesAccountServiceScenarioTest(ScenarioTest):
         assert account['activeDirectories'] is None
 
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_account_')
-    def atest_active_directory(self):
+    def test_active_directory(self):
         account_name = self.create_random_name(prefix='cli', length=24)
 
         # create an account as normal
