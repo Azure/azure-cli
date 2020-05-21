@@ -81,6 +81,9 @@ def _configstore_credential_format_group(item):
 
 
 def _keyvalue_entry_format_group(item):
+    # CLI core converts KeyValue object field names to camelCase (eg: content_type becomes contentType)
+    # But when customers specify field filters, we return a dict of requested fields instead of KeyValue object
+    # In that case, field names are not converted to camelCase. We need to check for both content_type and contentType
     content_type = _get_value(item, 'contentType')
     content_type = content_type if content_type != ' ' else _get_value(item, 'content_type')
 
