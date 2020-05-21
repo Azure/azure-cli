@@ -26,6 +26,7 @@ def acr_replication_create(cmd,
                            registry_name,
                            resource_group_name=None,
                            replication_name=None,
+                           region_endpoint_enabled=None,
                            tags=None):
     registry, resource_group_name = validate_premium_registry(
         cmd, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
@@ -34,13 +35,18 @@ def acr_replication_create(cmd,
     if registry.location == normalized_location:
         raise CLIError('Replication could not be created in the same location as the registry.')
 
+    if region_endpoint_enabled is None:
+        region_endpoint_enabled = True
+
     from msrest.exceptions import ValidationError
+    ReplicationType = cmd.get_models('Replication')
+
     try:
         return client.create(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
             replication_name=replication_name or normalized_location,
-            location=location,
+            replication=ReplicationType(location=location, region_endpoint_enabled=region_endpoint_enabled),
             tags=tags
         )
     except ValidationError as e:
@@ -67,9 +73,13 @@ def acr_replication_show(cmd,
     return client.get(resource_group_name, registry_name, replication_name)
 
 
-def acr_replication_update_custom(instance, tags=None):
+def acr_replication_update_custom(instance, region_endpoint_enabled=None, tags=None):
     if tags is not None:
         instance.tags = tags
+
+    if region_endpoint_enabled is not None:
+        instance.region_endpoint_enabled = region_endpoint_enabled
+
     return instance
 
 
@@ -86,10 +96,12 @@ def acr_replication_update_set(cmd,
                                registry_name,
                                resource_group_name=None,
                                parameters=None):
+
     resource_group_name = get_resource_group_name_by_registry_name(
         cmd.cli_ctx, registry_name, resource_group_name)
     return client.update(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
         replication_name=replication_name,
+        region_endpoint_enabled=parameters.region_endpoint_enabled,
         tags=parameters.tags)
