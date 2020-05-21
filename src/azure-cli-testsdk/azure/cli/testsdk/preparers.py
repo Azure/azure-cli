@@ -30,6 +30,9 @@ class NoTrafficRecordingPreparer(AbstractPreparer):
         # first time during live or playback, it would have the same value.
         _ = self.moniker
 
+        if hasattr(self, 'subscription') and self.subscription:
+            command += ' --subscription ' + self.subscription
+
         try:
             if self.test_class_instance.in_recording:
                 return self._raw_execute(cli_ctx, command, expect_failure)
@@ -76,8 +79,6 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         cmd = 'az group create --location {} --name {} --tag {}'.format(
             self.location, name, tags
         )
-        if not self.subscription:
-            cmd += ' --subscription ' + self.subscription
         self.live_only_execute(self.cli_ctx, cmd)
 
         self.test_class_instance.kwargs[self.key] = name
@@ -87,8 +88,6 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         # delete group if test is being recorded and if the group is not a dev rg
         if not self.dev_setting_name:
             cmd = 'az group delete --name {} --yes --no-wait'.format(name)
-            if not self.subscription:
-                cmd += ' --subscription ' + self.subscription
             self.live_only_execute(self.cli_ctx, cmd)
 
 
@@ -120,16 +119,12 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
             cmd = 'az storage account create -n {} -g {} -l {} --sku {} --kind {} --https-only --hns {}'.format(
                 name, group, self.location, self.sku, self.kind, self.hns
             )
-            if not self.subscription:
-                cmd += ' --subscription ' + self.subscription
             self.live_only_execute(self.cli_ctx, cmd)
         else:
             name = self.dev_setting_name
 
         try:
             cmd = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'.format(name, group)
-            if not self.subscription:
-                cmd += ' --subscription ' + self.subscription
             account_key = self.live_only_execute(self.cli_ctx, cmd).output
         except AttributeError:  # live only execute returns None if playing from record
             account_key = None
@@ -142,8 +137,6 @@ class StorageAccountPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
             cmd = 'az storage account delete -n {} -g {} --yes'.format(name, group)
-            if not self.subscription:
-                cmd += ' --subscription ' + self.subscription
             self.live_only_execute(self.cli_ctx, cmd)
 
     def _get_resource_group(self, **kwargs):
