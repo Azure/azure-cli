@@ -674,6 +674,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         # Test delete
         self.cmd('network private-endpoint-connection delete --id {pec_id} -y')
 
+
 class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
     def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
                  replay_processors=None, recording_patches=None, replay_patches=None):
@@ -709,7 +710,6 @@ class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
         self.cmd(
             'network private-link-resource list --id {scope_id}',
             checks=[self.check('length(@)', 1), self.check('[0].properties.groupId', 'topic')])
-
 
         domain_id = self.cmd('az eventgrid domain create --name {domain_name} --resource-group {rg} --location {location} --public-network-access disabled',).get_output_in_json()['id']
         self.kwargs.update({
