@@ -56,7 +56,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.assertEqual('"1.0.0.0"\n', result.output)
 
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
-    def test_resource_group_export_skip_all_parameterization(self, resource_group):
+    def test_resource_group_export_skip_all_params(self, resource_group):
 
         self.kwargs.update({
             'vnet': 'vnet1'
@@ -69,7 +69,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.assertEqual('{}\n', result.output)
 
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
-    def test_resource_group_export_skip_resource_name_parameterization(self, resource_group):
+    def test_resource_group_export_skip_resource_name_params(self, resource_group):
 
         self.kwargs.update({
             'vnet': 'vnet1'
