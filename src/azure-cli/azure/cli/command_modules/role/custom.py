@@ -1745,17 +1745,25 @@ def _gen_guid():
 def _random_password(length):
     import random
     import string
-    random_source = string.ascii_letters + string.digits + string.punctuation
-    password = random.choice(string.ascii_lowercase)
-    password += random.choice(string.ascii_uppercase)
-    password += random.choice(string.digits)
-    password += random.choice(string.punctuation)
+    safe_punctuation = '@%_-+=:,.(){}[]<>'
+    random_source = string.ascii_letters + string.digits + safe_punctuation
+    alphanumeric = string.ascii_letters + string.digits
 
-    for i in range(length - 4):    # pylint: disable=unused-variable
+    password = random.choice(alphanumeric)
+
+    # generate a password of the given length from the options in the random_source variable
+    for _ in range(length):
         password += random.choice(random_source)
 
+    # turn it into a list for some extra shuffling
     password_list = list(password)
     random.SystemRandom().shuffle(password_list)
+
+    # ensure that the password starts with an alphanumeric to avoid issues in shell scripting
+    while password_list[0] not in alphanumeric:
+        random.SystemRandom().shuffle(password_list)
+    
+    # turn the password back into a string befor returning it
     password = ''.join(password_list)
     return password
 
