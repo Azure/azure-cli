@@ -53,6 +53,10 @@ def load_arguments(self, _):
                                                 local_context_attribute=LocalContextAttribute(name='functionapp_name', actions=[LocalContextAction.GET]))
     isolated_sku_arg_type = CLIArgumentType(help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
                                             arg_type=get_enum_type(['I1', 'I2', 'I3']))
+    staticsites_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
+                                           completer=get_resource_name_completion_list('Microsoft.Web/staticSites'), id_part='name',
+                                           help="Name of the static site",
+                                           local_context_attribute=LocalContextAttribute(name='staticsite_name', actions=[LocalContextAction.GET]))
 
     # combine all runtime versions for all functions versions
     functionapp_runtime_to_version = {}
@@ -665,3 +669,15 @@ def load_arguments(self, _):
     with self.argument_context('appservice ase list-plans') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
+    
+    with self.argument_context('staticsites show') as c:
+        c.argument('name', arg_type=staticsites_name_arg_type)
+    with self.argument_context('staticsites list-domains') as c:
+        c.argument('name', arg_type=staticsites_name_arg_type)
+    with self.argument_context('staticsites list-secrets') as c:
+        c.argument('name', arg_type=staticsites_name_arg_type)
+    with self.argument_context('staticsites list-functions') as c:
+        c.argument('name', arg_type=staticsites_name_arg_type)
+    with self.argument_context('staticsites list-function-appsettings') as c:
+        c.argument('name', arg_type=staticsites_name_arg_type)
+    

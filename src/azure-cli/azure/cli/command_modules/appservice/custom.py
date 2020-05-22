@@ -3594,3 +3594,4 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
             verified_hostname_found = True
 
     return verified_hostname_found
+
