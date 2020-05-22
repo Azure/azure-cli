@@ -229,8 +229,11 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('regionEndpointEnabled', False),
                          self.check('tags', {'key': 'value'})])
 
+        # test replication delete
+        self.cmd('acr replication delete -n {replication_name} -r {registry_name}')
+
         # test create replication disable on home region
-        self.cmd('acr replication create -n {rg_loc} -r {registry_name} -l {rg_loc} --region-endpoint-enabled false',
+        self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc} --region-endpoint-enabled false',
                  checks=[self.check('name', '{replication_name}'),
                          self.check('location', '{replication_loc}'),
                          self.check('provisioningState', 'Succeeded'),
