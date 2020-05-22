@@ -1025,14 +1025,14 @@ def update_resource_group(instance, tags=None):
 
 
 def export_group_as_template(
-        cmd, resource_group_name, resource_ids=None, include_comments=False, include_parameter_default_value=False, skip_resource_name_parameterization=False, skip_all_parameterization=False):
+        cmd, resource_group_name, include_comments=False, include_parameter_default_value=False, resource_ids=None, skip_resource_name_params=False, skip_all_params=False):
     """Captures a resource group as a template.
     :param str resource_group_name: the name of the resource group.
     :param str resource_ids: a string containing space-separated resource ids to filter the export by. To export all resources, do not specify this argument or supply "*".
     :param bool include_comments: export template with comments.
     :param bool include_parameter_default_value: export template parameter with default value.
-    :param bool skip_resource_name_parameterization: export template and skip resource name parameterization.
-    :param bool skip_all_parameterization: export template parameter and skip all parameterization.
+    :param bool skip_resource_name_params: export template and skip resource name parameterization.
+    :param bool skip_all_params: export template parameter and skip all parameterization.
     """
     rcf = _resource_client_factory(cmd.cli_ctx)
 
@@ -1041,9 +1041,9 @@ def export_group_as_template(
         export_options.append('IncludeComments')
     if include_parameter_default_value:
         export_options.append('IncludeParameterDefaultValue')
-    if skip_resource_name_parameterization:
+    if skip_resource_name_params:
         export_options.append('SkipResourceNameParameterization')
-    if skip_all_parameterization:
+    if skip_all_params:
         export_options.append('SkipAllParameterization')
 
     resources = []
@@ -1054,7 +1054,7 @@ def export_group_as_template(
             if is_valid_resource_id(i):
                 resources.append(i)
             else:
-                raise CLIError('az resource: error: argument --resource_ids: invalid ResourceId value: \'%s\'' % i)
+                raise CLIError('az resource: error: argument --resource-ids: invalid ResourceId value: \'%s\'' % i)
 
     options = ','.join(export_options) if export_options else None
 
