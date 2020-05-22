@@ -64,9 +64,9 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
-        result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-all-parameterization --query "contentVersion"')
+        result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-all-params --query "parameters"')
 
-        self.assertEqual('"1.0.0.0"\n', result.output)
+        self.assertEqual('{}\n', result.output)
 
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
     def test_resource_group_export_skip_resource_name_parameterization(self, resource_group):
@@ -77,9 +77,9 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
-        result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-resource-name-parameterization --query "contentVersion"')
+        result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-resource-name-params --query "parameters"')
 
-        self.assertEqual('"1.0.0.0"\n', result.output)
+        self.assertEqual('{}\n', result.output)
 
 
 class ResourceGroupNoWaitScenarioTest(ScenarioTest):
