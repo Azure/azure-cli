@@ -680,4 +680,3 @@ def load_arguments(self, _):
         c.argument('name', arg_type=staticsites_name_arg_type)
     with self.argument_context('staticsites list-function-appsettings') as c:
         c.argument('name', arg_type=staticsites_name_arg_type)
-    
