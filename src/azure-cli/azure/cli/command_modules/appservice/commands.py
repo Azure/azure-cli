@@ -89,7 +89,7 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('restart', 'restart_webapp', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('browse', 'view_in_browser')
-        g.custom_command('list-runtimes', 'list_runtimes')
+        g.custom_command('list-runtimes', 'list_runtimes_hardcoded')
         g.custom_command('identity assign', 'assign_identity', validator=validate_app_or_slot_exists_in_rg)
         g.custom_show_command('identity show', 'show_identity', validator=validate_app_or_slot_exists_in_rg)
         g.custom_command('identity remove', 'remove_identity', validator=validate_app_or_slot_exists_in_rg)
