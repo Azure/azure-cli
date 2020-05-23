@@ -1762,7 +1762,7 @@ def _random_password(length):
     # ensure that the password starts with an alphanumeric to avoid issues in shell scripting
     while password_list[0] not in alphanumeric:
         random.SystemRandom().shuffle(password_list)
-    
+
     # turn the password back into a string befor returning it
     password = ''.join(password_list)
     return password
