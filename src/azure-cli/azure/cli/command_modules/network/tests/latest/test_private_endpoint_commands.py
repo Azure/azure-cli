@@ -199,8 +199,9 @@ class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection show --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
                  checks=self.check('id', '{sa_pec_id}'))
 
-        self.cmd('network private-endpoint-connection approve --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
-                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+        # cannot approve it from auto-approved state
+        # self.cmd('network private-endpoint-connection approve --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
+        #          checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
         self.cmd('network private-endpoint-connection reject --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
@@ -298,7 +299,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
     def test_private_endpoint_connection_private_link_scope(self, resource_group, resource_group_location):
         self.kwargs.update({
             'rg': resource_group,
