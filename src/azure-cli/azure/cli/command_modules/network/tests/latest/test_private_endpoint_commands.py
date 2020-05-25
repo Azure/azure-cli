@@ -67,7 +67,7 @@ class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
                       '-l {loc} '
                       '--connection-name {pe_connection} '
                       '--private-connection-resource-id {kv_id} '
-                      '--group-ids vault').get_output_in_json()
+                      '--group-id vault').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
 
         # Show the connection at vault side
@@ -178,7 +178,7 @@ class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
         private_endpoint = self.cmd(
             'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
             '--connection-name {pe_connection} --private-connection-resource-id {sa_id} '
-            '--group-ids blob').get_output_in_json()
+            '--group-id blob').get_output_in_json()
         self.assertEqual(private_endpoint['name'], self.kwargs['pe'])
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], self.kwargs['pe_connection'])
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'], 'Approved')
@@ -199,8 +199,9 @@ class NetworkPrivateLinkStorageAccountScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection show --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
                  checks=self.check('id', '{sa_pec_id}'))
 
-        self.cmd('network private-endpoint-connection approve --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
-                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
+        # cannot approve it from auto-approved state
+        # self.cmd('network private-endpoint-connection approve --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
+        #          checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
         self.cmd('network private-endpoint-connection reject --name {sa_pec_name} -g {rg} --resource-name {sa} --type Microsoft.Storage/storageAccounts',
                  checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')])
@@ -245,7 +246,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
         # add an endpoint and approve it
         result = self.cmd(
             'network private-endpoint create -n {endpoint_name} -g {rg} --subnet {subnet_name} --vnet-name {vnet_name}  '
-            '--private-connection-resource-id {registry_id} --group-ids registry --connection-name {endpoint_conn_name} --manual-request').get_output_in_json()
+            '--private-connection-resource-id {registry_id} --group-id registry --connection-name {endpoint_conn_name} --manual-request').get_output_in_json()
         self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
 
         result = self.cmd(
@@ -261,7 +262,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
 
         # add an endpoint and then reject it
         self.cmd(
-            'network private-endpoint create -n {second_endpoint_name} -g {rg} --subnet {subnet_name} --vnet-name {vnet_name} --private-connection-resource-id {registry_id} --group-ids registry --connection-name {second_endpoint_conn_name} --manual-request')
+            'network private-endpoint create -n {second_endpoint_name} -g {rg} --subnet {subnet_name} --vnet-name {vnet_name} --private-connection-resource-id {registry_id} --group-id registry --connection-name {second_endpoint_conn_name} --manual-request')
         result = self.cmd('network private-endpoint-connection list -g {rg} --name {registry_name} --type Microsoft.ContainerRegistry/registries').get_output_in_json()
 
         # the connection request name starts with the registry / resource name
@@ -298,7 +299,7 @@ class NetworkPrivateLinkACRScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
     def test_private_endpoint_connection_private_link_scope(self, resource_group, resource_group_location):
         self.kwargs.update({
             'rg': resource_group,
@@ -363,7 +364,7 @@ class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
         private_endpoint = self.cmd(
             'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
             '--connection-name {pe_connection} --private-connection-resource-id {scope_id} '
-            '--group-ids {group_id}').get_output_in_json()
+            '--group-id {group_id}').get_output_in_json()
         self.assertEqual(private_endpoint['name'], self.kwargs['pe'])
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], self.kwargs['pe_connection'])
         self.assertEqual(
@@ -465,7 +466,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
         # Create a private endpoint connection
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
-                                    '--group-ids {}'
+                                    '--group-id {}'
                                     .format(resource_group, pe_name_auto, vnet, subnet, loc, pe_connection_name_auto, server_id, group_id)).get_output_in_json()
         self.assertEqual(private_endpoint['name'], pe_name_auto)
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], pe_connection_name_auto)
@@ -506,7 +507,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
         # Create a private endpoint connection
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
-                                    '--group-ids {} --manual-request'
+                                    '--group-id {} --manual-request'
                                     .format(resource_group, pe_name_manual_approve, vnet, subnet, loc, pe_connection_name_manual_approve, server_id, group_id)).get_output_in_json()
         self.assertEqual(private_endpoint['name'], pe_name_manual_approve)
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_approve)
@@ -551,7 +552,7 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
         # Create a private endpoint connection
         private_endpoint = self.cmd('network private-endpoint create -g {} -n {} --vnet-name {} --subnet {} -l {} '
                                     '--connection-name {} --private-connection-resource-id {} '
-                                    '--group-ids {} --manual-request true'
+                                    '--group-id {} --manual-request true'
                                     .format(resource_group, pe_name_manual_reject, vnet, subnet, loc, pe_connection_name_manual_reject, server_id, group_id)).get_output_in_json()
         self.assertEqual(private_endpoint['name'], pe_name_manual_reject)
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['name'], pe_connection_name_manual_reject)
@@ -632,7 +633,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         # Create a private endpoint connection
         pe = self.cmd('network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
                       '--connection-name {pe_connection} --private-connection-resource-id {acc_id} '
-                      '--group-ids Sql').get_output_in_json()
+                      '--group-id Sql').get_output_in_json()
         self.kwargs['pe_id'] = pe['id']
         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 

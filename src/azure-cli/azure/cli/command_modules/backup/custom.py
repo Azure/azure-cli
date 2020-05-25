@@ -170,6 +170,11 @@ def set_policy(client, resource_group_name, vault_name, policy, policy_name):
             policy_object.properties.instant_rp_retention_range_in_days = 2
     if policy_name is None:
         policy_name = policy_object.name
+
+    additional_properties = policy_object.properties.additional_properties
+    if 'instantRpDetails' in additional_properties:
+        policy_object.properties.instant_rp_details = additional_properties['instantRpDetails']
+
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
@@ -586,6 +591,12 @@ def undelete_protection(cmd, client, resource_group_name, vault_name, item):
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, vm_item, raw=True)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
+
+
+def resume_protection(cmd, client, resource_group_name, vault_name, item, policy):
+    if item.properties.protection_state != "ProtectionStopped":
+        raise CLIError("Azure Virtual Machine is already protected")
+    return update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy)
 
 
 def list_jobs(client, resource_group_name, vault_name, status=None, operation=None, start_date=None, end_date=None):

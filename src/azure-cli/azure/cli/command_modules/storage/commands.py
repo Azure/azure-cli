@@ -12,7 +12,9 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_blob_data_gen_update, cf_sa_for_keys,
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
                                                                cf_private_link, cf_private_endpoint,
-                                                               cf_mgmt_encryption_scope, cf_mgmt_file_services)
+                                                               cf_mgmt_encryption_scope, cf_mgmt_file_services,
+                                                               cf_adls_file_system, cf_adls_directory,
+                                                               cf_adls_file, cf_adls_service)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -628,3 +630,80 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                           exception_handler=show_exception_handler,
                           transform=transform_entity_result)
         g.storage_custom_command('insert', 'insert_table_entity')
+
+    adls_service_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.filedatalake._data_lake_service_client#DataLakeServiceClient.{}',
+        client_factory=cf_adls_service,
+        resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
+    )
+
+    adls_fs_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.filedatalake._file_system_client#FileSystemClient.{}',
+        client_factory=cf_adls_file_system,
+        resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
+    )
+    adls_directory_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.filedatalake._data_lake_directory_client#DataLakeDirectoryClient.{}',
+        client_factory=cf_adls_directory,
+        resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
+    )
+    adls_file_sdk = CliCommandType(
+        operations_tmpl='azure.multiapi.storagev2.filedatalake._data_lake_file_client#DataLakeFileClient.{}',
+        client_factory=cf_adls_file,
+        resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE
+    )
+
+    with self.command_group('storage fs', adls_fs_sdk, resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
+                            custom_command_type=get_custom_sdk('filesystem', cf_adls_file_system),
+                            min_api='2018-11-09') as g:
+        from ._transformers import transform_fs_list_public_access_output, transform_fs_public_access_output, \
+            transform_metadata
+        g.storage_command_oauth('create', 'create_file_system')
+        g.storage_command_oauth('list', 'list_file_systems', command_type=adls_service_sdk,
+                                transform=transform_fs_list_public_access_output)
+        g.storage_command_oauth('show', 'get_file_system_properties', exception_handler=show_exception_handler,
+                                transform=transform_fs_public_access_output)
+        g.storage_command_oauth('delete', 'delete_file_system', confirmation=True)
+        g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
+        g.storage_command_oauth('metadata update', 'set_file_system_metadata')
+        g.storage_command_oauth('metadata show', 'get_file_system_properties', exception_handler=show_exception_handler,
+                                transform=transform_metadata)
+
+    with self.command_group('storage fs directory', adls_directory_sdk,
+                            custom_command_type=get_custom_sdk('fs_directory', cf_adls_directory),
+                            resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09') as g:
+        from ._transformers import transform_storage_list_output, transform_metadata
+        g.storage_command_oauth('create', 'create_directory')
+        g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
+        g.storage_custom_command_oauth('show', 'get_directory_properties', exception_handler=show_exception_handler)
+        g.storage_command_oauth('delete', 'delete_directory', confirmation=True)
+        g.storage_command_oauth('move', 'rename_directory')
+        g.storage_custom_command_oauth('list', 'list_fs_directories', client_factory=cf_adls_file_system,
+                                       transform=transform_storage_list_output)
+        g.storage_command_oauth('metadata update', 'set_metadata')
+        g.storage_command_oauth('metadata show', 'get_directory_properties', exception_handler=show_exception_handler,
+                                transform=transform_metadata)
+
+    with self.command_group('storage fs file', adls_file_sdk, resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE,
+                            custom_command_type=get_custom_sdk('fs_file', cf_adls_file), min_api='2018-11-09') as g:
+        from ._transformers import transform_storage_list_output, create_boolean_result_output_transformer
+        g.storage_command_oauth('create', 'create_file')
+        g.storage_custom_command_oauth('upload', 'upload_file')
+        g.storage_custom_command_oauth('exists', 'exists', transform=create_boolean_result_output_transformer('exists'))
+        g.storage_custom_command_oauth('append', 'append_file')
+        g.storage_custom_command_oauth('download', 'download_file')
+        g.storage_custom_command_oauth('show', 'get_file_properties', exception_handler=show_exception_handler)
+        g.storage_custom_command_oauth('list', 'list_fs_files',
+                                       custom_command_type=get_custom_sdk('fs_file', cf_adls_file_system),
+                                       transform=transform_storage_list_output)
+        g.storage_command('move', 'rename_file')
+        g.storage_command('delete', 'delete_file', confirmation=True)
+        g.storage_command_oauth('metadata update', 'set_metadata')
+        g.storage_command_oauth('metadata show', 'get_file_properties', exception_handler=show_exception_handler,
+                                transform=transform_metadata)
+
+    with self.command_group('storage fs access', adls_directory_sdk,
+                            resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09') as g:
+        from ._transformers import transform_fs_access_output
+        g.storage_command('set', 'set_access_control')
+        g.storage_command('show', 'get_access_control', transform=transform_fs_access_output)

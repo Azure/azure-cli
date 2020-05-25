@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.5.1"
+VERSION = "2.6.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -88,7 +88,7 @@ DEPENDENCIES = [
     'azure-mgmt-hdinsight~=1.4.0',
     'azure-mgmt-imagebuilder~=0.2.1',
     'azure-mgmt-iotcentral~=3.0.0',
-    'azure-mgmt-iothub~=0.11.0',
+    'azure-mgmt-iothub~=0.12.0',
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
     'azure-mgmt-keyvault~=2.2.0',
     'azure-mgmt-kusto~=0.3.0',
@@ -101,7 +101,7 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=0.9.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.8.0',
-    'azure-mgmt-network~=10.1.0',
+    'azure-mgmt-network~=10.2.0',
     'azure-mgmt-policyinsights~=0.4.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=2.2.0',
@@ -122,7 +122,7 @@ DEPENDENCIES = [
     'azure-mgmt-storage~=9.0.0',
     'azure-mgmt-trafficmanager~=0.51.0',
     'azure-mgmt-web~=0.46.0',
-    'azure-multiapi-storage~=0.3.1',
+    'azure-multiapi-storage~=0.3.2',
     'azure-loganalytics~=0.1.0',
     'azure-storage-blob>=1.3.1,<2.0.0',
     'cryptography>=2.3.1,<3.0.0',

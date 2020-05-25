@@ -10,6 +10,7 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 get_three_state_flag, get_enum_type, tags_type)
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
@@ -46,7 +47,10 @@ def load_arguments(self, _):
                                    arg_type=get_enum_type(['F1', 'FREE', 'D1', 'SHARED', 'B1', 'B2', 'B3', 'S1', 'S2', 'S3', 'P1V2', 'P2V2', 'P3V2', 'PC2', 'PC3', 'PC4', 'I1', 'I2', 'I3']))
     webapp_name_arg_type = CLIArgumentType(configured_default='web', options_list=['--name', '-n'], metavar='NAME',
                                            completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                                           help="name of the web app. You can configure the default using `az configure --defaults web=<name>`")
+                                           help="name of the web app. You can configure the default using `az configure --defaults web=<name>`",
+                                           local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
+    functionapp_name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME', help="name of the function app.",
+                                                local_context_attribute=LocalContextAttribute(name='functionapp_name', actions=[LocalContextAction.GET]))
     isolated_sku_arg_type = CLIArgumentType(help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
                                             arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
@@ -71,9 +75,7 @@ def load_arguments(self, _):
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
-        c.argument('name', configured_default='web', arg_type=name_arg_type,
-                   completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
-                   help="name of the web app. You can configure the default using `az configure --defaults web=<name>`")
+        c.argument('name', arg_type=webapp_name_arg_type)
 
     with self.argument_context('appservice') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -86,16 +88,19 @@ def load_arguments(self, _):
     with self.argument_context('appservice plan') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   configured_default='appserviceplan', id_part='name')
+                   configured_default='appserviceplan', id_part='name',
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('admin_site_name', help='The name of the admin web app.', deprecate_info=c.deprecate(expiration='0.2.17'))
         c.ignore('max_burst')
 
     with self.argument_context('appservice plan create') as c:
         c.argument('name', options_list=['--name', '-n'], help="Name of the new app service plan", completer=None,
-                   validator=validate_asp_create)
+                   validator=validate_asp_create,
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.SET], scopes=['appservice', 'webapp', 'functionapp']))
         c.argument('app_service_environment', options_list=['--app-service-environment', '-e'],
-                   help="Name or ID of the app service environment")
+                   help="Name or ID of the app service environment",
+                   local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
         c.argument('hyper_v', action='store_true', required=False, help='Host web app on Windows container', is_preview=True)
@@ -109,8 +114,14 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
         c.ignore('allow_pending_state')
 
+    with self.argument_context('appservice plan delete') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name', local_context_attribute=None)
+
     with self.argument_context('webapp create') as c:
-        c.argument('name', options_list=['--name', '-n'], help='name of the new web app', validator=validate_site_create)
+        c.argument('name', options_list=['--name', '-n'], help='name of the new web app', validator=validate_site_create,
+                   local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET], scopes=['webapp']))
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-s'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-w'], help='The container registry server password. Required for private registries.')
@@ -119,7 +130,8 @@ def load_arguments(self, _):
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use `az webapp list-runtimes` for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+                   help="name or resource id of the app service plan. Use 'appservice plan create' to get one",
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.ignore('language')
         c.ignore('using_webapp_up')
 
@@ -153,6 +165,7 @@ def load_arguments(self, _):
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true', help='Enable viewing the log stream immediately after launching the web app')
     with self.argument_context('webapp delete') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, local_context_attribute=None)
         c.argument('keep_empty_plan', action='store_true', help='keep empty app service plan')
         c.argument('keep_metrics', action='store_true', help='keep app metrics')
         c.argument('keep_dns_registration', action='store_true', help='keep DNS registration')
@@ -221,7 +234,7 @@ def load_arguments(self, _):
             c.argument('timeout', type=int, options_list=['--timeout', '-t'], help='Configurable timeout in seconds for checking the status of deployment', validator=validate_timeout_value)
 
         with self.argument_context(scope + ' config appsettings list') as c:
-            c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type), id_part=None)
 
         with self.argument_context(scope + ' config hostname list') as c:
             c.argument('webapp_name', arg_type=webapp_name_arg_type, id_part=None, options_list='--webapp-name')
@@ -287,11 +300,13 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config hostname') as c:
         c.argument('webapp_name', help="webapp name. You can configure the default using `az configure --defaults web=<name>`", configured_default='web',
-                   completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
+                   completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name',
+                   local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
     with self.argument_context('webapp deployment slot') as c:
         c.argument('slot', help='the name of the slot')
         c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
-                   help='Name of the webapp', id_part='name')
+                   help='Name of the webapp', id_part='name',
+                   local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
         c.argument('auto_swap_slot', help='target slot to auto swap', default='production')
         c.argument('disable', help='disable auto swap', action='store_true')
         c.argument('target_slot', help="target slot to swap, default to 'production'")
@@ -324,7 +339,8 @@ def load_arguments(self, _):
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
         c.argument('ids', options_list=['--ids'], help="One or more resource IDs (space delimited). If provided no other 'Resource Id' arguments should be specified.", required=True)
         c.argument('resource_group', options_list=['--resource-group', '-g'], help='Name of resource group. You can configure the default group using `az configure --default-group=<name>`. If `--ids` is provided this should NOT be specified.')
-        c.argument('name', options_list=['--name', '-n'], help='Name of the web app. You can configure the default using `az configure --defaults web=<name>`. If `--ids` is provided this should NOT be specified.')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the web app. You can configure the default using `az configure --defaults web=<name>`. If `--ids` is provided this should NOT be specified.',
+                   local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('webapp config storage-account') as c:
         c.argument('custom_id', options_list=['--custom-id', '-i'], help='custom identifier')
@@ -341,22 +357,25 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config backup') as c:
         c.argument('storage_account_url', help='URL with SAS token to the blob storage container', options_list=['--container-url'])
-        c.argument('webapp_name', help='The name of the web app')
+        c.argument('webapp_name', help='The name of the web app', local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
         c.argument('db_name', help='Name of the database in the backup', arg_group='Database')
         c.argument('db_connection_string', help='Connection string for the database in the backup', arg_group='Database')
         c.argument('db_type', help='Type of database in the backup', arg_group='Database', arg_type=get_enum_type(DatabaseType))
 
     with self.argument_context('webapp config backup create') as c:
-        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the web app name and a timestamp')
+        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the web app name and a timestamp',
+                   local_context_attribute=LocalContextAttribute(name='backup_name', actions=[LocalContextAction.SET], scopes=['webapp']))
 
     with self.argument_context('webapp config backup update') as c:
-        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the web app name and a timestamp')
+        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the web app name and a timestamp',
+                   local_context_attribute=LocalContextAttribute(name='backup_name', actions=[LocalContextAction.GET]))
         c.argument('frequency', help='How often to backup. Use a number followed by d or h, e.g. 5d = 5 days, 2h = 2 hours')
         c.argument('keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], arg_type=get_three_state_flag(return_label=True))
         c.argument('retention_period_in_days', help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention', options_list=['--retention'])
 
     with self.argument_context('webapp config backup restore') as c:
-        c.argument('backup_name', help='Name of the backup to restore')
+        c.argument('backup_name', help='Name of the backup to restore',
+                   local_context_attribute=LocalContextAttribute(name='backup_name', actions=[LocalContextAction.GET]))
         c.argument('target_name', help='The name to use for the restored web app. If unspecified, will default to the name that was used when the backup was created')
         c.argument('overwrite', help='Overwrite the source web app, if --target-name is not specified', action='store_true')
         c.argument('ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
@@ -407,26 +426,28 @@ def load_arguments(self, _):
         c.argument('hybrid_connection', help="Hybrid connection name")
 
     with self.argument_context('functionapp hybrid-connection') as c:
-        c.argument('name', id_part=None)
+        c.argument('name', id_part=None, local_context_attribute=LocalContextAttribute(name='functionapp_name', actions=[LocalContextAction.GET]))
         c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
         c.argument('namespace', help="Hybrid connection namespace")
         c.argument('hybrid_connection', help="Hybrid connection name")
 
     with self.argument_context('appservice hybrid-connection set-key') as c:
-        c.argument('plan', help="AppService plan")
+        c.argument('plan', help="AppService plan", local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('namespace', help="Hybrid connection namespace")
         c.argument('hybrid_connection', help="Hybrid connection name")
         c.argument('key_type', help="Which key (primary or secondary) should be used")
 
     with self.argument_context('appservice vnet-integration list') as c:
-        c.argument('plan', help="AppService plan")
+        c.argument('plan', help="AppService plan", local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('resource_group', arg_type=resource_group_name_type)
 
     with self.argument_context('webapp up') as c:
-        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('name', arg_type=webapp_name_arg_type,
+                   local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET, LocalContextAction.SET], scopes=['webapp']))
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name of the appserviceplan associated with the webapp")
+                   help="name of the appserviceplan associated with the webapp",
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it", default=False, action='store_true')
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
@@ -447,27 +468,29 @@ def load_arguments(self, _):
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
-        c.argument('vnet', help="Vnet name")
-        c.argument('subnet', help="Subnet name")
+        c.argument('vnet', help="Vnet name", local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
+        c.argument('subnet', help="Subnet name", local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('functionapp vnet-integration') as c:
-        c.argument('name', arg_type=name_arg_type, id_part=None)
+        c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('slot', help="the name of the slot. Default to the productions slot if not specified")
-        c.argument('vnet', help="Vnet name", validator=validate_add_vnet)
-        c.argument('subnet', help="Subnet name")
+        c.argument('vnet', help="Vnet name", validator=validate_add_vnet, local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.GET]))
+        c.argument('subnet', help="Subnet name", local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance')
-        c.argument('name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        c.argument('name', arg_type=functionapp_name_arg_type, id_part='name', help='name of the function app')
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
     with self.argument_context('functionapp config hostname') as c:
-        c.argument('webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
+        c.argument('webapp_name', arg_type=functionapp_name_arg_type, id_part='name')
     with self.argument_context('functionapp create') as c:
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
-        c.argument('new_app_name', options_list=['--name', '-n'], help='name of the new function app')
+                   help="name or resource id of the function app service plan. Use 'appservice plan create' to get one",
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
+        c.argument('name', options_list=['--name', '-n'], help='name of the new function app',
+                   local_context_attribute=LocalContextAttribute(name='functionapp_name', actions=[LocalContextAction.SET], scopes=['functionapp']))
         c.argument('storage_account', options_list=['--storage-account', '-s'],
                    help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
@@ -485,14 +508,17 @@ def load_arguments(self, _):
 
     # For commands with shared impl between web app and function app and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:
-        c.argument('name', arg_type=name_arg_type)
+        c.argument('name', arg_type=functionapp_name_arg_type)
+    with self.argument_context('functionapp delete') as c:
+        c.argument('name', arg_type=functionapp_name_arg_type, local_context_attribute=None)
     with self.argument_context('functionapp config appsettings') as c:
         c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of `<name>=<value>`")
 
     with self.argument_context('functionapp plan') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   configured_default='appserviceplan', id_part='name')
+                   configured_default='appserviceplan', id_part='name',
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('is_linux', arg_type=get_three_state_flag(return_label=True), required=False, help='host function app on Linux worker')
         c.argument('number_of_workers', options_list=['--number-of-workers', '--min-instances'],
                    help='The number of workers for the app service plan.')
@@ -504,13 +530,24 @@ def load_arguments(self, _):
         c.argument('plan', required=False, help='The name or resource id of the plan to update the functionapp with.')
 
     with self.argument_context('functionapp plan create') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name',
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.SET], scopes=['appservice', 'webapp', 'functionapp']))
         c.argument('sku', required=True, help='The SKU of the app service plan.')
 
     with self.argument_context('functionapp plan update') as c:
         c.argument('sku', required=False, help='The SKU of the app service plan.')
 
+    with self.argument_context('functionapp plan delete') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name',
+                   local_context_attribute=None)
+
     with self.argument_context('functionapp devops-build create') as c:
-        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False)
+        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False,
+                   local_context_attribute=LocalContextAttribute(name='functionapp_name', actions=[LocalContextAction.GET]))
         c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use", required=False)
         c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
         c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
@@ -520,7 +557,8 @@ def load_arguments(self, _):
         c.argument('github_repository', help="Fullname of your Github repository (e.g. Azure/azure-cli)", required=False)
 
     with self.argument_context('functionapp devops-pipeline create') as c:
-        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False)
+        c.argument('functionapp_name', help="Name of the Azure function app that you want to use", required=False,
+                   local_context_attribute=LocalContextAttribute(name='functionapp_name', actions=[LocalContextAction.GET]))
         c.argument('organization_name', help="Name of the Azure DevOps organization that you want to use", required=False)
         c.argument('project_name', help="Name of the Azure DevOps project that you want to use", required=False)
         c.argument('repository_name', help="Name of the Azure DevOps repository that you want to use", required=False)
@@ -533,7 +571,7 @@ def load_arguments(self, _):
         c.argument('slot', help='the name of the slot')
         # This is set to webapp to simply reuse webapp functions, without rewriting same functions for function apps.
         # The help will still show "-n or --name", so it should not be a problem to do it this way
-        c.argument('webapp', arg_type=name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+        c.argument('webapp', arg_type=functionapp_name_arg_type, completer=get_resource_name_completion_list('Microsoft.Web/sites'),
                    help='Name of the function app', id_part='name')
         c.argument('auto_swap_slot', help='target slot to auto swap', default='production')
         c.argument('disable', help='disable auto swap', action='store_true')
@@ -544,13 +582,13 @@ def load_arguments(self, _):
         c.argument('action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
 
-
 # Access Restriction Commands
     for scope in ['webapp', 'functionapp']:
         with self.argument_context(scope + ' config access-restriction show') as c:
-            c.argument('name', arg_type=webapp_name_arg_type)
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
+
         with self.argument_context(scope + ' config access-restriction add') as c:
-            c.argument('name', arg_type=webapp_name_arg_type)
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction rule to add')
             c.argument('priority', options_list=['--priority', '-p'],
@@ -569,7 +607,7 @@ def load_arguments(self, _):
             c.argument('scm_site', help='True if access restrictions is added for scm site',
                        arg_type=get_three_state_flag())
         with self.argument_context(scope + ' config access-restriction remove') as c:
-            c.argument('name', arg_type=webapp_name_arg_type)
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('rule_name', options_list=['--rule-name', '-r'],
                        help='Name of the access restriction to remove')
             c.argument('ip_address', help="IP address or CIDR range", validator=validate_ip_address)
@@ -580,18 +618,19 @@ def load_arguments(self, _):
             c.argument('action', arg_type=get_enum_type(ACCESS_RESTRICTION_ACTION_TYPES),
                        help="Allow or deny access")
         with self.argument_context(scope + ' config access-restriction set') as c:
-            c.argument('name', arg_type=webapp_name_arg_type)
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type))
             c.argument('use_same_restrictions_for_scm_site',
                        help="Use same access restrictions for scm site",
                        arg_type=get_three_state_flag())
 
 # App Service Environment Commands
     with self.argument_context('appservice ase show') as c:
-        c.argument('name', options_list=['--name', '-n'],
-                   help='Name of the app service environment')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
+                   local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
     with self.argument_context('appservice ase create') as c:
         c.argument('name', options_list=['--name', '-n'], validator=validate_ase_create,
-                   help='Name of the app service environment')
+                   help='Name of the app service environment',
+                   local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.SET], scopes=['appservice']))
         c.argument('subnet', help='Name or ID of existing subnet. To create vnet and/or subnet \
                    use `az network vnet [subnet] create`')
         c.argument('vnet_name', help='Name of the vNet. Mandatory if only subnet name is specified.')
@@ -612,18 +651,16 @@ def load_arguments(self, _):
         c.argument('front_end_sku', arg_type=isolated_sku_arg_type, default='I1',
                    help='Size of front end servers.')
     with self.argument_context('appservice ase delete') as c:
-        c.argument('name', options_list=['--name', '-n'],
-                   help='Name of the app service environment')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment')
     with self.argument_context('appservice ase update') as c:
-        c.argument('name', options_list=['--name', '-n'],
-                   help='Name of the app service environment')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
+                   local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('front_end_scale_factor', type=int, validator=validate_front_end_scale_factor,
                    help='Scale of front ends to app service plan instance ratio between 5 and 15.')
-        c.argument('front_end_sku', arg_type=isolated_sku_arg_type,
-                   help='Size of front end servers.')
+        c.argument('front_end_sku', arg_type=isolated_sku_arg_type, help='Size of front end servers.')
     with self.argument_context('appservice ase list-addresses') as c:
-        c.argument('name', options_list=['--name', '-n'],
-                   help='Name of the app service environment')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
+                   local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
     with self.argument_context('appservice ase list-plans') as c:
-        c.argument('name', options_list=['--name', '-n'],
-                   help='Name of the app service environment')
+        c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
+                   local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
