@@ -256,7 +256,10 @@ class Identity:
         return decoded
 
     def get_user(self, user_or_sp=None):
-        return self._msal_app.get_accounts(user_or_sp)
+        try:
+            return self._msal_app.get_accounts(user_or_sp)
+        except ValueError:
+            pass
 
     def logout_user(self, user_or_sp):
         accounts = self._msal_app.get_accounts(user_or_sp)
@@ -588,6 +591,10 @@ class MSALSecretStore:
                 self._service_principal_creds = json.loads(persistence.load())
             except FileNotFoundError:
                 pass
+            except Exception as ex:
+                raise CLIError("Failed to load token files. If you have a repro, please log an issue at "
+                               "https://github.com/Azure/azure-cli/issues. At the same time, you can clean "
+                               "up by running 'az account clear' and then 'az login'. (Inner Error: {})".format(ex))
 
     def _build_persistence(self):
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/blob/0.2.2/sample/persistence_sample.py

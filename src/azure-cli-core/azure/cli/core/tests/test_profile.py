@@ -90,7 +90,7 @@ class TestProfile(unittest.TestCase):
             'homeTenantId': cls.tenant_id,
             'managedByTenants': [
                 {
-                    "tenantId": "00000003-0000-0000-0000-mock_arm_client000000000000"
+                    "tenantId": "00000003-0000-0000-0000-000000000000"
                 },
                 {
                     "tenantId": "00000004-0000-0000-0000-000000000000"
@@ -437,9 +437,8 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('azure.cli.core._identity.Identity.login_with_username_password', autospec=True)
     def test_create_account_without_subscriptions_thru_common_tenant(self, login_with_username_password):
-        from azure.identity import AuthProfile, UsernamePasswordCredential
-        auth_profile = AuthProfile('https://login.microsoftonline.com/', self.home_account_id, self.tenant_id,
-                                   self.user1)
+        from azure.identity import UsernamePasswordCredential
+        auth_profile = self.authentication_record
         credential = UsernamePasswordCredential(self.client_id, '1234', 'my-secret')
         login_with_username_password.return_value = [credential, auth_profile]
         cli = DummyCli()
@@ -476,9 +475,8 @@ class TestProfile(unittest.TestCase):
     @mock.patch('azure.cli.core._identity.Identity.login_with_interactive_browser', autospec=True)
     def test_create_account_without_subscriptions_without_tenant(self, login_with_interactive_browser):
         cli = DummyCli()
-        from azure.identity import AuthProfile, InteractiveBrowserCredential
-        auth_profile = AuthProfile('https://login.microsoftonline.com/', self.home_account_id, self.tenant_id,
-                                   self.user1)
+        from azure.identity import InteractiveBrowserCredential
+        auth_profile = self.authentication_record
         credential = InteractiveBrowserCredential()
         login_with_interactive_browser.return_value = [credential, auth_profile]
 
@@ -745,9 +743,10 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.identity.ClientSecretCredential.get_token', autospec=True)
-    def test_get_raw_token_for_sp(self, get_token):
+    @mock.patch('azure.cli.core._identity.MSALSecretStore.retrieve_secret_of_service_principal', autospec=True)
+    def test_get_raw_token_for_sp(self, retrieve_secret_of_service_principal, get_token):
         cli = DummyCli()
-        # todo: sp store
+        retrieve_secret_of_service_principal.return_value = 'fake', 'fake'
         get_token.return_value = self.access_token
         # setup
         storage_mock = {'subscriptions': None}
@@ -1326,7 +1325,8 @@ class TestProfile(unittest.TestCase):
         cli = DummyCli()
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False)
+        consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False, None, None,
+                                                     self.home_account_id)
         profile._set_subscriptions(consolidated)
         get_token.return_value = self.access_token
         mock_arm_client = mock.MagicMock()
@@ -1351,7 +1351,8 @@ class TestProfile(unittest.TestCase):
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         sp_subscription1 = SubscriptionStub('sp-sub/3', 'foo-subname', self.state1, 'foo_tenant.onmicrosoft.com')
-        consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False)
+        consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False, None, None,
+                                                     self.home_account_id)
         consolidated += profile._normalize_properties('http://foo', [sp_subscription1], True)
         profile._set_subscriptions(consolidated)
         retrieve_secret_of_service_principal.return_value = 'fake', 'fake'
@@ -1380,7 +1381,8 @@ class TestProfile(unittest.TestCase):
         get_token.return_value = self.access_token
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
-        consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False)
+        consolidated = profile._normalize_properties(self.user1, deepcopy([self.subscription1]), False, None, None,
+                                                     self.home_account_id)
         profile._set_subscriptions(consolidated)
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
