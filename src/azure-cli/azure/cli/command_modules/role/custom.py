@@ -1750,17 +1750,17 @@ def _random_password(length):
     alphanumeric = string.ascii_letters + string.digits
 
     # make sure first character is not a punctuation like '--' which will make CLI command break
-    first_character = random.choice(alphanumeric)
+    first_character = random.SystemRandom().choice(alphanumeric)
 
     # make sure we have special character in the password
-    password = random.choice(string.ascii_lowercase)
-    password += random.choice(string.ascii_uppercase)
-    password += random.choice(string.digits)
-    password += random.choice(safe_punctuation)
+    password = random.SystemRandom().choice(string.ascii_lowercase)
+    password += random.SystemRandom().choice(string.ascii_uppercase)
+    password += random.SystemRandom().choice(string.digits)
+    password += random.SystemRandom().choice(safe_punctuation)
 
     # generate a password of the given length from the options in the random_source variable
     for _ in range(length - 5):
-        password += random.choice(random_source)
+        password += random.SystemRandom().choice(random_source)
 
     # turn it into a list for some extra shuffling
     password_list = list(password)
