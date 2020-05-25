@@ -4519,5 +4519,19 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --off')
 
 
+class PreparerTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_preparer', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+    @ResourceGroupPreparer(name_prefix='cli_test_preparer', parameter_name='resource_group2', key='rg2')
+    # @StorageAccountPreparer(name_prefix='clitestpreparer', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
+    # @StorageAccountPreparer(name_prefix='clitestpreparer')
+    def test_prepare(self, resource_group, resource_group2):
+        print(resource_group)
+        print(resource_group2)
+        self.cmd('group show -g {rg} --subscription 1c638cf4-608f-4ee6-b680-c329e824c3a8')
+        self.cmd('group show -g {rg2}')
+        # self.cmd('storage account show -g {rg} -n {sa} --subscription 1c638cf4-608f-4ee6-b680-c329e824c3a8')
+
+
 if __name__ == '__main__':
     unittest.main()
