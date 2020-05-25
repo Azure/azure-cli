@@ -864,14 +864,11 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
 
         # import with same policy
         policy = self.cmd('keyvault certificate show --vault-name {kv} -n cert2 --query policy').get_output_in_json()
-
-        if self.is_live:
-            if os.path.exists(policy3_path):
-                os.remove(policy3_path)
+        if not os.path.exists(policy3_path) or self.is_live:
             with open(policy3_path, "w") as f:
                 f.write(json.dumps(policy))
 
-        if self.is_live:
+        if not os.path.exists(cert_secret_path) or self.is_live:
             if os.path.exists(cert_secret_path):
                 os.remove(cert_secret_path)
             self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
