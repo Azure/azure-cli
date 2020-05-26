@@ -319,8 +319,8 @@ class DeploymentLiveTest(LiveScenarioTest):
 
         # very the progress
         lines = test_io.getvalue().splitlines()
-        for l in lines:
-            self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
+        for line in lines:
+            self.assertTrue(line.split(':')[0] in ['Accepted', 'Succeeded'])
         self.assertTrue('Succeeded: {} (Microsoft.Resources/deployments)'.format(self.kwargs['dn']), lines)
 
 
@@ -468,78 +468,6 @@ class PolicyScenarioTest(ScenarioTest):
         # delete the assignment
         self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match')
-
-        # delete the policy
-        self.cmd('policy definition delete -n {pn}')
-        time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy definition list',
-                 checks=self.check("length([?name=='{pn}'])", 0))
-
-    @ResourceGroupPreparer(name_prefix='cli_test_policy')
-    @AllowLargeResponse
-    def test_resource_policyset(self, resource_group):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-
-        self.kwargs.update({
-            'pn': self.create_random_name('azure-cli-test-policy', 30),
-            'pdn': self.create_random_name('test_policy', 20),
-            'desc': 'desc_for_test_policy_123',
-            'psn': self.create_random_name('azure-cli-test-policyset', 30),
-            'psdn': self.create_random_name('test_policyset', 20),
-            'ps_desc': 'desc_for_test_policyset_123',
-            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
-            'psf': os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\'),
-            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
-        })
-
-        # create a policy
-        policy = self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}').get_output_in_json()
-
-        # create a policy set
-        policyset = get_file_json(self.kwargs['psf'])
-        policyset[0]['policyDefinitionId'] = policy['id']
-        with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
-            json.dump(policyset, outfile)
-        self.cmd('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc}', checks=[
-            self.check('name', '{psn}'),
-            self.check('displayName', '{psdn}'),
-            self.check('description', '{ps_desc}')
-        ])
-
-        # update it
-        self.kwargs['ps_desc'] = self.kwargs['ps_desc'] + '_new'
-        self.cmd('policy set-definition update -n {psn} --description {ps_desc}',
-                 checks=self.check('description', '{ps_desc}'))
-
-        # list and show it
-        self.cmd('policy set-definition list',
-                 checks=self.check("length([?name=='{psn}'])", 1))
-        self.cmd('policy set-definition show -n {psn}', checks=[
-            self.check('name', '{psn}'),
-            self.check('displayName', '{psdn}')
-        ])
-
-        # create a policy assignment on a resource group
-        self.kwargs.update({
-            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
-            'padn': self.create_random_name('test_assignment', 20)
-        })
-        self.cmd('policy assignment create -d {psn} -n {pan} --display-name {padn} -g {rg}', checks=[
-            self.check('name', '{pan}'),
-            self.check('displayName', '{padn}'),
-            self.check('sku.name', 'A0'),
-            self.check('sku.tier', 'Free'),
-        ])
-
-        # delete the assignment
-        self.cmd('policy assignment delete -n {pan} -g {rg}')
-        self.cmd('policy assignment list --disable-scope-strict-match')
-
-        # delete the policy set
-        self.cmd('policy set-definition delete -n {psn}')
-        time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy set-definition list',
-                 checks=self.check("length([?name=='{psn}'])", 0))
 
         # delete the policy
         self.cmd('policy definition delete -n {pn}')

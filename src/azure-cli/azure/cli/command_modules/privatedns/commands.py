@@ -35,6 +35,8 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.show_command('show', 'get', table_transformer=transform_privatedns_zone_table_output)
         g.custom_command('list', 'list_privatedns_zones', client_factory=cf_privatedns_mgmt_zones, table_transformer=transform_privatedns_zone_table_output)
+        g.custom_command('import', 'import_zone')
+        g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_privatedns_zone', client_factory=cf_privatedns_mgmt_zones, supports_no_wait=True)
         g.generic_update_command('update', setter_name='update', custom_func_name='update_privatedns_zone', supports_no_wait=True)
         g.wait_command('wait')

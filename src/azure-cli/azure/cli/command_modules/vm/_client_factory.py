@@ -124,7 +124,7 @@ def _log_analytics_client_factory(cli_ctx, subscription_id, *_):
 
 
 def cf_log_analytics(cli_ctx, subscription_id, *_):
-    return _log_analytics_client_factory(cli_ctx, subscription_id).workspaces
+    return _log_analytics_client_factory(cli_ctx, subscription_id)
 
 
 def cf_log_analytics_data_sources(cli_ctx, subscription_id, *_):
@@ -143,3 +143,9 @@ def cf_log_analytics_data_plane(cli_ctx, _):
 
 def cf_disk_encryption_set(cli_ctx, _):
     return _compute_client_factory(cli_ctx).disk_encryption_sets
+
+
+def _dev_test_labs_client_factory(cli_ctx, subscription_id, *_):
+    from azure.mgmt.devtestlabs import DevTestLabsClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, DevTestLabsClient, subscription_id=subscription_id)

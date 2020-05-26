@@ -467,6 +467,65 @@ type: command
 short-summary: Updates the instance failover group.
 """
 
+helps['sql instance-pool'] = """
+type: group
+short-summary: Manage instance pools.
+"""
+
+helps['sql instance-pool create'] = """
+type: command
+short-summary: Create an instance pool.
+examples:
+  - name: Example to create an instance pool (include --no-wait in the end to get an asynchronous experience)
+    text: az sql instance-pool create -g resource_group_name -n instance_pool_name -l location --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName} --license-type LicenseIncluded --capacity 8 -e GeneralPurpose -f Gen5 --no-wait
+  - name: Example to create an instance pool with subnet name and vnet-name
+    text: az sql instance-pool create --license-type LicenseIncluded -l northcentralus -n myinstancepool -c 8 -e GeneralPurpose -f Gen5 -g billingPools --subnet mysubnetname --vnet-name myvnetname
+"""
+
+helps['sql instance-pool delete'] = """
+type: command
+short-summary: Delete an instance pool.
+examples:
+  - name: Delete an instance pool
+    text: az sql instance-pool delete -g mygroup -n myinstancepool --yes
+"""
+
+helps['sql instance-pool list'] = """
+type: command
+short-summary: List available instance pools.
+examples:
+  - name: List all instance pools in the current subscription.
+    text: az sql instance-pool list
+  - name: List all instance pools in a resource group.
+    text: az sql instance-pool list -g mygroup
+"""
+
+helps['sql instance-pool show'] = """
+type: command
+short-summary: Get the details for an instance pool.
+examples:
+  - name: Get the details for an instance pool
+    text: az sql instance-pool show -g mygroup -n myinstancepool
+"""
+
+helps['sql instance-pool update'] = """
+type: command
+short-summary: Update an instance pool.
+examples:
+  - name: Update an instance pool with new tags (make sure they are space separated if there are multiple tags)
+    text: az sql instance-pool update -n myinstancepool -g mygroup --tags mykey1=myvalue1 mykey2=myvalue2
+  - name: Clear the tags assigned to an instance pool
+    text: az sql instance-pool update -n myinstancepool -g mygroup --tags ""
+"""
+
+helps['sql instance-pool wait'] = """
+type: command
+short-summary: Wait for an instance pool to reach a desired state.
+examples:
+  - name: Wait until an instance pool gets created.
+    text: az sql instance-pool wait -n myinstancepool -g mygroup --created
+"""
+
 helps['sql mi'] = """
 type: group
 short-summary: Manage SQL managed instances.
@@ -643,7 +702,7 @@ examples:
 
 helps['sql midb short-term-retention-policy'] = """
 type: group
-short-summary: Manage SQL managed instance database backup short term retention policy.
+short-summary: Manage SQL Managed Instance database backup short term retention policy.
 """
 
 helps['sql midb short-term-retention-policy set'] = """
@@ -664,6 +723,84 @@ examples:
     text: az sql midb short-term-retention-policy show -g mygroup --mi myinstance -n mymanageddb
   - name: Show backup short term retention for dropped managed database.
     text: az sql midb short-term-retention-policy show -g mygroup --mi myinstance -n mymanageddb --deleted-time "2018-05-20T05:34:22"
+"""
+
+helps['sql midb ltr-policy'] = """
+type: group
+short-summary: Manage SQL Managed Instance database long term retention policy.
+"""
+
+helps['sql midb ltr-policy set'] = """
+type: command
+short-summary: Update long term retention settings for a managed database.
+examples:
+  - name: Set long term retention for a managed database.
+    text: az sql midb ltr-policy set -g mygroup --mi myinstance -n mymanageddb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26
+"""
+
+helps['sql midb ltr-policy show'] = """
+type: command
+short-summary: Show the long term retention policy for a managed database.
+examples:
+  - name: Show long term retention policy for a managed database.
+    text: az sql midb ltr-policy show -g mygroup --mi myinstance -n mymanageddb
+"""
+
+helps['sql midb ltr-backup'] = """
+type: group
+short-summary: Manage SQL Managed Instance database long term retention backups.
+"""
+
+helps['sql midb ltr-backup show'] = """
+type: command
+short-summary: Get a long term retention backup for a managed database.
+examples:
+  - name: Show long term retention backup for a managed database.
+    text: az sql midb ltr-backup show -l southeastasia --mi myinstance -d mymanageddb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    name: Show long term retention backup for a managed database.
+    text: az sql midb ltr-backup show --backup-id '/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/mymanageddb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000'
+"""
+
+helps['sql midb ltr-backup list'] = """
+type: command
+short-summary: List the long term retention backups for a location, instance or database.
+examples:
+  - name: List long term retention backups for a managed database.
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance -d mymanageddb
+  - name: List long term retention backups for a managed instance (list only the latest LTR backups, which belong to live databases).
+    text: az sql midb ltr-backup list -l southeastasia --mi myinstance --database-state Live --only-latest-per-database
+  - name: List long term retention backups for a managed instance (with resource group argument).
+    text: az sql midb ltr-backup list -l southeastasia -g mygroup --mi myinstance
+  - name: List long term retention backups for a location (list only the latest LTR backups, which belong to live databases).
+    text: az sql midb ltr-backup list -l southeastasia --database-state Live --only-latest-per-database
+  - name: List long term retention backups for a location (with resource group argument).
+    text: az sql midb ltr-backup list -l southeastasia -g mygroup
+"""
+
+helps['sql midb ltr-backup delete'] = """
+type: command
+short-summary: Delete a long term retention backup.
+examples:
+  - name: Delete long term retention backup for a managed database.
+    text: az sql midb ltr-backup delete -l southeastasia --mi myinstance -d mymanageddb --name "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+  - name: Delete long term retention backup for a managed database.
+    text: az sql midb ltr-backup delete --backup-id '/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/mymanageddb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000'
+"""
+
+helps['sql midb ltr-backup restore'] = """
+type: command
+short-summary: Restore a long term retention backup to a new database.
+examples:
+  - name: Restore a managed database using LTR backup.
+    text: |
+            az sql midb ltr-backup restore \\
+                --dest-database targetmidb --dest-mi myinstance --dest-resource-group mygroup \\
+                --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionManagedInstances/myinstance/longTermRetentionDatabases/sourcemidb/longTermRetentionManagedInstanceBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql midb ltr-backup wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the managed database is met.
 """
 
 helps['sql server'] = """

@@ -7,13 +7,14 @@
 # pylint: disable=too-many-lines
 import os
 import unittest
+import tempfile
 
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
 
 from knack.util import CLIError
 
@@ -132,6 +133,97 @@ class NetworkPrivateEndpoints(ScenarioTest):
             self.check('length(privateEndpointConnections)', 0)
         ])
         self.cmd('network private-endpoint delete -g {rg} -n {pe}')
+
+    @ResourceGroupPreparer(name_prefix='fanqiu_cli_test_network_private_endpoints', location='CentralUSEuap')
+    @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
+    def test_network_private_endpoint_private_dns_zone_group(self, resource_group, storage_account):
+        from msrestazure.azure_exceptions import CloudError
+        self.kwargs.update({
+            'sa': storage_account,
+            'loc': 'CentralUSEuap',
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24),
+            'zone_name1': 'www.clizone1.com',
+            'zone_name2': 'www.clizone2.com',
+            'private_dns_zone_group_name': 'clidnsgroup',
+            'private_zone_name1': 'clizone1',
+            'private_zone_name2': 'clizone2'
+        })
+
+        # Prepare network
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        # Create a private endpoint connection
+        pr = self.cmd('storage account private-link-resource list --account-name {sa} -g {rg}').get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+
+        storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+        self.kwargs['sa_id'] = storage['id']
+        private_endpoint = self.cmd(
+            'network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} -l {loc} '
+            '--connection-name {pe_connection} --private-connection-resource-id {sa_id} '
+            '--group-ids blob').get_output_in_json()
+        self.assertEqual(private_endpoint['name'], self.kwargs['pe'])
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['name'], self.kwargs['pe_connection'])
+        self.assertEqual(
+            private_endpoint['privateLinkServiceConnections'][0]['privateLinkServiceConnectionState']['status'],
+            'Approved')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['provisioningState'], 'Succeeded')
+        self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], self.kwargs['group_id'])
+        self.kwargs['pe_id'] = private_endpoint['privateLinkServiceConnections'][0]['id']
+
+        # Show the connection at storage account
+        storage = self.cmd('storage account show -n {sa} -g {rg}').get_output_in_json()
+        self.assertIn('privateEndpointConnections', storage)
+        self.assertEqual(len(storage['privateEndpointConnections']), 1)
+        self.assertEqual(storage['privateEndpointConnections'][0]['privateLinkServiceConnectionState']['status'],
+                         'Approved')
+
+        self.kwargs['sa_pec_id'] = storage['privateEndpointConnections'][0]['id']
+        self.kwargs['sa_pec_name'] = storage['privateEndpointConnections'][0]['name']
+
+        self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
+                 checks=self.check('id', '{sa_pec_id}'))
+
+        self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
+            self.check('length(customDnsConfigs)', 1)
+        ])
+        self.cmd('network private-dns zone create -n {zone_name1} -g {rg}')
+        self.cmd('network private-dns zone create -n {zone_name2} -g {rg}')
+
+        self.cmd('network private-endpoint dns-zone-group create --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name} '
+                 '--zone-name {private_zone_name1} --private-dns-zone {zone_name1}',
+                 checks=[
+                     self.check('name', '{private_dns_zone_group_name}')
+                 ])
+
+        self.cmd('network private-endpoint dns-zone-group add --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name} '
+                 '--zone-name {private_zone_name2} --private-dns-zone {zone_name2}',
+                 checks=[
+                     self.check('length(privateDnsZoneConfigs)', 2)
+                 ])
+
+        self.cmd('network private-endpoint dns-zone-group show --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name}', checks=[
+            self.check('length(privateDnsZoneConfigs)', 2)
+        ])
+        self.cmd('network private-endpoint dns-zone-group list --endpoint-name {pe} -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network private-endpoint dns-zone-group remove --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name} '
+                 '--zone-name {private_zone_name2}',
+                 checks=[
+                     self.check('length(privateDnsZoneConfigs)', 1)
+                 ])
+        self.cmd('network private-endpoint dns-zone-group show --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name}', checks=[
+            self.check('length(privateDnsZoneConfigs)', 1)
+        ])
+        self.cmd('network private-endpoint dns-zone-group delete --endpoint-name {pe} -g {rg} -n {private_dns_zone_group_name}')
 
 
 class NetworkPrivateLinkService(ScenarioTest):
@@ -3488,6 +3580,72 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
             self.check('name', '{bastion}')
         ])
         self.cmd('network bastion delete -g {rg} -n {bastion}')
+
+
+class NetworkVnetLocalContextScenarioTest(LocalContextScenarioTest):
+
+    @ResourceGroupPreparer()
+    def test_network_vnet_local_context(self):
+        self.kwargs.update({
+            'vnet': self.create_random_name(prefix='vnet-', length=12),
+            'subnet': self.create_random_name(prefix='subnet-', length=12)
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}',
+                 checks=[self.check('newVNet.name', self.kwargs['vnet'])])
+        self.cmd('network vnet show', checks=[
+            self.check('name', self.kwargs['vnet'])
+        ])
+        self.cmd('network vnet subnet show', checks=[
+            self.check('name', self.kwargs['subnet'])
+        ])
+        with self.assertRaises(CLIError):
+            self.cmd('network vnet delete')
+        with self.assertRaises(CLIError):
+            self.cmd('network vnet subnet delete')
+
+        self.cmd('network vnet subnet delete -n {subnet}')
+        self.cmd('network vnet delete -n {vnet}')
+
+
+class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
+    def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
+                 replay_processors=None, recording_patches=None, replay_patches=None):
+        super(NetworkSecurityPartnerProviderScenarioTest, self).__init__(method_name)
+        self.cmd('extension add -n virtual-wan')
+
+    @ResourceGroupPreparer()
+    def test_network_security_partner_provider(self, resource_group):
+        self.kwargs.update({
+            'vwan': 'clitestvwan',
+            'vhub': 'clitestvhub',
+            'gateway': 'cligateway',
+            'name': 'clisecuritypartnerprovider',
+            'rg': resource_group
+        })
+
+        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard')
+        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan}  --address-prefix 10.5.0.0/16 -l westus --sku Standard')
+        self.cmd('network vpn-gateway create -g {rg} -n {gateway} --vhub {vhub}')
+
+        self.cmd('network security-partner-provider create -n {name} -g {rg} --vhub {vhub} --provider Checkpoint', checks=[
+            self.check('name', '{name}'),
+            self.check('securityProviderName', 'Checkpoint')
+        ])
+        self.cmd('network security-partner-provider show -n {name} -g {rg}', checks=[
+            self.check('name', '{name}'),
+            self.check('securityProviderName', 'Checkpoint')
+        ])
+        self.cmd('network security-partner-provider update -n {name} -g {rg} --tag a=b', checks=[
+            self.check('tags.a', 'b')
+        ])
+        self.cmd('network security-partner-provider list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network security-partner-provider list', checks=[
+            self.check('length(@)', 1)
+        ])
+        self.cmd('network security-partner-provider delete -n {name} -g {rg}')
 
 
 if __name__ == '__main__':

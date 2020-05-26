@@ -89,25 +89,27 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
     import requests
     from azure.cli.core.cloud import CloudEndpointNotSetException
     from azure.cli.core.util import should_disable_connection_verify
+    from azure.cli.command_modules.vm._alias import alias_json
     try:
         target_url = cli_ctx.cloud.endpoints.vm_image_alias_doc
     except CloudEndpointNotSetException:
-        raise CLIError("'endpoint_vm_image_alias_doc' isn't configured. Please invoke 'az cloud update' to configure "
-                       "it or use '--all' to retrieve images from server")
-    # under hack mode(say through proxies with unsigned cert), opt out the cert verification
-    from azure.cli.command_modules.vm._alias import alias_json
-    try:
-        response = requests.get(target_url, verify=(not should_disable_connection_verify()))
-        if response.status_code == 200:
-            dic = json.loads(response.content.decode())
-        else:
-            logger.warning("Failed to retrieve image alias doc '%s'. Error: '%s'. Use local copy instead.",
-                           target_url, response)
-            dic = json.loads(alias_json)
-    except requests.exceptions.ConnectionError:
-        logger.warning("Failed to retrieve image alias doc '%s'. Error: 'ConnectionError'. Use local copy instead.",
-                       target_url)
+        logger.warning("'endpoint_vm_image_alias_doc' isn't configured. Please invoke 'az cloud update' to configure "
+                       "it or use '--all' to retrieve images from server. Use local copy instead.")
         dic = json.loads(alias_json)
+    else:
+        # under hack mode(say through proxies with unsigned cert), opt out the cert verification
+        try:
+            response = requests.get(target_url, verify=(not should_disable_connection_verify()))
+            if response.status_code == 200:
+                dic = json.loads(response.content.decode())
+            else:
+                logger.warning("Failed to retrieve image alias doc '%s'. Error: '%s'. Use local copy instead.",
+                               target_url, response)
+                dic = json.loads(alias_json)
+        except requests.exceptions.ConnectionError:
+            logger.warning("Failed to retrieve image alias doc '%s'. Error: 'ConnectionError'. Use local copy instead.",
+                           target_url)
+            dic = json.loads(alias_json)
     try:
         all_images = []
         result = (dic['outputs']['aliases']['value'])

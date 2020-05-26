@@ -283,6 +283,8 @@ parameters:
     short-summary: The location to store the deployment metadata.
   - name: --name -n
     short-summary: The deployment name.
+  - name: --what-if-result-format -r
+    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -407,6 +409,8 @@ parameters:
     short-summary: The location to store the deployment metadata.
   - name: --name -n
     short-summary: The deployment name.
+  - name: --what-if-result-format -r
+    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -422,6 +426,38 @@ examples:
     text: >
         az deployment sub create --location WestUS --template-file azuredeploy.json  \\
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+"""
+
+
+helps['deployment sub what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at subscription scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --location -l
+    short-summary: The location to store the deployment What-If operation metadata.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --result-format -r
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at a subscription.
+    text: >
+        az deployment sub what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at a subscription with ResourceIdOnly format.
+    text: >
+        az deployment sub what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at a subscription without pretty-printing the result.
+    text: >
+        az deployment sub what-if --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
 """
 
 helps['deployment sub export'] = """
@@ -532,6 +568,8 @@ parameters:
     short-summary: The deployment name.
   - name: --mode
     short-summary: The deployment mode.
+  - name: --what-if-result-format -r
+    short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
 examples:
   - name: Create a deployment at resource group from a remote template file, using parameters from a local JSON file.
     text: >
@@ -543,10 +581,46 @@ examples:
                     "value": "policy2"
                 }
             }'
+  - name: Create a deployment at resource group from a local template file, using parameters from an array string.
+    text: |
+      az deployment group create --resource-group testgroup --template-file demotemplate.json --parameters exampleString='inline string' exampleArray='("value1", "value2")'
   - name: Create a deployment at resource group from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
         az deployment group create --resource-group testrg --name rollout01 --template-file azuredeploy.json  \\
             --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+"""
+
+helps['deployment group what-if'] = """
+type: command
+short-summary: Execute a deployment What-If operation at resource group scope.
+parameters:
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values.
+    long-summary: >
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as <KEY=VALUE> pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --template-file -f
+    short-summary: The path to the template file.
+  - name: --template-uri -u
+    short-summary: The URI to the template file.
+  - name: --resource-group -g
+    short-summary: The resource group to execute deployment What-If operation at.
+  - name: --name -n
+    short-summary: The deployment name.
+  - name: --mode
+    short-summary: The deployment mode.
+  - name: --result-format -r
+    short-summary: The format of What-If results.
+examples:
+  - name: Execute a deployment What-If operation at a resource group.
+    text: >
+        az deployment group what-if --resource-group testrg --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+  - name: Execute a deployment What-If operation at a resource group with ResourceIdOnly format.
+    text: >
+        az deployment group what-if --resource-group testrg --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --result-format ResourceIdOnly
+  - name: Execute a deployment What-If operation at a resource group without pretty-printing the result.
+    text: >
+        az deployment group what-if --resource-group testrg --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json --no-pretty-print
 """
 
 helps['deployment group export'] = """
@@ -826,6 +900,59 @@ short-summary: List deployment operations at tenant scope.
 helps['deployment operation tenant show'] = """
 type: command
 short-summary: Show a deployment operation at tenant scope.
+"""
+
+helps['deployment-scripts'] = """
+type: group
+short-summary: Manage deployment scripts at subscription or resource group scope.
+"""
+
+helps['deployment-scripts list'] = """
+type: command
+short-summary: List all deployment scripts.
+examples:
+  - name: Retrieve all deployment scripts found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts list
+  - name: Retrieve all deployment scripts found in a resource group
+    text: |
+        az deployment-scripts list --resource-group contoso-rg
+"""
+
+helps['deployment-scripts show'] = """
+type: command
+short-summary: Retrieve a deployment script.
+parameters:
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Retrieve a deployment script found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts show --resource-group contoso-rg --name contosoBashScript
+"""
+
+helps['deployment-scripts show-log'] = """
+type: command
+short-summary: Show deployment script logs.
+parameters:
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Retrieve deployment script logs found in the user's logged-in default subscription, max limit is 4MB.
+    text: >
+        az deployment-scripts show-log --resource-group contoso-rg --name contosoBashScript
+"""
+
+helps['deployment-scripts delete'] = """
+type: command
+short-summary: Delete a deployment script.
+parameters:
+  - name: --name
+    short-summary: Deployment script resource name.
+examples:
+  - name: Delete a deployment script found in the user's logged-in default subscription.
+    text: >
+        az deployment-scripts delete --resource-group contoso-rg --name contosoBashScript
 """
 
 helps['feature'] = """
@@ -1268,7 +1395,7 @@ short-summary: Show a policy assignment's managed identity.
 examples:
   - name: Show a policy assignment's managed identity. (autogenerated)
     text: |
-        az policy assignment identity show --name MyPolicyAssignment
+        az policy assignment identity show --name MyPolicyAssignment --scope '/providers/Microsoft.Management/managementGroups/MyManagementGroup'
     crafted: true
 """
 
@@ -1692,6 +1819,10 @@ examples:
   - name: Delete a resource level lock on a vnet using a vnet id.
     text: >
         az resource lock delete -n lockName --resource /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VMName}
+  - name: Delete a resource-level lock. (autogenerated)
+    text: |
+        az resource lock delete --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
+    crafted: true
 """
 
 helps['resource lock list'] = """
@@ -1752,10 +1883,9 @@ examples:
   - name: Tag a web app with the key 'vmlist' and value 'vm1', using a resource identifier.
     text: >
         az resource tag --tags vmlist=vm1 --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
-  - name: Tag a resource. (autogenerated)
-    text: |
-        az resource tag --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp} --tags vmlist=vm1
-    crafted: true
+  - name: Tag the virtual machine 'MyVm' with the key 'vmlist' and value 'vm1' incrementally. It doesn't empty the existing tags.
+    text: >
+        az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines" -i
 """
 
 helps['resource update'] = """
@@ -1788,7 +1918,15 @@ examples:
 
 helps['rest'] = """
 type: command
-short-summary: invoke a custom request
+short-summary: Invoke a custom request.
+long-summary: >
+    This command automatically authenticates using the credential logged in: If Authorization header is not set, it
+    attaches header `Authorization: Bearer <token>`, where `<token>` is retrieved from AAD. The target resource of the
+    token is derived from --url if --url starts with an endpoint from `az cloud show --query endpoints`. You may also
+    use --resource for a custom resource.
+
+    If Content-Type header is not set and --body is a valid JSON string, Content-Type header will default to
+    application/json.
 examples:
   - name: Get Audit log through Microsoft Graph
     text: >

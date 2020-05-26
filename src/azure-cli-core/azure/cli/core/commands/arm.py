@@ -220,7 +220,7 @@ def register_ids_argument(cli_ctx):
                 'metavar': 'ID',
                 'help': "One or more resource IDs (space-delimited). "
                         "It should be a complete resource ID containing all information of '{gname}' arguments. "
-                        "If provided, no other '{gname}' arguments should be specified.".format(gname=group_name),
+                        "You should provide either --ids or other '{gname}' arguments.".format(gname=group_name),
                 'dest': 'ids' if id_arg else '_ids',
                 'deprecate_info': deprecate_info,
                 'is_preview': id_arg.settings.get('is_preview', None) if id_arg else None,
@@ -1066,7 +1066,7 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
         retry_times = 36
         assignment_name = _gen_guid()
-        for l in range(0, retry_times):
+        for retry_time in range(0, retry_times):
             try:
                 assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
                                           parameters=parameters)
@@ -1075,9 +1075,9 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
                 if 'role assignment already exists' in ex.message:
                     logger.info('Role assignment already exists')
                     break
-                elif l < retry_times and ' does not exist in the directory ' in ex.message:
+                elif retry_time < retry_times and ' does not exist in the directory ' in ex.message:
                     time.sleep(5)
-                    logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                    logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
                                    retry_times)
                     continue
                 else:

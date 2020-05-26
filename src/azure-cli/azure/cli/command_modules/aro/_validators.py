@@ -177,6 +177,7 @@ def validate_visibility(key):
     def _validate_visibility(namespace):
         visibility = getattr(namespace, key)
         if visibility is not None:
+            visibility = visibility.capitalize()
             if visibility not in ['Private', 'Public']:
                 raise CLIError("Invalid --%s '%s'." %
                                (key.replace('_', '-'), visibility))
@@ -220,4 +221,4 @@ def validate_worker_vm_disk_size_gb(namespace):
 
         if namespace.worker_vm_disk_size_gb < 128:
             raise CLIError(
-                '--worker_vm_disk_size_gb must be greater than or equal to 128.')
+                '--worker-vm-disk-size-gb must be greater than or equal to 128.')

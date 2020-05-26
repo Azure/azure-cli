@@ -59,6 +59,8 @@ def process_query(cli_term):
                 if has_pruned_answer:
                     print(style_message("More commands and examples are available in the latest version of the CLI. "
                                         "Please update for the best experience.\n"))
+    from azure.cli.core.util import show_updates_available
+    show_updates_available(new_line_after=True)
     print(SURVEY_PROMPT)
 
 

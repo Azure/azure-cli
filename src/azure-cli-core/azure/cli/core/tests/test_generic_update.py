@@ -233,7 +233,7 @@ class GenericUpdateTest(unittest.TestCase):
                 return
             except Exception as ex:
                 raise ex
-            raise AssertionError("exception not raised for ''".format(message))
+            raise AssertionError("exception not raised for '{0}'".format(message))
 
         missing_remove_message = "Couldn't find 'doesntExist' in ''. Available options: ['additional1', 'additionalList', 'emptyDict', 'emptyDictOfDicts', 'emptyList', 'emptyProp', 'myDict', 'myList', 'myListOfCamelDicts', 'myListOfObjects', 'myListOfSnakeDicts', 'myProp', 'myTestObject']"
         _execute_with_error('genupdate --remove doesntExist',

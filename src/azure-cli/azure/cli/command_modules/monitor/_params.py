@@ -16,7 +16,7 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import (
     process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension)
+    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
 
 from knack.arguments import CLIArgumentType
 
@@ -114,13 +114,14 @@ def load_arguments(self, _):
     # region MetricAlerts
     with self.argument_context('monitor metrics alert') as c:
         c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-        c.argument('severity', type=int, help='Severity of the alert from 0 (low) to 4 (high).')
+        c.argument('severity', type=int, help='Severity of the alert from 0 (critical) to 4 (verbose).')
         c.argument('window_size', type=get_period_type(), help='Time over which to aggregate metrics in "##h##m##s" format.')
         c.argument('evaluation_frequency', type=get_period_type(), help='Frequency with which to evaluate the rule in "##h##m##s" format.')
         c.argument('auto_mitigate', arg_type=get_three_state_flag(), help='Automatically resolve the alert.')
         c.argument('condition', options_list=['--condition'], action=MetricAlertConditionAction, nargs='+')
         c.argument('description', help='Free-text description of the rule.')
-        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to.')
+        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to. '
+                                             'The resources specified in this parameter must be of the same type and exist in the same location.')
         c.argument('disabled', arg_type=get_three_state_flag())
         c.argument('enabled', arg_type=get_three_state_flag(), help='Whether the metric alert rule is enabled.')
 
@@ -232,6 +233,11 @@ def load_arguments(self, _):
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
         c.argument('logs', type=get_json_object)
         c.argument('metrics', type=get_json_object)
+        c.argument('export_to_specific_resource', arg_type=get_three_state_flag(),
+                   help='Indicate that the export to LA must be done to a resource specific table, '
+                        'a.k.a. dedicated or fixed schema table, '
+                        'as opposed to the default dynamic schema table called AzureDiagnostics. '
+                        'This argument is effective only when the argument --workspace is also given.')
 
     with self.argument_context('monitor diagnostic-settings categories list') as c:
         c.resource_parameter('resource_uri', required=True)
@@ -339,10 +345,51 @@ def load_arguments(self, _):
         c.argument('workspace_name', options_list=['--workspace-name', '-n'], help="Name of the Log Analytics Workspace.")
         c.ignore('sku')
         c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
+        from azure.mgmt.loganalytics.models import PublicNetworkAccessType
+        c.argument('public_network_access_for_ingestion', options_list=['--ingestion-access'], help='The public network access type to access workspace ingestion.',
+                   arg_type=get_enum_type(PublicNetworkAccessType))
+        c.argument('public_network_access_for_query', options_list=['--query-access'], help='The public network access type to access workspace query.',
+                   arg_type=get_enum_type(PublicNetworkAccessType))
 
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
+    # endregion
+
+    # region Log Analytics Workspace Linked Service
+    with self.argument_context('monitor log-analytics workspace linked-service') as c:
+        c.argument('linked_service_name', name_arg_type, help='Name of the linkedServices resource. Supported values: cluster, automation.')
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('resource_id', help='The resource id of the resource that will be linked to the workspace. This '
+                                       'should be used for linking resources which require read access.')
+        c.argument('write_access_resource_id', help='The resource id of the resource that will be linked to the '
+                                                    'workspace. This should be used for linking resources which '
+                                                    'require write access.')
+    # endregion
+
+    # region Log Analytics Cluster
+    with self.argument_context('monitor log-analytics cluster') as c:
+        c.argument('cluster_name', name_arg_type, help='The name of the Log Analytics cluster.')
+        c.argument('sku_name', help="The name of the SKU. Currently only support 'CapacityReservation'")
+        c.argument('sku_capacity', help='The capacity of the SKU. It must be in the range of 1000-2000 per day and must'
+                                        ' be in multiples of 100. If you want to increase the limit, please contact'
+                                        ' LAIngestionRate@microsoft.com. It can be decreased only after 31 days.')
+        c.argument('identity_type', help='The identity type. Supported values: SystemAssigned')
+
+    with self.argument_context('monitor log-analytics cluster update') as c:
+        c.argument('key_vault_uri', help='The Key Vault uri which holds the key associated with the Log Analytics cluster.')
+        c.argument('key_name', help='The name of the key associated with the Log Analytics cluster.')
+        c.argument('key_version', help='The version of the key associated with the Log Analytics cluster.')
+    # endregion
+
+    # region Log Analytics Linked Storage Account
+    with self.argument_context('monitor log-analytics workspace linked-storage') as c:
+        from azure.mgmt.loganalytics.models import DataSourceType
+        c.argument('data_source_type', help='Data source type for the linked storage account.',
+                   options_list=['--type'], arg_type=get_enum_type(DataSourceType))
+        c.argument('storage_account_ids', nargs='+', options_list=['--storage-accounts'],
+                   help='List of Name or ID of Azure Storage Account.',
+                   validator=validate_storage_accounts_name_or_id)
     # endregion
 
     # region monitor clone

@@ -263,14 +263,14 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     activity_log = list(client.activity_logs.list(filter=odata_filters))
     start_events, end_events, offline_events = {}, {}, []
 
-    for l in activity_log:
-        if l.http_request:
-            if l.status.value == 'Started':
-                start_events[l.operation_id] = l
+    for item in activity_log:
+        if item.http_request:
+            if item.status.value == 'Started':
+                start_events[item.operation_id] = item
             else:
-                end_events[l.operation_id] = l
-        elif l.event_name and l.event_name.value.lower() == 'classicadministrators':
-            offline_events.append(l)
+                end_events[item.operation_id] = item
+        elif item.event_name and item.event_name.value.lower() == 'classicadministrators':
+            offline_events.append(item)
     return start_events, end_events, offline_events, client
 
 
@@ -1238,7 +1238,7 @@ def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_dat
 
     if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
-        return str(_gen_guid()), None, None, None, None
+        return _random_password(32), None, None, None, None
 
     if password:
         # 2 - Password supplied -- no certs
@@ -1358,15 +1358,15 @@ def create_service_principal_for_rbac(
     # retry till server replication is done
     aad_sp = existing_sps[0] if existing_sps else None
     if not aad_sp:
-        for l in range(0, _RETRY_TIMES):
+        for retry_time in range(0, _RETRY_TIMES):
             try:
                 aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
                 break
             except Exception as ex:  # pylint: disable=broad-except
-                if l < _RETRY_TIMES and (
+                if retry_time < _RETRY_TIMES and (
                         ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
                     time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', l + 1, _RETRY_TIMES)
+                    logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
                 else:
                     logger.warning(
                         "Creating service principal failed for appid '%s'. Trace followed:\n%s",
@@ -1379,14 +1379,14 @@ def create_service_principal_for_rbac(
     if not skip_assignment:
         for scope in scopes:
             logger.warning('Creating a role assignment under the scope of "%s"', scope)
-            for l in range(0, _RETRY_TIMES):
+            for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
                     break
                 except Exception as ex:
-                    if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
+                    if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                         time.sleep(5)
-                        logger.warning('  Retrying role assignment creation: %s/%s', l + 1,
+                        logger.warning('  Retrying role assignment creation: %s/%s', retry_time + 1,
                                        _RETRY_TIMES)
                         continue
                     elif _error_caused_by_role_assignment_exists(ex):
@@ -1739,6 +1739,25 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
 # for injecting test seems to produce predicatable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
+
+
+# reference: https://pynative.com/python-generate-random-string/
+def _random_password(length):
+    import random
+    import string
+    random_source = string.ascii_letters + string.digits + string.punctuation
+    password = random.choice(string.ascii_lowercase)
+    password += random.choice(string.ascii_uppercase)
+    password += random.choice(string.digits)
+    password += random.choice(string.punctuation)
+
+    for i in range(length - 4):    # pylint: disable=unused-variable
+        password += random.choice(random_source)
+
+    password_list = list(password)
+    random.SystemRandom().shuffle(password_list)
+    password = ''.join(password_list)
+    return password
 
 
 def list_user_assigned_identities(cmd, resource_group_name=None):
