@@ -14,14 +14,14 @@ interactions:
       - --name --resource-group --sku
       User-Agent:
       - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/9.0.0
-        Azure-SDK-For-Python AZURECLI/2.4.0
+        Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sa_plr000001?api-version=2019-07-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001","name":"cli_test_sa_plr000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-04-27T02:55:29Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001","name":"cli_test_sa_plr000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-05-19T06:50:25Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -30,7 +30,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 27 Apr 2020 02:55:34 GMT
+      - Tue, 19 May 2020 06:50:30 GMT
       expires:
       - '-1'
       pragma:
@@ -46,7 +46,7 @@ interactions:
       message: OK
 - request:
     body: '{"location": "westus", "sku": {"name": "Premium"}, "properties": {"adminUserEnabled":
-      false}}'
+      false, "publicNetworkAccess": "Enabled"}}'
     headers:
       Accept:
       - application/json
@@ -57,21 +57,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '93'
+      - '127'
       Content-Type:
       - application/json; charset=utf-8
       ParameterSetName:
       - --name --resource-group --sku
       User-Agent:
-      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc11
-        Azure-SDK-For-Python AZURECLI/2.4.0
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-containerregistry/3.0.0rc12
+        Azure-SDK-For-Python AZURECLI/2.5.1
       accept-language:
       - en-US
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002?api-version=2019-12-01-preview
   response:
     body:
-      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"westus","tags":{},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2020-04-27T02:55:40.9791394Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-04-27T02:55:42.7180351+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
+      string: '{"sku":{"name":"Premium","tier":"Premium"},"type":"Microsoft.ContainerRegistry/registries","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002","name":"testreg000002","location":"westus","tags":{},"properties":{"loginServer":"testreg000002.azurecr.io","creationDate":"2020-05-19T06:50:36.4010504Z","provisioningState":"Succeeded","adminUserEnabled":false,"networkRuleSet":{"defaultAction":"Allow","virtualNetworkRules":[],"ipRules":[]},"policies":{"quarantinePolicy":{"status":"disabled"},"trustPolicy":{"type":"Notary","status":"disabled"},"retentionPolicy":{"days":7,"lastUpdatedTime":"2020-05-19T06:50:37.6652163+00:00","status":"disabled"}},"encryption":{"status":"disabled"},"dataEndpointEnabled":false,"dataEndpointHostNames":[],"privateEndpointConnections":[],"publicNetworkAccess":"Enabled"}}'
     headers:
       cache-control:
       - no-cache
@@ -80,7 +80,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 27 Apr 2020 02:55:43 GMT
+      - Tue, 19 May 2020 06:50:39 GMT
       expires:
       - '-1'
       pragma:
@@ -96,7 +96,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '1192'
     status:
       code: 200
       message: OK
@@ -114,7 +114,7 @@ interactions:
       ParameterSetName:
       - --id
       User-Agent:
-      - AZURECLI/2.4.0
+      - AZURECLI/2.5.1
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sa_plr000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateLinkResources?api-version=2019-12-01-preview
   response:
@@ -128,7 +128,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 27 Apr 2020 02:55:46 GMT
+      - Tue, 19 May 2020 06:50:41 GMT
       expires:
       - '-1'
       pragma:
