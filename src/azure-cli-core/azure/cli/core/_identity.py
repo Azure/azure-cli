@@ -399,8 +399,8 @@ class ADALCredentialCache:
         try:
             query = {
                 "client_id": _CLIENT_ID,
-                "environment": credential._profile.environment,
-                "home_account_id": credential._profile.home_account_id
+                "environment": credential._auth_record.authority,
+                "home_account_id": credential._auth_record.home_account_id
             }
             refresh_token = credential._cache.find(
                 credential._cache.CredentialType.REFRESH_TOKEN,
@@ -413,12 +413,12 @@ class ADALCredentialCache:
                 "tokenType": "Bearer",
                 "expiresOn": datetime.datetime.fromtimestamp(access_token.expires_on).strftime("%Y-%m-%d %H:%M:%S.%f"),
                 "resource": self._cli_ctx.cloud.endpoints.active_directory_resource_id,
-                "userId": credential._profile.username,
+                "userId": credential._auth_record.username,
                 "accessToken": access_token.token,
                 "refreshToken": refresh_token[0]['secret'],
                 "_clientId": _CLIENT_ID,
                 "_authority": self._cli_ctx.cloud.endpoints.active_directory.rstrip('/')
-                              + "/" + credential._profile.tenant_id
+                              + "/" + credential._auth_record.tenant_id
             }
             self.adal_token_cache.add([entry])
         except Exception as e:
