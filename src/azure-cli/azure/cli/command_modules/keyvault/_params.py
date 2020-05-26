@@ -306,7 +306,7 @@ def load_arguments(self, _):
 
     for scope in ['create', 'set-attributes', 'import']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
-            c.argument('policy', options_list=['--policy', '-p'],
+            c.argument('release_policy', options_list=['--policy', '-p'],
                        help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
                        type=get_json_object)
     # endregion
