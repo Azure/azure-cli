@@ -178,6 +178,11 @@ examples:
         az keyvault key download --vault-name MyKeyVault -n MyKey -e DER -f mykey.der
 """
 
+helps['keyvault key get-policy-template'] = """
+type: command
+short-summary: Returns policy template as JSON encoded policy definition.
+"""
+
 helps['keyvault list'] = """
 type: command
 short-summary: List key vaults.

@@ -939,6 +939,21 @@ def download_key(client, file_path, hsm_base_url=None, identifier=None,  # pylin
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex
+
+
+def get_policy_template():
+    policy = {
+        'version': '0.2',
+        'anyOf': [{
+            'authority': '<issuer>',
+            'allOf': [{
+                'name': '<claim name>',
+                'condition': 'equals',
+                'value': '<value to match>'
+            }]
+        }]
+    }
+    return policy
 # endregion
 
 

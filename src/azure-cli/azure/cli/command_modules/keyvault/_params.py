@@ -303,6 +303,12 @@ def load_arguments(self, _):
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('maxresults', options_list=['--maxresults'], type=int)
+
+    for scope in ['create', 'set-attributes', 'import']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('policy', options_list=['--policy', '-p'],
+                       help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
+                       type=get_json_object)
     # endregion
 
     # region KeyVault Secret
