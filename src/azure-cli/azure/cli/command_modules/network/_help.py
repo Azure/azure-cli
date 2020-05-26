@@ -4756,7 +4756,7 @@ examples:
     text: |
         az network vnet-gateway ipsec-policy add -g MyResourceGroup --gateway-name MyGateway \\
             --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
-            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
+            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 27000 --sa-max-size 102400000
 """
 
 helps['network vnet-gateway ipsec-policy clear'] = """
@@ -5033,7 +5033,7 @@ examples:
     text: |
         az network vpn-connection ipsec-policy add -g MyResourceGroup --connection-name MyConnection \\
             --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
-            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
+            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 27000 --sa-max-size 102400000
 """
 
 helps['network vpn-connection ipsec-policy clear'] = """

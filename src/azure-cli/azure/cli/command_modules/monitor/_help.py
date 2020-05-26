@@ -1230,22 +1230,35 @@ parameters:
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
+        Due to server limitation, when an alert rule contains multiple criterias, the use of dimensions is limited to one value per dimension within each criterion.
+
         Multiple conditions can be specified by using more than one `--condition` argument.
 examples:
-  - name: Create a high CPU usage alert on a VM with no actions.
+  - name: Create a high CPU usage alert on a VM with no action.
     text: >
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} --condition "avg Percentage CPU > 90" --description "High CPU"
   - name: Create a high CPU usage alert on a VM with email and webhook actions.
     text: |
         az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID} \\
             --condition "avg Percentage CPU > 90" --window-size 5m --evaluation-frequency 1m \\
-            --action {actionGroupId} apiKey={APIKey} type=HighCPU --description "High CPU"
+            --action "/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.Insights/actionGroups/<actionGroupName>" apiKey={APIKey} type=HighCPU \\
+            --description "High CPU"
   - name: Create an alert when a storage account shows a high number of slow transactions, using multi-dimensional filters.
     text: |
         az monitor metrics alert create -g {ResourceGroup} -n alert1 --scopes {StorageAccountId} \\
             --description "Storage Slow Transactions" \\
             --condition "total transactions > 5 where ResponseType includes Success" \\
-            --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob or PutBlob"
+            --condition "avg SuccessE2ELatency > 250 where ApiName includes GetBlob"
+  - name: Create a metric-based alert rule that monitors a custom metric.
+    text: |
+        az monitor metrics alert create -n "metric alert rule on a custom metric" -g "Demos" --scopes {VirtualMachineID} \\
+            --condition "max Azure.VM.Windows.GuestMetrics.Memory\\Available Bytes > 90" \\
+            --window-size 5m --evaluation-frequency 1m
+  - name: Create a high CPU usage alert on several VMs with no actions.
+    text: |
+        az monitor metrics alert create -n alert1 -g {ResourceGroup} --scopes {VirtualMachineID1} {VirtualMachineID2} {VirtualMachineID3} \\
+            --condition "avg Percentage CPU > 90" --description "High CPU"
+
 """
 
 helps['monitor metrics alert delete'] = """
@@ -1293,6 +1306,8 @@ parameters:
 
         Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.
 
+        Due to server limitation, when an alert rule contains multiple criterias, the use of dimensions is limited to one value per dimension within each criterion.
+
         Multiple conditions can be specified by using more than one `--condition` argument.
   - name: --remove-conditions
     short-summary: Space-separated list of condition names to remove.
@@ -1309,6 +1324,9 @@ examples:
     text: |
         az monitor metrics alert update --enabled true --name MyAlertRule --resource-group MyResourceGroup
     crafted: true
+  - name: Disable/Enable a metric-based alert rule.
+    text: |
+        az monitor metrics alert update --enabled false --name MyAlertRule --resource-group MyResourceGroup
 """
 
 helps['monitor metrics list'] = """

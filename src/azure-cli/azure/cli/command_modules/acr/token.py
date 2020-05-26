@@ -28,7 +28,7 @@ def acr_token_create(cmd,
     from ._utils import get_resource_id_by_registry_name
 
     if bool(repository_actions_list) == bool(scope_map_name):
-        raise CLIError("usage error: --repository | --scope-map-name")
+        raise CLIError("usage error: --repository | --scope-map")
     if no_passwords and (expiration_in_days is not None or expiration is not None):
         raise CLIError("usage error: --no-passwords and expiration arguments are mutually exclusive.")
     if expiration_in_days is not None and expiration is not None:
