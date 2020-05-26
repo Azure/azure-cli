@@ -43,7 +43,7 @@ def _create_keyvault(test, kwargs, additional_args=None):
     return test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
 
 
-def _clear_hsm_role_assigments(test, hsm_name, assignees):
+def _clear_hsm_role_assignments(test, hsm_name, assignees):
     for assignee in assignees:
         test.cmd('keyvault role assignment delete --hsm-name {hsm_name} --assignee {assignee}'
                  .format(hsm_name=hsm_name, assignee=assignee))
@@ -182,7 +182,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             'kv2': self.create_random_name('cli-test-kv-mgmt-', 24),
             'kv3': self.create_random_name('cli-test-kv-mgmt-', 24),
             'kv4': self.create_random_name('cli-test-kv-mgmt-', 24),
-            'loc': 'westus'
+            'loc': 'eastus'
         })
 
         # test create keyvault with default access policy set
@@ -314,8 +314,8 @@ class KeyVaultHSMRoleScenarioTest(ScenarioTest):
         for i in range(6):
             self.kwargs['role_assignment_name{}'.format(i + 1)] = self.create_guid()
 
-        _clear_hsm_role_assigments(self, hsm_name=self.kwargs['hsm'],
-                                   assignees=[self.kwargs['user1'], self.kwargs['user2'], self.kwargs['user3']])
+        _clear_hsm_role_assignments(self, hsm_name=self.kwargs['hsm'],
+                                    assignees=[self.kwargs['user1'], self.kwargs['user2'], self.kwargs['user3']])
 
         role_definitions = self.cmd('keyvault role definition list --hsm-name {hsm}').get_output_in_json()
         role_definitions2 = self.cmd('keyvault role definition list --id {hsm_id}').get_output_in_json()

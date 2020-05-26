@@ -474,7 +474,7 @@ def load_arguments(self, _):
     for item in ['create', 'set-attributes', 'import']:
         with self.argument_context('keyvault certificate ' + item) as c:
             c.argument('certificate_policy', options_list=['--policy', '-p'],
-                       help='JSON encoded policy defintion. Use @{file} to load from a file(e.g. @my_policy.json).',
+                       help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
                        type=get_json_object)
 
     with self.argument_context('keyvault certificate import') as c:

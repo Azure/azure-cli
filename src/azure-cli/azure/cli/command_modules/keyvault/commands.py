@@ -124,11 +124,11 @@ def load_command_table(self, _):
         g.command('list', 'list_by_vault', transform=gen_dict_to_list_transform(key='value'))
 
     # Data Plane Commands
-    with self.command_group('keyvault backup', kv_private_data_sdk) as g:
+    with self.command_group('keyvault backup', kv_private_data_sdk, is_preview=True) as g:
         g.keyvault_command('start', 'full_backup')
         g.keyvault_command('status', 'full_backup_status')
 
-    with self.command_group('keyvault restore', kv_private_data_sdk) as g:
+    with self.command_group('keyvault restore', kv_private_data_sdk, is_preview=True) as g:
         g.keyvault_command('start', 'full_restore_operation_method')
         g.keyvault_command('status', 'full_restore_status')
 

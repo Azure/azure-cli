@@ -80,10 +80,10 @@ class KeyVaultCommandGroup(AzCommandGroup):
             return extract_full_summary_from_signature(op)
 
         def keyvault_command_handler(command_args):
-            from azure.cli.core.util import get_arg_list
             from azure.cli.core.commands.client_factory import resolve_client_arg_name
+            from azure.cli.core.profiles import ResourceType
+            from azure.cli.core.util import get_arg_list, poller_classes
             from msrest.paging import Paged
-            from azure.cli.core.util import poller_classes
 
             op = get_op_handler()
             op_args = get_arg_list(op)
@@ -98,10 +98,11 @@ class KeyVaultCommandGroup(AzCommandGroup):
             if 'cmd' not in op_args:
                 command_args.pop('cmd')
             try:
-                abandoned_args = ['identifier', 'hsm_base_url', 'storage_account_name', 'blob_container_name']
-                for arg in abandoned_args:
-                    if arg in command_args:
-                        command_args.pop(arg)
+                if command_type.settings.get('resource_type') == ResourceType.DATA_PRIVATE_KEYVAULT:
+                    abandoned_args = ['identifier', 'hsm_base_url', 'storage_account_name', 'blob_container_name']
+                    for arg in abandoned_args:
+                        if arg in command_args:
+                            command_args.pop(arg)
 
                 result = op(**command_args)
                 # apply results transform if specified
