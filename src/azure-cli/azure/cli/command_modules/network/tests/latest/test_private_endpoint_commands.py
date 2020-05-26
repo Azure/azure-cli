@@ -628,8 +628,8 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest, BatchScenarioMixi
         self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
         if self.is_live or self.in_recording:
-             import time
-             time.sleep(30)
+            import time
+            time.sleep(30)
 
         endpoint = self.get_account_endpoint(
             batch_account_name,
@@ -663,8 +663,8 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest, BatchScenarioMixi
             'network private-endpoint-connection approve --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts '
             '--description "{approval_desc}"')
         if self.is_live or self.in_recording:
-             import time
-             time.sleep(15)
+            import time
+            time.sleep(15)
         self.cmd(
             'network private-endpoint-connection show --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts',
             checks=[
@@ -675,8 +675,8 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest, BatchScenarioMixi
         self.cmd('network private-endpoint-connection reject --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts '
                  '--description "{rejection_desc}"')
         if self.is_live or self.in_recording:
-             import time
-             time.sleep(15)
+            import time
+            time.sleep(15)
         self.cmd('network private-endpoint-connection show --id {pe_id}',
                  checks=[
                      self.check('id', '{pe_id}'),

@@ -183,6 +183,3 @@ def _build_resource_url_endpoint(resource_group_name, namespace_type, resource_n
                                                                 resource_name=resource_name,
                                                                 api_version=api_version)
     return resource_url_endpoint
-
-
-from .batch_provider import BatchPrivateEndpointClient
