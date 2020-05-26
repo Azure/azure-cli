@@ -9,6 +9,9 @@ from ._utils import (
     get_resource_group_name_by_registry_name,
     validate_premium_registry
 )
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 REPLICATIONS_NOT_SUPPORTED = 'Replications are only supported for managed registries in Premium SKU.'
@@ -35,18 +38,39 @@ def acr_replication_create(cmd,
     if registry.location == normalized_location:
         raise CLIError('Replication could not be created in the same location as the registry.')
 
-    if region_endpoint_enabled is None:
-        region_endpoint_enabled = True
-
     from msrest.exceptions import ValidationError
     ReplicationType = cmd.get_models('Replication')
 
+    # version below adds region_endpoint_enabled and a breaking change where some create params are grouped into a model
+    grouped_params_create_api_version = "2019-12-01-preview"
+    replication_client_api_version = ""
+
     try:
+        replication_client_api_version = client.api_version
+        logger.debug('[ACR] detected api version %s', replication_client_api_version)
+    except AttributeError:
+        logger.debug('[ACR] could not detect api version')
+
+    # set / handle defaults
+    if region_endpoint_enabled is None:
+        region_endpoint_enabled = True
+    replication_name = replication_name or normalized_location
+
+    try:
+        if replication_client_api_version >= grouped_params_create_api_version:
+            return client.create(
+                resource_group_name=resource_group_name,
+                registry_name=registry_name,
+                replication_name=replication_name,
+                replication=ReplicationType(location=location, region_endpoint_enabled=region_endpoint_enabled),
+                tags=tags
+            )
+        # else use old create
         return client.create(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
-            replication_name=replication_name or normalized_location,
-            replication=ReplicationType(location=location, region_endpoint_enabled=region_endpoint_enabled),
+            replication_name=replication_name,
+            location=location,
             tags=tags
         )
     except ValidationError as e:
