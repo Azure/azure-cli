@@ -136,22 +136,6 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             processor.reset()
         super(ScenarioTest, self).tearDown()
 
-    def setUp(self):
-        super(ReplayableTest, self).setUp()
-
-        # set up cassette
-        cm = self.vcr.use_cassette(self.recording_file)
-        self.cassette = cm.__enter__()
-        self.addCleanup(cm.__exit__, None, None, None)
-
-        # set up mock patches
-        if self.in_recording:
-            for patch in self.recording_patches:
-                patch(self)
-        else:
-            for patch in self.replay_patches:
-                patch(self)
-
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
         moniker = '{}{:06}'.format(prefix, self.test_resources_count)
