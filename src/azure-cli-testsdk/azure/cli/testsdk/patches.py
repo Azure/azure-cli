@@ -11,6 +11,13 @@ from .exceptions import CliExecutionError
 MOCKED_USER_NAME = 'example@example.com'
 
 
+def patch_time_sleep_api(unit_test):
+    def _time_sleep_skip(*_):
+        return
+
+    mock_in_unit_test(unit_test, 'time.sleep', _time_sleep_skip)
+
+
 def patch_progress_controller(unit_test):
     def _mock_pass(*args, **kwargs):  # pylint: disable=unused-argument
         pass
