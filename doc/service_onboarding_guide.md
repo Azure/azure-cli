@@ -5,7 +5,7 @@ This article aims to provide a guide for service team to request a feature in Az
 
 We encourage you to contact Azure CLI team as early as possible even if the service is not ready yet so that the work can be planned in advance. We officially support three kinds of communication channels, namely Github, email and Teams. The email address of Azure CLI is azpycli@microsoft.com.
 
-The only mandatory action is opening an issue at [Service Team Support Request](https://github.com/Azure/azure-cli/issues/new?assignees=&labels=&template=Service_team_request.md&title=). Fill in the blanks of the issue template as detailed as possible to help Azure CLI people understand the feature request without difficulties and deliver the feature as expected.
+The only mandatory action is opening an issue at [Service Team Support Request](https://github.com/Azure/azure-cli/issues/new?assignees=&labels=&template=Service_team_request.md&title=). Fill in the blanks of the issue template as detailed as possible to help Azure CLI team understand the feature request without difficulties and deliver the feature as expected.
 
 Information required from service team:
 
