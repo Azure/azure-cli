@@ -599,14 +599,14 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
                  .format(server_pec_id))
 
 
-class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest, BatchScenarioMixin):
+class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest):
     def _get_test_data_file(self, filename):
         filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
         self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
         return filepath
 
     # Currently private-link-resource and private-endpoint-connection are whitelist only features so scenario tests are limited
-    @ResourceGroupPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westcentralus')
     def test_private_link_resource_batch_account(self, resource_group, batch_account_name='testprivatelink'):
         self.kwargs.update({
             'vnet_name': self.create_random_name('testvnet', 20),
@@ -617,7 +617,7 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest, BatchScenarioMixi
             'rejection_desc': 'You are rejected!',
             'rg': resource_group,
             'acc_n': batch_account_name,
-            'loc': 'eastus'
+            'loc': 'westcentralus'
         })
         account = self.cmd('batch account create -g {rg} -n {acc_n} -l {loc} --public-network-access disabled').assert_with_checks([
             self.check('name', '{acc_n}'),
@@ -630,17 +630,6 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest, BatchScenarioMixi
         if self.is_live or self.in_recording:
             import time
             time.sleep(30)
-
-        endpoint = self.get_account_endpoint(
-            batch_account_name,
-            resource_group).replace("https://", "")
-        key = self.get_account_key(
-            batch_account_name,
-            resource_group)
-        self.kwargs.update({
-            'acc_k': key,
-            'acc_u': endpoint
-        })
 
         # add an endpoint and then reject it
         self.cmd(
