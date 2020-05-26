@@ -28,7 +28,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_express_route_ports, cf_express_route_port_locations, cf_express_route_links, cf_app_gateway_waf_policy,
     cf_service_tags, cf_private_link_services, cf_private_endpoint_types, cf_peer_express_route_circuit_connections,
     cf_virtual_router, cf_virtual_router_peering, cf_service_aliases, cf_bastion_hosts, cf_flow_logs,
-    cf_private_dns_zone_groups, cf_security_partner_providers)
+    cf_private_dns_zone_groups, cf_security_partner_providers, cf_load_balancer_backend_pools)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -201,6 +201,11 @@ def load_command_table(self, _):
     network_lb_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#LoadBalancersOperations.{}',
         client_factory=cf_load_balancers
+    )
+
+    network_lb_backend_pool_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations#LoadBalancerBackendAddressPoolsOperations.{}',
+        client_factory=cf_load_balancer_backend_pools
     )
 
     network_lgw_sdk = CliCommandType(
@@ -751,7 +756,6 @@ def load_command_table(self, _):
         'frontend_ip_configurations': 'frontend-ip',
         'inbound_nat_rules': 'inbound-nat-rule',
         'inbound_nat_pools': 'inbound-nat-pool',
-        'backend_address_pools': 'address-pool',
         'load_balancing_rules': 'rule',
         'probes': 'probe',
     }
@@ -777,8 +781,12 @@ def load_command_table(self, _):
         g.generic_update_command('update', child_collection_prop_name='inbound_nat_pools',
                                  custom_func_name='set_lb_inbound_nat_pool')
 
-    with self.command_group('network lb address-pool', network_lb_sdk) as g:
+    with self.command_group('network lb address-pool', network_lb_backend_pool_sdk) as g:
         g.custom_command('create', 'create_lb_backend_address_pool')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+
 
     with self.command_group('network lb rule', network_lb_sdk) as g:
         g.custom_command('create', 'create_lb_rule')
