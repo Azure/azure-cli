@@ -871,6 +871,11 @@ def load_arguments(self, _):
         c.argument('vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
         c.ignore('vnet_type', 'subnet_type')
 
+    with self.argument_context('network lb address-pool') as c:
+        c.argument('backend_address_pool_name',
+                   options_list=['--name', '-n'],
+                   help='The name of the backend address pool. {}'.format(default_existing))
+
     with self.argument_context('network lb frontend-ip') as c:
         c.argument('zone', zone_type, min_api='2017-06-01')
 

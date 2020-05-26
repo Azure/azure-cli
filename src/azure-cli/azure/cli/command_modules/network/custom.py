@@ -2895,14 +2895,10 @@ def set_lb_frontend_ip_configuration(
     return parent
 
 
-def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, item_name):
+def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
     BackendAddressPool = cmd.get_models('BackendAddressPool')
-    ncf = network_client_factory(cmd.cli_ctx)
-    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     new_pool = BackendAddressPool(name=item_name)
-    upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
     poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().backend_address_pools, item_name)
 
 
 def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
