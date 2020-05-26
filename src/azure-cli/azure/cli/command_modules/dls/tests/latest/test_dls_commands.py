@@ -138,7 +138,7 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
         local_folder = self.kwargs.get('local_folder', None)
         if local_folder and os.path.exists(local_folder):
             rmtree(local_folder)
-        self.mp.__exit__()
+        self.mp.__exit__(None, None, None)
         return super(DataLakeStoreFileScenarioTest, self).tearDown()
 
     @ResourceGroupPreparer(name_prefix='cls_test_adls_file')
