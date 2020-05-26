@@ -136,7 +136,6 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             processor.reset()
         super(ScenarioTest, self).tearDown()
 
-
     def setUp(self):
         super(ReplayableTest, self).setUp()
 
@@ -152,7 +151,6 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         else:
             for patch in self.replay_patches:
                 patch(self)
-
 
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
