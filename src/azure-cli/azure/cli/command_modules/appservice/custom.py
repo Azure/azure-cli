@@ -2755,7 +2755,7 @@ def list_consumption_locations(cmd):
 def list_locations(cmd, sku, linux_workers_enabled=None):
     web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_name(sku)
-    web_client_geo_regions = web_client.list_geo_regions(full_sku, linux_workers_enabled)
+    web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
 
     providers_client = providers_client_factory(cmd.cli_ctx)
     providers_client_locations_list = getattr(providers_client.get('Microsoft.Web'), 'resource_types', [])
