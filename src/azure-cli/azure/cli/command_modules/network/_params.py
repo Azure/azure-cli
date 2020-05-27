@@ -873,6 +873,7 @@ def load_arguments(self, _):
         c.ignore('vnet_type', 'subnet_type')
 
     with self.argument_context('network lb address-pool') as c:
+        c.argument('load_balancer_name', load_balancer_name_type, id_part=None)
         c.argument('backend_address_pool_name',
                    options_list=['--name', '-n'],
                    help='The name of the backend address pool. {}'.format(default_existing))
