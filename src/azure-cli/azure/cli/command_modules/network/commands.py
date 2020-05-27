@@ -205,7 +205,8 @@ def load_command_table(self, _):
 
     network_lb_backend_pool_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations#LoadBalancerBackendAddressPoolsOperations.{}',
-        client_factory=cf_load_balancer_backend_pools
+        client_factory=cf_load_balancer_backend_pools,
+        min_api='2020-04-01'
     )
 
     network_lgw_sdk = CliCommandType(
@@ -786,6 +787,12 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.custom_command('delete', 'delete_lb_backend_address_pool')
+
+    with self.command_group('network lb address-pool', network_lb_sdk, max_api='2020-04-01') as g:
+        g.custom_command('create', 'create_lb_backend_address_pool')
+        g.command('list', list_network_resource_property('load_balancers', 'backend_address_pools'))
+        g.show_command('show', get_network_resource_property_entry('load_balancers', 'backend_address_pools'))
+        g.command('delete', delete_network_resource_property_entry('load_balancers', 'backend_address_pools'))
 
     with self.command_group('network lb address-pool address', network_lb_backend_pool_sdk, is_preview=True) as g:
         g.custom_command('add', 'add_lb_backend_address_pool_address')

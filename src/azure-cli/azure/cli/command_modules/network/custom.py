@@ -2907,7 +2907,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                                                        'VirtualNetwork',
                                                        'NetworkInterfaceIPConfiguration')
     # Hope we can remove this logic
-    if lb.sku.name.lower() == 'basic':
+    if cmd.supported_api_version(max_api='2020-04-01') or lb.sku.name.lower() == 'basic':
         new_pool = BackendAddressPool(name=backend_address_pool_name)
         upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
         poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
