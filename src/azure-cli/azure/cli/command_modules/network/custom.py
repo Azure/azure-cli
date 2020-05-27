@@ -2895,10 +2895,23 @@ def set_lb_frontend_ip_configuration(
     return parent
 
 
-def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
-    BackendAddressPool = cmd.get_models('BackendAddressPool')
-    new_pool = BackendAddressPool(name=item_name)
-    poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
+                                   address_name=None, vnet=None, ip_address=None, nic_ip_config=None):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    (BackendAddressPool,
+     LoadBalancerBackendAddress,
+     VirtualNetwork,
+     NetworkInterfaceIPConfiguration) = cmd.get_models('BackendAddressPool',
+                                                       'LoadBalancerBackendAddress',
+                                                       'VirtualNetwork',
+                                                       'NetworkInterfaceIPConfiguration')
+    new_address = LoadBalancerBackendAddress(name=address_name,
+                                             virtual_network=VirtualNetwork(id=vnet),
+                                             ip_address=ip_address,
+                                             network_interface_ip_configuration=NetworkInterfaceIPConfiguration(id=nic_ip_config))
+    new_pool = BackendAddressPool(name=item_name,
+                                  load_balancer_backend_addresses=[new_address])
+    return client.create_or_update(resource_group_name, load_balancer_name, backend_address_pool_name, new_pool)
 
 
 def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
