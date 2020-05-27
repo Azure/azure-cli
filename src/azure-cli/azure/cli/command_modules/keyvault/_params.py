@@ -197,8 +197,10 @@ def load_arguments(self, _):
             c.argument('not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
 
     with self.argument_context('keyvault key create') as c:
-        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type)
-        c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName))
+        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
+                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeytype')
+        c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName),
+                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
         c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)
