@@ -29,7 +29,8 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, AppRole,
                                     PasswordCredential, KeyCredential, UserCreateParameters, PasswordProfile,
                                     ServicePrincipalCreateParameters, RequiredResourceAccess, ResourceAccess,
-                                    GroupCreateParameters, CheckGroupMembershipParameters, UserUpdateParameters)
+                                    GroupCreateParameters, CheckGroupMembershipParameters, UserUpdateParameters,
+                                    OptionalClaim, OptionalClaims)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._multi_api_adaptor import MultiAPIAdaptor
@@ -262,14 +263,14 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     activity_log = list(client.activity_logs.list(filter=odata_filters))
     start_events, end_events, offline_events = {}, {}, []
 
-    for l in activity_log:
-        if l.http_request:
-            if l.status.value == 'Started':
-                start_events[l.operation_id] = l
+    for item in activity_log:
+        if item.http_request:
+            if item.status.value == 'Started':
+                start_events[item.operation_id] = item
             else:
-                end_events[l.operation_id] = l
-        elif l.event_name and l.event_name.value.lower() == 'classicadministrators':
-            offline_events.append(l)
+                end_events[item.operation_id] = item
+        elif item.event_name and item.event_name.value.lower() == 'classicadministrators':
+            offline_events.append(item)
     return start_events, end_events, offline_events, client
 
 
@@ -726,7 +727,7 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None,
-                       credential_description=None, app_roles=None):
+                       credential_description=None, app_roles=None, optional_claims=None):
     graph_client = _graph_client_factory(cmd.cli_ctx)
     key_creds, password_creds, required_accesses = None, None, None
     existing_apps = list_apps(cmd, display_name=display_name)
@@ -765,6 +766,8 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
 
     if app_roles:
         app_roles = _build_app_roles(app_roles)
+    if optional_claims:
+        optional_claims = _build_optional_claims(optional_claims)
 
     app_create_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
                                                    display_name=display_name,
@@ -775,7 +778,8 @@ def create_application(cmd, display_name, homepage=None, identifier_uris=None,  
                                                    password_credentials=password_creds,
                                                    oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
                                                    required_resource_access=required_accesses,
-                                                   app_roles=app_roles)
+                                                   app_roles=app_roles,
+                                                   optional_claims=optional_claims)
 
     try:
         result = graph_client.applications.create(app_create_param)
@@ -943,7 +947,7 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
                        oauth2_allow_implicit_flow=None, required_resource_accesses=None,
-                       credential_description=None, app_roles=None):
+                       credential_description=None, app_roles=None, optional_claims=None):
 
     # propagate the values
     app_patch_param = ApplicationUpdateParameters()
@@ -967,6 +971,9 @@ def update_application(instance, display_name=None, homepage=None,  # pylint: di
 
     if app_roles:
         app_patch_param.app_roles = _build_app_roles(app_roles)
+
+    if optional_claims:
+        app_patch_param.optional_claims = _build_optional_claims(optional_claims)
 
     if available_to_other_tenants is not None:
         app_patch_param.available_to_other_tenants = available_to_other_tenants
@@ -1022,6 +1029,29 @@ def _build_app_roles(app_roles):
                        description=x.get('description', None), display_name=x.get('displayName', None),
                        is_enabled=x.get('isEnabled', None), value=x.get('value', None))
         result.append(role)
+    return result
+
+
+def _build_optional_claims(optional_claims):
+    if not optional_claims:
+        return None
+    available_keys = {
+        'idToken': 'id_token',
+        'accessToken': 'access_token'
+    }
+    result = OptionalClaims()
+    for key, object_key in available_keys.items():
+        if optional_claims.get(key, []):
+            tokens = []
+            for token in optional_claims.get(key):
+                tokens.append(OptionalClaim(
+                    name=token.get('name', None),
+                    source=token.get('source', None),
+                    essential=token.get('essential', None),
+                    additional_properties=token.get('additionalProperties', None)
+                ))
+            if tokens:
+                setattr(result, object_key, tokens)
     return result
 
 
@@ -1208,7 +1238,7 @@ def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_dat
 
     if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
-        return str(_gen_guid()), None, None, None, None
+        return _random_password(32), None, None, None, None
 
     if password:
         # 2 - Password supplied -- no certs
@@ -1328,15 +1358,15 @@ def create_service_principal_for_rbac(
     # retry till server replication is done
     aad_sp = existing_sps[0] if existing_sps else None
     if not aad_sp:
-        for l in range(0, _RETRY_TIMES):
+        for retry_time in range(0, _RETRY_TIMES):
             try:
                 aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
                 break
             except Exception as ex:  # pylint: disable=broad-except
-                if l < _RETRY_TIMES and (
+                if retry_time < _RETRY_TIMES and (
                         ' does not reference ' in str(ex) or ' does not exist ' in str(ex)):
                     time.sleep(5)
-                    logger.warning('Retrying service principal creation: %s/%s', l + 1, _RETRY_TIMES)
+                    logger.warning('Retrying service principal creation: %s/%s', retry_time + 1, _RETRY_TIMES)
                 else:
                     logger.warning(
                         "Creating service principal failed for appid '%s'. Trace followed:\n%s",
@@ -1349,14 +1379,14 @@ def create_service_principal_for_rbac(
     if not skip_assignment:
         for scope in scopes:
             logger.warning('Creating a role assignment under the scope of "%s"', scope)
-            for l in range(0, _RETRY_TIMES):
+            for retry_time in range(0, _RETRY_TIMES):
                 try:
                     _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
                     break
                 except Exception as ex:
-                    if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
+                    if retry_time < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                         time.sleep(5)
-                        logger.warning('  Retrying role assignment creation: %s/%s', l + 1,
+                        logger.warning('  Retrying role assignment creation: %s/%s', retry_time + 1,
                                        _RETRY_TIMES)
                         continue
                     elif _error_caused_by_role_assignment_exists(ex):
@@ -1709,6 +1739,25 @@ def _set_owner(cli_ctx, graph_client, asset_object_id, setter):
 # for injecting test seems to produce predicatable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
+
+
+# reference: https://pynative.com/python-generate-random-string/
+def _random_password(length):
+    import random
+    import string
+    random_source = string.ascii_letters + string.digits + string.punctuation
+    password = random.choice(string.ascii_lowercase)
+    password += random.choice(string.ascii_uppercase)
+    password += random.choice(string.digits)
+    password += random.choice(string.punctuation)
+
+    for i in range(length - 4):    # pylint: disable=unused-variable
+        password += random.choice(random_source)
+
+    password_list = list(password)
+    random.SystemRandom().shuffle(password_list)
+    password = ''.join(password_list)
+    return password
 
 
 def list_user_assigned_identities(cmd, resource_group_name=None):

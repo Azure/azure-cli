@@ -32,7 +32,8 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version)
-from ._client_factory import _compute_client_factory, cf_public_ip_addresses, cf_vm_image_term
+from ._client_factory import (_compute_client_factory, cf_public_ip_addresses, cf_vm_image_term,
+                              _dev_test_labs_client_factory)
 
 logger = get_logger(__name__)
 
@@ -644,7 +645,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               boot_diagnostics_storage=None, ultra_ssd_enabled=None, ephemeral_os_disk=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
-              os_disk_encryption_set=None, data_disk_encryption_sets=None):
+              os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -814,7 +815,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         proximity_placement_group=proximity_placement_group, computer_name=computer_name,
         dedicated_host=dedicated_host, priority=priority, max_price=max_price, eviction_policy=eviction_policy,
         enable_agent=enable_agent, vmss=vmss, os_disk_encryption_set=os_disk_encryption_set,
-        data_disk_encryption_sets=data_disk_encryption_sets)
+        data_disk_encryption_sets=data_disk_encryption_sets, specialized=specialized)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -887,6 +888,43 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     return vm
 
 
+def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, webhook=None, time=None,
+                     location=None):
+    from msrestazure.tools import resource_id
+    from azure.mgmt.devtestlabs.models import Schedule
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    client = _dev_test_labs_client_factory(cmd.cli_ctx, subscription_id)
+    name = 'shutdown-computevm-' + vm_name
+    vm_id = resource_id(subscription=client.config.subscription_id, resource_group=resource_group_name,
+                        namespace='Microsoft.Compute', type='virtualMachines', name=vm_name)
+    if off:
+        if email is not None or webhook is not None or time is not None:
+            # I don't want to disrupt users. So I warn instead of raising an error.
+            logger.warning('If --off, other parameters will be ignored.')
+        return client.global_schedules.delete(resource_group_name, name)
+
+    if time is None:
+        raise CLIError('usage error: --time is a required parameter')
+    daily_recurrence = {'time': time}
+    notification_settings = None
+    if webhook:
+        notification_settings = {
+            'emailRecipient': email,
+            'webhookUrl': webhook,
+            'timeInMinutes': 30,
+            'status': 'Enabled'
+        }
+    schedule = Schedule(status='Enabled',
+                        target_resource_id=vm_id,
+                        daily_recurrence=daily_recurrence,
+                        notification_settings=notification_settings,
+                        time_zone_id='UTC',
+                        task_type='ComputeVmShutdownTask',
+                        location=location)
+    return client.global_schedules.create_or_update(resource_group_name, name, schedule)
+
+
 def get_instance_view(cmd, resource_group_name, vm_name):
     return get_vm(cmd, resource_group_name, vm_name, 'instanceView')
 
@@ -945,8 +983,7 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     if size:
         result = [x for x in result if x.resource_type == 'virtualMachines' and size.lower() in x.name.lower()]
     if zone:
-        result = [x for x in result if x.resource_type == 'virtualMachines' and
-                  x.location_info and x.location_info[0].zones]
+        result = [x for x in result if x.location_info and x.location_info[0].zones]
     return result
 
 
@@ -990,7 +1027,7 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
             }
             for ip_configuration in nic.ip_configurations:
                 network_info['privateIpAddresses'].append(ip_configuration.private_ip_address)
-                if ip_configuration.public_ip_address:
+                if ip_configuration.public_ip_address and ip_configuration.public_ip_address.id in ip_address_lookup:
                     public_ip_address = ip_address_lookup[ip_configuration.public_ip_address.id]
 
                     public_ip_addr_info = {
@@ -1268,7 +1305,7 @@ def list_av_sets(cmd, resource_group_name=None):
     op_group = _compute_client_factory(cmd.cli_ctx).availability_sets
     if resource_group_name:
         return op_group.list(resource_group_name)
-    return op_group.list_by_subscription()
+    return op_group.list_by_subscription(expand='virtualMachines/$ref')
 # endregion
 
 
@@ -2163,7 +2200,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode='ScaleSetVM', scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
-                automatic_repairs_grace_period=None):
+                automatic_repairs_grace_period=None, specialized=None, os_disk_size_gb=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -2392,7 +2429,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             terminate_notification_time=terminate_notification_time, max_price=max_price,
             scale_in_policy=scale_in_policy, os_disk_encryption_set=os_disk_encryption_set,
             data_disk_encryption_sets=data_disk_encryption_sets, data_disk_iops=data_disk_iops,
-            data_disk_mbps=data_disk_mbps, automatic_repairs_grace_period=automatic_repairs_grace_period)
+            data_disk_mbps=data_disk_mbps, automatic_repairs_grace_period=automatic_repairs_grace_period,
+            specialized=specialized, os_disk_size_gb=os_disk_size_gb)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -2671,6 +2709,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.virtual_machine_profile.license_type = license_type
 
     if enable_terminate_notification is not None or terminate_notification_time is not None:
+        if vmss.virtual_machine_profile.scheduled_events_profile is None:
+            ScheduledEventsProfile = cmd.get_models('ScheduledEventsProfile')
+            vmss.virtual_machine_profile.scheduled_events_profile = ScheduledEventsProfile()
         TerminateNotificationProfile = cmd.get_models('TerminateNotificationProfile')
         vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
             TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
@@ -2803,6 +2844,9 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
     else:
         vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
         data_disks = vmss_vm.storage_profile.data_disks
+
+    if not data_disks:
+        raise CLIError("Data disk doesn't exist")
 
     leftovers = [d for d in data_disks if d.lun != lun]
     if len(data_disks) == len(leftovers):
@@ -2989,7 +3033,9 @@ def create_gallery_image(cmd, resource_group_name, gallery_name, gallery_image_n
 def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_name, gallery_image_version,
                          location=None, target_regions=None, storage_account_type=None,
                          end_of_life_date=None, exclude_from_latest=None, replica_count=None, tags=None,
-                         os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None):
+                         os_snapshot=None, data_snapshots=None, managed_image=None, data_snapshot_luns=None,
+                         target_region_encryption=None):
+    # print(target_regions)
     from msrestazure.tools import resource_id, is_valid_resource_id
     ImageVersionPublishingProfile, GalleryArtifactSource, ManagedArtifact, ImageVersion, TargetRegion = cmd.get_models(
         'GalleryImageVersionPublishingProfile', 'GalleryArtifactSource', 'ManagedArtifact', 'GalleryImageVersion',
@@ -3157,18 +3203,19 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
         log_client = _get_log_analytics_client(cmd)
         workspace_result = None
         try:
-            workspace_result = log_client.get(resource_group_name, workspace_name)
+            workspace_result = log_client.workspaces.get(resource_group_name, workspace_name)
         except CloudError:
-            from azure.mgmt.loganalytics.models import Workspace, Sku, SkuNameEnum
-            sku = Sku(name=SkuNameEnum.per_gb2018.value)
+            from azure.mgmt.loganalytics.models import Workspace, WorkspaceSku, WorkspaceSkuNameEnum
+            sku = WorkspaceSku(name=WorkspaceSkuNameEnum.per_gb2018.value)
             retention_time = 30  # default value
             location = _get_resource_group_location(cmd.cli_ctx, resource_group_name)
             workspace_instance = Workspace(location=location,
                                            sku=sku,
                                            retention_in_days=retention_time)
-            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.create_or_update(resource_group_name,
-                                                                                             workspace_name,
-                                                                                             workspace_instance))
+            workspace_result = LongRunningOperation(cmd.cli_ctx)(log_client.workspaces.create_or_update(
+                resource_group_name,
+                workspace_name,
+                workspace_instance))
         workspace_id = workspace_result.id
     else:
         workspace_id = workspace
@@ -3230,12 +3277,12 @@ def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name
     is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
     log_client = _get_log_analytics_client(cmd)
-    customer_id = log_client.get(resource_group_name, workspace_name).customer_id
+    customer_id = log_client.workspaces.get(resource_group_name, workspace_name).customer_id
     settings = {
         'workspaceId': customer_id,
         'stopOnMultipleConnections': 'true'
     }
-    primary_shared_key = log_client.get_shared_keys(resource_group_name, workspace_name).primary_shared_key
+    primary_shared_key = log_client.shared_keys.get_shared_keys(resource_group_name, workspace_name).primary_shared_key
     protected_settings = {
         'workspaceKey': primary_shared_key,
     }

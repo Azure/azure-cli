@@ -18,6 +18,10 @@ def load_command_table(self, _):
     update_custom_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.iotcentral.custom#{}')
 
+    with self.command_group('iotcentral', iotcentral_sdk, client_factory=iotcentral_service_factory,
+                            deprecate_info=self.deprecate(redirect='iot central', hide=True)):
+        pass
+
     with self.command_group('iotcentral app', iotcentral_sdk, client_factory=iotcentral_service_factory) as g:
         g.custom_command('create', 'iotcentral_app_create')
         g.custom_command('list', 'iotcentral_app_list')

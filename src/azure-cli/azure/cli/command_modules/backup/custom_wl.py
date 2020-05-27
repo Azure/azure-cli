@@ -20,7 +20,7 @@ from azure.mgmt.recoveryservicesbackup.models import AzureVMAppContainerProtecti
     AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
     AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem
 
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import backup_workload_items_cf, \
     protectable_containers_cf, backup_protection_containers_cf, backup_protected_items_cf
 
@@ -115,8 +115,7 @@ def register_wl_container(cmd, client, vault_name, resource_group_name, workload
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger register and wait for completion
-    result = sdk_no_wait(True, client.register,
-                         vault_name, resource_group_name, fabric_name, container_name, param)
+    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param, raw=True)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -151,8 +150,7 @@ def re_register_wl_container(cmd, client, vault_name, resource_group_name, workl
                                                         source_resource_id=source_resource_id)
     param = ProtectionContainerResource(properties=properties)
     # Trigger register and wait for completion
-    result = sdk_no_wait(True, client.register,
-                         vault_name, resource_group_name, fabric_name, container_name, param)
+    result = client.register(vault_name, resource_group_name, fabric_name, container_name, param, raw=True)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -165,8 +163,7 @@ def unregister_wl_container(cmd, client, vault_name, resource_group_name, contai
             """)
 
     # Trigger unregister and wait for completion
-    result = sdk_no_wait(True, client.unregister,
-                         vault_name, resource_group_name, fabric_name, container_name)
+    result = client.unregister(vault_name, resource_group_name, fabric_name, container_name, raw=True)
     return cust_help.track_register_operation(cmd.cli_ctx, result, vault_name, resource_group_name, container_name)
 
 
@@ -186,8 +183,8 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     param = ProtectedItemResource(properties=item_properties)
 
     # Update policy
-    result = sdk_no_wait(True, client.create_or_update,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, param)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -215,14 +212,24 @@ def create_policy(client, resource_group_name, vault_name, policy_name, policy, 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
-def set_policy(client, resource_group_name, vault_name, policy, policy_name):
+def set_policy(client, resource_group_name, vault_name, policy, policy_name, fix_for_inconsistent_items):
     if policy_name is None:
         raise CLIError(
             """
             Policy name is required for set policy.
             """)
 
-    policy_object = cust_help.get_policy_from_json(client, policy)
+    if policy is not None:
+        policy_object = cust_help.get_policy_from_json(client, policy)
+    else:
+        if fix_for_inconsistent_items:
+            policy_object = common.show_policy(client, resource_group_name, vault_name, policy_name)
+            policy_object.properties.make_policy_consistent = True
+        else:
+            raise CLIError(
+                """
+                Please provide policy object.
+                """)
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
@@ -327,8 +334,8 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     param = ProtectionContainerResource(properties=properties)
 
     # Trigger enable protection and wait for completion
-    result = sdk_no_wait(True, client.create_or_update,
-                         vault_name, resource_group_name, fabric_name, container_name, item_name, param)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_name, item_name, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -358,9 +365,8 @@ def backup_now(cmd, client, resource_group_name, vault_name, item, retain_until,
     param = BackupRequestResource(properties=properties)
 
     # Trigger backup and wait for completion
-    result = sdk_no_wait(True, client.trigger,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri,
-                         param)
+    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
+                            item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -377,8 +383,7 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
             """)
 
     if delete_backup_data:
-        result = sdk_no_wait(True, client.delete,
-                             vault_name, resource_group_name, fabric_name, container_uri, item_uri)
+        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri, raw=True)
         return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     properties = _get_protected_item_instance(backup_item_type)
@@ -387,8 +392,8 @@ def disable_protection(cmd, client, resource_group_name, vault_name, item, delet
     param = ProtectedItemResource(properties=properties)
 
     # Trigger disable protection and wait for completion
-    result = sdk_no_wait(True, client.create_or_update,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, param)
+    result = client.create_or_update(vault_name, resource_group_name, fabric_name,
+                                     container_uri, item_uri, param, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -496,9 +501,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
     # Trigger restore and wait for completion
-    result = sdk_no_wait(True, client.trigger,
-                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, recovery_point_id,
-                         trigger_restore_request)
+    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri,
+                            item_uri, recovery_point_id, trigger_restore_request, raw=True)
     return cust_help.track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
