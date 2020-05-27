@@ -2897,7 +2897,8 @@ def set_lb_frontend_ip_configuration(
 
 def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
                                    address_name=None, vnet=None, ip_address=None, nic_ip_config=None):
-    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    ncf = network_client_factory(cmd.cli_ctx)
+    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
     (BackendAddressPool,
      LoadBalancerBackendAddress,
      VirtualNetwork,
@@ -2905,6 +2906,13 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                                                        'LoadBalancerBackendAddress',
                                                        'VirtualNetwork',
                                                        'NetworkInterfaceIPConfiguration')
+    # Hope we can remove this logic
+    if lb.sku.name.lower() == 'basic':
+        new_pool = BackendAddressPool(name=backend_address_pool_name)
+        upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
+        poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+        return get_property(poller.result().backend_address_pools, backend_address_pool_name)
+
     new_address = LoadBalancerBackendAddress(name=address_name,
                                              virtual_network=VirtualNetwork(id=vnet) if vnet else None,
                                              ip_address=ip_address if ip_address else None,
@@ -2913,7 +2921,30 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                                              ) if nic_ip_config else None)
     new_pool = BackendAddressPool(name=backend_address_pool_name,
                                   load_balancer_backend_addresses=[new_address] if address_name else None)
-    return client.create_or_update(resource_group_name, load_balancer_name, backend_address_pool_name, new_pool)
+    return ncf.load_balancer_backend_address_pools.create_or_update(resource_group_name,
+                                                                    load_balancer_name,
+                                                                    backend_address_pool_name,
+                                                                    new_pool)
+
+
+def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
+    from azure.cli.core.commands import LongRunningOperation
+    ncf = network_client_factory(cmd.cli_ctx)
+    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    # Hope we can remove this logic
+    if lb.sku.name.lower() == 'basic':
+        new_be_pools = [pool for pool in lb.backend_address_pools
+                        if pool.name.lower() != backend_address_pool_name.lower()]
+        lb.backend_address_pools = new_be_pools
+        poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+        result = LongRunningOperation(cmd.cli_ctx)(poller).backend_address_pools
+        if next((x for x in result if x.name.lower() == backend_address_pool_name.lower()), None):
+            raise CLIError("Failed to delete '{}' on '{}'".format(backend_address_pool_name, load_balancer_name))
+        return None
+
+    return ncf.load_balancer_backend_address_pools.delete(resource_group_name,
+                                                          load_balancer_name,
+                                                          backend_address_pool_name)
 
 
 def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
@@ -2939,13 +2970,13 @@ def remove_lb_backend_address_pool_address(cmd, resource_group_name, load_balanc
                                            backend_address_pool_name, address_name):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
     address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
-    lb_addresses = [addr for addr in address_pool.load_balancer_backend_addresses if addr.name!=address_name]
+    lb_addresses = [addr for addr in address_pool.load_balancer_backend_addresses if addr.name != address_name]
     address_pool.load_balancer_backend_addresses = lb_addresses
     return client.create_or_update(resource_group_name, load_balancer_name, backend_address_pool_name, address_pool)
 
 
 def list_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name,
-                                         backend_address_pool_name, address_name):
+                                         backend_address_pool_name):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
     address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
     return address_pool.load_balancer_backend_addresses

@@ -1924,7 +1924,7 @@ def process_vnet_name_or_id(cmd, namespace):
             name=namespace.vnet)
 
 
-def validate_nic_ip_config(cmd, namespace):
+def validate_nic_ip_config(namespace):
     from msrestazure.tools import is_valid_resource_id
     if namespace.nic_ip_config and namespace.vnet:
         raise CLIError("usage error: --nic-ip-config | --vnet --ip-address")
