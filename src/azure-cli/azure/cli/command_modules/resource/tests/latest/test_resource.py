@@ -306,6 +306,7 @@ class TagScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
     def test_tag_update_by_patch(self, resource_group, resource_group_location):
 
+        # Test Microsoft.RecoveryServices/vaults
         self.kwargs.update({
             'loc': resource_group_location,
             'vault': self.create_random_name('vault-', 30),
@@ -313,17 +314,39 @@ class TagScenarioTest(ScenarioTest):
             'resource_group_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
         })
 
-        resource = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
-                            checks=self.check('name', '{vault}')).get_output_in_json()
-
-        self.kwargs['vault_id'] = resource['id']
-
+        vault = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults '
+                         '--is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",'
+                         '\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+                         checks=self.check('name', '{vault}')).get_output_in_json()
+        self.kwargs['vault_id'] = vault['id']
         self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
 
-        self.cmd('resource tag --ids {resource_group_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
-
         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+
+        # Test Microsoft.Resources/resourceGroups
+        self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
+                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'}))
+
+        # Test Microsoft.ContainerRegistry/registries/webhooks
+        self.kwargs.update({
+            'registry_name': self.create_random_name('clireg', 20),
+            'webhook_name': 'cliregwebhook',
+            'rg_loc': resource_group_location,
+            'uri': 'http://www.microsoft.com',
+            'actions': 'push',
+            'sku': 'Standard'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}')])
+        webhook = self.cmd('acr webhook create -n {webhook_name} -r {registry_name} --uri {uri} --actions {actions}',
+                           checks=[self.check('name', '{webhook_name}')]).get_output_in_json()
+        self.kwargs['webhook_id'] = webhook['id']
+        self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
+
+        self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
