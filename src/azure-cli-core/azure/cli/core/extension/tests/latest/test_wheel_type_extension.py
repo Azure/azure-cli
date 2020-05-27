@@ -11,7 +11,10 @@ import shutil
 import unittest
 
 from azure.cli.core.extension import WheelExtension
-from azure.cli.core.extension.tests.latest import ExtensionTypeTestMixin, get_test_data_file
+try:
+    from azure.cli.core.extension.tests.latest import ExtensionTypeTestMixin, get_test_data_file
+except ImportError:
+    from . import ExtensionTypeTestMixin, get_test_data_file
 
 
 class TestWheelTypeExtensionMetadata(ExtensionTypeTestMixin):
