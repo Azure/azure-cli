@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -1029,3 +1029,19 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
             self.check('name', '{sa}'),
             self.check('failoverInProgress', True)
         ])
+
+
+class StorageAccountLocalContextScenarioTest(LocalContextScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    def test_storage_account_local_context(self):
+        self.kwargs.update({
+            'account_name': self.create_random_name(prefix='cli', length=24)
+        })
+        self.cmd('storage account create -g {rg} -n {account_name} --https-only',
+                 checks=[self.check('name', self.kwargs['account_name'])])
+        self.cmd('storage account show',
+                 checks=[self.check('name', self.kwargs['account_name'])])
+        with self.assertRaises(Exception):
+            self.cmd('storage account delete')
+        self.cmd('storage account delete -n {account_name} -y')
