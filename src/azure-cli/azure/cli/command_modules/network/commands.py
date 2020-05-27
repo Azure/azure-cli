@@ -790,6 +790,8 @@ def load_command_table(self, _):
 
     with self.command_group('network lb address-pool', network_lb_sdk, max_api='2020-04-01') as g:
         g.custom_command('create', 'create_lb_backend_address_pool')
+
+    with self.command_group('network lb address-pool', network_util, max_api='2020-04-01') as g:
         g.command('list', list_network_resource_property('load_balancers', 'backend_address_pools'))
         g.show_command('show', get_network_resource_property_entry('load_balancers', 'backend_address_pools'))
         g.command('delete', delete_network_resource_property_entry('load_balancers', 'backend_address_pools'))
