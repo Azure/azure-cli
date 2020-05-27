@@ -2747,6 +2747,8 @@ short-summary: Create an address pool.
 examples:
   - name: Create an address pool.
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+  - name: Create an address pool with one backend address
+    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --address-name MyAddress --vnet MyVnet --ip-address 10.0.0.1
 """
 
 helps['network lb address-pool delete'] = """
@@ -2771,6 +2773,35 @@ short-summary: Get the details of an address pool.
 examples:
   - name: Get the details of an address pool.
     text: az network lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
+"""
+
+helps['network lb address-pool address'] = """
+type: group
+short-summary: Manage backend addresses of the load balance backend address pool.
+"""
+
+helps['network lb address-pool address add'] = """
+type: command
+short-summary: Add one backend address into the load balance backend address pool.
+examples:
+  - name: Add one backend address into the load balance backend address pool.
+    text: az network lb address-pool address add -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress --vnet MyVnet --ip-address 10.0.0.1
+"""
+
+helps['network lb address-pool address remove'] = """
+type: command
+short-summary: Remove one backend address from the load balance backend address pool.
+examples:
+  - name: Remove one backend address from the load balance backend address pool.
+    text: az network lb address-pool address remove -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool -n MyAddress
+"""
+
+helps['network lb address-pool address list'] = """
+type: command
+short-summary: List all backend addresses of the load balance backend address pool.
+examples:
+  - name: List all backend addresses of the load balance backend address pool.
+    text: az network lb address-pool address list -g MyResourceGroup --lb-name MyLb --pool-name MyAddressPool
 """
 
 helps['network lb create'] = """
