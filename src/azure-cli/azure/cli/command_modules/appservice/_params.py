@@ -56,6 +56,27 @@ def load_arguments(self, _):
     staticsite_name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME',
                                                help="Name of the static site",
                                                local_context_attribute=LocalContextAttribute(name='staticsite_name', actions=[LocalContextAction.GET]))
+    staticsite_repo_token_arg_type = CLIArgumentType(options_list=['--repository-token', '-token'],
+                                                     help="A user's github repository token. This is used to setup the Github Actions workflow file and API secrets.",
+                                                     local_context_attribute=LocalContextAttribute(name='staticsite_repo_token', actions=[LocalContextAction.GET]))
+    staticsite_repo_url_arg_type = CLIArgumentType(options_list=['--repository-url', '-url'],
+                                                   help="URL for the repository of the static site.",
+                                                   local_context_attribute=LocalContextAttribute(name='staticsite_repo_url', actions=[LocalContextAction.GET]))
+    staticsite_repo_branch_arg_type = CLIArgumentType(options_list=['--branch', '-b'],
+                                                      help="The target branch in the repository.",
+                                                      local_context_attribute=LocalContextAttribute(name='staticsite_repo_branch', actions=[LocalContextAction.GET]))
+    staticsite_custom_domains_arg_type = CLIArgumentType(options_list=['--custom-domains', '-c'],
+                                                      help="The Space-separated list of custom domains associated with this static site. Use \"\" to clear existing tags",
+                                                      local_context_attribute=LocalContextAttribute(name='staticsite_custom_domains', actions=[LocalContextAction.GET]))
+    staticsite_app_location_arg_type = CLIArgumentType(options_list=['--app-location', '-apploc'],
+                                                      help="Location of your application code. For example, '/' represents the root of your app, while '/app' represents a directory called 'app'",
+                                                      local_context_attribute=LocalContextAttribute(name='staticsite_app_location', actions=[LocalContextAction.GET]))
+    staticsite_api_location_arg_type = CLIArgumentType(options_list=['--api-location', '-apiloc'],
+                                                      help="Location of your Azure Functions code. For example, '/api' represents a folder called 'api'.",
+                                                      local_context_attribute=LocalContextAttribute(name='staticsite_api_location', actions=[LocalContextAction.GET]))
+    staticsite_app_artifact_location_arg_type = CLIArgumentType(options_list=['--app-artifact-location', '-aal'],
+                                                      help="The path of your build output relative to your apps location. For example, setting a value of 'build' when your app location is set to '/app' will cause the content at '/app/build' to be served.",
+                                                      local_context_attribute=LocalContextAttribute(name='staticsite_app_artifact_location', actions=[LocalContextAction.GET]))
 
     # combine all runtime versions for all functions versions
     functionapp_runtime_to_version = {}
@@ -681,3 +702,14 @@ def load_arguments(self, _):
         c.argument('name', arg_type=staticsite_name_arg_type)
     with self.argument_context('staticsite delete') as c:
         c.argument('name', arg_type=staticsite_name_arg_type)
+    with self.argument_context('staticsite create') as c:
+        c.argument('name', arg_type=staticsite_name_arg_type)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('tags', arg_type=tags_type)
+        c.argument('repository_url', arg_type=staticsite_repo_token_arg_type)
+        c.argument('repository_token', arg_type=staticsite_repo_url_arg_type)
+        c.argument('branch', arg_type=staticsite_repo_branch_arg_type)
+        c.argument('custom_domains', arg_type=staticsite_custom_domains_arg_type)
+        c.argument('app_location', arg_type=staticsite_app_location_arg_type)
+        c.argument('api_location', arg_type=staticsite_api_location_arg_type)
+        c.argument('app_artifact_location', arg_type=staticsite_app_artifact_location_arg_type)
