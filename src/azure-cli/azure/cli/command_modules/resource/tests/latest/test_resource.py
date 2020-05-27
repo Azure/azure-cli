@@ -555,8 +555,10 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'tf_invalid': os.path.join(curr_dir, 'simple_deploy_invalid.json').replace('\\', '\\\\'),
             'extra_param_tf': os.path.join(curr_dir, 'simple_extra_param_deploy.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
+            'params_invalid': os.path.join(curr_dir, 'simple_deploy_parameters_invalid.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\')
@@ -597,6 +599,24 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         with self.assertRaises(CLIError) as err:
             self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt false')
             self.assertTrue("Missing input parameters" in str(err.exception))
+
+        json_invalid_info = "Failed to parse '{}', please check whether it is a valid JSON format"
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group validate -g {rg} -f {tf_invalid} -p @"{params}"')
+            self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group validate -g {rg} -f {tf} -p @"{params_invalid}"')
+            self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group create -g {rg} -n {dn} -f {tf_invalid} -p @"{params}"')
+            self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group create -g {rg} -n {dn} -f {tf} -p @"{params_invalid}"')
+            self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         self.cmd('deployment group list --resource-group {rg}', checks=[
             self.check('[0].name', '{dn}'),
@@ -755,13 +775,15 @@ class DeploymentTest(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
+            'tf_invalid': os.path.join(curr_dir, 'simple_deploy_invalid.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
             'error_params': os.path.join(curr_dir, 'test-error-params.json').replace('\\', '\\\\'),
+            'params_invalid': os.path.join(curr_dir, 'simple_deploy_parameters_invalid.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the test_params.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/test-params.json',
             'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
             'dn': 'azure-cli-deployment',
-            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60)
+            'dn2': self.create_random_name('azure-cli-resource-group-deployment2', 60)
         })
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
@@ -799,6 +821,24 @@ class DeploymentTest(ScenarioTest):
             self.check('length([])', 2),
             self.check('[0].resourceGroup', '{rg}')
         ])
+
+        json_invalid_info = "Failed to parse '{}', please check whether it is a valid JSON format"
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('group deployment validate -g {rg} -f {tf_invalid} -p @"{params}"')
+            self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('group deployment validate -g {rg} -f {tf} -p @"{params_invalid}"')
+            self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('group deployment create -g {rg} -n {dn} -f {tf_invalid} -p @"{params}"')
+            self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('group deployment create -g {rg} -n {dn} -f {tf} -p @"{params_invalid}"')
+            self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         self.cmd('group deployment create -g {rg} -n {dn2} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}" --no-wait')
 
