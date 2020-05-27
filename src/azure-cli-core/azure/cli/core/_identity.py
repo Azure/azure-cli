@@ -418,7 +418,8 @@ class ADALCredentialCache:
                 "refreshToken": refresh_token[0]['secret'],
                 "_clientId": _CLIENT_ID,
                 "_authority": self._cli_ctx.cloud.endpoints.active_directory.rstrip('/')
-                              + "/" + credential._auth_record.tenant_id
+                              + "/" + credential._auth_record.tenant_id,
+                "isMRRT": True
             }
             self.adal_token_cache.add([entry])
         except Exception as e:
