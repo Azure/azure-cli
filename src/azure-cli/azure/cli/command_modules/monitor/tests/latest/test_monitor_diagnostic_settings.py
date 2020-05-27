@@ -52,7 +52,7 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
         self.cmd('monitor diagnostic-settings list --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} -o json',
                  checks=self.check('length(value)', 0))
 
-        self.cmd('monitor diagnostic-settings create -n test02 --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} --workspace {ws} --export-to-specific-resource --log \'{log_config}\' -o json',
+        self.cmd('monitor diagnostic-settings create -n test02 --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} --workspace {ws} --export-to-resource-specific --log \'{log_config}\' -o json',
                  checks=[
                      self.check('name', 'test02'),
                      self.check('logAnalyticsDestinationType', 'Dedicated')
