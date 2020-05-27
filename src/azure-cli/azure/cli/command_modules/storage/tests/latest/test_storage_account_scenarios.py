@@ -324,6 +324,15 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('table.retentionPolicy.days', None)
         ])
 
+        blob_storage = self.create_random_name(prefix='blob', length=24)
+        self.cmd('storage account create -g {} -n {} --kind BlobStorage --access-tier hot --https-only'.format(
+            resource_group, blob_storage))
+
+        blob_connection_string = self.cmd(
+            'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, blob_storage)).output
+        with self.assertRaisesRegexp(CLIError, "Your storage account doesn't support logging"):
+            self.cmd('storage logging show --services q --connection-string {}'.format(blob_connection_string))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_metrics_operations(self, resource_group, storage_account_info):

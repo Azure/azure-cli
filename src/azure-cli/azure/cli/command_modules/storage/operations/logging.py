@@ -16,18 +16,13 @@ def set_logging(client, log, retention, timeout=None, version=None):
 
 def get_logging(client, timeout=None):
     from azure.common import AzureException
+    from knack.util import CLIError
     results = {}
     for s in client:
         try:
             results[s.name] = s.get_logging(timeout)
         except (KeyError, AzureException):
-            import sys
-            from azure.cli.core.azlogging import CommandLoggerContext
-            from knack.log import get_logger
+            raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
+                           "--services in your commands.".format(s.name))
 
-            logger = get_logger(__name__)
-            with CommandLoggerContext(logger):
-                logger.error("Your storage account doesn't support logging for %s service. Please change value for "
-                             "--services in your commands.", s.name)
-                sys.exit(1)
     return results
