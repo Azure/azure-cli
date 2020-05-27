@@ -3550,3 +3550,19 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
             verified_hostname_found = True
 
     return verified_hostname_found
+
+
+def list_private_link(cmd, resource_group_name, name, private_endpoint_name=None):
+    return 'List'
+
+
+def delete_private_link(cmd, resource_group_name, name, private_endpoint_name):
+    return 'Delete'
+
+
+def approve_private_link(cmd, resource_group_name, name, private_endpoint_name):
+    return 'Approve'
+
+
+def reject_private_link(cmd, resource_group_name, name, private_endpoint_name):
+    return 'Reject'

@@ -357,3 +357,9 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_appserviceenvironment_arm', supports_no_wait=True)
         g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
         g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)
+
+    with self.command_group('webapp private-link', is_preview=True) as g:
+        g.custom_command('list', 'list_private_link')
+        g.custom_command('delete', 'delete_private_link')
+        g.custom_command('approve', 'approve_private_link')
+        g.custom_command('reject', 'reject_private_link')
