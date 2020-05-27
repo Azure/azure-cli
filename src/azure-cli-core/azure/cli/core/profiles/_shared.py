@@ -54,7 +54,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_APPSERVICE = ('azure.mgmt.web', 'WebSiteManagementClient')
     MGMT_IOTHUB = ('azure.mgmt.iothub', 'IotHubClient')
     MGMT_ARO = ('azure.mgmt.redhatopenshift', 'AzureRedHatOpenShiftClient')
-    MGMT_BATCH = ('azure.mgmt.batch', 'BatchManagementClient')
     # the "None" below will stay till a command module fills in the type so "get_mgmt_service_client"
     # can be provided with "ResourceType.XXX" to initialize the client object. This usually happens
     # when related commands start to support Multi-API
@@ -64,6 +63,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_ADVISOR = ('azure.mgmt.advisor', None)
     MGMT_MEDIA = ('azure.mgmt.media', None)
     MGMT_BACKUP = ('azure.mgmt.recoveryservicesbackup', None)
+    MGMT_BATCH = ('azure.mgmt.batch', None)
     MGMT_BATCHAI = ('azure.mgmt.batchai', None)
     MGMT_BILLING = ('azure.mgmt.billing', None)
     MGMT_BOTSERVICE = ('azure.mgmt.botservice', None)
