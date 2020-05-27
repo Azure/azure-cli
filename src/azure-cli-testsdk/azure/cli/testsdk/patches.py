@@ -37,6 +37,25 @@ def patch_main_exception_handler(unit_test):
     mock_in_unit_test(unit_test, 'azure.cli.core.util.handle_exception', _handle_main_exception)
 
 
+def patch_get_subscription(unit_test):
+    def _get_subscription(*args, **kwargs):  # pylint: disable=unused-argument
+        return {
+            "id": MOCKED_SUBSCRIPTION_ID,
+            "user": {
+                "name": MOCKED_USER_NAME,
+                "type": "user"
+            },
+            "state": "Enabled",
+            "name": "Example",
+            "tenantId": MOCKED_TENANT_ID,
+            "isDefault": True
+        }
+
+    mock_in_unit_test(unit_test,
+                      'azure.cli.core._profile.Profile.get_subscription',
+                      _get_subscription)
+
+
 def patch_load_cached_subscriptions(unit_test):
     def _handle_load_cached_subscription(*args, **kwargs):  # pylint: disable=unused-argument
 

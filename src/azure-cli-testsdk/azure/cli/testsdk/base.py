@@ -11,7 +11,8 @@ import inspect
 import unittest
 import tempfile
 
-from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
+from azure.cli.testsdk.processors import SubscriptionRecordingProcessor
+from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest,
                                            OAuthRequestResponsesFilter, LargeRequestBodyProcessor,
                                            LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
                                            live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
@@ -20,7 +21,7 @@ from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
-                      patch_progress_controller, patch_get_current_system_username)
+                      patch_progress_controller, patch_get_current_system_username, patch_get_subscription)
 from .exceptions import CliExecutionError
 from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
 from .reverse_dependency import get_dummy_cli
@@ -86,7 +87,8 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.test_guid_count = 0
         self._processors_to_reset = [StorageAccountKeyReplacer(), GraphClientPasswordReplacer()]
         default_recording_processors = [
-            SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
+            # SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
+            SubscriptionRecordingProcessor(self),
             OAuthRequestResponsesFilter(),
             LargeRequestBodyProcessor(),
             LargeResponseBodyProcessor(),
@@ -107,6 +109,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             patch_main_exception_handler,
             patch_time_sleep_api,
             patch_long_run_operation_delay,
+            patch_get_subscription,
             patch_load_cached_subscriptions,
             patch_retrieve_token_for_user,
             patch_progress_controller,
