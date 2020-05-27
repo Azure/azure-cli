@@ -881,6 +881,18 @@ def load_arguments(self, _):
         c.argument('ip_address', help='Ip Address within the Virtual Network.')
         c.argument('nic_ip_config', help='Id of the network interface ip configuration.', validator=validate_nic_ip_config)
 
+    with self.argument_context('network lb address-pool address') as c:
+        c.argument('backend_address_pool_name',
+                   options_list=['--pool-name'],
+                   help='The name of the backend address pool. {}'.format(default_existing))
+        c.argument('address_name', options_list=['--name', '-n'])
+
+    with self.argument_context('network lb address-pool create') as c:
+        c.argument('address_name', is_preview=True)
+        c.argument('vnet', is_preview=True)
+        c.argument('ip_address', is_preview=True)
+        c.argument('nic_ip_config', is_preview=True)
+
     with self.argument_context('network lb frontend-ip') as c:
         c.argument('zone', zone_type, min_api='2017-06-01')
 

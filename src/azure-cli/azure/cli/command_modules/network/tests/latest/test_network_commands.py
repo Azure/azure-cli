@@ -2082,6 +2082,55 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 3))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_addresses')
+    def test_network_lb_address_pool_addresses(self, resource_group):
+
+        self.kwargs.update({
+            'lb': 'lb1',
+            'vnet': 'clitestvnet',
+            'nic': 'clitestnic',
+            'rg': resource_group
+        })
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1')
+        self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet}')
+        nic_ip_config_id = self.cmd('network nic ip-config list -g {rg} --nic-name {nic}',
+                                    checks=self.check('length(@)', 1)).get_output_in_json()[0]['id']
+        self.kwargs.update({
+            'nic_ip_config': nic_ip_config_id
+        })
+        self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
+
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --address-name addr1 --vnet {vnet} --ip-address 10.0.0.1', checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 2))
+        self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n bap1',
+                 checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n bap1',
+                 checks=self.is_empty())
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 1))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_lb_address_pool_addresses')
+    def test_network_lb_address_pool_addresses_compitable_tests(self, resource_group):
+
+        self.kwargs.update({
+            'lb': 'lb1',
+            'vnet': 'clitestvnet',
+            'nic': 'clitestnic',
+            'rg': resource_group
+        })
+        self.cmd('network lb create -g {rg} -n {lb}')
+
+        # self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --address-name addr1 --vnet {vnet} --ip-address 10.0.0.1', checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 1))
+        self.cmd('network lb address-pool show -g {rg} --lb-name {lb} -n lb1bepool',
+                 checks=self.check('name', 'lb1bepool'))
+        self.cmd('network lb address-pool delete -g {rg} --lb-name {lb} -n lb1bepool',
+                 checks=self.is_empty())
+        self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
+                 checks=self.check('length(@)', 0))
+
     @ResourceGroupPreparer(name_prefix='cli_test_lb_probes')
     def test_network_lb_probes(self, resource_group):
 
