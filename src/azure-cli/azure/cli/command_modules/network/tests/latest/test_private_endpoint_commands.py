@@ -675,12 +675,14 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint-connection delete --id {pec_id} -y')
 
 
-@unittest.skip("Conflit recording files between az extension and core module for event grid")
 class NetworkPrivateLinkEventGridScenarioTest(ScenarioTest):
-    def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
-                 replay_processors=None, recording_patches=None, replay_patches=None):
-        super(NetworkPrivateLinkEventGridScenarioTest, self).__init__(method_name)
+    def setUp(self):
+        super(NetworkPrivateLinkEventGridScenarioTest, self).setUp()
         self.cmd('extension add -n eventgrid')
+
+    def tearDown(self):
+        self.cmd('extension remove -n eventgrid')
+        super(NetworkPrivateLinkEventGridScenarioTest, self).tearDown()
 
     @ResourceGroupPreparer(name_prefix='cli_test_event_grid_plr')
     def test_private_link_resource_event_grid(self, resource_group):
