@@ -4532,7 +4532,7 @@ class MultiSubsTest(ScenarioTest):
         self.cmd('group show -g {rg} --subscription {subscription}')
         self.cmd('group show -g {rg2}')
 
-    @unittest.skip()
+    @unittest.skip('skip')
     @ResourceGroupPreparer(name_prefix='cli_test_preparer2_', parameter_name='resource_group2', key='rg2')
     @ResourceGroupPreparer(name_prefix='cli_test_preparer2_', subscription=subscription)
     @StorageAccountPreparer(name_prefix='clitestpreparer', subscription=subscription)
