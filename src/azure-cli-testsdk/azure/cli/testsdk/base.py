@@ -15,13 +15,15 @@ from azure.cli.testsdk.processors import SubscriptionRecordingProcessor
 from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest,
                                            OAuthRequestResponsesFilter, LargeRequestBodyProcessor,
                                            LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
-                                           live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
+                                           live_only, DeploymentNameReplacer, create_random_name)
 
 from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
                       patch_retrieve_token_for_user, patch_long_run_operation_delay,
-                      patch_progress_controller, patch_get_current_system_username, patch_get_subscription)
+                      patch_progress_controller, patch_get_current_system_username, patch_get_subscription,
+                      patch_time_sleep_api)
+
 from .exceptions import CliExecutionError
 from .utilities import find_recording_dir, StorageAccountKeyReplacer, GraphClientPasswordReplacer, GeneralNameReplacer
 from .reverse_dependency import get_dummy_cli
