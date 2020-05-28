@@ -14,7 +14,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
 from azure.cli.testsdk import (
-    ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
+    ScenarioTest, LiveScenarioTest, LocalContextScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, live_only)
 
 from knack.util import CLIError
 
@@ -190,9 +190,6 @@ class NetworkPrivateEndpoints(ScenarioTest):
 
         self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=self.check('id', '{sa_pec_id}'))
-
-        self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}',
-                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
 
         self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
             self.check('length(customDnsConfigs)', 1)
@@ -3585,7 +3582,7 @@ class NetworkBastionHostScenarioTest(ScenarioTest):
         self.cmd('network bastion delete -g {rg} -n {bastion}')
 
 
-class NetworkVnetLocalContextScenarioTest(ScenarioTest):
+class NetworkVnetLocalContextScenarioTest(LocalContextScenarioTest):
 
     @ResourceGroupPreparer()
     def test_network_vnet_local_context(self):
@@ -3593,10 +3590,6 @@ class NetworkVnetLocalContextScenarioTest(ScenarioTest):
             'vnet': self.create_random_name(prefix='vnet-', length=12),
             'subnet': self.create_random_name(prefix='subnet-', length=12)
         })
-        original_working_dir = os.getcwd()
-        working_dir = tempfile.mkdtemp()
-        os.chdir(working_dir)
-        self.cmd('local-context on')
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}',
                  checks=[self.check('newVNet.name', self.kwargs['vnet'])])
@@ -3613,9 +3606,6 @@ class NetworkVnetLocalContextScenarioTest(ScenarioTest):
 
         self.cmd('network vnet subnet delete -n {subnet}')
         self.cmd('network vnet delete -n {vnet}')
-
-        self.cmd('local-context off --yes')
-        os.chdir(original_working_dir)
 
 
 class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):

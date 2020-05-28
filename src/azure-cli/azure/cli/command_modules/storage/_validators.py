@@ -638,6 +638,13 @@ def validate_container_public_access(cmd, namespace):
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
 
 
+def validate_fs_public_access(cmd, namespace):
+    from .sdkutil import get_fs_access_type
+
+    if namespace.public_access:
+        namespace.public_access = get_fs_access_type(cmd.cli_ctx, namespace.public_access.lower())
+
+
 def validate_select(namespace):
     if namespace.select:
         namespace.select = ','.join(namespace.select)
@@ -1071,7 +1078,7 @@ def blob_tier_validator(cmd, namespace):
 
 def validate_azcopy_upload_destination_url(cmd, namespace):
     client = blob_data_service_factory(cmd.cli_ctx, {
-        'account_name': namespace.account_name})
+        'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
     destination_path = namespace.destination_path
     if not destination_path:
         destination_path = ''
@@ -1170,6 +1177,17 @@ def validator_delete_retention_days(namespace):
                 "incorrect usage: '--delete-retention-days' must be less than or equal to 365")
 
 
+def validate_delete_retention_days(namespace):
+    if namespace.enable_delete_retention is True and namespace.delete_retention_days is None:
+        raise ValueError(
+            "incorrect usage: you have to provide value for '--delete-retention-days' when '--enable-delete-retention' "
+            "is set to true")
+
+    if namespace.enable_delete_retention is False and namespace.delete_retention_days is not None:
+        raise ValueError(
+            "incorrect usage: '--delete-retention-days' is invalid when '--enable-delete-retention' is set to false")
+
+
 # pylint: disable=too-few-public-methods
 class BlobRangeAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -1213,6 +1231,9 @@ def pop_data_client_auth(ns):
 
 
 def validate_client_auth_parameter(cmd, ns):
+    from .sdkutil import get_container_access_type
+    if ns.public_access:
+        ns.public_access = get_container_access_type(cmd.cli_ctx, ns.public_access.lower())
     if ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None:
         # simply try to retrieve the remaining variables from environment variables
         if not ns.account_name:
@@ -1233,3 +1254,8 @@ def validate_encryption_scope_client_params(ns):
     if ns.encryption_scope:
         # will use track2 client and socket_timeout is unused
         del ns.socket_timeout
+
+
+def validate_access_control(namespace):
+    if namespace.acl and namespace.permissions:
+        raise CLIError('usage error: invalid when specifying both --acl and --permissions.')

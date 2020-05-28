@@ -6,7 +6,7 @@
 import os
 import json
 from pprint import pformat
-from six.moves import configparser
+import configparser
 
 from azure.cli.core.profiles import API_PROFILES
 from azure.cli.core._config import GLOBAL_CONFIG_DIR
@@ -14,7 +14,6 @@ from azure.cli.core.util import urlretrieve
 
 from knack.log import get_logger
 from knack.util import CLIError
-from knack.config import get_config_parser
 
 logger = get_logger(__name__)
 
@@ -381,7 +380,7 @@ def _get_cloud_name(cli_ctx, cloud_name):
 
 def get_clouds(cli_ctx):
     clouds = []
-    config = get_config_parser()
+    config = configparser.ConfigParser()
     # Start off with known clouds and apply config file on top of current config
     for c in KNOWN_CLOUDS:
         _config_add_cloud(config, c)
@@ -438,7 +437,7 @@ def get_active_cloud(cli_ctx=None):
 
 
 def get_cloud_subscription(cloud_name):
-    config = get_config_parser()
+    config = configparser.ConfigParser()
     config.read(CLOUD_CONFIG_FILE)
     try:
         return config.get(cloud_name, 'subscription')
@@ -449,7 +448,7 @@ def get_cloud_subscription(cloud_name):
 def set_cloud_subscription(cli_ctx, cloud_name, subscription):
     if not _get_cloud(cli_ctx, cloud_name):
         raise CloudNotRegisteredException(cloud_name)
-    config = get_config_parser()
+    config = configparser.ConfigParser()
     config.read(CLOUD_CONFIG_FILE)
     if subscription:
         try:
@@ -519,7 +518,7 @@ def _config_add_cloud(config, cloud, overwrite=False):
 
 
 def _save_cloud(cloud, overwrite=False):
-    config = get_config_parser()
+    config = configparser.ConfigParser()
     config.read(CLOUD_CONFIG_FILE)
     _config_add_cloud(config, cloud, overwrite=overwrite)
     if not os.path.isdir(GLOBAL_CONFIG_DIR):
@@ -550,7 +549,7 @@ def remove_cloud(cli_ctx, cloud_name):
     if is_known_cloud:
         raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
                                              "as it's not a custom cloud.".format(cloud_name))
-    config = get_config_parser()
+    config = configparser.ConfigParser()
     config.read(CLOUD_CONFIG_FILE)
     config.remove_section(cloud_name)
     with open(CLOUD_CONFIG_FILE, 'w') as configfile:

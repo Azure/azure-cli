@@ -30,10 +30,19 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
         sp_name = self.create_random_name('cli-test-sp', 15)
         self.kwargs['sp'] = 'http://{}'.format(sp_name)
         self.kwargs['display_name'] = sp_name
+        self.kwargs['display_name_new'] = self.create_random_name('cli-test-sp', 15)
+
         try:
-            self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment', checks=self.check('name', '{sp}'))
+            sp_info = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()
+            self.assertTrue(sp_info['name'] == self.kwargs['sp'])
+            # verify password can be used in cli
+            self.kwargs['gen_password'] = sp_info['password']
+            sp_info2 = self.cmd('ad app create --display-name {display_name_new} --password {gen_password}')\
+                .get_output_in_json()
+            self.kwargs['sp_new'] = sp_info2['appId']
         finally:
             self.cmd('ad app delete --id {sp}')
+            self.cmd('ad app delete --id {sp_new}')
 
         # verify we can extrat out disply name from name which starts with protocol
         sp_name2 = self.create_random_name('cli-test-sp', 15)

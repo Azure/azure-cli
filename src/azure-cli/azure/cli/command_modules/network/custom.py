@@ -2109,6 +2109,15 @@ def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location
     return instance
 
 
+def list_express_route_route_tables(cmd, resource_group_name, circuit_name, peering_name, device_path):
+    from azure.cli.core.commands import LongRunningOperation
+
+    client = network_client_factory(cmd.cli_ctx).express_route_circuits
+
+    return LongRunningOperation(cmd.cli_ctx)(
+        client.list_routes_table(resource_group_name, circuit_name, peering_name, device_path)).value
+
+
 def create_express_route_peering_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
                                             peer_circuit, address_prefix, authorization_key=None):
     client = network_client_factory(cmd.cli_ctx).express_route_circuit_connections
@@ -3532,7 +3541,7 @@ def _delete_network_watchers(cmd, client, watchers):
 def configure_network_watcher(cmd, client, locations, resource_group_name=None, enabled=None, tags=None):
     watcher_list = list(client.list_all())
     existing_watchers = [w for w in watcher_list if w.location in locations]
-    nonenabled_regions = list(set(locations) - set(l.location for l in existing_watchers))
+    nonenabled_regions = list(set(locations) - set(watcher.location for watcher in existing_watchers))
 
     if enabled is None:
         if resource_group_name is not None:

@@ -35,7 +35,8 @@ from ._validators import (
     validate_set,
     validate_set_secret,
     validate_retention_days,
-    validate_registry_name
+    validate_registry_name,
+    validate_expiration_time
 )
 from .scope_map import ScopeMapActions
 
@@ -321,6 +322,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('repository_actions_list', options_list=['--repository'], nargs='+', action='append',
                    help='repository permissions. Use the format "--repository REPO [ACTION1 ACTION2 ...]" per flag. ' + valid_actions)
         c.argument('no_passwords', arg_type=get_three_state_flag(), help='Do not generate passwords, instead use "az acr token credential generate"')
+        c.argument('expiration_in_days', help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
 
     with self.argument_context('acr token update') as c:
         c.argument('scope_map_name', options_list=['--scope-map'], help='The name of the scope map associated with the token. If not specified, running this command will disassociate the current scope map related to the token.', required=False)
@@ -328,7 +330,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr token credential generate') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if password1 should be generated.', action='store_true', required=False)
         c.argument('password2', options_list=['--password2'], help='Flag indicating if password2 should be generated.', action='store_true', required=False)
-        c.argument('days', options_list=['--days'], help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
+        c.argument('expiration_in_days', options_list=['--expiration-in-days', c.deprecate(target='--days', redirect='--expiration-in-days', hide=True)],
+                   help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
+
+    for scope in ['acr token create', 'acr token credential generate']:
+        with self.argument_context(scope) as c:
+            c.argument('expiration', validator=validate_expiration_time,
+                       help='UTC time for which the credentials will be valid. In the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2025-12-31T12:59:59Z')
 
     with self.argument_context('acr token credential delete') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)

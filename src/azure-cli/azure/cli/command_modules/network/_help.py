@@ -3785,6 +3785,88 @@ examples:
     text: az network private-link-service update -g MyResourceGroup -n MyPLSName --visibility SubId1 SubId2 --auto-approval SubId1 SubId2
 """
 
+helps['network private-endpoint-connection'] = """
+type: group
+short-summary: Manage private endpoint connections.
+"""
+
+helps['network private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection.
+examples:
+  - name: Approve a private endpoint connection for a storage account.
+    text: az network private-endpoint-connection approve -g MyResourceGroup -n MyPrivateEndpoint --resource-name MySA --type Microsoft.Storage/storageAccounts --description "Approved"
+  - name: Approve a private endpoint connection for a keyvault.
+    text: az network private-endpoint-connection approve -g MyResourceGroup -n MyPrivateEndpoint --resource-name MyKV --type Microsoft.Keyvault/vaults --description "Approved"
+  - name: Approve a private endpoint connection for an ACR.
+    text: az network private-endpoint-connection approve --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.6e6bf72bc59d41cc89c698d4cc5ee79d --description "Approved"
+"""
+
+helps['network private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection.
+examples:
+  - name: Reject a private endpoint connection for a storage account.
+    text: az network private-endpoint-connection reject -g MyResourceGroup -n MyPrivateEndpoint --resource-name MySA --type Microsoft.Storage/storageAccounts --description "Rejected"
+  - name: Reject a private endpoint connection for a keyvault.
+    text: az network private-endpoint-connection reject -g MyResourceGroup -n MyPrivateEndpoint --resource-name MyKV --type Microsoft.Keyvault/vaults --description "Rejected"
+  - name: Reject a private endpoint connection for an ACR.
+    text: az network private-endpoint-connection reject --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.6e6bf72bc59d41cc89c698d4cc5ee79d --description "Rejected"
+"""
+
+helps['network private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection.
+examples:
+  - name: Delete a private endpoint connection for a storage account.
+    text: az network private-endpoint-connection delete -g MyResourceGroup -n MyPrivateEndpoint --resource-name MySA --type Microsoft.Storage/storageAccounts
+  - name: Delete a private endpoint connection for a keyvault.
+    text: az network private-endpoint-connection delete -g MyResourceGroup -n MyPrivateEndpoint --resource-name MyKV --type Microsoft.Keyvault/vaults
+  - name: Delete a private endpoint connection for an ACR.
+    text: az network private-endpoint-connection delete --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.6e6bf72bc59d41cc89c698d4cc5ee79d
+"""
+
+helps['network private-endpoint-connection show'] = """
+type: command
+short-summary: Show a private endpoint connection.
+examples:
+  - name: Show a private endpoint connection for a storage account.
+    text: az network private-endpoint-connection show -g MyResourceGroup -n MyPrivateEndpoint --resource-name MySA --type Microsoft.Storage/storageAccounts
+  - name: Show a private endpoint connection for a keyvault.
+    text: az network private-endpoint-connection show -g MyResourceGroup -n MyPrivateEndpoint --resource-name MyKV --type Microsoft.Keyvault/vaults
+  - name: Show a private endpoint connection for an ACR.
+    text: az network private-endpoint-connection show --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002/privateEndpointConnections/testreg000002.6e6bf72bc59d41cc89c698d4cc5ee79d
+"""
+
+helps['network private-endpoint-connection list'] = """
+type: command
+short-summary: List all private endpoint connections.
+examples:
+  - name: List all private endpoint connections for a storage account.
+    text: az network private-endpoint-connection list -g MyResourceGroup -n MySA --type Microsoft.Storage/storageAccounts
+  - name: List all private endpoint connections for a keyvault.
+    text: az network private-endpoint-connection list -g MyResourceGroup -n MyKV --type Microsoft.Keyvault/vaults
+  - name: List all private endpoint connections for an ACR.
+    text: az network private-endpoint-connection list --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002
+"""
+
+helps['network private-link-resource'] = """
+type: group
+short-summary: Manage private link resources.
+"""
+
+helps['network private-link-resource list'] = """
+type: command
+short-summary: List all private link resources.
+examples:
+  - name: List all private link resources for a storage account.
+    text: az network private-link-resource list -g MyResourceGroup -n MySA --type Microsoft.Storage/storageAccounts
+  - name: List all private link resources for a keyvault.
+    text: az network private-link-resource list -g MyResourceGroup -n MyKV --type Microsoft.Keyvault/vaults
+  - name: List all private link resources for an ACR.
+    text: az network private-link-resource list --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerRegistry/registries/testreg000002
+"""
+
 helps['network profile'] = """
 type: group
 short-summary: Manage network profiles.
@@ -4674,7 +4756,7 @@ examples:
     text: |
         az network vnet-gateway ipsec-policy add -g MyResourceGroup --gateway-name MyGateway \\
             --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
-            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
+            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 27000 --sa-max-size 102400000
 """
 
 helps['network vnet-gateway ipsec-policy clear'] = """
@@ -4951,7 +5033,7 @@ examples:
     text: |
         az network vpn-connection ipsec-policy add -g MyResourceGroup --connection-name MyConnection \\
             --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
-            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
+            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 27000 --sa-max-size 102400000
 """
 
 helps['network vpn-connection ipsec-policy clear'] = """

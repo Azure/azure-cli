@@ -114,13 +114,14 @@ def load_arguments(self, _):
     # region MetricAlerts
     with self.argument_context('monitor metrics alert') as c:
         c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-        c.argument('severity', type=int, help='Severity of the alert from 0 (low) to 4 (high).')
+        c.argument('severity', type=int, help='Severity of the alert from 0 (critical) to 4 (verbose).')
         c.argument('window_size', type=get_period_type(), help='Time over which to aggregate metrics in "##h##m##s" format.')
         c.argument('evaluation_frequency', type=get_period_type(), help='Frequency with which to evaluate the rule in "##h##m##s" format.')
         c.argument('auto_mitigate', arg_type=get_three_state_flag(), help='Automatically resolve the alert.')
         c.argument('condition', options_list=['--condition'], action=MetricAlertConditionAction, nargs='+')
         c.argument('description', help='Free-text description of the rule.')
-        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to.')
+        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to. '
+                                             'The resources specified in this parameter must be of the same type and exist in the same location.')
         c.argument('disabled', arg_type=get_three_state_flag())
         c.argument('enabled', arg_type=get_three_state_flag(), help='Whether the metric alert rule is enabled.')
 
@@ -232,6 +233,11 @@ def load_arguments(self, _):
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
         c.argument('logs', type=get_json_object)
         c.argument('metrics', type=get_json_object)
+        c.argument('export_to_resource_specific', arg_type=get_three_state_flag(),
+                   help='Indicate that the export to LA must be done to a resource specific table, '
+                        'a.k.a. dedicated or fixed schema table, '
+                        'as opposed to the default dynamic schema table called AzureDiagnostics. '
+                        'This argument is effective only when the argument --workspace is also given.')
 
     with self.argument_context('monitor diagnostic-settings categories list') as c:
         c.resource_parameter('resource_uri', required=True)
