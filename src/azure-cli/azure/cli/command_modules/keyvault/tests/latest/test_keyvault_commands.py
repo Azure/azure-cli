@@ -840,17 +840,45 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
 
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
+        policy3_path = os.path.join(TEST_DIR, 'policy3.json')
+        cert_secret_path = os.path.join(TEST_DIR, 'cert_secret')
         self.kwargs.update({
             'policy_path': policy_path,
-            'policy2_path': policy2_path
+            'policy2_path': policy2_path,
+            'policy3_path': policy3_path,
+            'cert_secret_path': cert_secret_path
         })
 
-        # create a certificate
+        # create certificates
         self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy_path}"',
                  checks=[
                      self.check('status', 'completed'),
                      self.check('name', 'cert1')
                  ])
+        self.cmd('keyvault certificate create --vault-name {kv} -n cert2 -p @"{policy_path}"',
+                 checks=[
+                     self.check('status', 'completed'),
+                     self.check('name', 'cert2')
+                 ])
+
+        # import with same policy
+        policy = self.cmd('keyvault certificate show --vault-name {kv} -n cert2 --query policy').get_output_in_json()
+        if not os.path.exists(policy3_path) or self.is_live:
+            with open(policy3_path, "w") as f:
+                f.write(json.dumps(policy))
+
+        if not os.path.exists(cert_secret_path) or self.is_live:
+            if os.path.exists(cert_secret_path):
+                os.remove(cert_secret_path)
+            self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
+
+        self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy3_path}"',
+                 checks=[
+                     self.check('name', 'cert2'),
+                     self.check('policy.secretProperties.contentType',
+                                policy['secretProperties']['contentType'])
+                 ])
+        self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
 
         # list certificates
         self.cmd('keyvault certificate list --vault-name {kv}',
@@ -1055,7 +1083,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
 
         self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms}')
 
-        # create secrets keys and certifictes to delete recover and purge
+        # create secrets keys and certificates to delete recover and purge
         self.cmd('keyvault secret set --vault-name {kv} -n secret1 --value ABC123',
                  checks=self.check('value', 'ABC123'))
         self.cmd('keyvault secret set --vault-name {kv} -n secret2 --value ABC123',
