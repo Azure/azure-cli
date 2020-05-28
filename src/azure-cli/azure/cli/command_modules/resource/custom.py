@@ -402,10 +402,12 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                               template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
                                               no_wait=False, handle_extended_json_format=None, no_prompt=False,
-                                              confirm_with_what_if=None, what_if_result_format=None):
+                                              confirm_with_what_if=None, what_if_result_format=None,
+                                              what_if_exclude_change_types=None):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_subscription_scope(cmd, template_file, template_uri, parameters,
-                                                          deployment_name, deployment_location, what_if_result_format)
+                                                          deployment_name, deployment_location, what_if_result_format,
+                                                          exclude_change_types=what_if_exclude_change_types)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -460,10 +462,12 @@ def deploy_arm_template_at_resource_group(cmd,
                                           deployment_name=None, mode=None, rollback_on_error=None,
                                           no_wait=False, handle_extended_json_format=None,
                                           aux_subscriptions=None, aux_tenants=None, no_prompt=False,
-                                          confirm_with_what_if=None, what_if_result_format=None):
+                                          confirm_with_what_if=None, what_if_result_format=None,
+                                          what_if_exclude_change_types=None):
     if confirm_with_what_if:
         what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name, template_file, template_uri, parameters,
-                                                      deployment_name, mode, aux_tenants, what_if_result_format)
+                                                      deployment_name, mode, aux_tenants, what_if_result_format,
+                                                      exclude_change_types=what_if_exclude_change_types)
         from knack.prompting import prompt_y_n
 
         if not prompt_y_n("\nAre you sure you want to execute the deployment?"):
@@ -620,29 +624,32 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                   template_file=None, template_uri=None, parameters=None,
                                                   deployment_name=None, mode=DeploymentMode.incremental,
                                                   aux_tenants=None, result_format=None,
-                                                  no_pretty_print=None, no_prompt=False):
+                                                  no_pretty_print=None, no_prompt=False,
+                                                  exclude_change_types=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri,
                                                                 parameters, mode, result_format, no_prompt)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_tenants=aux_tenants,
                                                     plug_pipeline=(template_uri is None))
     what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties)
 
-    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print)
+    return _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, exclude_change_types)
 
 
 def what_if_deploy_arm_template_at_subscription_scope(cmd,
                                                       template_file=None, template_uri=None, parameters=None,
                                                       deployment_name=None, deployment_location=None,
-                                                      result_format=None, no_pretty_print=None, no_prompt=False):
+                                                      result_format=None, no_pretty_print=None, no_prompt=False,
+                                                      exclude_change_types=None):
     what_if_properties = _prepare_deployment_what_if_properties(cmd.cli_ctx, template_file, template_uri, parameters,
                                                                 DeploymentMode.incremental, result_format, no_prompt)
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
     what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location)
 
-    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print)
+    return _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, exclude_change_types)
 
 
-def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
+def _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, exclude_change_types):
+    cli_ctx = cmd.cli_ctx
     what_if_result = LongRunningOperation(cli_ctx)(what_if_poller)
 
     if what_if_result.error:
@@ -651,6 +658,21 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
         # is on the ARM template but not the operation.
         err_message = _build_what_if_error_message(what_if_result.error)
         raise CLIError(err_message)
+
+    if exclude_change_types:
+        ChangeType = cmd.get_models('ChangeType')
+
+        exclude_change_types = set(map(lambda x: x.lower(), exclude_change_types))
+        valid_change_types = map(lambda x: x.value.lower(), ChangeType)
+        invalid_change_types = list(exclude_change_types.difference(valid_change_types))
+
+        if invalid_change_types:
+            word = 'types' if len(invalid_change_types) > 1 else 'type'
+            raise CLIError(f'Unrecognized resource change {word}: {", ".join(invalid_change_types)}.')
+
+        what_if_result.changes = list(
+            filter(lambda x: x.change_type.lower() not in exclude_change_types, what_if_result.changes)
+        )
 
     if no_pretty_print:
         return what_if_result

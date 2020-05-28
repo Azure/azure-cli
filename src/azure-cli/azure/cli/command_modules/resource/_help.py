@@ -285,6 +285,8 @@ parameters:
     short-summary: The deployment name.
   - name: --what-if-result-format -r
     short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+  - name: --what-if-exclude-change-types -x
+    short-summary: Space-separated list of resource change types to be excluded from What-If results. Possible values are Create, Delete, Modify, Deploy, NoChange, and Ignore. Applicable when --confirm-with-what-if is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -411,6 +413,8 @@ parameters:
     short-summary: The deployment name.
   - name: --what-if-result-format -r
     short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+  - name: --what-if-exclude-change-types -x
+    short-summary: Space-separated list of resource change types to be excluded from What-If results. Possible values are Create, Delete, Modify, Deploy, NoChange, and Ignore. Applicable when --confirm-with-what-if is set.
 examples:
   - name: Create a deployment at subscription scope from a remote template file, using parameters from a local JSON file.
     text: >
@@ -567,6 +571,8 @@ parameters:
     short-summary: The deployment mode.
   - name: --what-if-result-format -r
     short-summary: The format of What-If results. Applicable when --confirm-with-what-if is set.
+  - name: --what-if-exclude-change-types -x
+    short-summary: Space-separated list of resource change types to be excluded from What-If results. Possible values are Create, Delete, Modify, Deploy, NoChange, and Ignore. Applicable when --confirm-with-what-if is set.
 examples:
   - name: Create a deployment at resource group from a remote template file, using parameters from a local JSON file.
     text: >
