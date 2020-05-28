@@ -158,7 +158,7 @@ short-summary: Manage keys.
 
 helps['keyvault key download'] = """
 type: command
-short-summary: Download a key from a KeyVault.
+short-summary: Downloads the public part of a stored key.
 examples:
   - name: Save the key with PEM encoding
     text: |
