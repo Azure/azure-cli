@@ -1042,6 +1042,6 @@ class StorageAccountLocalContextScenarioTest(LocalContextScenarioTest):
                  checks=[self.check('name', self.kwargs['account_name'])])
         self.cmd('storage account show',
                  checks=[self.check('name', self.kwargs['account_name'])])
-        with self.assertRaises(Exception):
+        with self.assertRaises(CLIError):
             self.cmd('storage account delete')
         self.cmd('storage account delete -n {account_name} -y')
