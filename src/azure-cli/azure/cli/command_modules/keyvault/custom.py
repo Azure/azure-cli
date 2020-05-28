@@ -1076,6 +1076,11 @@ def import_certificate(cmd, client, vault_base_url, certificate_name, certificat
             secret_props['content_type'] = content_type
         elif certificate_policy and not secret_props:
             certificate_policy['secret_properties'] = SecretProperties(content_type=content_type)
+
+        attributes = certificate_policy.get('attributes')
+        if attributes:
+            attributes['created'] = None
+            attributes['updated'] = None
     else:
         certificate_policy = CertificatePolicy(
             secret_properties=SecretProperties(content_type=content_type))
