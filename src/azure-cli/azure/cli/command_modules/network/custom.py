@@ -2110,8 +2110,12 @@ def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location
 
 
 def list_express_route_route_tables(cmd, resource_group_name, circuit_name, peering_name, device_path):
+    from azure.cli.core.commands import LongRunningOperation
+
     client = network_client_factory(cmd.cli_ctx).express_route_circuits
-    return client.list_routes_table(resource_group_name, circuit_name, peering_name, device_path).value
+
+    return LongRunningOperation(cmd.cli_ctx)(
+        client.list_routes_table(resource_group_name, circuit_name, peering_name, device_path)).value
 
 
 def create_express_route_peering_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
