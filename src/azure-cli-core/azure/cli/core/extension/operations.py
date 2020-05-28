@@ -57,7 +57,7 @@ def _run_pip(pip_exec_args, extension_path=None):
         logger.debug(e.output)
         logger.debug(e)
         if "PermissionError: [WinError 5]" in e.output:
-            logger.warning("You do not have the permission to add extensions in the target directory%s. You may need to rerun on a shell as administrator.", ': '+ os.path.split(extension_path)[0] if extension_path else '')
+            logger.warning("You do not have the permission to add extensions in the target directory%s. You may need to rerun on a shell as administrator.", ': ' + os.path.split(extension_path)[0] if extension_path else '')
         returncode = e.returncode
     return returncode
 
