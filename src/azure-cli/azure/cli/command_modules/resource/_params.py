@@ -365,6 +365,9 @@ def load_arguments(self, _):
     with self.argument_context('group export') as c:
         c.argument('include_comments', action='store_true')
         c.argument('include_parameter_default_value', action='store_true')
+        c.argument('skip_resource_name_params', action='store_true')
+        c.argument('skip_all_params', action='store_true')
+        c.argument('resource_ids', nargs='+', options_list='--resource-ids')
 
     with self.argument_context('group create') as c:
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
