@@ -192,7 +192,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         # test updating updating other properties
         self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete '
                  '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
-                 '--bypass AzureServices --default-action Deny --retention-days 17',
+                 '--bypass AzureServices --default-action Deny',
                  checks=[
                      self.check('name', '{kv}'),
                      self.check('properties.enableSoftDelete', True),
@@ -201,8 +201,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                      self.check('properties.enabledForDiskEncryption', True),
                      self.check('properties.enabledForTemplateDeployment', True),
                      self.check('properties.networkAcls.bypass', 'AzureServices'),
-                     self.check('properties.networkAcls.defaultAction', 'Deny'),
-                     self.check('properties.softDeleteRetentionInDays', 17),
+                     self.check('properties.networkAcls.defaultAction', 'Deny')
                  ])
         # test policy set/delete
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapKey',
