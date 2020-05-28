@@ -447,7 +447,8 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
     validation_result = mgmt_client.validate_at_subscription_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(todict(validation_result.error))
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise CLIError(err_message)
     if validate_only:
         return validation_result
 
@@ -514,7 +515,8 @@ def _deploy_arm_template_at_resource_group(cli_ctx,
     validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
 
     if validation_result and validation_result.error:
-        raise CLIError(todict(validation_result.error))
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise CLIError(err_message)
     if validate_only:
         return validation_result
 
@@ -566,7 +568,8 @@ def _deploy_arm_template_at_management_group(cli_ctx,
     validation_result = mgmt_client.validate_at_management_group_scope(group_id=management_group_id, deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(todict(validation_result.error))
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise CLIError(err_message)
     if validate_only:
         return validation_result
 
@@ -612,7 +615,8 @@ def _deploy_arm_template_at_tenant_scope(cli_ctx,
     validation_result = mgmt_client.validate_at_tenant_scope(deployment_name=deployment_name, properties=deployment_properties, location=deployment_location)
 
     if validation_result and validation_result.error:
-        raise CLIError(todict(validation_result.error))
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise CLIError(err_message)
     if validate_only:
         return validation_result
 
@@ -656,7 +660,7 @@ def _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, excl
         # The status code is 200 even when there's an error, because
         # it is technically a successful What-If operation. The error
         # is on the ARM template but not the operation.
-        err_message = _build_what_if_error_message(what_if_result.error)
+        err_message = _build_preflight_error_message(what_if_result.error)
         raise CLIError(err_message)
 
     if exclude_change_types:
@@ -698,10 +702,10 @@ def _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, excl
     return None
 
 
-def _build_what_if_error_message(what_if_error):
-    err_messages = [f'{what_if_error.code} - {what_if_error.message}']
-    for detail in what_if_error.details or []:
-        err_messages.append(_build_what_if_error_message(detail))
+def _build_preflight_error_message(preflight_error):
+    err_messages = [f'{preflight_error.code} - {preflight_error.message}']
+    for detail in preflight_error.details or []:
+        err_messages.append(_build_preflight_error_message(detail))
     return '\n'.join(err_messages)
 
 
