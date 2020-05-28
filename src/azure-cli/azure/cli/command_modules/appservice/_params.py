@@ -665,22 +665,22 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
 
-    with self.argument_context('webapp private-link list') as c:
+    with self.argument_context('webapp private-endpoint-connection list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('private_endpoint_name', options_list=['--private-endpoint-name', '-p'], help='Name of the private endpoint connection to list details of. If none specified, returns details of all private endpoint connections.')
+        c.argument('private_endpoint_connection_name', options_list=['--private-endpoint-connection-name', '-p'], help='Name of the private endpoint connection to list details of. If none specified, returns details of all private endpoint connections.')
 
-    with self.argument_context('webapp private-link delete') as c:
+    with self.argument_context('webapp private-endpoint-connection delete') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('private_endpoint_name', options_list=['--private-endpoint-name', '-p'], help='Name of the private endpoint connection to delete.')
+        c.argument('private_endpoint_connection_name', options_list=['--private-endpoint-connection-name', '-p'], help='Name of the private endpoint connection to delete.')
 
-    with self.argument_context('webapp private-link approve') as c:
+    with self.argument_context('webapp private-endpoint-connection approve') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('private_endpoint_name', options_list=['--private-endpoint-name', '-p'], help='Name of the private endpoint connection to approve.')
+        c.argument('private_endpoint_connection_name', options_list=['--private-endpoint-connection-name', '-p'], help='Name of the private endpoint connection to approve.')
 
-    with self.argument_context('webapp private-link reject') as c:
+    with self.argument_context('webapp private-endpoint-connection reject') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('private_endpoint_name', options_list=['--private-endpoint-name', '-p'], help='Name of the private endpoint connection to reject.')
+        c.argument('private_endpoint_connection_name', options_list=['--private-endpoint-connection-name', '-p'], help='Name of the private endpoint connection to reject.')

@@ -1901,43 +1901,43 @@ examples:
     crafted: true
 """
 
-helps['webapp private-link'] = """
+helps['webapp private-endpoint-connection'] = """
 type: group
-short-summary: Manage web app's private links.
+short-summary: Manage web app's private endpoint connections.
 """
 
-helps['webapp private-link list'] = """
+helps['webapp private-endpoint-connection list'] = """
 type: command
 short-summary: List details of the private endpoint connections associated with web app.
 examples:
   - name: List details of the private endpoint connections associated with web app.
-    text: az webapp private-link list --name MyWebApp --resource-group MyResourceGroup
+    text: az webapp private-endpoint-connection list --name MyWebApp --resource-group MyResourceGroup
   - name: List details of a particular private endpoint connection associated with web app.
-    text: az webapp private-link list --name MyWebApp --resource-group MyResourceGroup --private-endpoint-name MyPrivateEndpointConnection
+    text: az webapp private-endpoint-connection list --name MyWebApp --resource-group MyResourceGroup --private-endpoint-connection-name MyPrivateEndpointConnection
 """
 
-helps['webapp private-link delete'] = """
+helps['webapp private-endpoint-connection delete'] = """
 type: command
 short-summary: Delete a private endpoint connection from a web app.
 examples:
   - name: Delete a private endpoint connection from a web app.
-    text: az webapp private-link delete --name MyWebApp --resource-group MyResourceGroup --private-endpoint-name MyPrivateEndpointConnection
+    text: az webapp private-endpoint-connection delete --name MyWebApp --resource-group MyResourceGroup --private-endpoint-connection-name MyPrivateEndpointConnection
 """
 
-helps['webapp private-link approve'] = """
+helps['webapp private-endpoint-connection approve'] = """
 type: command
 short-summary: Approve private endpoint connection.
 examples:
   - name: Approve private endpoint connection.
-    text: az webapp private-link approve --name MyWebApp --resource-group MyResourceGroup --private-endpoint-name MyPrivateEndpointConnection
+    text: az webapp private-endpoint-connection approve --name MyWebApp --resource-group MyResourceGroup --private-endpoint-connection-name MyPrivateEndpointConnection
 """
 
-helps['webapp private-link reject'] = """
+helps['webapp private-endpoint-connection reject'] = """
 type: command
 short-summary: Reject private endpoint connection.
 examples:
   - name: Reject private endpoint connection.
-    text: az webapp private-link reject --name MyWebApp --resource-group MyResourceGroup --private-endpoint-name MyPrivateEndpointConnection
+    text: az webapp private-endpoint-connection reject --name MyWebApp --resource-group MyResourceGroup --private-endpoint-connection-name MyPrivateEndpointConnection
 """
 
 helps['appservice ase'] = """
