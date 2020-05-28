@@ -4532,10 +4532,12 @@ class MultiSubsTest(ScenarioTest):
         self.cmd('group show -g {rg} --subscription {subscription}')
         self.cmd('group show -g {rg2}')
 
+    @unittest.skip()
     @ResourceGroupPreparer(name_prefix='cli_test_preparer2_', parameter_name='resource_group2', key='rg2')
     @ResourceGroupPreparer(name_prefix='cli_test_preparer2_', subscription=subscription)
     @StorageAccountPreparer(name_prefix='clitestpreparer', subscription=subscription)
-    @StorageAccountPreparer(name_prefix='clitestpreparer', parameter_name='storage_account2', key='sa2')
+    @StorageAccountPreparer(name_prefix='clitestpreparer', parameter_name='storage_account2', key='sa2',
+                            resource_group_parameter_name='resource_group2')
     def test_preparer2(self, resource_group, resource_group2):
         self.kwargs.update({
             'subscription': self.subscription
