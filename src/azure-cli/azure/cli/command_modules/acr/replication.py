@@ -51,9 +51,6 @@ def acr_replication_create(cmd,
     except AttributeError:
         logger.debug('[ACR] could not detect api version')
 
-    # set / handle defaults
-    if region_endpoint_enabled is None:
-        region_endpoint_enabled = True
     replication_name = replication_name or normalized_location
 
     try:
