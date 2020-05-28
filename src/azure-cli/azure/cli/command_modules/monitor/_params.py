@@ -363,7 +363,7 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace table') as c:
         c.argument('table_name', name_arg_type, help='Name of the table.')
         c.argument('workspace_name', options_list='--workspace-name')
-        c.argument('retention_in_days', options_list='--retention-time', required=True)
+        c.argument('retention_in_days', options_list='--retention-time', type=int, required=True)
     # endregion
 
     # region Log Analytics Workspace Linked Service

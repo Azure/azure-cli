@@ -54,7 +54,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check("@[?name=='AzureSecurityOfThings'].enabled", '[False]')
         ])
 
-        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name}")
+        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
 
     @record_only()
     def test_monitor_log_analytics_workspace_linked_service_common_scenario(self):
@@ -245,10 +245,10 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('publicNetworkAccessForQuery', 'Disabled')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_recover', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_recover', location='westus')
     @AllowLargeResponse()
     def test_monitor_log_analytics_workspace_recover(self, resource_group):
-        workspace_name = self.create_random_name('clitest_ws_', 20)
+        workspace_name = self.create_random_name('clitest', 20)
         self.kwargs.update({
             'name': workspace_name
         })
@@ -267,24 +267,25 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('workspaceCapping.dailyQuotaGb', 2.0)
         ])
 
-        tables = self.cmd("monitor log-analytics workspace table list -g {rg} --workspace-name {name}").get_output_in_json()
+        self.cmd("monitor log-analytics workspace table list -g {rg} --workspace-name {name}", checks=[
+            # self.check('length(@)', 0)
+        ])
 
-        first_table_name = tables[0]['name']
         self.kwargs.update({
-            'table_name': first_table_name
+            'table_name': 'Syslog'
         })
-        self.cmd("monitor log-analytics workspace table update -g {rg} --workspace-name {name} -n {table_name} --retention-time 30", checks=[
+        self.cmd("monitor log-analytics workspace table update -g {rg} --workspace-name {name} -n {table_name} --retention-time 30 --debug", checks=[
             self.check('retentionInDays', 30)
         ])
 
         self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-            self.check('length(@)', 0),
+            self.check('length(@)', 0)
         ])
 
-        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name}")
+        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
 
         self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-            self.check('length(@)', 1),
+            self.check('length(@)', 1)
         ])
 
         self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
@@ -304,7 +305,7 @@ class TestLogProfileScenarios(ScenarioTest):
         ])
 
         self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
-            self.check('length(@)', 0),
+            self.check('length(@)', 0)
         ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} --force -y")

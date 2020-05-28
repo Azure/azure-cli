@@ -987,6 +987,15 @@ examples:
         az monitor log-analytics workspace list-deleted-workspaces --resource-group MyResourceGroup
 """
 
+helps['monitor log-analytics workspace recover'] = """
+type: command
+short-summary: Recover a workspace in a soft-delete state within 14 days.
+examples:
+  - name: Recover a workspace in a soft-delete state within 14 days
+    text: |
+        az monitor log-analytics workspace recover --resource-group MyResourceGroup -n MyWorkspace
+"""
+
 helps['monitor log-analytics workspace list-management-groups'] = """
 type: command
 short-summary: Get a list of management groups connected to a workspace.
