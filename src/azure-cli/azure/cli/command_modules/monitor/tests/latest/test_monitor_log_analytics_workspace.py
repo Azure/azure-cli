@@ -110,10 +110,14 @@ class TestLogProfileScenarios(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_linked_storage', location='eastus')
     @AllowLargeResponse()
-    @StorageAccountPreparer(name_prefix='saws1', kind='StorageV2', sku='Standard_LRS', parameter_name='account_1', location='eastus')
-    @StorageAccountPreparer(name_prefix='saws2', kind='StorageV2', sku='Standard_LRS', parameter_name='account_2', location='eastus')
-    @StorageAccountPreparer(name_prefix='saws3', kind='StorageV2', sku='Standard_LRS', parameter_name='account_3', location='eastus')
-    @StorageAccountPreparer(name_prefix='saws4', kind='StorageV2', sku='Standard_LRS', parameter_name='account_4', location='eastus')
+    @StorageAccountPreparer(name_prefix='saws1', kind='StorageV2', sku='Standard_LRS', parameter_name='account_1',
+                            location='eastus')
+    @StorageAccountPreparer(name_prefix='saws2', kind='StorageV2', sku='Standard_LRS', parameter_name='account_2',
+                            location='eastus')
+    @StorageAccountPreparer(name_prefix='saws3', kind='StorageV2', sku='Standard_LRS', parameter_name='account_3',
+                            location='eastus')
+    @StorageAccountPreparer(name_prefix='saws4', kind='StorageV2', sku='Standard_LRS', parameter_name='account_4',
+                            location='eastus')
     def test_monitor_log_analytics_workspace_linked_storage(self, resource_group, account_1,
                                                             account_2, account_3, account_4):
         from msrestazure.tools import resource_id
@@ -240,3 +244,70 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('publicNetworkAccessForIngestion', 'Enabled'),
             self.check('publicNetworkAccessForQuery', 'Disabled')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_recover', location='eastus')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_recover(self, resource_group):
+        workspace_name = self.create_random_name('clitest_ws_', 20)
+        self.kwargs.update({
+            'name': workspace_name
+        })
+
+        self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --quota 1 --level 100 --sku CapacityReservation", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.capacityReservationLevel', 100),
+            self.check('workspaceCapping.dailyQuotaGb', 1.0)
+        ])
+
+        self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --quota 2 --level 200", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.capacityReservationLevel', 200),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
+
+        tables = self.cmd("monitor log-analytics workspace table list -g {rg} --workspace-name {name}").get_output_in_json()
+
+        first_table_name = tables[0]['name']
+        self.kwargs.update({
+            'table_name': first_table_name
+        })
+        self.cmd("monitor log-analytics workspace table update -g {rg} --workspace-name {name} -n {table_name} --retention-time 30", checks=[
+            self.check('retentionInDays', 30)
+        ])
+
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 0),
+        ])
+
+        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name}")
+
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 1),
+        ])
+
+        self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.capacityReservationLevel', 200),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
+
+        self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.capacityReservationLevel', 200),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
+
+        self.cmd("monitor log-analytics workspace list-deleted-workspaces -g {rg}", checks=[
+            self.check('length(@)', 0),
+        ])
+
+        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} --force -y")
+
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('monitor log-analytics workspace show -g {rg} -n {name}')

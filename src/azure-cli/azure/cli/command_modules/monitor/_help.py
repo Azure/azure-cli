@@ -978,6 +978,15 @@ type: command
 short-summary: Get a list of workspaces under a resource group or a subscription.
 """
 
+helps['monitor log-analytics workspace list-deleted-workspaces'] = """
+type: command
+short-summary: Get a list of deleted workspaces that can be recovered in a subscription or a resource group.
+examples:
+  - name: Get a list of deleted workspaces that can be recovered in a resource group
+    text: |
+        az monitor log-analytics workspace list-deleted-workspaces --resource-group MyResourceGroup
+"""
+
 helps['monitor log-analytics workspace list-management-groups'] = """
 type: command
 short-summary: Get a list of management groups connected to a workspace.
@@ -996,6 +1005,38 @@ examples:
     text: |
         az monitor log-analytics workspace list-usages --resource-group MyResourceGroup --subscription MySubscription --workspace-name MyWorkspace
     crafted: true
+"""
+
+helps['monitor log-analytics workspace table'] = """
+type: group
+short-summary: Manage tables for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace table list'] = """
+type: command
+short-summary: List all the tables for the given Log Analytics workspace.
+examples:
+  - name: List all the tables for the given Log Analytics workspace
+    text: |
+        az monitor log-analytics workspace table list --resource-group MyResourceGroup --workspace-name MyWorkspace
+"""
+
+helps['monitor log-analytics workspace table show'] = """
+type: command
+short-summary: Get a Log Analytics workspace table.
+examples:
+  - name: Get a Log Analytics workspace table
+    text: |
+        az monitor log-analytics workspace table show --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable
+"""
+
+helps['monitor log-analytics workspace table update'] = """
+type: command
+short-summary: Update the properties of a Log Analytics workspace table, currently only support updating retention time.
+examples:
+  - name: Update the retention time of a Log Analytics workspace table
+    text: |
+        az monitor log-analytics workspace table update --resource-group MyResourceGroup --workspace-name MyWorkspace -n MyTable --retention-time 30
 """
 
 helps['monitor log-analytics workspace pack'] = """
