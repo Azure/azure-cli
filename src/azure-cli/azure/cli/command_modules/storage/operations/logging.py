@@ -21,8 +21,14 @@ def get_logging(client, timeout=None):
     for s in client:
         try:
             results[s.name] = s.get_logging(timeout)
-        except (KeyError, AzureException):
+        except KeyError as ex:
             raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
                            "--services in your commands.".format(s.name))
+        except AzureException as ex:
+            from urllib3.exceptions import MaxRetryError
+            # MaxRetryError is only used for track1
+            if isinstance(ex.args[0], MaxRetryError):
+                raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
+                               "--services in your commands. {}".format(s.name, ex.args[0]))
 
     return results
