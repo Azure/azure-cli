@@ -444,7 +444,7 @@ class Profile(object):
         identity = Identity(self._authority)
         accounts = identity.get_user(user_or_sp)
         if accounts:
-            logger.info("The credential of %s were found from MSAL encrypted cache: %s", user_or_sp, accounts)
+            logger.info("The credential of %s were found from MSAL encrypted cache.", user_or_sp)
             if clear_credential:
                 identity.logout_user(user_or_sp)
                 logger.warning("The credential of %s were cleared from MSAL encrypted cache. This account is "
@@ -623,11 +623,7 @@ class Profile(object):
         subscriptions = self.load_cached_subscriptions()
         to_refresh = subscriptions
 
-        from azure.cli.core._debug import allow_debug_adal_connection
-        allow_debug_adal_connection()
-        subscription_finder = subscription_finder or SubscriptionFinder(self.cli_ctx,
-                                                                        self.auth_ctx_factory,
-                                                                        self._creds_cache.adal_token_cache)
+        subscription_finder = subscription_finder or SubscriptionFinder(self.cli_ctx, adal_cache=self._adal_cache)
         refreshed_list = set()
         result = []
         for s in to_refresh:
@@ -639,13 +635,12 @@ class Profile(object):
             tenant = s[_TENANT_ID]
             subscriptions = []
             try:
+                identity_credential = self._create_identity_credential(s, tenant)
                 if is_service_principal:
-                    sp_auth = ServicePrincipalAuth(self._creds_cache.retrieve_secret_of_service_principal(user_name))
-                    subscriptions = subscription_finder.find_from_service_principal_id(user_name, sp_auth, tenant,
-                                                                                       self._ad_resource_uri)
+                    subscriptions = subscription_finder.find_using_specific_tenant(tenant, identity_credential)
                 else:
-                    subscriptions = subscription_finder.find_from_user_account(user_name, None, None,
-                                                                               self._ad_resource_uri)
+                    subscriptions = subscription_finder.find_using_common_tenant(identity_credential._auth_record,
+                                                                               identity_credential)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
                                "modified. You can run 'az login' later to explicitly refresh them", user_name, ex)
@@ -663,9 +658,6 @@ class Profile(object):
                                                       subscriptions,
                                                       is_service_principal)
             result += consolidated
-
-        if self._creds_cache.adal_token_cache.has_state_changed:
-            self._creds_cache.persist_cached_creds()
 
         self._set_subscriptions(result, merge=False)
 
@@ -687,14 +679,13 @@ class Profile(object):
             if user_type == _SERVICE_PRINCIPAL:
                 result['clientId'] = account[_USER_ENTITY][_USER_NAME]
                 msal_cache = MSALSecretStore(True)
-                sp_auth = ServicePrincipalAuth(msal_cache.retrieve_secret_of_service_principal(
-                    account[_USER_ENTITY][_USER_NAME]))
-                secret = getattr(sp_auth, 'secret', None)
+                secret, certificate_file = msal_cache.retrieve_secret_of_service_principal(
+                    account[_USER_ENTITY][_USER_NAME], account[_TENANT_ID])
                 if secret:
                     result['clientSecret'] = secret
                 else:
                     # we can output 'clientCertificateThumbprint' if asked
-                    result['clientCertificate'] = sp_auth.certificate_file
+                    result['clientCertificate'] = certificate_file
                 result['subscriptionId'] = account[_SUBSCRIPTION_ID]
             else:
                 raise CLIError('SDK Auth file is only applicable when authenticated using a service principal')
