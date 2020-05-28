@@ -21,7 +21,7 @@ def get_logging(client, timeout=None):
     for s in client:
         try:
             results[s.name] = s.get_logging(timeout)
-        except KeyError as ex:
+        except KeyError:
             raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
                            "--services in your commands.".format(s.name))
         except AzureException as ex:
