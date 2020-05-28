@@ -653,7 +653,9 @@ def load_arguments(self, _):
         c.argument('bandwidth_in_mbps', er_bandwidth_type, validator=bandwidth_validator_factory(mbps=True), help='Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps')
         c.argument('service_provider_name', options_list='--provider', help="Name of the ExpressRoute Service Provider.")
         c.argument('peering_location', help="Name of the peering location.")
-        c.argument('device_path', options_list='--path', arg_type=get_enum_type(device_path_values))
+        c.argument('peering_name', help='The name of the peering')
+        c.argument('device_path', options_list='--path', arg_type=get_enum_type(device_path_values),
+                   help='The path of the device')
         c.argument('vlan_id', type=int)
         c.argument('allow_global_reach', arg_type=get_three_state_flag(), min_api='2018-07-01', help='Enable global reach on the circuit.')
         c.argument('express_route_port', help='Name or ID of an ExpressRoute port.', min_api='2018-08-01', validator=validate_express_route_port)
