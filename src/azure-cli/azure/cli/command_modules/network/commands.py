@@ -626,7 +626,7 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('get-stats', 'get_stats')
         g.command('list-arp-tables', 'list_arp_table')
-        g.command('list-route-tables', 'list_routes_table')
+        g.custom_command('list-route-tables', 'list_express_route_route_tables')
         g.custom_command('create', 'create_express_route', supports_no_wait=True)
         g.custom_command('list', 'list_express_route_circuits')
         g.command('list-service-providers', 'list', command_type=network_ersp_sdk)
