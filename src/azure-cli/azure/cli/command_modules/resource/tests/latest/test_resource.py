@@ -2259,14 +2259,26 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
 
     def test_resource_group_local_context(self):
         self.kwargs.update({
-            'group': 'test_local_context_group',
+            'group1': 'test_local_context_group_1',
+            'group2': 'test_local_context_group_2',
             'location': 'eastasia'
         })
-        self.cmd('group create -n {group} -l {location}', checks=[self.check('name', self.kwargs['group'])])
-        self.cmd('group show', checks=[
-            self.check('name', self.kwargs['group']),
+        self.cmd('group create -n {group1} -l {location}', checks=[
+            self.check('name', self.kwargs['group1']),
             self.check('location', self.kwargs['location'])
         ])
+        self.cmd('group show', checks=[
+            self.check('name', self.kwargs['group1']),
+            self.check('location', self.kwargs['location'])
+        ])
+        with self.assertRaisesRegexp(SystemExit, '2'):
+            self.cmd('group delete')
+        self.cmd('group delete -n {group1} -y')
+        self.cmd('group create -n {group2}', checks=[
+            self.check('name', self.kwargs['group2']),
+            self.check('location', self.kwargs['location'])
+        ])
+        self.cmd('group delete -n {group2} -y')
 
 
 if __name__ == '__main__':
