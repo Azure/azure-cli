@@ -39,8 +39,18 @@ def patch_main_exception_handler(unit_test):
 
 def patch_get_subscription(unit_test):
     def _get_subscription(*args, **kwargs):  # pylint: disable=unused-argument
+        # Build a map
+        if not hasattr(unit_test, 'subs_map'):
+            unit_test.subs_map = {}
+        subs_map = unit_test.subs_map
+        sub = args[1]
+        if sub is None or sub not in subs_map and sub.count('0') < 20:
+            size = len(subs_map)
+            moniker = '00000000-0000-0000-0000-' + '%012d' % size
+            subs_map[sub] = moniker
+
         return {
-            "id": MOCKED_SUBSCRIPTION_ID,
+            "id": subs_map[sub],
             "user": {
                 "name": MOCKED_USER_NAME,
                 "type": "user"

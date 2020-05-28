@@ -14,7 +14,7 @@ class SubscriptionRecordingProcessor(RecordingProcessor):
 
     def __init__(self, test_instance):
         self.test_instance = test_instance
-        if not hasattr(test_instance, 'subs_count'):
+        if not hasattr(test_instance, 'subs_map'):
             # Mapping between real subscription and moniker
             test_instance.subs_map = {}
 

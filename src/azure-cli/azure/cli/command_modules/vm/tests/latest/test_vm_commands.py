@@ -4519,23 +4519,31 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --off')
 
 
-class PreparerTest(ScenarioTest):
+class MultiSubsTest(ScenarioTest):
 
     subscription = '1c638cf4-608f-4ee6-b680-c329e824c3a8'
 
     @ResourceGroupPreparer(name_prefix='cli_test_preparer_', subscription=subscription)
     @ResourceGroupPreparer(name_prefix='cli_test_preparer_', parameter_name='resource_group2', key='rg2')
-    # @StorageAccountPreparer(name_prefix='clitestpreparer', subscription='1c638cf4-608f-4ee6-b680-c329e824c3a8')
-    # @StorageAccountPreparer(name_prefix='clitestpreparer')
-    def test_prepare(self, resource_group, resource_group2):
-        print(resource_group)
-        print(resource_group2)
+    def test_preparer(self, resource_group, resource_group2):
         self.kwargs.update({
             'subscription': self.subscription
         })
         self.cmd('group show -g {rg} --subscription {subscription}')
         self.cmd('group show -g {rg2}')
-        # self.cmd('storage account show -g {rg} -n {sa} --subscription 1c638cf4-608f-4ee6-b680-c329e824c3a8')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_preparer2_', parameter_name='resource_group2', key='rg2')
+    @ResourceGroupPreparer(name_prefix='cli_test_preparer2_', subscription=subscription)
+    @StorageAccountPreparer(name_prefix='clitestpreparer', subscription=subscription)
+    @StorageAccountPreparer(name_prefix='clitestpreparer', parameter_name='storage_account2', key='sa2')
+    def test_preparer2(self, resource_group, resource_group2):
+        self.kwargs.update({
+            'subscription': self.subscription
+        })
+        self.cmd('group show -g {rg} --subscription {subscription}')
+        self.cmd('group show -g {rg2}')
+        self.cmd('storage account show -g {rg} -n {sa} --subscription {subscription}')
+        self.cmd('storage account show -g {rg2} -n {sa2}')
 
 
 if __name__ == '__main__':
