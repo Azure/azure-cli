@@ -653,6 +653,17 @@ def what_if_deploy_arm_template_at_subscription_scope(cmd,
 
 
 def _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, exclude_change_types):
+    if exclude_change_types:
+        ChangeType = cmd.get_models('ChangeType')
+
+        exclude_change_types = set(exclude_change_types)
+        valid_change_types = set(map(lambda x: x.value.lower(), ChangeType))
+        invalid_change_types = [x for x in exclude_change_types if x.lower() not in valid_change_types]
+
+        if invalid_change_types:
+            word = 'types' if len(invalid_change_types) > 1 else 'type'
+            raise CLIError(f'Unrecognized resource change {word}: {", ".join(invalid_change_types)}. Specifying one or more values in the following list and try again: Ignore, NoChange, Deploy, Create, Modify, Delete.')
+
     cli_ctx = cmd.cli_ctx
     what_if_result = LongRunningOperation(cli_ctx)(what_if_poller)
 
@@ -664,16 +675,7 @@ def _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, excl
         raise CLIError(err_message)
 
     if exclude_change_types:
-        ChangeType = cmd.get_models('ChangeType')
-
         exclude_change_types = set(map(lambda x: x.lower(), exclude_change_types))
-        valid_change_types = map(lambda x: x.value.lower(), ChangeType)
-        invalid_change_types = list(exclude_change_types.difference(valid_change_types))
-
-        if invalid_change_types:
-            word = 'types' if len(invalid_change_types) > 1 else 'type'
-            raise CLIError(f'Unrecognized resource change {word}: {", ".join(invalid_change_types)}.')
-
         what_if_result.changes = list(
             filter(lambda x: x.change_type.lower() not in exclude_change_types, what_if_result.changes)
         )
