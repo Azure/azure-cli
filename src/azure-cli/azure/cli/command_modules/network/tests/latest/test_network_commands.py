@@ -1080,15 +1080,14 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {settings} --port 443 --protocol https')
         self.cmd(
             'network application-gateway url-path-map create -g {rg} --gateway-name {ag} -n {name} --rule-name {rulename} --paths /mypath1/* '
-            '--default-rewrite-rule-set {set} --rewrite-rule-set {set} --default-redirect-config {redirect_config}')
-        self.cmd(
-            'network application-gateway url-path-map update -g {rg} --gateway-name {ag} -n {name} --default-rewrite-rule-set {set}')
+            '--redirect-config {redirect_config} --default-redirect-config {redirect_config}')
         self.cmd(
             'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
-            '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --rewrite-rule-set {set}')
+            '--paths /mypath122/* --address-pool {pool} --http-settings {settings}')
         with self.assertRaisesRegexp(CLIError, "Cannot reference a BackendAddressPool when Redirect Configuration is specified."):
-            self.cmd('network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
-            '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --rewrite-rule-set {set} --redirect-config {redirect_config}')
+            self.cmd(
+                'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
+                '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --redirect-config {redirect_config}')
 
 
 class NetworkAppGatewayRewriteRuleset(ScenarioTest):
