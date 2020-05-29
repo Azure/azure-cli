@@ -67,6 +67,7 @@ Release History
 
 * `az storage copy`: Add parameter `--follow-symlinks` to support symlinks (#12037)
 * Enable local context for storage account (#13682)
+* `az storage logging`: Fix issue #11969 to refine error message (#13605)
 
 2.6.0
 ++++++
