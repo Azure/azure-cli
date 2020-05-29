@@ -382,3 +382,14 @@ def validate_storage_disabled_attribute(attr_arg_name, attr_type):
         attr_arg = attr_type(enabled=(not disabled))
         setattr(ns, attr_arg_name, attr_arg)
     return _validate
+
+
+def convert_encrypted_value(ns):
+    try:
+        ns.value = base64.b64decode(ns.value.encode('utf-8'))
+
+    ns.value = ns.value.encode('utf-8')
+
+
+def convert_base64_to_str(ns):
+    ns.value = base64.b64decode(ns.value)

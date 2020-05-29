@@ -27,7 +27,7 @@ from ._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_id, validate_sas_definition_id,
     validate_storage_account_id, validate_storage_disabled_attribute,
-    validate_deleted_vault_name)
+    validate_deleted_vault_name, convert_str_to_base64, convert_base64_to_str)
 
 # CUSTOM CHOICE LISTS
 
@@ -38,9 +38,11 @@ key_format_values = certificate_format_values = ['PEM', 'DER']
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
     (JsonWebKeyOperation, KeyAttributes, JsonWebKeyType, JsonWebKeyCurveName, SasTokenType,
-     SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes) = self.get_models(
+     SasDefinitionAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes,
+     JsonWebKeyEncryptionAlgorithm) = self.get_models(
          'JsonWebKeyOperation', 'KeyAttributes', 'JsonWebKeyType', 'JsonWebKeyCurveName', 'SasTokenType',
          'SasDefinitionAttributes', 'SecretAttributes', 'CertificateAttributes', 'StorageAccountAttributes',
+         'JsonWebKeyEncryptionAlgorithm',
          resource_type=ResourceType.DATA_KEYVAULT)
 
     class CLIJsonWebKeyOperation(str, Enum):
@@ -161,10 +163,10 @@ def load_arguments(self, _):
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
             c.argument(item + '_version', options_list=['--version', '-v'], help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False, completer=get_keyvault_version_completion_list(item))
 
-        for cmd in ['backup', 'delete', 'download', 'list-versions', 'set-attributes', 'show']:
+        for cmd in ['backup', 'decrypt', 'delete', 'download', 'encrypt', 'list-versions', 'set-attributes', 'show']:
             with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
                 try:
-                    c.extra('identifier', options_list=['--id'], help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
+                    c.extra('identifier', options_list=['--id'], help='Id of the {}. If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
                 except ValueError:
                     pass
                 c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
@@ -221,6 +223,16 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key set-attributes') as c:
         c.attributes_argument('key', KeyAttributes)
+
+    for scope in ['encrypt', 'decrypt']:
+        with self.argument_context('keyvault key {}'.format(scope)) as c:
+            c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
+
+    with self.argument_context('keyvault key encrypt'.format(scope)) as c:
+        c.argument('value', help='The value to be encrypted.'.format(scope), validator=convert_str_to_base64)
+
+    with self.argument_context('keyvault key decrypt'.format(scope)) as c:
+        c.argument('value', help='The value to be decrypted.'.format(scope), validator=convert_base64_to_str)
 
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
