@@ -77,12 +77,13 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         result = list_appserviceenvironments(self.mock_cmd, None)
         self.assertEqual(len(result), 2)
 
+    @mock.patch('azure.cli.core.profiles.get_sdk', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_deployment_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_network_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_create(self, ase_client_factory_mock, network_client_factory_mock,
-                                            deployment_client_factory_mock, deployment_name_mock):
+                                            deployment_client_factory_mock, deployment_name_mock, get_sdk_mock):
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
         vnet_name = 'mock_vnet_name'
@@ -98,6 +99,9 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         network_client = mock.MagicMock()
         network_client_factory_mock.return_value = network_client
+
+        sdk = mock.MagicMock()
+        get_sdk_mock.return_value = sdk
 
         subnet = Subnet(id=1, address_prefix='10.10.10.10/25')
         network_client.subnets.get.return_value = subnet
