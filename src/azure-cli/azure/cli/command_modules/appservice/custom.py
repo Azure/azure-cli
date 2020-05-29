@@ -880,8 +880,9 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
 
 
 def list_instances(cmd, resource_group_name, name, slot=None):
-    # API Version 2019-08-01 does not return slot instances, however 2018-02-01 does
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot, api_version="2018-02-01")
+    # API Version 2019-08-01 (latest as of writing this code) does not return slot instances, however 2018-02-01 does
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot,
+                                   api_version="2018-02-01")
 
 
 # Currently using hardcoded values instead of this function. This function calls the stacks API;
