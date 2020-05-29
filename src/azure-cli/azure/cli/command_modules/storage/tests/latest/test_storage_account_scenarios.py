@@ -323,6 +323,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('table.retentionPolicy.enabled', False),
             JMESPathCheck('table.retentionPolicy.days', None)
         ])
+
+    @live_only()
+    @ResourceGroupPreparer()
+    def test_logging_error_operations(self, resource_group):
         # BlobStorage doesn't support logging for some services
         blob_storage = self.create_random_name(prefix='blob', length=24)
         self.cmd('storage account create -g {} -n {} --kind BlobStorage --access-tier hot --https-only'.format(

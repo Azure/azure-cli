@@ -30,5 +30,6 @@ def get_logging(client, timeout=None):
             if isinstance(ex.args[0], MaxRetryError):
                 raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
                                "--services in your commands. {}".format(s.name, ex.args[0]))
+            raise ex
 
     return results
