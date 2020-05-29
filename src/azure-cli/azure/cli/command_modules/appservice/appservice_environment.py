@@ -354,7 +354,7 @@ def _build_ase_deployment_properties(cli_ctx, name, location, subnet_id, virtual
                                      front_end_scale_factor=None, front_end_sku=None, tags=None):
     from azure.cli.core.profiles import ResourceType, get_sdk
     DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
-    
+
     # InternalLoadBalancingMode Enum: None 0, Web 1, Publishing 2.
     # External: 0 (None), Internal: 3 (Web + Publishing)
     ilb_mode = 3 if virtual_ip_type == 'Internal' else 0
