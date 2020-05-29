@@ -25,11 +25,10 @@ def get_logging(client, timeout=None):
             raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
                            "--services in your commands.".format(s.name))
         except AzureException as ex:
-            from urllib3.exceptions import MaxRetryError
-            # MaxRetryError is only used for track1
-            if isinstance(ex.args[0], MaxRetryError):
+            if ex.args and hasattr(ex.args[0], 'args') and ex.args[0].args \
+                    and 'Max retries exceeded with url: /?restype=service&comp=properties' in ex.args[0].args[0]:
                 raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
-                               "--services in your commands. {}".format(s.name, ex.args[0]))
+                               "--services in your commands.".format(s.name))
             raise ex
 
     return results
