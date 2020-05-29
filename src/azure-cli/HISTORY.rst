@@ -8,7 +8,7 @@ Release History
 
 **ACR**
 
-* Fix a typo in an error message of token create (#13620)
+* Fix a typo in an error message of token creation (#13620)
 
 **AKS**
 
@@ -31,7 +31,7 @@ Release History
 
 **EventHub**
 
-* : Fix for issue #12406 Argument --capture-interval does not update the "intervalInSeconds" (#13054)
+* Fix for issue #12406 Argument --capture-interval does not update the "intervalInSeconds" (#13054)
 
 **HDInsight**
 
