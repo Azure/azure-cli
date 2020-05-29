@@ -24,9 +24,17 @@ The overall workflow is:
 2. Azure Python SDK ready (PyPI).
 3. Azure CLI commands ready.
 
-This is the easiest and most efficient way that Azure CLI collaborates with service team. Service should be well-designed, stable and tested before asking Azure CLI support.
+```
+ ---------      ------------      -----------
+|         |    |            |    |           |
+| Service | -> | Python SDK | -> | Azure CLI |
+|         |    |            |    |           |
+ ---------      ------------      -----------
+```
 
-However, sometimes, some features are urgent due to some reasons like bad planning. If we wait the previous phase to finish before start the next phase, it could last a very long time to deliver the feature. We support developing Azure CLI commands before the service is ready. The requirements are 
+This is the way that Azure CLI collaborates with service team. Service should be well-designed, stable and tested before asking Azure CLI support.
+
+However, sometimes, some features are urgent due to some reasons like bad planning. If we wait the previous phase to finish before starting the next phase, it could last a very long time to deliver the feature. We support developing Azure CLI commands before the service is ready. The requirements are 
 1. The service is available for testing.
 2. Azure Python SDK is available. A private build is allowed.
 
