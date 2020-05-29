@@ -7,7 +7,6 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule)
-from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -353,6 +352,9 @@ def _get_unique_deployment_name(prefix):
 
 def _build_ase_deployment_properties(cli_ctx, name, location, subnet_id, virtual_ip_type,
                                      front_end_scale_factor=None, front_end_sku=None, tags=None):
+    from azure.cli.core.profiles import ResourceType, get_sdk
+    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
+    
     # InternalLoadBalancingMode Enum: None 0, Web 1, Publishing 2.
     # External: 0 (None), Internal: 3 (Web + Publishing)
     ilb_mode = 3 if virtual_ip_type == 'Internal' else 0
@@ -385,7 +387,6 @@ def _build_ase_deployment_properties(cli_ctx, name, location, subnet_id, virtual
     template = deployment_template.build()
     parameters = deployment_template.build_parameters()
 
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
     deployment = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     return deployment
 
