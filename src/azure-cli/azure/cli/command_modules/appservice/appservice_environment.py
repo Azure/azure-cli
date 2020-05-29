@@ -7,7 +7,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule)
-from azure.mgmt.resource.resources.models import DeploymentProperties
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -59,7 +59,8 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, vne
 
     logger.info('Create App Service Environment...')
     deployment_name = _get_unique_deployment_name('cli_ase_deploy_')
-    ase_deployment_properties = _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
+    ase_deployment_properties = _build_ase_deployment_properties(cmd.cli_ctx, name, location,
+                                                                 subnet_id, virtual_ip_type,
                                                                  front_end_scale_factor, front_end_sku, None)
     deployment_client = _get_deployment_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, deployment_client.create_or_update,
@@ -350,7 +351,7 @@ def _get_unique_deployment_name(prefix):
     return prefix + random_string(16)
 
 
-def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
+def _build_ase_deployment_properties(cli_ctx, name, location, subnet_id, virtual_ip_type,
                                      front_end_scale_factor=None, front_end_sku=None, tags=None):
     # InternalLoadBalancingMode Enum: None 0, Web 1, Publishing 2.
     # External: 0 (None), Internal: 3 (Web + Publishing)
@@ -384,6 +385,7 @@ def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
     template = deployment_template.build()
     parameters = deployment_template.build_parameters()
 
+    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
     deployment = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     return deployment
 
