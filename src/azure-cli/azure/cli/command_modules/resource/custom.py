@@ -662,7 +662,7 @@ def _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, excl
 
         if invalid_change_types:
             word = 'types' if len(invalid_change_types) > 1 else 'type'
-            raise CLIError(f'Unrecognized resource change {word}: {", ".join(invalid_change_types)}. Specifying one or more values in the following list and try again: Ignore, NoChange, Deploy, Create, Modify, Delete.')
+            raise CLIError(f'Unrecognized resource change {word}: {", ".join(invalid_change_types)}. Specify one or more values in the following list and try again: Ignore, NoChange, Deploy, Create, Modify, Delete.')
 
     cli_ctx = cmd.cli_ctx
     what_if_result = LongRunningOperation(cli_ctx)(what_if_poller)
