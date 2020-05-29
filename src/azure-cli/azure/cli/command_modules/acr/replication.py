@@ -41,33 +41,14 @@ def acr_replication_create(cmd,
     from msrest.exceptions import ValidationError
     ReplicationType = cmd.get_models('Replication')
 
-    # version below adds region_endpoint_enabled and a breaking change where some create params are grouped into a model
-    grouped_params_create_api_version = "2019-12-01-preview"
-    replication_client_api_version = ""
-
-    try:
-        replication_client_api_version = client.api_version
-        logger.debug('[ACR] detected api version %s', replication_client_api_version)
-    except AttributeError:
-        logger.debug('[ACR] could not detect api version')
-
     replication_name = replication_name or normalized_location
 
     try:
-        if replication_client_api_version >= grouped_params_create_api_version:
-            return client.create(
-                resource_group_name=resource_group_name,
-                registry_name=registry_name,
-                replication_name=replication_name,
-                replication=ReplicationType(location=location, region_endpoint_enabled=region_endpoint_enabled),
-                tags=tags
-            )
-        # else use old create
         return client.create(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
             replication_name=replication_name,
-            location=location,
+            replication=ReplicationType(location=location, region_endpoint_enabled=region_endpoint_enabled),
             tags=tags
         )
     except ValidationError as e:
