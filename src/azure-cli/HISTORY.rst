@@ -49,7 +49,7 @@ Release History
 * `az network vpn-connection ipsec-policy`: change the --sa-lifetime and --sa-max-size to larger values in example (#13590)
 * Bump network to 2020-04-01 (#13568)
 * `az network private-endpoint-connection`: support event grid (#13608)
-*`az network express-route list-route-tables`: fix bug that cannot list routes as table (#13714)
+* `az network express-route list-route-tables`: fix bug that cannot list routes as table (#13714)
 
 **Packaging**
 
