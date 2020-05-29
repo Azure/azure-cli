@@ -22,7 +22,7 @@ Release History
 **ARM**
 
 * `az deployment`: Fix issue #13159 of incorrect message of JSON after removing comments and compressing (#13561)
-* `az resource tag`: Fix the problem of tagging resources with resource type `Microsoft.ContainerRegistry/registries/webhooks` (#13255)
+* `az resource tag`: Fix the problem of tagging resources with resource type `Microsoft.ContainerRegistry/registries/webhooks` (#13375)
 * Improve the examples for the resource module (#12906)
 
 **ARO**
