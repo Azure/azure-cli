@@ -25,7 +25,8 @@ def get_logging(client, timeout=None):
             raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
                            "--services in your commands.".format(s.name))
         except AzureException as ex:
-            if ex.args and hasattr(ex.args[0], 'args') and ex.args[0].args \
+            # pylint: disable = no-member
+            if ex.args and isinstance(ex.args, tuple) and hasattr(ex.args[0], 'args') and ex.args[0].args \
                     and 'Max retries exceeded with url: /?restype=service&comp=properties' in ex.args[0].args[0]:
                 raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
                                "--services in your commands.".format(s.name))
