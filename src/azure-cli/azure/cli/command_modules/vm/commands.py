@@ -217,7 +217,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='update_image')
 
-    with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom, is_preview=True) as g:
+    with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
         g.custom_command('list', 'list_image_templates')
         g.command('show', 'get')
