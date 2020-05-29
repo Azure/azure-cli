@@ -14,7 +14,7 @@ Information required from service team:
 3. Minimum API version required. What is the minimum API version of your service required to implement your feature?
 4. Swagger link. Provide a link to the location of your feature(s) in the REST API specs repo. If your feature(s) has corresponding commit or pull request in the REST API specs repo, provide them. This should be on the master branch of the REST API specs repo.
 5. Target date. If you have a target date for releasing this feature/work, please provide it. While we can't guarantee these dates, it will help us prioritize your request against other requests.
-6. Where do you want the feature locate? Module or Extension? A [Comparision](https://github.com/Azure/azure-cli/blob/dev/doc/onboarding_guide.md#extension-vs-module).
+6. Where do you want the feature to locate? A command module or an extension? Here is a [Comparision](https://github.com/Azure/azure-cli/blob/dev/doc/onboarding_guide.md#extension-vs-module).
 7. Status of the service. Is it in preview or GAed?
 8. Examples of the feature. Usually REST API specs repo should contain examples. An independent documentation or tutorial is also OK.  
 9. Prerequisite to use this feature. Whitelist subscription? Register the feature for subscription? Is it available in public Azure?
