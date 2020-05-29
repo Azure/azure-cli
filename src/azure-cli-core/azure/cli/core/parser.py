@@ -152,6 +152,10 @@ class AzCliCommandParser(CLICommandParser):
         with CommandLoggerContext(logger):
             logger.error('%(prog)s: error: %(message)s', args)
         self.print_usage(sys.stderr)
+        # Manual recommendations
+        manual_recommendations = self._get_manual_recommendations(**args)
+        self._suggestion_msg.extend(manual_recommendations)
+        # AI recommendations
         failure_recovery_recommendations = self._get_failure_recovery_recommendations()
         self._suggestion_msg.extend(failure_recovery_recommendations)
         self._print_suggestion_msg(sys.stderr)
@@ -178,6 +182,13 @@ class AzCliCommandParser(CLICommandParser):
         argcomplete.autocomplete = AzCompletionFinder()
         argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
                                  default_completer=lambda _: ())
+
+    def _get_manual_recommendations(self, **kwargs):
+        recommendations = []
+        # recommendation for --query value error
+        if 'message' in kwargs and '--query' in kwargs['message']:
+            recommendations.append('To learn more about [--query JMESPATH] usage in AzureCLI, visit https://aka.ms/CLIQuery')
+        return recommendations
 
     def _get_failure_recovery_arguments(self, action=None):
         # Strip the leading "az " and any extraneous whitespace.
