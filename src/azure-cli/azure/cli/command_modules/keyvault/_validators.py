@@ -387,9 +387,9 @@ def validate_storage_disabled_attribute(attr_arg_name, attr_type):
 def convert_encrypted_value(ns):
     try:
         ns.value = base64.b64decode(ns.value.encode('utf-8'))
+    except:  # pylint: disable=bare-except
+        ns.value = ns.value.encode('utf-8')
 
-    ns.value = ns.value.encode('utf-8')
 
-
-def convert_base64_to_str(ns):
+def convert_decrypted_value(ns):
     ns.value = base64.b64decode(ns.value)
