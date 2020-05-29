@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.7.0
+++++++
+* Enable local context for location (#13682)
+
 2.6.0
 ++++++
 * Update local context on/off status to global user level (#13277)
