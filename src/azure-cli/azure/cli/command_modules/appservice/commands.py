@@ -361,7 +361,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
         g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('staticsite', custom_command_type=staticsite_sdk) as g:
+    with self.command_group('staticapp', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsites')
         g.custom_command('show', 'show_staticsite')
         g.custom_command('list-domains', 'list_staticsite_domains')
