@@ -69,7 +69,8 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
                          "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
             return 1
         if isinstance(ex, (CLIError, CloudError, AzureException, AzureError)):
-            logger.error(ex.args[0])
+            # Another option is showing a description of the error type.
+            logger.error(type(ex).__name__ + ': ' + ex.args[0])
             try:
                 for detail in ex.args[0].error.details:
                     logger.error(detail)
