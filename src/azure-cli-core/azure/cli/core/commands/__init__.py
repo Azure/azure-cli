@@ -1013,7 +1013,10 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 
 def _load_command_loader(loader, args, name, prefix):
     module = import_module(prefix + name)
-    loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
+    if name == 'storage' and loader.cli_ctx.cloud.profile != 'latest':
+        loader_cls = getattr(module, 'AZURE_STACK_COMMAND_LOADER_CLS', None)
+    else:
+        loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
     command_table = {}
 
     if loader_cls:
