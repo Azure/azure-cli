@@ -15,9 +15,9 @@ Information required from service team:
 4. Swagger link. Provide a link to the location of your feature(s) in the REST API specs repo. If your feature(s) has corresponding commit or pull request in the REST API specs repo, provide them. This should be on the master branch of the REST API specs repo.
 5. Target date. If you have a target date for releasing this feature/work, please provide it. While we can't guarantee these dates, it will help us prioritize your request against other requests.
 6. Where do you want the feature to locate? A command module or an extension? Here is a [Comparision](https://github.com/Azure/azure-cli/blob/dev/doc/onboarding_guide.md#extension-vs-module).
-7. Status of the service. Is it in preview or GAed?
+7. Status of the service. Is it in preview or GA?
 8. Examples of the feature. Usually REST API specs repo should contain examples. An independent documentation or tutorial is also OK.  
-9. Prerequisite to use this feature. Whitelist subscription? Register the feature for subscription? Is it available in public Azure?
+9. Prerequisite to use this feature. Whitelisting subscription? Registering the feature for subscription? Is it available in public Azure?
 
 The overall workflow is:
 1. Swagger and service ready.
@@ -32,12 +32,6 @@ The overall workflow is:
  ---------      ------------      -----------
 ```
 
-This is the way that Azure CLI collaborates with service team. Service should be well-designed, stable and tested before asking Azure CLI support.
-
-However, sometimes, some features are urgent due to some reasons like bad planning. If we wait the previous phase to finish before starting the next phase, it could last a very long time to deliver the feature. We support developing Azure CLI commands before the service is ready. The requirements are 
-1. The service is available for testing.
-2. Azure Python SDK is available. A private build is allowed.
-
-Once the service is published and SDK is published in PyPI, we will release CLI commands. Please notice that this is not a recommended way of collaboration because service tends to change even involves breaking changes without cost before this version of service is announced released.
+This is the way that Azure CLI collaborates with service team. The swagger PR should be merged and the service should be released before asking Azure CLI support.
 
 Feel free to contact Azure CLI team at any time through any channels. We are passionate to build the world-class cloud product.
