@@ -461,7 +461,10 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
 
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
     if scope:
-        assignments = list(assignments_client.list_for_scope(scope=scope, filter='atScope()'))
+        f = 'atScope()'
+        if assignee_object_id and include_groups:
+            f = f + " and assignedTo('{}')".format(assignee_object_id)
+        assignments = list(assignments_client.list_for_scope(scope=scope, filter=f))
     elif assignee_object_id:
         if include_groups:
             f = "assignedTo('{}')".format(assignee_object_id)
@@ -483,8 +486,8 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
             role_id = _resolve_role_id(role, scope, definitions_client)
             assignments = [i for i in assignments if worker.get_role_property(i, 'role_definition_id') == role_id]
 
-        # filter the assignee if "scope" is provided
-        if assignee_object_id and scope:
+        # filter the assignee if "include_groups" is not provided
+        if assignee_object_id and not include_groups:
             assignments = [i for i in assignments if worker.get_role_property(i, 'principal_id') == assignee_object_id]
 
     return assignments
