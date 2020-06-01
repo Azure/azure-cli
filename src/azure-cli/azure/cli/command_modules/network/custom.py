@@ -970,7 +970,7 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
                                 item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
                                 firewall_policy=None, no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
-    if (address_pool or http_settings) and redirect_config:
+    if address_pool and redirect_config:
         raise CLIError("Cannot reference a BackendAddressPool when Redirect Configuration is specified.")
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
