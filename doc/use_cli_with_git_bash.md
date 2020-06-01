@@ -13,7 +13,7 @@ $ az vm show --ids "/subscriptions/00000000-0000-0000-0000-000000000000/resource
 
 invalid resource ID: C:/Program Files/Git/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/virtualMachines/my-vm
 ```
-To disable the path conversion. You can set enviroment variable MSYS_NO_PATHCONV=1 or set it temporarily when a running command:
+To disable the path conversion. You can set enviroment variable `MSYS_NO_PATHCONV=1` or set it temporarily when a running command:
 ```
 $ MSYS_NO_PATHCONV=1 az vm show --ids "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/virtualMachines/my-vm"
 ```
