@@ -20,9 +20,9 @@ Information required from service team:
 9. Prerequisite to use this feature. Whitelisting subscription? Registering the feature for subscription? Is it available in public Azure?
 
 The overall workflow is:
-1. Swagger and service ready.
-2. Azure Python SDK ready (PyPI).
-3. Azure CLI commands ready.
+1. Swagger and service ready
+2. Azure Python SDK ready (PyPI)
+3. Azure CLI commands ready
 
 ```
  ---------      ------------      -----------
