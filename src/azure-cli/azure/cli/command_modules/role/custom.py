@@ -483,7 +483,8 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
             role_id = _resolve_role_id(role, scope, definitions_client)
             assignments = [i for i in assignments if worker.get_role_property(i, 'role_definition_id') == role_id]
 
-        if assignee_object_id:
+        # filter the assignee if "scope" is provided
+        if assignee_object_id and scope:
             assignments = [i for i in assignments if worker.get_role_property(i, 'principal_id') == assignee_object_id]
 
     return assignments

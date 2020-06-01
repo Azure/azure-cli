@@ -250,8 +250,22 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 'nsg': 'nsg1'
             })
 
-            result = self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+            result = self.cmd('ad user create --display-name tester123 --password Test123456789'
+                              ' --user-principal-name {upn}').get_output_in_json()
+            self.kwargs.update({
+                'user_id': result['objectId']})
             time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+            group = self.create_random_name('testgroup', 15)
+            self.kwargs.update({
+                'group': group})
+
+            group_result = self.cmd(
+                'ad group create --display-name group123 --mail-nickname {group}').get_output_in_json()
+            self.kwargs.update({
+                'group_id': group_result['objectId']})
+            self.cmd(
+                'ad group member add --group {group_id} --member-id {user_id}')
 
             try:
                 self.cmd('network nsg create -n {nsg} -g {rg}')
@@ -270,6 +284,13 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     self.check("[0].principalName", self.kwargs["upn"])
                 ])
 
+                self.cmd('role assignment create --assignee {group_id} --role contributor -g {rg}')
+
+                # test include-groups
+                self.cmd('role assignment list --assignee {upn} --all --include-groups', checks=[
+                    self.check("length([])", 2)
+                ])
+
                 # test couple of more general filters
                 result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()
                 self.assertTrue(len(result) >= 1)
@@ -277,6 +298,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 result = self.cmd('role assignment list --all').get_output_in_json()
                 self.assertTrue(len(result) >= 1)
 
+                self.cmd('role assignment delete --assignee {group_id} --role contributor -g {rg}')
                 self.cmd('role assignment delete --assignee {upn} --role contributor -g {rg}')
                 self.cmd('role assignment list -g {rg}',
                          checks=self.is_empty())
