@@ -970,13 +970,15 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
                                 item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
                                 firewall_policy=None, no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
+    if address_pool and redirect_config:
+        raise CLIError("Cannot reference a BackendAddressPool when Redirect Configuration is specified.")
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
     if not url_map:
         raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
     default_backend_pool = SubResource(id=url_map.default_backend_address_pool.id) \
-        if url_map.default_backend_address_pool else None
+        if (url_map.default_backend_address_pool and not redirect_config) else None
     default_http_settings = SubResource(id=url_map.default_backend_http_settings.id) \
         if url_map.default_backend_http_settings else None
     new_rule = ApplicationGatewayPathRule(
@@ -986,7 +988,7 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings)
     if cmd.supported_api_version(min_api='2017-06-01'):
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
-            if url_map.default_redirect_configuration else None
+            if (url_map.default_redirect_configuration and not address_pool) else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
 
     rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
