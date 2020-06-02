@@ -82,7 +82,7 @@ class TestResolveFromIndex(unittest.TestCase):
 
         with IndexPatch(index_data):
             self.assertEqual(resolve_from_index(ext_name, cur_version='0.1.0')[0], index_data[ext_name][0]['downloadUrl'])
-            self.assertEqual(resolve_from_index(ext_name, cur_version='0.2.0')[0], index_data[ext_name][2]['downloadUrl'])
+            self.assertEqual(resolve_from_index(ext_name, cur_version='0.2.0')[0], index_data[ext_name][1]['downloadUrl'])
 
 class TestResolveFilters(unittest.TestCase):
 
