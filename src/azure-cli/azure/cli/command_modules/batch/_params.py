@@ -7,7 +7,9 @@ from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.batch.models import AccountKeyType, KeySource, PublicNetworkAccessType
+from azure.mgmt.batch.models import \
+    AccountKeyType, KeySource,\
+    PublicNetworkAccessType, ResourceIdentityType
 from azure.batch.models import ComputeNodeDeallocationOption
 
 from azure.cli.core.commands.parameters import \
@@ -55,13 +57,15 @@ def load_arguments(self, _):
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault', arg_type=get_enum_type(KeySource))
         c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. '
                                                      'Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
         c.ignore('keyvault_url')
 
     with self.argument_context('batch account set') as c:
         c.argument('tags', tags_type)
         c.argument('storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
         c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault')
-        c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. '                                                  'Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
+        c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
 
     with self.argument_context('batch account keys renew') as c:
         c.argument('key_name', arg_type=get_enum_type(AccountKeyType))
