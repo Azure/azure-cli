@@ -7,7 +7,7 @@ import mock
 
 from azure.cli.core.extension._resolve import (resolve_from_index, resolve_project_url_from_index,
                                                NoExtensionCandidatesError, _is_not_platform_specific,
-                                               _is_greater_than_cur_version)
+                                               _is_greater_or_equal_than_cur_version)
 
 
 class IndexPatch(object):
@@ -71,6 +71,18 @@ class TestResolveFromIndex(unittest.TestCase):
             # Should choose the second one as py version is not considered platform specific.
             self.assertEqual(resolve_from_index(name)[0], index_data[name][1]['downloadUrl'])
 
+    def test_filter_version(self):
+        ext_name = 'hellp'
+        index_data = {
+            ext_name: [
+                mock_ext('hello-0.1.0-py3-none-any.whl', '0.1.0'),
+                mock_ext('hello-0.2.0-py3-none-any.whl', '0.2.0')
+            ]
+        }
+
+        with IndexPatch(index_data):
+            self.assertEqual(resolve_from_index(ext_name, cur_version='0.1.0')[0], index_data[ext_name][0]['downloadUrl'])
+            self.assertEqual(resolve_from_index(ext_name, cur_version='0.2.0')[0], index_data[ext_name][2]['downloadUrl'])
 
 class TestResolveFilters(unittest.TestCase):
 
@@ -83,16 +95,16 @@ class TestResolveFilters(unittest.TestCase):
         self.assertFalse(_is_not_platform_specific(mock_ext('myext-1.1.26.0-py2-none-linux_armv7l.whl')))
 
     def test_greater_than_current(self):
-        self.assertIsNone(_is_greater_than_cur_version(None))
-        self.assertIsNotNone(_is_greater_than_cur_version('0.0.1'))
-        filter_func = _is_greater_than_cur_version('0.0.1')
+        self.assertIsNone(_is_greater_or_equal_than_cur_version(None))
+        self.assertIsNotNone(_is_greater_or_equal_than_cur_version('0.0.1'))
+        filter_func = _is_greater_or_equal_than_cur_version('0.0.1')
         filter_func
         self.assertTrue(filter_func(mock_ext('myext-0.0.2-py2.py3-none-any.whl', '0.0.2')))
         self.assertTrue(filter_func(mock_ext('myext-0.0.1+dev-py2.py3-none-any.whl', '0.0.1+dev')))
         self.assertTrue(filter_func(mock_ext('myext-0.0.1.post1-py2.py3-none-any.whl', '0.0.1.post1')))
+        self.assertTrue(filter_func(mock_ext('myext-0.0.1-py2.py3-none-any.whl', '0.0.1')))
 
         self.assertFalse(filter_func(mock_ext('myext-0.0.1.pre1-py2.py3-none-any.whl', '0.0.1.pre1')))
-        self.assertFalse(filter_func(mock_ext('myext-0.0.1-py2.py3-none-any.whl', '0.0.1')))
 
 
 class TestResolveProjectUrlFromIndex(unittest.TestCase):
