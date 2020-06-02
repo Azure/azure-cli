@@ -128,7 +128,7 @@ type: command
 short-summary: Create a disk encryption set.
 examples:
   - name: Create a disk encryption set
-    text: az disk-encryption-set create ----resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault
+    text: az disk-encryption-set create --resource-group MyResourceGroup --name MyDiskEncryptionSet --key-url MyKey --source-vault MyVault
 """
 
 helps['disk-encryption-set delete'] = """
