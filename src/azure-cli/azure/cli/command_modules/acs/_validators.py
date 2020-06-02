@@ -325,7 +325,7 @@ def validate_label(label):
 
     # validate label value
     if len(kv[1]) > 63:
-        raise CLIError("Invalid label: %s. Label must be more than 63 chars." % label)
+        raise CLIError("Invalid label: %s. Label must not be more than 63 chars." % label)
     if not value_regex.match(kv[1]):
         raise CLIError("Invalid label: %s. A valid label must be an empty string or consist of alphanumeric "
                        "characters, '-', '_' or '.', and must start and end with an alphanumeric character" % label)
