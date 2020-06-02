@@ -7,6 +7,8 @@ import argparse
 from knack.util import CLIError
 from collections import defaultdict
 
+
+# pylint: disable=protected-access
 class AddBackendAddressCreate(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)

@@ -2759,8 +2759,8 @@ parameters:
     short-summary: A config file used to set backend addresses. This argument is for experienced users. You may encounter parse errors if the json file is invalid.
     long-summary: |
         Usage: --backend-addresses-config-file @"{config_file.json}"
-        
-        A example config file is 
+
+        A example config file is
         [
           {
             "name": "address1",
@@ -2777,9 +2777,9 @@ examples:
   - name: Create an address pool.
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
   - name: Create an address pool with several backend addresses using key-value arguments.
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-address name=addr1 vnet=MyVnet ip-address=10.0.0.1 --backend-address name=addr2 vnet={VnetResourceId} ip-address=10.0.0.3 
+    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-address name=addr1 vnet=MyVnet ip-address=10.0.0.1 --backend-address name=addr2 vnet={VnetResourceId} ip-address=10.0.0.3
   - name: Create an address pool with several backend addresses using config file
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-address name=addr1 vnet=MyVnet ip-address=10.0.0.1 --backend-address-config-file @"config_file.json"
+    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-address name=addr1 vnet=MyVnet ip-address=10.0.0.1 --backend-addresses-config-file @config_file.json
 """
 
 helps['network lb address-pool delete'] = """

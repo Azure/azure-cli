@@ -2906,8 +2906,9 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                 type='virtualNetworks',
                 name=vnet)
         return vnet
-    if backend_addresses_config_file and not isinstance(backend_addresses_config_file, list):
-        raise CLIError('Config file must be a list. Please see example as a reference.')
+    if backend_addresses_config_file:
+        if not isinstance(backend_addresses_config_file, list):
+            raise CLIError('Config file must be a list. Please see example as a reference.')
         for addr in backend_addresses_config_file:
             if not isinstance(addr, dict):
                 raise CLIError('Each address in config file must be a dictionary. Please see example as a reference.')
@@ -2928,6 +2929,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     addresses_pool = []
     addresses_pool.extend(backend_addresses)
     addresses_pool.extend(backend_addresses_config_file)
+    # pylint: disable=line-too-long
     new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
                                                 virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])),
                                                 ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
@@ -2960,20 +2962,15 @@ def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
 
 
 def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
-                                        address_name=None, vnet=None, ip_address=None, nic_ip_config=None):
+                                        address_name=None, vnet=None, ip_address=None):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
     address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
     (LoadBalancerBackendAddress,
-     VirtualNetwork,
-     NetworkInterfaceIPConfiguration) = cmd.get_models('LoadBalancerBackendAddress',
-                                                       'VirtualNetwork',
-                                                       'NetworkInterfaceIPConfiguration')
+     VirtualNetwork) = cmd.get_models('LoadBalancerBackendAddress',
+                                      'VirtualNetwork')
     new_address = LoadBalancerBackendAddress(name=address_name,
                                              virtual_network=VirtualNetwork(id=vnet) if vnet else None,
-                                             ip_address=ip_address if ip_address else None,
-                                             network_interface_ip_configuration=NetworkInterfaceIPConfiguration(
-                                                 id=nic_ip_config
-                                             ) if nic_ip_config else None)
+                                             ip_address=ip_address if ip_address else None)
     address_pool.load_balancer_backend_addresses.append(new_address)
     return client.create_or_update(resource_group_name, load_balancer_name, backend_address_pool_name, address_pool)
 
