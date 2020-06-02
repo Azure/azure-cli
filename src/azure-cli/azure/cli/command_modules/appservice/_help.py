@@ -1991,3 +1991,19 @@ helps['appservice ase delete'] = """
     - name: Delete app service environment.
       text: az appservice ase delete -n MyAseName
 """
+
+helps['staticapp environments list'] = """
+    type: command
+    short-summary: List all environments of the static app including production.
+    examples:
+    - name: List static app environment.
+      text: az staticapp environments list -n MyStaticAppName
+"""
+
+helps['staticapp environments show'] = """
+    type: command
+    short-summary: Show information about the production environment or the specified environment.
+    examples:
+    - name: Show static app environment.
+      text: az staticapp environments show -n MyStaticAppName
+"""

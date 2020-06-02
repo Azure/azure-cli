@@ -56,6 +56,7 @@ def load_arguments(self, _):
     staticapp_name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME',
                                                help="Name of the static site",
                                                local_context_attribute=LocalContextAttribute(name='staticsite_name', actions=[LocalContextAction.GET]))
+    environment_name_arg_type = CLIArgumentType(options_list=['--environment_name'], help="Name of the environment of static site")
     staticapp_repo_token_arg_type = CLIArgumentType(options_list=['--token', '-t'],
                                                      help="A user's github repository token. This is used to setup the Github Actions workflow file and API secrets.",
                                                      local_context_attribute=LocalContextAttribute(name='staticsite_repo_token', actions=[LocalContextAction.GET]))
@@ -696,6 +697,7 @@ def load_arguments(self, _):
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp environments show') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
+        c.argument('environment_name', arg_type=environment_name_arg_type)
     with self.argument_context('staticapp list-domains') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp list-secrets') as c:
