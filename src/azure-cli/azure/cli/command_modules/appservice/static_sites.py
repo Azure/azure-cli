@@ -26,11 +26,10 @@ def show_staticsite(cmd, name, resource_group_name=None):
 
 def list_staticsite_environments(cmd, name, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
-    if resource_group_name:
-        result = list(client.get_static_sites_by_resource_group(resource_group_name))
-    else:
-        result = list(client.list())
-    return result
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return client.get_static_site_builds(resource_group_name, name)
 
 
 def show_staticsite_environment(cmd, name, environment_name=None, resource_group_name=None):
