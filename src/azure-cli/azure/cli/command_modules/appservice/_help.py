@@ -1298,9 +1298,9 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a NodeJS 6.2 runtime and deployed from a local git repository.
+  - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|10.14" --deployment-local-git
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx

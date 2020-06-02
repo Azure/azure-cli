@@ -29,7 +29,8 @@ def storage_copy(cmd, source=None,
                  destination_share=None,
                  destination_file_path=None,
                  destination_local_path=None,
-                 exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None):
+                 exclude_pattern=None, include_pattern=None, exclude_path=None, include_path=None,
+                 follow_symlinks=None):
     def get_url_with_sas(source, account_name, container, blob, share, file_path, local_path):
         import re
         import os
@@ -106,6 +107,8 @@ def storage_copy(cmd, source=None,
         flags.append('--exclude-path=' + exclude_path)
     if content_type is not None:
         flags.append('--content-type=' + content_type)
+    if follow_symlinks is not None:
+        flags.append('--follow-symlinks=true')
     azcopy.copy(full_source, full_destination, flags=flags)
 
 

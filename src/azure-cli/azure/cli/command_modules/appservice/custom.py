@@ -49,7 +49,7 @@ from .tunnel import TunnelServer
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
-from ._client_factory import web_client_factory, ex_handler_factory
+from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
@@ -58,7 +58,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src)
 from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
                          FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT,
-                         DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION)
+                         DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION, RUNTIME_STACKS)
 
 logger = get_logger(__name__)
 
@@ -756,11 +756,20 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_auth_settings', slot, auth_settings)
 
 
+# Currently using hardcoded values instead of this function. This function calls the stacks API;
+# Stacks API is updated with Antares deployments,
+# which are infrequent and don't line up with stacks EOL schedule.
 def list_runtimes(cmd, linux=False):
     client = web_client_factory(cmd.cli_ctx)
     runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
 
     return [s['displayName'] for s in runtime_helper.stacks]
+
+
+def list_runtimes_hardcoded(linux=False):
+    if linux:
+        return RUNTIME_STACKS['linux']
+    return RUNTIME_STACKS['windows']
 
 
 def _rename_server_farm_props(webapp):
@@ -2753,9 +2762,18 @@ def list_consumption_locations(cmd):
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
-    client = web_client_factory(cmd.cli_ctx)
+    web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_name(sku)
-    return client.list_geo_regions(full_sku, linux_workers_enabled)
+    web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
+
+    providers_client = providers_client_factory(cmd.cli_ctx)
+    providers_client_locations_list = getattr(providers_client.get('Microsoft.Web'), 'resource_types', [])
+    for resource_type in providers_client_locations_list:
+        if resource_type.resource_type == 'sites':
+            providers_client_locations_list = resource_type.locations
+            break
+
+    return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
 def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):

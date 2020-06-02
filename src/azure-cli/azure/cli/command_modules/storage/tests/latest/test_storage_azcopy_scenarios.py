@@ -346,6 +346,20 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage blob list -c {} --account-name {}'
                  .format(first_container, first_account), checks=JMESPathCheck('length(@)', 21))
 
+        # Upload a single file with a symlink
+        source_path = os.path.join(test_dir, 'symlink_source')
+        with open(source_path, 'w') as f:
+            f.write('This is a data source for symlink.')
+        symlink = os.path.join(test_dir, 'symlink')
+        # If the error of "WinError[1314]" occurred during execution in Windows environment,
+        # please try to execute azdev with administrator privileges
+        os.symlink(source_path, symlink)
+
+        self.cmd('storage copy --source-local-path "{}" --destination-account-name {} --destination-container {} '
+                 '--follow-symlinks'.format(symlink, first_account, first_container))
+        self.cmd('storage blob list -c {} --account-name {}'
+                 .format(first_container, first_account), checks=JMESPathCheck('length(@)', 22))
+
         local_folder = self.create_temp_dir()
         # Download a single file
         self.cmd('storage copy --source-account-name {} --source-container {} --source-blob {} --destination-local-path "{}"'
@@ -384,7 +398,7 @@ class StorageAzcopyTests(StorageScenarioMixin, LiveScenarioTest):
         self.cmd('storage container list --account-name {}'
                  .format(second_account), checks=JMESPathCheck('length(@)', 2))
         self.cmd('storage blob list -c {} --account-name {}'
-                 .format(first_container, second_account), checks=JMESPathCheck('length(@)', 21))
+                 .format(first_container, second_account), checks=JMESPathCheck('length(@)', 22))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

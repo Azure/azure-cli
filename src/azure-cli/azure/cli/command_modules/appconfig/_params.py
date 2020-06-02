@@ -134,7 +134,7 @@ def load_arguments(self, _):
         c.argument('format_', options_list=['--format'], arg_type=get_enum_type(['json', 'yaml', 'properties']), help='File format exporting to. Required for file arguments. Currently, feature flags are not supported in properties format.')
         c.argument('depth', validator=validate_import_depth, help="Depth for flattening the json or yaml file to key-value pairs. Flatten to the deepest level by default. Not appicable for property files or feature flags.")
         # bypass cli allowed values limition
-        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for importing hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
+        c.argument('separator', validator=validate_separator, help="Delimiter for flattening the json or yaml file to key-value pairs. Required for exporting hierarchical structure. Separator will be ignored for property files and feature flags. Supported values: '.', ',', ';', '-', '_', '__', '/', ':' ")
         c.argument('naming_convention', arg_type=get_enum_type(['pascal', 'camel', 'underscore', 'hyphen']), help='Naming convention to be used for "Feature Management" section of file. Example: pascal = FeatureManagement, camel = featureManagement, underscore = feature_management, hyphen = feature-management.')
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), validator=validate_resolve_keyvault, help="Resolve the content of key vault reference.")
 
