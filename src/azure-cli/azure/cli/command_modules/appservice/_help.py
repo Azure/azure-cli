@@ -1992,6 +1992,46 @@ helps['appservice ase delete'] = """
       text: az appservice ase delete -n MyAseName
 """
 
+helps['staticapp list'] = """
+    type: command
+    short-summary: List all static app resources in a subscription, or in resource group if provided
+    examples:
+    - name: List static apps.
+      text: az staticapp list
+"""
+
+helps['staticapp show'] = """
+    type: command
+    short-summary: Show details of a static app.
+    examples:
+    - name: Show static app.
+      text: az staticapp show -n MyStaticAppName
+"""
+
+helps['staticapp create'] = """
+    type: command
+    short-summary: Create a static app and returns the app created.
+    examples:
+    - name: Create static app.
+      text: az staticapp create -n MyStaticAppName -g MyRg -s MyGitHubRepo -l Location
+"""
+
+helps['staticapp update'] = """
+    type: command
+    short-summary: Update a static app and returns the app updated.
+    examples:
+    - name: Update static app.
+      text: az staticapp update -n MyStaticAppName -g MyRg
+"""
+
+helps['staticapp delete'] = """
+    type: command
+    short-summary: Delete a static app.
+    examples:
+    - name: Delete static app.
+      text: az staticapp delete -n MyStaticAppName -g MyRg
+"""
+
 helps['staticapp environments list'] = """
     type: command
     short-summary: List all environments of the static app including production.
