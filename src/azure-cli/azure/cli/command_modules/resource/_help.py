@@ -1916,38 +1916,7 @@ examples:
     crafted: true
 """
 
-helps['rest'] = """
-type: command
-short-summary: Invoke a custom request.
-long-summary: >
-    This command automatically authenticates using the credential logged in: If Authorization header is not set, it
-    attaches header `Authorization: Bearer <token>`, where `<token>` is retrieved from AAD. The target resource of the
-    token is derived from --url if --url starts with an endpoint from `az cloud show --query endpoints`. You may also
-    use --resource for a custom resource.
-
-    If Content-Type header is not set and --body is a valid JSON string, Content-Type header will default to
-    application/json.
-examples:
-  - name: Get Audit log through Microsoft Graph
-    text: >
-        az rest --method get --uri https://graph.microsoft.com/beta/auditLogs/directoryAudits
-  - name: Update a Azure Active Directory Graph User's display name
-    text: >
-        az rest --method patch --uri "https://graph.microsoft.com/v1.0/users/johndoe@azuresdkteam.onmicrosoft.com" --body "{\\"displayName\\": \\"jondoe2\\"}"
-  - name: Get a virtual machine
-    text: >
-        az rest --method get --uri /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachines/{vmName}?api-version=2019-03-01
-  - name: Create a public IP address from body.json file
-    text: >
-        az rest --method put --uri https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}?api-version=2019-09-01 --body @body.json
-"""
-
 helps['tag'] = """
 type: group
 short-summary: Manage resource tags.
-"""
-
-helps['version'] = """
-type: command
-short-summary: Show the versions of Azure CLI modules and extensions in JSON format by default or format configured by --output
 """
