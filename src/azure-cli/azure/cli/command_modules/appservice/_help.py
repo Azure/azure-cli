@@ -2047,3 +2047,11 @@ helps['staticapp environments show'] = """
     - name: Show static app environment.
       text: az staticapp environments show -n MyStaticAppName
 """
+
+helps['staticapp environments functions'] = """
+    type: command
+    short-summary: Show information about functions.
+    examples:
+    - name: Show static app functions.
+      text: az staticapp environments functions -n MyStaticAppName
+"""

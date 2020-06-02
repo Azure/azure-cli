@@ -5,6 +5,7 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
+from knack.util import CLIError
 
 
 def list_staticsites(cmd, resource_group_name=None):
@@ -50,9 +51,12 @@ def list_staticsite_secrets(cmd, resource_group_name, name):
     return client.list_static_site_secrets(resource_group_name, name)
 
 
-def list_staticsite_functions(cmd, resource_group_name, name):
+def list_staticsite_functions(cmd, name, resource_group_name=None, environment_name='default'):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
-    return client.list_static_site_functions(resource_group_name, name)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return client.list_static_site_build_functions(resource_group_name, name, environment_name)
 
 
 def list_staticsite_function_app_settings(cmd, resource_group_name, name):
@@ -65,7 +69,6 @@ def create_staticsites(cmd, resource_group_name, name, location,
                        app_location='/', api_location='api', app_artifact_location=None,
                        custom_domains=None, tags=None, no_wait=False):
     if not token:
-        from knack.util import CLIError
         raise CLIError("GitHub access token is required to authenticate to your repositories. "
                        "If you need to create a Github Personal Access Token, "
                        "please follow the steps found at the following link:\n{0}"
