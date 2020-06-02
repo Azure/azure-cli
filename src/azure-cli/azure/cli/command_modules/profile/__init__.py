@@ -57,7 +57,12 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('service_principal', action='store_true', help='The credential representing a service principal.')
             c.argument('username', options_list=['--username', '-u'], help='user name, service principal, or managed service identity ID')
             c.argument('tenant', options_list=['--tenant', '-t'], help='The AAD tenant, must provide when using service principals.', validator=validate_tenant)
-            c.argument('allow_no_subscriptions', action='store_true', help="Support access tenants without subscriptions. It's uncommon but useful to run tenant level commands, such as 'az ad'")
+            c.argument('tenant_access', action='store_true',
+                       help='Only log in to the home tenant or the tenant specified by --tenant. CLI will not perform '
+                            'ARM operations to list tenants and subscriptions. Then you may run tenant-level commands, '
+                            'such as `az ad`, `az account get-access-token`.')
+            c.argument('allow_no_subscriptions', action='store_true', deprecate_info=c.deprecate(target='--allow-no-subscriptions', expiration='3.0.0', redirect="--tenant-access", hide=False),
+                       help="Support access tenants without subscriptions. It's uncommon but useful to run tenant level commands, such as `az ad`")
             c.ignore('_subscription')  # hide the global subscription parameter
             c.argument('identity', options_list=('-i', '--identity'), action='store_true', help="Log in using the Virtual Machine's managed identity", arg_group='Managed Identity')
             c.argument('identity_port', type=int, help="the port to retrieve tokens for login. Default: 50342", arg_group='Managed Identity')
