@@ -16,7 +16,24 @@ def list_staticsites(cmd, resource_group_name=None):
     return result
 
 
-def show_staticsite(cmd, resource_group_name, name):
+def show_staticsite(cmd, name, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return client.get_static_site(resource_group_name, name)
+
+
+def list_staticsite_environments(cmd, name, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if resource_group_name:
+        result = list(client.get_static_sites_by_resource_group(resource_group_name))
+    else:
+        result = list(client.list())
+    return result
+
+
+def show_staticsite_environment(cmd, name, environment_name=None, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.get_static_site(resource_group_name, name)
 
@@ -89,6 +106,16 @@ def delete_staticsite(cmd, resource_group_name, name, no_wait=False):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.delete_static_site,
                        resource_group_name=resource_group_name, name=name)
+
+
+def _get_resource_group_name_of_staticsite(client, static_site_name):
+    static_sites = client.list()
+    for static_site in static_sites:
+        if static_site.name.lower() == static_site_name.lower():
+            from .utils import _get_resource_group_from_id
+            return _get_resource_group_from_id(static_site.id)
+
+    raise CLIError("Static site was '{}' not found in subscription.".format(static_site_name))
 
 
 def _get_staticsites_client_factory(cli_ctx, api_version=None):

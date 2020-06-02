@@ -692,6 +692,10 @@ def load_arguments(self, _):
 
     with self.argument_context('staticapp show') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
+    with self.argument_context('staticapp environments list') as c:
+        c.argument('name', arg_type=staticapp_name_arg_type)
+    with self.argument_context('staticapp environments show') as c:
+        c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp list-domains') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp list-secrets') as c:

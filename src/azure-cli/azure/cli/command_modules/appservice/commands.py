@@ -371,3 +371,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_staticsites', supports_no_wait=True)
         g.custom_command('update', 'update_staticsites', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite', supports_no_wait=True, confirmation=True)
+
+    with self.command_group('staticapp environments', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('list', 'list_staticsite_environments')
+        g.custom_command('show', 'show_staticsite_environment')

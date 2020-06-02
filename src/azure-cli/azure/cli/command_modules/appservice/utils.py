@@ -63,3 +63,9 @@ def retryable_method(retries=3, interval_sec=5, excpt_type=Exception):
                 time.sleep(interval_sec)
         return call
     return decorate
+
+
+def _get_resource_group_from_id(arm_id):
+    import re
+    m = re.search('(?<=resourceGroups/)[^/]+', arm_id)
+    return m.group(0)
