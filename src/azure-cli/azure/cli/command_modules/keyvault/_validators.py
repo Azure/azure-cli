@@ -131,10 +131,10 @@ def validate_key_import_source(ns):
     pem_file = ns.pem_file
     pem_string = ns.pem_string
     pem_password = ns.pem_password
-    if not ((byok_file and not byok_string and not pem_file and not pem_string)
-            or (not byok_file and byok_string and not pem_file and not pem_string)
-            or (not byok_file and not byok_string and pem_file and not pem_string)
-            or (not byok_file and not byok_string and not pem_file and pem_string)):
+    if not ((byok_file and not byok_string and not pem_file and not pem_string) or
+            (not byok_file and byok_string and not pem_file and not pem_string) or
+            (not byok_file and not byok_string and pem_file and not pem_string) or
+            (not byok_file and not byok_string and not pem_file and pem_string)):
         raise ValueError('supply exactly one: --byok-file, --byok-string, --pem-file, --pem-string')
     if (byok_file or byok_string) and pem_password:
         raise ValueError('--byok-file or --byok-string cannot be used with --pem-password')
