@@ -306,6 +306,7 @@ class TagScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_tag_update_by_patch', location='westus')
     def test_tag_update_by_patch(self, resource_group, resource_group_location):
 
+        # Test Microsoft.RecoveryServices/vaults
         self.kwargs.update({
             'loc': resource_group_location,
             'vault': self.create_random_name('vault-', 30),
@@ -313,17 +314,39 @@ class TagScenarioTest(ScenarioTest):
             'resource_group_id': '/subscriptions/' + self.get_subscription_id() + '/resourceGroups/' + resource_group
         })
 
-        resource = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults --is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
-                            checks=self.check('name', '{vault}')).get_output_in_json()
-
-        self.kwargs['vault_id'] = resource['id']
-
+        vault = self.cmd('resource create -g {rg} -n {vault} --resource-type Microsoft.RecoveryServices/vaults '
+                         '--is-full-object -p "{{\\"properties\\":{{}},\\"location\\":\\"{loc}\\",'
+                         '\\"sku\\":{{\\"name\\":\\"Standard\\"}}}}"',
+                         checks=self.check('name', '{vault}')).get_output_in_json()
+        self.kwargs['vault_id'] = vault['id']
         self.cmd('resource tag --ids {vault_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
         self.cmd('resource tag --ids {vault_id} --tags', checks=self.check('tags', {}))
 
-        self.cmd('resource tag --ids {resource_group_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
-
         self.cmd('resource delete --id {vault_id}', checks=self.is_empty())
+
+        # Test Microsoft.Resources/resourceGroups
+        self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
+                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'}))
+
+        # Test Microsoft.ContainerRegistry/registries/webhooks
+        self.kwargs.update({
+            'registry_name': self.create_random_name('clireg', 20),
+            'webhook_name': 'cliregwebhook',
+            'rg_loc': resource_group_location,
+            'uri': 'http://www.microsoft.com',
+            'actions': 'push',
+            'sku': 'Standard'
+        })
+
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}')])
+        webhook = self.cmd('acr webhook create -n {webhook_name} -r {registry_name} --uri {uri} --actions {actions}',
+                           checks=[self.check('name', '{webhook_name}')]).get_output_in_json()
+        self.kwargs['webhook_id'] = webhook['id']
+        self.cmd('resource tag --ids {webhook_id} --tags {tag}', checks=self.check('tags', {'cli-test': 'test'}))
+        self.cmd('resource tag --ids {webhook_id} --tags', checks=self.check('tags', {}))
+
+        self.cmd('resource delete --id {webhook_id}', checks=self.is_empty())
 
     @ResourceGroupPreparer(name_prefix='cli_test_tag_incrementally', location='westus')
     def test_tag_incrementally(self, resource_group, resource_group_location):
@@ -555,8 +578,10 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'tf_invalid': os.path.join(curr_dir, 'simple_deploy_invalid.json').replace('\\', '\\\\'),
             'extra_param_tf': os.path.join(curr_dir, 'simple_extra_param_deploy.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
+            'params_invalid': os.path.join(curr_dir, 'simple_deploy_parameters_invalid.json').replace('\\', '\\\\'),
             'dn': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60),
             'Japanese-characters-tf': os.path.join(curr_dir, 'Japanese-characters-template.json').replace('\\', '\\\\')
@@ -597,6 +622,24 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
         with self.assertRaises(CLIError) as err:
             self.cmd('deployment group create --resource-group {rg} -n {dn2} --template-file {extra_param_tf} --parameters @"{params}" --no-prompt false')
             self.assertTrue("Missing input parameters" in str(err.exception))
+
+        json_invalid_info = "Failed to parse '{}', please check whether it is a valid JSON format"
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group validate -g {rg} -f {tf_invalid} -p @"{params}"')
+            self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group validate -g {rg} -f {tf} -p @"{params_invalid}"')
+            self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group create -g {rg} -n {dn} -f {tf_invalid} -p @"{params}"')
+            self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('deployment group create -g {rg} -n {dn} -f {tf} -p @"{params_invalid}"')
+            self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         self.cmd('deployment group list --resource-group {rg}', checks=[
             self.check('[0].name', '{dn}'),
@@ -755,13 +798,15 @@ class DeploymentTest(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
+            'tf_invalid': os.path.join(curr_dir, 'simple_deploy_invalid.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
             'error_params': os.path.join(curr_dir, 'test-error-params.json').replace('\\', '\\\\'),
+            'params_invalid': os.path.join(curr_dir, 'simple_deploy_parameters_invalid.json').replace('\\', '\\\\'),
             # params-uri below is the raw file url of the test_params.json above
             'params_uri': 'https://raw.githubusercontent.com/Azure/azure-cli/dev/src/azure-cli/azure/cli/command_modules/resource/tests/latest/test-params.json',
             'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
             'dn': 'azure-cli-deployment',
-            'dn2': self.create_random_name('azure-cli-resource-group-deployment', 60)
+            'dn2': self.create_random_name('azure-cli-resource-group-deployment2', 60)
         })
         self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
@@ -799,6 +844,24 @@ class DeploymentTest(ScenarioTest):
             self.check('length([])', 2),
             self.check('[0].resourceGroup', '{rg}')
         ])
+
+        json_invalid_info = "Failed to parse '{}', please check whether it is a valid JSON format"
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('group deployment validate -g {rg} -f {tf_invalid} -p @"{params}"')
+            self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('group deployment validate -g {rg} -f {tf} -p @"{params_invalid}"')
+            self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('group deployment create -g {rg} -n {dn} -f {tf_invalid} -p @"{params}"')
+            self.assertTrue(json_invalid_info.format('{tf_invalid}') == err.exception)
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd('group deployment create -g {rg} -n {dn} -f {tf} -p @"{params_invalid}"')
+            self.assertTrue(json_invalid_info.format('{params_invalid}') in err.exception)
 
         self.cmd('group deployment create -g {rg} -n {dn2} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}" --no-wait')
 
@@ -2196,14 +2259,26 @@ class ResourceGroupLocalContextScenarioTest(LocalContextScenarioTest):
 
     def test_resource_group_local_context(self):
         self.kwargs.update({
-            'group': 'test_local_context_group',
+            'group1': 'test_local_context_group_1',
+            'group2': 'test_local_context_group_2',
             'location': 'eastasia'
         })
-        self.cmd('group create -n {group} -l {location}', checks=[self.check('name', self.kwargs['group'])])
-        self.cmd('group show', checks=[
-            self.check('name', self.kwargs['group']),
+        self.cmd('group create -n {group1} -l {location}', checks=[
+            self.check('name', self.kwargs['group1']),
             self.check('location', self.kwargs['location'])
         ])
+        self.cmd('group show', checks=[
+            self.check('name', self.kwargs['group1']),
+            self.check('location', self.kwargs['location'])
+        ])
+        with self.assertRaisesRegexp(SystemExit, '2'):
+            self.cmd('group delete')
+        self.cmd('group delete -n {group1} -y')
+        self.cmd('group create -n {group2}', checks=[
+            self.check('name', self.kwargs['group2']),
+            self.check('location', self.kwargs['location'])
+        ])
+        self.cmd('group delete -n {group2} -y')
 
 
 if __name__ == '__main__':

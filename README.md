@@ -134,15 +134,30 @@ If you want to get the latest build from the `dev` branch, you can use our "edge
 
 You can download the latest builds by following the links below:
 
-| Platform  | Link                                       |
+| Package  | Link                                       |
 | :-------: | :----------------------------------------- |
-| Windows   | https://aka.ms/InstallAzureCliWindowsEdge  |
-| Homebrew  | https://aka.ms/InstallAzureCliHomebrewEdge |
+| MSI   | https://aka.ms/InstallAzureCliWindowsEdge  |
+| Homebrew Formula | https://aka.ms/InstallAzureCliHomebrewEdge |
+| Ubuntu Xenial Deb | https://aka.ms/InstallAzureCliXenialEdge |
+| Ubuntu Bionic Deb | https://aka.ms/InstallAzureCliBionicEdge |
+| RPM | https://aka.ms/InstallAzureCliRpmEdge |
 
 You can easily install the latest Homebrew edge build with the following command:
 
 ```bash
 brew install $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliHomebrewEdge)
+```
+
+You can install the edge build on Ubuntu Xenial with the following command:
+
+```bash
+curl -Ls -o azure-cli_xenial_all.deb https://aka.ms/InstallAzureCliXenialEdge && dpkg -i azure-cli_xenial_all.deb
+```
+
+And install the edge build with rpm package on CentOS/RHEL/Fedora:
+
+```bash
+rpm -ivh --nodeps $(curl -Ls -o /dev/null -w %{url_effective} https://aka.ms/InstallAzureCliRpmEdge)
 ```
 
 Here's an example of installing edge builds with pip3 in a virtual environment. The `--upgrade-strategy=eager` option will install the edge builds of dependencies as well. 

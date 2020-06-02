@@ -78,7 +78,7 @@ Please specify exactly ONE (suggest connection string) in one of the following o
     if connection_string_env:
         if not is_valid_connection_string(connection_string_env):
             raise CLIError(
-                "The environment variavle connection string is invalid. Correct format should be Endpoint=https://example.appconfig.io;Id=xxxxx;Secret=xxxx")
+                "The environment variable connection string is invalid. Correct format should be Endpoint=https://example.appconfig.io;Id=xxxxx;Secret=xxxx")
 
         if string and connection_string_env != string:
             raise CLIError(error_message)

@@ -76,7 +76,7 @@ def _process_parameters(template_param_defs, parameter_lists):  # pylint: disabl
                 content = read_file_content(file_path)
                 if not content:
                     return None
-                parsed = _remove_comments_from_json(content, False)
+                parsed = _remove_comments_from_json(content, False, file_path)
                 return parsed.get('parameters', parsed)
             except Exception as ex:
                 raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
@@ -265,7 +265,7 @@ def _urlretrieve(url):
     return req.read()
 
 
-def _remove_comments_from_json(template, preserve_order=True):
+def _remove_comments_from_json(template, preserve_order=True, file_path=None):
     from jsmin import jsmin
 
     # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
@@ -274,7 +274,14 @@ def _remove_comments_from_json(template, preserve_order=True):
     minified = jsmin(template)
     # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
     result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)
-    return shell_safe_json_parse(result, preserve_order)
+    try:
+        return shell_safe_json_parse(result, preserve_order)
+    except CLIError:
+        # Because the processing of removing comments and compression will lead to misplacement of error location,
+        # so the error message should be wrapped.
+        if file_path:
+            raise CLIError("Failed to parse '{}', please check whether it is a valid JSON format".format(file_path))
+        raise CLIError("Failed to parse the JSON data, please check whether it is a valid JSON format")
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
@@ -291,10 +298,10 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
     template_content = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'))
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = read_file_content(template_file)
-        template_obj = _remove_comments_from_json(template_content)
+        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -687,10 +694,10 @@ def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, templ
     template_content = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'))
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = read_file_content(template_file)
-        template_obj = _remove_comments_from_json(template_content)
+        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -2581,7 +2588,8 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         # please add the service type that needs to be requested with PATCH type here
         # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
         # to properties will fail due to the lack of properties, so the PATCH type should be used
-        need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups']
+        need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
+                              'Microsoft.ContainerRegistry/registries/webhooks']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)

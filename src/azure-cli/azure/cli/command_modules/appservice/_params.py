@@ -492,7 +492,8 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='name of the new function app',
                    local_context_attribute=LocalContextAttribute(name='functionapp_name', actions=[LocalContextAction.SET], scopes=['functionapp']))
         c.argument('storage_account', options_list=['--storage-account', '-s'],
-                   help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group')
+                   help='Provide a string value of a Storage Account in the provided Resource Group. Or Resource ID of a Storage Account in a different Resource Group',
+                   local_context_attribute=LocalContextAttribute(name='storage_account_name', actions=[LocalContextAction.GET]))
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
         c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))

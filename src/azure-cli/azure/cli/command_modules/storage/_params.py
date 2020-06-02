@@ -7,6 +7,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type,
                                                 get_three_state_flag)
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
@@ -42,7 +43,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     acct_name_type = CLIArgumentType(options_list=['--account-name', '-n'], help='The storage account name.',
                                      id_part='name',
-                                     completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+                                     completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'),
+                                     local_context_attribute=LocalContextAttribute(
+                                         name='storage_account_name', actions=[LocalContextAction.GET]))
     blob_name_type = CLIArgumentType(options_list=['--blob-name', '-b'], help='The blob name.',
                                      completer=get_storage_name_completion_list(t_base_blob_service, 'list_blobs',
                                                                                 parent='container_name'))
@@ -174,6 +177,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'])
 
+    with self.argument_context('storage account delete') as c:
+        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
+
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_account_type, t_sku_name, t_kind = self.get_models('AccountType', 'SkuName', 'Kind',
                                                              resource_type=ResourceType.MGMT_STORAGE)
@@ -181,7 +187,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_common_storage_account_options()
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('account_type', help='The storage account type', arg_type=get_enum_type(t_account_type))
-        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None)
+        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None,
+                   local_context_attribute=LocalContextAttribute(
+                       name='storage_account_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('kind', help='Indicates the type of storage account.', min_api="2018-02-01",
                    arg_type=get_enum_type(t_kind), default='StorageV2')
         c.argument('kind', help='Indicates the type of storage account.', max_api="2017-10-01",
@@ -624,6 +632,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('include_path', include_path_type)
         c.argument('recursive', recursive_type)
         c.argument('content_type', arg_group='Additional Flags', help="Specify content type of the file. ")
+        c.argument('follow_symlinks', arg_group='Additional Flags', action='store_true',
+                   help='Follow symbolic links when uploading from local file system.')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
