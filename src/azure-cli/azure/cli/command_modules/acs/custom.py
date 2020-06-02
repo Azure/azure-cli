@@ -1649,7 +1649,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                windows_admin_username=None,
                windows_admin_password=None,
                kubernetes_version='',
-               node_vm_size="Standard_D2s_v3",
+               node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
                node_count=3,
                nodepool_name="nodepool1",
@@ -2848,7 +2848,10 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                 raise CLIError('Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
 
     if node_vm_size is None:
-        node_vm_size = "Standard_D2s_v3"
+        if os_type.lower() == "windows":
+            node_vm_size = "Standard_D2s_v3"
+        else:
+            node_vm_size = "Standard_DS2_v2"
 
     agent_pool = AgentPool(
         name=nodepool_name,
