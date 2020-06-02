@@ -42,9 +42,17 @@ def list_staticsite_function_app_settings(cmd, resource_group_name, name):
 
 
 def create_staticsites(cmd, resource_group_name, name, location,
-                       source, token, branch='master',
+                       source, branch, token=None,
                        app_location='/', api_location='api', app_artifact_location=None,
                        custom_domains=None, tags=None, no_wait=False):
+    if not token:
+        from knack.util import CLIError
+        raise CLIError("GitHub access token is required to authenticate to your repositories. "
+                       "If you need to create a Github Personal Access Token, "
+                       "please follow the steps found at the following link:\n{0}"
+                       .format(
+                        "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"))
+
     StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
 
