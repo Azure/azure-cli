@@ -72,7 +72,7 @@ class TestResolveFromIndex(unittest.TestCase):
             self.assertEqual(resolve_from_index(name)[0], index_data[name][1]['downloadUrl'])
 
     def test_filter_version(self):
-        ext_name = 'hellp'
+        ext_name = 'hello'
         index_data = {
             ext_name: [
                 mock_ext('hello-0.1.0-py3-none-any.whl', '0.1.0'),
