@@ -84,6 +84,7 @@ class TestResolveFromIndex(unittest.TestCase):
             self.assertEqual(resolve_from_index(ext_name, cur_version='0.1.0')[0], index_data[ext_name][0]['downloadUrl'])
             self.assertEqual(resolve_from_index(ext_name, cur_version='0.2.0')[0], index_data[ext_name][1]['downloadUrl'])
 
+
 class TestResolveFilters(unittest.TestCase):
 
     def test_platform_specific(self):
