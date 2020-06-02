@@ -205,8 +205,12 @@ def check_version_compatibility(azext_metadata):
 
 
 def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
-                  pip_extra_index_urls=None, pip_proxy=None, system=None):
+                  pip_extra_index_urls=None, pip_proxy=None, system=None,
+                  version=None):
     ext_sha256 = None
+
+    version = None if version == 'latest' else version
+
     if extension_name:
         cmd.cli_ctx.get_progress_controller().add(message='Searching')
         ext = None
@@ -220,10 +224,16 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url)
+            source, ext_sha256 = resolve_from_index(extension_name, cur_version=version, index_url=index_url)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
-            raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
+
+            if version:
+                err = "No matching extensions for '{} ({})'. Use --debug for more information.".format(extension_name, version)
+            else:
+                err = "No matching extensions for '{}'. Use --debug for more information.".format(extension_name)
+            raise CLIError(err)
+
     extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
     try:
