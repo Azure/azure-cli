@@ -152,6 +152,7 @@ def load_arguments(self, _):
         c.argument('custom_domain', help='User domain assigned to the account. Name is the CNAME source.')
 
     with self.argument_context('cognitiveservices account create') as c:
+        c.argument('assign_identity', help='Generate and assign an Azure Active Directory Identity for this account.')
         c.argument('yes', action='store_true', help='Do not prompt for terms confirmation')
 
     with self.argument_context('cognitiveservices account network-rule') as c:
