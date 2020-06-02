@@ -1649,7 +1649,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                windows_admin_username=None,
                windows_admin_password=None,
                kubernetes_version='',
-               node_vm_size="Standard_DS2_v2",
+               node_vm_size="Standard_D2s_v3",
                node_osdisk_size=0,
                node_count=3,
                nodepool_name="nodepool1",
@@ -1777,11 +1777,20 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     if (vnet_subnet_id and not skip_subnet_role_assignment and
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
-        scope = vnet_subnet_id
-        if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
-                                    service_principal_profile.client_id, scope=scope):
-            logger.warning('Could not create a role assignment for subnet. '
-                           'Are you an Owner on this subscription?')
+        # if service_principal_profile is None, then this cluster is an MSI cluster,
+        # and the service principal does not exist. For now, We just tell user to grant the
+        # permission after the cluster is created to keep consistent with portal experience.
+        if service_principal_profile is None:
+            logger.warning('The cluster is an MSI cluster, please manually grant '
+                           'Network Contributor role to the system assigned identity '
+                           'after the cluster is created, see '
+                           'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity')
+        else:
+            scope = vnet_subnet_id
+            if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
+                                        service_principal_profile.client_id, scope=scope):
+                logger.warning('Could not create a role assignment for subnet. '
+                               'Are you an Owner on this subscription?')
 
     load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
@@ -2835,10 +2844,7 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                 raise CLIError('Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
 
     if node_vm_size is None:
-        if os_type.lower() == "windows":
-            node_vm_size = "Standard_D2s_v3"
-        else:
-            node_vm_size = "Standard_DS2_v2"
+        node_vm_size = "Standard_D2s_v3"
 
     agent_pool = AgentPool(
         name=nodepool_name,

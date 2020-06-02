@@ -278,7 +278,9 @@ examples:
   - name: Create a rule to allow a specific address-range.
     text: az storage account network-rule add -g myRg --account-name mystorageaccount --ip-address 23.45.1.0/24
   - name: Create a rule to allow access for a subnet.
-    text: az storage account network-rule add -g myRg --account-name mystorageaccount --vnet myvnet --subnet mysubnet
+    text: az storage account network-rule add -g myRg --account-name mystorageaccount --vnet-name myvnet --subnet mysubnet
+  - name: Create a rule to allow access for a subnet in another resource group.
+    text: az storage account network-rule add -g myRg --account-name mystorageaccount  --subnet $subnetId
 """
 
 helps['storage account network-rule list'] = """

@@ -21,6 +21,8 @@ def register_providers():
     _register_one_provider('Microsoft.DBforPostgreSQL/servers', '2018-06-01', False, '2017-12-01-preview')
     _register_one_provider('Microsoft.DocumentDB/databaseAccounts', '2019-08-01-preview', False, '2020-03-01')
     _register_one_provider('Microsoft.Devices/IotHubs', '2020-03-01', True)
+    _register_one_provider('Microsoft.EventGrid/topics', '2020-04-01-preview', True)
+    _register_one_provider('Microsoft.EventGrid/domains', '2020-04-01-preview', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None):

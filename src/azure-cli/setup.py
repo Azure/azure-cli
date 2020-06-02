@@ -18,7 +18,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.6.0"
+VERSION = "2.7.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -74,7 +74,7 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=12.0',
     'azure-mgmt-consumption~=2.0',
     'azure-mgmt-containerinstance~=1.4',
-    'azure-mgmt-containerregistry~=3.0.0rc12',
+    'azure-mgmt-containerregistry==3.0.0rc12',
     'azure-mgmt-containerservice~=9.0.1',
     'azure-mgmt-cosmosdb~=0.14.0',
     'azure-mgmt-datalake-analytics~=0.2.1',
@@ -92,7 +92,7 @@ DEPENDENCIES = [
     'azure-mgmt-iothubprovisioningservices~=0.2.0',
     'azure-mgmt-keyvault~=2.2.0',
     'azure-mgmt-kusto~=0.3.0',
-    'azure-mgmt-loganalytics~=0.5.0',
+    'azure-mgmt-loganalytics~=0.6.0',
     'azure-mgmt-managedservices~=1.0',
     'azure-mgmt-managementgroups~=0.1',
     'azure-mgmt-maps~=0.1.0',
@@ -101,7 +101,7 @@ DEPENDENCIES = [
     'azure-mgmt-monitor~=0.9.0',
     'azure-mgmt-msi~=0.2',
     'azure-mgmt-netapp~=0.8.0',
-    'azure-mgmt-network~=10.1.0',
+    'azure-mgmt-network~=10.2.0',
     'azure-mgmt-policyinsights~=0.4.0',
     'azure-mgmt-privatedns~=0.1.0',
     'azure-mgmt-rdbms~=2.2.0',
