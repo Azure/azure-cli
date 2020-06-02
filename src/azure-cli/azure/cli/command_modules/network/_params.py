@@ -43,6 +43,7 @@ from azure.cli.command_modules.network._completers import (
     subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
     ag_url_map_rule_completion_list, tm_endpoint_completion_list, service_endpoint_completer,
     get_sdk_completer)
+from azure.cli.command_modules.network._actions import AddBackendAddressCreate
 from azure.cli.core.util import get_json_object
 from azure.cli.core.profiles import ResourceType
 
@@ -877,25 +878,16 @@ def load_arguments(self, _):
         c.argument('backend_address_pool_name',
                    options_list=['--name', '-n'],
                    help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('address_name', help='Name of the backend address.')
-        c.argument('vnet', help='Name or Id of the virtual network.', validator=process_vnet_name_or_id)
-        c.argument('ip_address', help='Ip Address within the Virtual Network.')
-        c.ignore('nic_ip_config')
-        # service doesn't support this argument right now. It will support this feature in the future
-        # c.argument('nic_ip_config', help='Id of the network interface ip configuration.', validator=validate_nic_ip_config)
+        c.argument('backend_addresses', options_list=['--backend-address'], nargs='+', action=AddBackendAddressCreate, is_preview=True)
+        c.argument('backend_addresses_config_file', type=get_json_object, is_preview=True)
 
     with self.argument_context('network lb address-pool address') as c:
         c.argument('backend_address_pool_name',
                    options_list=['--pool-name'],
                    help='The name of the backend address pool. {}'.format(default_existing))
-        c.argument('address_name', options_list=['--name', '-n'])
-
-    with self.argument_context('network lb address-pool create') as c:
-        c.argument('address_name', is_preview=True)
-        c.argument('vnet', is_preview=True)
-        c.argument('ip_address', is_preview=True)
-        c.ignore('nic_ip_config')
-        # c.argument('nic_ip_config', is_preview=True)
+        c.argument('address_name', options_list=['--name', '-n'], help='Name of the backend address.')
+        c.argument('vnet', help='Name or Id of the virtual network.', validator=process_vnet_name_or_id)
+        c.argument('ip_address', help='Ip Address within the Virtual Network.')
 
     with self.argument_context('network lb frontend-ip') as c:
         c.argument('zone', zone_type, min_api='2017-06-01')

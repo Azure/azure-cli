@@ -2089,24 +2089,25 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
             'lb': 'lb1',
             'vnet': 'clitestvnet',
             'nic': 'clitestnic',
-            'rg': resource_group
+            'rg': resource_group,
+            'lb_address_pool_file_path': os.path.join(TEST_DIR, 'test-address-pool-config.json')
         })
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name subnet1')
         self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet}')
-        nic_ip_config_id = self.cmd('network nic ip-config list -g {rg} --nic-name {nic}',
-                                    checks=self.check('length(@)', 1)).get_output_in_json()[0]['id']
-        self.kwargs.update({
-            'nic_ip_config': nic_ip_config_id
-        })
         self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
 
-        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --address-name addr1 --vnet {vnet} --ip-address 10.0.0.1', checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 '
+                 '--backend-address name=addr1 vnet={vnet} ip-address=10.0.0.1 '
+                 '--backend-address name=addr2 vnet={vnet} ip-address=10.0.0.2 '
+                 '--backend-address name=addr3 vnet={vnet} ip-address=10.0.0.3 '
+                 '--backend-addresses-config-file @"{lb_address_pool_file_path}"',
+                 checks=self.check('name', 'bap1'))
 
-        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr2 --vnet {vnet} --ip-address 10.0.0.2', checks=self.check('name', 'bap1'))
+        self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
 
         self.cmd('network lb address-pool address remove -g {rg} --lb-name {lb} --pool-name bap1 --name addr2', checks=self.check('name', 'bap1'))
 
-        self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '1'))
+        self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '5'))
 
         self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 2))
