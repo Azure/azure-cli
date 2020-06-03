@@ -170,7 +170,7 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs.update(kwargs)
 
     if is_track2(client_type):
-        client_kwargs.update(configure_common_settings_track2(cli_ctx))
+        client_kwargs.update(configure_common_settings_track2(cli_ctx, client_kwargs))
 
     if subscription_bound:
         client = client_type(cred, subscription_id, **client_kwargs)
