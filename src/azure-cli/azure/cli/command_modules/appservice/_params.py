@@ -691,7 +691,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
 
-    with self.argument_context('staticapp show') as c:
+    with self.argument_context('staticapp browse') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp environments list') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)

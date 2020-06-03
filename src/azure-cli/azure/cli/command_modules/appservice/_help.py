@@ -2000,7 +2000,7 @@ helps['staticapp list'] = """
       text: az staticapp list
 """
 
-helps['staticapp show'] = """
+helps['staticapp browse'] = """
     type: command
     short-summary: Show details of a static app.
     examples:
