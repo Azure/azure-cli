@@ -7,7 +7,7 @@ import mock
 
 from azure.cli.core.extension._resolve import (resolve_from_index, resolve_project_url_from_index,
                                                NoExtensionCandidatesError, _is_not_platform_specific,
-                                               _is_greater_or_equal_than_cur_version)
+                                               _is_greater_than_or_equal_to_cur_version)
 
 
 class IndexPatch(object):
@@ -96,9 +96,9 @@ class TestResolveFilters(unittest.TestCase):
         self.assertFalse(_is_not_platform_specific(mock_ext('myext-1.1.26.0-py2-none-linux_armv7l.whl')))
 
     def test_greater_than_current(self):
-        self.assertIsNone(_is_greater_or_equal_than_cur_version(None))
-        self.assertIsNotNone(_is_greater_or_equal_than_cur_version('0.0.1'))
-        filter_func = _is_greater_or_equal_than_cur_version('0.0.1')
+        self.assertIsNone(_is_greater_than_or_equal_to_cur_version(None))
+        self.assertIsNotNone(_is_greater_than_or_equal_to_cur_version('0.0.1'))
+        filter_func = _is_greater_than_or_equal_to_cur_version('0.0.1')
         filter_func
         self.assertTrue(filter_func(mock_ext('myext-0.0.2-py2.py3-none-any.whl', '0.0.2')))
         self.assertTrue(filter_func(mock_ext('myext-0.0.1+dev-py2.py3-none-any.whl', '0.0.1+dev')))
