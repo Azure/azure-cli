@@ -2019,6 +2019,7 @@ class WebappAuthenticationTest(ScenarioTest):
             JMESPathCheck('tokenStoreEnabled', None),
             JMESPathCheck('allowedExternalRedirectUrls', None),
             JMESPathCheck('tokenRefreshExtensionHours', None),
+            JMESPathCheck('runtimeVersion', None),
             JMESPathCheck('clientId', None),
             JMESPathCheck('clientSecret', None),
             JMESPathCheck('allowedAudiences', None),
@@ -2051,7 +2052,7 @@ class WebappAuthenticationTest(ScenarioTest):
 
         self.assertIn('https://audience1', result['allowedAudiences'])
         self.assertIn('email', result['facebookOauthScopes'])
-        self.assertIn('public_profile', result['facebookOauthScopes'])
+        self.assertIn('public_profile', result['facebookgitOauthScopes'])
 
 
 class WebappUpdateTest(ScenarioTest):
