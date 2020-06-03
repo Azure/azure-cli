@@ -7,6 +7,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.mgmt.network.models import (RouteTable, Route, NetworkSecurityGroup, SecurityRule)
+from azure.mgmt.resource.resources.models import (DeploymentProperties, Deployment)
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -16,6 +17,7 @@ from azure.cli.core.util import sdk_no_wait
 from azure.cli.command_modules.network._client_factory import network_client_factory
 
 VERSION_2019_02_01 = "2019-02-01"
+VERSION_2019_10_01 = "2019-10-01"
 
 logger = get_logger(__name__)
 
@@ -58,10 +60,11 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, vne
 
     logger.info('Create App Service Environment...')
     deployment_name = _get_unique_deployment_name('cli_ase_deploy_')
-    ase_deployment_properties = _build_ase_deployment_properties(cli_ctx=cmd.cli_ctx, name=name, location=location,
+    ase_deployment_properties = _build_ase_deployment_properties(cmd=cmd, name=name, location=location,
                                                                  subnet_id=subnet_id, virtual_ip_type=virtual_ip_type,
                                                                  front_end_scale_factor=front_end_scale_factor,
                                                                  front_end_sku=front_end_sku, tags=None)
+
     deployment_client = _get_deployment_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, deployment_client.create_or_update,
                        resource_group_name, deployment_name, ase_deployment_properties)
@@ -119,7 +122,7 @@ def _get_ase_client_factory(cli_ctx, api_version=None):
 
 def _get_deployment_client_factory(cli_ctx):
     from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient).deployments
+    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient, api_version=VERSION_2019_10_01).deployments
     return client
 
 
@@ -131,7 +134,7 @@ def _get_network_client_factory(cli_ctx):
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
     from azure.mgmt.resource import ResourceManagementClient
-    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
+    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient, api_version=VERSION_2019_10_01)
     group = client.resource_groups.get(resource_group_name)
     return group.location
 
@@ -351,11 +354,8 @@ def _get_unique_deployment_name(prefix):
     return prefix + random_string(16)
 
 
-def _build_ase_deployment_properties(cli_ctx, name, location, subnet_id, virtual_ip_type,
+def _build_ase_deployment_properties(cmd, name, location, subnet_id, virtual_ip_type,
                                      front_end_scale_factor=None, front_end_sku=None, tags=None):
-    from azure.cli.core.profiles import ResourceType, get_sdk
-    DeploymentProperties = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'DeploymentProperties', mod='models')
-
     # InternalLoadBalancingMode Enum: None 0, Web 1, Publishing 2.
     # External: 0 (None), Internal: 3 (Web + Publishing)
     ilb_mode = 3 if virtual_ip_type == 'Internal' else 0
@@ -388,7 +388,8 @@ def _build_ase_deployment_properties(cli_ctx, name, location, subnet_id, virtual
     template = deployment_template.build()
     parameters = deployment_template.build_parameters()
 
-    deployment = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+    deploymentProperties = DeploymentProperties(template=template, parameters=parameters, mode='Incremental')
+    deployment = Deployment(properties=deploymentProperties)
     return deployment
 
 
