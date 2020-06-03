@@ -173,6 +173,8 @@ def _convert_arm_to_cli(arm_cloud_metadata_dict):
     cli_cloud_metadata_dict = {}
     for cloud in arm_cloud_metadata_dict:
         cli_cloud_metadata_dict[cloud['name']] = _arm_to_cli_mapper(cloud)
+    if 'AzureCloud' in cli_cloud_metadata_dict:
+        cli_cloud_metadata_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
     return cli_cloud_metadata_dict
 
 
@@ -199,9 +201,9 @@ def _arm_to_cli_mapper(arm_dict):
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
             sql_server_hostname=arm_dict['suffixes']['sqlServerHostname'],
-            mysql_server_endpoint=arm_dict['suffixes']['mysqlServerEndpoint'],
-            postgresql_server_endpoint=arm_dict['suffixes']['postgresqlServerEndpoint'],
-            mariadb_server_endpoint=arm_dict['suffixes']['mariadbServerEndpoint'],
+            # mysql_server_endpoint=arm_dict['suffixes']['mysqlServerEndpoint'],
+            # postgresql_server_endpoint=arm_dict['suffixes']['postgresqlServerEndpoint'],
+            # mariadb_server_endpoint=arm_dict['suffixes']['mariadbServerEndpoint'],
             azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
             acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None))  # pylint: disable=line-too-long
@@ -363,28 +365,38 @@ def get_known_clouds():
         if clouds_json:
             KNOWN_CLOUDS = [Cloud.fromJSON(c) for c in clouds_json['clouds']]
             return KNOWN_CLOUDS
-
+    # get metadata url from environment variable
     if 'ARM_CLOUD_METADATA_URL' in os.environ:
         try:
             arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
             cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
-            if 'AzureCloud' in cli_cloud_dict:
-                cli_cloud_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
             KNOWN_CLOUDS = list(cli_cloud_dict.values())
         except Exception as ex:  # pylint: disable=broad-except
-            logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL')
+            logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL: %s',
+                           os.getenv('ARM_CLOUD_METADATA_URL'))
             raise ex
     else:
-        # TODO query discover.azure.com
-        # if above query fails, use default values in public cloud
-        KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
-        # TODO throw error in air-gapped cloud
+        try:
+            # resolve metadata url from DNS
+            arm_cloud_dict = json.loads(urlretrieve(os.getenv('https://discover.azure.com')))
+            cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
+            KNOWN_CLOUDS = list(cli_cloud_dict.values())
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning('Failed to load cloud metadata from discover.azure.com')
+            from azure.cli.core.util import check_connectivity
+            if not check_connectivity():
+                raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import' first.") # pylint: disable=line-too-long
+            KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
+    save_endpoints_to_file(KNOWN_CLOUDS)
+    return KNOWN_CLOUDS
+
+
+def save_endpoints_to_file(clouds):
     with os.fdopen(os.open(CLOUD_ENDPOINTS_FILE, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
                    'w+') as version_file:
-        file_json = {'clouds': [c.toJSON() for c in KNOWN_CLOUDS]}
+        file_json = {'clouds': [c.toJSON() for c in clouds]}
         version_file.write(json.dumps(file_json))
-    return KNOWN_CLOUDS
 
 
 def _set_active_cloud(cli_ctx, cloud_name):
