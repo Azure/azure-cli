@@ -427,6 +427,9 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
     setter_arg_name: The name of the argument in the setter which corresponds to the object being updated.
     In track2, unknown kwargs will raise, so we should not pass 'parameters" for operation when the name of the argument
     in the setter which corresponds to the object being updated is not 'parameters'.
+
+    serialize: A function that receives an object (usually a model defined in SDK) and returns a serialized dict.
+    Specify None to use default serialization.
     """
     def _put_operation():
         result = None

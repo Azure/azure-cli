@@ -517,8 +517,8 @@ def _serialize(body):
 def serialize_image_template(parameters):
     """
     A customized serializer for image template.
-    :param parameters:
-    :return:
+    :param parameters: An object
+    :return: A serialized dict
     """
     body = {}
     if parameters.location is not None:
