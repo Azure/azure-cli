@@ -4141,7 +4141,6 @@ class DiskEncryptionSetTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_update_', location='westcentralus')
     @AllowLargeResponse(size_kb=99999)
-    @unittest.skip('Key rotation in disk encryption set is not supported in this version of service')
     def test_disk_encryption_set_update(self, resource_group):
 
         self.kwargs.update({
@@ -4165,9 +4164,23 @@ class DiskEncryptionSetTest(ScenarioTest):
         })
 
         self.cmd('disk-encryption-set create -g {rg} -n {des} --key-url {kid1} --source-vault {vault1}')
+        des_show_output = self.cmd('disk-encryption-set show -g {rg} -n {des}').get_output_in_json()
+        des_sp_id = des_show_output['identity']['principalId']
+        des_id = des_show_output['id']
+        self.kwargs.update({
+            'des_sp_id': des_sp_id,
+            'des_id': des_id
+        })
+
+        self.cmd('keyvault set-policy -n {vault2} --object-id {des_sp_id} --key-permissions wrapKey unwrapKey get')
+        time.sleep(15)
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('role assignment create --assignee {des_sp_id} --role Reader --scope {vault2_id}')
+        time.sleep(15)
+
         self.cmd('disk-encryption-set update -g {rg} -n {des} --key-url {kid2} --source-vault {vault2}', checks=[
-            self.check('key', '{kid2}'),
-            self.check('vault', '{vault2}'),
+            self.check('activeKey.keyUrl', '{kid2}'),
+            self.check('activeKey.sourceVault.id', '{vault2_id}'),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_disk_update_', location='westcentralus')
