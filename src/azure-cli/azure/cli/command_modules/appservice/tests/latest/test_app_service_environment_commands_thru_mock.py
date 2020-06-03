@@ -67,7 +67,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         # Assert listvips is called
         list_appserviceenvironment_addresses(self.mock_cmd, ase_name_1)
-        ase_client.list_vips.assert_called_with(rg_name_1, ase_name_1)
+        ase_client.get_vip_info.assert_called_with(rg_name_1, ase_name_1)
 
         # Assert list_app_service_plans is called
         list_appserviceenvironment_plans(self.mock_cmd, ase_name_2)

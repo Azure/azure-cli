@@ -58,9 +58,10 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, vne
 
     logger.info('Create App Service Environment...')
     deployment_name = _get_unique_deployment_name('cli_ase_deploy_')
-    ase_deployment_properties = _build_ase_deployment_properties(cmd.cli_ctx, name, location,
-                                                                 subnet_id, virtual_ip_type,
-                                                                 front_end_scale_factor, front_end_sku, None)
+    ase_deployment_properties = _build_ase_deployment_properties(cli_ctx=cmd.cli_ctx, name=name, location=location,
+                                                                 subnet_id=subnet_id, virtual_ip_type=virtual_ip_type,
+                                                                 front_end_scale_factor=front_end_scale_factor,
+                                                                 front_end_sku=front_end_sku, tags=None)
     deployment_client = _get_deployment_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, deployment_client.create_or_update,
                        resource_group_name, deployment_name, ase_deployment_properties)
@@ -97,7 +98,7 @@ def list_appserviceenvironment_addresses(cmd, name, resource_group_name=None):
     ase_client = _get_ase_client_factory(cmd.cli_ctx, VERSION_2019_02_01)
     if resource_group_name is None:
         resource_group_name = _get_resource_group_name_from_ase(ase_client, name)
-    return ase_client.list_vips(resource_group_name, name)
+    return ase_client.get_vip_info(resource_group_name, name)
 
 
 def list_appserviceenvironment_plans(cmd, name, resource_group_name=None):
