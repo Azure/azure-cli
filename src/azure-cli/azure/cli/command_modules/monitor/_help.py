@@ -1096,6 +1096,8 @@ short-summary: Update a workspace instance
 helps['monitor log-analytics workspace linked-service'] = """
 type: group
 short-summary: Manage linked service for log analytics workspace.
+long-summary: |
+    Linked services is used to defined a relation from the workspace to another Azure resource. Log Analytics and Azure resources then leverage this connection in their operations. Example uses of Linked Services in Log Analytics workspace are Automation account and workspace association to CMK.
 """
 
 helps['monitor log-analytics workspace linked-service create'] = """
