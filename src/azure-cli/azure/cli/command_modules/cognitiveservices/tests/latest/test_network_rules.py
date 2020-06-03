@@ -19,7 +19,7 @@ class CognitiveServicesNetworkRulesTests(ScenarioTest):
             'vnetname': sname,
             'kind': 'Face',
             'sku': 'S0',
-            'location': 'centraluseuap',
+            'location': 'westus',
             'customdomain': customdomain,
         })
 

@@ -7,6 +7,7 @@ import time
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure_devtools.scenario_tests import AllowLargeResponse
 from knack.util import CLIError
 
 
@@ -59,6 +60,7 @@ class CognitiveServicesTests(ScenarioTest):
         exitcode = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}').exit_code
         self.assertEqual(exitcode, 0)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_cognitiveservices_account_list_kinds(self, resource_group):
         # test to list cognitive services account kinds
@@ -86,6 +88,7 @@ class CognitiveServicesTests(ScenarioTest):
         self.assertTrue(isinstance(results['value'], list))
         self.assertTrue(len(results['value']) > 0)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_cognitiveservices_account_list_skus(self, resource_group):
 
