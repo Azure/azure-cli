@@ -60,7 +60,7 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, vne
 
     logger.info('Create App Service Environment...')
     deployment_name = _get_unique_deployment_name('cli_ase_deploy_')
-    ase_deployment_properties = _build_ase_deployment_properties(cmd=cmd, name=name, location=location,
+    ase_deployment_properties = _build_ase_deployment_properties(name=name, location=location,
                                                                  subnet_id=subnet_id, virtual_ip_type=virtual_ip_type,
                                                                  front_end_scale_factor=front_end_scale_factor,
                                                                  front_end_sku=front_end_sku, tags=None)
@@ -354,7 +354,7 @@ def _get_unique_deployment_name(prefix):
     return prefix + random_string(16)
 
 
-def _build_ase_deployment_properties(cmd, name, location, subnet_id, virtual_ip_type,
+def _build_ase_deployment_properties(name, location, subnet_id, virtual_ip_type,
                                      front_end_scale_factor=None, front_end_sku=None, tags=None):
     # InternalLoadBalancingMode Enum: None 0, Web 1, Publishing 2.
     # External: 0 (None), Internal: 3 (Web + Publishing)
