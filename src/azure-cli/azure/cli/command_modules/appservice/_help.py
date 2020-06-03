@@ -2016,12 +2016,12 @@ helps['staticapp create'] = """
       text: az staticapp create -n MyStaticAppName -g MyRg -s MyGitHubRepo -l Location
 """
 
-helps['staticapp update'] = """
+helps['staticapp disconnect'] = """
     type: command
-    short-summary: Update a static app and returns the app updated.
+    short-summary: Disconnect source control to enable connecting to a different repo.
     examples:
-    - name: Update static app.
-      text: az staticapp update -n MyStaticAppName -g MyRg
+    - name: Disconnect static app.
+      text: az staticapp disconnect -n MyStaticAppName
 """
 
 helps['staticapp delete'] = """

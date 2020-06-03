@@ -25,6 +25,15 @@ def show_staticsite(cmd, name, resource_group_name=None):
     return client.get_static_site(resource_group_name, name)
 
 
+def disconnect_staticsite(cmd, name, resource_group_name=None, no_wait=False):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return sdk_no_wait(no_wait, client.detach_static_site,
+                       resource_group_name=resource_group_name, name=name)
+
+
 def list_staticsite_environments(cmd, name, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
@@ -57,7 +66,7 @@ def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait
     client.validate_custom_domain_can_be_added_to_static_site(resource_group_name, name, hostname)
 
     return sdk_no_wait(no_wait, client.create_or_update_static_site_custom_domain,
-                           resource_group_name=resource_group_name, name=name, domain_name=hostname)
+                       resource_group_name=resource_group_name, name=name, domain_name=hostname)
 
 
 def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False):
@@ -96,8 +105,8 @@ def create_staticsites(cmd, resource_group_name, name, location,
         raise CLIError("GitHub access token is required to authenticate to your repositories. "
                        "If you need to create a Github Personal Access Token, "
                        "please follow the steps found at the following link:\n{0}"
-                       .format(
-                        "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"))
+            .format(
+            "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"))
 
     StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
