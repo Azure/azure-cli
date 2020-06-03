@@ -78,7 +78,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None):
     if cur_version:
         try:
             chosen = [c for c in candidates_sorted if c['metadata']['version'] == cur_version][0]
-        except Exception:
+        except IndexError:
             raise NoExtensionCandidatesError('Extension with version {} not found'.format(cur_version))
     else:
         chosen = candidates_sorted[0]
