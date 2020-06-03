@@ -1777,11 +1777,20 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     if (vnet_subnet_id and not skip_subnet_role_assignment and
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
-        scope = vnet_subnet_id
-        if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
-                                    service_principal_profile.client_id, scope=scope):
-            logger.warning('Could not create a role assignment for subnet. '
-                           'Are you an Owner on this subscription?')
+        # if service_principal_profile is None, then this cluster is an MSI cluster,
+        # and the service principal does not exist. For now, We just tell user to grant the
+        # permission after the cluster is created to keep consistent with portal experience.
+        if service_principal_profile is None:
+            logger.warning('The cluster is an MSI cluster, please manually grant '
+                           'Network Contributor role to the system assigned identity '
+                           'after the cluster is created, see '
+                           'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity')
+        else:
+            scope = vnet_subnet_id
+            if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
+                                        service_principal_profile.client_id, scope=scope):
+                logger.warning('Could not create a role assignment for subnet. '
+                               'Are you an Owner on this subscription?')
 
     load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
@@ -2222,7 +2231,11 @@ def aks_update(cmd, client, resource_group_name, name,
 
 # pylint: disable=unused-argument,inconsistent-return-statements
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, control_plane_only=False,
-                no_wait=False, **kwargs):
+                no_wait=False, yes=False):
+    msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
+    if not yes and not prompt_y_n(msg, default="n"):
+        return None
+
     instance = client.get(resource_group_name, name)
 
     if instance.kubernetes_version == kubernetes_version:
@@ -2248,20 +2261,20 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, cont
         if control_plane_only:
             msg = ("Legacy clusters do not support control plane only upgrade. All node pools will be "
                    "upgraded to {} as well. Continue?").format(instance.kubernetes_version)
-            if not prompt_y_n(msg, default="n"):
+            if not yes and not prompt_y_n(msg, default="n"):
                 return None
         upgrade_all = True
     else:
         if not control_plane_only:
             msg = ("Since control-plane-only argument is not specified, this will upgrade the control plane "
                    "AND all nodepools to version {}. Continue?").format(instance.kubernetes_version)
-            if not prompt_y_n(msg, default="n"):
+            if not yes and not prompt_y_n(msg, default="n"):
                 return None
             upgrade_all = True
         else:
             msg = ("Since control-plane-only argument is specified, this will upgrade only the control plane to {}. "
                    "Node pool will not change. Continue?").format(instance.kubernetes_version)
-            if not prompt_y_n(msg, default="n"):
+            if not yes and not prompt_y_n(msg, default="n"):
                 return None
 
     if upgrade_all:

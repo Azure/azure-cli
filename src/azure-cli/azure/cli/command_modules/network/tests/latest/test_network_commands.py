@@ -191,9 +191,6 @@ class NetworkPrivateEndpoints(ScenarioTest):
         self.cmd('storage account private-endpoint-connection show --account-name {sa} -g {rg} --name {sa_pec_name}',
                  checks=self.check('id', '{sa_pec_id}'))
 
-        self.cmd('storage account private-endpoint-connection approve --account-name {sa} -g {rg} --name {sa_pec_name}',
-                 checks=[self.check('privateLinkServiceConnectionState.status', 'Approved')])
-
         self.cmd('network private-endpoint show -g {rg} -n {pe}', checks=[
             self.check('length(customDnsConfigs)', 1)
         ])
@@ -1052,6 +1049,45 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway url-path-map update -g {rg} --gateway-name {ag} -n {name} --default-rewrite-rule-set {set}')
         self.cmd('network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
                  '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --rewrite-rule-set {set}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map_edge_case')
+    def test_network_ag_url_path_map_edge_case(self, resource_group):
+        self.kwargs.update({
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'name': 'mypathmap',
+            'rulename': 'myurlrule',
+            'rulename2': 'myurlrule2',
+            'pool': 'mypool',
+            'set': 'myruleset',
+            'settings': 'http_settings',
+            'redirect_config': 'myconfig',
+            'rg': resource_group
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd(
+            'network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+
+        self.cmd(
+            'network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
+
+        self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
+        self.cmd('network application-gateway redirect-config create -g {rg} --gateway-name {ag} -n {redirect_config} '
+                 '--target-listener mylistener --type Permanent')
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
+        self.cmd(
+            'network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {settings} --port 443 --protocol https')
+        self.cmd(
+            'network application-gateway url-path-map create -g {rg} --gateway-name {ag} -n {name} --rule-name {rulename} --paths /mypath1/* '
+            '--redirect-config {redirect_config} --default-redirect-config {redirect_config}')
+        self.cmd(
+            'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
+            '--paths /mypath122/* --address-pool {pool} --http-settings {settings}')
+        with self.assertRaisesRegexp(CLIError, "Cannot reference a BackendAddressPool when Redirect Configuration is specified."):
+            self.cmd(
+                'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
+                '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --redirect-config {redirect_config}')
 
 
 class NetworkAppGatewayRewriteRuleset(ScenarioTest):

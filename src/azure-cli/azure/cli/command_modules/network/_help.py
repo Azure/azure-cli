@@ -61,8 +61,12 @@ helps['network application-gateway address-pool update'] = """
 type: command
 short-summary: Update an address pool.
 examples:
-  - name: Update an address pool, add server.
+  - name: Update backend address pool.
     text: az network application-gateway address-pool update -g MyResourceGroup --gateway-name MyAppGateway \\ -n MyAddressPool --servers 10.0.0.4 10.0.0.5 10.0.0.6
+  - name: Add to the backend address pool by using backend server IP address
+    text: |
+        az network application-gateway address-pool update -g MyResourceGroup --gateway-name MyAppGateway -n MyAddressPool \\
+            --add backendAddresses "{ \"ip_address\": \"{10.0.0.13}\" }"
 """
 
 helps['network application-gateway auth-cert'] = """
@@ -4756,7 +4760,7 @@ examples:
     text: |
         az network vnet-gateway ipsec-policy add -g MyResourceGroup --gateway-name MyGateway \\
             --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
-            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
+            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 27000 --sa-max-size 102400000
 """
 
 helps['network vnet-gateway ipsec-policy clear'] = """
@@ -5033,7 +5037,7 @@ examples:
     text: |
         az network vpn-connection ipsec-policy add -g MyResourceGroup --connection-name MyConnection \\
             --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
-            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
+            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 27000 --sa-max-size 102400000
 """
 
 helps['network vpn-connection ipsec-policy clear'] = """
