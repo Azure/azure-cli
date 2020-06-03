@@ -87,11 +87,6 @@ def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_w
                        resource_group_name=resource_group_name, name=name, domain_name=hostname)
 
 
-def list_staticsite_secrets(cmd, resource_group_name, name):
-    client = _get_staticsites_client_factory(cmd.cli_ctx)
-    return client.list_static_site_secrets(resource_group_name, name)
-
-
 def list_staticsite_functions(cmd, name, resource_group_name=None, environment_name='default'):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
@@ -100,14 +95,17 @@ def list_staticsite_functions(cmd, name, resource_group_name=None, environment_n
     return client.list_static_site_build_functions(resource_group_name, name, environment_name)
 
 
-def list_staticsite_function_app_settings(cmd, resource_group_name, name):
+def list_staticsite_function_app_settings(cmd, name, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
     return client.list_static_site_function_app_settings(resource_group_name, name)
 
 
 def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
-                       app_location='/', api_location='api', app_artifact_location=None,
+                       app_location='.', api_location='.', app_artifact_location='.github/workflows',
                        custom_domains=None, tags=None, no_wait=False):
     if not token:
         _raise_missing_token_suggestion()

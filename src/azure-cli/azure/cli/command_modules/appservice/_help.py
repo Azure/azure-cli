@@ -2088,3 +2088,12 @@ helps['staticapp hostname delete'] = """
       text: az staticapp hostname delete -n MyStaticAppName --hostname HostnameToDelete
 """
 
+helps['staticapp appsettings list'] = """
+    type: command
+    short-summary: List function app settings of the static app. A function must first be deployed to use this method. 
+    examples:
+    - name: List function app settings of the static app.
+      text: az staticapp appsettings list -n MyStaticAppName
+"""
+
+

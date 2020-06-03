@@ -368,8 +368,6 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_staticsite', supports_no_wait=True, confirmation=True)
         g.custom_command('disconnect', 'disconnect_staticsite', supports_no_wait=True)
         g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
-        g.custom_command('list-secrets', 'list_staticsite_secrets')
-        g.custom_command('list-function-appsettings', 'list_staticsite_function_app_settings')
 
     with self.command_group('staticapp environments', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_environments')
@@ -380,3 +378,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_staticsite_domains')
         g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
+
+    with self.command_group('staticapp appsettings', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('list', 'list_staticsite_function_app_settings')
+        g.custom_command('list', 'list_staticsite_function_app_settings')
