@@ -135,6 +135,33 @@ def load_arguments(self, _):
     with self.argument_context('cdn custom-domain create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)
 
+    with self.argument_context('cdn custom-domain enable-https') as c:
+        c.argument('profile_name', id_part=None, help='Name of the parent profile.')
+        c.argument('endpoint_name', help='Name of the parent endpoint.')
+        c.argument('custom_domain_name', name_arg_type, help='Name of the custom domain.')
+        c.argument('min_tls_version',
+                   help='The minimum TLS version required for the custom domain.',
+                   arg_type=get_enum_type(['none', '1.0', '1.2']))
+        c.argument('user_cert_protocol_type',
+                   arg_group='Bring Your Own Certificate',
+                   help='The protocol type of the certificate.',
+                   arg_type=get_enum_type(['sni', 'ip']))
+        c.argument('user_cert_subscription_id',
+                   arg_group='Bring Your Own Certificate',
+                   help='The subscription id of the KeyVault certificate')
+        c.argument('user_cert_group_name',
+                   arg_group='Bring Your Own Certificate',
+                   help='The resource group of the KeyVault certificate')
+        c.argument('user_cert_vault_name',
+                   arg_group='Bring Your Own Certificate',
+                   help='The vault name of the KeyVault certificate')
+        c.argument('user_cert_secret_name',
+                   arg_group='Bring Your Own Certificate',
+                   help='The secret name of the KeyVault certificate')
+        c.argument('user_cert_secret_version',
+                   arg_group='Bring Your Own Certificate',
+                   help='The secret version of the KeyVault certificate')
+
     # Origin #
     with self.argument_context('cdn origin') as c:
         c.argument('origin_name', name_arg_type, id_part='name')
