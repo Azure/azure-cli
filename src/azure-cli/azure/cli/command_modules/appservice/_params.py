@@ -709,6 +709,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp hostname list') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
+    with self.argument_context('staticapp hostname set') as c:
+        c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp hostname delete') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp create') as c:

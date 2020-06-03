@@ -2064,6 +2064,14 @@ helps['staticapp hostname list'] = """
       text: az staticapp hostname list -n MyStaticAppName
 """
 
+helps['staticapp hostname set'] = """
+    type: command
+    short-summary: Set given sub-domain hostname to the static app. Please configure a CNAME record with your DNS provider.
+    examples:
+    - name: Set hostname to the static app.
+      text: az staticapp hostname set -n MyStaticAppName --hostname www.example.com
+"""
+
 helps['staticapp hostname delete'] = """
     type: command
     short-summary: Delete given hostname of the static app.

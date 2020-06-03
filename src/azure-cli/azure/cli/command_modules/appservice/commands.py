@@ -377,4 +377,5 @@ def load_command_table(self, _):
 
     with self.command_group('staticapp hostname', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_domains')
+        g.custom_command('set', 'set_staticsite_domain')
         g.custom_command('delete', 'delete_staticsite_domain')

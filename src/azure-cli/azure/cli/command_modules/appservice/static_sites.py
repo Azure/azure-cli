@@ -49,6 +49,14 @@ def list_staticsite_domains(cmd, name, resource_group_name=None):
     return client.list_static_site_custom_domains(resource_group_name, name)
 
 
+def set_staticsite_domain(cmd, name, hostname, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return client.create_or_update_static_site_custom_domain(resource_group_name, name, hostname)
+
+
 def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
