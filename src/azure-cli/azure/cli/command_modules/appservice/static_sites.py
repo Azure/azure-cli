@@ -65,6 +65,7 @@ def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_w
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
+    print("After deleting a custom domain, there can be a 15 minute delay for the change to propagate.")
     return sdk_no_wait(no_wait, client.delete_static_site_custom_domain,
                        resource_group_name=resource_group_name, name=name, domain_name=hostname)
 
