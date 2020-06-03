@@ -49,20 +49,24 @@ def list_staticsite_domains(cmd, name, resource_group_name=None):
     return client.list_static_site_custom_domains(resource_group_name, name)
 
 
-def set_staticsite_domain(cmd, name, hostname, resource_group_name=None):
+def set_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return client.create_or_update_static_site_custom_domain(resource_group_name, name, hostname)
+    client.validate_custom_domain_can_be_added_to_static_site(resource_group_name, name, hostname)
+
+    return sdk_no_wait(no_wait, client.create_or_update_static_site_custom_domain,
+                           resource_group_name=resource_group_name, name=name, domain_name=hostname)
 
 
-def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None):
+def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_wait=False):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return client.delete_static_site_custom_domain(resource_group_name, name, hostname)
+    return sdk_no_wait(no_wait, client.delete_static_site_custom_domain,
+                       resource_group_name=resource_group_name, name=name, domain_name=hostname)
 
 
 def list_staticsite_secrets(cmd, resource_group_name, name):
