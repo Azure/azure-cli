@@ -210,7 +210,7 @@ examples:
         # create and update template object in local cli cache. Defers put request to ARM
         # Cache object ttl set via az configure.
         az image builder create --image-source $imagesource -n mytemplate \\
-            -g my-group --scripts $script --defer
+            -g my-group --scripts $script --identity myidentity --defer
 
         # add customizers
         az image builder customizer add -n mytemplate -g my-group  \\
@@ -400,7 +400,7 @@ examples:
     text: |
         # create and write template object to local cli cache
         az image builder create --image-source {image_source} -n mytemplate -g my-group \\
-            --scripts {script} --managed-image-destinations image_1=westus --defer
+            --scripts {script} --managed-image-destinations image_1=westus --identity myidentity --defer
 
         # add customizers and outputs to local cache template object via az image template output / customizer add
         # one can also update cache object properties through generic update options, such as: --set
