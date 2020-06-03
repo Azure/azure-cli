@@ -2055,3 +2055,11 @@ helps['staticapp environments functions'] = """
     - name: Show static app functions.
       text: az staticapp environments functions -n MyStaticAppName
 """
+
+helps['staticapp hostname list'] = """
+    type: command
+    short-summary: List custom hostnames of the static app.
+    examples:
+    - name: List custom hostnames of the static app.
+      text: az staticapp hostname list -n MyStaticAppName
+"""

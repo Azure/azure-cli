@@ -701,13 +701,13 @@ def load_arguments(self, _):
     with self.argument_context('staticapp environments functions') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
         c.argument('environment_name', arg_type=environment_name_arg_type)
-    with self.argument_context('staticapp list-domains') as c:
-        c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp list-secrets') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp list-function-appsettings') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp delete') as c:
+        c.argument('name', arg_type=staticapp_name_arg_type)
+    with self.argument_context('staticapp hostname list') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp create') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)

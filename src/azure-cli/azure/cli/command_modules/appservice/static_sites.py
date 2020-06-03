@@ -41,8 +41,11 @@ def show_staticsite_environment(cmd, name, environment_name='default', resource_
     return client.get_static_site_build(resource_group_name, name, environment_name)
 
 
-def list_staticsite_domains(cmd, resource_group_name, name):
+def list_staticsite_domains(cmd, name, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
     return client.list_static_site_custom_domains(resource_group_name, name)
 
 
