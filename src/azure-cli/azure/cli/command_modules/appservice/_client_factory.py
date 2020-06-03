@@ -54,4 +54,4 @@ def cf_providers(cli_ctx, _):
 
 
 def cf_web_client(cli_ctx, _):
-    return web_client_factory(cli_ctx)
+    return web_client_factory(cli_ctx).web_site_management_client

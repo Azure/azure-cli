@@ -195,7 +195,9 @@ AZURE_API_PROFILES = {
             'private_link_scopes': '2019-10-17-preview',
             'private_endpoint_connections': '2019-10-17-preview'
         }),
-        ResourceType.MGMT_APPSERVICE: '2019-08-01',
+        ResourceType.MGMT_APPSERVICE: SDKProfile('2019-08-01', {
+            'app_service_environments': '2018-02-01'
+        }),
         ResourceType.MGMT_IOTHUB: '2020-03-01',
         ResourceType.MGMT_ARO: '2020-04-30'
     },

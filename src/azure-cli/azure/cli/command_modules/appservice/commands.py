@@ -60,22 +60,26 @@ def ex_handler_factory(creating_plan=False):
 def load_command_table(self, _):
     webclient_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.web.operations#WebSiteManagementClientOperationsMixin.{}',
-        client_factory=cf_web_client
+        client_factory=cf_web_client,
+        operation_group='web_apps'
     )
     appservice_plan_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.web.operations#AppServicePlansOperations.{}',
-        client_factory=cf_plans
+        client_factory=cf_plans,
+        operation_group='app_service_plans'
     )
     webapp_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.web.operations#WebAppsOperations.{}',
-        client_factory=cf_webapps
+        client_factory=cf_webapps,
+        operation_group='web_apps'
     )
 
     appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')
 
-    webapp_access_restrictions = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.access_restrictions#{}')
+    webapp_access_restrictions = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.access_restrictions#{}', operation_group='web_apps')
 
-    appservice_environment = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_environment#{}')
+    appservice_environment = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.appservice_environment#{}',
+                                            operation_group='app_service_environments')
 
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
@@ -262,8 +266,9 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
-        g.generic_update_command('update', setter_name='set_functionapp', exception_handler=ex_handler_factory(),
-                                 custom_func_name='update_functionapp', setter_type=appservice_custom, command_type=webapp_sdk)
+        g.generic_update_command('update', setter_name='set_functionapp', getter_name='get_webapp',
+                                 exception_handler=ex_handler_factory(), custom_func_name='update_functionapp',
+                                 command_type=appservice_custom)
 
     with self.command_group('functionapp config') as g:
         g.custom_command('set', 'update_site_configs')

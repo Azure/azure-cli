@@ -109,8 +109,8 @@ def list_appserviceenvironment_plans(cmd, name, resource_group_name=None):
 
 
 def _get_ase_client_factory(cli_ctx, api_version=None):
-    from azure.mgmt.web import WebSiteManagementClient
-    client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient).app_service_environments
+    from azure.cli.core.profiles import ResourceType
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_APPSERVICE).app_service_environments
     if api_version:
         client.api_version = api_version
     return client
