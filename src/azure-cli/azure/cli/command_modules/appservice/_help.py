@@ -2063,3 +2063,12 @@ helps['staticapp hostname list'] = """
     - name: List custom hostnames of the static app.
       text: az staticapp hostname list -n MyStaticAppName
 """
+
+helps['staticapp hostname delete'] = """
+    type: command
+    short-summary: Delete given hostname of the static app.
+    examples:
+    - name: Delete given hostname of the static app.
+      text: az staticapp hostname delete -n MyStaticAppName --hostname HostnameToDelete
+"""
+

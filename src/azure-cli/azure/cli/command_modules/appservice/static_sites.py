@@ -49,6 +49,14 @@ def list_staticsite_domains(cmd, name, resource_group_name=None):
     return client.list_static_site_custom_domains(resource_group_name, name)
 
 
+def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return client.delete_static_site_custom_domain(resource_group_name, name, hostname)
+
+
 def list_staticsite_secrets(cmd, resource_group_name, name):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return client.list_static_site_secrets(resource_group_name, name)
