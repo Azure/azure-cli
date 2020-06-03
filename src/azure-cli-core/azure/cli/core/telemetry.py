@@ -203,6 +203,10 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 _session = TelemetrySession()
 
 
+def has_exceptions():
+    return len(_session.exceptions) > 0
+
+
 def _user_agrees_to_telemetry(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):

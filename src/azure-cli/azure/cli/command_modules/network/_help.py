@@ -61,8 +61,12 @@ helps['network application-gateway address-pool update'] = """
 type: command
 short-summary: Update an address pool.
 examples:
-  - name: Update an address pool, add server.
+  - name: Update backend address pool.
     text: az network application-gateway address-pool update -g MyResourceGroup --gateway-name MyAppGateway \\ -n MyAddressPool --servers 10.0.0.4 10.0.0.5 10.0.0.6
+  - name: Add to the backend address pool by using backend server IP address
+    text: |
+        az network application-gateway address-pool update -g MyResourceGroup --gateway-name MyAppGateway -n MyAddressPool \\
+            --add backendAddresses "{ \"ip_address\": \"{10.0.0.13}\" }"
 """
 
 helps['network application-gateway auth-cert'] = """

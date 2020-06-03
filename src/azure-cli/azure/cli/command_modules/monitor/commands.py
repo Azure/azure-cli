@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
 from azure.cli.core.commands import CliCommandType
 
 
@@ -12,7 +11,8 @@ def load_command_table(self, _):
     from ._client_factory import (
         cf_alert_rules, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles, cf_autoscale,
         cf_diagnostics, cf_activity_log, cf_action_groups, cf_activity_log_alerts, cf_event_categories,
-        cf_metric_alerts, cf_log_analytics_workspace, cf_log_analytics_workspace_management_groups,
+        cf_metric_alerts, cf_log_analytics_deleted_workspaces, cf_log_analytics_workspace,
+        cf_log_analytics_workspace_tables, cf_log_analytics_workspace_management_groups,
         cf_log_analytics_workspace_usage, cf_log_analytics_workspace_schema, cf_log_analytics_workspace_shared_keys,
         cf_log_analytics_workspace_intelligence_packs, cf_log_analytics_cluster,
         cf_log_analytics_workspace_linked_service, cf_diagnostics_category,
@@ -169,6 +169,12 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler
     )
 
+    log_analytics_deleted_workspace_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace#{}',
+        client_factory=cf_log_analytics_deleted_workspaces,
+        exception_handler=monitor_exception_handler
+    )
+
     log_analytics_workspace_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace#{}',
         client_factory=cf_log_analytics_workspace,
@@ -214,6 +220,12 @@ def load_command_table(self, _):
     log_analytics_workspace_linked_service_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.log_analytics_workspace_linked_service#{}',
         client_factory=cf_log_analytics_workspace_linked_service,
+        exception_handler=monitor_exception_handler
+    )
+
+    log_analytics_workspace_table_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#TablesOperations.{}',
+        client_factory=cf_log_analytics_workspace_tables,
         exception_handler=monitor_exception_handler
     )
 
@@ -342,15 +354,22 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_metric_alert', custom_func_type=alert_custom)
 
     with self.command_group('monitor log-analytics workspace', log_analytics_workspace_sdk, custom_command_type=log_analytics_workspace_custom, is_preview=True) as g:
-        g.custom_command('create', 'create_log_analytics_workspace')
+        g.custom_command('create', 'create_log_analytics_workspace', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace')
         g.show_command('show', 'get')
-        g.command('delete', 'delete')
+        g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_log_analytics_workspace')
+        g.custom_command('list-deleted-workspaces', 'list_deleted_log_analytics_workspaces', custom_command_type=log_analytics_deleted_workspace_custom)
+        g.custom_command('recover', 'recover_log_analytics_workspace', supports_no_wait=True)
         g.command('get-schema', 'get', command_type=log_analytics_workspace_schema_sdk)
         g.command('list-usages', 'list', command_type=log_analytics_workspace_usage_sdk)
         g.command('list-management-groups', 'list', command_type=log_analytics_workspace_management_groups_sdk)
         g.command('get-shared-keys', 'get_shared_keys', command_type=log_analytics_workspace_shared_keys_sdk)
+
+    with self.command_group('monitor log-analytics workspace table', log_analytics_workspace_table_sdk) as g:
+        g.command('list', 'list_by_workspace')
+        g.command('show', 'get')
+        g.command('update', 'update')
 
     with self.command_group('monitor log-analytics workspace pack', log_analytics_workspace_intelligence_packs_sdk) as g:
         g.command('list', 'list')

@@ -92,9 +92,7 @@ def load_command_table(self, _):
         g.custom_command('remove-dev-spaces', 'aks_remove_dev_spaces')
         g.custom_command('scale', 'aks_scale', supports_no_wait=True)
         g.custom_show_command('show', 'aks_show', table_transformer=aks_show_table_format)
-        g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True,
-                         confirmation='Kubernetes may be unavailable during cluster upgrades.\n' +
-                         'Are you sure you want to perform this operation?')
+        g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True)
         g.custom_command('upgrade-connector', 'k8s_upgrade_connector', is_preview=True)
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces')
         g.custom_command('rotate-certs', 'aks_rotate_certs', supports_no_wait=True,

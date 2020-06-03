@@ -3,6 +3,72 @@
 Release History
 ===============
 
+2.7.0
+++++++
+
+**ACR**
+
+* Fix a typo in an error message of token creation (#13620)
+
+**AKS**
+
+* Change default vm sku to Standard_D2s_v3 (#13541)
+* Fix creating role assignment for MSI clsuter plus custom subnet (#13543)
+
+**AppService**
+
+* Fix #12739 az appservice list-locations returns some invalid locations (#13520)
+
+**ARM**
+
+* `az deployment`: Fix issue #13159 of incorrect message of JSON after removing comments and compressing (#13561)
+* `az resource tag`: Fix issue #13255 of tagging resources with resource type `Microsoft.ContainerRegistry/registries/webhooks` (#13495)
+* Improve the examples for the resource module (#13375)
+
+**ARO**
+
+* Change CLIError to correct flag for --worker-vm-disk-size-gb (#13439)
+
+**EventHub**
+
+* Fix for issue #12406 Argument --capture-interval does not update the "intervalInSeconds" (#13054)
+
+**HDInsight**
+
+* Change get_json_object to shell_safe_json_parse (#13684)
+
+**Monitor**
+
+* `az monitor metrics alert`: refine several help messages (#13469)
+* `az monitor diagnostic-settings create`: support --export-to-resource-specific argument (#13697)
+* Support LA workspace recover (#13719)
+
+**Network**
+
+* `az network dns zone`: support - character (#13377)
+* `az network vpn-connection ipsec-policy`: change the --sa-lifetime and --sa-max-size to larger values in example (#13590)
+* Bump network to 2020-04-01 (#13568)
+* `az network private-endpoint-connection`: support event grid (#13608)
+* `az network express-route list-route-tables`: fix bug that cannot list routes as table (#13714)
+
+**Packaging**
+
+* Add Ubuntu Focal Package (#13491)
+
+**RBAC**
+
+* `az ad sp credential reset`: modify credential generation to avoid troublesome special characters (#13643)
+
+**Redis**
+
+* Fix #13529: Change documentation of parameter enable_non_ssl_port (#13584)
+
+**Storage**
+
+* `az storage copy`: Add parameter `--follow-symlinks` to support symlinks (#12037)
+* Enable local context for storage account (#13682)
+* `az storage logging`: Fix issue #11969 to refine error message (#13605)
+
 2.6.0
 ++++++
 
