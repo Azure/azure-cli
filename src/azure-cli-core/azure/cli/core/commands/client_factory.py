@@ -110,9 +110,7 @@ def configure_common_settings(cli_ctx, client):
     client.config.generate_client_request_id = 'x-ms-client-request-id' not in cli_ctx.data['headers']
 
 
-def configure_common_settings_track2(cli_ctx):
-    client_kwargs = {}
-
+def configure_common_settings_track2(cli_ctx, **client_kwargs):
     client_kwargs.update(_debug.change_ssl_cert_verification_track2())
 
     client_kwargs['logging_enable'] = True
