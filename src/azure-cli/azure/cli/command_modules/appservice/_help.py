@@ -2024,6 +2024,14 @@ helps['staticapp disconnect'] = """
       text: az staticapp disconnect -n MyStaticAppName
 """
 
+helps['staticapp reconnect'] = """
+    type: command
+    short-summary: Connect to a repo and branch following a disconnect command.
+    examples:
+    - name: Connect a repo and branch to static app.
+      text: az staticapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --token MyAccessToken
+"""
+
 helps['staticapp delete'] = """
     type: command
     short-summary: Delete a static app.

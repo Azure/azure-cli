@@ -695,6 +695,11 @@ def load_arguments(self, _):
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp disconnect') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
+    with self.argument_context('staticapp reconnect') as c:
+        c.argument('name', arg_type=staticapp_name_arg_type)
+        c.argument('source', arg_type=staticapp_repo_url_arg_type)
+        c.argument('token', arg_type=staticapp_repo_token_arg_type)
+        c.argument('branch', arg_type=staticapp_repo_branch_arg_type)
     with self.argument_context('staticapp delete') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp environments list') as c:

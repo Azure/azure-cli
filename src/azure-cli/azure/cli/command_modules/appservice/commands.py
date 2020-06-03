@@ -367,6 +367,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_staticsites', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite', supports_no_wait=True, confirmation=True)
         g.custom_command('disconnect', 'disconnect_staticsite', supports_no_wait=True)
+        g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
         g.custom_command('list-secrets', 'list_staticsite_secrets')
         g.custom_command('list-function-appsettings', 'list_staticsite_function_app_settings')
 

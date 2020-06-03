@@ -34,6 +34,14 @@ def disconnect_staticsite(cmd, name, resource_group_name=None, no_wait=False):
                        resource_group_name=resource_group_name, name=name)
 
 
+def reconnect_staticsite(cmd, name, source, branch, token=None, resource_group_name=None, no_wait=False):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    location = _get_staticsite_location(client, name, resource_group_name)
+
+    return create_staticsites(cmd, resource_group_name, name, location,
+                              source, branch, token, no_wait=no_wait)
+
+
 def list_staticsite_environments(cmd, name, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
@@ -102,11 +110,7 @@ def create_staticsites(cmd, resource_group_name, name, location,
                        app_location='/', api_location='api', app_artifact_location=None,
                        custom_domains=None, tags=None, no_wait=False):
     if not token:
-        raise CLIError("GitHub access token is required to authenticate to your repositories. "
-                       "If you need to create a Github Personal Access Token, "
-                       "please follow the steps found at the following link:\n{0}"
-            .format(
-            "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"))
+        _raise_missing_token_suggestion()
 
     StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription = cmd.get_models(
         'StaticSiteARMResource', 'StaticSiteBuildProperties', 'SkuDescription')
@@ -136,14 +140,32 @@ def create_staticsites(cmd, resource_group_name, name, location,
                        static_site_envelope=staticsite_deployment_properties)
 
 
-def update_staticsites(cmd, no_wait=False):
-    return
-
-
 def delete_staticsite(cmd, resource_group_name, name, no_wait=False):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     return sdk_no_wait(no_wait, client.delete_static_site,
                        resource_group_name=resource_group_name, name=name)
+
+
+def _raise_missing_token_suggestion():
+    pat_documentation = "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line"
+    raise CLIError("GitHub access token is required to authenticate to your repositories. "
+                   "If you need to create a Github Personal Access Token, "
+                   "please follow the steps found at the following link:\n{0}".format(pat_documentation))
+
+
+def _get_staticsite_location(client, static_site_name, resource_group_name=None):
+    static_sites = client.list()
+    for static_site in static_sites:
+        if static_site.name.lower() == static_site_name.lower():
+            if not resource_group_name:
+                return static_site.location
+            else:
+                from .utils import _get_resource_group_from_id
+                found_rg = _get_resource_group_from_id(static_site.id)
+                if found_rg.lower() == resource_group_name.lower():
+                    return static_site.location
+
+    raise CLIError("Static site was '{}' not found in subscription.".format(static_site_name))
 
 
 def _get_resource_group_name_of_staticsite(client, static_site_name):
