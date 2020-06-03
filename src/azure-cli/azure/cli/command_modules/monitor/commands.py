@@ -17,7 +17,7 @@ def load_command_table(self, _):
         cf_log_analytics_workspace_intelligence_packs, cf_log_analytics_cluster,
         cf_log_analytics_workspace_linked_service, cf_diagnostics_category,
         cf_private_link_resources, cf_private_link_scoped_resources,
-        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage)
+        cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage, cf_log_analytics_workspace_saved_searches)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
     from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id
@@ -210,6 +210,12 @@ def load_command_table(self, _):
         exception_handler=monitor_exception_handler
     )
 
+    log_analytics_workspace_saved_search_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.loganalytics.operations#SavedSearchesOperations.{}',
+        client_factory=cf_log_analytics_workspace_saved_searches,
+        exception_handler=monitor_exception_handler
+    )
+
     log_analytics_workspace_linked_service_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.loganalytics.operations#LinkedServicesOperations.{}',
         client_factory=cf_log_analytics_workspace_linked_service,
@@ -374,6 +380,13 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.command('enable', 'enable')
         g.command('disable', 'disable')
+
+    with self.command_group('monitor log-analytics workspace saved-search', log_analytics_workspace_saved_search_sdk, custom_command_type=log_analytics_workspace_custom) as g:
+        g.custom_command('create', 'create_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches,)
+        g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_saved_search', client_factory=cf_log_analytics_workspace_saved_searches,)
+        g.command('delete', 'delete', confirmation=True)
+        g.show_command('show', 'get')
+        g.command('list', 'list_by_workspace')
 
     with self.command_group('monitor log-analytics workspace linked-service', log_analytics_workspace_linked_service_sdk, custom_command_type=log_analytics_workspace_linked_service_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_linked_service', supports_no_wait=True)

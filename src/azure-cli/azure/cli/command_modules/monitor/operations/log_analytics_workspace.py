@@ -80,3 +80,41 @@ def recover_log_analytics_workspace(cmd, workspace_name, resource_group_name=Non
 
     raise CLIError('{} is not a deleted workspace and you can only recover a deleted workspace within 14 days.'
                    .format(workspace_name))
+
+def _format_tags(tags):
+    from azure.mgmt.loganalytics.models import Tag
+    if tags:
+        tags = [Tag(name=key, value=value) for key, value in tags.items()]
+    return tags
+
+def create_log_analytics_workspace_saved_search(client, workspace_name, resource_group_name, saved_search_id,
+                                                category, display_name, saved_query,
+                                                function_alias=None, function_parameters=None, version=None,
+                                                tags=None):
+    from azure.mgmt.loganalytics.models import SavedSearch
+    saved_search = SavedSearch(category=category,
+                               display_name=display_name,
+                               query=saved_query,
+                               function_alias=function_alias,
+                               function_parameters=function_parameters,
+                               version=version,
+                               tags=_format_tags(tags))
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   workspace_name=workspace_name,
+                                   saved_search_id=saved_search_id,
+                                   parameters=saved_search)
+
+
+def update_log_analytics_workspace_saved_search(cmd, instance, category=None, display_name=None, saved_query=None,
+                                                function_alias=None, function_parameters=None,
+                                                tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('category', category)
+        c.set_param('display_name', display_name)
+        c.set_param('query', saved_query)
+        c.set_param('function_alias', function_alias)
+        c.set_param('function_parameters', function_parameters)
+        c.set_param('tags', _format_tags(tags))
+        # workaround for server's issue. server would return etag instead of eTag.
+        c.set_param('e_tag', '*')
+    return instance

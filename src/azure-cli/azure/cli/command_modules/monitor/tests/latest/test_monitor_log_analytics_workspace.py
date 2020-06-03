@@ -312,3 +312,62 @@ class TestLogProfileScenarios(ScenarioTest):
 
         with self.assertRaisesRegexp(SystemExit, '3'):
             self.cmd('monitor log-analytics workspace show -g {rg} -n {name}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_saved_search', location='eastus')
+    def test_monitor_log_analytics_workspace_saved_search(self, resource_group):
+        self.kwargs.update({
+            'workspace_name': self.create_random_name('clitest', 20),
+            'saved_search_name': 'clitest',
+            'category': 'cli',
+            'category_2': 'cli2',
+            'display_name': 'myclitest',
+            'display_name_2': 'myclitest2',
+            'function_alias': 'myfun',
+            'function_param': "a:string = value",
+            'function_alias_2': 'myfun2',
+            'function_param_2': "a2:string = value",
+            'rg': resource_group
+        })
+
+        self.cmd("monitor log-analytics workspace create -g {rg} -n {workspace_name} --tags clitest=myron")
+
+        self.cmd('monitor log-analytics workspace saved-search create -g {rg} --workspace-name {workspace_name} -n {saved_search_name} '
+                 '--category {category} --display-name {display_name} -q "Heartbeat | getschema" --fa {function_alias} '
+                 '--fp "{function_param}" --tags a=b c=d', checks=[
+            self.check('category', '{category}'),
+            self.check('displayName', '{display_name}'),
+            self.check('query', "Heartbeat | getschema"),
+            self.check('functionAlias', '{function_alias}'),
+            self.check('functionParameters', '{function_param}'),
+            self.check('length(tags)', 2)
+        ])
+
+        self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}', checks=[
+            self.check('category', '{category}'),
+            self.check('displayName', '{display_name}'),
+            self.check('query', "Heartbeat | getschema"),
+            self.check('functionAlias', '{function_alias}'),
+            self.check('functionParameters', '{function_param}'),
+            self.check('length(tags)', 2)
+        ])
+        self.cmd('monitor log-analytics workspace saved-search list -g {rg} --workspace-name {workspace_name}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        self.cmd(
+            'monitor log-analytics workspace saved-search update -g {rg} --workspace-name {workspace_name} -n {saved_search_name} '
+            '--category {category_2} --display-name {display_name_2} -q "AzureActivity | summarize count() by bin(timestamp, 1h)" --fa {function_alias_2} '
+            '--fp "{function_param_2}" --tags a=c f=e', checks=[
+            self.check('category', '{category_2}'),
+            self.check('displayName', '{display_name_2}'),
+            self.check('query', "AzureActivity | summarize count() by bin(timestamp, 1h)"),
+            self.check('functionAlias', '{function_alias_2}'),
+            self.check('functionParameters', '{function_param_2}'),
+            self.check('length(tags)', 2),
+            self.check('tags[0].value', 'c'),
+            self.check('tags[1].value', 'e')
+        ])
+
+        self.cmd('monitor log-analytics workspace saved-search delete -g {rg} --workspace-name {workspace_name} -n {saved_search_name} -y')
+        with self.assertRaisesRegexp(SystemExit, '3'):
+            self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}')
