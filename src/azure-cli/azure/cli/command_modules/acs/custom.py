@@ -1738,7 +1738,17 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         linux_profile = ContainerServiceLinuxProfile(admin_username=admin_username, ssh=ssh_config)
 
     windows_profile = None
-    if windows_admin_username:
+    if windows_admin_username or windows_admin_password:
+        # To avoid that windows_admin_password is set but windows_admin_username is not
+        if windows_admin_username is None:
+            try:
+                from knack.prompting import prompt
+                windows_admin_username = prompt('windows_admin_username: ')
+                # The validation for admin_username in ManagedClusterWindowsProfile will fail even if
+                # users still set windows_admin_username to empty here
+            except NoTTYException:
+                raise CLIError('Please specify username for Windows in non-interactive mode.')
+
         if windows_admin_password is None:
             try:
                 windows_admin_password = prompt_pass(
@@ -1767,11 +1777,20 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     if (vnet_subnet_id and not skip_subnet_role_assignment and
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
-        scope = vnet_subnet_id
-        if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
-                                    service_principal_profile.client_id, scope=scope):
-            logger.warning('Could not create a role assignment for subnet. '
-                           'Are you an Owner on this subscription?')
+        # if service_principal_profile is None, then this cluster is an MSI cluster,
+        # and the service principal does not exist. For now, We just tell user to grant the
+        # permission after the cluster is created to keep consistent with portal experience.
+        if service_principal_profile is None:
+            logger.warning('The cluster is an MSI cluster, please manually grant '
+                           'Network Contributor role to the system assigned identity '
+                           'after the cluster is created, see '
+                           'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity')
+        else:
+            scope = vnet_subnet_id
+            if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
+                                        service_principal_profile.client_id, scope=scope):
+                logger.warning('Could not create a role assignment for subnet. '
+                               'Are you an Owner on this subscription?')
 
     load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
@@ -2136,8 +2155,7 @@ def aks_update(cmd, client, resource_group_name, name,
         raise CLIError('There are more than one node pool in the cluster. Please use "az aks nodepool" command '
                        'to update per node pool auto scaler settings')
 
-    node_count = instance.agent_pool_profiles[0].count
-    _validate_autoscaler_update_counts(min_count, max_count, node_count, enable_cluster_autoscaler or
+    _validate_autoscaler_update_counts(min_count, max_count, enable_cluster_autoscaler or
                                        update_cluster_autoscaler)
 
     if enable_cluster_autoscaler:
@@ -2213,7 +2231,11 @@ def aks_update(cmd, client, resource_group_name, name,
 
 # pylint: disable=unused-argument,inconsistent-return-statements
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, control_plane_only=False,
-                no_wait=False, **kwargs):
+                no_wait=False, yes=False):
+    msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
+    if not yes and not prompt_y_n(msg, default="n"):
+        return None
+
     instance = client.get(resource_group_name, name)
 
     if instance.kubernetes_version == kubernetes_version:
@@ -2239,20 +2261,20 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, cont
         if control_plane_only:
             msg = ("Legacy clusters do not support control plane only upgrade. All node pools will be "
                    "upgraded to {} as well. Continue?").format(instance.kubernetes_version)
-            if not prompt_y_n(msg, default="n"):
+            if not yes and not prompt_y_n(msg, default="n"):
                 return None
         upgrade_all = True
     else:
         if not control_plane_only:
             msg = ("Since control-plane-only argument is not specified, this will upgrade the control plane "
                    "AND all nodepools to version {}. Continue?").format(instance.kubernetes_version)
-            if not prompt_y_n(msg, default="n"):
+            if not yes and not prompt_y_n(msg, default="n"):
                 return None
             upgrade_all = True
         else:
             msg = ("Since control-plane-only argument is specified, this will upgrade only the control plane to {}. "
                    "Node pool will not change. Continue?").format(instance.kubernetes_version)
-            if not prompt_y_n(msg, default="n"):
+            if not yes and not prompt_y_n(msg, default="n"):
                 return None
 
     if upgrade_all:
@@ -2904,9 +2926,8 @@ def aks_agentpool_update(cmd, client, resource_group_name, cluster_name, nodepoo
                        '"--tags" or "--mode"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    node_count = instance.count
 
-    _validate_autoscaler_update_counts(min_count, max_count, node_count, enable_cluster_autoscaler or
+    _validate_autoscaler_update_counts(min_count, max_count, enable_cluster_autoscaler or
                                        update_cluster_autoscaler)
 
     if enable_cluster_autoscaler:
@@ -3147,7 +3168,7 @@ def _check_cluster_autoscaler_flag(enable_cluster_autoscaler,
             raise CLIError('min-count and max-count are required for --enable-cluster-autoscaler, please use the flag')
 
 
-def _validate_autoscaler_update_counts(min_count, max_count, node_count, is_enable_or_update):
+def _validate_autoscaler_update_counts(min_count, max_count, is_enable_or_update):
     """
     Validates the min, max, and node count when performing an update
     """
@@ -3158,8 +3179,6 @@ def _validate_autoscaler_update_counts(min_count, max_count, node_count, is_enab
     if min_count is not None and max_count is not None:
         if int(min_count) > int(max_count):
             raise CLIError('Value of min-count should be less than or equal to value of max-count.')
-        if int(node_count) < int(min_count) or int(node_count) > int(max_count):
-            raise CLIError("Current node count '{}' is not in the range of min-count and max-count.".format(node_count))
 
 
 def _print_or_merge_credentials(path, kubeconfig, overwrite_existing, context_name):
@@ -3232,14 +3251,10 @@ def _remove_osa_nulls(managed_clusters):
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
     attrs = ['tags', 'plan', 'type', 'id']
-    ap_master_attrs = ['name', 'os_type']
     for managed_cluster in managed_clusters:
         for attr in attrs:
-            if getattr(managed_cluster, attr, None) is None:
+            if hasattr(managed_cluster, attr) and getattr(managed_cluster, attr) is None:
                 delattr(managed_cluster, attr)
-        for attr in ap_master_attrs:
-            if getattr(managed_cluster.master_pool_profile, attr, None) is None:
-                delattr(managed_cluster.master_pool_profile, attr)
     return managed_clusters
 
 

@@ -516,6 +516,9 @@ def list_key(cmd,
              top=None,
              all_=False,
              resolve_keyvault=False):
+    if fields and resolve_keyvault:
+        raise CLIError("Please provide only one of these arguments: '--fields' or '--resolve-keyvault'. See 'az appconfig kv list -h' for examples.")
+
     keyvalues = __read_kv_from_config_store(cmd,
                                             name=name,
                                             connection_string=connection_string,

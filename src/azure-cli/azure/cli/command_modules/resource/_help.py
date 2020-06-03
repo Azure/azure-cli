@@ -417,11 +417,8 @@ examples:
         az deployment sub create --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
   - name: Create a deployment at subscription scope from a local template file, using parameters from a JSON string.
     text: |
-        az deployment sub create --location WestUS --template-file azuredeploy.json --parameters '{
-                "policyName": {
-                    "value": "policy2"
-                }
-            }'
+        az deployment sub create --location WestUS --template-file azuredeploy.json  \\
+            --parameters '{ \\"policyName\\": { \\"value\\": \\"policy2\\" } }'
   - name: Create a deployment at subscription scope from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
         az deployment sub create --location WestUS --template-file azuredeploy.json  \\
@@ -573,18 +570,21 @@ parameters:
 examples:
   - name: Create a deployment at resource group from a remote template file, using parameters from a local JSON file.
     text: >
-        az deployment group create --resource-group testrg --name rollout01 --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+        az deployment group create --resource-group testrg --name rollout01 \\
+            --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
   - name: Create a deployment at resource group from a local template file, using parameters from a JSON string.
     text: |
-        az deployment group create --resource-group testrg --name rollout01 --template-file azuredeploy.json --parameters '{
-                "policyName": {
-                    "value": "policy2"
-                }
-            }'
+        az deployment group create --resource-group testrg --name rollout01 \\
+            --template-file azuredeploy.json  \\
+            --parameters '{ \\"policyName\\": { \\"value\\": \\"policy2\\" } }'
+  - name: Create a deployment at resource group from a local template file, using parameters from an array string.
+    text: |
+      az deployment group create --resource-group testgroup --template-file demotemplate.json --parameters exampleString='inline string' exampleArray='("value1", "value2")'
   - name: Create a deployment at resource group from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
-        az deployment group create --resource-group testrg --name rollout01 --template-file azuredeploy.json  \\
-            --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+        az deployment group create --resource-group testrg --name rollout01 \\
+            --template-file azuredeploy.json  --parameters @params.json \\
+            --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
 """
 
 helps['deployment group what-if'] = """
@@ -731,18 +731,18 @@ parameters:
 examples:
   - name: Create a deployment at management group from a remote template file, using parameters from a local JSON file.
     text: >
-        az deployment mg create --management-group-id testrg --name rollout01 --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+        az deployment mg create --management-group-id testrg --name rollout01 --location WestUS \\
+            --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
   - name: Create a deployment at management group from a local template file, using parameters from a JSON string.
     text: |
-        az deployment mg create --management-group-id testmg --name rollout01 --location WestUS --template-file azuredeploy.json --parameters '{
-                "policyName": {
-                    "value": "policy2"
-                }
-            }'
+        az deployment mg create --management-group-id testmg --name rollout01 --location WestUS \\
+            --template-file azuredeploy.json \\
+            --parameters '{ \\"policyName\\": { \\"value\\": \\"policy2\\" } }'
   - name: Create a deployment at management group from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
-        az deployment mg create --management-group-id testmg --name rollout01 --location WestUS --template-file azuredeploy.json  \\
-            --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+        az deployment mg create --management-group-id testmg --name rollout01 --location WestUS \\
+            --template-file azuredeploy.json --parameters @params.json \\
+            --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
 """
 
 helps['deployment mg export'] = """
@@ -852,18 +852,18 @@ parameters:
 examples:
   - name: Create a deployment at tenant scope from a remote template file, using parameters from a local JSON file.
     text: >
-        az deployment tenant create --name rollout01 --location WestUS --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
+        az deployment tenant create --name rollout01 --location WestUS \\
+            --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
   - name: Create a deployment at tenant scope from a local template file, using parameters from a JSON string.
     text: |
-        az deployment tenant create --name rollout01 --location WestUS --template-file azuredeploy.json --parameters '{
-                "policyName": {
-                    "value": "policy2"
-                }
-            }'
+        az deployment tenant create --name rollout01 --location WestUS \\
+            --template-file azuredeploy.json \\
+            --parameters '{ \\"policyName\\": { \\"value\\": \\"policy2\\" } }'
   - name: Create a deployment at tenant scope from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
     text: >
-        az deployment tenant create --name rollout01 --location WestUS --template-file azuredeploy.json  \\
-            --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
+        az deployment tenant create --name rollout01 --location WestUS \\
+            --template-file azuredeploy.json  --parameters @params.json \\
+            --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json
 """
 
 helps['deployment tenant export'] = """
@@ -1524,14 +1524,16 @@ examples:
             --params "{ \\"requiredSku\\": { \\"type\\": \\"String\\" } }"
   - name: Create a policy set definition with parameters.
     text: |
-        az policy set-definition create -n readOnlyStorage --definitions '[
-                { "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" }
-            ]'
+        az policy set-definition create -n readOnlyStorage \\
+            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
+                Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]'
   - name: Create a policy set definition in a subscription.
     text: |
-        az policy set-definition create -n readOnlyStorage --subscription '0b1f6471-1bf0-4dda-aec3-111122223333' --definitions '[
-                { "policyDefinitionId": "/subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" }
-            ]'
+        az policy set-definition create -n readOnlyStorage \\
+            --subscription '0b1f6471-1bf0-4dda-aec3-111122223333' \\
+            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/ \\
+                0b1f6471-1bf0-4dda-aec3-111122223333/providers/Microsoft.Authorization/ \\
+                    policyDefinitions/storagePolicy\\" } ]'
   - name: Create a policy set definition with policy definition groups.
     text: |
         az policy set-definition create -n computeRequirements \\
@@ -1575,9 +1577,10 @@ short-summary: Update a policy set definition.
 examples:
   - name: Update a policy set definition.
     text: |-
-        az policy set-definition update --definitions '[
-                { "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" }
-            ]' --name MyPolicySetDefinition
+        az policy set-definition update \\
+            --definitions '[ { \\"policyDefinitionId\\": \\"/subscriptions/mySubId/providers/ \\
+                Microsoft.Authorization/policyDefinitions/storagePolicy\\" } ]' \\
+            --name MyPolicySetDefinition
   - name: Update the groups and definitions within a policy set definition.
     text: |
         az policy set-definition update -n computeRequirements \\
@@ -1939,9 +1942,37 @@ examples:
         az rest --method put --uri https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}?api-version=2019-09-01 --body @body.json
 """
 
+
 helps['tag'] = """
 type: group
 short-summary: Manage resource tags.
+"""
+
+helps['tag add-value'] = """
+type: command
+short-summary: Create a tag value.
+examples:
+  - name: Create a tag value.
+    text: >
+        az tag add-value --name MyTag --value MyValue
+"""
+
+helps['tag create'] = """
+type: command
+short-summary: Create a tag in the subscription.
+examples:
+  - name: Create a tag in the subscription.
+    text: >
+        az tag create --name MyTag
+"""
+
+helps['tag delete'] = """
+type: command
+short-summary: Delete a tag in the subscription.
+examples:
+  - name: Delete a tag from the subscription.
+    text: >
+        az tag delete --name MyTag
 """
 
 helps['version'] = """

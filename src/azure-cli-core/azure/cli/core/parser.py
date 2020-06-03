@@ -133,6 +133,7 @@ class AzCliCommandParser(CLICommandParser):
                 param.deprecate_info = arg.deprecate_info
                 param.preview_info = arg.preview_info
                 param.experimental_info = arg.experimental_info
+                param.default_value_source = arg.default_value_source
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,
@@ -142,7 +143,7 @@ class AzCliCommandParser(CLICommandParser):
                 _parser=command_parser)
 
     def validation_error(self, message):
-        telemetry.set_user_fault('validation error')
+        telemetry.set_user_fault('validation error: {}'.format(message))
         return super(AzCliCommandParser, self).error(message)
 
     def error(self, message):
