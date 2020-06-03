@@ -95,12 +95,29 @@ def list_staticsite_functions(cmd, name, resource_group_name=None, environment_n
     return client.list_static_site_build_functions(resource_group_name, name, environment_name)
 
 
-def list_staticsite_function_app_settings(cmd, name, resource_group_name=None):
+def list_staticsite_function_app_settings(cmd, name, resource_group_name=None, environment_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return client.list_static_site_function_app_settings(resource_group_name, name)
+    if not environment_name:
+        return client.list_static_site_function_app_settings(resource_group_name, name)
+
+    return client.list_static_site_build_function_app_settings(resource_group_name, name, environment_name)
+
+
+def set_staticsite_function_app_settings(cmd, name, setting_names, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    setting_dict = {}
+    for pair in setting_names:
+        key, value = _parse_pair(pair)
+        setting_dict[key] = value
+
+    return client.create_or_update_static_site_function_app_settings(
+        resource_group_name, name, kind=None, properties=setting_dict)
 
 
 def create_staticsites(cmd, resource_group_name, name, location,
@@ -138,10 +155,18 @@ def create_staticsites(cmd, resource_group_name, name, location,
                        static_site_envelope=staticsite_deployment_properties)
 
 
-def delete_staticsite(cmd, resource_group_name, name, no_wait=False):
+def delete_staticsite(cmd, name, resource_group_name=None, no_wait=False):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
     return sdk_no_wait(no_wait, client.delete_static_site,
                        resource_group_name=resource_group_name, name=name)
+
+
+def _parse_pair(pair):
+    list = pair.split("=")
+    return list[0], list[1]
 
 
 def _raise_missing_token_suggestion():

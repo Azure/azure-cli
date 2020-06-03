@@ -2096,4 +2096,12 @@ helps['staticapp appsettings list'] = """
       text: az staticapp appsettings list -n MyStaticAppName
 """
 
+helps['staticapp appsettings set'] = """
+    type: command
+    short-summary: Set (replace) function app settings of the static app. 
+    examples:
+    - name: Set (replace) function app settings of the static app.
+      text: az staticapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2
+"""
+
 
