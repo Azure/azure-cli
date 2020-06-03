@@ -2104,4 +2104,12 @@ helps['staticapp appsettings set'] = """
       text: az staticapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2
 """
 
+helps['staticapp appsettings delete'] = """
+    type: command
+    short-summary: Delete function app settings with given keys of the static app. 
+    examples:
+    - name: Delete given app settings of the static app.
+      text: az staticapp appsettings delete -n MyStaticAppName --setting-names key1 key2
+"""
+
 

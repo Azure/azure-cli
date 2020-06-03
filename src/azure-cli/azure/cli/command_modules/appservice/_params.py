@@ -57,9 +57,11 @@ def load_arguments(self, _):
                                                help="Name of the static site",
                                                local_context_attribute=LocalContextAttribute(name='staticsite_name', actions=[LocalContextAction.GET]))
     environment_name_arg_type = CLIArgumentType(options_list=['--environment-name'], help="Name of the environment of static site")
+    setting_pairs_arg_type = CLIArgumentType(options_list=['--setting-names'],
+                                             help="Space-separated app settings in 'key=value' format. ",
+                                             nargs='*')
     setting_names_arg_type = CLIArgumentType(options_list=['--setting-names'],
-                                             help="Space-separated app settings in 'key=value' format. "
-                                                  "These properties are associated with the action groups added in this command.",
+                                             help="Space-separated app setting names.",
                                              nargs='*')
     staticapp_repo_token_arg_type = CLIArgumentType(options_list=['--token', '-t'],
                                                      help="A user's github repository token. This is used to setup the Github Actions workflow file and API secrets.",
@@ -716,7 +718,7 @@ def load_arguments(self, _):
         c.argument('environment_name', arg_type=environment_name_arg_type)
     with self.argument_context('staticapp appsettings') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
-        c.argument('environment_name', arg_type=environment_name_arg_type)
+        c.argument('setting_pairs', arg_type=setting_pairs_arg_type)
         c.argument('setting_names', arg_type=setting_names_arg_type)
     with self.argument_context('staticapp hostname list') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)

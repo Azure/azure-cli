@@ -95,29 +95,43 @@ def list_staticsite_functions(cmd, name, resource_group_name=None, environment_n
     return client.list_static_site_build_functions(resource_group_name, name, environment_name)
 
 
-def list_staticsite_function_app_settings(cmd, name, resource_group_name=None, environment_name=None):
+def list_staticsite_function_app_settings(cmd, name, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    if not environment_name:
-        return client.list_static_site_function_app_settings(resource_group_name, name)
-
-    return client.list_static_site_build_function_app_settings(resource_group_name, name, environment_name)
+    return client.list_static_site_function_app_settings(resource_group_name, name)
 
 
-def set_staticsite_function_app_settings(cmd, name, setting_names, resource_group_name=None):
+def set_staticsite_function_app_settings(cmd, name, setting_pairs, resource_group_name=None):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
     setting_dict = {}
-    for pair in setting_names:
+    for pair in setting_pairs:
         key, value = _parse_pair(pair)
         setting_dict[key] = value
 
     return client.create_or_update_static_site_function_app_settings(
         resource_group_name, name, kind=None, properties=setting_dict)
+
+
+def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    app_settings = client.list_static_site_function_app_settings(resource_group_name, name).properties
+
+    for key in setting_names:
+        if key in app_settings:
+            app_settings.pop(key)
+        else:
+            print("key '{0}' not found in app settings".format(key))
+
+    return client.create_or_update_static_site_function_app_settings(
+        resource_group_name, name, kind=None, properties=app_settings)
 
 
 def create_staticsites(cmd, resource_group_name, name, location,
