@@ -123,8 +123,8 @@ def load_command_table(self, _):
         g.keyvault_custom('restore', 'restore_key', doc_string_source=data_doc_string.format('restore_key'))
         g.keyvault_custom('import', 'import_key')
         g.keyvault_custom('download', 'download_key')
-        g.keyvault_command('encrypt', 'encrypt')
-        g.keyvault_command('decrypt', 'decrypt')
+        g.keyvault_custom('encrypt', 'encrypt_data')
+        g.keyvault_custom('decrypt', 'decrypt_data')
 
     with self.command_group('keyvault secret', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_secrets',

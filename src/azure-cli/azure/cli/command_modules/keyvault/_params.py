@@ -27,7 +27,7 @@ from ._validators import (
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet,
     validate_vault_id, validate_sas_definition_id,
     validate_storage_account_id, validate_storage_disabled_attribute,
-    validate_deleted_vault_name, convert_encrypted_value, convert_decrypted_value)
+    validate_deleted_vault_name, validate_encryption, validate_decryption)
 
 # CUSTOM CHOICE LISTS
 
@@ -227,12 +227,14 @@ def load_arguments(self, _):
     for scope in ['encrypt', 'decrypt']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
+            c.extra('plaintext_file', options_list=['--plaintext-file', '-p'])
+            c.extra('ciphertext_file', options_list=['--ciphertext-file', '-c'])
 
     with self.argument_context('keyvault key encrypt'.format(scope)) as c:
-        c.argument('value', help='The value to be encrypted.'.format(scope), validator=convert_encrypted_value)
+        c.argument('value', help='The value to be encrypted.'.format(scope), validator=validate_encryption)
 
     with self.argument_context('keyvault key decrypt'.format(scope)) as c:
-        c.argument('value', help='The value to be decrypted.'.format(scope), validator=convert_decrypted_value)
+        c.argument('value', help='The value to be decrypted.'.format(scope), validator=validate_decryption)
 
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:

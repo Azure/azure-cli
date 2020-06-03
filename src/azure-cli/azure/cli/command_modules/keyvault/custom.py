@@ -932,6 +932,14 @@ def download_key(client, file_path, vault_base_url=None, key_name=None, key_vers
         if os.path.isfile(file_path):
             os.remove(file_path)
         raise ex
+
+
+def encrypt_data(client, vault_base_url, key_name, key_version, algorithm, value, plaintext_file, ciphertext_file):
+    if value:
+        return client.encrypt(vault_base_url, key_name, key_version, algorithm, value)
+
+    with open(plaintext_file) as f:
+        f.read()
 # endregion
 
 
