@@ -2052,7 +2052,7 @@ class WebappAuthenticationTest(ScenarioTest):
 
         self.assertIn('https://audience1', result['allowedAudiences'])
         self.assertIn('email', result['facebookOauthScopes'])
-        self.assertIn('public_profile', result['facebookgitOauthScopes'])
+        self.assertIn('public_profile', result['facebookOauthScopes'])
 
 
 class WebappUpdateTest(ScenarioTest):
