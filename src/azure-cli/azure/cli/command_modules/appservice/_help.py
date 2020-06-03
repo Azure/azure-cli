@@ -2112,4 +2112,11 @@ helps['staticapp appsettings delete'] = """
       text: az staticapp appsettings delete -n MyStaticAppName --setting-names key1 key2
 """
 
+helps['staticapp users list'] = """
+    type: command
+    short-summary: Lists users and assigned roles, limited to users who accepted their invites. 
+    examples:
+    - name: Lists users and assigned roles.
+      text: az staticapp users list -n MyStaticAppName
+"""
 

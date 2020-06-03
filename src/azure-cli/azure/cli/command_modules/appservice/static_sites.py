@@ -134,6 +134,14 @@ def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_g
         resource_group_name, name, kind=None, properties=app_settings)
 
 
+def list_staticsite_users(cmd, name, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    return client.list_static_site_users(resource_group_name, name, authprovider='all')
+
+
 def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
                        app_location='.', api_location='.', app_artifact_location='.github/workflows',

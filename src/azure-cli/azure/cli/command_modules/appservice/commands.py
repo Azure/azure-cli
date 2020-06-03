@@ -383,3 +383,6 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_staticsite_function_app_settings')
         g.custom_command('set', 'set_staticsite_function_app_settings')
         g.custom_command('delete', 'delete_staticsite_function_app_settings')
+
+    with self.command_group('staticapp users', custom_command_type=staticsite_sdk) as g:
+        g.custom_command('list', 'list_staticsite_users')

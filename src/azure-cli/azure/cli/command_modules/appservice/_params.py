@@ -720,6 +720,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=staticapp_name_arg_type)
         c.argument('setting_pairs', arg_type=setting_pairs_arg_type)
         c.argument('setting_names', arg_type=setting_names_arg_type)
+    with self.argument_context('staticapp users') as c:
+        c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp hostname list') as c:
         c.argument('name', arg_type=staticapp_name_arg_type)
     with self.argument_context('staticapp hostname set') as c:
