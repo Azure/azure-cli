@@ -134,6 +134,14 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     elif plan_info.is_xenon:  # windows container webapp
         site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
+        # set the needed app settings for container image validation
+        if name_validation.name_available:
+            site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
+                                                          value=docker_registry_server_user))
+            site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_PASSWORD",
+                                                          value=docker_registry_server_password))
+            site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_URL",
+                                                          value=docker_registry_server_url))
 
     elif runtime:  # windows webapp with runtime specified
         if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
@@ -895,6 +903,8 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
 
 
 def _format_fx_version(custom_image_name, container_config_type=None):
+    custom_image_name = custom_image_name.lower()
+    custom_image_name = custom_image_name.replace("https://", "").replace("http://", "")
     fx_version = custom_image_name.strip()
     fx_version_lower = fx_version.lower()
     # handles case of only spaces
@@ -1301,9 +1311,10 @@ def _resolve_hostname_through_dns(hostname):
 
 
 def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None):
-    Site, SiteConfig = cmd.get_models('Site', 'SiteConfig')
+    Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, webapp)
+    site_config = get_site_configs(cmd, resource_group_name, webapp, None)
     if not site:
         raise CLIError("'{}' app doesn't exist".format(webapp))
     if 'functionapp' in site.kind:
@@ -1311,6 +1322,21 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
+
+    # if it is a Windows Container site, at least pass the necessary
+    # app settings to perform the container image validation:
+    if configuration_source and site_config.windows_fx_version:
+        # get settings from the source
+        clone_from_prod = configuration_source.lower() == webapp.lower()
+        src_slot = None if clone_from_prod else configuration_source
+        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                               'list_application_settings', src_slot)
+        settings = []
+        for k, v in app_settings.properties.items():
+            if k in ("DOCKER_REGISTRY_SERVER_USERNAME", "DOCKER_REGISTRY_SERVER_PASSWORD",
+                     "DOCKER_REGISTRY_SERVER_URL"):
+                settings.append(NameValuePair(name=k, value=v))
+        slot_def.site_config = SiteConfig(app_settings=settings)
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
