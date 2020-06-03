@@ -357,7 +357,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_invalid_what_if_exclude_change_types(self):
-        with self.assertRaisesRegex(CLIError, "Unrecognized resource change types: foo, bar"):
+        with self.assertRaisesRegex(CLIError, "Unrecognized resource change types: foo, bar.*"):
             _what_if_deploy_arm_template_core(mock.MagicMock(), mock.MagicMock(), mock.MagicMock(), ["foo", "bar"])
 
     @mock.patch("azure.cli.command_modules.resource.custom.LongRunningOperation.__call__", autospec=True)
@@ -373,7 +373,7 @@ class TestCustom(unittest.TestCase):
         cmd = AzCliCommand(loader, 'test', None)
         cmd.command_kwargs = {'resource_type': ResourceType.MGMT_RESOURCE_RESOURCES}
         cmd.cli_ctx = cli_ctx
-        
+
         WhatIfOperationResult, WhatIfChange, ChangeType = cmd.get_models(
             'WhatIfOperationResult', 'WhatIfChange', 'ChangeType'
         )
@@ -390,6 +390,7 @@ class TestCustom(unittest.TestCase):
         # Assert.
         self.assertEqual(1, len(result.changes))
         self.assertEqual(ChangeType.modify, result.changes[0].change_type)
+
 
 if __name__ == '__main__':
     unittest.main()
