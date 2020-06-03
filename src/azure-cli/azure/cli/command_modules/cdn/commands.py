@@ -140,9 +140,8 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.command('delete', 'delete')
         g.command('list', 'list_by_endpoint')
-        g.custom_command('create', 'create_custom_domain',
-                         client_factory=cf_cdn)
-        g.command('enable-https', 'enable_custom_https')
+        g.custom_command('create', 'create_custom_domain', client_factory=cf_cdn)
+        g.custom_command('enable-https', 'enable_custom_https', client_factory=cf_cdn)
         g.command('disable-https', 'disable_custom_https')
 
     with self.command_group('cdn origin', cdn_origin_sdk) as g:

@@ -1920,3 +1920,30 @@ helps['tag'] = """
 type: group
 short-summary: Manage resource tags.
 """
+
+helps['tag add-value'] = """
+type: command
+short-summary: Create a tag value.
+examples:
+  - name: Create a tag value.
+    text: >
+        az tag add-value --name MyTag --value MyValue
+"""
+
+helps['tag create'] = """
+type: command
+short-summary: Create a tag in the subscription.
+examples:
+  - name: Create a tag in the subscription.
+    text: >
+        az tag create --name MyTag
+"""
+
+helps['tag delete'] = """
+type: command
+short-summary: Delete a tag in the subscription.
+examples:
+  - name: Delete a tag from the subscription.
+    text: >
+        az tag delete --name MyTag
+"""
