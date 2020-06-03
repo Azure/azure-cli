@@ -174,7 +174,7 @@ def _convert_arm_to_cli(arm_cloud_metadata_dict):
     for cloud in arm_cloud_metadata_dict:
         cli_cloud_metadata_dict[cloud['name']] = _arm_to_cli_mapper(cloud)
     if 'AzureCloud' in cli_cloud_metadata_dict:
-        cli_cloud_metadata_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
+        cli_cloud_metadata_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
     return cli_cloud_metadata_dict
 
 
@@ -372,7 +372,7 @@ def get_known_clouds():
             cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
             KNOWN_CLOUDS = list(cli_cloud_dict.values())
         except Exception as ex:  # pylint: disable=broad-except
-            logger.warning('Failed to load cloud metadata from the url specified by ARM_CLOUD_METADATA_URL: %s',
+            logger.warning('Failed to load cloud metadata from the URL: %s',
                            os.getenv('ARM_CLOUD_METADATA_URL'))
             raise ex
     else:
@@ -381,11 +381,11 @@ def get_known_clouds():
             arm_cloud_dict = json.loads(urlretrieve(os.getenv('https://discover.azure.com')))
             cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
             KNOWN_CLOUDS = list(cli_cloud_dict.values())
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.warning('Failed to load cloud metadata from discover.azure.com')
+        except Exception:  # pylint: disable=broad-except
+            logger.info('Failed to load cloud metadata from discover.azure.com')  # change to warning when DNS is ready
             from azure.cli.core.util import check_connectivity
             if not check_connectivity():
-                raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import' first.") # pylint: disable=line-too-long
+                raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import' first.")  # pylint: disable=line-too-long
             KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
     save_endpoints_to_file(KNOWN_CLOUDS)
