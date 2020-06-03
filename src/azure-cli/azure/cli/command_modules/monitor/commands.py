@@ -20,8 +20,7 @@ def load_command_table(self, _):
         cf_private_link_scopes, cf_private_endpoint_connections, cf_log_analytics_linked_storage)
     from ._exception_handler import monitor_exception_handler, missing_resource_handler
     from .transformers import (action_group_list_table)
-    from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id,\
-        make_cluster_creation_as_no_wait_by_default
+    from .validators import process_autoscale_create_namespace, validate_private_endpoint_connection_id
 
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
@@ -376,7 +375,7 @@ def load_command_table(self, _):
         g.command('enable', 'enable')
         g.command('disable', 'disable')
 
-    with self.command_group('monitor log-analytics workspace linked-service', log_analytics_workspace_linked_service_sdk, custom_command_type=log_analytics_workspace_linked_service_custom, is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace linked-service', log_analytics_workspace_linked_service_sdk, custom_command_type=log_analytics_workspace_linked_service_custom) as g:
         g.custom_command('create', 'create_log_analytics_workspace_linked_service', supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_log_analytics_workspace_linked_service', supports_no_wait=True)
         g.show_command('show', 'get')
@@ -384,15 +383,15 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.wait_command('wait')
 
-    with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom, is_preview=True) as g:
-        g.custom_command('create', 'create_log_analytics_cluster', validator=make_cluster_creation_as_no_wait_by_default)
+    with self.command_group('monitor log-analytics cluster', log_analytics_cluster_sdk, custom_command_type=log_analytics_cluster_custom) as g:
+        g.custom_command('create', 'create_log_analytics_cluster', supports_no_wait=True)
         g.custom_command('update', 'update_log_analytics_cluster')
         g.show_command('show', 'get')
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.custom_command('list', 'list_log_analytics_clusters')
         g.wait_command('wait')
 
-    with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom, is_preview=True) as g:
+    with self.command_group('monitor log-analytics workspace linked-storage', log_analytics_linked_storage_sdk, custom_command_type=log_analytics_linked_storage_custom) as g:
         g.command('create', 'create_or_update')
         g.custom_command('add', 'add_log_analytics_workspace_linked_storage_accounts')
         g.custom_command('remove', 'remove_log_analytics_workspace_linked_storage_accounts')
