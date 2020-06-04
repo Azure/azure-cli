@@ -660,7 +660,6 @@ def _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, excl
         valid_change_types = set(map(lambda x: x.value.lower(), ChangeType))
         invalid_change_types = sorted([x for x in exclude_change_types if x.lower() not in valid_change_types])
 
-
         if invalid_change_types:
             word = 'types' if len(invalid_change_types) > 1 else 'type'
             raise CLIError(
