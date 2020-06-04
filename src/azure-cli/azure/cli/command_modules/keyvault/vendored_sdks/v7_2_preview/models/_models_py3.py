@@ -969,6 +969,9 @@ class KeyBundle(Model):
     :ivar managed: True if the key's lifetime is managed by key vault. If this
      is a key backing a certificate, then managed will be true.
     :vartype managed: bool
+    :param release_policy: The policy rules under which the key can be
+     exported.
+    :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
     """
 
     _validation = {
@@ -980,14 +983,16 @@ class KeyBundle(Model):
         'attributes': {'key': 'attributes', 'type': 'KeyAttributes'},
         'tags': {'key': 'tags', 'type': '{str}'},
         'managed': {'key': 'managed', 'type': 'bool'},
+        'release_policy': {'key': 'release_policy', 'type': 'KeyReleasePolicy'},
     }
 
-    def __init__(self, *, key=None, attributes=None, tags=None, **kwargs) -> None:
+    def __init__(self, *, key=None, attributes=None, tags=None, release_policy=None, **kwargs) -> None:
         super(KeyBundle, self).__init__(**kwargs)
         self.key = key
         self.attributes = attributes
         self.tags = tags
         self.managed = None
+        self.release_policy = release_policy
 
 
 class DeletedKeyBundle(KeyBundle):
@@ -1006,6 +1011,9 @@ class DeletedKeyBundle(KeyBundle):
     :ivar managed: True if the key's lifetime is managed by key vault. If this
      is a key backing a certificate, then managed will be true.
     :vartype managed: bool
+    :param release_policy: The policy rules under which the key can be
+     exported.
+    :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
     :param recovery_id: The url of the recovery object, used to identify and
      recover the deleted key.
     :type recovery_id: str
@@ -1027,13 +1035,14 @@ class DeletedKeyBundle(KeyBundle):
         'attributes': {'key': 'attributes', 'type': 'KeyAttributes'},
         'tags': {'key': 'tags', 'type': '{str}'},
         'managed': {'key': 'managed', 'type': 'bool'},
+        'release_policy': {'key': 'release_policy', 'type': 'KeyReleasePolicy'},
         'recovery_id': {'key': 'recoveryId', 'type': 'str'},
         'scheduled_purge_date': {'key': 'scheduledPurgeDate', 'type': 'unix-time'},
         'deleted_date': {'key': 'deletedDate', 'type': 'unix-time'},
     }
 
-    def __init__(self, *, key=None, attributes=None, tags=None, recovery_id: str=None, **kwargs) -> None:
-        super(DeletedKeyBundle, self).__init__(key=key, attributes=attributes, tags=tags, **kwargs)
+    def __init__(self, *, key=None, attributes=None, tags=None, release_policy=None, recovery_id: str=None, **kwargs) -> None:
+        super(DeletedKeyBundle, self).__init__(key=key, attributes=attributes, tags=tags, release_policy=release_policy, **kwargs)
         self.recovery_id = recovery_id
         self.scheduled_purge_date = None
         self.deleted_date = None
@@ -2129,7 +2138,7 @@ class JsonWebKey(Model):
     :type q: bytes
     :param k: Symmetric key.
     :type k: bytes
-    :param t: HSM Token, used with 'Bring Your Own Key'.
+    :param t: Protected Key, used with 'Bring Your Own Key'.
     :type t: bytes
     :param crv: Elliptic curve name. For valid values, see
      JsonWebKeyCurveName. Possible values include: 'P-256', 'P-384', 'P-521',
@@ -2208,6 +2217,8 @@ class KeyAttributes(Attributes):
      'CustomizedRecoverable', 'CustomizedRecoverable+ProtectedSubscription'
     :vartype recovery_level: str or
      ~azure.keyvault.v7_2.models.DeletionRecoveryLevel
+    :param exportable: Indicates if the private key can be exported.
+    :type exportable: bool
     """
 
     _validation = {
@@ -2225,12 +2236,14 @@ class KeyAttributes(Attributes):
         'updated': {'key': 'updated', 'type': 'unix-time'},
         'recoverable_days': {'key': 'recoverableDays', 'type': 'int'},
         'recovery_level': {'key': 'recoveryLevel', 'type': 'str'},
+        'exportable': {'key': 'exportable', 'type': 'bool'},
     }
 
-    def __init__(self, *, enabled: bool=None, not_before=None, expires=None, **kwargs) -> None:
+    def __init__(self, *, enabled: bool=None, not_before=None, expires=None, exportable: bool=None, **kwargs) -> None:
         super(KeyAttributes, self).__init__(enabled=enabled, not_before=not_before, expires=expires, **kwargs)
         self.recoverable_days = None
         self.recovery_level = None
+        self.exportable = exportable
 
 
 class KeyCreateParameters(Model):
@@ -2245,6 +2258,8 @@ class KeyCreateParameters(Model):
     :param key_size: The key size in bits. For example: 2048, 3072, or 4096
      for RSA.
     :type key_size: int
+    :param public_exponent: The public exponent for a RSA key.
+    :type public_exponent: int
     :param key_ops:
     :type key_ops: list[str or
      ~azure.keyvault.v7_2.models.JsonWebKeyOperation]
@@ -2256,6 +2271,9 @@ class KeyCreateParameters(Model):
      JsonWebKeyCurveName. Possible values include: 'P-256', 'P-384', 'P-521',
      'P-256K'
     :type curve: str or ~azure.keyvault.v7_2.models.JsonWebKeyCurveName
+    :param release_policy: The policy rules under which the key can be
+     exported.
+    :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
     """
 
     _validation = {
@@ -2265,20 +2283,46 @@ class KeyCreateParameters(Model):
     _attribute_map = {
         'kty': {'key': 'kty', 'type': 'str'},
         'key_size': {'key': 'key_size', 'type': 'int'},
+        'public_exponent': {'key': 'public_exponent', 'type': 'int'},
         'key_ops': {'key': 'key_ops', 'type': '[str]'},
         'key_attributes': {'key': 'attributes', 'type': 'KeyAttributes'},
         'tags': {'key': 'tags', 'type': '{str}'},
         'curve': {'key': 'crv', 'type': 'str'},
+        'release_policy': {'key': 'release_policy', 'type': 'KeyReleasePolicy'},
     }
 
-    def __init__(self, *, kty, key_size: int=None, key_ops=None, key_attributes=None, tags=None, curve=None, **kwargs) -> None:
+    def __init__(self, *, kty, key_size: int=None, public_exponent: int=None, key_ops=None, key_attributes=None, tags=None, curve=None, release_policy=None, **kwargs) -> None:
         super(KeyCreateParameters, self).__init__(**kwargs)
         self.kty = kty
         self.key_size = key_size
+        self.public_exponent = public_exponent
         self.key_ops = key_ops
         self.key_attributes = key_attributes
         self.tags = tags
         self.curve = curve
+        self.release_policy = release_policy
+
+
+class KeyExportParameters(Model):
+    """The export key parameters.
+
+    All required parameters must be populated in order to send to Azure.
+
+    :param environment: Required. The target environment assertion.
+    :type environment: str
+    """
+
+    _validation = {
+        'environment': {'required': True, 'min_length': 1},
+    }
+
+    _attribute_map = {
+        'environment': {'key': 'env', 'type': 'str'},
+    }
+
+    def __init__(self, *, environment: str, **kwargs) -> None:
+        super(KeyExportParameters, self).__init__(**kwargs)
+        self.environment = environment
 
 
 class KeyImportParameters(Model):
@@ -2294,6 +2338,9 @@ class KeyImportParameters(Model):
     :type key_attributes: ~azure.keyvault.v7_2.models.KeyAttributes
     :param tags: Application specific metadata in the form of key-value pairs.
     :type tags: dict[str, str]
+    :param release_policy: The policy rules under which the key can be
+     exported.
+    :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
     """
 
     _validation = {
@@ -2305,14 +2352,16 @@ class KeyImportParameters(Model):
         'key': {'key': 'key', 'type': 'JsonWebKey'},
         'key_attributes': {'key': 'attributes', 'type': 'KeyAttributes'},
         'tags': {'key': 'tags', 'type': '{str}'},
+        'release_policy': {'key': 'release_policy', 'type': 'KeyReleasePolicy'},
     }
 
-    def __init__(self, *, key, hsm: bool=None, key_attributes=None, tags=None, **kwargs) -> None:
+    def __init__(self, *, key, hsm: bool=None, key_attributes=None, tags=None, release_policy=None, **kwargs) -> None:
         super(KeyImportParameters, self).__init__(**kwargs)
         self.hsm = hsm
         self.key = key
         self.key_attributes = key_attributes
         self.tags = tags
+        self.release_policy = release_policy
 
 
 class KeyListResult(Model):
@@ -2379,7 +2428,8 @@ class KeyOperationsParameters(Model):
 
     :param algorithm: Required. algorithm identifier. Possible values include:
      'RSA-OAEP', 'RSA-OAEP-256', 'RSA1_5', 'A128GCM', 'A192GCM', 'A256GCM',
-     'A128KW', 'A192KW', 'A256KW'
+     'A128KW', 'A192KW', 'A256KW', 'A128CBC', 'A192CBC', 'A256CBC',
+     'A128CBCPAD', 'A192CBCPAD', 'A256CBCPAD'
     :type algorithm: str or
      ~azure.keyvault.v7_2.models.JsonWebKeyEncryptionAlgorithm
     :param value: Required.
@@ -2454,6 +2504,81 @@ class KeyProperties(Model):
         self.curve = curve
 
 
+class KeyReleaseAuthority(Model):
+    """KeyReleaseAuthority.
+
+    :param authority_url: Base URL of the attestation service.
+    :type authority_url: str
+    :param all_of:
+    :type all_of: list[~azure.keyvault.v7_2.models.KeyReleaseCondition]
+    """
+
+    _validation = {
+        'authority_url': {'min_length': 1},
+    }
+
+    _attribute_map = {
+        'authority_url': {'key': 'authority', 'type': 'str'},
+        'all_of': {'key': 'allOf', 'type': '[KeyReleaseCondition]'},
+    }
+
+    def __init__(self, *, authority_url: str=None, all_of=None, **kwargs) -> None:
+        super(KeyReleaseAuthority, self).__init__(**kwargs)
+        self.authority_url = authority_url
+        self.all_of = all_of
+
+
+class KeyReleaseCondition(Model):
+    """KeyReleaseCondition.
+
+    :param claim_type: claim type name
+    :type claim_type: str
+    :param claim_condition: condition to test. Possible values include:
+     'equals'
+    :type claim_condition: str or
+     ~azure.keyvault.v7_2.models.KeyReleaseConditionCondition
+    :param value:
+    :type value: str
+    """
+
+    _validation = {
+        'claim_type': {'min_length': 1},
+        'claim_condition': {'min_length': 1},
+    }
+
+    _attribute_map = {
+        'claim_type': {'key': 'claim', 'type': 'str'},
+        'claim_condition': {'key': 'condition', 'type': 'str'},
+        'value': {'key': 'value', 'type': 'str'},
+    }
+
+    def __init__(self, *, claim_type: str=None, claim_condition=None, value: str=None, **kwargs) -> None:
+        super(KeyReleaseCondition, self).__init__(**kwargs)
+        self.claim_type = claim_type
+        self.claim_condition = claim_condition
+        self.value = value
+
+
+class KeyReleasePolicy(Model):
+    """KeyReleasePolicy.
+
+    :param version: key release policy version. Possible values include: '0.2'
+    :type version: str or ~azure.keyvault.v7_2.models.KeyReleasePolicyVersion
+    :param any_of:
+    :type any_of: list[~azure.keyvault.v7_2.models.KeyReleaseAuthority]
+    """
+
+    _attribute_map = {
+        'version': {'key': 'version', 'type': 'str'},
+        'any_of': {'key': 'anyOf', 'type': '[KeyReleaseAuthority]'},
+    }
+
+    def __init__(self, *, version=None, any_of=None, **kwargs) -> None:
+        super(KeyReleasePolicy, self).__init__(**kwargs)
+        self.version = version
+        self.any_of = any_of
+
+
 class KeyRestoreParameters(Model):
     """The key restore parameters.
 
@@ -2520,19 +2645,24 @@ class KeyUpdateParameters(Model):
     :type key_attributes: ~azure.keyvault.v7_2.models.KeyAttributes
     :param tags: Application specific metadata in the form of key-value pairs.
     :type tags: dict[str, str]
+    :param release_policy: The policy rules under which the key can be
+     exported.
+    :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
     """
 
     _attribute_map = {
         'key_ops': {'key': 'key_ops', 'type': '[str]'},
         'key_attributes': {'key': 'attributes', 'type': 'KeyAttributes'},
         'tags': {'key': 'tags', 'type': '{str}'},
+        'release_policy': {'key': 'release_policy', 'type': 'KeyReleasePolicy'},
     }
 
-    def __init__(self, *, key_ops=None, key_attributes=None, tags=None, **kwargs) -> None:
+    def __init__(self, *, key_ops=None, key_attributes=None, tags=None, release_policy=None, **kwargs) -> None:
         super(KeyUpdateParameters, self).__init__(**kwargs)
         self.key_ops = key_ops
         self.key_attributes = key_attributes
         self.tags = tags
+        self.release_policy = release_policy
 
 
 class KeyVaultError(Model):

@@ -69,7 +69,7 @@ class KeyVaultClient(MultiApiClientMixin):
     """
 
     DEFAULT_API_VERSION = v7_2_PREVIEW_VERSION
-    _PROFILE_TAG = "azure.cli.command_modules.keyvault.vendored_sdks.KeyVaultClient"
+    _PROFILE_TAG = "azure.keyvault.KeyVaultClient"
     LATEST_PROFILE = ProfileDefinition({
         _PROFILE_TAG: {
             None: DEFAULT_API_VERSION
@@ -106,11 +106,11 @@ class KeyVaultClient(MultiApiClientMixin):
         api_version = self._get_api_version(None)
 
         if api_version == v7_2_PREVIEW_VERSION:
-            from azure.keyvault.v7_2_preview import models as implModels
+            from .v7_2_preview import models as implModels
         elif api_version == v7_0_VERSION:
-            from azure.keyvault.v7_0 import models as implModels
+            from .v7_0 import models as implModels
         elif api_version == v2016_10_01_VERSION:
-            from azure.keyvault.v2016_10_01 import models as implModels
+            from .v2016_10_01 import models as implModels
         else:
             raise NotImplementedError("APIVersion {} is not available".format(api_version))
         return implModels

@@ -60,6 +60,16 @@ class ActionType(str, Enum):
     auto_renew = "AutoRenew"
 
 
+class KeyReleaseConditionCondition(str, Enum):
+
+    equals = "equals"  #: equals comparison.
+
+
+class KeyReleasePolicyVersion(str, Enum):
+
+    zero_full_stop_two = "0.2"  #: Schema version 0.2
+
+
 class JsonWebKeyOperation(str, Enum):
 
     encrypt = "encrypt"
@@ -69,6 +79,7 @@ class JsonWebKeyOperation(str, Enum):
     wrap_key = "wrapKey"
     unwrap_key = "unwrapKey"
     import_enum = "import"
+    export = "export"
 
 
 class JsonWebKeyEncryptionAlgorithm(str, Enum):
@@ -82,6 +93,12 @@ class JsonWebKeyEncryptionAlgorithm(str, Enum):
     a128_kw = "A128KW"
     a192_kw = "A192KW"
     a256_kw = "A256KW"
+    a128_cbc = "A128CBC"
+    a192_cbc = "A192CBC"
+    a256_cbc = "A256CBC"
+    a128_cbcpad = "A128CBCPAD"
+    a192_cbcpad = "A192CBCPAD"
+    a256_cbcpad = "A256CBCPAD"
 
 
 class JsonWebKeySignatureAlgorithm(str, Enum):

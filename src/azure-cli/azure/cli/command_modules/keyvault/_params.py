@@ -257,6 +257,7 @@ def load_arguments(self, _):
                            required=False, help='Name of the Key Vault.')
             c.extra('hsm_base_url', hsm_name_type, type=get_hsm_base_url_type(self.cli_ctx), id_part=None,
                     validator=process_vault_and_hsm_name, help=hsm_base_url_descriptions[item])
+            c.ignore('cls')
 
     for item in ['create', 'import']:
         with self.argument_context('keyvault key {}'.format(item)) as c:
@@ -306,7 +307,7 @@ def load_arguments(self, _):
 
     for scope in ['create', 'set-attributes', 'import']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
-            c.argument('release_policy', options_list=['--policy', '-p'],
+            c.argument('release_policy', options_list=['--policy'],
                        help='JSON encoded policy definition. Use @{file} to load from a file(e.g. @my_policy.json).',
                        type=get_json_object)
     # endregion

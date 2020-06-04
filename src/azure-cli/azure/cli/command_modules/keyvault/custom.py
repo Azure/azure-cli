@@ -696,7 +696,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 def create_key(cmd, client, key_name, vault_base_url=None,
                hsm_base_url=None, protection=None,  # pylint: disable=unused-argument
                key_size=None, key_ops=None, disabled=False, expires=None,
-               not_before=None, tags=None, kty=None, curve=None):
+               not_before=None, tags=None, kty=None, curve=None, release_policy=None):
     KeyAttributes = cmd.get_models('KeyAttributes', resource_type=ResourceType.DATA_KEYVAULT)
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     return client.create_key(vault_base_url=vault_base_url,
@@ -706,7 +706,8 @@ def create_key(cmd, client, key_name, vault_base_url=None,
                              key_ops=key_ops,
                              key_attributes=key_attrs,
                              tags=tags,
-                             curve=curve)
+                             curve=curve,
+                             release_policy=release_policy)
 
 
 def backup_key(client, file_path, vault_base_url=None,

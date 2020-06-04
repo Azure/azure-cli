@@ -61,12 +61,16 @@ try:
     from ._models_py3 import KeyAttributes
     from ._models_py3 import KeyBundle
     from ._models_py3 import KeyCreateParameters
+    from ._models_py3 import KeyExportParameters
     from ._models_py3 import KeyImportParameters
     from ._models_py3 import KeyItem
     from ._models_py3 import KeyListResult
     from ._models_py3 import KeyOperationResult
     from ._models_py3 import KeyOperationsParameters
     from ._models_py3 import KeyProperties
+    from ._models_py3 import KeyReleaseAuthority
+    from ._models_py3 import KeyReleaseCondition
+    from ._models_py3 import KeyReleasePolicy
     from ._models_py3 import KeyRestoreParameters
     from ._models_py3 import KeySignParameters
     from ._models_py3 import KeyUpdateParameters
@@ -167,12 +171,16 @@ except (SyntaxError, ImportError):
     from ._models import KeyAttributes
     from ._models import KeyBundle
     from ._models import KeyCreateParameters
+    from ._models import KeyExportParameters
     from ._models import KeyImportParameters
     from ._models import KeyItem
     from ._models import KeyListResult
     from ._models import KeyOperationResult
     from ._models import KeyOperationsParameters
     from ._models import KeyProperties
+    from ._models import KeyReleaseAuthority
+    from ._models import KeyReleaseCondition
+    from ._models import KeyReleasePolicy
     from ._models import KeyRestoreParameters
     from ._models import KeySignParameters
     from ._models import KeyUpdateParameters
@@ -227,6 +235,8 @@ from ._key_vault_client_enums import (
     JsonWebKeyCurveName,
     KeyUsageType,
     ActionType,
+    KeyReleaseConditionCondition,
+    KeyReleasePolicyVersion,
     JsonWebKeyOperation,
     JsonWebKeyEncryptionAlgorithm,
     JsonWebKeySignatureAlgorithm,
@@ -285,12 +295,16 @@ __all__ = [
     'KeyAttributes',
     'KeyBundle',
     'KeyCreateParameters',
+    'KeyExportParameters',
     'KeyImportParameters',
     'KeyItem',
     'KeyListResult',
     'KeyOperationResult',
     'KeyOperationsParameters',
     'KeyProperties',
+    'KeyReleaseAuthority',
+    'KeyReleaseCondition',
+    'KeyReleasePolicy',
     'KeyRestoreParameters',
     'KeySignParameters',
     'KeyUpdateParameters',
@@ -344,6 +358,8 @@ __all__ = [
     'JsonWebKeyCurveName',
     'KeyUsageType',
     'ActionType',
+    'KeyReleaseConditionCondition',
+    'KeyReleasePolicyVersion',
     'JsonWebKeyOperation',
     'JsonWebKeyEncryptionAlgorithm',
     'JsonWebKeySignatureAlgorithm',

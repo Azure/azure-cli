@@ -1774,7 +1774,7 @@ class KeyVaultClientOperationsMixin(object):
         return deserialized
     recover_deleted_certificate.metadata = {'url': '/deletedcertificates/{certificate-name}/recover'}
 
-    def create_key(self, vault_base_url, key_name, kty, key_size=None, key_ops=None, key_attributes=None, tags=None, curve=None, cls=None, **kwargs):
+    def create_key(self, vault_base_url, key_name, kty, key_size=None, public_exponent=None, key_ops=None, key_attributes=None, tags=None, curve=None, release_policy=None, cls=None, **kwargs):
         """Creates a new key, stores it, then returns key parameters and
         attributes to the client.
 
@@ -1795,6 +1795,8 @@ class KeyVaultClientOperationsMixin(object):
         :param key_size: The key size in bits. For example: 2048, 3072, or
          4096 for RSA.
         :type key_size: int
+        :param public_exponent: The public exponent for a RSA key.
+        :type public_exponent: int
         :param key_ops:
         :type key_ops: list[str or
          ~azure.keyvault.v7_2.models.JsonWebKeyOperation]
@@ -1807,6 +1809,9 @@ class KeyVaultClientOperationsMixin(object):
          JsonWebKeyCurveName. Possible values include: 'P-256', 'P-384',
          'P-521', 'P-256K'
         :type curve: str or ~azure.keyvault.v7_2.models.JsonWebKeyCurveName
+        :param release_policy: The policy rules under which the key can be
+         exported.
+        :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: KeyBundle or the result of cls(response)
@@ -1815,7 +1820,7 @@ class KeyVaultClientOperationsMixin(object):
          :class:`KeyVaultErrorException<azure.keyvault.v7_2.models.KeyVaultErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
-        parameters = models.KeyCreateParameters(kty=kty, key_size=key_size, key_ops=key_ops, key_attributes=key_attributes, tags=tags, curve=curve)
+        parameters = models.KeyCreateParameters(kty=kty, key_size=key_size, public_exponent=public_exponent, key_ops=key_ops, key_attributes=key_attributes, tags=tags, curve=curve, release_policy=release_policy)
 
         # Construct URL
         url = self.create_key.metadata['url']
@@ -1858,7 +1863,7 @@ class KeyVaultClientOperationsMixin(object):
         return deserialized
     create_key.metadata = {'url': '/keys/{key-name}/create'}
 
-    def import_key(self, vault_base_url, key_name, key, hsm=None, key_attributes=None, tags=None, cls=None, **kwargs):
+    def import_key(self, vault_base_url, key_name, key, hsm=None, key_attributes=None, tags=None, release_policy=None, cls=None, **kwargs):
         """Imports an externally created key, stores it, and returns key
         parameters and attributes to the client.
 
@@ -1881,6 +1886,9 @@ class KeyVaultClientOperationsMixin(object):
         :param tags: Application specific metadata in the form of key-value
          pairs.
         :type tags: dict[str, str]
+        :param release_policy: The policy rules under which the key can be
+         exported.
+        :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: KeyBundle or the result of cls(response)
@@ -1889,7 +1897,7 @@ class KeyVaultClientOperationsMixin(object):
          :class:`KeyVaultErrorException<azure.keyvault.v7_2.models.KeyVaultErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
-        parameters = models.KeyImportParameters(hsm=hsm, key=key, key_attributes=key_attributes, tags=tags)
+        parameters = models.KeyImportParameters(hsm=hsm, key=key, key_attributes=key_attributes, tags=tags, release_policy=release_policy)
 
         # Construct URL
         url = self.import_key.metadata['url']
@@ -1991,7 +1999,7 @@ class KeyVaultClientOperationsMixin(object):
         return deserialized
     delete_key.metadata = {'url': '/keys/{key-name}'}
 
-    def update_key(self, vault_base_url, key_name, key_version, key_ops=None, key_attributes=None, tags=None, cls=None, **kwargs):
+    def update_key(self, vault_base_url, key_name, key_version, key_ops=None, key_attributes=None, tags=None, release_policy=None, cls=None, **kwargs):
         """The update key operation changes specified attributes of a stored key
         and can be applied to any key type and key version stored in Azure Key
         Vault.
@@ -2016,6 +2024,9 @@ class KeyVaultClientOperationsMixin(object):
         :param tags: Application specific metadata in the form of key-value
          pairs.
         :type tags: dict[str, str]
+        :param release_policy: The policy rules under which the key can be
+         exported.
+        :type release_policy: ~azure.keyvault.v7_2.models.KeyReleasePolicy
         :param callable cls: A custom type or function that will be passed the
          direct response
         :return: KeyBundle or the result of cls(response)
@@ -2024,7 +2035,7 @@ class KeyVaultClientOperationsMixin(object):
          :class:`KeyVaultErrorException<azure.keyvault.v7_2.models.KeyVaultErrorException>`
         """
         error_map = kwargs.pop('error_map', None)
-        parameters = models.KeyUpdateParameters(key_ops=key_ops, key_attributes=key_attributes, tags=tags)
+        parameters = models.KeyUpdateParameters(key_ops=key_ops, key_attributes=key_attributes, tags=tags, release_policy=release_policy)
 
         # Construct URL
         url = self.update_key.metadata['url']
@@ -2452,7 +2463,8 @@ class KeyVaultClientOperationsMixin(object):
         :type key_version: str
         :param algorithm: algorithm identifier. Possible values include:
          'RSA-OAEP', 'RSA-OAEP-256', 'RSA1_5', 'A128GCM', 'A192GCM', 'A256GCM',
-         'A128KW', 'A192KW', 'A256KW'
+         'A128KW', 'A192KW', 'A256KW', 'A128CBC', 'A192CBC', 'A256CBC',
+         'A128CBCPAD', 'A192CBCPAD', 'A256CBCPAD'
         :type algorithm: str or
          ~azure.keyvault.v7_2.models.JsonWebKeyEncryptionAlgorithm
         :param value:
@@ -2538,7 +2550,8 @@ class KeyVaultClientOperationsMixin(object):
         :type key_version: str
         :param algorithm: algorithm identifier. Possible values include:
          'RSA-OAEP', 'RSA-OAEP-256', 'RSA1_5', 'A128GCM', 'A192GCM', 'A256GCM',
-         'A128KW', 'A192KW', 'A256KW'
+         'A128KW', 'A192KW', 'A256KW', 'A128CBC', 'A192CBC', 'A256CBC',
+         'A128CBCPAD', 'A192CBCPAD', 'A256CBCPAD'
         :type algorithm: str or
          ~azure.keyvault.v7_2.models.JsonWebKeyEncryptionAlgorithm
         :param value:
@@ -2780,7 +2793,8 @@ class KeyVaultClientOperationsMixin(object):
         :type key_version: str
         :param algorithm: algorithm identifier. Possible values include:
          'RSA-OAEP', 'RSA-OAEP-256', 'RSA1_5', 'A128GCM', 'A192GCM', 'A256GCM',
-         'A128KW', 'A192KW', 'A256KW'
+         'A128KW', 'A192KW', 'A256KW', 'A128CBC', 'A192CBC', 'A256CBC',
+         'A128CBCPAD', 'A192CBCPAD', 'A256CBCPAD'
         :type algorithm: str or
          ~azure.keyvault.v7_2.models.JsonWebKeyEncryptionAlgorithm
         :param value:
@@ -2864,7 +2878,8 @@ class KeyVaultClientOperationsMixin(object):
         :type key_version: str
         :param algorithm: algorithm identifier. Possible values include:
          'RSA-OAEP', 'RSA-OAEP-256', 'RSA1_5', 'A128GCM', 'A192GCM', 'A256GCM',
-         'A128KW', 'A192KW', 'A256KW'
+         'A128KW', 'A192KW', 'A256KW', 'A128CBC', 'A192CBC', 'A256CBC',
+         'A128CBCPAD', 'A192CBCPAD', 'A256CBCPAD'
         :type algorithm: str or
          ~azure.keyvault.v7_2.models.JsonWebKeyEncryptionAlgorithm
         :param value:
@@ -2928,6 +2943,75 @@ class KeyVaultClientOperationsMixin(object):
 
         return deserialized
     unwrap_key.metadata = {'url': '/keys/{key-name}/{key-version}/unwrapkey'}
+
+    def export_key(self, vault_base_url, key_name, key_version, environment, cls=None, **kwargs):
+        """Exports a key.
+
+        The export key operation is applicable to all key types. The target key
+        must be marked exportable. This operation requires the keys/export
+        permission.
+
+        :param vault_base_url: The vault name, for example
+         https://myvault.vault.azure.net.
+        :type vault_base_url: str
+        :param key_name: The name of the key to get.
+        :type key_name: str
+        :param key_version: Adding the version parameter retrieves a specific
+         version of a key.
+        :type key_version: str
+        :param environment: The target environment assertion.
+        :type environment: str
+        :param callable cls: A custom type or function that will be passed the
+         direct response
+        :return: KeyBundle or the result of cls(response)
+        :rtype: ~azure.keyvault.v7_2.models.KeyBundle
+        :raises:
+         :class:`KeyVaultErrorException<azure.keyvault.v7_2.models.KeyVaultErrorException>`
+        """
+        error_map = kwargs.pop('error_map', None)
+        parameters = models.KeyExportParameters(environment=environment)
+
+        # Construct URL
+        url = self.export_key.metadata['url']
+        path_format_arguments = {
+            'vaultBaseUrl': self._serialize.url("vault_base_url", vault_base_url, 'str', skip_quote=True),
+            'key-name': self._serialize.url("key_name", key_name, 'str'),
+            'key-version': self._serialize.url("key_version", key_version, 'str')
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Accept'] = 'application/json'
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self._config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+
+        # Construct body
+        body_content = self._serialize.body(parameters, 'KeyExportParameters')
+
+        # Construct and send request
+        request = self._client.post(url, query_parameters, header_parameters, body_content)
+        pipeline_response = self._client._pipeline.run(request, stream=False, **kwargs)
+        response = pipeline_response.http_response
+
+        if response.status_code not in [200]:
+            map_error(status_code=response.status_code, response=response, error_map=error_map)
+            raise models.KeyVaultErrorException(response, self._deserialize)
+
+        deserialized = None
+        if response.status_code == 200:
+            deserialized = self._deserialize('KeyBundle', response)
+
+        if cls:
+            return cls(response, deserialized, None)
+
+        return deserialized
+    export_key.metadata = {'url': '/keys/{key-name}/{key-version}/export'}
 
     def get_deleted_keys(
             self, vault_base_url, maxresults=None, cls=None, **kwargs):
