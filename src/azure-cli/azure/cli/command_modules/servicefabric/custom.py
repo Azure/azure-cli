@@ -1666,7 +1666,7 @@ def _get_keyVault_not_arm_client(cli_ctx):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_KEYVAULT))
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return 'Bearer', Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0].get_token(), None
 
     client = KeyVaultClient(KeyVaultAuthentication(get_token), api_version=version)
     return client

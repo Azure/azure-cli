@@ -8,7 +8,7 @@ from azure.cli.core._profile import Profile
 
 
 def _get_token(cli_ctx, server, resource, scope):  # pylint: disable=unused-argument
-    return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+    return 'Bearer', Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0].get_token(), None
 
 
 def get_keyvault_name_completion_list(resource_name):

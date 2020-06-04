@@ -54,8 +54,8 @@ class AuthenticationWrapper(Authentication):
                 AuthenticationWrapper._log_hostname()
 
             raise CLIError("Credentials have expired due to inactivity or "
-                           "configuration of your account was changed. {}Error details: {}".format(
-                           "Please run 'az login'. " if not in_cloud_console() else '', err))
+                           "configuration of your account was changed. {}Error details: {}"
+                           .format("Please run 'az login'. " if not in_cloud_console() else '', err))
             # todo: error type
             # err = (getattr(err, 'error_response', None) or {}).get('error_description') or ''
             # if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related

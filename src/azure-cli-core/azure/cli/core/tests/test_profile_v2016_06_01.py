@@ -349,8 +349,8 @@ class TestProfile(unittest.TestCase):
 
         # action
         result = profile.login(False,
-                                                     '1234',
-                                                     'my-secret',
+                               '1234',
+                               'my-secret',
                                True,
                                self.tenant_id,
                                use_device_code=False,
@@ -379,8 +379,8 @@ class TestProfile(unittest.TestCase):
 
         # action
         result = profile.login(False,
-                                                     '1234',
-                                                     'my-secret',
+                               '1234',
+                               'my-secret',
                                True,
                                self.tenant_id,
                                use_device_code=False,
@@ -414,8 +414,8 @@ class TestProfile(unittest.TestCase):
 
         # action
         result = profile.login(False,
-                                                     '1234',
-                                                     'my-secret',
+                               '1234',
+                               'my-secret',
                                False,
                                None,
                                use_device_code=False,
@@ -439,8 +439,8 @@ class TestProfile(unittest.TestCase):
 
         # action
         result = profile.login(True,
-                                                     '1234',
-                                                     'my-secret',
+                               '1234',
+                               'my-secret',
                                False,
                                None,
                                use_device_code=False,

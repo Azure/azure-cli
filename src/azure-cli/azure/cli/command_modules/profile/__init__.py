@@ -94,4 +94,5 @@ class ProfileCommandsLoader(AzCommandsLoader):
         with self.argument_context('account logout') as c:
             c.argument('clear_credential', clear_credential_type)
 
+
 COMMAND_LOADER_CLS = ProfileCommandsLoader
