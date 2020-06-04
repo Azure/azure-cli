@@ -205,7 +205,7 @@ class TestExtensionCommands(unittest.TestCase):
 
         non_existing_version = '0.0.5'
         with IndexPatch(mocked_index_data):
-            with self.assertRaisesRegex(CLIError, non_existing_version) as err:
+            with self.assertRaisesRegex(CLIError, non_existing_version):
                 add_extension(self.cmd, extension_name=extension_name, version=non_existing_version)
 
     def test_add_extension_with_name_valid_checksum(self):
