@@ -357,7 +357,7 @@ class TestCustom(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_invalid_what_if_exclude_change_types(self):
-        with self.assertRaisesRegex(CLIError, "Unrecognized resource change types: foo, bar.*"):
+        with self.assertRaisesRegex(CLIError, "Unrecognized resource change types: bar, foo"):
             _what_if_deploy_arm_template_core(mock.MagicMock(), mock.MagicMock(), mock.MagicMock(), ["foo", "bar"])
 
     @mock.patch("azure.cli.command_modules.resource.custom.LongRunningOperation.__call__", autospec=True)
