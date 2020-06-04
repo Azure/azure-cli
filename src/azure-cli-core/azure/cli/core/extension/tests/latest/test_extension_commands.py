@@ -174,8 +174,6 @@ class TestExtensionCommands(unittest.TestCase):
                 raise AssertionError("proxy parameter in check_output args although no proxy specified")
 
     def test_add_extension_with_specific_version(self):
-        from azure.cli.core.extension.operations import resolve_from_index
-
         extension_name = MY_EXT_NAME
         extension1 = 'myfirstcliextension-0.0.3+dev-py2.py3-none-any.whl'
         extension2 = 'myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl'
@@ -192,6 +190,23 @@ class TestExtensionCommands(unittest.TestCase):
             ext = show_extension(extension_name)
             self.assertEqual(ext['name'], extension_name)
             self.assertEqual(ext['version'], '0.0.3+dev')
+
+    def test_add_extension_with_non_existing_version(self):
+        extension_name = MY_EXT_NAME
+        extension1 = 'myfirstcliextension-0.0.3+dev-py2.py3-none-any.whl'
+        extension2 = 'myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl'
+
+        mocked_index_data = {
+            extension_name: [
+                mock_ext(extension1, version='0.0.3+dev', download_url=_get_test_data_file(extension1)),
+                mock_ext(extension2, version='0.0.4+dev', download_url=_get_test_data_file(extension2))
+            ]
+        }
+
+        non_existing_version = '0.0.5'
+        with IndexPatch(mocked_index_data):
+            with self.assertRaisesRegex(CLIError, non_existing_version) as err:
+                add_extension(self.cmd, extension_name=extension_name, version=non_existing_version)
 
     def test_add_extension_with_name_valid_checksum(self):
         extension_name = MY_EXT_NAME
