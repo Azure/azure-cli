@@ -607,7 +607,7 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest):
 
     # Currently private-link-resource and private-endpoint-connection are whitelist only features so scenario tests are limited
     @ResourceGroupPreparer(location='westcentralus')
-    def test_private_link_resource_batch_account(self, resource_group, batch_account_name='testprivatelink'):
+    def test_private_link_resource_batch_account(self, resource_group, batch_account_name='testplinksbatch'):
         self.kwargs.update({
             'vnet_name': self.create_random_name('testvnet', 20),
             'subnet_name': self.create_random_name('testsubnet', 20),
@@ -627,9 +627,6 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest):
         # create subnet with disabled endpoint network policies
         self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(30)
 
         # add an endpoint and then reject it
         self.cmd(
@@ -645,32 +642,30 @@ class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest):
         private_endpoints = self.cmd('network private-endpoint-connection list --name {acc_n} --resource-group {rg} --type Microsoft.Batch/batchAccounts', checks=[
             self.check('length(@)', 1)
         ]).get_output_in_json()
+        self.cmd('batch account show --name {acc_n} --resource-group {rg}', checks=[
+            self.check('length(privateEndpointConnections[*])', 1),
+            self.check('privateEndpointConnections[0].id', private_endpoints[0]['id'])
+        ])
         self.kwargs['pe_id'] = private_endpoints[0]["id"]
         self.kwargs['pe_name'] = private_endpoints[0]['name']
 
         self.cmd(
             'network private-endpoint-connection approve --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts '
             '--description "{approval_desc}"')
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(15)
         self.cmd(
             'network private-endpoint-connection show --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts',
             checks=[
                 self.check('name', '{pe_name}'),
-                self.check('privateLinkServiceConnectionState.status', 'Approved'),
-                self.check('privateLinkServiceConnectionState.description', '{approval_desc}')])
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}')])
 
         self.cmd('network private-endpoint-connection reject --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts '
                  '--description "{rejection_desc}"')
-        if self.is_live or self.in_recording:
-            import time
-            time.sleep(15)
         self.cmd('network private-endpoint-connection show --id {pe_id}',
                  checks=[
                      self.check('id', '{pe_id}'),
-                     self.check('privateLinkServiceConnectionState.status', 'Rejected'),
-                     self.check('privateLinkServiceConnectionState.description', '{rejection_desc}')])
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')])
 
         # Test delete
         self.cmd('network private-endpoint-connection delete --id {pe_id} -y')

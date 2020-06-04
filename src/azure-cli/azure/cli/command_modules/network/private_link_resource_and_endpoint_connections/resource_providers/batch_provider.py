@@ -6,15 +6,22 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import PrivateLinkServiceConnectionState, PrivateLinkServiceConnectionStatus
 from knack.log import get_logger
-from . import PrivateEndpointClient
+from . import GeneralPrivateEndpointClient
 
 logger = get_logger(__name__)
 
 
-class BatchPrivateEndpointClient(PrivateEndpointClient):
-    @staticmethod
-    def _update_private_endpoint_connection_status(client, resource_group_name,
-                                                   account_name,
+class BatchPrivateEndpointClient(GeneralPrivateEndpointClient):
+    def __init__(self):
+        super().__init__(
+            rp='Microsoft.Batch/batchAccounts',
+            api_version='2020-05-01',
+            support_list=True)
+
+    def _update_private_endpoint_connection_status(self,
+                                                   cmd,
+                                                   resource_group_name,
+                                                   resource_name,
                                                    private_endpoint_connection_name,
                                                    is_approved=True,
                                                    description=None):
@@ -25,47 +32,35 @@ class BatchPrivateEndpointClient(PrivateEndpointClient):
                 status=PrivateLinkServiceConnectionStatus.rejected,
                 description=description)
 
+        client = get_mgmt_service_client(
+            cmd.cli_ctx,
+            BatchManagementClient).private_endpoint_connection
         return client.update(
             resource_group_name=resource_group_name,
-            account_name=account_name,
+            account_name=resource_name,
             private_endpoint_connection_name=private_endpoint_connection_name,
             private_link_service_connection_state=new_status)
 
-    def list_private_link_resource(self, cmd, resource_group_name, name):
-        client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient).private_link_resource
-        return client.list_by_batch_account(resource_group_name, name)
+    def remove_private_endpoint_connection(self, cmd, resource_group_name, resource_name, name):
+        logger.error("Microsoft.Batch/batchAccounts does not currently support deleting private endpoint "
+                     "connections directly. Please delete the top level private endpoint.")
 
     def approve_private_endpoint_connection(self, cmd, resource_group_name,
                                             resource_name, name, approval_description=None):
-        client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient).private_endpoint_connection
         return self._update_private_endpoint_connection_status(
-            client=client,
+            cmd=cmd,
             resource_group_name=resource_group_name,
-            account_name=resource_name,
+            resource_name=resource_name,
             private_endpoint_connection_name=name,
             is_approved=True,
             description=approval_description)
 
     def reject_private_endpoint_connection(self, cmd, resource_group_name,
                                            resource_name, name, rejection_description=None):
-        client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient).private_endpoint_connection
         return self._update_private_endpoint_connection_status(
-            client=client,
+            cmd=cmd,
             resource_group_name=resource_group_name,
-            account_name=resource_name,
+            resource_name=resource_name,
             private_endpoint_connection_name=name,
             is_approved=False,
             description=rejection_description)
-
-    def remove_private_endpoint_connection(self, cmd, resource_group_name, resource_name, name):
-        logger.error("Microsoft.Batch/batchAccounts does not currently support deleting private endpoint "
-                     "connections directly. Please delete the top level private endpoint.")
-
-    def show_private_endpoint_connection(self, cmd, resource_group_name, resource_name, name):
-        client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient).private_endpoint_connection
-        return client.get(resource_group_name, resource_name, name)
-
-    # pylint: disable=R0201
-    def list_private_endpoint_connection(self, cmd, resource_group_name, resource_name):
-        client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient).private_endpoint_connection
-        return client.list_by_batch_account(resource_group_name=resource_group_name, account_name=resource_name)

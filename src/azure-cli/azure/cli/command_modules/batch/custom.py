@@ -80,7 +80,8 @@ def create_account(client,
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
     identity = BatchAccountIdentity(type=identity_type) if identity_type else None
-    if encryption_key_source == "Microsoft.KeyVault" and not encryption_key_identifier:
+    if (encryption_key_source and
+            encryption_key_source.tolower() == "microsoft.keyvault" and not encryption_key_identifier):
         raise ValueError("The --encryption-key-identifier property is required when "
                          "--encryption-key-source is set to Microsoft.KeyVault")
     encryption_key_identifier = KeyVaultProperties(key_identifier=encryption_key_identifier) \
@@ -108,7 +109,9 @@ def update_account(client, resource_group_name, account_name,
                    encryption_key_identifier=None, identity_type=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
-    if encryption_key_source == "Microsoft.KeyVault" and not encryption_key_identifier:
+    if (encryption_key_source and
+            encryption_key_source.lower() == "microsoft.keyvault" and not
+            encryption_key_identifier):
         raise ValueError("The --encryption-key-identifier property is required when "
                          "--encryption-key-source is set to Microsoft.KeyVault")
     encryption_key_identifier = KeyVaultProperties(key_identifier=encryption_key_identifier) \

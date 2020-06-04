@@ -7,24 +7,38 @@ from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.batch.models import \
-    AccountKeyType, KeySource,\
-    PublicNetworkAccessType, ResourceIdentityType
+from azure.mgmt.batch.models import (
+    AccountKeyType,
+    KeySource,
+    PublicNetworkAccessType,
+    ResourceIdentityType)
 from azure.batch.models import ComputeNodeDeallocationOption
 
-from azure.cli.core.commands.parameters import \
-    (tags_type, get_location_type, resource_group_name_type,
-     get_resource_name_completion_list, file_type, get_enum_type)
+from azure.cli.core.commands.parameters import (
+    tags_type,
+    get_location_type,
+    resource_group_name_type,
+    get_resource_name_completion_list,
+    file_type,
+    get_enum_type)
 
 from azure.cli.command_modules.batch._completers import load_supported_images
-from azure.cli.command_modules.batch._validators import \
-    (application_enabled, application_package_reference_format,
-     certificate_reference_format, datetime_format,
-     disk_encryption_configuration_format, environment_setting_format,
-     keyvault_id, metadata_item_format, resource_file_format,
-     storage_account_id, validate_cert_file, validate_cert_settings,
-     validate_client_parameters, validate_json_file,
-     validate_pool_resize_parameters)
+from azure.cli.command_modules.batch._validators import (
+    application_enabled,
+    application_package_reference_format,
+    certificate_reference_format,
+    datetime_format,
+    disk_encryption_configuration_format,
+    environment_setting_format,
+    keyvault_id,
+    metadata_item_format,
+    resource_file_format,
+    storage_account_id,
+    validate_cert_file,
+    validate_cert_settings,
+    validate_client_parameters,
+    validate_json_file,
+    validate_pool_resize_parameters)
 
 
 # pylint: disable=line-too-long, too-many-statements
