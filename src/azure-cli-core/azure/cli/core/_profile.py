@@ -440,7 +440,7 @@ class Profile(object):
             # https://english.stackexchange.com/questions/5302/log-in-to-or-log-into-or-login-to
             logger.warning("Account %s was not logged in to Azure CLI.", user_or_sp)
 
-        # Deal with MSAL cache
+        # Log out from MSAL cache
         identity = Identity(self._authority)
         accounts = identity.get_user(user_or_sp)
         if accounts:

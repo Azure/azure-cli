@@ -64,10 +64,10 @@ class Identity:
 
     CLOUD_SHELL_IDENTITY_UNIQUE_NAME = "unique_name"
 
-    def __init__(self, authority=None, tenant_id=None, client_id=_CLIENT_ID, **kwargs):
+    def __init__(self, authority=None, tenant_id=None, client_id=None, **kwargs):
         self.authority = authority
-        self.tenant_id = tenant_id
-        self.client_id = client_id
+        self.tenant_id = tenant_id or "organizations"
+        self.client_id = client_id or _CLIENT_ID
         self._cred_cache = kwargs.pop('cred_cache', None)
         # todo: MSAL support force encryption
         self.allow_unencrypted = True
@@ -92,7 +92,9 @@ class Identity:
 
         # Store for user token persistence
         cache = load_persistent_cache(self.allow_unencrypted)
-        return PublicClientApplication(authority=self.authority, client_id=self.client_id, token_cache=cache)
+        # Build the authority in MSAL style
+        msal_authority = "https://{}/{}".format(self.authority, self.tenant_id)
+        return PublicClientApplication(authority=msal_authority, client_id=self.client_id, token_cache=cache)
 
     def login_with_interactive_browser(self):
         # Use InteractiveBrowserCredential
@@ -256,16 +258,15 @@ class Identity:
         return decoded
 
     def get_user(self, user_or_sp=None):
-        try:
-            return self._msal_app.get_accounts(user_or_sp)
-        except ValueError:
-            pass
+        accounts = self._msal_app.get_accounts(user_or_sp)
+        return accounts
 
     def logout_user(self, user_or_sp):
         accounts = self._msal_app.get_accounts(user_or_sp)
         logger.info('Before account removal:')
         logger.info(json.dumps(accounts))
 
+        # `accounts` are the same user in all tenants, log out all of them
         for account in accounts:
             self._msal_app.remove_account(account)
 
@@ -276,6 +277,7 @@ class Identity:
         self._msal_store.remove_cached_creds(user_or_sp)
 
     def logout_all(self):
+        # TODO: Support multi-authority logout
         accounts = self._msal_app.get_accounts()
         logger.info('Before account removal:')
         logger.info(json.dumps(accounts))
