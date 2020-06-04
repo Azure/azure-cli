@@ -62,7 +62,7 @@ class TestProfile(unittest.TestCase):
                                      'state': 'Enabled',
                                      'tenantId': 'microsoft.com',
                                      'user': {
-                                         'homeAccountId': '00000003-0000-0000-0000-000000000000@00000003-0000-0000-0000-000000000000',
+                                         'homeAccountId': '00000003-0000-0000-0000-000000000000.00000003-0000-0000-0000-000000000000',
                                          'name': 'foo@foo.com',
                                          'type': 'user'}}]
 
