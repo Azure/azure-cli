@@ -110,3 +110,6 @@ SESSION = Session()
 # it could be lagged behind and can be used to check whether
 # an upgrade of azure-cli happens
 VERSIONS = Session()
+
+# SESSION provides endpoints of clouds
+CLOUD_ENDPOINTS = Session()

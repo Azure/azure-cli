@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 import os
 import json
@@ -174,7 +175,7 @@ def _convert_arm_to_cli(arm_cloud_metadata_dict):
     for cloud in arm_cloud_metadata_dict:
         cli_cloud_metadata_dict[cloud['name']] = _arm_to_cli_mapper(cloud)
     if 'AzureCloud' in cli_cloud_metadata_dict:
-        cli_cloud_metadata_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # pylint: disable=line-too-long # change once active_directory is fixed in ARM for the public cloud
+        cli_cloud_metadata_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
     return cli_cloud_metadata_dict
 
 
@@ -190,13 +191,13 @@ def _arm_to_cli_mapper(arm_dict):
             active_directory=arm_dict['authentication']['loginEndpoint'],
             active_directory_resource_id=arm_dict['authentication']['audiences'][0],
             active_directory_graph_resource_id=arm_dict['graphAudience'],
-            microsoft_graph_resource_id=_get_microsoft_graph_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once microsoft_graph_resource_id is fixed in ARM
-            vm_image_alias_doc=arm_dict['vmImageAliasDoc'],  # pylint: disable=line-too-long
+            microsoft_graph_resource_id=_get_microsoft_graph_resource_id(arm_dict['name']),  # change once microsoft_graph_resource_id is fixed in ARM
+            vm_image_alias_doc=arm_dict['vmImageAliasDoc'],
             media_resource_id=arm_dict['media'],
-            ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # pylint: disable=line-too-long # change once ossrdbms_resource_id is available via ARM
-            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,  # pylint: disable=line-too-long
+            ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # change once ossrdbms_resource_id is available via ARM
+            active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,
             app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else None,
-            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None),  # pylint: disable=line-too-long
+            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None),
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
@@ -204,9 +205,9 @@ def _arm_to_cli_mapper(arm_dict):
             # mysql_server_endpoint=arm_dict['suffixes']['mysqlServerEndpoint'],
             # postgresql_server_endpoint=arm_dict['suffixes']['postgresqlServerEndpoint'],
             # mariadb_server_endpoint=arm_dict['suffixes']['mariadbServerEndpoint'],
-            azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
-            azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,  # pylint: disable=line-too-long
-            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None))  # pylint: disable=line-too-long
+            azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,
+            azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,
+            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None))
 
 
 class Cloud(object):  # pylint: disable=too-few-public-methods
@@ -257,7 +258,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         active_directory_graph_resource_id='https://graph.windows.net/',
         microsoft_graph_resource_id='https://graph.microsoft.com/',
         active_directory_data_lake_resource_id='https://datalake.azure.net/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.azure.net',
         ossrdbms_resource_id='https://ossrdbms-aad.database.windows.net',
         app_insights_resource_id='https://api.applicationinsights.io',
@@ -286,7 +287,7 @@ AZURE_CHINA_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.chinacloudapi.cn/',
         active_directory_graph_resource_id='https://graph.chinacloudapi.cn/',
         microsoft_graph_resource_id='https://microsoftgraph.chinacloudapi.cn',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.chinacloudapi.cn',
         ossrdbms_resource_id='https://ossrdbms-aad.database.chinacloudapi.cn',
         app_insights_resource_id='https://api.applicationinsights.azure.cn',
@@ -313,7 +314,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
         microsoft_graph_resource_id='https://graph.microsoft.us/',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.usgovcloudapi.net',
         ossrdbms_resource_id='https://ossrdbms-aad.database.usgovcloudapi.net',
         app_insights_resource_id='https://api.applicationinsights.us',
@@ -340,7 +341,7 @@ AZURE_GERMAN_CLOUD = Cloud(
         active_directory_resource_id='https://management.core.cloudapi.de/',
         active_directory_graph_resource_id='https://graph.cloudapi.de/',
         microsoft_graph_resource_id='https://graph.microsoft.de',
-        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',  # pylint: disable=line-too-long
+        vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.cloudapi.de',
         ossrdbms_resource_id='https://ossrdbms-aad.database.cloudapi.de'),
     suffixes=CloudSuffixes(
@@ -359,12 +360,12 @@ def get_known_clouds():
     if KNOWN_CLOUDS:
         return KNOWN_CLOUDS
     # read from file
-    if os.path.exists(CLOUD_ENDPOINTS_FILE):
-        from azure.cli.core.util import get_file_json
-        clouds_json = get_file_json(CLOUD_ENDPOINTS_FILE, throw_on_empty=False) or []
-        if clouds_json:
-            KNOWN_CLOUDS = [Cloud.fromJSON(c) for c in clouds_json['clouds']]
-            return KNOWN_CLOUDS
+    from azure.cli.core._session import CLOUD_ENDPOINTS
+    CLOUD_ENDPOINTS.load(CLOUD_ENDPOINTS_FILE)
+    if CLOUD_ENDPOINTS['clouds']:
+        KNOWN_CLOUDS = [Cloud.fromJSON(c) for c in CLOUD_ENDPOINTS['clouds']]
+        return KNOWN_CLOUDS
+
     # get metadata url from environment variable
     if 'ARM_CLOUD_METADATA_URL' in os.environ:
         try:
@@ -382,21 +383,14 @@ def get_known_clouds():
             cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
             KNOWN_CLOUDS = list(cli_cloud_dict.values())
         except Exception:  # pylint: disable=broad-except
-            logger.info('Failed to load cloud metadata from discover.azure.com')  # change to warning when DNS is ready
+            logger.info('Failed to load cloud metadata from discover.azure.com')  # TODO change to warning when DNS is ready
             from azure.cli.core.util import check_connectivity
             if not check_connectivity():
-                raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import' first.")  # pylint: disable=line-too-long
+                raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import --endpoint <metadata url>' first.")
             KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
-    save_endpoints_to_file(KNOWN_CLOUDS)
+    CLOUD_ENDPOINTS['clouds'] = [c.toJSON() for c in KNOWN_CLOUDS]
     return KNOWN_CLOUDS
-
-
-def save_endpoints_to_file(clouds):
-    with os.fdopen(os.open(CLOUD_ENDPOINTS_FILE, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
-                   'w+') as version_file:
-        file_json = {'clouds': [c.toJSON() for c in clouds]}
-        version_file.write(json.dumps(file_json))
 
 
 def _set_active_cloud(cli_ctx, cloud_name):
