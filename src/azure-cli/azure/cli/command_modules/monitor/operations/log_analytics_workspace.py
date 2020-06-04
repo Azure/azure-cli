@@ -81,11 +81,13 @@ def recover_log_analytics_workspace(cmd, workspace_name, resource_group_name=Non
     raise CLIError('{} is not a deleted workspace and you can only recover a deleted workspace within 14 days.'
                    .format(workspace_name))
 
+
 def _format_tags(tags):
     from azure.mgmt.loganalytics.models import Tag
     if tags:
         tags = [Tag(name=key, value=value) for key, value in tags.items()]
     return tags
+
 
 def create_log_analytics_workspace_saved_search(client, workspace_name, resource_group_name, saved_search_id,
                                                 category, display_name, saved_query,

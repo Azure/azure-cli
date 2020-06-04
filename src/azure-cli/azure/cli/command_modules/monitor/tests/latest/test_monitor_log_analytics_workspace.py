@@ -333,14 +333,15 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd('monitor log-analytics workspace saved-search create -g {rg} --workspace-name {workspace_name} -n {saved_search_name} '
                  '--category {category} --display-name {display_name} -q "Heartbeat | getschema" --fa {function_alias} '
-                 '--fp "{function_param}" --tags a=b c=d', checks=[
-            self.check('category', '{category}'),
-            self.check('displayName', '{display_name}'),
-            self.check('query', "Heartbeat | getschema"),
-            self.check('functionAlias', '{function_alias}'),
-            self.check('functionParameters', '{function_param}'),
-            self.check('length(tags)', 2)
-        ])
+                 '--fp "{function_param}" --tags a=b c=d',
+                 checks=[
+                     self.check('category', '{category}'),
+                     self.check('displayName', '{display_name}'),
+                     self.check('query', "Heartbeat | getschema"),
+                     self.check('functionAlias', '{function_alias}'),
+                     self.check('functionParameters', '{function_param}'),
+                     self.check('length(tags)', 2)
+                 ])
 
         self.cmd('monitor log-analytics workspace saved-search show -g {rg} --workspace-name {workspace_name} -n {saved_search_name}', checks=[
             self.check('category', '{category}'),
@@ -357,16 +358,17 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd(
             'monitor log-analytics workspace saved-search update -g {rg} --workspace-name {workspace_name} -n {saved_search_name} '
             '--category {category_2} --display-name {display_name_2} -q "AzureActivity | summarize count() by bin(timestamp, 1h)" --fa {function_alias_2} '
-            '--fp "{function_param_2}" --tags a=c f=e', checks=[
-            self.check('category', '{category_2}'),
-            self.check('displayName', '{display_name_2}'),
-            self.check('query', "AzureActivity | summarize count() by bin(timestamp, 1h)"),
-            self.check('functionAlias', '{function_alias_2}'),
-            self.check('functionParameters', '{function_param_2}'),
-            self.check('length(tags)', 2),
-            self.check('tags[0].value', 'c'),
-            self.check('tags[1].value', 'e')
-        ])
+            '--fp "{function_param_2}" --tags a=c f=e',
+            checks=[
+                self.check('category', '{category_2}'),
+                self.check('displayName', '{display_name_2}'),
+                self.check('query', "AzureActivity | summarize count() by bin(timestamp, 1h)"),
+                self.check('functionAlias', '{function_alias_2}'),
+                self.check('functionParameters', '{function_param_2}'),
+                self.check('length(tags)', 2),
+                self.check('tags[0].value', 'c'),
+                self.check('tags[1].value', 'e')
+            ])
 
         self.cmd('monitor log-analytics workspace saved-search delete -g {rg} --workspace-name {workspace_name} -n {saved_search_name} -y')
         with self.assertRaisesRegexp(SystemExit, '3'):
