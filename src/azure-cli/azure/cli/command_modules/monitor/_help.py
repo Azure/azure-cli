@@ -1209,6 +1209,42 @@ examples:
     text: az monitor log-analytics workspace linked-storage show --type AzureWatson -g MyResourceGroup --workspace-name MyWorkspace
 """
 
+helps['monitor log-analytics workspace saved-search'] = """
+type: group
+short-summary: Manage saved search for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace saved-search create'] = """
+type: command
+short-summary: Create a saved search for a given workspace.
+examples:
+  - name: Create a saved search for a given workspace.
+    text: az monitor log-analytics workspace saved-search create -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(timestamp, 1h)" --fa myfun --fp "a:string = value"
+"""
+
+helps['monitor log-analytics workspace saved-search update'] = """
+type: command
+short-summary: Update a saved search for a given workspace.
+examples:
+  - name: Update a saved search for a given workspace.
+    text: az monitor log-analytics workspace saved-search update -g MyRG --workspace-name MyWS -n MySavedSearch --category Test1 --display-name TestSavedSearch -q "AzureActivity | summarize count() by bin(timestamp, 1h)" --fa myfun --fp "a:string = value"
+"""
+
+helps['monitor log-analytics workspace saved-search list'] = """
+type: command
+short-summary: List all saved searches for a given workspace.
+"""
+
+helps['monitor log-analytics workspace saved-search show'] = """
+type: command
+short-summary: Show a saved search for a given workspace.
+"""
+
+helps['monitor log-analytics workspace saved-search delete'] = """
+type: command
+short-summary: Delete a saved search for a given workspace.
+"""
+
 helps['monitor log-profiles'] = """
 type: group
 short-summary: Manage log profiles.

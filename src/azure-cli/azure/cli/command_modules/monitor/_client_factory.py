@@ -121,6 +121,10 @@ def cf_log_analytics_workspace_intelligence_packs(cli_ctx, _):
     return _log_analytics_client_factory(cli_ctx).intelligence_packs
 
 
+def cf_log_analytics_workspace_saved_searches(cli_ctx, _):
+    return _log_analytics_client_factory(cli_ctx).saved_searches
+
+
 def cf_log_analytics_workspace_linked_service(cli_ctx, _):
     return _log_analytics_client_factory(cli_ctx).linked_services
 
