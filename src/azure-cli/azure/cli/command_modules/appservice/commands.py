@@ -387,3 +387,4 @@ def load_command_table(self, _):
     with self.command_group('staticapp users', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_users')
         g.custom_command('invite', 'invite_staticsite_users')
+        g.custom_command('update', 'update_staticsite_users')

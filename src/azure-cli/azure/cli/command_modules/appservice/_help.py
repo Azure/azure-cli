@@ -2128,3 +2128,11 @@ helps['staticapp users invite'] = """
       text: az staticapp users list -n MyStaticAppName
 """
 
+helps['staticapp users update'] = """
+    type: command
+    short-summary: Updates a user entry with the listed roles. Either user details or user id is required.
+    examples:
+    - name: Updates a user entry with the listed roles.
+      text: az staticapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor 
+"""
+

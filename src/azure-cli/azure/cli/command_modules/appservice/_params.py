@@ -857,12 +857,15 @@ def load_arguments(self, _):
         c.argument('authentication_provider', options_list=['--authentication-provider'],
                    help="Authentication provider of the user identity such as AAD, Facebook, GitHub, Google, Twitter.")
         c.argument('user_details', options_list=['--user-details'],
-                   help="User id provided to the user by the authentication provider."
-                        "Email for AAD, Facebook, and Google. Account name (handle) for GitHub and Twitter.")
+                   help="Email for AAD, Facebook, and Google. Account name (handle) for GitHub and Twitter.")
+        c.argument('user_id',
+                   help="Given id of registered user.")
         c.argument('domain', options_list=['--domain'],
                    help="A domain added to the static app in quotes.")
         c.argument('roles', options_list=['--roles'],
                    help="Comma-separated default or user-defined role names. "
+                        "Roles that can be assigned to a user are comma separated and case-insensitive (at most 50 "
+                        "roles up to 25 characters each and restricted to 0-9,A-Z,a-z, and _). "
                         "Define roles in routes.json during root directory of your GitHub repo.")
         c.argument('invitation_expiration_in_hours', options_list=['--invitation-expiration-in-hours'],
                    help="This value sets when the link will expire in hours. The maximum is 168 (7 days).")

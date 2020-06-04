@@ -134,12 +134,12 @@ def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_g
         resource_group_name, name, kind=None, properties=app_settings)
 
 
-def list_staticsite_users(cmd, name, resource_group_name=None):
+def list_staticsite_users(cmd, name, resource_group_name=None, authentication_provider='all'):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    return client.list_static_site_users(resource_group_name, name, authprovider='all')
+    return client.list_static_site_users(resource_group_name, name, authentication_provider)
 
 
 def invite_staticsite_users(cmd, name, authentication_provider, user_details, domain,
@@ -150,8 +150,6 @@ def invite_staticsite_users(cmd, name, authentication_provider, user_details, do
 
     StaticSiteUserInvitationRequestResource = cmd.get_models('StaticSiteUserInvitationRequestResource')
 
-
-
     invite_request = StaticSiteUserInvitationRequestResource(
         domain=domain,
         provider=authentication_provider,
@@ -161,6 +159,26 @@ def invite_staticsite_users(cmd, name, authentication_provider, user_details, do
     )
 
     return client.create_user_roles_invitation_link(resource_group_name, name, invite_request)
+
+
+def update_staticsite_users(cmd, name, roles, authentication_provider=None, user_details=None, user_id=None,
+                            resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    if not authentication_provider and user_id:
+        authentication_provider = _find_authentication_provider(
+            client, resource_group_name, name, user_id, authentication_provider)
+
+    if not user_id and user_details:
+        user_id, authentication_provider = _find_user_id_and_authentication_provider(
+            client, resource_group_name, name, user_id, authentication_provider, user_details)
+
+    if not authentication_provider or not user_id:
+        raise CLIError("Either user id or user details is required.")
+
+    return client.update_static_site_user(resource_group_name, name, authentication_provider, user_id, roles=roles)
 
 
 def create_staticsites(cmd, resource_group_name, name, location,
@@ -250,3 +268,33 @@ def _get_staticsites_client_factory(cli_ctx, api_version=None):
     if api_version:
         client.api_version = api_version
     return client
+
+
+def _find_authentication_provider(client, resource_group_name, name, user_id, authentication_provider):
+    users = client.list_static_site_users(resource_group_name, name, 'all')
+    for user in users:
+        if user.name.lower() == user_id.lower():
+            authentication_provider = user.provider
+
+    if not authentication_provider:
+        raise CLIError("user id was not found.")
+
+    return authentication_provider
+
+
+def _find_user_id_and_authentication_provider(client, resource_group_name, name,
+                                              user_id, authentication_provider, user_details):
+    users = client.list_static_site_users(resource_group_name, name, 'all')
+    for user in users:
+        if user.display_name.lower() == user_details.lower():
+            if not authentication_provider:
+                authentication_provider = user.provider
+                user_id = user.name
+            else:
+                if user.provider.lower() == authentication_provider:
+                    user_id = user.name
+
+    if not user_id or not authentication_provider:
+        raise CLIError("user details and authentication provider was not found.")
+
+    return user_id, authentication_provider
