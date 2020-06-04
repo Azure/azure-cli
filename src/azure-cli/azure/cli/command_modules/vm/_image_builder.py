@@ -378,10 +378,10 @@ def process_img_tmpl_output_add_namespace(cmd, namespace):
 # region Custom Commands
 
 def create_image_template(  # pylint: disable=too-many-locals, too-many-branches, too-many-statements
-        cmd, client, resource_group_name, image_template_name, identity, location=None,
+        cmd, client, resource_group_name, image_template_name, location=None,
         source_dict=None, scripts_list=None, destinations_lists=None, build_timeout=None, tags=None,
         source=None, scripts=None, checksum=None, managed_image_destinations=None,  # pylint: disable=unused-argument
-        shared_image_destinations=None, no_wait=False, image_template=None):  # pylint: disable=unused-argument, too-many-locals
+        shared_image_destinations=None, no_wait=False, image_template=None, identity=None):  # pylint: disable=unused-argument, too-many-locals
     from azure.mgmt.imagebuilder.models import (ImageTemplate, ImageTemplateSharedImageVersionSource,
                                                 ImageTemplatePlatformImageSource, ImageTemplateManagedImageSource,  # pylint: disable=line-too-long
                                                 ImageTemplateShellCustomizer, ImageTemplatePowerShellCustomizer,
