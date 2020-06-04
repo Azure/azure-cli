@@ -61,52 +61,6 @@ def load_arguments(self, _):
     isolated_sku_arg_type = CLIArgumentType(
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
-    staticapp_name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME',
-                                              help="Name of the static site",
-                                              local_context_attribute=LocalContextAttribute(name='staticsite_name',
-                                                                                            actions=[
-                                                                                                LocalContextAction.GET]))
-    environment_name_arg_type = CLIArgumentType(options_list=['--environment-name'],
-                                                help="Name of the environment of static site")
-    setting_pairs_arg_type = CLIArgumentType(options_list=['--setting-names'],
-                                             help="Space-separated app settings in 'key=value' format. ",
-                                             nargs='*')
-    setting_names_arg_type = CLIArgumentType(options_list=['--setting-names'],
-                                             help="Space-separated app setting names.",
-                                             nargs='*')
-    staticapp_repo_token_arg_type = CLIArgumentType(options_list=['--token', '-t'],
-                                                    help="A user's github repository token. This is used to setup the Github Actions workflow file and API secrets.",
-                                                    local_context_attribute=LocalContextAttribute(
-                                                        name='staticsite_repo_token', actions=[LocalContextAction.GET]))
-    staticapp_repo_url_arg_type = CLIArgumentType(options_list=['--source', '-s'],
-                                                  help="URL for the repository of the static site.",
-                                                  local_context_attribute=LocalContextAttribute(
-                                                      name='staticsite_repo_url', actions=[LocalContextAction.GET]))
-    staticapp_repo_branch_arg_type = CLIArgumentType(options_list=['--branch', '-b'],
-                                                     help="The target branch in the repository.",
-                                                     local_context_attribute=LocalContextAttribute(
-                                                         name='staticsite_repo_branch',
-                                                         actions=[LocalContextAction.GET]))
-    staticapp_custom_domains_arg_type = CLIArgumentType(options_list=['--custom-domains', '-c'],
-                                                        help="The Space-separated list of custom domains associated with this static site. Use \"\" to clear existing tags",
-                                                        local_context_attribute=LocalContextAttribute(
-                                                            name='staticsite_custom_domains',
-                                                            actions=[LocalContextAction.GET]))
-    staticapp_app_location_arg_type = CLIArgumentType(options_list=['--app-location', '-apploc'],
-                                                      help="Location of your application code. For example, '/' represents the root of your app, while '/app' represents a directory called 'app'",
-                                                      local_context_attribute=LocalContextAttribute(
-                                                          name='staticsite_app_location',
-                                                          actions=[LocalContextAction.GET]))
-    staticapp_api_location_arg_type = CLIArgumentType(options_list=['--api-location', '-apiloc'],
-                                                      help="Location of your Azure Functions code. For example, '/api' represents a folder called 'api'.",
-                                                      local_context_attribute=LocalContextAttribute(
-                                                          name='staticsite_api_location',
-                                                          actions=[LocalContextAction.GET]))
-    staticapp_app_artifact_location_arg_type = CLIArgumentType(options_list=['--app-artifact-location', '-aal'],
-                                                               help="The path of your build output relative to your apps location. For example, setting a value of 'build' when your app location is set to '/app' will cause the content at '/app/build' to be served.",
-                                                               local_context_attribute=LocalContextAttribute(
-                                                                   name='staticsite_app_artifact_location',
-                                                                   actions=[LocalContextAction.GET]))
 
     # combine all runtime versions for all functions versions
     functionapp_runtime_to_version = {}
@@ -884,16 +838,21 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('staticapp') as c:
-        c.argument('name', arg_type=staticapp_name_arg_type)
-    with self.argument_context('staticapp reconnect') as c:
-        c.argument('source', arg_type=staticapp_repo_url_arg_type)
-        c.argument('token', arg_type=staticapp_repo_token_arg_type)
-        c.argument('branch', arg_type=staticapp_repo_branch_arg_type)
+        c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
+        c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
+        c.argument('token', options_list=['--token', '-t'],
+                   help="A user's github repository token. This is used to setup the Github Actions workflow file and "
+                        "API secrets.")
+        c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.")
     with self.argument_context('staticapp environments') as c:
-        c.argument('environment_name', arg_type=environment_name_arg_type)
+        c.argument('environment_name',
+                   options_list=['--environment-name'], help="Name of the environment of static site")
     with self.argument_context('staticapp appsettings') as c:
-        c.argument('setting_pairs', arg_type=setting_pairs_arg_type)
-        c.argument('setting_names', arg_type=setting_names_arg_type)
+        c.argument('setting_pairs', options_list=['--setting-names'],
+                   help="Space-separated app settings in 'key=value' format. ",
+                   nargs='*')
+        c.argument('setting_names', options_list=['--setting-names'], help="Space-separated app setting names.",
+                   nargs='*')
     with self.argument_context('staticapp users') as c:
         c.argument('authentication_provider', options_list=['--authentication-provider'],
                    help="Authentication provider of the user identity such as AAD, Facebook, GitHub, Google, Twitter.")
@@ -910,10 +869,15 @@ def load_arguments(self, _):
     with self.argument_context('staticapp create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('tags', arg_type=tags_type)
-        c.argument('source', arg_type=staticapp_repo_url_arg_type)
-        c.argument('token', arg_type=staticapp_repo_token_arg_type)
-        c.argument('branch', arg_type=staticapp_repo_branch_arg_type)
-        c.argument('custom_domains', arg_type=staticapp_custom_domains_arg_type)
-        c.argument('app_location', arg_type=staticapp_app_location_arg_type)
-        c.argument('api_location', arg_type=staticapp_api_location_arg_type)
-        c.argument('app_artifact_location', arg_type=staticapp_app_artifact_location_arg_type)
+        c.argument('custom_domains', options_list=['--custom-domains', '-c'],
+                   help="The Space-separated list of custom domains associated with this static site. Use \"\" to "
+                        "clear existing tags")
+        c.argument('app_location', options_list=['--app-location', '-apploc'],
+                   help="Location of your application code. For example, '/' represents the root of your app, "
+                        "while '/app' represents a directory called 'app'")
+        c.argument('api_location', options_list=['--api-location', '-apiloc'],
+                   help="Location of your Azure Functions code. For example, '/api' represents a folder called 'api'.")
+        c.argument('app_artifact_location', options_list=['--app-artifact-location', '-aal'],
+                   help="The path of your build output relative to your apps location. For example, setting a value "
+                        "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
+                        "be served.")
