@@ -2090,7 +2090,7 @@ helps['staticapp hostname delete'] = """
 
 helps['staticapp appsettings list'] = """
     type: command
-    short-summary: List function app settings of the static app. A function must first be deployed to use this method. 
+    short-summary: List function app settings of the static app. A function must first be deployed to use this method.
     examples:
     - name: List function app settings of the static app.
       text: az staticapp appsettings list -n MyStaticAppName
@@ -2098,7 +2098,7 @@ helps['staticapp appsettings list'] = """
 
 helps['staticapp appsettings set'] = """
     type: command
-    short-summary: Set (replace) function app settings of the static app. 
+    short-summary: Set (replace) function app settings of the static app.
     examples:
     - name: Set (replace) function app settings of the static app.
       text: az staticapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2
@@ -2106,7 +2106,7 @@ helps['staticapp appsettings set'] = """
 
 helps['staticapp appsettings delete'] = """
     type: command
-    short-summary: Delete function app settings with given keys of the static app. 
+    short-summary: Delete function app settings with given keys of the static app.
     examples:
     - name: Delete given app settings of the static app.
       text: az staticapp appsettings delete -n MyStaticAppName --setting-names key1 key2
@@ -2114,7 +2114,7 @@ helps['staticapp appsettings delete'] = """
 
 helps['staticapp users list'] = """
     type: command
-    short-summary: Lists users and assigned roles, limited to users who accepted their invites. 
+    short-summary: Lists users and assigned roles, limited to users who accepted their invites.
     examples:
     - name: Lists users and assigned roles.
       text: az staticapp users list -n MyStaticAppName
@@ -2133,6 +2133,5 @@ helps['staticapp users update'] = """
     short-summary: Updates a user entry with the listed roles. Either user details or user id is required.
     examples:
     - name: Updates a user entry with the listed roles.
-      text: az staticapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor 
+      text: az staticapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor
 """
-

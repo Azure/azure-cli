@@ -226,8 +226,8 @@ def delete_staticsite(cmd, name, resource_group_name=None, no_wait=False):
 
 
 def _parse_pair(pair):
-    list = pair.split("=")
-    return list[0], list[1]
+    pair_split = pair.split("=")
+    return pair_split[0], pair_split[1]
 
 
 def _raise_missing_token_suggestion():
@@ -243,11 +243,11 @@ def _get_staticsite_location(client, static_site_name, resource_group_name=None)
         if static_site.name.lower() == static_site_name.lower():
             if not resource_group_name:
                 return static_site.location
-            else:
-                from .utils import _get_resource_group_from_id
-                found_rg = _get_resource_group_from_id(static_site.id)
-                if found_rg.lower() == resource_group_name.lower():
-                    return static_site.location
+
+            from .utils import _get_resource_group_from_id
+            found_rg = _get_resource_group_from_id(static_site.id)
+            if found_rg.lower() == resource_group_name.lower():
+                return static_site.location
 
     raise CLIError("Static site was '{}' not found in subscription.".format(static_site_name))
 

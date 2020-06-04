@@ -261,10 +261,11 @@ def load_arguments(self, _):
                        help='Framework used for Python application. Default is Django',
                        arg_type=get_enum_type(['Bottle', 'Django', 'Flask']))
             c.argument('python_version', arg_group='VSTS CD Provider',
-                       help='Python version used for application. Default is Python 3.5.3 x86', arg_type=get_enum_type(
-                    ['Python 2.7.12 x64', 'Python 2.7.12 x86', 'Python 2.7.13 x64', 'Python 2.7.13 x86',
-                     'Python 3.5.3 x64', 'Python 3.5.3 x86', 'Python 3.6.0 x64', 'Python 3.6.0 x86', 'Python 3.6.2 x64',
-                     'Python 3.6.1 x86']))
+                       help='Python version used for application. Default is Python 3.5.3 x86',
+                       arg_type=get_enum_type(['Python 2.7.12 x64', 'Python 2.7.12 x86', 'Python 2.7.13 x64',
+                                               'Python 2.7.13 x86', 'Python 3.5.3 x64', 'Python 3.5.3 x86',
+                                               'Python 3.6.0 x64', 'Python 3.6.0 x86', 'Python 3.6.2 x64',
+                                               'Python 3.6.1 x86']))
             c.argument('cd_project_url', arg_group='VSTS CD Provider',
                        help='URL of the Visual Studio Team Services (VSTS) project to use for continuous delivery. URL should be in format `https://<accountname>.visualstudio.com/<projectname>`')
             c.argument('cd_account_create', arg_group='VSTS CD Provider',
@@ -645,13 +646,14 @@ def load_arguments(self, _):
         c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
         c.argument('runtime', help='The functions runtime stack.',
                    arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
-        c.argument('runtime_version', help='The version of the functions runtime stack. '
-                                           'Allowed values for each --runtime are: ' + ', '.join(
-            functionapp_runtime_to_version_texts))
+        c.argument('runtime_version',
+                   help='The version of the functions runtime stack. '
+                        'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
         c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
         c.argument('app_insights',
-                   help="Name of the existing App Insights project to be added to the Function app. Must be in the same resource group.")
+                   help="Name of the existing App Insights project to be added to the Function app. Must be in the "
+                        "same resource group.")
         c.argument('disable_app_insights', arg_type=get_three_state_flag(return_label=True),
                    help="Disable creating application insights resource during functionapp create. No logs will be available.")
         c.argument('docker_registry_server_user', help='The container registry server username.')
