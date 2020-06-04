@@ -170,6 +170,51 @@ def _get_microsoft_graph_resource_id(cloud_name):
     return graph_endpoint_mapper.get(cloud_name, None)
 
 
+def _get_database_server_endpoint(db_prefix, sql_server_hostname, cloud_name):
+    if cloud_name == 'AzureCloud':
+        return db_prefix + '.database.azure.com'
+    if cloud_name in ['AzureChinaCloud', 'AzureUSGovernment', 'AzureGermanCloud']:
+        return db_prefix + sql_server_hostname
+    return None
+
+
+def _get_app_insights_telemetry_channel_resource_id(cloud_name):
+    app_insights_telemetry_channel_resource_id_mapper = {
+        'AzureCloud': 'https://dc.applicationinsights.azure.com/v2/track',
+        'AzureChinaCloud': 'https://dc.applicationinsights.azure.cn/v2/track',
+        'AzureUSGovernment': 'https://dc.applicationinsights.us/v2/track',
+        'AzureGermanCloud': 'https://dc.applicationinsights.azure.com/v2/track'
+    }
+    return app_insights_telemetry_channel_resource_id_mapper.get(cloud_name, None)
+
+
+def _get_log_analytics_resource_id(cloud_name):
+    log_analytics_resource_id_mapper = {
+        'AzureCloud': 'https://api.loganalytics.io',
+        'AzureChinaCloud': 'https://api.loganalytics.azure.cn',
+        'AzureUSGovernment': 'https://api.loganalytics.us'
+    }
+    return log_analytics_resource_id_mapper.get(cloud_name, None)
+
+
+def _get_app_insights_resource_id(cloud_name):
+    app_insights_resource_id_mapper = {
+        'AzureCloud': 'https://api.applicationinsights.io',
+        'AzureChinaCloud': 'https://api.applicationinsights.azure.cn',
+        'AzureUSGovernment': 'https://api.applicationinsights.us'
+    }
+    return app_insights_resource_id_mapper.get(cloud_name, None)
+
+
+def _get_acr_login_server_endpoint(cloud_name):
+    acr_login_server_endpoint_mapper = {
+        'AzureCloud': '.azurecr.io',
+        'AzureChinaCloud': '.azurecr.cn',
+        'AzureUSGovernment': '.azurecr.us'
+    }
+    return acr_login_server_endpoint_mapper.get(cloud_name, None)
+
+
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
     cli_cloud_metadata_dict = {}
     for cloud in arm_cloud_metadata_dict:
@@ -178,7 +223,8 @@ def _convert_arm_to_cli(arm_cloud_metadata_dict):
         cli_cloud_metadata_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
     return cli_cloud_metadata_dict
 
-
+# Please refer to the arm endpoints in https://management.azure.com/metadata/endpoints?api-version=2019-05-01
+# when modifying this method. Patch the endpoint if it does not exist and submit a PR on ADO to add it.
 def _arm_to_cli_mapper(arm_dict):
     return Cloud(
         arm_dict['name'],
@@ -196,18 +242,19 @@ def _arm_to_cli_mapper(arm_dict):
             media_resource_id=arm_dict['media'],
             ossrdbms_resource_id=_get_ossrdbms_resource_id(arm_dict['name']),  # change once ossrdbms_resource_id is available via ARM
             active_directory_data_lake_resource_id=arm_dict['activeDirectoryDataLake'] if 'activeDirectoryDataLake' in arm_dict else None,
-            app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else None,
-            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None),
+            app_insights_resource_id=arm_dict['appInsightsResourceId'] if 'appInsightsResourceId' in arm_dict else _get_app_insights_resource_id(arm_dict['name']),
+            log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else _get_log_analytics_resource_id(arm_dict['name']),
+            app_insights_telemetry_channel_resource_id=arm_dict['appInsightsTelemetryChannelResourceId'] if 'appInsightsTelemetryChannelResourceId' in arm_dict else _get_app_insights_telemetry_channel_resource_id(arm_dict['name'])),
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
             sql_server_hostname=arm_dict['suffixes']['sqlServerHostname'],
-            # mysql_server_endpoint=arm_dict['suffixes']['mysqlServerEndpoint'],
-            # postgresql_server_endpoint=arm_dict['suffixes']['postgresqlServerEndpoint'],
-            # mariadb_server_endpoint=arm_dict['suffixes']['mariadbServerEndpoint'],
+            mysql_server_endpoint=_get_database_server_endpoint('.mysql', arm_dict['suffixes']['sqlServerHostname'], arm_dict['name']),
+            postgresql_server_endpoint=_get_database_server_endpoint('.postgres', arm_dict['suffixes']['sqlServerHostname'], arm_dict['name']),
+            mariadb_server_endpoint=_get_database_server_endpoint('.mariadb', arm_dict['suffixes']['sqlServerHostname'], arm_dict['name']),
             azure_datalake_store_file_system_endpoint=arm_dict['suffixes']['azureDataLakeStoreFileSystem'] if 'azureDataLakeStoreFileSystem' in arm_dict['suffixes'] else None,
             azure_datalake_analytics_catalog_and_job_endpoint=arm_dict['suffixes']['azureDataLakeAnalyticsCatalogAndJob'] if 'azureDataLakeAnalyticsCatalogAndJob' in arm_dict['suffixes'] else None,
-            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else None))
+            acr_login_server_endpoint=arm_dict['suffixes']['acrLoginServer'] if 'acrLoginServer' in arm_dict['suffixes'] else _get_acr_login_server_endpoint(arm_dict['name'])))
 
 
 class Cloud(object):  # pylint: disable=too-few-public-methods
@@ -373,7 +420,7 @@ def get_known_clouds():
             cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
             KNOWN_CLOUDS = list(cli_cloud_dict.values())
         except Exception as ex:  # pylint: disable=broad-except
-            logger.warning('Failed to load cloud metadata from the URL: %s',
+            logger.warning("Failed to load cloud metadata from the URL: %s, please check your 'ARM_CLOUD_METADATA_URL' environment variable or '--endpoint' value if you're running 'az cloud import' command.",
                            os.getenv('ARM_CLOUD_METADATA_URL'))
             raise ex
     else:
