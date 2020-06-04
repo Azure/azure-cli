@@ -251,10 +251,10 @@ class DevExtension(Extension):
         from glob import glob
         exts = []
 
-        def _collect(path, depth=0, max_depth=3):
+        def _collect(path, packaging_pattern, depth=0, max_depth=3):
             if not os.path.isdir(path) or depth == max_depth or os.path.split(path)[-1].startswith('.'):
                 return
-            pattern = os.path.join(path, '*.egg-info')
+            pattern = os.path.join(path, packaging_pattern)
             match = glob(pattern)
             if match:
                 ext_path = os.path.dirname(match[0])
@@ -262,9 +262,10 @@ class DevExtension(Extension):
                 exts.append(DevExtension(ext_name, ext_path))
             else:
                 for item in os.listdir(path):
-                    _collect(os.path.join(path, item), depth + 1, max_depth)
+                    _collect(os.path.join(path, item), packaging_pattern, depth + 1, max_depth)
         for source in DEV_EXTENSION_SOURCES:
-            _collect(source)
+            _collect(source, '*.dist-info')
+            _collect(source, '*.egg-info')
         return exts
 
 
