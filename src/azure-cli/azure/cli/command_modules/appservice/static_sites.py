@@ -142,6 +142,27 @@ def list_staticsite_users(cmd, name, resource_group_name=None):
     return client.list_static_site_users(resource_group_name, name, authprovider='all')
 
 
+def invite_staticsite_users(cmd, name, authentication_provider, user_details, domain,
+                            roles, invitation_expiration_in_hours, resource_group_name=None):
+    client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
+    StaticSiteUserInvitationRequestResource = cmd.get_models('StaticSiteUserInvitationRequestResource')
+
+
+
+    invite_request = StaticSiteUserInvitationRequestResource(
+        domain=domain,
+        provider=authentication_provider,
+        user_details=user_details,
+        roles=roles,
+        num_hours_to_expiration=invitation_expiration_in_hours
+    )
+
+    return client.create_user_roles_invitation_link(resource_group_name, name, invite_request)
+
+
 def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
                        app_location='.', api_location='.', app_artifact_location='.github/workflows',

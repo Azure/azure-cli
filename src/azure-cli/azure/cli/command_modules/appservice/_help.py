@@ -2120,3 +2120,11 @@ helps['staticapp users list'] = """
       text: az staticapp users list -n MyStaticAppName
 """
 
+helps['staticapp users invite'] = """
+    type: command
+    short-summary: Create invitation link for specified user to the static app.
+    examples:
+    - name: Create invitation link for specified user to the static app.
+      text: az staticapp users list -n MyStaticAppName
+"""
+
