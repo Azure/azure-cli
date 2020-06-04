@@ -14,6 +14,11 @@ def load_command_table(self, _):
         client_factory=cf_service
     )
 
+    api_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#ApiOperations.{}',
+        client_factory=cf_service
+    )
+
     # pylint: disable=line-too-long
     with self.command_group('apim', service_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_apim', supports_no_wait=True, table_transformer=service_output_format)
@@ -24,3 +29,8 @@ def load_command_table(self, _):
         g.custom_command('check-name', 'check_name_availability')
         g.custom_command('backup', 'apim_backup', supports_no_wait=True)
         g.custom_command('apply-network-updates', 'apim_apply_network_configuration_updates', supports_no_wait=True)
+
+    with self.command_group('apim api', api_sdk, is_preview=True) as g:
+        g.custom_command('list', 'list_api')
+        g.custom_show_command('show', 'get_api')
+        

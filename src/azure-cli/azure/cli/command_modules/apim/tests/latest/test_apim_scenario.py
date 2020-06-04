@@ -94,6 +94,11 @@ class ApimScenarioTest(ScenarioTest):
         final_count = len(self.cmd('apim list').get_output_in_json())
         self.assertEqual(final_count, count - 1)
 
+        # list apis
+
+        self.cmd('apim api list -g {rg} -n {service_name}')
+        
+
 
 KNOWN_LOCS = {'eastasia': 'East Asia',
               'southeastasia': 'Southeast Asia',
