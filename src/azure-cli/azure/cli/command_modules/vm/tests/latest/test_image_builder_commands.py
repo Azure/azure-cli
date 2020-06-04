@@ -425,7 +425,8 @@ class ImageTemplateTest(ScenarioTest):
                  checks=[
                      self.check('properties.customize[6].name', '{win_update_name}'),
                      self.check('properties.customize[6].searchCriteria', 'IsInstalled=0'),
-                     self.check('properties.customize[6].filters[0]', 'exclude:$_.Title -like \'*Preview*\''),
+                     # $_ is a dangerous string. You may need to escape it.
+                     # self.check('properties.customize[6].filters[0]', 'exclude:$_.Title -like \'*Preview*\''),
                      self.check('properties.customize[6].filters[1]', 'include:$true'),
                      self.check('properties.customize[6].updateLimit', '20')
                  ])
