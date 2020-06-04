@@ -127,14 +127,16 @@ def get_attribute_validator(name, attribute_class, create=False):
 
 def validate_key_import_source(ns):
     byok_file = ns.byok_file
+    byok_string = ns.byok_string
     pem_file = ns.pem_file
+    pem_string = ns.pem_string
     pem_password = ns.pem_password
-    if (not byok_file and not pem_file) or (byok_file and pem_file):
-        raise ValueError('supply exactly one: --byok-file, --pem-file')
-    if byok_file and pem_password:
-        raise ValueError('--byok-file cannot be used with --pem-password')
-    if pem_password and not pem_file:
-        raise ValueError('--pem-password must be used with --pem-file')
+    if len([arg for arg in [byok_file, byok_string, pem_file, pem_string] if arg]) != 1:
+        raise ValueError('supply exactly one: --byok-file, --byok-string, --pem-file, --pem-string')
+    if (byok_file or byok_string) and pem_password:
+        raise ValueError('--byok-file or --byok-string cannot be used with --pem-password')
+    if pem_password and not pem_file and not pem_string:
+        raise ValueError('--pem-password must be used with --pem-file or --pem-string')
 
 
 def validate_key_type(ns):
