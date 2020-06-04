@@ -21,7 +21,6 @@ from knack.log import get_logger
 from knack.util import CLIError
 from msrestazure.tools import (parse_resource_id, is_valid_resource_id, resource_id)
 
-VERSION_2019_02_01 = "2019-02-01"
 VERSION_2019_10_01 = "2019-10-01"
 VERSION_2020_04_01 = "2020-04-01"
 
@@ -117,12 +116,8 @@ def list_appserviceenvironment_plans(cmd, name, resource_group_name=None):
     return ase_client.list_app_service_plans(resource_group_name, name)
 
 
-def _get_ase_client_factory(cli_ctx, api_version=None):
+def _get_ase_client_factory(cli_ctx):
     client = get_mgmt_service_client(cli_ctx, WebSiteManagementClient).app_service_environments
-    if api_version:
-        client.api_version = api_version
-    else:
-        api_version = VERSION_2019_02_01
     return client
 
 
