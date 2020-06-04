@@ -94,7 +94,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         resource_client_mock = mock.MagicMock()
         resource_client_factory_mock.return_value = resource_client_mock
-        
+
         deployment_name_mock.return_value = deployment_name
 
         network_client = mock.MagicMock()
