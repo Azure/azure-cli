@@ -7,19 +7,16 @@ from __future__ import print_function
 
 import collections
 
-import json
 import os
 import os.path
 import re
-import string
 from copy import deepcopy
 from enum import Enum
 
 from azure.cli.core._session import ACCOUNT
-from azure.cli.core.util import get_file_json, in_cloud_console, open_page_in_browser, can_launch_browser,\
-    is_windows, is_wsl
+from azure.cli.core.util import in_cloud_console, can_launch_browser
 from azure.cli.core.cloud import get_active_cloud, set_cloud_subscription
-from azure.cli.core._identity import *
+from azure.cli.core._identity import Identity, ADALCredentialCache, MSALSecretStore
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -97,7 +94,7 @@ def _get_cloud_console_token_endpoint():
     return os.environ.get('MSI_ENDPOINT')
 
 
-# pylint: disable=too-many-lines,too-many-instance-attributes
+# pylint: disable=too-many-lines,too-many-instance-attributes,unused-argument
 class Profile(object):
 
     def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
@@ -125,8 +122,8 @@ class Profile(object):
               use_cert_sn_issuer=None,
               find_subscriptions=True):
 
-        credential=None
-        auth_record=None
+        credential = None
+        auth_record = None
         identity = Identity(self._authority, tenant, cred_cache=self._adal_cache)
 
         if not subscription_finder:
@@ -240,7 +237,6 @@ class Profile(object):
         # Also, the name "MSI" is deprecated. So will be assignedIdentityInfo.
         legacy_identity_type = id_type_to_identity_type[mi_info[Identity.MANAGED_IDENTITY_ID_TYPE]]
         legacy_base_name = ('{}-{}'.format(legacy_identity_type, identity_id) if identity_id else legacy_identity_type)
-        client_id = mi_info[Identity.MANAGED_IDENTITY_CLIENT_ID]
 
         consolidated = self._normalize_properties(user_name, subscriptions, is_service_principal=True,
                                                   user_assigned_identity_id=legacy_base_name,
@@ -315,7 +311,8 @@ class Profile(object):
             if managed_identity_info:
                 subscription_dict[_USER_ENTITY]['clientId'] = managed_identity_info[Identity.MANAGED_IDENTITY_CLIENT_ID]
                 subscription_dict[_USER_ENTITY]['objectId'] = managed_identity_info[Identity.MANAGED_IDENTITY_OBJECT_ID]
-                subscription_dict[_USER_ENTITY]['resourceId'] = managed_identity_info[Identity.MANAGED_IDENTITY_RESOURCE_ID]
+                subscription_dict[_USER_ENTITY]['resourceId'] = \
+                    managed_identity_info[Identity.MANAGED_IDENTITY_RESOURCE_ID]
 
             # This will be deprecated and client_id will be the only persisted ID
             if user_assigned_identity_id:
@@ -639,8 +636,9 @@ class Profile(object):
                 if is_service_principal:
                     subscriptions = subscription_finder.find_using_specific_tenant(tenant, identity_credential)
                 else:
+                    # pylint: disable=protected-access
                     subscriptions = subscription_finder.find_using_common_tenant(identity_credential._auth_record,
-                                                                               identity_credential)
+                                                                                 identity_credential)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
                                "modified. You can run 'az login' later to explicitly refresh them", user_name, ex)
@@ -796,7 +794,8 @@ class SubscriptionFinder(object):
 
             identity = Identity(self.authority, tenant_id)
             try:
-                specific_tenant_credential = identity.get_user_credential(auth_record.home_account_id, auth_record.username)
+                specific_tenant_credential = identity.get_user_credential(auth_record.home_account_id,
+                                                                          auth_record.username)
                 # todo: remove after ADAL deprecation
                 if self.adal_cache:
                     self.adal_cache.add_credential(specific_tenant_credential)

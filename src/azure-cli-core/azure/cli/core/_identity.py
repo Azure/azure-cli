@@ -111,8 +111,8 @@ class Identity:
         # Use DeviceCodeCredential
         def prompt_callback(verification_uri, user_code, _):
             # expires_on is discarded
-            message = 'To sign in, use a web browser to open the page {} and enter the code {} to authenticate.'
-            logger.warning(message.format(verification_uri, user_code))
+            logger.warning("To sign in, use a web browser to open the page %s and enter the code %s to authenticate.",
+                           verification_uri, user_code)
 
         credential = DeviceCodeCredential(authority=self.authority,
                                           tenant_id=self.tenant_id,
@@ -243,7 +243,8 @@ class Identity:
         logger.warning('Using Cloud Shell Managed Identity: %s', json.dumps(cloud_shell_identity_info))
         return credential, cloud_shell_identity_info
 
-    def _decode_managed_identity_token(self, credential, resource):
+    @staticmethod
+    def _decode_managed_identity_token(credential, resource):
         # As Managed Identity doesn't have ID token, we need to get an initial access token and extract info from it
         # The resource is only used for acquiring the initial access token
         scope = resource.rstrip('/') + '/.default'
@@ -298,7 +299,8 @@ class Identity:
                                             enable_persistent_cache=True)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
-        client_secret, certificate_path = self._msal_store.retrieve_secret_of_service_principal(client_id, self.tenant_id)
+        client_secret, certificate_path = self._msal_store.retrieve_secret_of_service_principal(client_id,
+                                                                                                self.tenant_id)
         # TODO: support use_cert_sn_issuer in CertificateCredential
         if client_secret:
             return ClientSecretCredential(self.tenant_id, client_id, client_secret)
@@ -397,6 +399,7 @@ class ADALCredentialCache:
             self.persist_cached_creds()
 
     # noinspection PyBroadException
+    # pylint: disable=protected-access
     def add_credential(self, credential):
         try:
             query = {
@@ -408,8 +411,8 @@ class ADALCredentialCache:
                 credential._cache.CredentialType.REFRESH_TOKEN,
                 # target=scopes,  # AAD RTs are scope-independent
                 query=query)
-            access_token = credential.get_token(self._cli_ctx.cloud.endpoints.active_directory_resource_id.rstrip('/')
-                                                + '/.default')
+            access_token = credential.get_token(self._cli_ctx.cloud.endpoints.active_directory_resource_id.rstrip('/') +
+                                                '/.default')
             import datetime
             entry = {
                 "tokenType": "Bearer",
@@ -419,13 +422,13 @@ class ADALCredentialCache:
                 "accessToken": access_token.token,
                 "refreshToken": refresh_token[0]['secret'],
                 "_clientId": _CLIENT_ID,
-                "_authority": self._cli_ctx.cloud.endpoints.active_directory.rstrip('/')
-                              + "/" + credential._auth_record.tenant_id,
+                "_authority": self._cli_ctx.cloud.endpoints.active_directory.rstrip('/') +
+                "/" + credential._auth_record.tenant_id,
                 "isMRRT": True
             }
             self.adal_token_cache.add([entry])
-        except Exception as e:
-            logger.debug("Failed to store ADAL token: {}".format(e))
+        except Exception as e:    # pylint: disable=broad-except
+            logger.debug("Failed to store ADAL token: %s", e)
             # swallow all errors since it does not impact az
 
     @property
@@ -474,7 +477,7 @@ class ADALCredentialCache:
         _delete_file(self._token_file)
 
 
-class ServicePrincipalAuth(object):
+class ServicePrincipalAuth(object):   # pylint: disable=too-few-public-methods
 
     def __init__(self, client_id, tenant_id, secret=None, certificate_file=None, use_cert_sn_issuer=None):
         if not (secret or certificate_file):
@@ -517,6 +520,7 @@ class ServicePrincipalAuth(object):
 class MSALSecretStore:
     """Caches secrets in MSAL custom secret store
     """
+
     def __init__(self, fallback_to_plaintext=True):
         self._token_file = (os.environ.get('AZURE_MSAL_TOKEN_FILE', None) or
                             os.path.join(get_config_dir(), 'msalCustomToken.bin'))
@@ -601,27 +605,20 @@ class MSALSecretStore:
 
     def _build_persistence(self):
         # https://github.com/AzureAD/microsoft-authentication-extensions-for-python/blob/0.2.2/sample/persistence_sample.py
-        from msal_extensions import FilePersistenceWithDataProtection,\
-            KeychainPersistence,\
-            LibsecretPersistence,\
+        from msal_extensions import FilePersistenceWithDataProtection, \
+            KeychainPersistence, \
+            LibsecretPersistence, \
             FilePersistence
 
         import sys
-        """Build a suitable persistence instance based your current OS"""
         if sys.platform.startswith('win'):
             return FilePersistenceWithDataProtection(self._token_file)
         if sys.platform.startswith('darwin'):
-            #todo: support darwin
+            # todo: support darwin
             return KeychainPersistence(self._token_file, "my_service_name", "my_account_name")
         if sys.platform.startswith('linux'):
             try:
                 return LibsecretPersistence(
-                    # By using same location as the fall back option below,
-                    # this would override the unencrypted data stored by the
-                    # fall back option.  It is probably OK, or even desirable
-                    # (in order to aggressively wipe out plain-text persisted data),
-                    # unless there would frequently be a desktop session and
-                    # a remote ssh session being active simultaneously.
                     self._token_file,
                     schema_name="my_schema_name",
                     attributes={"my_attr1": "foo", "my_attr2": "bar"},
@@ -629,6 +626,6 @@ class MSALSecretStore:
             except:  # pylint: disable=bare-except
                 if not self._fallback_to_plaintext:
                     raise
-                #todo: add missing lib in message
+                # todo: add missing lib in message
                 logger.warning("Encryption unavailable. Opting in to plain text.")
         return FilePersistence(self._token_file)
