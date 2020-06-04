@@ -35,7 +35,7 @@ class TestProfile(unittest.TestCase):
         cls.user1 = 'foo@foo.com'
         cls.id1 = 'subscriptions/1'
         cls.display_name1 = 'foo account'
-        cls.home_account_id = "00000003-0000-0000-0000-000000000000@00000003-0000-0000-0000-000000000000"
+        cls.home_account_id = "00000003-0000-0000-0000-000000000000.00000003-0000-0000-0000-000000000000"
         cls.client_id = "00000003-0000-0000-0000-000000000000"
         cls.authentication_record = AuthenticationRecord(cls.tenant_id, cls.client_id,
                                                          "https://login.microsoftonline.com", cls.home_account_id,
@@ -165,6 +165,40 @@ class TestProfile(unittest.TestCase):
                                      'e-lOym1sH5iOcxfIjXF0Tp2y0f3zM7qCq8Cp1ZxEwz6xYIgByoxjErNXrOME5Ld1WizcsaWxTXpwxJn_'
                                      'Q8U2g9kXHrbYFeY2gJxF_hnfLvNKxUKUBnftmyYxZwKi0GDS0BvdJnJnsqSRSpxUx__Ra9QJkG1IaDzj'
                                      'ZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw')
+
+        cls.msal_accounts = [
+            {
+                'home_account_id': '182c0000-0000-0000-0000-000000000000.54820000-0000-0000-0000-000000000000',
+                'environment': 'login.microsoftonline.com',
+                'realm': 'organizations',
+                'local_account_id': '182c0000-0000-0000-0000-000000000000',
+                'username': cls.user1,
+                'authority_type': 'MSSTS'
+            }, {
+                'home_account_id': '182c0000-0000-0000-0000-000000000000.54820000-0000-0000-0000-000000000000',
+                'environment': 'login.microsoftonline.com',
+                'realm': '54820000-0000-0000-0000-000000000000',
+                'local_account_id': '182c0000-0000-0000-0000-000000000000',
+                'username': cls.user1,
+                'authority_type': 'MSSTS'
+            }]
+
+        cls.msal_accounts_all = [
+            {
+                'home_account_id': 'c7970000-0000-0000-0000-000000000000.54820000-0000-0000-0000-000000000000',
+                'environment': 'login.microsoftonline.com',
+                'realm': 'organizations',
+                'local_account_id': 'c7970000-0000-0000-0000-000000000000',
+                'username': cls.user2,
+                'authority_type': 'MSSTS'
+            }, {
+                'home_account_id': 'c7970000-0000-0000-0000-000000000000.54820000-0000-0000-0000-000000000000',
+                'environment': 'login.microsoftonline.com',
+                'realm': '54820000-0000-0000-0000-000000000000',
+                'local_account_id': 'c7970000-0000-0000-0000-000000000000',
+                'username': cls.user2,
+                'authority_type': 'MSSTS'
+            }] + cls.msal_accounts
 
     def test_normalize(self):
         cli = DummyCli()
@@ -878,26 +912,75 @@ class TestProfile(unittest.TestCase):
         get_token.assert_called_once_with(mock.ANY, 'https://datalake.azure.net/.default')
         self.assertEqual(tenant_id, self.tenant_id)
 
-    def test_logout(self):
+    @mock.patch('msal.PublicClientApplication.remove_account', autospec=True)
+    @mock.patch('msal.PublicClientApplication.get_accounts', autospec=True)
+    def test_logout(self, mock_get_accounts, mock_remove_account):
         cli = DummyCli()
 
-        storage_mock = {'subscriptions': None}
+        storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties(self.user1,
                                                      [self.subscription1],
                                                      False)
+
+        # 1. Log out from CLI, but not from MSAL
         profile._set_subscriptions(consolidated)
         self.assertEqual(1, len(storage_mock['subscriptions']))
-        # action
-        profile.logout(self.user1, False)
 
-        # verify
+        profile.logout(self.user1, clear_credential=False)
+
         self.assertEqual(0, len(storage_mock['subscriptions']))
+        mock_get_accounts.assert_called_with(mock.ANY, self.user1)
+        mock_remove_account.assert_not_called()
 
-    def test_logout_all(self):
+        # 2. Log out from both CLI and MSAL
+        profile._set_subscriptions(consolidated)
+        mock_get_accounts.reset_mock()
+        mock_remove_account.reset_mock()
+        mock_get_accounts.return_value = self.msal_accounts
+
+        profile.logout(self.user1, True)
+
+        self.assertEqual(0, len(storage_mock['subscriptions']))
+        mock_get_accounts.assert_called_with(mock.ANY, self.user1)
+        mock_remove_account.assert_has_calls([mock.call(mock.ANY, self.msal_accounts[0]),
+                                             mock.call(mock.ANY, self.msal_accounts[1])])
+
+        # 3. When already logged out from CLI, log out from MSAL
+        profile._set_subscriptions([])
+        mock_get_accounts.reset_mock()
+        mock_remove_account.reset_mock()
+        profile.logout(self.user1, True)
+        mock_get_accounts.assert_called_with(mock.ANY, self.user1)
+        mock_remove_account.assert_has_calls([mock.call(mock.ANY, self.msal_accounts[0]),
+                                              mock.call(mock.ANY, self.msal_accounts[1])])
+
+        # 4. Log out from CLI, when already logged out from MSAL
+        profile._set_subscriptions(consolidated)
+        mock_get_accounts.reset_mock()
+        mock_remove_account.reset_mock()
+        mock_get_accounts.return_value = []
+        profile.logout(self.user1, True)
+        self.assertEqual(0, len(storage_mock['subscriptions']))
+        mock_get_accounts.assert_called_with(mock.ANY, self.user1)
+        mock_remove_account.assert_not_called()
+
+        # 5. Not logged in to CLI or MSAL
+        profile._set_subscriptions([])
+        mock_get_accounts.reset_mock()
+        mock_remove_account.reset_mock()
+        mock_get_accounts.return_value = []
+        profile.logout(self.user1, True)
+        self.assertEqual(0, len(storage_mock['subscriptions']))
+        mock_get_accounts.assert_called_with(mock.ANY, self.user1)
+        mock_remove_account.assert_not_called()
+
+    @mock.patch('msal.PublicClientApplication.remove_account', autospec=True)
+    @mock.patch('msal.PublicClientApplication.get_accounts', autospec=True)
+    def test_logout_all(self, mock_get_accounts, mock_remove_account):
         cli = DummyCli()
         # setup
-        storage_mock = {'subscriptions': None}
+        storage_mock = {'subscriptions': []}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         consolidated = profile._normalize_properties(self.user1,
                                                      [self.subscription1],
@@ -905,18 +988,54 @@ class TestProfile(unittest.TestCase):
         consolidated2 = profile._normalize_properties(self.user2,
                                                       [self.subscription2],
                                                       False)
+        # 1. Log out from CLI, but not from MSAL
         profile._set_subscriptions(consolidated + consolidated2)
-
         self.assertEqual(2, len(storage_mock['subscriptions']))
-        # action
-        profile.logout_all(False)
 
-        # verify
+        profile.logout_all(clear_credential=False)
         self.assertEqual([], storage_mock['subscriptions'])
+        mock_get_accounts.assert_called_with(mock.ANY)
+        mock_remove_account.assert_not_called()
 
-    def test_logout_clear_credential(self):
-        # TODO: MSAL
-        pass
+        # 2. Log out from both CLI and MSAL
+        profile._set_subscriptions(consolidated + consolidated2)
+        mock_get_accounts.reset_mock()
+        mock_remove_account.reset_mock()
+        mock_get_accounts.return_value = self.msal_accounts_all
+        profile.logout_all(clear_credential=True)
+        self.assertEqual([], storage_mock['subscriptions'])
+        mock_get_accounts.assert_called_with(mock.ANY)
+        self.assertEqual(mock_remove_account.call_count, 4)
+
+        # 3. When already logged out from CLI, log out from MSAL
+        profile._set_subscriptions([])
+        mock_get_accounts.reset_mock()
+        mock_remove_account.reset_mock()
+        mock_get_accounts.return_value = self.msal_accounts_all
+        profile.logout_all(clear_credential=True)
+        self.assertEqual([], storage_mock['subscriptions'])
+        mock_get_accounts.assert_called_with(mock.ANY)
+        self.assertEqual(mock_remove_account.call_count, 4)
+
+        # 4. Log out from CLI, when already logged out from MSAL
+        profile._set_subscriptions(consolidated + consolidated2)
+        mock_get_accounts.reset_mock()
+        mock_remove_account.reset_mock()
+        mock_get_accounts.return_value = []
+        profile.logout_all(clear_credential=True)
+        self.assertEqual([], storage_mock['subscriptions'])
+        mock_get_accounts.assert_called_with(mock.ANY)
+        mock_remove_account.assert_not_called()
+
+        # 5. Not logged in to CLI or MSAL
+        profile._set_subscriptions([])
+        mock_get_accounts.reset_mock()
+        mock_remove_account.reset_mock()
+        mock_get_accounts.return_value = []
+        profile.logout_all(clear_credential=True)
+        self.assertEqual([], storage_mock['subscriptions'])
+        mock_get_accounts.assert_called_with(mock.ANY)
+        mock_remove_account.assert_not_called()
 
     @mock.patch('azure.identity.ManagedIdentityCredential.get_token', autospec=True)
     @mock.patch('azure.cli.core._profile.SubscriptionFinder', autospec=True)
