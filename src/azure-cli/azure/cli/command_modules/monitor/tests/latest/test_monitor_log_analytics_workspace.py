@@ -320,6 +320,8 @@ class TestLogProfileScenarios(ScenarioTest):
             'saved_search_name': 'clitest',
             'category': 'cli',
             'category_2': 'cli2',
+            'query': "Heartbeat | getschema",
+            'query_2': "AzureActivity | summarize count() by bin(timestamp, 1h)",
             'display_name': 'myclitest',
             'display_name_2': 'myclitest2',
             'function_alias': 'myfun',
@@ -332,12 +334,12 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {workspace_name} --tags clitest=myron")
 
         self.cmd('monitor log-analytics workspace saved-search create -g {rg} --workspace-name {workspace_name} -n {saved_search_name} '
-                 '--category {category} --display-name {display_name} -q "Heartbeat | getschema" --fa {function_alias} '
+                 '--category {category} --display-name {display_name} -q "{query}" --fa {function_alias} '
                  '--fp "{function_param}" --tags a=b c=d',
                  checks=[
                      self.check('category', '{category}'),
                      self.check('displayName', '{display_name}'),
-                     self.check('query', "Heartbeat | getschema"),
+                     self.check('query', "{query}"),
                      self.check('functionAlias', '{function_alias}'),
                      self.check('functionParameters', '{function_param}'),
                      self.check('length(tags)', 2)
@@ -357,12 +359,12 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd(
             'monitor log-analytics workspace saved-search update -g {rg} --workspace-name {workspace_name} -n {saved_search_name} '
-            '--category {category_2} --display-name {display_name_2} -q "AzureActivity | summarize count() by bin(timestamp, 1h)" --fa {function_alias_2} '
+            '--category {category_2} --display-name {display_name_2} -q "{query_2}" --fa {function_alias_2} '
             '--fp "{function_param_2}" --tags a=c f=e',
             checks=[
                 self.check('category', '{category_2}'),
                 self.check('displayName', '{display_name_2}'),
-                self.check('query', "AzureActivity | summarize count() by bin(timestamp, 1h)"),
+                self.check('query', "{query_2}"),
                 self.check('functionAlias', '{function_alias_2}'),
                 self.check('functionParameters', '{function_param_2}'),
                 self.check('length(tags)', 2),
