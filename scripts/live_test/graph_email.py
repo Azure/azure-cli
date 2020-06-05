@@ -1,0 +1,93 @@
+import logging
+import msal
+import requests
+import json
+
+USER = False
+
+
+def main():
+    app = msal.ConfidentialClientApplication(
+        'b1023c2f-3625-4726-a173-09449d190793',
+        authority='https://login.microsoftonline.com/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a',
+        client_credential='y5VL3nj0Yu.zYcQnra~ck-PF.6fr-t9p3u'
+    )
+
+    result = None
+    scope = ['https://graph.microsoft.com/.default']
+
+    if USER:
+        accounts = app.get_accounts(username='fey@microsoft.com')
+        if accounts:
+            logging.info("Account(s) exists in cache, probably with token too. Let's try.")
+            result = app.acquire_token_silent(scope, account=accounts[0])
+
+        if not result:
+            logging.info("No suitable token exists in cache. Let's get a new one from AAD.")
+
+            result = app.acquire_token_by_username_password(
+                'fey@microsoft', 'asdf', scope
+            )
+    else:
+        result = app.acquire_token_silent(scope, account=None)
+        if not result:
+            logging.info("No suitable token exists in cache. Let's get a new one from AAD.")
+            result = app.acquire_token_for_client(scope)
+        # print(result)
+    if "access_token" in result:
+        token = result['access_token']
+    else:
+        raise Exception()
+
+    # Calling graph using the access token
+    # graph_data = requests.get(  # Use token to call downstream service
+    #     'https://graph.microsoft.com/v1.0/users',
+    #     headers={'Authorization': 'Bearer ' + token}, ).json()
+    # print("Graph API call result: %s" % json.dumps(graph_data, indent=2))
+
+    payload = {
+        "message": {
+            "subject": "Meet for lunch?",
+            # "body": {
+            #     "contentType": "Text",
+            #     "content": "The new cafeteria is open."
+            # },
+            "toRecipients": [
+                {
+                    "emailAddress": {
+                        "address": "jiasli@microsoft.com"
+                    }
+                }
+            ],
+            "from": {
+                "emailAddress": {
+                    "address": "fey@contoso.com"
+                }
+            }
+            # "ccRecipients": [
+            #     {
+            #         "emailAddress": {
+            #             "address": "fey@microsoft.com"
+            #         }
+            #     }
+            # ]
+        }
+    }
+
+    if USER:
+        response = requests.post(
+            'https://graph.microsoft.com/v1.0/me/sendMail',
+            headers={'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'},
+            json=payload
+        )
+    else:
+        response = requests.post(
+            'https://graph.microsoft.com/v1.0/users/fey_microsoft.com#EXT#@AzureSDKTeam.onmicrosoft.com/sendMail',
+            headers={'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'},
+            json=payload
+        )
+    print(response.json())
+
+
+if __name__ == '__main__':
+    main()
