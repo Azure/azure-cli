@@ -371,7 +371,6 @@ def load_arguments(self, _):
                         "Value should be in the following format: 'param-name1:type1 = default_value1, param-name2:type2 = default_value2'. "
                         "For more examples and proper syntax please refer to "
                         "https://docs.microsoft.com/en-us/azure/kusto/query/functions/user-defined-functions.")
-        c.argument('version', type=int, help='The version number of the query language', default=2)
         c.argument('tags', tags_type)
     # endregion
 
