@@ -21,7 +21,7 @@ import six
 
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
-    BLACKLISTED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
+    BLOCKED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
     CLI_POSITIONAL_PARAM_KWARGS, CONFIRM_PARAM_NAME)
 from azure.cli.core.commands.parameters import (
     AzArgumentContext, patch_arg_make_required, patch_arg_make_optional)

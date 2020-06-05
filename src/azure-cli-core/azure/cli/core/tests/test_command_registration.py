@@ -146,10 +146,14 @@ class TestCommandRegistration(unittest.TestCase):
         return mock_obj
 
     def _mock_iter_modules(_):
-        return [(None, __name__, None)]
+        return [(None, "hello", None),
+                (None, "extra", None)]
 
     def _mock_extension_modname(ext_name, ext_dir):
-        return ext_name
+        if ext_name.endswith('.ExtCommandsLoader'):
+            return "azext_hello1"
+        if ext_name.endswith('.Ext2CommandsLoader'):
+            return "azext_hello2"
 
     def _mock_get_extensions():
         MockExtension = namedtuple('Extension', ['name', 'preview', 'experimental', 'path', 'get_metadata'])
@@ -164,6 +168,17 @@ class TestCommandRegistration(unittest.TestCase):
                 super(TestCommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('world', 'sample_vm_get')
+                    g.command('do-not-override-me', 'sample_vm_get')
+                self.__module__ = "azure.cli.command_modules.hello"
+                return self.command_table
+
+        class Test2CommandsLoader(AzCommandsLoader):
+            # An extra group that is not loaded if a module is found from the index
+            def load_command_table(self, args):
+                super(Test2CommandsLoader, self).load_command_table(args)
+                with self.command_group('extra', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
+                    g.command('unused', 'sample_vm_get')
+                self.__module__ = "azure.cli.command_modules.extra"
                 return self.command_table
 
         # A command from an extension
@@ -173,6 +188,7 @@ class TestCommandRegistration(unittest.TestCase):
                 super(ExtCommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('noodle', 'sample_vm_get')
+                self.__module__ = "azext_hello1"
                 return self.command_table
 
         # A command from an extension that overrides the original command
@@ -182,21 +198,25 @@ class TestCommandRegistration(unittest.TestCase):
                 super(Ext2CommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('world', 'sample_vm_get')
+                self.__module__ = "azext_hello2"
                 return self.command_table
 
         if prefix == 'azure.cli.command_modules.':
-            command_loaders = {'TestCommandsLoader': TestCommandsLoader}
+            command_loaders = {'hello': TestCommandsLoader, 'extra': Test2CommandsLoader}
         else:
-            command_loaders = {'ExtCommandsLoader': ExtCommandsLoader, 'Ext2CommandsLoader': Ext2CommandsLoader}
+            command_loaders = {'azext_hello1': ExtCommandsLoader, 'azext_hello2': Ext2CommandsLoader}
 
         module_command_table = {}
-        for _, loader_cls in command_loaders.items():
+        for mod_name, loader_cls in command_loaders.items():
+            # If name is provided, only load the named module
+            if name and name != mod_name:
+                continue
             command_loader = loader_cls(cli_ctx=loader.cli_ctx)
             command_table = command_loader.load_command_table(args)
             if command_table:
                 module_command_table.update(command_table)
                 loader.loaders.append(command_loader)  # this will be used later by the load_arguments method
-        return module_command_table, {}
+        return module_command_table, command_loader.command_group_table
 
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
@@ -206,19 +226,65 @@ class TestCommandRegistration(unittest.TestCase):
     def test_register_command_from_extension(self):
 
         from azure.cli.core.commands import _load_command_loader
+        from azure.cli.core._session import INDEX
+        from azure.cli.core import _COMMAND_INDEX
+
         cli = DummyCli()
+        # Clear the command index
+        INDEX[_COMMAND_INDEX] = {}
+        self.assertFalse(INDEX[_COMMAND_INDEX])
         main_loader = MainCommandsLoader(cli)
         cli.loader = main_loader
 
         cmd_tbl = cli.loader.load_command_table(None)
+        cmd1 = cmd_tbl['hello do-not-override-me']
         ext1 = cmd_tbl['hello noodle']
         ext2 = cmd_tbl['hello world']
+
+        self.assertEquals(cmd1.command_source, 'hello')
+        self.assertEquals(cmd1.loader.__module__, 'azure.cli.command_modules.hello')
 
         self.assertTrue(isinstance(ext1.command_source, ExtensionCommandSource))
         self.assertFalse(ext1.command_source.overrides_command)
 
         self.assertTrue(isinstance(ext2.command_source, ExtensionCommandSource))
         self.assertTrue(ext2.command_source.overrides_command)
+
+        expected_command_index = {'hello': ['azext_hello2', 'azure.cli.command_modules.hello', 'azext_hello1'],
+                                  'extra': ['azure.cli.command_modules.extra']}
+
+        # Test command index is built for None args
+        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+
+        # Test command index is built
+        INDEX[_COMMAND_INDEX] = {}
+        cli.loader.command_table = {}
+        cli.loader.command_group_table = {}
+        cmd_tbl = cli.loader.load_command_table(["hello"])
+        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+
+        # Test refresh command index if no module found
+        INDEX[_COMMAND_INDEX] = {"network": ["azure.cli.command_modules.network"]}
+        cli.loader.command_table = {}
+        cli.loader.command_group_table = {}
+        cli.loader.load_command_table(["hello"])
+        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+
+        # Test refresh command index if modules are found but outdated
+        INDEX[_COMMAND_INDEX] = {"hello": ["azure.cli.command_modules.hello_outdated"]}
+        cli.loader.command_table = {}
+        cli.loader.command_group_table = {}
+        cli.loader.load_command_table(["hello"])
+        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+
+        # Test extra is not loaded
+        INDEX[_COMMAND_INDEX] = expected_command_index
+        cli.loader.command_table = {}
+        cli.loader.command_group_table = {}
+        cmd_tbl = cli.loader.load_command_table(["hello"])
+        self.assertEquals(['hello world', 'hello do-not-override-me', 'hello noodle'], list(cmd_tbl.keys()))
+
+        INDEX[_COMMAND_INDEX] = {}
 
     def test_argument_with_overrides(self):
 

@@ -30,6 +30,9 @@ logger = get_logger(__name__)
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
+_COMMAND_INDEX = 'commandIndex'
+# Extensions that will always be loaded if installed. These extensions don't expose commands but hook into CLI core.
+ALWAYS_LOADED_EXTENSION_MODNAMES = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
 
 
 class AzCli(CLI):
@@ -42,7 +45,7 @@ class AzCli(CLI):
             register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
-        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
+        from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX
 
         from knack.util import ensure_dir
 
@@ -57,6 +60,8 @@ class AzCli(CLI):
         ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))
         CONFIG.load(os.path.join(azure_folder, 'az.json'))
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
+        INDEX.load(os.path.join(azure_folder, 'commandIndex.json'))
+
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))
         self.local_context = AzCLILocalContext(self)
@@ -160,33 +165,37 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader.command_table = self.command_table
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
-    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-statements, too-many-locals
     def load_command_table(self, args):
         from importlib import import_module
         import pkgutil
         import traceback
         from azure.cli.core.commands import (
-            _load_module_command_loader, _load_extension_command_loader, BLACKLISTED_MODS, ExtensionCommandSource)
+            _load_module_command_loader, _load_extension_command_loader, BLOCKED_MODS, ExtensionCommandSource)
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
+        from azure.cli.core._session import INDEX
 
-        def _update_command_table_from_modules(args):
+        def _update_command_table_from_modules(args, command_modules=None):
             '''Loads command table(s)
             When `module_name` is specified, only commands from that module will be loaded.
             If the module is not found, all commands are loaded.
             '''
-            installed_command_modules = []
-            try:
-                mods_ns_pkg = import_module('azure.cli.command_modules')
-                installed_command_modules = [modname for _, modname, _ in
-                                             pkgutil.iter_modules(mods_ns_pkg.__path__)
-                                             if modname not in BLACKLISTED_MODS]
-            except ImportError as e:
-                logger.warning(e)
 
-            logger.debug('Installed command modules %s', installed_command_modules)
+            if not command_modules:
+                # Perform module discovery
+                command_modules = []
+                try:
+                    mods_ns_pkg = import_module('azure.cli.command_modules')
+                    command_modules = [modname for _, modname, _ in
+                                       pkgutil.iter_modules(mods_ns_pkg.__path__)]
+                    logger.debug('Discovered command modules: %s', command_modules)
+                except ImportError as e:
+                    logger.warning(e)
+
+            logger.debug("Loading command modules: %s", command_modules)
             cumulative_elapsed_time = 0
-            for mod in [m for m in installed_command_modules if m not in BLACKLISTED_MODS]:
+            for mod in [m for m in command_modules if m not in BLOCKED_MODS]:
                 try:
                     start_time = timeit.default_timer()
                     module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
@@ -209,7 +218,7 @@ class MainCommandsLoader(CLICommandsLoader):
                          "(note: there's always an overhead with the first module loaded)",
                          cumulative_elapsed_time)
 
-        def _update_command_table_from_extensions(ext_suppressions):
+        def _update_command_table_from_extensions(ext_suppressions, extension_modname=None):
 
             from azure.cli.core.extension.operations import check_version_compatibility
 
@@ -224,9 +233,23 @@ class MainCommandsLoader(CLICommandsLoader):
                         filtered_extensions.append(ext)
                 return filtered_extensions
 
+            def _filter_modname(extensions):
+                # Extension's name may not be the same as its modname. eg. name: virtual-wan, modname: azext_vwan
+                filtered_extensions = []
+                extension_modname.extend(ALWAYS_LOADED_EXTENSION_MODNAMES)
+                for ext in extensions:
+                    ext_name = ext.name
+                    ext_dir = ext.path or get_extension_path(ext.name)
+                    ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
+                    # Filter the extensions according to the index
+                    if ext_mod in extension_modname:
+                        filtered_extensions.append(ext)
+                return filtered_extensions
+
             extensions = get_extensions()
             if extensions:
-                logger.debug("Found %s extensions: %s", len(extensions), [e.name for e in extensions])
+                if extension_modname:
+                    extensions = _filter_modname(extensions)
                 allowed_extensions = _handle_extension_suppressions(extensions)
                 module_commands = set(self.command_table.keys())
                 for ext in allowed_extensions:
@@ -295,15 +318,87 @@ class MainCommandsLoader(CLICommandsLoader):
                             res.append(sup)
             return res
 
+        def _update_index():
+            index = {}
+            for command_name, command in self.command_table.items():
+                # Get the top-level name: <vm> create
+                top_command = command_name.split()[0]
+                # Get module name: azure.cli.command_modules.vm
+                module_name = command.loader.__module__
+                if top_command not in index:
+                    index[top_command] = [module_name]
+                elif module_name not in index[top_command]:
+                    index[top_command].append(module_name)
+            logger.debug("Index updated: %s", index)
+            INDEX[_COMMAND_INDEX] = index
+
+        def _roughly_parse_command(args):
+            # Roughly parse the command part: <az vm create> --name vm1
+            # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but we don't need to bother with
+            # positional args
+            nouns = []
+            for arg in args:
+                if arg and arg[0] != '-':
+                    nouns.append(arg)
+                else:
+                    break
+            return ' '.join(nouns).lower()
+
+        # Check the command index for (command: [module]) mapping, like
+        # "sql": ["azure.cli.command_modules.sql", "azure.cli.command_modules.sqlvm", "azext_sql"]
+        top_command = None
+        # This list contains both built-in modules and extensions
+        index_modules = []
+        index_builtin_modules = []
+        index_extensions = []
+
+        if args and not args[0].startswith('-'):
+            # A top level command is provided, like `az version`
+            top_command = args[0]
+            index = INDEX[_COMMAND_INDEX]
+            index_modules = index.get(top_command)
+
+        if index_modules:
+            # Found modules from index
+            logger.debug("Modules found from index for '%s': %s", top_command, index_modules)
+            command_module_prefix = 'azure.cli.command_modules.'
+            for m in index_modules:
+                if m.startswith(command_module_prefix):
+                    # The top-level command is from a command module
+                    index_builtin_modules.append(m[len(command_module_prefix):])
+                elif m.startswith('azext_'):
+                    # The top-level command is from an extension
+                    index_extensions.append(m)
+                else:
+                    logger.warning("Unrecognized module: %s", m)
+
+            if index_builtin_modules:
+                _update_command_table_from_modules(args, index_builtin_modules)
+            if index_extensions:
+                # The index won't contain suppressed extensions
+                _update_command_table_from_extensions([], index_extensions)
+
+            # The index may be outdated. Make sure the command appears in the loaded command table
+            command_str = _roughly_parse_command(args)
+            if command_str in self.command_table or command_str in self.command_group_table:
+                logger.debug("Found a match in the command table for '%s'", command_str)
+                return self.command_table
+
+            logger.debug("Could not find a match in the command table for '%s'. The index may be outdated",
+                         command_str)
+        else:
+            logger.debug("No module found from index for '%s'", top_command)
+
+        # No module found from the index. Load all command modules and extensions
+        logger.debug("Loading all modules and extensions")
         _update_command_table_from_modules(args)
-        try:
-            ext_suppressions = _get_extension_suppressions(self.loaders)
-            # We always load extensions even if the appropriate module has been loaded
-            # as an extension could override the commands already loaded.
-            _update_command_table_from_extensions(ext_suppressions)
-        except Exception:  # pylint: disable=broad-except
-            logger.warning("Unable to load extensions. Use --debug for more information.")
-            logger.debug(traceback.format_exc())
+
+        ext_suppressions = _get_extension_suppressions(self.loaders)
+        # We always load extensions even if the appropriate module has been loaded
+        # as an extension could override the commands already loaded.
+        _update_command_table_from_extensions(ext_suppressions)
+
+        _update_index()
 
         return self.command_table
 
