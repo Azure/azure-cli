@@ -259,7 +259,7 @@ class Identity:
         return decoded
 
     def get_user(self, user_or_sp=None):
-        accounts = self._msal_app.get_accounts(user_or_sp)
+        accounts = self._msal_app.get_accounts(user_or_sp) if user_or_sp else self._msal_app.get_accounts()
         return accounts
 
     def logout_user(self, user_or_sp):
