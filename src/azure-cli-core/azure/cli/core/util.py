@@ -729,7 +729,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     endpoints = cli_ctx.cloud.endpoints
     # If url is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
     # default to Azure Resource Manager.
-    # https://management.azure.com/ + subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
+    # https://management.azure.com + /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
     if '://' not in url:
         url = endpoints.resource_manager.rstrip('/') + url
 
