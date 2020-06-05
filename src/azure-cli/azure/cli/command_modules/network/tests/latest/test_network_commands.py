@@ -2669,6 +2669,30 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_subnet_nsg_test')
+    def test_network_vnet_with_subnet_nsg(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'nsg': 'nsg',
+            'rt': 'Microsoft.Network/virtualNetworks',
+            'prefixes': '20.0.0.0/16 10.0.0.0/16'
+        })
+        result = self.cmd('network nsg create --resource-group {rg} --name {nsg}').get_output_in_json()
+        self.kwargs['nsg_id'] = result['NewNSG']['id']
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --address-prefixes {prefixes} '
+                 '--subnet-name {subnet} --subnet-prefixes 20.0.0.0/24 --nsg {nsg}')
+        self.cmd('network vnet subnet list --resource-group {rg} --vnet-name {vnet}',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network vnet subnet show --resource-group {rg} --vnet-name {vnet} --name {subnet}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{subnet}'),
+            self.check('networkSecurityGroup.id', '{nsg_id}')
+        ])
+
+        self.cmd('network vnet subnet delete --resource-group {rg} --vnet-name {vnet} --name {subnet}')
+
     @ResourceGroupPreparer(name_prefix='cli_vnet_test')
     def test_network_vnet_list_available_ips(self, resource_group):
         self.kwargs.update({
