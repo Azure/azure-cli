@@ -36,7 +36,6 @@ from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
 from azure.mgmt.relay.models import AccessRights
 from azure.cli.command_modules.relay._client_factory import hycos_mgmt_client_factory, namespaces_mgmt_client_factory
-from azure.storage.blob import BlockBlobService, BlobPermissions
 from azure.cli.command_modules.network._client_factory import network_client_factory
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -44,13 +43,13 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait
 from azure.cli.core.util import get_az_user_agent
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 from .tunnel import TunnelServer
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
-from ._client_factory import web_client_factory, ex_handler_factory
+from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
@@ -59,7 +58,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src)
 from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
                          FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT,
-                         DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION)
+                         DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION, RUNTIME_STACKS)
 
 logger = get_logger(__name__)
 
@@ -502,7 +501,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
     container_name = "function-releases"
     blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
-
+    BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
     block_blob_service = BlockBlobService(connection_string=storage_connection)
     if not block_blob_service.exists(container_name):
         block_blob_service.create_container(container_name)
@@ -522,6 +521,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
     now = datetime.datetime.now()
     blob_start = now - datetime.timedelta(minutes=10)
     blob_end = now + datetime.timedelta(weeks=520)
+    BlobPermissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlobPermissions')
     blob_token = block_blob_service.generate_blob_shared_access_signature(container_name,
                                                                           blob_name,
                                                                           permission=BlobPermissions(read=True),
@@ -756,11 +756,20 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_auth_settings', slot, auth_settings)
 
 
+# Currently using hardcoded values instead of this function. This function calls the stacks API;
+# Stacks API is updated with Antares deployments,
+# which are infrequent and don't line up with stacks EOL schedule.
 def list_runtimes(cmd, linux=False):
     client = web_client_factory(cmd.cli_ctx)
     runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
 
     return [s['displayName'] for s in runtime_helper.stacks]
+
+
+def list_runtimes_hardcoded(linux=False):
+    if linux:
+        return RUNTIME_STACKS['linux']
+    return RUNTIME_STACKS['windows']
 
 
 def _rename_server_farm_props(webapp):
@@ -2136,7 +2145,26 @@ def import_ssl_cert(cmd, resource_group_name, name, key_vault, key_vault_certifi
         raise CLIError("'{}' app doesn't exist in resource group {}".format(name, resource_group_name))
     server_farm_id = webapp.server_farm_id
     location = webapp.location
-    kv_id = _format_key_vault_id(cmd.cli_ctx, key_vault, resource_group_name)
+    kv_id = None
+    if not is_valid_resource_id(key_vault):
+        kv_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_KEYVAULT)
+        key_vaults = kv_client.vaults.list_by_subscription()
+        for kv in key_vaults:
+            if key_vault == kv.name:
+                kv_id = kv.id
+                break
+    else:
+        kv_id = key_vault
+
+    if kv_id is None:
+        kv_msg = 'The Key Vault {0} was not found in the subscription in context. ' \
+                 'If your Key Vault is in a different subscription, please specify the full Resource ID: ' \
+                 '\naz .. ssl import -n {1} -g {2} --key-vault-certificate-name {3} ' \
+                 '--key-vault /subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.KeyVault/' \
+                 'vaults/{0}'.format(key_vault, name, resource_group_name, key_vault_certificate_name)
+        logger.warning(kv_msg)
+        return
+
     kv_id_parts = parse_resource_id(kv_id)
     kv_name = kv_id_parts['name']
     kv_resource_group_name = kv_id_parts['resource_group']
@@ -2464,7 +2492,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
 
     if consumption_plan_location:
         locations = list_consumption_locations(cmd)
-        location = next((l for l in locations if l['name'].lower() == consumption_plan_location.lower()), None)
+        location = next((loc for loc in locations if loc['name'].lower() == consumption_plan_location.lower()), None)
         if location is None:
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
@@ -2734,9 +2762,18 @@ def list_consumption_locations(cmd):
 
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
-    client = web_client_factory(cmd.cli_ctx)
+    web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_name(sku)
-    return client.list_geo_regions(full_sku, linux_workers_enabled)
+    web_client_geo_regions = web_client.list_geo_regions(sku=full_sku, linux_workers_enabled=linux_workers_enabled)
+
+    providers_client = providers_client_factory(cmd.cli_ctx)
+    providers_client_locations_list = getattr(providers_client.get('Microsoft.Web'), 'resource_types', [])
+    for resource_type in providers_client_locations_list:
+        if resource_type.resource_type == 'sites':
+            providers_client_locations_list = resource_type.locations
+            break
+
+    return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
 
 
 def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, authorization, timeout=None):

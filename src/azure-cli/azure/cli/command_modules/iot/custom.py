@@ -45,7 +45,7 @@ from azure.mgmt.iotcentral.models import (AppSkuInfo,
 
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
-from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType
+from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType
 from ._constants import PNP_ENDPOINT
 from ._client_factory import resource_service_factory, get_pnp_client
 from ._utils import open_certificate, get_auth_header, generateKey
@@ -388,7 +388,9 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                    fileupload_notification_ttl=1,
                    fileupload_storage_connectionstring=None,
                    fileupload_storage_container_name=None,
-                   fileupload_sas_ttl=1):
+                   fileupload_sas_ttl=1,
+                   fileupload_storage_authentication_type=None,
+                   fileupload_storage_container_uri=None):
     from datetime import timedelta
     cli_ctx = cmd.cli_ctx
     if enable_fileupload_notifications:
@@ -398,6 +400,11 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
         raise CLIError('Please mention storage container name.')
     if fileupload_storage_container_name and not fileupload_storage_connectionstring:
         raise CLIError('Please mention storage connection string.')
+    identity_based_file_upload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
+    if not identity_based_file_upload and not fileupload_storage_connectionstring and fileupload_storage_container_name:
+        raise CLIError('Key-based authentication requires a connection string.')
+    if identity_based_file_upload and not fileupload_storage_container_uri:
+        raise CLIError('Identity-based authentication requires a storage container uri (--fileupload-storage-container-uri, --fcu).')
     _check_name_availability(client.iot_hub_resource, hub_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     sku = IotHubSkuInfo(name=sku, capacity=unit)
@@ -418,7 +425,9 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
     storage_endpoint_dic['$default'] = StorageEndpointProperties(
         sas_ttl_as_iso8601=timedelta(hours=fileupload_sas_ttl),
         connection_string=fileupload_storage_connectionstring if fileupload_storage_connectionstring else '',
-        container_name=fileupload_storage_container_name if fileupload_storage_container_name else '')
+        container_name=fileupload_storage_container_name if fileupload_storage_container_name else '',
+        authentication_type=fileupload_storage_authentication_type if fileupload_storage_authentication_type else None,
+        container_uri=fileupload_storage_container_uri if fileupload_storage_container_uri else '')
 
     properties = IotHubProperties(event_hub_endpoints=event_hub_dic,
                                   messaging_endpoints=msg_endpoint_dic,
@@ -472,7 +481,9 @@ def update_iot_hub_custom(instance,
                           fileupload_notification_ttl=None,
                           fileupload_storage_connectionstring=None,
                           fileupload_storage_container_name=None,
-                          fileupload_sas_ttl=None):
+                          fileupload_sas_ttl=None,
+                          fileupload_storage_authentication_type=None,
+                          fileupload_storage_container_uri=None):
     from datetime import timedelta
     if sku is not None:
         instance.sku.name = sku
@@ -499,6 +510,15 @@ def update_iot_hub_custom(instance,
     if fileupload_notification_ttl is not None:
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
+
+    identity_based_file_upload = fileupload_storage_authentication_type and fileupload_storage_authentication_type.lower() == AuthenticationType.IdentityBased.value
+    if identity_based_file_upload:
+        instance.properties.storage_endpoints['$default'].authentication_type = AuthenticationType.IdentityBased
+        instance.properties.storage_endpoints['$default'].container_uri = fileupload_storage_container_uri
+    elif fileupload_storage_authentication_type is not None:
+        instance.properties.storage_endpoints['$default'].authentication_type = None
+        instance.properties.storage_endpoints['$default'].container_uri = None
+    # TODO - remove connection string and set containerURI once fileUpload SAS URL is enabled
     if fileupload_storage_connectionstring is not None and fileupload_storage_container_name is not None:
         instance.properties.storage_endpoints['$default'].connection_string = fileupload_storage_connectionstring
         instance.properties.storage_endpoints['$default'].container_name = fileupload_storage_container_name
@@ -672,11 +692,26 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
     return client.iot_hub_resource.get_stats(resource_group_name, hub_name)
 
 
+def validate_authentication_type_input(endpoint_type, connection_string=None, authentication_type=None, endpoint_uri=None, entity_path=None):
+    is_keyBased = (AuthenticationType.KeyBased.value == authentication_type.lower()) or (authentication_type is None)
+    has_connection_string = (connection_string is not None)
+    if is_keyBased and not has_connection_string:
+        raise CLIError("Please provide a connection string '--connection-string/-c'")
+
+    has_endpoint_uri = (endpoint_uri is not None)
+    has_endpoint_uri_and_path = (has_endpoint_uri) and (entity_path is not None)
+    if EndpointType.AzureStorageContainer.value == endpoint_type.lower() and not has_endpoint_uri:
+        raise CLIError("Please provide an endpoint uri '--endpoint-uri'")
+    if not has_endpoint_uri_and_path:
+        raise CLIError("Please provide an endpoint uri '--endpoint-uri' and entity path '--entity-path'")
+
+
 def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoint_type,
                                     endpoint_resource_group, endpoint_subscription_id,
-                                    connection_string, container_name=None, encoding=None,
+                                    connection_string=None, container_name=None, encoding=None,
                                     resource_group_name=None, batch_frequency=300, chunk_size_window=300,
-                                    file_name_format='{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}'):
+                                    file_name_format='{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}',
+                                    authentication_type=None, endpoint_uri=None, entity_path=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     if EndpointType.EventHub.value == endpoint_type.lower():
@@ -685,7 +720,10 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 connection_string=connection_string,
                 name=endpoint_name,
                 subscription_id=endpoint_subscription_id,
-                resource_group=endpoint_resource_group
+                resource_group=endpoint_resource_group,
+                authentication_type=authentication_type,
+                endpoint_uri=endpoint_uri,
+                entity_path=entity_path
             )
         )
     elif EndpointType.ServiceBusQueue.value == endpoint_type.lower():
@@ -694,7 +732,10 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 connection_string=connection_string,
                 name=endpoint_name,
                 subscription_id=endpoint_subscription_id,
-                resource_group=endpoint_resource_group
+                resource_group=endpoint_resource_group,
+                authentication_type=authentication_type,
+                endpoint_uri=endpoint_uri,
+                entity_path=entity_path
             )
         )
     elif EndpointType.ServiceBusTopic.value == endpoint_type.lower():
@@ -703,7 +744,10 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 connection_string=connection_string,
                 name=endpoint_name,
                 subscription_id=endpoint_subscription_id,
-                resource_group=endpoint_resource_group
+                resource_group=endpoint_resource_group,
+                authentication_type=authentication_type,
+                endpoint_uri=endpoint_uri,
+                entity_path=entity_path
             )
         )
     elif EndpointType.AzureStorageContainer.value == endpoint_type.lower():
@@ -719,7 +763,9 @@ def iot_hub_routing_endpoint_create(cmd, client, hub_name, endpoint_name, endpoi
                 encoding=encoding.lower() if encoding else EncodingFormat.AVRO.value,
                 file_name_format=file_name_format,
                 batch_frequency_in_seconds=batch_frequency,
-                max_chunk_size_in_bytes=(chunk_size_window * 1048576)
+                max_chunk_size_in_bytes=(chunk_size_window * 1048576),
+                authentication_type=authentication_type,
+                endpoint_uri=endpoint_uri
             )
         )
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub, {'IF-MATCH': hub.etag})
@@ -891,8 +937,11 @@ def iot_message_enrichment_list(cmd, client, hub_name, resource_group_name=None)
 
 
 def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client, ResourceType
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
+    # DeviceStreams property is still in preview, so until GA we need to use an older API version (2019-07-01-preview)
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_IOTHUB, api_version='2019-07-01-preview')
+    hub = client.iot_hub_resource.get(resource_group_name, hub_name)
     return hub.properties.device_streams
 
 

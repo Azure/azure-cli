@@ -385,7 +385,7 @@ def _should_consider_property_change_path(property_change):
     if property_change_type in (PropertyChangeType.delete, PropertyChangeType.modify):
         return _is_leaf(property_change.before)
 
-    return bool(property_change.children)
+    return not property_change.children
 
 
 def format_json(value, enable_color=True):

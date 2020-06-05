@@ -28,8 +28,8 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('customSubDomainName', '{customdomain}')])
+                         self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.customSubDomainName', '{customdomain}')])
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
@@ -40,15 +40,15 @@ class CognitiveServicesCustomDomainTests(ScenarioTest):
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded')])
+                         self.check('properties.provisioningState', 'Succeeded')])
 
         # test to create cognitive services account
         self.cmd('az cognitiveservices account update -n {sname} -g {rg} --custom-domain {customdomain}',
                  checks=[self.check('name', '{sname}'),
                          self.check('location', '{location}'),
                          self.check('sku.name', '{sku}'),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('customSubDomainName', '{customdomain}')])
+                         self.check('properties.provisioningState', 'Succeeded'),
+                         self.check('properties.customSubDomainName', '{customdomain}')])
 
         # delete the cognitive services account
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')

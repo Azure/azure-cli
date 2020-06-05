@@ -8,8 +8,9 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
-from azure.mgmt.cognitiveservices.models import CognitiveServicesAccountCreateParameters, Sku,\
-    VirtualNetworkRule, IpRule, NetworkRuleSet
+from azure.mgmt.cognitiveservices.models import CognitiveServicesAccount, Sku,\
+    VirtualNetworkRule, IpRule, NetworkRuleSet,\
+    CognitiveServicesAccountProperties, CognitiveServicesAccountApiProperties
 
 logger = get_logger(__name__)
 
@@ -93,16 +94,15 @@ def create(
                 raise CLIError('Operation cancelled.')
     sku = Sku(name=sku_name)
 
-    properties = {}
-
+    properties = CognitiveServicesAccountProperties()
     if api_properties is not None:
-        properties["apiProperties"] = api_properties
-
+        api_properties = CognitiveServicesAccountApiProperties.deserialize(api_properties)
+        properties.api_properties = api_properties
     if custom_domain:
-        properties["customSubDomainName"] = custom_domain
+        properties.custom_sub_domain_name = custom_domain
+    params = CognitiveServicesAccount(sku=sku, kind=kind, location=location,
+                                      properties=properties, tags=tags)
 
-    params = CognitiveServicesAccountCreateParameters(sku=sku, kind=kind, location=location,
-                                                      properties=properties, tags=tags)
     return client.create(resource_group_name, account_name, params)
 
 
@@ -115,15 +115,15 @@ def update(client, resource_group_name, account_name, sku_name=None, custom_doma
 
     sku = Sku(name=sku_name)
 
-    properties = {}
-
+    properties = CognitiveServicesAccountProperties()
     if api_properties is not None:
-        properties["apiProperties"] = api_properties
-
+        api_properties = CognitiveServicesAccountApiProperties.deserialize(api_properties)
+        properties.api_properties = api_properties
     if custom_domain:
-        properties["customSubDomainName"] = custom_domain
+        properties.custom_sub_domain_name = custom_domain
+    params = CognitiveServicesAccount(sku=sku, properties=properties, tags=tags)
 
-    return client.update(resource_group_name, account_name, sku, tags, properties)
+    return client.update(resource_group_name, account_name, params)
 
 
 def default_network_acls():
@@ -136,10 +136,9 @@ def default_network_acls():
 
 def list_network_rules(client, resource_group_name, account_name):
     sa = client.get_properties(resource_group_name, account_name)
-    rules = sa.network_acls
+    rules = sa.properties.network_acls
     if rules is None:
         rules = default_network_acls()
-    delattr(rules, 'bypass')
     delattr(rules, 'default_action')
     return rules
 
@@ -147,7 +146,7 @@ def list_network_rules(client, resource_group_name, account_name):
 def add_network_rule(client, resource_group_name, account_name, subnet=None,
                      vnet_name=None, ip_address=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
-    rules = sa.network_acls
+    rules = sa.properties.network_acls
     if rules is None:
         rules = default_network_acls()
 
@@ -164,13 +163,17 @@ def add_network_rule(client, resource_group_name, account_name, subnet=None,
             rules.ip_rules = []
         rules.ip_rules.append(IpRule(value=ip_address))
 
-    return client.update(resource_group_name, account_name, properties={"networkAcls": rules})
+    properties = CognitiveServicesAccountProperties()
+    properties.network_acls = rules
+    params = CognitiveServicesAccount(properties=properties)
+
+    return client.update(resource_group_name, account_name, params)
 
 
 def remove_network_rule(client, resource_group_name, account_name, ip_address=None, subnet=None,
                         vnet_name=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
-    rules = sa.network_acls
+    rules = sa.properties.network_acls
     if rules is None:
         # nothing to update, but return the object
         return client.update(resource_group_name, account_name)
@@ -181,4 +184,8 @@ def remove_network_rule(client, resource_group_name, account_name, ip_address=No
     if ip_address:
         rules.ip_rules = [x for x in rules.ip_rules if x.value != ip_address]
 
-    return client.update(resource_group_name, account_name, properties={"networkAcls": rules})
+    properties = CognitiveServicesAccountProperties()
+    properties.network_acls = rules
+    params = CognitiveServicesAccount(properties=properties)
+
+    return client.update(resource_group_name, account_name, params)

@@ -20,6 +20,7 @@ from azure.cli.command_modules.iot.shared import (EndpointType,
                                                   RouteSourceType,
                                                   EncodingFormat,
                                                   RenewKeyType,
+                                                  AuthenticationType,
                                                   UserRole)
 from .custom import KeyType, SimpleAccessRights
 from ._validators import (validate_policy_permissions,
@@ -160,6 +161,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('fileupload_storage_connectionstring',
                    options_list=['--fileupload-storage-connectionstring', '--fcs'],
                    help='The connection string for the Azure Storage account to which files are uploaded.')
+        c.argument('fileupload_storage_authentication_type',
+                   options_list=['--fileupload-storage-auth-type', '--fsa'],
+                   help='The authentication type for the Azure Storage account to which files are uploaded.'
+                        'Possible values are keyBased and identityBased')
+        c.argument('fileupload_storage_container_uri',
+                   options_list=['--fileupload-storage-container-uri', '--fcu'],
+                   help='The container URI for the Azure Storage account to which files are uploaded.')
         c.argument('fileupload_storage_container_name',
                    options_list=['--fileupload-storage-container-name', '--fc'],
                    help='The name of the root container where you upload files. The container need not exist but'
@@ -207,6 +215,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('encoding', options_list=['--encoding'], arg_type=get_enum_type(EncodingFormat),
                    help='Encoding format for the container. The default is AVRO. '
                         'Note that this field is applicable only for blob container endpoints.')
+        c.argument('endpoint_uri', options_list=['--endpoint-uri'],
+                   help='The uri of the endpoint resource.')
+        c.argument('entity_path', options_list=['--entity-path'],
+                   help='The entity path of the endpoint resource.')
 
     with self.argument_context('iot hub routing-endpoint create') as c:
         c.argument('batch_frequency', options_list=['--batch-frequency', '-b'], type=int,
@@ -218,6 +230,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='File name format for the blob. The file name format must contain {iothub},'
                         ' {partition}, {YYYY}, {MM}, {DD}, {HH} and {mm} fields. All parameters are'
                         ' mandatory but can be reordered with or without delimiters.')
+        c.argument('authentication_type', options_list=['--auth-type'], arg_type=get_enum_type(AuthenticationType),
+                   help='Authentication type for the endpoint. The default is keyBased.')
 
     with self.argument_context('iot hub certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
