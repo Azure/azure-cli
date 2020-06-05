@@ -49,7 +49,7 @@ from .tunnel import TunnelServer
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
-from ._client_factory import web_client_factory, ex_handler_factory, cf_webapps
+from ._client_factory import web_client_factory, ex_handler_factory
 from ._appservice_utils import _generic_site_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
@@ -3550,59 +3550,3 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
             verified_hostname_found = True
 
     return verified_hostname_found
-
-
-def list_private_endpoint_connection(cmd, resource_group_name, name, private_endpoint_connection_name):
-    client = web_client_factory(cmd.cli_ctx)
-    return client.web_apps.get_private_endpoint_connection(
-        resource_group_name=resource_group_name,
-        name=name,
-        private_endpoint_connection_name=private_endpoint_connection_name)
-
-
-def delete_private_endpoint_connection(cmd, resource_group_name, name, private_endpoint_connection_name):
-    client = web_client_factory(cmd.cli_ctx)
-    deleted = client.web_apps.delete_private_endpoint_connection(
-        resource_group_name=resource_group_name,
-        name=name,
-        private_endpoint_connection_name=private_endpoint_connection_name,
-        polling=False)
-    return deleted
-
-
-def approve_private_endpoint_connection(cmd, resource_group_name, name, private_endpoint_connection_name):
-    client = web_client_factory(cmd.cli_ctx)
-
-    PrivateLinkConnectionState = cmd.get_models('PrivateLinkConnectionState')
-    private_link_connection_state = PrivateLinkConnectionState(
-        status="Approved",
-        description="",
-        actions_required="None")
-
-    approve = client.web_apps.approve_or_reject_private_endpoint_connection(
-        resource_group_name=resource_group_name,
-        name=name,
-        private_endpoint_connection_name=private_endpoint_connection_name,
-        kind=None,
-        private_link_service_connection_state=private_link_connection_state,
-        polling=False)
-    return approve
-
-
-def reject_private_endpoint_connection(cmd, resource_group_name, name, private_endpoint_connection_name):
-    client = web_client_factory(cmd.cli_ctx)
-
-    PrivateLinkConnectionState = cmd.get_models('PrivateLinkConnectionState')
-    private_link_connection_state = PrivateLinkConnectionState(
-        status="Rejected",
-        description="",
-        actions_required="None")
-
-    reject = client.web_apps.approve_or_reject_private_endpoint_connection(
-        resource_group_name=resource_group_name,
-        name=name,
-        private_endpoint_connection_name=private_endpoint_connection_name,
-        kind=None,
-        private_link_service_connection_state=private_link_connection_state,
-        polling=False)
-    return reject
