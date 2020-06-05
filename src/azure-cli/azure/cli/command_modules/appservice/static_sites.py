@@ -6,6 +6,10 @@
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.util import sdk_no_wait
 from knack.util import CLIError
+from knack.log import get_logger
+
+
+logger = get_logger(__name__)
 
 
 def list_staticsites(cmd, resource_group_name=None):
@@ -82,7 +86,7 @@ def delete_staticsite_domain(cmd, name, hostname, resource_group_name=None, no_w
     if not resource_group_name:
         resource_group_name = _get_resource_group_name_of_staticsite(client, name)
 
-    print("After deleting a custom domain, there can be a 15 minute delay for the change to propagate.")
+    logger.warning("After deleting a custom domain, there can be a 15 minute delay for the change to propagate.")
     return sdk_no_wait(no_wait, client.delete_static_site_custom_domain,
                        resource_group_name=resource_group_name, name=name, domain_name=hostname)
 
@@ -110,7 +114,7 @@ def set_staticsite_function_app_settings(cmd, name, setting_pairs, resource_grou
 
     setting_dict = {}
     for pair in setting_pairs:
-        key, value = _parse_pair(pair)
+        key, value = _parse_pair(pair, "=")
         setting_dict[key] = value
 
     return client.create_or_update_static_site_function_app_settings(
@@ -128,7 +132,7 @@ def delete_staticsite_function_app_settings(cmd, name, setting_names, resource_g
         if key in app_settings:
             app_settings.pop(key)
         else:
-            print("key '{0}' not found in app settings".format(key))
+            logger.warning("key '%s' not found in app settings", key)
 
     return client.create_or_update_static_site_function_app_settings(
         resource_group_name, name, kind=None, properties=app_settings)
@@ -225,8 +229,11 @@ def delete_staticsite(cmd, name, resource_group_name=None, no_wait=False):
                        resource_group_name=resource_group_name, name=name)
 
 
-def _parse_pair(pair):
-    pair_split = pair.split("=")
+def _parse_pair(pair, delimiter):
+    if delimiter not in pair:
+        CLIError("invalid format of pair {0}".format(pair))
+
+    pair_split = pair.split(delimiter)
     return pair_split[0], pair_split[1]
 
 

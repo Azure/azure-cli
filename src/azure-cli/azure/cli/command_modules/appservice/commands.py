@@ -369,9 +369,9 @@ def load_command_table(self, _):
         g.custom_command('disconnect', 'disconnect_staticsite', supports_no_wait=True)
         g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
 
-    with self.command_group('staticapp environments', custom_command_type=staticsite_sdk) as g:
+    with self.command_group('staticapp environment', custom_command_type=staticsite_sdk) as g:
         g.custom_command('list', 'list_staticsite_environments')
-        g.custom_command('show', 'show_staticsite_environment')
+        g.custom_show_command('show', 'show_staticsite_environment')
         g.custom_command('functions', 'list_staticsite_functions')
 
     with self.command_group('staticapp hostname', custom_command_type=staticsite_sdk) as g:

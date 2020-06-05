@@ -846,7 +846,7 @@ def load_arguments(self, _):
                    help="A user's github repository token. This is used to setup the Github Actions workflow file and "
                         "API secrets.")
         c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.")
-    with self.argument_context('staticapp environments') as c:
+    with self.argument_context('staticapp environment') as c:
         c.argument('environment_name',
                    options_list=['--environment-name'], help="Name of the environment of static site")
     with self.argument_context('staticapp hostname') as c:

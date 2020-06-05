@@ -1912,7 +1912,7 @@ helps['appservice ase list'] = """
     examples:
     - name: List all app service environments in subscription.
       text: az appservice ase list
-    - name: List all app service environments in resource group.
+    - name: List all app service environment in resource group.
       text: az appservice ase list --resource-group MyResourceGroup
 """
 
@@ -2001,7 +2001,7 @@ helps['staticapp list'] = """
     type: command
     short-summary: List all static app resources in a subscription, or in resource group if provided
     examples:
-    - name: List static apps.
+    - name: List static apps in a subscription.
       text: az staticapp list
 """
 
@@ -2009,16 +2009,17 @@ helps['staticapp browse'] = """
     type: command
     short-summary: Show details of a static app.
     examples:
-    - name: Show static app.
+    - name: Show static app in a subscription.
       text: az staticapp browse -n MyStaticAppName
 """
 
 helps['staticapp create'] = """
     type: command
-    short-summary: Create a static app and returns the app created.
+    short-summary: Create a static app with content from GitHubRepository URL provided in source on provided branch. Return the app created.
     examples:
-    - name: Create static app.
-      text: az staticapp create -n MyStaticAppName -g MyRg -s MyGitHubRepo -l Location -b master
+    - name: Create static app in a subscription.
+      text: az staticapp create -n MyStaticAppName -g MyExistingRg
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
 """
 
 helps['staticapp disconnect'] = """
@@ -2041,37 +2042,37 @@ helps['staticapp delete'] = """
     type: command
     short-summary: Delete a static app.
     examples:
-    - name: Delete static app.
+    - name: Delete a static app.
       text: az staticapp delete -n MyStaticAppName -g MyRg
 """
 
-helps['staticapp environments'] = """
+helps['staticapp environment'] = """
     type: group
-    short-summary: Manage environments of the static app.
+    short-summary: Manage environment of the static app.
 """
 
-helps['staticapp environments list'] = """
+helps['staticapp environment list'] = """
     type: command
-    short-summary: List all environments of the static app including production.
+    short-summary: List all environment of the static app including production.
     examples:
     - name: List static app environment.
-      text: az staticapp environments list -n MyStaticAppName
+      text: az staticapp environment list -n MyStaticAppName
 """
 
-helps['staticapp environments show'] = """
+helps['staticapp environment show'] = """
     type: command
     short-summary: Show information about the production environment or the specified environment.
     examples:
-    - name: Show static app environment.
-      text: az staticapp environments show -n MyStaticAppName
+    - name: Show a static app environment.
+      text: az staticapp environment show -n MyStaticAppName
 """
 
-helps['staticapp environments functions'] = """
+helps['staticapp environment functions'] = """
     type: command
     short-summary: Show information about functions.
     examples:
     - name: Show static app functions.
-      text: az staticapp environments functions -n MyStaticAppName
+      text: az staticapp environment functions -n MyStaticAppName
 """
 
 helps['staticapp hostname'] = """
