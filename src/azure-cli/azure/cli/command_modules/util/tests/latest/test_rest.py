@@ -77,6 +77,83 @@ class ResourceGroupScenarioTest(ScenarioTest):
         # https://docs.microsoft.com/en-us/rest/api/storagerp/storageaccounts/delete
         self.cmd('az rest -m DELETE -u "/subscriptions/{{subscriptionId}}/resourceGroups/{rg}/providers/Microsoft.Storage/storageAccounts/{sa}?api-version=2019-06-01"')
 
+    def test_rest_microsoft_graph(self):
+        display_name_prefix = "az-rest-test-app"
+        self.kwargs.update({
+            'display_name_prefix': display_name_prefix,
+            'display_name': self.create_random_name(display_name_prefix, length=25)
+        })
+
+        # Create application
+        # https://docs.microsoft.com/en-us/graph/api/application-post-applications?view=graph-rest-1.0&tabs=http
+        # Escape single quote for `shlex` and curly braces for `format`
+        app = self.cmd('az rest --method POST --url https://graph.microsoft.com/v1.0/applications --body \'{{"displayName": "{display_name}"}}\'',
+                       checks=[
+                           self.check('displayName', '{display_name}')
+                       ]).get_output_in_json()
+
+        self.kwargs["app_object_id"] = app["id"]
+        self.kwargs["app_id"] = app["appId"]
+
+        # Get application
+        # https://docs.microsoft.com/en-us/graph/api/application-get?view=graph-rest-1.0&tabs=http
+        self.cmd('az rest --method GET --uri https://graph.microsoft.com/v1.0/applications/{app_object_id}',
+                 checks=[self.check('displayName', '{display_name}')])
+
+        # Update application
+        # https://docs.microsoft.com/en-us/graph/api/application-update?view=graph-rest-1.0&tabs=http
+        self.cmd('az rest --method PATCH --url https://graph.microsoft.com/v1.0/applications/{app_object_id} --body \'{{"web":{{"redirectUris":["https://myapp.com"]}}}}\'')
+
+        # application: addPassword
+        # https://docs.microsoft.com/en-us/graph/api/application-addpassword?view=graph-rest-1.0&tabs=http
+        self.cmd('az rest --method POST --uri https://graph.microsoft.com/v1.0/applications/{app_object_id}/addPassword '
+                 '--body \'{{"passwordCredential": {{"displayName": "Password friendly name"}}}}\'',
+                 checks=[self.check('displayName', "Password friendly name")])
+
+        # Create servicePrincipal
+        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-post-serviceprincipals?view=graph-rest-1.0&tabs=http
+        sp = self.cmd('az rest --method POST --url https://graph.microsoft.com/v1.0/serviceprincipals --body \'{{"appId": "{app_id}"}}\'').get_output_in_json()
+        self.kwargs["sp_object_id"] = sp["id"]
+
+        # Get servicePrincipal
+        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-get?view=graph-rest-1.0&tabs=http
+        self.cmd('az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/{sp_object_id}',
+                 checks=[self.check('appId', '{app_id}'),
+                         self.check('id', '{sp_object_id}')])
+
+        # Update servicePrincipal
+        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-update?view=graph-rest-1.0&tabs=http
+        self.cmd('az rest --method PATCH --url https://graph.microsoft.com/v1.0/servicePrincipals/{sp_object_id} '
+                 '--body \'{{"appRoleAssignmentRequired": true}}\'')
+
+        # servicePrincipal: addPassword
+        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addpassword?view=graph-rest-1.0&tabs=http
+        self.cmd('az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/{sp_object_id}/addPassword '
+                 '--body \'{{"passwordCredential": {{"displayName": "Password friendly name"}}}}\'',
+                 checks=[self.check('displayName', "Password friendly name")])
+
+        # Delete servicePrincipal
+        # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-delete?view=graph-rest-1.0&tabs=http
+        self.cmd('az rest --method DELETE --url https://graph.microsoft.com/v1.0/serviceprincipals/{sp_object_id}')
+
+        from knack.util import CLIError
+        with self.assertRaisesRegex(CLIError, "Request_ResourceNotFound"):
+            self.cmd('az rest --method GET --url https://graph.microsoft.com/v1.0/servicePrincipals/{sp_object_id}')
+
+        # Delete application
+        # https://docs.microsoft.com/en-us/graph/api/application-delete?view=graph-rest-1.0&tabs=http
+        self.cmd('az rest --method DELETE --url https://graph.microsoft.com/v1.0/applications/{app_object_id}')
+
+        from knack.util import CLIError
+        with self.assertRaisesRegex(CLIError, "Request_ResourceNotFound"):
+            self.cmd('az rest --method GET --url https://graph.microsoft.com/v1.0/applications/{app_object_id}')
+
+        # Clear the trash left behind by failed tests
+        response = self.cmd('az rest -m GET -u "https://graph.microsoft.com/v1.0/applications?$filter=startswith(displayName, \'{display_name_prefix}\')"').get_output_in_json()
+        apps = response['value']
+        for app in apps:
+            self.cmd('az rest --method DELETE --url https://graph.microsoft.com/v1.0/applications/{}'.format(app['id']))
+
 
 if __name__ == '__main__':
     unittest.main()
