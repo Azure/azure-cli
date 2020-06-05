@@ -707,3 +707,14 @@ def get_default_cli():
                  logging_cls=AzCliLogging,
                  output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)
+
+
+def invalidate_command_index():
+    """Invalidate the command index.
+
+    This function must be called when installing, updating or removing extensions. Otherwise, if an extension overrides
+    a built-in command, the command will be loaded according to the stale command index.
+    """
+    from azure.cli.core._session import INDEX
+    INDEX[_COMMAND_INDEX] = {}
+    logger.debug("Command index has been invalidated.")
