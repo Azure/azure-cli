@@ -91,7 +91,7 @@ def _format_tags(tags):
 
 def create_log_analytics_workspace_saved_search(client, workspace_name, resource_group_name, saved_search_id,
                                                 category, display_name, saved_query,
-                                                function_alias=None, function_parameters=None, version=None,
+                                                function_alias=None, function_parameters=None,
                                                 tags=None):
     from azure.mgmt.loganalytics.models import SavedSearch
     saved_search = SavedSearch(category=category,
@@ -99,7 +99,6 @@ def create_log_analytics_workspace_saved_search(client, workspace_name, resource
                                query=saved_query,
                                function_alias=function_alias,
                                function_parameters=function_parameters,
-                               version=version,
                                tags=_format_tags(tags))
     return client.create_or_update(resource_group_name=resource_group_name,
                                    workspace_name=workspace_name,
