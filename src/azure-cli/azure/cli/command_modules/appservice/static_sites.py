@@ -184,7 +184,7 @@ def update_staticsite_users(cmd, name, roles, authentication_provider=None, user
 def create_staticsites(cmd, resource_group_name, name, location,
                        source, branch, token=None,
                        app_location='.', api_location='.', app_artifact_location='.github/workflows',
-                       custom_domains=None, tags=None, no_wait=False):
+                       tags=None, no_wait=False):
     if not token:
         _raise_missing_token_suggestion()
 
@@ -205,7 +205,7 @@ def create_staticsites(cmd, resource_group_name, name, location,
         tags=tags,
         repository_url=source,
         branch=branch,
-        custom_domains=custom_domains,
+        custom_domains=None,
         repository_token=token,
         build_properties=build,
         sku=sku)

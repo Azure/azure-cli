@@ -1992,6 +1992,11 @@ helps['appservice ase delete'] = """
       text: az appservice ase delete -n MyAseName
 """
 
+helps['staticapp'] = """
+    type: group
+    short-summary: Manage static apps.
+"""
+
 helps['staticapp list'] = """
     type: command
     short-summary: List all static app resources in a subscription, or in resource group if provided
@@ -2005,7 +2010,7 @@ helps['staticapp browse'] = """
     short-summary: Show details of a static app.
     examples:
     - name: Show static app.
-      text: az staticapp show -n MyStaticAppName
+      text: az staticapp browse -n MyStaticAppName
 """
 
 helps['staticapp create'] = """
@@ -2013,7 +2018,7 @@ helps['staticapp create'] = """
     short-summary: Create a static app and returns the app created.
     examples:
     - name: Create static app.
-      text: az staticapp create -n MyStaticAppName -g MyRg -s MyGitHubRepo -l Location
+      text: az staticapp create -n MyStaticAppName -g MyRg -s MyGitHubRepo -l Location -b master
 """
 
 helps['staticapp disconnect'] = """
@@ -2040,6 +2045,11 @@ helps['staticapp delete'] = """
       text: az staticapp delete -n MyStaticAppName -g MyRg
 """
 
+helps['staticapp environments'] = """
+    type: group
+    short-summary: Manage environments of the static app.
+"""
+
 helps['staticapp environments list'] = """
     type: command
     short-summary: List all environments of the static app including production.
@@ -2062,6 +2072,11 @@ helps['staticapp environments functions'] = """
     examples:
     - name: Show static app functions.
       text: az staticapp environments functions -n MyStaticAppName
+"""
+
+helps['staticapp hostname'] = """
+    type: group
+    short-summary: Manage custom hostnames of Functions of the static app.
 """
 
 helps['staticapp hostname list'] = """
@@ -2088,6 +2103,11 @@ helps['staticapp hostname delete'] = """
       text: az staticapp hostname delete -n MyStaticAppName --hostname HostnameToDelete
 """
 
+helps['staticapp appsettings'] = """
+    type: group
+    short-summary: Manage app settings of Functions of the static app.
+"""
+
 helps['staticapp appsettings list'] = """
     type: command
     short-summary: List function app settings of the static app. A function must first be deployed to use this method.
@@ -2112,6 +2132,11 @@ helps['staticapp appsettings delete'] = """
       text: az staticapp appsettings delete -n MyStaticAppName --setting-names key1 key2
 """
 
+helps['staticapp users'] = """
+    type: group
+    short-summary: Manage users of the static app.
+"""
+
 helps['staticapp users list'] = """
     type: command
     short-summary: Lists users and assigned roles, limited to users who accepted their invites.
@@ -2125,7 +2150,9 @@ helps['staticapp users invite'] = """
     short-summary: Create invitation link for specified user to the static app.
     examples:
     - name: Create invitation link for specified user to the static app.
-      text: az staticapp users list -n MyStaticAppName
+      text: az staticapp users invite -n MyStaticAppName --authentication-provider GitHub --user-details JohnDoe
+       --role Contributor --domain static-app-001.azurestaticapps.net --invitation-expiration-in-hours 1
+
 """
 
 helps['staticapp users update'] = """

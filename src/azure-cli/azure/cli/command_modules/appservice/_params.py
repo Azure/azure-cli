@@ -849,6 +849,10 @@ def load_arguments(self, _):
     with self.argument_context('staticapp environments') as c:
         c.argument('environment_name',
                    options_list=['--environment-name'], help="Name of the environment of static site")
+    with self.argument_context('staticapp hostname') as c:
+        c.argument('hostname',
+                   options_list=['--hostname'],
+                   help="custom hostname such as www.example.com. Only support sub domain in preview.")
     with self.argument_context('staticapp appsettings') as c:
         c.argument('setting_pairs', options_list=['--setting-names'],
                    help="Space-separated app settings in 'key=value' format. ",
@@ -874,15 +878,12 @@ def load_arguments(self, _):
     with self.argument_context('staticapp create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('tags', arg_type=tags_type)
-        c.argument('custom_domains', options_list=['--custom-domains', '-c'],
-                   help="The Space-separated list of custom domains associated with this static site. Use \"\" to "
-                        "clear existing tags")
-        c.argument('app_location', options_list=['--app-location', '-apploc'],
+        c.argument('app_location', options_list=['--app-location'],
                    help="Location of your application code. For example, '/' represents the root of your app, "
                         "while '/app' represents a directory called 'app'")
-        c.argument('api_location', options_list=['--api-location', '-apiloc'],
+        c.argument('api_location', options_list=['--api-location'],
                    help="Location of your Azure Functions code. For example, '/api' represents a folder called 'api'.")
-        c.argument('app_artifact_location', options_list=['--app-artifact-location', '-aal'],
+        c.argument('app_artifact_location', options_list=['--app-artifact-location'],
                    help="The path of your build output relative to your apps location. For example, setting a value "
                         "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
                         "be served.")
