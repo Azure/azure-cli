@@ -740,7 +740,17 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.allow_anonymous
     elif action:
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.redirect_to_login_page
-        auth_settings.default_provider = AUTH_TYPES[action]
+        auth_settings.default_provider = AUTH_TYPES[action]    
+    # validate runtime version
+    from version_parser.version import Version
+    try:
+        if runtime_version is not None:
+            if runtime_version.startswith("~") and len(runtime_version) > 1:
+                Version(runtime_version[1:])
+            else:
+                Version(runtime_version)
+    except(Exception, SystemExit) as ex:
+        raise CLIError('Usage Error: --runtime-version set to invalid value')
 
     import inspect
     frame = inspect.currentframe()
