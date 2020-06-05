@@ -4994,7 +4994,8 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
             vnet.subnets = [Subnet(name=subnet_name,
                                    address_prefix=subnet_prefix[0] if len(subnet_prefix) == 1 else None,
                                    address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None,
-                                   network_security_group=NetworkSecurityGroup(id=network_security_group) if network_security_group else None)]
+                                   network_security_group=NetworkSecurityGroup(id=network_security_group)
+                                   if network_security_group else None)]
         else:
             vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
     if cmd.supported_api_version(min_api='2017-09-01'):
