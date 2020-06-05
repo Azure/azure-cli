@@ -78,6 +78,8 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.cmd('az rest -m DELETE -u "/subscriptions/{{subscriptionId}}/resourceGroups/{rg}/providers/Microsoft.Storage/storageAccounts/{sa}?api-version=2019-06-01"')
 
     def test_rest_microsoft_graph(self):
+        from knack.util import CLIError
+
         display_name_prefix = "az-rest-test-app"
         self.kwargs.update({
             'display_name_prefix': display_name_prefix,
@@ -86,7 +88,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         # Create application
         # https://docs.microsoft.com/en-us/graph/api/application-post-applications?view=graph-rest-1.0&tabs=http
-        # Escape single quote for `shlex` and curly braces for `format`
+        # Escape single quotes for `shlex` and curly braces for `format`
         app = self.cmd('az rest --method POST --url https://graph.microsoft.com/v1.0/applications --body \'{{"displayName": "{display_name}"}}\'',
                        checks=[
                            self.check('displayName', '{display_name}')
@@ -136,7 +138,6 @@ class ResourceGroupScenarioTest(ScenarioTest):
         # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-delete?view=graph-rest-1.0&tabs=http
         self.cmd('az rest --method DELETE --url https://graph.microsoft.com/v1.0/serviceprincipals/{sp_object_id}')
 
-        from knack.util import CLIError
         with self.assertRaisesRegex(CLIError, "Request_ResourceNotFound"):
             self.cmd('az rest --method GET --url https://graph.microsoft.com/v1.0/servicePrincipals/{sp_object_id}')
 
@@ -144,7 +145,6 @@ class ResourceGroupScenarioTest(ScenarioTest):
         # https://docs.microsoft.com/en-us/graph/api/application-delete?view=graph-rest-1.0&tabs=http
         self.cmd('az rest --method DELETE --url https://graph.microsoft.com/v1.0/applications/{app_object_id}')
 
-        from knack.util import CLIError
         with self.assertRaisesRegex(CLIError, "Request_ResourceNotFound"):
             self.cmd('az rest --method GET --url https://graph.microsoft.com/v1.0/applications/{app_object_id}')
 
