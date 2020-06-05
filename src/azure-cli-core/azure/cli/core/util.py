@@ -17,12 +17,8 @@ import re
 import logging
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-
-from azure.common import AzureException
-from azure.core.exceptions import AzureError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
-from inspect import getfullargspec as get_arg_spec
 
 logger = get_logger(__name__)
 
@@ -61,6 +57,8 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
+    from azure.common import AzureException
+    from azure.core.exceptions import AzureError
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):
@@ -477,6 +475,7 @@ def is_track2(client_class):
     """ IS this client a autorestv3/track2 one?.
     Could be refined later if necessary.
     """
+    from inspect import getfullargspec as get_arg_spec
     args = get_arg_spec(client_class.__init__).args
     return "credential" in args
 
