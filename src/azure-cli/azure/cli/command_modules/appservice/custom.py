@@ -1172,7 +1172,6 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
     if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
         update_app_settings(cmd, resource_group_name, name, settings, slot)
     settings = get_app_settings(cmd, resource_group_name, name, slot)
-    
     if docker_custom_image_name is not None:
         _add_fx_version(cmd, resource_group_name, name, docker_custom_image_name, slot)
 
