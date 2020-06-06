@@ -1950,6 +1950,55 @@ def show_diagnostic_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_diagnostic_logs_configuration', slot)
 
 
+def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    if deployment_id:
+        deployment_log_url = '{}/api/deployments/{}'.format(scm_url, deployment_id)
+    else:
+        deployment_log_url = '{}/api/deployments/'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+
+    import urllib3
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    import requests
+    response = requests.get(deployment_log_url, headers=headers, timeout=3)
+
+    if response.status_code != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            scm_url, response.status_code, response.reason))
+
+    if deployment_id:
+        return response.json() or {}
+
+    sortedLogs = sorted(
+        response.json(),
+        key=lambda x: x['start_time'],
+        reverse=True
+    )
+    if sortedLogs:
+        return sortedLogs[0]
+    return {}
+
+
+def list_deployment_logs(cmd, resource_group, name, slot=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    deployment_log_url = '{}/api/deployments/'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+
+    import urllib3
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    import requests
+    response = requests.get(deployment_log_url, headers=headers, timeout=3)
+
+    if response.status_code != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            scm_url, response.status_code, response.reason))
+
+    return response.json() or []
+
+
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory(cmd.cli_ctx)
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
