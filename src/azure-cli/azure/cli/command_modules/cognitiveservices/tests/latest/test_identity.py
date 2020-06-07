@@ -30,7 +30,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
                          self.check('properties.provisioningState', 'Creating')])
 
         for i in range(10):
-            time.sleep(0.1) # when generating recording, use a large value such as 15
+            time.sleep(0.1)  # when generating recording, use a large value such as 15
             account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
             if 'Creating' != account['properties']['provisioningState']:
                 break
@@ -60,7 +60,7 @@ class CognitiveServicesByoxTests(ScenarioTest):
                          self.check('properties.provisioningState', 'Creating')])
 
         for i in range(10):
-            time.sleep(15) # when generating recording, use a large value such as 15
+            time.sleep(15)  # when generating recording, use a large value such as 15
             account = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
             if 'Creating' != account['properties']['provisioningState']:
                 break
