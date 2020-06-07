@@ -30,12 +30,13 @@ def cli_main(cli, args):
     return cli.invoke(args)
 
 try:
-    if sys.argv[1] == 'cloud' and sys.argv[2] == 'import' and sys.argv[3] == '--endpoint':
-        url = sys.argv[4]
+    if sys.argv[1] == 'cloud' and sys.argv[2] == 'import':
         import os
-        os.environ["ARM_CLOUD_METADATA_URL"] = url
         from azure.cli.core.cloud import CLOUD_ENDPOINTS_FILE
         os.remove(CLOUD_ENDPOINTS_FILE)
+        if sys.argv[3] == '--endpoint':
+            url = sys.argv[4]
+            os.environ["ARM_CLOUD_METADATA_URL"] = url
 except Exception:  # pylint: disable=broad-except
     pass
 

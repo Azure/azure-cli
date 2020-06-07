@@ -77,7 +77,7 @@ class CloudCommandsLoader(AzCommandsLoader):
             c.argument('cloud_name', completer=get_custom_cloud_name_completion_list)
 
         with self.argument_context('cloud import') as c:
-            c.argument('endpoint', help='URL for cloud endpoint metadata',)
+            c.argument('endpoint', help='URL for cloud endpoint metadata. If not provided, will use environment variable ARM_CLOUD_METADATA_URL or discover.azure.com',)
 
 
 COMMAND_LOADER_CLS = CloudCommandsLoader

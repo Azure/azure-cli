@@ -150,6 +150,6 @@ def list_profiles(cmd, cloud_name=None, show_all=False):
     return list(API_PROFILES)
 
 
-def import_cloud_endpoints(cmd, endpoint):
+def import_cloud_endpoints(cmd, endpoint=None):
     # special handling for this method in src/azure_cli/azure/cli/__main__.py
     return get_clouds(cmd.cli_ctx)
