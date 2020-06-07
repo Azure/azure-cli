@@ -33,10 +33,13 @@ try:
     if sys.argv[1] == 'cloud' and sys.argv[2] == 'import':
         import os
         from azure.cli.core.cloud import CLOUD_ENDPOINTS_FILE
-        os.remove(CLOUD_ENDPOINTS_FILE)
-        if sys.argv[3] == '--endpoint':
-            url = sys.argv[4]
-            os.environ["ARM_CLOUD_METADATA_URL"] = url
+        from azure.cli.core._session import CLOUD_ENDPOINTS
+        CLOUD_ENDPOINTS.load(CLOUD_ENDPOINTS_FILE)
+        CLOUD_ENDPOINTS['clouds'] = {}
+        if len(sys.argv) == 3:
+            CLOUD_ENDPOINTS['metadata_url'] = ''
+        elif sys.argv[3] == '--endpoint':
+            CLOUD_ENDPOINTS['metadata_url'] = sys.argv[4]
 except Exception:  # pylint: disable=broad-except
     pass
 

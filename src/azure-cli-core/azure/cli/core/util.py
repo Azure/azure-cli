@@ -174,7 +174,6 @@ def get_cached_latest_versions(versions=None):
     if not versions:
         versions = _get_local_versions()
 
-    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
     if VERSIONS[_VERSION_UPDATE_TIME]:
         version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')
         if datetime.datetime.now() < version_update_time + datetime.timedelta(days=1):
@@ -284,7 +283,6 @@ def show_updates_available(new_line_before=False, new_line_after=False):
     import datetime
     from azure.cli.core._environment import get_config_dir
 
-    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
     if VERSIONS[_VERSION_CHECK_TIME]:
         version_check_time = datetime.datetime.strptime(VERSIONS[_VERSION_CHECK_TIME], '%Y-%m-%d %H:%M:%S.%f')
         if datetime.datetime.now() < version_check_time + datetime.timedelta(days=7):

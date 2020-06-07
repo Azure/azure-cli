@@ -22,6 +22,8 @@ CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 
 CLOUD_ENDPOINTS_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'cloudEndpoints.json')
 
+CLOUD_ENDPOINTS_DNS_ADDRESS = 'https://discover.azure.com'
+
 # Add names of clouds that don't allow telemetry data collection here such as JEDI.
 CLOUDS_FORBIDDING_TELEMETRY = []
 
@@ -408,17 +410,27 @@ def get_known_clouds():
         return KNOWN_CLOUDS
     # read from file
     from azure.cli.core._session import CLOUD_ENDPOINTS
-    CLOUD_ENDPOINTS.load(CLOUD_ENDPOINTS_FILE)
     if CLOUD_ENDPOINTS['clouds']:
         KNOWN_CLOUDS = [Cloud.fromJSON(c) for c in CLOUD_ENDPOINTS['clouds']]
         return KNOWN_CLOUDS
-
+    url = ''
+    if CLOUD_ENDPOINTS['metadata_url']:
+        try:
+            arm_cloud_dict = json.loads(urlretrieve(CLOUD_ENDPOINTS['metadata_url']))
+            cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
+            KNOWN_CLOUDS = list(cli_cloud_dict.values())
+            url = CLOUD_ENDPOINTS['metadata_url']
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("Failed to load cloud metadata from the URL: %s.", CLOUD_ENDPOINTS['metadata_url'])
+            CLOUD_ENDPOINTS['metadata_url'] = ''
+            raise ex
     # get metadata url from environment variable
-    if 'ARM_CLOUD_METADATA_URL' in os.environ:
+    elif 'ARM_CLOUD_METADATA_URL' in os.environ:
         try:
             arm_cloud_dict = json.loads(urlretrieve(os.getenv('ARM_CLOUD_METADATA_URL')))
             cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
             KNOWN_CLOUDS = list(cli_cloud_dict.values())
+            url = os.getenv('ARM_CLOUD_METADATA_URL')
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("Failed to load cloud metadata from the URL: %s, please check your 'ARM_CLOUD_METADATA_URL' environment variable or '--endpoint' value if you're running 'az cloud import' command.",
                            os.getenv('ARM_CLOUD_METADATA_URL'))
@@ -426,17 +438,19 @@ def get_known_clouds():
     else:
         try:
             # resolve metadata url from DNS
-            arm_cloud_dict = json.loads(urlretrieve(os.getenv('https://discover.azure.com')))
+            arm_cloud_dict = json.loads(urlretrieve(CLOUD_ENDPOINTS_DNS_ADDRESS))
             cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
             KNOWN_CLOUDS = list(cli_cloud_dict.values())
+            url = CLOUD_ENDPOINTS_DNS_ADDRESS
         except Exception:  # pylint: disable=broad-except
-            logger.info('Failed to load cloud metadata from discover.azure.com')  # TODO change to warning when DNS is ready
+            logger.info('Failed to load cloud metadata from %s', CLOUD_ENDPOINTS_DNS_ADDRESS)  # TODO change to warning when DNS is ready
             from azure.cli.core.util import check_connectivity
             if not check_connectivity():
                 raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import --endpoint <metadata url>' first.")
             KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
     CLOUD_ENDPOINTS['clouds'] = [c.toJSON() for c in KNOWN_CLOUDS]
+    CLOUD_ENDPOINTS['metadata_url'] = url
     return KNOWN_CLOUDS
 
 
