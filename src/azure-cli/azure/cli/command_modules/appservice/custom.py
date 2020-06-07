@@ -723,6 +723,7 @@ def get_auth_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_auth_settings', slot)
 
 def is_auth_runtime_version_valid(runtime_version=None):
+    
     if runtime_version is None:
         return True
     if runtime_version.startswith("~") and len(runtime_version) > 1:
@@ -739,6 +740,7 @@ def is_auth_runtime_version_valid(runtime_version=None):
             int(version)
         except ValueError:
             return False
+            
     return True
 
 def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
@@ -758,7 +760,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.allow_anonymous
     elif action:
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.redirect_to_login_page
-        auth_settings.default_provider = AUTH_TYPES[action]    
+        auth_settings.default_provider = AUTH_TYPES[action]
     # validate runtime version
     if not is_auth_runtime_version_valid(runtime_version):
         raise CLIError('Usage Error: --runtime-version set to invalid value')
