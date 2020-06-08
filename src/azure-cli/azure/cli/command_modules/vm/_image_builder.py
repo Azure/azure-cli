@@ -481,6 +481,7 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
     return cached_put(cmd, client.virtual_machine_image_templates.create_or_update, parameters=image_template,
                       resource_group_name=resource_group_name, image_template_name=image_template_name)
 
+
 def list_image_templates(client, resource_group_name=None):
     if resource_group_name:
         return client.virtual_machine_image_templates.list_by_resource_group(resource_group_name)
