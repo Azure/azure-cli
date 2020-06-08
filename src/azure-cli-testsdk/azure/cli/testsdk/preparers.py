@@ -284,6 +284,7 @@ class VirtualNetworkPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if self.dev_setting_name:
+            self.test_class_instance.kwargs[self.key] = name
             return {self.parameter_name: self.dev_setting_name, }
 
         tags = {'product': 'azurecli', 'cause': 'automation',
@@ -334,6 +335,7 @@ class VnetNicPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
 
     def create_resource(self, name, **kwargs):
         if self.dev_setting_name:
+            self.test_class_instance.kwargs[self.key] = name
             return {self.parameter_name: self.dev_setting_name, }
 
         template = 'az network nic create --resource-group {} --name {} --vnet-name {} --subnet default '
