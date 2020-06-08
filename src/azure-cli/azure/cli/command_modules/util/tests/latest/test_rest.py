@@ -99,7 +99,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         # Get application
         # https://docs.microsoft.com/en-us/graph/api/application-get?view=graph-rest-1.0&tabs=http
-        self.cmd('az rest --method GET --uri https://graph.microsoft.com/v1.0/applications/{app_object_id}',
+        self.cmd('az rest --method GET --url https://graph.microsoft.com/v1.0/applications/{app_object_id}',
                  checks=[self.check('displayName', '{display_name}')])
 
         # Update application
@@ -108,7 +108,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         # application: addPassword
         # https://docs.microsoft.com/en-us/graph/api/application-addpassword?view=graph-rest-1.0&tabs=http
-        self.cmd('az rest --method POST --uri https://graph.microsoft.com/v1.0/applications/{app_object_id}/addPassword '
+        self.cmd('az rest --method POST --url https://graph.microsoft.com/v1.0/applications/{app_object_id}/addPassword '
                  '--body \'{{"passwordCredential": {{"displayName": "Password friendly name"}}}}\'',
                  checks=[self.check('displayName', "Password friendly name")])
 
@@ -119,7 +119,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         # Get servicePrincipal
         # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-get?view=graph-rest-1.0&tabs=http
-        self.cmd('az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/{sp_object_id}',
+        self.cmd('az rest --method GET --url https://graph.microsoft.com/v1.0/servicePrincipals/{sp_object_id}',
                  checks=[self.check('appId', '{app_id}'),
                          self.check('id', '{sp_object_id}')])
 
@@ -130,7 +130,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         # servicePrincipal: addPassword
         # https://docs.microsoft.com/en-us/graph/api/serviceprincipal-addpassword?view=graph-rest-1.0&tabs=http
-        self.cmd('az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/{sp_object_id}/addPassword '
+        self.cmd('az rest --method POST --url https://graph.microsoft.com/v1.0/servicePrincipals/{sp_object_id}/addPassword '
                  '--body \'{{"passwordCredential": {{"displayName": "Password friendly name"}}}}\'',
                  checks=[self.check('displayName', "Password friendly name")])
 
