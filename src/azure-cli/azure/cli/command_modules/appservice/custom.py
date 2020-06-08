@@ -2870,7 +2870,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
 
         if res_dict.get('status', 0) == 3:
             _configure_default_logging(cmd, rg_name, name)
-            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
+            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log deployment show
                            -n {} -g {}""".format(res_dict, name, rg_name))
         if res_dict.get('status', 0) == 4:
             break
