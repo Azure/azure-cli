@@ -143,7 +143,7 @@ class AzCliCommandParser(CLICommandParser):
                 _parser=command_parser)
 
     def validation_error(self, message):
-        telemetry.set_user_fault('validation error')
+        telemetry.set_user_fault('validation error: {}'.format(message))
         return super(AzCliCommandParser, self).error(message)
 
     def error(self, message):

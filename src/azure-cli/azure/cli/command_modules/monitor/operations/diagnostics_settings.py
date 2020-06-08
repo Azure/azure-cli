@@ -12,10 +12,10 @@ def create_diagnostics_settings(client, name, resource_uri,
                                 event_hub_rule=None,
                                 storage_account=None,
                                 workspace=None,
-                                export_to_specific_resource=None):
+                                export_to_resource_specific=None):
     from azure.mgmt.monitor.models import DiagnosticSettingsResource
     from knack.util import CLIError
-    if export_to_specific_resource and workspace is None:
+    if export_to_resource_specific and workspace is None:
         raise CLIError('usage error: --workspace and --export-to-specific-resource')
     parameters = DiagnosticSettingsResource(storage_account_id=storage_account,
                                             workspace_id=workspace,
@@ -23,6 +23,6 @@ def create_diagnostics_settings(client, name, resource_uri,
                                             event_hub_authorization_rule_id=event_hub_rule,
                                             metrics=metrics,
                                             logs=logs,
-                                            log_analytics_destination_type='Dedicated' if export_to_specific_resource else None)
+                                            log_analytics_destination_type='Dedicated' if export_to_resource_specific else None)
 
     return client.create_or_update(resource_uri=resource_uri, parameters=parameters, name=name)

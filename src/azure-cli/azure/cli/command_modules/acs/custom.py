@@ -70,17 +70,15 @@ from azure.mgmt.containerservice.v2020_03_01.models import AgentPool
 from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterSKU
 from azure.mgmt.containerservice.v2020_03_01.models import ManagedClusterWindowsProfile
 
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftManagedClusterMasterPoolProfile
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftAgentPoolProfileRole
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftManagedClusterIdentityProvider
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftManagedClusterAADIdentityProvider
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftManagedCluster
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftRouterProfile
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftManagedClusterAuthProfile
-from azure.mgmt.containerservice.v2019_10_27_preview.models import NetworkProfile
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftManagedClusterMonitorProfile
-from azure.mgmt.containerservice.v2019_10_27_preview.models import OpenShiftAPIProperties
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftAgentPoolProfileRole
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterIdentityProvider
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAADIdentityProvider
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedCluster
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftRouterProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterAuthProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import NetworkProfile
+from azure.mgmt.containerservice.v2019_09_30_preview.models import OpenShiftManagedClusterMonitorProfile
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_resource_groups
@@ -1649,7 +1647,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                windows_admin_username=None,
                windows_admin_password=None,
                kubernetes_version='',
-               node_vm_size="Standard_D2s_v3",
+               node_vm_size="Standard_DS2_v2",
                node_osdisk_size=0,
                node_count=3,
                nodepool_name="nodepool1",
@@ -1777,11 +1775,20 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     if (vnet_subnet_id and not skip_subnet_role_assignment and
             not subnet_role_assignment_exists(cmd.cli_ctx, vnet_subnet_id)):
-        scope = vnet_subnet_id
-        if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
-                                    service_principal_profile.client_id, scope=scope):
-            logger.warning('Could not create a role assignment for subnet. '
-                           'Are you an Owner on this subscription?')
+        # if service_principal_profile is None, then this cluster is an MSI cluster,
+        # and the service principal does not exist. For now, We just tell user to grant the
+        # permission after the cluster is created to keep consistent with portal experience.
+        if service_principal_profile is None:
+            logger.warning('The cluster is an MSI cluster, please manually grant '
+                           'Network Contributor role to the system assigned identity '
+                           'after the cluster is created, see '
+                           'https://docs.microsoft.com/en-us/azure/aks/use-managed-identity')
+        else:
+            scope = vnet_subnet_id
+            if not _add_role_assignment(cmd.cli_ctx, 'Network Contributor',
+                                        service_principal_profile.client_id, scope=scope):
+                logger.warning('Could not create a role assignment for subnet. '
+                               'Are you an Owner on this subscription?')
 
     load_balancer_profile = create_load_balancer_profile(
         load_balancer_managed_outbound_ip_count,
@@ -2222,7 +2229,11 @@ def aks_update(cmd, client, resource_group_name, name,
 
 # pylint: disable=unused-argument,inconsistent-return-statements
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, control_plane_only=False,
-                no_wait=False, **kwargs):
+                no_wait=False, yes=False):
+    msg = 'Kubernetes may be unavailable during cluster upgrades.\n Are you sure you want to perform this operation?'
+    if not yes and not prompt_y_n(msg, default="n"):
+        return None
+
     instance = client.get(resource_group_name, name)
 
     if instance.kubernetes_version == kubernetes_version:
@@ -2248,20 +2259,20 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, cont
         if control_plane_only:
             msg = ("Legacy clusters do not support control plane only upgrade. All node pools will be "
                    "upgraded to {} as well. Continue?").format(instance.kubernetes_version)
-            if not prompt_y_n(msg, default="n"):
+            if not yes and not prompt_y_n(msg, default="n"):
                 return None
         upgrade_all = True
     else:
         if not control_plane_only:
             msg = ("Since control-plane-only argument is not specified, this will upgrade the control plane "
                    "AND all nodepools to version {}. Continue?").format(instance.kubernetes_version)
-            if not prompt_y_n(msg, default="n"):
+            if not yes and not prompt_y_n(msg, default="n"):
                 return None
             upgrade_all = True
         else:
             msg = ("Since control-plane-only argument is specified, this will upgrade only the control plane to {}. "
                    "Node pool will not change. Continue?").format(instance.kubernetes_version)
-            if not prompt_y_n(msg, default="n"):
+            if not yes and not prompt_y_n(msg, default="n"):
                 return None
 
     if upgrade_all:
@@ -2835,7 +2846,10 @@ def aks_agentpool_add(cmd, client, resource_group_name, cluster_name, nodepool_n
                 raise CLIError('Taint does not match allowed values. Expect value such as "special=true:NoSchedule".')
 
     if node_vm_size is None:
-        node_vm_size = "Standard_D2s_v3"
+        if os_type.lower() == "windows":
+            node_vm_size = "Standard_D2s_v3"
+        else:
+            node_vm_size = "Standard_DS2_v2"
 
     agent_pool = AgentPool(
         name=nodepool_name,
@@ -3235,10 +3249,18 @@ def _remove_osa_nulls(managed_clusters):
     by the server, but get recreated by the CLI's own "to_dict" serialization.
     """
     attrs = ['tags', 'plan', 'type', 'id']
+    ap_master_attrs = ['name', 'os_type']
+    net_attrs = ['peer_vnet_id']
     for managed_cluster in managed_clusters:
         for attr in attrs:
             if hasattr(managed_cluster, attr) and getattr(managed_cluster, attr) is None:
                 delattr(managed_cluster, attr)
+        for attr in ap_master_attrs:
+            if getattr(managed_cluster.master_pool_profile, attr, None) is None:
+                delattr(managed_cluster.master_pool_profile, attr)
+        for attr in net_attrs:
+            if getattr(managed_cluster.network_profile, attr, None) is None:
+                delattr(managed_cluster.network_profile, attr)
     return managed_clusters
 
 
@@ -3303,13 +3325,7 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
                      tags=None,
                      no_wait=False,
                      workspace_id=None,
-                     customer_admin_group_id=None,
-                     management_subnet_cidr=None,
-                     private_cluster=None):
-
-    if vnet_peer is not None:
-        raise CLIError('Vnet peering is no longer supported during cluster creation.'
-                       'Instead it is possible to edit vnet properties after cluster creation')
+                     customer_admin_group_id=None):
 
     if location is None:
         location = _get_rg_location(cmd.cli_ctx, resource_group_name)
@@ -3321,13 +3337,6 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         os_type="Linux",
         role=OpenShiftAgentPoolProfileRole.compute,
         subnet_cidr=subnet_prefix
-    )
-
-    if bool(private_cluster) != bool(management_subnet_cidr is not None):
-        raise CLIError('Both --private-cluster and --management-subnet-cidr need to be supplied or neither.')
-
-    api_properties = OpenShiftAPIProperties(
-        private_api_server=bool(private_cluster)
     )
 
     agent_infra_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
@@ -3342,15 +3351,13 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
     agent_pool_profiles.append(agent_node_pool_profile)
     agent_pool_profiles.append(agent_infra_pool_profile)
 
-    agent_master_pool_profile = OpenShiftManagedClusterMasterPoolProfile(
+    agent_master_pool_profile = OpenShiftManagedClusterAgentPoolProfile(
         name='master',  # Must be 12 chars or less before ACS RP adds to it
         count=int(3),
         vm_size="Standard_D4s_v3",
         os_type="Linux",
-        subnet_cidr=subnet_prefix,
-        api_properties=api_properties
+        subnet_cidr=subnet_prefix
     )
-
     identity_providers = []
 
     create_aad = False
@@ -3379,13 +3386,22 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
 
     default_router_profile = OpenShiftRouterProfile(name='default')
 
+    if vnet_peer is not None:
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        if not is_valid_resource_id(vnet_peer):
+            vnet_peer = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network', type='virtualNetwork',
+                name=vnet_peer
+            )
     if workspace_id is not None:
         workspace_id = _format_workspace_id(workspace_id)
         monitor_profile = OpenShiftManagedClusterMonitorProfile(enabled=True, workspace_resource_id=workspace_id)  # pylint: disable=line-too-long
     else:
         monitor_profile = None
 
-    network_profile = NetworkProfile(vnet_cidr=vnet_prefix, management_subnet_cidr=management_subnet_cidr)
+    network_profile = NetworkProfile(vnet_cidr=vnet_prefix, peer_vnet_id=vnet_peer)
     osamc = OpenShiftManagedCluster(
         location=location, tags=tags,
         open_shift_version="v3.11",
@@ -3413,14 +3429,6 @@ def openshift_create(cmd, client, resource_group_name, name,  # pylint: disable=
         if "No registered resource provider found for location" in ex.message:
             raise CLIError('Please make sure your subscription is whitelisted to use this service. https://aka.ms/openshift/managed')  # pylint: disable=line-too-long
         raise ex
-
-
-def openshift_update(cmd, client, resource_group_name, name, refresh_cluster=None, no_wait=False):
-    instance = client.get(resource_group_name, name)
-    if refresh_cluster:
-        instance.refresh_cluster = True
-
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 def openshift_show(cmd, client, resource_group_name, name):

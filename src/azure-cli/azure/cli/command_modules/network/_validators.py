@@ -1053,6 +1053,7 @@ def process_vnet_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
     validate_ddos_name_or_id(cmd, namespace)
     validate_tags(namespace)
+    get_nsg_validator()(cmd, namespace)
 
     if namespace.subnet_prefix and not namespace.subnet_name:
         if cmd.supported_api_version(min_api='2018-08-01'):
