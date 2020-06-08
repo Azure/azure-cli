@@ -712,8 +712,10 @@ def get_default_cli():
 def invalidate_command_index():
     """Invalidate the command index.
 
-    This function must be called when installing, updating or removing extensions. Otherwise, if an extension overrides
-    a built-in command, the command will be loaded according to the stale command index.
+    This function must be called when installing, updating extensions. Otherwise, if an extension overrides
+    a built-in command, the command will be loaded from the command module as per the stale command index.
+
+    This function can be called when removing extensions and updating cloud profiles for double insurance.
     """
     from azure.cli.core._session import INDEX
     INDEX[_COMMAND_INDEX] = {}

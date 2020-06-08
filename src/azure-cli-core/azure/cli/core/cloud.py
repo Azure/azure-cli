@@ -537,6 +537,8 @@ def update_cloud(cli_ctx, cloud):
     if not _get_cloud(cli_ctx, cloud.name):
         raise CloudNotRegisteredException(cloud.name)
     _save_cloud(cloud, overwrite=True)
+    from azure.cli.core import invalidate_command_index
+    invalidate_command_index()
 
 
 def remove_cloud(cli_ctx, cloud_name):
