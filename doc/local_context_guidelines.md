@@ -12,7 +12,7 @@ There are 3 properties of local context attribute.
 
 - **scopes**
 
-`scopes` is an array of string. It defines where this local context value can be referenced. The value could be a command group or a command, for example, `['vm', 'network']`. If one argument can be referenced in all the commands, you can define it as `['all']`. `scopes` is meaningful only when `SET` is in actions.
+`scopes` is an array of strings. It defines where this local context value can be referenced. The value could be a command group or a command, for example, `['vm', 'network']`. If one argument can be referenced in all the commands, you can define it as `['all']`. `scopes` is meaningful only when `SET` is in actions.
     
 - **actions**
 
@@ -34,7 +34,7 @@ Used for saving value to local context.
 
 ## Parameters which support `all` scope by default
 
-We define local context attribute for some command parameters by default. For commands which use them as argument name in the function signature will support local context by default.
+We define local context attribute for some command parameters by default. Commands whose function signature has the same argument name will support local context by default.
 
 All these parameters are listed here:
 
@@ -57,7 +57,7 @@ All these parameters are listed here:
     local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.GET])
 ```
 
-For example, below is the definition of custom function for `az network vnet create`:
+For example, below is function signature for `az network vnet create`:
 ```python
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
@@ -80,7 +80,7 @@ az group create --name myResourceGroup --location westus
 az appservice plan create -g myResourceGroup --name myPlan
 az webapp create -g myResourceGroup --plan myPlan --name myWebapp
 ```
-The user has to input resource group name 3 times and plan name 2 times for this scenario. To enable local context feature, we need to define local context attribute as below:
+The user has to input resource group name 3 times and plan name 2 times for this scenario. To reduce these duplicate type in, we need to enable local context feature for these parameters as below:
 
 - `az group create`: *set resource group name*
 > azure-cli/azure/cli/command_modules/resource/_params.py
@@ -131,8 +131,3 @@ with self.argument_context('webapp create') as c:
     c.argument('plan',
                 local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
 ```
-
-
-
-
-
