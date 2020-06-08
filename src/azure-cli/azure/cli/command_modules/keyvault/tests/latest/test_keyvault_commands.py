@@ -358,7 +358,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         if os.path.isfile(key_file):
             os.remove(key_file)
 
-        # import PEM
+        # import PEM from file
         self.kwargs.update({
             'key_enc_file': os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'),
             'key_enc_password': 'password',
@@ -366,6 +366,19 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         })
         self.cmd('keyvault key import --vault-name {kv} -n import-key-plain --pem-file "{key_plain_file}" -p software')
         self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password} -p hsm')
+
+        # import PEM from string
+        with open(os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'), 'rb') as f:
+            key_enc_string = f.read().decode('UTF-8')
+        with open(os.path.join(TEST_DIR, 'mydomain.test.pem'), 'rb') as f:
+            key_plain_string = f.read().decode('UTF-8')
+        self.kwargs.update({
+            'key_enc_string': key_enc_string,
+            'key_enc_password': 'password',
+            'key_plain_string': key_plain_string
+        })
+        self.cmd("keyvault key import --vault-name {kv} -n import-key-plain --pem-string '{key_plain_string}' -p software")
+        self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-string "{key_enc_string}" --pem-password {key_enc_password} -p hsm')
 
         # create ec keys
         self.cmd('keyvault key create --vault-name {kv} -n eckey1 --kty EC',
