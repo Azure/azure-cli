@@ -3,17 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import timeit
-# Log the start time
-start_time = timeit.default_timer()
-
 import sys
+import timeit
 import uuid
+
+import azure.cli.core.telemetry as telemetry
+from azure.cli.core import get_default_cli
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
-from azure.cli.core import get_default_cli
-import azure.cli.core.telemetry as telemetry
 
+# Log the start time
+# TODO: Disable E402 "Module level import not at top of file" so that imports can also be timed
+start_time = timeit.default_timer()
 
 # A workaround for https://bugs.python.org/issue32502 (https://github.com/Azure/azure-cli/issues/5184)
 # If uuid1 raises ValueError, use uuid4 instead.
