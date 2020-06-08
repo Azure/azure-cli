@@ -1054,7 +1054,7 @@ def export_group_as_template(
         export_options.append('SkipAllParameterization')
 
     resources = []
-    if resource_ids is None or resource_ids == "*":
+    if resource_ids is None or resource_ids[0] == "*":
         resources = ["*"]
     else:
         for i in resource_ids:
