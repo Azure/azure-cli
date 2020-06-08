@@ -1298,6 +1298,45 @@ type: command
 short-summary: Delete a saved search for a given workspace.
 """
 
+helps['monitor log-analytics workspace data-export'] = """
+type: group
+short-summary: Manage data export ruls for log analytics workspace.
+"""
+
+helps['monitor log-analytics workspace data-export create'] = """
+type: command
+short-summary: Create a data export rule for a given workspace.
+examples:
+  - name: Create a data export rule for a given workspace.
+    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --type StorageAccount --enable -t {table_name}
+  - name: Create a data export rule for a given workspace with all tables.
+    text: az monitor log-analytics workspace data-export create -g MyRG --workspace-name MyWS -n MyDataExport --destination {sa_id_1} --type StorageAccount --enable --all
+
+"""
+
+helps['monitor log-analytics workspace data-export update'] = """
+type: command
+short-summary: Update a data export rule for a given workspace.
+examples:
+  - name: Update a data export rule for a given workspace.
+    text: az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination {namespace_id} --type EventHub --all --event-hub-name {eventhubname} --enable false
+"""
+
+helps['monitor log-analytics workspace data-export list'] = """
+type: command
+short-summary: List all data export ruleses for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export show'] = """
+type: command
+short-summary: Show a data export rule for a given workspace.
+"""
+
+helps['monitor log-analytics workspace data-export delete'] = """
+type: command
+short-summary: Delete a data export rule for a given workspace.
+"""
+
 helps['monitor log-profiles'] = """
 type: group
 short-summary: Manage log profiles.
