@@ -2,17 +2,17 @@ The document provides instructions and guidelines on how to board local context 
 
 ## Local context attribute
 
-Local context attribute is an abstraction of the definition for local context. We use this class to define how the argument support local context.
+Local context attribute is an abstraction of the definition for local context. We use this class to define how the argument supports local context.
 
 There are 3 properties of local context attribute.
 
 - **name**
 
-`name` is the argument name used in local context. Usually just use the name which defined in the function signature, for example `resource_group_name`.
+`name` is the argument name used in local context. Usually we just use the name which defined in the function signature, for example, `resource_group_name`.
 
 - **scopes**
 
-`scopes` is an array of string. It defines where can this local context value been referenced. The value could be a command group or a command, for example `['vm', 'network']`. If one argument can be referenced in all the commands, you can define it as `['all']`. `scopes` is meaningful only when `SET` is in actions.
+`scopes` is an array of string. It defines where this local context value can be referenced. The value could be a command group or a command, for example, `['vm', 'network']`. If one argument can be referenced in all the commands, you can define it as `['all']`. `scopes` is meaningful only when `SET` is in actions.
     
 - **actions**
 
@@ -21,11 +21,11 @@ There are 3 properties of local context attribute.
 
 ## Local context action
 
-Local context action is defined as an enum. The available values are `GET` and `SET`.
+Local context action is defined as an enum type. The available values are `GET` and `SET`.
 
 - **GET**
 
-Used for retrieving value local context.
+Used for retrieving value from local context.
 
 - **SET**
 
@@ -36,7 +36,7 @@ Used for saving value to local context.
 
 We define local context attribute for some command parameters by default. For commands which use them as argument name in the function signature will support local context by default.
 
-All these parameters are list here:
+All these parameters are listed here:
 
 - *resource_group_name*
 ```python
@@ -74,7 +74,7 @@ As `resource_group_name` is defined in the signature, it will automatically supp
 - Define `SET` action only in `create` command.
 
 ## Examples
-In order to create a webapp, user need to prepare an appservice plan first. Previously the user need to run below commands to complete this scenario:
+In order to create a webapp, a user needs to prepare an appservice plan first. Previously the user needed to run below commands to complete this scenario:
 ```bash
 az group create --name myResourceGroup --location westus
 az appservice plan create -g myResourceGroup --name myPlan
@@ -131,7 +131,6 @@ with self.argument_context('webapp create') as c:
     c.argument('plan',
                 local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
 ```
-
 
 
 
