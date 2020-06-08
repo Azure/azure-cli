@@ -167,8 +167,8 @@ class TestCommandRegistration(unittest.TestCase):
             def load_command_table(self, args):
                 super(TestCommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
-                    g.command('world', 'sample_vm_get')
-                    g.command('do-not-override-me', 'sample_vm_get')
+                    g.command('mod-only', 'sample_vm_get')
+                    g.command('overridden', 'sample_vm_get')
                 self.__module__ = "azure.cli.command_modules.hello"
                 return self.command_table
 
@@ -187,7 +187,7 @@ class TestCommandRegistration(unittest.TestCase):
             def load_command_table(self, args):
                 super(ExtCommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
-                    g.command('noodle', 'sample_vm_get')
+                    g.command('ext-only', 'sample_vm_get')
                 self.__module__ = "azext_hello1"
                 return self.command_table
 
@@ -197,7 +197,7 @@ class TestCommandRegistration(unittest.TestCase):
             def load_command_table(self, args):
                 super(Ext2CommandsLoader, self).load_command_table(args)
                 with self.command_group('hello', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
-                    g.command('world', 'sample_vm_get')
+                    g.command('overridden', 'sample_vm_get')
                 self.__module__ = "azext_hello2"
                 return self.command_table
 
@@ -227,7 +227,7 @@ class TestCommandRegistration(unittest.TestCase):
 
         from azure.cli.core.commands import _load_command_loader
         from azure.cli.core._session import INDEX
-        from azure.cli.core import _COMMAND_INDEX
+        from azure.cli.core import _COMMAND_INDEX, invalidate_command_index
 
         cli = DummyCli()
         # Clear the command index
@@ -237,52 +237,86 @@ class TestCommandRegistration(unittest.TestCase):
         cli.loader = main_loader
 
         cmd_tbl = cli.loader.load_command_table(None)
-        cmd1 = cmd_tbl['hello do-not-override-me']
-        ext1 = cmd_tbl['hello noodle']
-        ext2 = cmd_tbl['hello world']
+        hello_mod_only_cmd = cmd_tbl['hello mod-only']
+        hello_ext_only_cmd = cmd_tbl['hello ext-only']
+        hello_overridden_cmd = cmd_tbl['hello overridden']
 
-        self.assertEquals(cmd1.command_source, 'hello')
-        self.assertEquals(cmd1.loader.__module__, 'azure.cli.command_modules.hello')
+        self.assertEquals(hello_mod_only_cmd.command_source, 'hello')
+        self.assertEquals(hello_mod_only_cmd.loader.__module__, 'azure.cli.command_modules.hello')
 
-        self.assertTrue(isinstance(ext1.command_source, ExtensionCommandSource))
-        self.assertFalse(ext1.command_source.overrides_command)
+        self.assertTrue(isinstance(hello_ext_only_cmd.command_source, ExtensionCommandSource))
+        self.assertFalse(hello_ext_only_cmd.command_source.overrides_command)
 
-        self.assertTrue(isinstance(ext2.command_source, ExtensionCommandSource))
-        self.assertTrue(ext2.command_source.overrides_command)
+        self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
+        self.assertTrue(hello_overridden_cmd.command_source.overrides_command)
 
-        expected_command_index = {'hello': ['azext_hello2', 'azure.cli.command_modules.hello', 'azext_hello1'],
+        expected_command_index = {'hello': ['azure.cli.command_modules.hello', 'azext_hello2', 'azext_hello1'],
                                   'extra': ['azure.cli.command_modules.extra']}
 
         # Test command index is built for None args
         self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
 
-        # Test command index is built
+        # Test command index is built when `args` is provided
         INDEX[_COMMAND_INDEX] = {}
         cli.loader.command_table = {}
         cli.loader.command_group_table = {}
-        cmd_tbl = cli.loader.load_command_table(["hello"])
+        cmd_tbl = cli.loader.load_command_table(["hello", "mod-only"])
         self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
 
-        # Test refresh command index if no module found
+        # Test rebuild command index if no module found
         INDEX[_COMMAND_INDEX] = {"network": ["azure.cli.command_modules.network"]}
         cli.loader.command_table = {}
         cli.loader.command_group_table = {}
-        cli.loader.load_command_table(["hello"])
+        cli.loader.load_command_table(["hello", "mod-only"])
         self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
 
-        # Test refresh command index if modules are found but outdated
-        INDEX[_COMMAND_INDEX] = {"hello": ["azure.cli.command_modules.hello_outdated"]}
+        # Test rebuild command index if modules are found but outdated
+        INDEX[_COMMAND_INDEX] = {"hello": ["azure.cli.command_modules.extra"]}
         cli.loader.command_table = {}
         cli.loader.command_group_table = {}
-        cli.loader.load_command_table(["hello"])
+        cli.loader.load_command_table(["hello", "mod-only"])
         self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
 
-        # Test extra is not loaded
+        # Test irrelevant commands are not loaded
         INDEX[_COMMAND_INDEX] = expected_command_index
         cli.loader.command_table = {}
         cli.loader.command_group_table = {}
-        cmd_tbl = cli.loader.load_command_table(["hello"])
-        self.assertEquals(['hello world', 'hello do-not-override-me', 'hello noodle'], list(cmd_tbl.keys()))
+        cmd_tbl = cli.loader.load_command_table(["hello", "mod-only"])
+        self.assertEquals(['hello mod-only', 'hello overridden', 'hello ext-only'], list(cmd_tbl.keys()))
+
+        # Full scenario test: Installing an extension that overrides an existing command
+        # With the old command index, `hello overridden` is loaded from the build-in module
+        outdated_command_index = {'hello': ['azure.cli.command_modules.hello', 'azext_hello1'],
+                                  'extra': ['azure.cli.command_modules.extra']}
+        INDEX[_COMMAND_INDEX] = outdated_command_index
+        cli.loader.command_table = {}
+        cli.loader.command_group_table = {}
+        cmd_tbl = cli.loader.load_command_table(["hello", "overridden"])
+        hello_overridden_cmd = cmd_tbl['hello overridden']
+        self.assertEquals(hello_overridden_cmd.command_source, 'hello')
+        self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
+
+        # Command index is explicitly invalidated by azure.cli.core.extension.operations.add_extension
+        # or azure.cli.core.cloud.update_cloud
+        invalidate_command_index()
+
+        # Rebuild the command index, and `hello overridden` is loaded from the new extension
+        cli.loader.command_table = {}
+        cli.loader.command_group_table = {}
+        cmd_tbl = cli.loader.load_command_table(["hello", "overridden"])
+        hello_overridden_cmd = cmd_tbl['hello overridden']
+        self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
+        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+        self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'extra unused', 'hello ext-only'])
+
+        # The new command index is used, and irrelevant commands are not loaded
+        cli.loader.command_table = {}
+        cli.loader.command_group_table = {}
+        cmd_tbl = cli.loader.load_command_table(["hello", "overridden"])
+        hello_overridden_cmd = cmd_tbl['hello overridden']
+        self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
+        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+        self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
 
         INDEX[_COMMAND_INDEX] = {}
 

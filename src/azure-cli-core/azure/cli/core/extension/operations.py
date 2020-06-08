@@ -189,8 +189,8 @@ def _augment_telemetry_with_ext_info(extension_name, ext=None):
 
 def check_version_compatibility(azext_metadata):
     is_compatible, cli_core_version, min_required, max_required = ext_compat_with_cli(azext_metadata)
-    logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
-                 "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
+    # logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
+    #              "max_required=%s", is_compatible, cli_core_version, min_required, max_required)
     if not is_compatible:
         min_max_msg_fmt = "The '{}' extension is not compatible with this version of the CLI.\n" \
                           "You have CLI core version {} and this extension " \

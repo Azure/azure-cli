@@ -153,6 +153,10 @@ class AzCli(CLI):
 
 class MainCommandsLoader(CLICommandsLoader):
 
+    # Format string for pretty-print the command module table
+    header_format_string = "%-20s %10s %8s %8s"
+    item_format_string = "%-20s %10.3f %8d %8d"
+
     def __init__(self, cli_ctx=None):
         super(MainCommandsLoader, self).__init__(cli_ctx)
         self.cmd_to_loader_map = {}
@@ -193,8 +197,11 @@ class MainCommandsLoader(CLICommandsLoader):
                 except ImportError as e:
                     logger.warning(e)
 
-            logger.debug("Loading command modules: %s", command_modules)
+            count = 0
             cumulative_elapsed_time = 0
+            logger.debug("Loading command modules:")
+            logger.debug(self.header_format_string, "Module", "Load Time", "Groups", "Commands")
+
             for mod in [m for m in command_modules if m not in BLOCKED_MODS]:
                 try:
                     start_time = timeit.default_timer()
@@ -203,8 +210,11 @@ class MainCommandsLoader(CLICommandsLoader):
                         cmd.command_source = mod
                     self.command_table.update(module_command_table)
                     self.command_group_table.update(module_group_table)
+
                     elapsed_time = timeit.default_timer() - start_time
-                    logger.debug("Loaded module '%s' in %.3f seconds.", mod, elapsed_time)
+                    logger.debug(self.item_format_string, mod, elapsed_time,
+                                 len(module_group_table), len(module_command_table))
+                    count += 1
                     cumulative_elapsed_time += elapsed_time
                 except Exception as ex:  # pylint: disable=broad-except
                     # Changing this error message requires updating CI script that checks for failed
@@ -214,9 +224,10 @@ class MainCommandsLoader(CLICommandsLoader):
                     telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
                                             summary='Error loading module: {}'.format(mod))
                     logger.debug(traceback.format_exc())
-            logger.debug("Loaded all modules in %.3f seconds. "
-                         "(note: there's always an overhead with the first module loaded)",
-                         cumulative_elapsed_time)
+            # Summary line
+            logger.debug(self.item_format_string,
+                         "Total ({})".format(count), cumulative_elapsed_time,
+                         len(self.command_group_table), len(self.command_table))
 
         def _update_command_table_from_extensions(ext_suppressions, extension_modname=None):
 
@@ -252,6 +263,15 @@ class MainCommandsLoader(CLICommandsLoader):
                     extensions = _filter_modname(extensions)
                 allowed_extensions = _handle_extension_suppressions(extensions)
                 module_commands = set(self.command_table.keys())
+
+                count = 0
+                cumulative_elapsed_time = 0
+                cumulative_group_count = 0
+                cumulative_command_count = 0
+                logger.debug("Loading extensions:")
+                logger.debug(self.header_format_string + " %s",
+                             "Extension", "Load Time", "Groups", "Commands", "Directory")
+
                 for ext in allowed_extensions:
                     try:
                         check_version_compatibility(ext.get_metadata())
@@ -261,7 +281,6 @@ class MainCommandsLoader(CLICommandsLoader):
                         continue
                     ext_name = ext.name
                     ext_dir = ext.path or get_extension_path(ext_name)
-                    logger.debug("Extensions directory: '%s'", ext_dir)
                     sys.path.append(ext_dir)
                     try:
                         ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
@@ -281,13 +300,24 @@ class MainCommandsLoader(CLICommandsLoader):
 
                         self.command_table.update(extension_command_table)
                         self.command_group_table.update(extension_group_table)
+
                         elapsed_time = timeit.default_timer() - start_time
-                        logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
+                        logger.debug(self.item_format_string + " %s", ext_name, elapsed_time,
+                                     len(extension_group_table), len(extension_command_table),
+                                     ext_dir)
+                        count += 1
+                        cumulative_elapsed_time += elapsed_time
+                        cumulative_group_count += len(extension_group_table)
+                        cumulative_command_count += len(extension_command_table)
                     except Exception as ex:  # pylint: disable=broad-except
                         self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
                         logger.warning("Unable to load extension '%s: %s'. Use --debug for more information.",
                                        ext_name, ex)
                         logger.debug(traceback.format_exc())
+                # Summary line
+                logger.debug(self.item_format_string,
+                             "Total ({})".format(count), cumulative_elapsed_time,
+                             cumulative_group_count, cumulative_command_count)
 
         def _wrap_suppress_extension_func(func, ext):
             """ Wrapper method to handle centralization of log messages for extension filters """
@@ -318,7 +348,8 @@ class MainCommandsLoader(CLICommandsLoader):
                             res.append(sup)
             return res
 
-        def _update_index():
+        def _update_command_index():
+            start_time = timeit.default_timer()
             index = {}
             for command_name, command in self.command_table.items():
                 # Get the top-level name: <vm> create
@@ -329,7 +360,8 @@ class MainCommandsLoader(CLICommandsLoader):
                     index[top_command] = [module_name]
                 elif module_name not in index[top_command]:
                     index[top_command].append(module_name)
-            logger.debug("Index updated: %s", index)
+            elapsed_time = timeit.default_timer() - start_time
+            logger.debug("Updated command index in %.3f seconds.", elapsed_time)
             INDEX[_COMMAND_INDEX] = index
 
         def _roughly_parse_command(args):
@@ -356,6 +388,8 @@ class MainCommandsLoader(CLICommandsLoader):
             # A top level command is provided, like `az version`
             top_command = args[0]
             index = INDEX[_COMMAND_INDEX]
+            # Un-comment this line to disable command index
+            index = {}
             index_modules = index.get(top_command)
 
         if index_modules:
@@ -378,6 +412,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 # The index won't contain suppressed extensions
                 _update_command_table_from_extensions([], index_extensions)
 
+            logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
             # The index may be outdated. Make sure the command appears in the loaded command table
             command_str = _roughly_parse_command(args)
             if command_str in self.command_table or command_str in self.command_group_table:
@@ -397,8 +432,8 @@ class MainCommandsLoader(CLICommandsLoader):
         # We always load extensions even if the appropriate module has been loaded
         # as an extension could override the commands already loaded.
         _update_command_table_from_extensions(ext_suppressions)
-
-        _update_index()
+        logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
+        _update_command_index()
 
         return self.command_table
 
