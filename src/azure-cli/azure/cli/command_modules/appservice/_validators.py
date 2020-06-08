@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from ._client_factory import web_client_factory
 from .utils import _normalize_sku
@@ -20,6 +19,7 @@ def validate_timeout_value(namespace):
 def validate_site_create(cmd, namespace):
     """Validate the SiteName that is being used to create is available
     This API requires that the RG is already created"""
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     client = web_client_factory(cmd.cli_ctx)
     if isinstance(namespace.name, str) and isinstance(namespace.resource_group_name, str) \
             and isinstance(namespace.plan, str):
