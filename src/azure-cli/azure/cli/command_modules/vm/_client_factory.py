@@ -42,6 +42,14 @@ def cf_vm_ext(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_extensions
 
 
+def cf_vm_shared_ext(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).shared_vm_extensions
+
+
+def cf_vm_shared_ext_version(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).shared_vm_extension_versions
+
+
 def cf_vm_ext_image(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_extension_images
 

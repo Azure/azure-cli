@@ -1140,6 +1140,16 @@ long-summary: >
     can be used to complete these tasks. Extensions can be bundled with a new virtual machine deployment or run against any existing system.
 """
 
+helps['vm shared-extension'] = """
+type: group
+short-summary: Manage shared VM extensions.
+"""
+
+helps['vm shared-extension version'] = """
+type: group
+short-summary: Manage shared VM extension versions.
+"""
+
 helps['vm extension delete'] = """
 type: command
 short-summary: Remove an extension attached to a VM.

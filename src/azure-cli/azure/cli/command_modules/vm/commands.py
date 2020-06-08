@@ -14,7 +14,8 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
-                                                          cf_disk_encryption_set)
+                                                          cf_disk_encryption_set, cf_vm_shared_ext,
+                                                          cf_vm_shared_ext_version)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -83,6 +84,16 @@ def load_command_table(self, _):
     compute_vm_extension_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionsOperations.{}',
         client_factory=cf_vm_ext
+    )
+
+    compute_vm_shared_extension_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionsOperations.{}',
+        client_factory=cf_vm_shared_ext
+    )
+
+    compute_vm_shared_extension_version_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionsOperations.{}',
+        client_factory=cf_vm_shared_ext_version
     )
 
     compute_vm_extension_image_sdk = CliCommandType(
@@ -310,7 +321,19 @@ def load_command_table(self, _):
         g.show_command('show', 'get', table_transformer=transform_extension_show_table_output)
         g.custom_command('set', 'set_extension', supports_no_wait=True)
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
+        g.custom_command('publish', 'publish_extension')
+        g.custom_command('publish-version', 'publish_extension_version')
         g.wait_command('wait')
+
+    with self.command_group('vm shared-extension', compute_vm_shared_extension_sdk) as g:
+        g.custom_command('create', 'create_shared_extension')
+        g.show_command('show', 'get')
+        g.command('delete', 'delete')
+
+    with self.command_group('vm shared-extension version', compute_vm_shared_extension_version_sdk) as g:
+        g.custom_command('create', 'create_shared_extension_version')
+        g.show_command('show', 'get')
+        g.command('delete', 'delete')
 
     with self.command_group('vm extension image', compute_vm_extension_image_sdk) as g:
         g.show_command('show', 'get')

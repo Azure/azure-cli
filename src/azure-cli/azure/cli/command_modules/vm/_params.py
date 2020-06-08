@@ -379,6 +379,14 @@ def load_arguments(self, _):
     with self.argument_context('vm extension list') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
 
+    with self.argument_context('vm shared_extension') as c:
+        c.argument('label', help='The label of this Shared VM Extension.')
+        c.argument('description', help='The description of this Shared VM Extension.')
+        c.argument('company_name', help='The company name of this Shared VM Extension.')
+        c.argument('eula', help='The privacy statement uri.')
+        c.argument('privacy', help='The privacy statement URI.')
+        c.argument('homepage', help='The homepage URI.')
+
     with self.argument_context('vm secret') as c:
         c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
         c.argument('keyvault', help='Name or ID of the key vault.', validator=validate_keyvault)

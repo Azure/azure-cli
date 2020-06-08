@@ -1530,6 +1530,16 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
         ext.force_update_tag = str(_gen_guid())
     return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
                        resource_group_name, vm_name, instance_name, ext)
+
+
+def create_shared_extension(cmd, client, resource_group_name, shared_vm_extension_name, label=None, description=None,
+                            company_name=None, eula=None, privacy=None, homepage=None, location=None, tags=None,
+                            no_wait=False):
+    pass
+
+
+def create_shared_extension_version():
+    pass
 # endregion
 
 
