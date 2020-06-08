@@ -31,6 +31,9 @@ examples:
   - name: Create a public IP address from body.json file
     text: >
         az rest --method put --url https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/publicIPAddresses/{publicIpAddressName}?api-version=2019-09-01 --body @body.json
+  - name: List the top three resources
+    text: >
+        az rest --method get --url https://management.azure.com/subscriptions/{subscriptionId}/resources?api-version=2019-07-01 --url-parameters $top=3
 """
 
 helps['version'] = """
