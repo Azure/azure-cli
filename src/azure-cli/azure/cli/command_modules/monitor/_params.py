@@ -357,6 +357,21 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
+
+    with self.argument_context('monitor log-analytics workspace saved-search') as c:
+        c.argument('saved_search_id', options_list=['--name', '-n'], help="Name of the saved search and it's unique in a given workspace.")
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('category', help='The category of the saved search. This helps the user to find a saved search faster.')
+        c.argument('display_name', help='Display name of the saved search.')
+        c.argument('saved_query', options_list=['--saved-query', '-q'], help='The query expression for the saved search.')
+        c.argument('function_alias', options_list=['--func-alias', '--fa'],
+                   help='Function Aliases are short names given to Saved Searches so they can be easily referenced in query. They are required for Computer Groups.')
+        c.argument('function_parameters', options_list=['--func-param', '--fp'],
+                   help="The optional function parameters if query serves as a function. "
+                        "Value should be in the following format: 'param-name1:type1 = default_value1, param-name2:type2 = default_value2'. "
+                        "For more examples and proper syntax please refer to "
+                        "https://docs.microsoft.com/en-us/azure/kusto/query/functions/user-defined-functions.")
+        c.argument('tags', tags_type)
     # endregion
 
     # region Log Analytics Workspace table
