@@ -1914,7 +1914,7 @@ def process_private_endpoint_connection_id_argument(cmd, namespace):
 
 
 def process_vnet_name_or_id(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id, resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
     if namespace.vnet and not is_valid_resource_id(namespace.vnet):
         namespace.vnet = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -1922,12 +1922,3 @@ def process_vnet_name_or_id(cmd, namespace):
             namespace='Microsoft.Network',
             type='virtualNetworks',
             name=namespace.vnet)
-
-
-def validate_nic_ip_config(namespace):
-    from msrestazure.tools import is_valid_resource_id
-    if namespace.nic_ip_config and namespace.vnet:
-        raise CLIError("usage error: --nic-ip-config | --vnet --ip-address")
-
-    if namespace.nic_ip_config and not is_valid_resource_id(namespace.nic_ip_config):
-        raise CLIError("Network Interface Ip Config is not a valid Resource ID. Please check it.")

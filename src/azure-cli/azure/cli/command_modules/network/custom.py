@@ -2906,6 +2906,8 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                 type='virtualNetworks',
                 name=vnet)
         return vnet
+    if backend_addresses and backend_addresses_config_file:
+        raise CLIError('usage error: --backend-address [--backend-address] | --backend-addresses-config-file')
     if backend_addresses_config_file:
         if not isinstance(backend_addresses_config_file, list):
             raise CLIError('Config file must be a list. Please see example as a reference.')
@@ -2919,7 +2921,9 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
      VirtualNetwork) = cmd.get_models('BackendAddressPool',
                                       'LoadBalancerBackendAddress',
                                       'VirtualNetwork')
-    # Hope we can remove this logic
+    # Before 2020-03-01, service doesn't support the other rest method.
+    # We have to use old one to keep backward compatibility.
+    # Same for basic sku. service refuses that basic sku lb call the other rest method.
     if cmd.supported_api_version(max_api='2020-03-01') or lb.sku.name.lower() == 'basic':
         new_pool = BackendAddressPool(name=backend_address_pool_name)
         upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
@@ -2927,8 +2931,10 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
         return get_property(poller.result().backend_address_pools, backend_address_pool_name)
 
     addresses_pool = []
-    addresses_pool.extend(backend_addresses)
-    addresses_pool.extend(backend_addresses_config_file)
+    if backend_addresses:
+        addresses_pool.extend(backend_addresses)
+    if backend_addresses_config_file:
+        addresses_pool.extend(backend_addresses_config_file)
     # pylint: disable=line-too-long
     new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
                                                 virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])),
@@ -2945,8 +2951,8 @@ def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     from azure.cli.core.commands import LongRunningOperation
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
-    # Hope we can remove this logic
-    if lb.sku.name.lower() == 'basic':
+
+    def delete_basic_lb_backend_address_pool():
         new_be_pools = [pool for pool in lb.backend_address_pools
                         if pool.name.lower() != backend_address_pool_name.lower()]
         lb.backend_address_pools = new_be_pools
@@ -2954,6 +2960,9 @@ def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
         result = LongRunningOperation(cmd.cli_ctx)(poller).backend_address_pools
         if next((x for x in result if x.name.lower() == backend_address_pool_name.lower()), None):
             raise CLIError("Failed to delete '{}' on '{}'".format(backend_address_pool_name, load_balancer_name))
+
+    if lb.sku.name.lower() == 'basic':
+        delete_basic_lb_backend_address_pool()
         return None
 
     return ncf.load_balancer_backend_address_pools.delete(resource_group_name,
@@ -2962,7 +2971,7 @@ def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
 
 
 def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
-                                        address_name=None, vnet=None, ip_address=None):
+                                        address_name, vnet, ip_address):
     client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
     address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
     (LoadBalancerBackendAddress,
