@@ -154,8 +154,10 @@ class AzCli(CLI):
 class MainCommandsLoader(CLICommandsLoader):
 
     # Format string for pretty-print the command module table
-    header_format_string = "%-20s %10s %8s %8s"
-    item_format_string = "%-20s %10.3f %8d %8d"
+    header_mod = "%-20s %10s %9s %9s" % ("Extension", "Load Time", "Groups", "Commands")
+    item_format_string = "%-20s %10.3f %9d %9d"
+    header_ext = header_mod + "  Directory"
+    item_ext_format_string = item_format_string + "  %s"
 
     def __init__(self, cli_ctx=None):
         super(MainCommandsLoader, self).__init__(cli_ctx)
@@ -200,7 +202,7 @@ class MainCommandsLoader(CLICommandsLoader):
             count = 0
             cumulative_elapsed_time = 0
             logger.debug("Loading command modules:")
-            logger.debug(self.header_format_string, "Module", "Load Time", "Groups", "Commands")
+            logger.debug(self.header_mod)
 
             for mod in [m for m in command_modules if m not in BLOCKED_MODS]:
                 try:
@@ -269,8 +271,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 cumulative_group_count = 0
                 cumulative_command_count = 0
                 logger.debug("Loading extensions:")
-                logger.debug(self.header_format_string + " %s",
-                             "Extension", "Load Time", "Groups", "Commands", "Directory")
+                logger.debug(self.header_ext)
 
                 for ext in allowed_extensions:
                     try:
@@ -302,7 +303,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         self.command_group_table.update(extension_group_table)
 
                         elapsed_time = timeit.default_timer() - start_time
-                        logger.debug(self.item_format_string + " %s", ext_name, elapsed_time,
+                        logger.debug(self.item_ext_format_string, ext_name, elapsed_time,
                                      len(extension_group_table), len(extension_command_table),
                                      ext_dir)
                         count += 1
@@ -315,9 +316,9 @@ class MainCommandsLoader(CLICommandsLoader):
                                        ext_name, ex)
                         logger.debug(traceback.format_exc())
                 # Summary line
-                logger.debug(self.item_format_string,
+                logger.debug(self.item_ext_format_string,
                              "Total ({})".format(count), cumulative_elapsed_time,
-                             cumulative_group_count, cumulative_command_count)
+                             cumulative_group_count, cumulative_command_count, "")
 
         def _wrap_suppress_extension_func(func, ext):
             """ Wrapper method to handle centralization of log messages for extension filters """
