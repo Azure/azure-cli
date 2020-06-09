@@ -429,8 +429,8 @@ def create_image_template(  # pylint: disable=too-many-locals, too-many-branches
     if source_dict['type'] == _SourceType.PLATFORM_IMAGE:
         template_source = ImageTemplatePlatformImageSource(**source_dict)
     elif source_dict['type'] == _SourceType.ISO_URI:
+        # It was supported before but is removed in the current service version.
         raise CLIError('usage error: Source type ISO URI is not supported.')
-        # template_source = ImageTemplateIsoSource(**source_dict)
     elif source_dict['type'] == _SourceType.MANAGED_IMAGE:
         template_source = ImageTemplateManagedImageSource(**source_dict)
     elif source_dict['type'] == _SourceType.SIG_VERSION:
