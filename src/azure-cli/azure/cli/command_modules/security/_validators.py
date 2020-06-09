@@ -22,3 +22,9 @@ def validate_pricing_tier(namespace):
     pricing_tier = namespace.tier.lower()
     if pricing_tier not in ['free', 'standard']:
         raise CLIError('--tier can only accept "standard" or "free" values')
+
+
+def validate_assessment_status_code(namespace):
+    status_code = namespace.status_code.lower()
+    if status_code not in ['healthy', 'unhealthy', 'notapplicable']:
+        raise CLIError('--status-code can only accept "healthy", "unhealthy" or "notapplicable" values')
