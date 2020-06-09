@@ -19,9 +19,10 @@ from azure.identity import (
     UsernamePasswordCredential,
     ClientSecretCredential,
     CertificateCredential,
-    ManagedIdentityCredential,
-    CredentialUnavailableError
+    ManagedIdentityCredential
 )
+
+from azure.core.exceptions import ClientAuthenticationError
 
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 logger = get_logger(__name__)
@@ -172,6 +173,7 @@ class Identity:
 
         credential = None
         id_type = None
+        scope = resource.rstrip('/') + '/.default'
         if identity_id:
             # Try resource ID
             if is_valid_resource_id(identity_id):
@@ -182,9 +184,10 @@ class Identity:
                 try:
                     # Try client ID
                     credential = ManagedIdentityCredential(client_id=identity_id)
+                    credential.get_token(scope)
                     id_type = self.MANAGED_IDENTITY_CLIENT_ID
                     authenticated = True
-                except CredentialUnavailableError as e:
+                except ClientAuthenticationError as e:
                     logger.debug('MSI authentication error: %s', e.message)
                     logger.info('Sniff: not an MSI client id')
                 except HTTPError as ex:
@@ -197,8 +200,12 @@ class Identity:
                     try:
                         # Try object ID
                         credential = ManagedIdentityCredential(identity_config={"object_id": identity_id})
+                        credential.get_token(scope)
                         id_type = self.MANAGED_IDENTITY_OBJECT_ID
                         authenticated = True
+                    except ClientAuthenticationError as e:
+                        logger.debug('MSI authentication error: %s', e.message)
+                        logger.info('Sniff: not an MSI object id')
                     except HTTPError as ex:
                         if ex.response.reason == 'Bad Request' and ex.response.status == 400:
                             logger.info('Sniff: not an MSI object id')
