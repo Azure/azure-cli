@@ -45,7 +45,7 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
             special_sp_name = 'http://{}'.format(
                 self.kwargs['display_name_special'].replace(' ', '-').replace('/', '-').replace('\\', '-')
             )
-            sp_special = self.cmd('ad sp create-for-rbac -n "{display_name_special}"', checks=[
+            sp_special = self.cmd('ad sp create-for-rbac -n "{display_name_special}" --skip-assignment', checks=[
                 self.check('name', special_sp_name)
             ]).get_output_in_json()
             self.kwargs['sp_special'] = sp_special['appId']
