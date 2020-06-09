@@ -55,7 +55,7 @@ class TestResolveFromIndex(unittest.TestCase):
             # Should choose the second one as py version is not considered platform specific.
             self.assertEqual(resolve_from_index(name)[0], index_data[name][1]['downloadUrl'])
 
-    def test_filter_version(self):
+    def test_filter_target_version(self):
         ext_name = 'hello'
         index_data = {
             ext_name: [
@@ -65,8 +65,8 @@ class TestResolveFromIndex(unittest.TestCase):
         }
 
         with IndexPatch(index_data):
-            self.assertEqual(resolve_from_index(ext_name, cur_version='0.1.0')[0], index_data[ext_name][0]['downloadUrl'])
-            self.assertEqual(resolve_from_index(ext_name, cur_version='0.2.0')[0], index_data[ext_name][1]['downloadUrl'])
+            self.assertEqual(resolve_from_index(ext_name, target_version='0.1.0')[0], index_data[ext_name][0]['downloadUrl'])
+            self.assertEqual(resolve_from_index(ext_name, target_version='0.2.0')[0], index_data[ext_name][1]['downloadUrl'])
 
 
 class TestResolveFilters(unittest.TestCase):

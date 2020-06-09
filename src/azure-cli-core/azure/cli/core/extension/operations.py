@@ -224,7 +224,7 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, cur_version=version, index_url=index_url)
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
 

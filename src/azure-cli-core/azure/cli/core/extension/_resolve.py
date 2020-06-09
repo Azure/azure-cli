@@ -53,9 +53,11 @@ def _is_greater_than_or_equal_to_cur_version(cur_version):
     return filter_func
 
 
-def resolve_from_index(extension_name, cur_version=None, index_url=None):
+def resolve_from_index(extension_name, cur_version=None, index_url=None, target_version=None):
     """
     Gets the download Url and digest for the matching extension
+
+    :param cur_version: threshold verssion to filter out extensions.
     """
     candidates = get_index_extensions(index_url=index_url).get(extension_name, [])
 
@@ -75,9 +77,9 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None):
     logger.debug("Candidates %s", [c['filename'] for c in candidates_sorted])
     logger.debug("Choosing the latest of the remaining candidates.")
 
-    if cur_version:
+    if target_version:
         try:
-            chosen = [c for c in candidates_sorted if c['metadata']['version'] == cur_version][0]
+            chosen = [c for c in candidates_sorted if c['metadata']['version'] == target_version][0]
         except IndexError:
             raise NoExtensionCandidatesError('Extension with version {} not found'.format(cur_version))
     else:
