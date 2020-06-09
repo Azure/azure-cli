@@ -1668,6 +1668,11 @@ short-summary: Start live log tracing for a web app.
 long-summary: This command may not work with web apps running on Linux.
 """
 
+helps['webapp log deployment'] = """
+type: group
+short-summary: Manage web app deployment logs.
+"""
+
 helps['webapp log deployment show'] = """
 type: command
 short-summary: Show deployment logs of the latest deployment, or a specific deployment if deployment-id is specified.
@@ -1675,7 +1680,7 @@ examples:
   - name: Show the deployment logs of the latest deployment
     text: az webapp log deployment show --name MyWebApp --resource-group MyResourceGroup
   - name: Show the deployment logs of a particular deployment
-    text: az webapp log demployment show --name MyWebApp --resource-group MyResourceGroup --deployment-id MyDeploymentId
+    text: az webapp log deployment show --name MyWebApp --resource-group MyResourceGroup --deployment-id MyDeploymentId
 """
 
 helps['webapp log deployment list'] = """
@@ -1684,6 +1689,29 @@ short-summary: List deployment logs of the deployments associated with web app
 examples:
   - name: List the deployment logs
     text: az webapp log deployment list --name MyWebApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp log deployment'] = """
+type: group
+short-summary: Manage function app deployment logs.
+"""
+
+helps['functionapp log deployment show'] = """
+type: command
+short-summary: Show deployment logs of the latest deployment, or a specific deployment if deployment-id is specified.
+examples:
+  - name: Show the deployment logs of the latest deployment
+    text: az functionapp log deployment show --name MyFunctionApp --resource-group MyResourceGroup
+  - name: Show the deployment logs of a particular deployment
+    text: az functionapp log deployment show --name MyFunctionApp --resource-group MyResourceGroup --deployment-id MyDeploymentId
+"""
+
+helps['functionapp log deployment list'] = """
+type: command
+short-summary: List deployment logs of the deployments associated with function app
+examples:
+  - name: List the deployment logs
+    text: az functionapp log deployment list --name MyFunctionApp --resource-group MyResourceGroup
 """
 
 helps['webapp restart'] = """

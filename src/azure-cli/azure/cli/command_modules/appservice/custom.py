@@ -1962,7 +1962,7 @@ def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None
     headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
 
     import requests
-    response = requests.get(deployment_log_url, headers=headers, timeout=3)
+    response = requests.get(deployment_log_url, headers=headers)
 
     if response.status_code != 200:
         raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
@@ -1990,7 +1990,7 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
     headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
 
     import requests
-    response = requests.get(deployment_log_url, headers=headers, timeout=3)
+    response = requests.get(deployment_log_url, headers=headers)
 
     if response.status_code != 200:
         raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(

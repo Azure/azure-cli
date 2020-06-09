@@ -2400,7 +2400,7 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
 
 
-class WebappDeploymentLogsScenarioTest(LocalContextScenarioTest):
+class WebappDeploymentLogsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_show_deployment_logs(self, resource_group):
         webapp_name = self.create_random_name('show-deployment-webapp', 40)
@@ -2446,7 +2446,7 @@ class WebappDeploymentLogsScenarioTest(LocalContextScenarioTest):
             JMESPathCheck('[0].id', deployment_1['id']),
         ])
 
-        deployment_2 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
         self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('length(@)', 2)
         ])

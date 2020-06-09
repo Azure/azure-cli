@@ -340,6 +340,17 @@ def load_arguments(self, _):
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
 
+    with self.argument_context('functionapp log deployment show') as c:
+        c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('deployment_id', options_list=['--deployment-id'], help='Deployment ID. If none specified, returns the deployment logs of the latest deployment.')
+
+    with self.argument_context('functionapp log deployment list') as c:
+        c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
+
     for scope in ['appsettings', 'connection-string']:
         with self.argument_context('webapp config ' + scope) as c:
             c.argument('settings', nargs='+', help="space-separated {} in a format of `<name>=<value>`".format(scope))
