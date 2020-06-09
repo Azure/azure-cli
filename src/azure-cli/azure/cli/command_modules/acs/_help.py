@@ -400,6 +400,9 @@ parameters:
   - name: --max-count
     type: int
     short-summary: Maximum nodes count used for autoscaler, when "--enable-cluster-autoscaler" specified. Please specify the value in the range of [1, 100]
+  - name: --uptime-sla
+    type: bool
+    short-summary: Enable a paid managed cluster service with a financially backed SLA.
   - name: --load-balancer-managed-outbound-ip-count
     type: int
     short-summary: Load balancer managed outbound IP count.
