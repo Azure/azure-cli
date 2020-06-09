@@ -174,8 +174,7 @@ class Identity:
         if identity_id:
             # Try resource ID
             if is_valid_resource_id(identity_id):
-                # TODO: Support resource ID in Azure Identity
-                credential = ManagedIdentityCredential(resource_id=identity_id)
+                credential = ManagedIdentityCredential(identity_config={"resource_id": identity_id})
                 id_type = self.MANAGED_IDENTITY_RESOURCE_ID
             else:
                 authenticated = False
@@ -193,8 +192,7 @@ class Identity:
                 if not authenticated:
                     try:
                         # Try object ID
-                        # TODO: Support resource ID in Azure Identity
-                        credential = ManagedIdentityCredential(object_id=identity_id)
+                        credential = ManagedIdentityCredential(identity_config={"object_id": identity_id})
                         id_type = self.MANAGED_IDENTITY_OBJECT_ID
                         authenticated = True
                     except HTTPError as ex:
