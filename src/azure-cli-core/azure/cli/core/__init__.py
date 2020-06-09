@@ -350,15 +350,14 @@ class MainCommandsLoader(CLICommandsLoader):
 
         def _update_command_index():
             start_time = timeit.default_timer()
-            index = {}
+            from collections import defaultdict
+            index = defaultdict(list)
             for command_name, command in self.command_table.items():
                 # Get the top-level name: <vm> create
                 top_command = command_name.split()[0]
-                # Get module name: azure.cli.command_modules.vm
+                # Get module name, like azure.cli.command_modules.vm, azext_webapp
                 module_name = command.loader.__module__
-                if top_command not in index:
-                    index[top_command] = [module_name]
-                elif module_name not in index[top_command]:
+                if module_name not in index[top_command]:
                     index[top_command].append(module_name)
             elapsed_time = timeit.default_timer() - start_time
             logger.debug("Updated command index in %.3f seconds.", elapsed_time)
@@ -384,12 +383,16 @@ class MainCommandsLoader(CLICommandsLoader):
         index_builtin_modules = []
         index_extensions = []
 
+        # Clear the tables to make this method idempotent
+        self.command_group_table = {}
+        self.command_table = {}
+
         if args and not args[0].startswith('-'):
             # A top level command is provided, like `az version`
             top_command = args[0]
             index = INDEX[_COMMAND_INDEX]
             # Un-comment this line to disable command index
-            index = {}
+            # index = {}
             index_modules = index.get(top_command)
 
         if index_modules:
@@ -747,8 +750,11 @@ def get_default_cli():
 def invalidate_command_index():
     """Invalidate the command index.
 
-    This function must be called when installing, updating extensions. Otherwise, if an extension overrides
-    a built-in command, the command will be loaded from the command module as per the stale command index.
+    This function MUST be called when installing or updating extensions. Otherwise, when an extension
+      1. overrides a built-in command, or
+      2. extends an existing command group,
+    the command or command group will only be loaded from the command modules as per the stale command index,
+    making the newly installed extension be ignored.
 
     This function can be called when removing extensions and updating cloud profiles for double insurance.
     """
