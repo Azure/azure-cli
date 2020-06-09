@@ -42,6 +42,7 @@ class AzCli(CLI):
             register_ids_argument, register_global_subscription_argument)
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
+        from azure.cli.core.util import handle_version_update
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, VERSIONS, CLOUD_ENDPOINTS
 
         from knack.util import ensure_dir
@@ -59,17 +60,7 @@ class AzCli(CLI):
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
         VERSIONS.load(os.path.join(azure_folder, 'versionCheck.json'))
         CLOUD_ENDPOINTS.load(os.path.join(azure_folder, 'cloudEndpoints.json'))
-        try:
-            cache_versions = VERSIONS['versions']
-            from azure.cli.core import __version__ as core_version
-            from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
-            # if cli core gets udpated
-            if cache_versions and LooseVersion(cache_versions['core']['local']) < LooseVersion(core_version):
-                VERSIONS['versions'] = {}
-                VERSIONS['update_time'] = ''
-                CLOUD_ENDPOINTS['clouds'] = {}
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.warning(ex)
+        handle_version_update()
 
         self.cloud = get_active_cloud(self)
         logger.debug('Current cloud config:\n%s', str(self.cloud.name))

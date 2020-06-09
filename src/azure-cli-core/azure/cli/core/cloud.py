@@ -225,6 +225,7 @@ def _convert_arm_to_cli(arm_cloud_metadata_dict):
         cli_cloud_metadata_dict['AzureCloud'].endpoints.active_directory = 'https://login.microsoftonline.com'  # change once active_directory is fixed in ARM for the public cloud
     return cli_cloud_metadata_dict
 
+
 # Please refer to the arm endpoints in https://management.azure.com/metadata/endpoints?api-version=2019-05-01
 # when modifying this method. Patch the endpoint if it does not exist and submit a PR on ADO to add it.
 def _arm_to_cli_mapper(arm_dict):
