@@ -177,7 +177,7 @@ class Identity:
         if identity_id:
             # Try resource ID
             if is_valid_resource_id(identity_id):
-                credential = ManagedIdentityCredential(identity_config={"resource_id": identity_id})
+                credential = ManagedIdentityCredential(identity_config={"msi_res_id": identity_id})
                 id_type = self.MANAGED_IDENTITY_RESOURCE_ID
             else:
                 authenticated = False
