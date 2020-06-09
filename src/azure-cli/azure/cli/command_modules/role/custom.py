@@ -496,7 +496,7 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
             err = 'Resource group "{}" is redundant because scope is supplied'
             raise CLIError(err.format(resource_group_name))
         from msrestazure.tools import is_valid_resource_id
-        if not is_valid_resource_id(scope):
+        if scope.startswith('/subscriptions/') and not is_valid_resource_id(scope):
             raise CLIError('Invalid scope. Please use --help to view the valid format.')
     elif scope == '':
         raise CLIError('Invalid scope. Please use --help to view the valid format.')
