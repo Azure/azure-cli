@@ -356,12 +356,8 @@ class TestCustom(unittest.TestCase):
         prompt_y_n_mock.assert_called_once_with("\nAre you sure you want to execute the deployment?")
         self.assertIsNone(result)
 
-    def test_invalid_what_if_exclude_change_types(self):
-        with self.assertRaisesRegex(CLIError, "Unrecognized resource change types: bar, foo"):
-            _what_if_deploy_arm_template_core(mock.MagicMock(), mock.MagicMock(), mock.MagicMock(), ["foo", "bar"])
-
     @mock.patch("azure.cli.command_modules.resource.custom.LongRunningOperation.__call__", autospec=True)
-    def test_valid_what_if_exclude_change_types(self, long_running_operation_stub):
+    def test_what_if_exclude_change_types(self, long_running_operation_stub):
         # Arrange.
         from azure.cli.core.mock import DummyCli
         from azure.cli.core import AzCommandsLoader

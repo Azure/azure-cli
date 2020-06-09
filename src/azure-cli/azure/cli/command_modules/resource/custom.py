@@ -636,7 +636,7 @@ def what_if_deploy_arm_template_at_resource_group(cmd, resource_group_name,
                                                     plug_pipeline=(template_uri is None))
     what_if_poller = mgmt_client.what_if(resource_group_name, deployment_name, what_if_properties)
 
-    return _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, exclude_change_types)
+    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
 
 def what_if_deploy_arm_template_at_subscription_scope(cmd,
@@ -649,24 +649,10 @@ def what_if_deploy_arm_template_at_subscription_scope(cmd,
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, plug_pipeline=(template_uri is None))
     what_if_poller = mgmt_client.what_if_at_subscription_scope(deployment_name, what_if_properties, deployment_location)
 
-    return _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, exclude_change_types)
+    return _what_if_deploy_arm_template_core(cmd.cli_ctx, what_if_poller, no_pretty_print, exclude_change_types)
 
 
-def _what_if_deploy_arm_template_core(cmd, what_if_poller, no_pretty_print, exclude_change_types):
-    if exclude_change_types:
-        ChangeType = cmd.get_models('ChangeType')
-
-        exclude_change_types = set(exclude_change_types)
-        valid_change_types = set(map(lambda x: x.value.lower(), ChangeType))
-        invalid_change_types = sorted([x for x in exclude_change_types if x.lower() not in valid_change_types])
-
-        if invalid_change_types:
-            word = 'types' if len(invalid_change_types) > 1 else 'type'
-            raise CLIError(
-                f'Unrecognized resource change {word}: {", ".join(invalid_change_types)}. Specify one or more values in the following list and try again: {", ".join(map(lambda x: x.value, ChangeType))}.'
-            )
-
-    cli_ctx = cmd.cli_ctx
+def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print, exclude_change_types):
     what_if_result = LongRunningOperation(cli_ctx)(what_if_poller)
 
     if what_if_result.error:
