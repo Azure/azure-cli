@@ -436,18 +436,19 @@ def get_known_clouds():
                            os.getenv('ARM_CLOUD_METADATA_URL'))
             raise ex
     else:
-        try:
-            # resolve metadata url from DNS
-            arm_cloud_dict = json.loads(urlretrieve(CLOUD_ENDPOINTS_DNS_ADDRESS))
-            cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
-            KNOWN_CLOUDS = list(cli_cloud_dict.values())
-            url = CLOUD_ENDPOINTS_DNS_ADDRESS
-        except Exception:  # pylint: disable=broad-except
-            logger.info('Failed to load cloud metadata from %s', CLOUD_ENDPOINTS_DNS_ADDRESS)  # TODO change to warning when DNS is ready
-            from azure.cli.core.util import check_connectivity
-            if not check_connectivity():
-                raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import --endpoint <metadata url>' first.")
-            KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
+        # TODO uncomment when DNS is ready
+        # try:
+        #     # resolve metadata url from DNS
+        #     arm_cloud_dict = json.loads(urlretrieve(CLOUD_ENDPOINTS_DNS_ADDRESS))
+        #     cli_cloud_dict = _convert_arm_to_cli(arm_cloud_dict)
+        #     KNOWN_CLOUDS = list(cli_cloud_dict.values())
+        #     url = CLOUD_ENDPOINTS_DNS_ADDRESS
+        # except Exception:  # pylint: disable=broad-except
+        #     logger.info('Failed to load cloud metadata from %s', CLOUD_ENDPOINTS_DNS_ADDRESS)
+        from azure.cli.core.util import check_connectivity
+        if not check_connectivity():
+            raise CLIError("Please ensure you have network connection. If you are in an air-gapped cloud, please run 'az cloud import --endpoint <metadata url>' first.")
+        KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
     CLOUD_ENDPOINTS['clouds'] = [c.toJSON() for c in KNOWN_CLOUDS]
     CLOUD_ENDPOINTS['metadata_url'] = url
