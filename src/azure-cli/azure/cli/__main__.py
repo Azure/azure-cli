@@ -41,13 +41,14 @@ try:
     exit_code = cli_main(az_cli, sys.argv[1:])
 
     if exit_code and exit_code != 0:
+        if az_cli.result.error is not None and not telemetry.has_exceptions():
+            telemetry.set_exception(az_cli.result.error, fault_type='')
         telemetry.set_failure()
     else:
         telemetry.set_success()
 
     elapsed_time = timeit.default_timer() - start_time
 
-    az_cli.logging.end_cmd_metadata_logging(exit_code)
     sys.exit(exit_code)
 
 except KeyboardInterrupt:
@@ -61,7 +62,6 @@ except SystemExit as ex:  # some code directly call sys.exit, this is to make su
     except NameError:
         pass
 
-    az_cli.logging.end_cmd_metadata_logging(exit_code)
     raise ex
 
 finally:

@@ -50,6 +50,11 @@ class StorageScenarioMixin(object):
         self.storage_cmd('storage share create -n {}', account_info, share_name)
         return share_name
 
+    def create_file_system(self, account_info, prefix='filesystem', length=24):
+        filesystem_name = self.create_random_name(prefix=prefix, length=length)
+        self.storage_cmd('storage fs create -n {}', account_info, filesystem_name)
+        return filesystem_name
+
 
 class StorageTestFilesPreparer(AbstractPreparer):
     def __init__(self, parameter_name='test_dir'):

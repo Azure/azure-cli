@@ -178,12 +178,16 @@ def _get_default_install_location():
     if system == 'Windows':
         home_dir = os.environ.get('USERPROFILE')
         if not home_dir:
-            return None
+            raise CLIError('In the Windows platform, please specify the environment variable "USERPROFILE" '
+                           'as the installation location.')
         install_location = os.path.join(home_dir, r'.azcopy\azcopy.exe')
     elif system in ('Linux', 'Darwin'):
         install_location = os.path.expanduser(os.path.join('~', 'bin/azcopy'))
     else:
-        install_location = None
+        raise CLIError('The {} platform is not currently supported. If you want to know which platforms are supported, '
+                       'please refer to the document for supported platforms: '
+                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azcopy-v10#download-azcopy'
+                       .format(system))
     return install_location
 
 

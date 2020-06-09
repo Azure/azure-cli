@@ -50,10 +50,16 @@ def acr_import(cmd,
     if source_registry:
         if is_valid_resource_id(source_registry):
             source = ImportSource(resource_id=source_registry, source_image=source_image)
-
         else:
             registry = get_registry_from_name_or_login_server(cmd.cli_ctx, source_registry, source_registry)
             if registry:
+                # trim away redundant login server name, a common error
+                prefix = registry.login_server + '/'
+                if source_image.lower().startswith(prefix.lower()):
+                    warning = ('The login server name of "%s" in the "--source" argument will be ignored as '
+                               '"--registry" already supplies the same information')
+                    logger.warning(warning, prefix[:-1])
+                    source_image = source_image[len(prefix):]
                 # For Azure container registry
                 source = ImportSource(resource_id=registry.id, source_image=source_image)
             else:

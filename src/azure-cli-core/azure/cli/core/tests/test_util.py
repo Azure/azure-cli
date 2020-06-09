@@ -213,7 +213,8 @@ class TestUtils(unittest.TestCase):
 
     @mock.patch('azure.cli.core.__version__', '7.8.9')
     def test_get_az_user_agent(self):
-        with mock.patch.dict('os.environ', {'AZ_INSTALLER': 'PIP'}):
+        from azure.cli.core._environment import _ENV_AZ_INSTALLER
+        with mock.patch.dict('os.environ', {_ENV_AZ_INSTALLER: 'PIP'}):
             actual = get_az_user_agent()
             self.assertEqual(actual, 'AZURECLI/7.8.9 (PIP)')
 
@@ -295,7 +296,7 @@ class TestUtils(unittest.TestCase):
                          body=test_body,
                          generated_client_request_id_name=None)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=None)
         request = send_mock.call_args.args[1]
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
@@ -303,7 +304,7 @@ class TestUtils(unittest.TestCase):
         send_raw_request(cli_ctx, 'GET', arm_resource_id, body=test_body,
                          generated_client_request_id_name=None)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=None)
         request = send_mock.call_args.args[1]
         self.assertEqual(request.url, 'https://management.azure.com/subscriptions/01/resourcegroups/02?api-version=2019-07-01')
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
@@ -311,7 +312,7 @@ class TestUtils(unittest.TestCase):
         # Test full ARM URL https://management.azure.com/subscriptions/01/resourcegroups/02?api-version=2019-07-01
         send_raw_request(cli_ctx, 'GET', full_arm_rest_url)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=None)
         request = send_mock.call_args.args[1]
         self.assertEqual(request.url, 'https://management.azure.com/subscriptions/01/resourcegroups/02?api-version=2019-07-01')
 
@@ -320,7 +321,7 @@ class TestUtils(unittest.TestCase):
         full_arm_rest_url_with_port = test_arm_endpoint_with_port.rstrip('/') + arm_resource_id
         send_raw_request(cli_ctx, 'GET', full_arm_rest_url_with_port)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+        get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=None)
         request = send_mock.call_args.args[1]
         self.assertEqual(request.url, 'https://management.azure.com:443/subscriptions/01/resourcegroups/02?api-version=2019-07-01')
 
@@ -328,7 +329,7 @@ class TestUtils(unittest.TestCase):
         send_raw_request(cli_ctx, 'PATCH', 'https://graph.microsoft.com/beta/appRoleAssignments/01',
                          body=test_body, generated_client_request_id_name=None)
 
-        get_raw_token_mock.assert_called_with(mock.ANY, 'https://graph.microsoft.com/')
+        get_raw_token_mock.assert_called_with(mock.ANY, 'https://graph.microsoft.com/', subscription=None)
         request = send_mock.call_args.args[1]
         self.assertEqual(request.method, 'PATCH')
         self.assertEqual(request.url, 'https://graph.microsoft.com/beta/appRoleAssignments/01')
@@ -337,7 +338,7 @@ class TestUtils(unittest.TestCase):
         with mock.patch.dict('os.environ', {'AZURE_HTTP_USER_AGENT': "env-ua"}):
             send_raw_request(cli_ctx, 'GET', full_arm_rest_url, headers={'user-agent=ARG-UA'})
 
-            get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id)
+            get_raw_token_mock.assert_called_with(mock.ANY, test_arm_active_directory_resource_id, subscription=None)
             request = send_mock.call_args.args[1]
             self.assertEqual(request.headers['User-Agent'], get_az_user_agent() + ' env-ua ARG-UA')
 

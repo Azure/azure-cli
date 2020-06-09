@@ -216,6 +216,12 @@ parameters:
   - name: --admin-username -u
     type: string
     short-summary: User account to create on node VMs for SSH access.
+  - name: --windows-admin-username
+    type: string
+    short-summary: Username to create on Windows node VMs.
+  - name: --windows-admin-password
+    type: string
+    short-summary: Password to create on Windows node VMs.
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
@@ -323,9 +329,15 @@ parameters:
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
+  - name: --enable-node-public-ip
+    type: bool
+    short-summary: Enable VMSS node public IP.
   - name: --workspace-resource-id
     type: string
     short-summary: The resource ID of an existing Log Analytics Workspace to use for storing monitoring data. If not specified, uses the default Log Analytics Workspace if it exists, otherwise creates one.
+  - name: --uptime-sla
+    type: bool
+    short-summary: Enable a paid managed cluster service with a financially backed SLA.
   - name: --attach-acr
     type: string
     short-summary: Grant the 'acrpull' role assignment to the ACR specified by name or resource ID.
@@ -365,6 +377,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-managed-identity
   - name: Create a kubernetes cluster with userDefinedRouting, standard load balancer SKU and a custom subnet preconfigured with a route table
     text: az aks create -g MyResourceGroup -n MyManagedCluster --outbound-type userDefinedRouting --load-balancer-sku standard --vnet-subnet-id customUserSubnetVnetID
+  - name: Create a kubernetes cluster with supporting Windows agent pools.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --load-balancer-sku Standard --vm-set-type VirtualMachineScaleSet --network-plugin azure --windows-admin-username azure --windows-admin-password 'replacePassword1234$'
 """
 
 helps['aks update'] = """
@@ -610,6 +624,9 @@ parameters:
   - name: --zones -z
     type: string array
     short-summary: Availability zones where agent nodes will be placed.
+  - name: --enable-node-public-ip
+    type: bool
+    short-summary: Enable VMSS node public IP.
   - name: --vnet-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to deploy the cluster.
@@ -922,39 +939,6 @@ short-summary: Manage Azure Red Hat OpenShift Services.
 helps['openshift create'] = """
 type: command
 short-summary: Create a new managed OpenShift cluster.
-parameters:
-  - name: --compute-vm-size -s
-    type: string
-    short-summary: Size of Virtual Machines to create as OpenShift nodes.
-  - name: --compute-count -c
-    type: int
-    short-summary: Number of nodes in the OpenShift node pool.
-  - name: --aad-client-app-id
-    type: string
-    short-summary: The ID of an Azure Active Directory client application. If not specified, a new Azure Active Directory client is created.
-  - name: --aad-client-app-secret
-    type: string
-    short-summary: The secret of an Azure Active Directory client application.
-  - name: --aad-tenant-id
-    type: string
-    short-summary: The ID of an Azure Active Directory tenant.
-  - name: --vnet-peer
-    type: string
-    short-summary: The ID or the name of a subnet in an existing VNet into which to peer the cluster.
-  - name: --vnet-prefix
-    type: string
-    short-summary: The CIDR used on the VNet into which to deploy the cluster.
-  - name: --subnet-prefix
-    type: string
-    short-summary: The CIDR used on the Subnet into which to deploy the cluster.
-  - name: --customer-admin-group-id
-    type: string
-    short-summary: The Object ID of an Azure Active Directory Group that memberships will get synced into the OpenShift group "osa-customer-admins". If not specified, no cluster admin access will be granted.
-  - name: --workspace-id
-    type: string
-    short-summary: The resource id of an existing Log Analytics Workspace to use for storing monitoring data.
-
-
 examples:
   - name: Create an OpenShift cluster and auto create an AAD Client
     text: az openshift create -g MyResourceGroup -n MyManagedCluster
@@ -962,10 +946,10 @@ examples:
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --customer-admin-group-id {GROUP_ID}
   - name: Create an OpenShift cluster with 5 compute nodes and a custom AAD Client.
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --aad-client-app-id {APP_ID} --aad-client-app-secret {APP_SECRET} --aad-tenant-id {TENANT_ID} --compute-count 5
-  - name: Create an Openshift cluster using a custom vnet
-    text: az openshift create -g MyResourceGroup -n MyManagedCluster --vnet-peer "/subscriptions/0000000-0000-0000-0000-000000000000/resourceGroups/openshift-vnet/providers/Microsoft.Network/virtualNetworks/test"
   - name: Create an Openshift cluster with Log Analytics monitoring enabled
     text: az openshift create -g MyResourceGroup -n MyManagedCluster --workspace-id "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.OperationalInsights/workspaces/{workspace-id}"
+  - name: Create a private OpenShift cluster
+    text: az openshift create -g MyResourceGroup -n MyManagedCluster --private-cluster --management-subnet-cidr 10.0.1.0/24
 """
 
 helps['openshift delete'] = """
@@ -1035,4 +1019,16 @@ examples:
   - name: Disable Log Analytics monitoring.
     text: |-
         az openshift monitor disable -g MyResourceGroup -n MyManagedCluster
+"""
+
+helps['openshift update'] = """
+type: command
+short-summary: Commands to manage existing Openshift cluster.
+parameters:
+  - name: --refresh-cluster
+    type: boolean
+examples:
+  - name: Trigger nodes rotation.
+    text: az openshift update -g MyResourceGroup -n MyManagedCluster --refresh-cluster
+    crafted: true
 """

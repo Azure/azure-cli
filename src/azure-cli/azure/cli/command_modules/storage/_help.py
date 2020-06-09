@@ -53,6 +53,8 @@ examples:
     text: az storage account blob-service-properties update --enable-change-feed true -n MyStorageAccount -g MyResourceGroup
   - name: Enable delete retention policy and set delete retention days to 100 for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
     text: az storage account blob-service-properties update --enable-delete-retention true --delete-retention-days 100 -n MyStorageAccount -g MyResourceGroup
+  - name: Enable versioning for the storage account 'MyStorageAccount' in resource group 'MyResourceGroup'.
+    text: az storage account blob-service-properties update --enable-versioning -n MyStorageAccount -g MyResourceGroup
 """
 
 helps['storage account create'] = """
@@ -81,6 +83,76 @@ examples:
     text: az storage account delete -n MyStorageAccount -g MyResourceGroup
 """
 
+helps['storage account encryption-scope'] = """
+type: group
+short-summary: Manage encryption scope for a storage account.
+"""
+
+helps['storage account encryption-scope create'] = """
+type: command
+short-summary: Create an encryption scope within storage account.
+examples:
+  - name: Create an encryption scope within storage account based on Micosoft.Storage key source.
+    text: |
+        az storage account encryption-scope create --name myencryption -s Microsoft.Storage --account-name mystorageaccount -g MyResourceGroup
+  - name: Create an encryption scope within storage account based on Micosoft.KeyVault key source.
+    text: |
+        az storage account encryption-scope create --name myencryption -s Microsoft.KeyVault -u "https://vaultname.vault.azure.net/keys/keyname/1f7fa7edc99f4cdf82b5b5f32f2a50a7" --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope list'] = """
+type: command
+short-summary: List encryption scopes within storage account.
+examples:
+  - name: List encryption scopes within storage account.
+    text: |
+        az storage account encryption-scope list --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope show'] = """
+type: command
+short-summary: Show properties for specified encryption scope within storage account.
+examples:
+  - name: Show properties for specified encryption scope within storage account.
+    text: |
+        az storage account encryption-scope show --name myencryption --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account encryption-scope update'] = """
+type: command
+short-summary: Update properties for specified encryption scope within storage account.
+examples:
+  - name: Update an encryption scope key source to Micosoft.Storage.
+    text: |
+        az storage account encryption-scope update --name myencryption -s Microsoft.Storage --account-name mystorageaccount -g MyResourceGroup
+  - name: Create an encryption scope within storage account based on Micosoft.KeyVault key source.
+    text: |
+        az storage account encryption-scope update --name myencryption -s Microsoft.KeyVault -u "https://vaultname.vault.azure.net/keys/keyname/1f7fa7edc99f4cdf82b5b5f32f2a50a7" --account-name mystorageaccount -g MyResourceGroup
+  - name: Disable an encryption scope within storage account.
+    text: |
+        az storage account encryption-scope update --name myencryption --state Disabled --account-name mystorageaccount -g MyResourceGroup
+  - name: Enable an encryption scope within storage account.
+    text: |
+        az storage account encryption-scope update --name myencryption --state Enabled --account-name mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account failover'] = """
+type: command
+short-summary: Failover request can be triggered for a storage account in case of availability issues.
+long-summary: |
+    The failover occurs from the storage account's primary cluster to secondary cluster for (RA-)GRS/GZRS accounts. The secondary
+    cluster will become primary after failover. For more information, please refer to
+    https://docs.microsoft.com/en-us/azure/storage/common/storage-disaster-recovery-guidance.
+examples:
+  - name: Failover a storage account.
+    text: |
+        az storage account failover -n mystorageaccount -g MyResourceGroup
+  - name: Failover a storage account without waiting for complete.
+    text: |
+        az storage account failover -n mystorageaccount -g MyResourceGroup --no-wait
+        az storage account show -n mystorageaccount --expand geoReplicationStats
+"""
+
 helps['storage account generate-sas'] = """
 type: command
 parameters:
@@ -107,6 +179,33 @@ examples:
     text: |
         az storage account generate-sas --account-key 00000000 --account-name MyStorageAccount --expiry 2020-01-01 --https-only --permissions acuw --resource-types co --services bfqt
     crafted: true
+"""
+
+helps['storage account file-service-properties'] = """
+type: group
+short-summary: Manage the properties of file service in storage account.
+"""
+
+helps['storage account file-service-properties show'] = """
+type: command
+short-summary: Show the properties of file service in storage account.
+long-summary: >
+    Show the properties of file service in storage account.
+examples:
+  - name: Show the properties of file service in storage account.
+    text: az storage account file-service-properties show -n mystorageaccount -g MyResourceGroup
+"""
+
+helps['storage account file-service-properties update'] = """
+type: command
+short-summary: Update the properties of file service in storage account.
+long-summary: >
+    Update the properties of file service in storage account.
+examples:
+  - name: Enable soft delete policy and set delete retention days to 100 for file service in storage account.
+    text: az storage account file-service-properties update --enable-delete-retention true --delete-retention-days 100 -n mystorageaccount -g MyResourceGroup
+  - name: Disable soft delete policy for file service.
+    text: az storage account file-service-properties update --enable-delete-retention false -n mystorageaccount -g MyResourceGroup
 """
 
 helps['storage account keys'] = """
@@ -179,7 +278,9 @@ examples:
   - name: Create a rule to allow a specific address-range.
     text: az storage account network-rule add -g myRg --account-name mystorageaccount --ip-address 23.45.1.0/24
   - name: Create a rule to allow access for a subnet.
-    text: az storage account network-rule add -g myRg --account-name mystorageaccount --vnet myvnet --subnet mysubnet
+    text: az storage account network-rule add -g myRg --account-name mystorageaccount --vnet-name myvnet --subnet mysubnet
+  - name: Create a rule to allow access for a subnet in another resource group.
+    text: az storage account network-rule add -g myRg --account-name mystorageaccount  --subnet $subnetId
 """
 
 helps['storage account network-rule list'] = """
@@ -812,7 +913,7 @@ examples:
         end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
         sas=`az storage container generate-sas -n mycontainer --https-only --permissions dlrw --expiry $end -o tsv`
         az storage blob upload -n MyBlob -c mycontainer -f file.txt --sas-token $sas
-  - name: Generates a shared access signature for the container (autogenerated)
+  - name: Generate a shared access signature for the container (autogenerated)
     text: |
         az storage container generate-sas --account-key 00000000 --account-name mystorageaccount --expiry 2020-01-01 --name mycontainer --permissions dlrw
     crafted: true
@@ -998,7 +1099,7 @@ short-summary: List directories in a share.
 examples:
   - name: List directories in a share. (autogenerated)
     text: |
-        az storage directory list --account-name MyAccount --share-name MyShare
+        az storage directory list --account-key 00000000 --account-name MyAccount --share-name MyShare
     crafted: true
 """
 
@@ -1179,10 +1280,6 @@ examples:
     text: |
         az storage file download-batch --account-key 00000000 --account-name MyAccount --destination . --no-progress --source /path/to/file
     crafted: true
-  - name: Download files from an Azure Storage File Share to a local directory in a batch operation. (autogenerated)
-    text: |
-        az storage file download-batch --destination . --pattern *.py --source /path/to/file
-    crafted: true
 """
 
 helps['storage file exists'] = """
@@ -1291,9 +1388,328 @@ examples:
     crafted: true
 """
 
+helps['storage fs'] = """
+type: group
+short-summary: Manage file systems in Azure Data Lake Storage Gen2 account.
+"""
+
+helps['storage fs access'] = """
+type: group
+short-summary: Manage file system access and permissions for Azure Data Lake Storage Gen2 account.
+"""
+
+helps['storage fs access set'] = """
+type: command
+short-summary: Set the access control properties of a path(directory or file) in Azure Data Lake Storage Gen2 account.
+parameters:
+    - name: --acl
+      short-summary: Invalid in conjunction with acl. POSIX access control rights on files and directories in the format "[scope:][type]:[id]:[permissions]". e.g. "user::rwx,group::r--,other::---,mask::rwx".
+      long-summary: >
+        The value is a comma-separated list of access control entries. Each access control entry (ACE) consists of a scope,
+        a type, a user or group identifier, and permissions in the format "[scope:][type]:[id]:[permissions]".
+        The scope must be "default" to indicate the ACE belongs to the default ACL for a directory;
+        otherwise scope is implicit and the ACE belongs to the access ACL. There are four ACE types:
+        "user" grants rights to the owner or a named user, "group" grants rights to the owning group
+        or a named group, "mask" restricts rights granted to named users and the members of groups,
+        and "other" grants rights to all users not found in any of the other entries.
+        The user or group identifier is omitted for entries of type "mask" and "other".
+        The user or group identifier is also omitted for the owner and owning group.
+        For example, the following ACL grants read, write, and execute rights to the file owner an
+        john.doe@contoso, the read right to the owning group, and nothing to everyone else:
+        "user::rwx,user:john.doe@contoso:rwx,group::r--,other::---,mask::rwx".
+        For more information, please refer to https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control.
+    - name: --permissions
+      short-summary: >
+        Invalid in conjunction with acl. POSIX access permissions for the file owner, the file owning group, and others.
+        Each class may be granted read(r), write(w), or execute(x) permission. Both symbolic (rwxrw-rw-) and 4-digit octal
+        notation (e.g. 0766) are supported.'
+    - name: --owner
+      short-summary: >
+        The owning user of the file or directory. The user Azure Active Directory object ID or user principal name to
+        set as the owner. For more information, please refer to
+        https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#the-owning-user.
+    - name: --group
+      short-summary: >
+        The owning group of the file or directory. The group Azure Active Directory object ID or user principal name to
+        set as the owning group. For more information, please refer to
+        https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#changing-the-owning-group.
+examples:
+    - name: Set the access control list of a path.
+      text: az storage fs access set --acl "user::rwx,group::r--,other::---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
+    - name: Set permissions of a path.
+      text: az storage fs access set --permissions "rwxrwx---" -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
+    - name: Set owner of a path.
+      text: az storage fs access set --owner example@microsoft.com -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
+    - name: Set owning group of a path.
+      text: az storage fs access set --group 68390a19-a897-236b-b453-488abf67b4dc -p dir -f myfilesystem --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage fs access show'] = """
+type: command
+short-summary: Show the access control properties of a path (directory or file) in Azure Data Lake Storage Gen2 account.
+examples:
+    - name: Show the access control properties of a path.
+      text: az storage fs access show -p dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs create'] = """
+type: command
+short-summary: Create file system for Azure Data Lake Storage Gen2 account.
+examples:
+  - name: Create file system for Azure Data Lake Storage Gen2 account.
+    text: |
+        az storage fs create -n fsname --account-name mystorageaccount --account-key 0000-0000
+  - name: Create file system for Azure Data Lake Storage Gen2 account and enable public access.
+    text: |
+        az storage fs create -n fsname --public-access file --account-name mystorageaccount --account-key 0000-0000
+"""
+
+helps['storage fs delete'] = """
+type: command
+short-summary: Delete a file system in ADLS Gen2 account.
+examples:
+    - name: Delete a file system in ADLS Gen2 account.
+      text: az storage fs delete -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs exists'] = """
+type: command
+short-summary: Check for the existence of a file system in ADLS Gen2 account.
+examples:
+    - name: Check for the existence of a file system in ADLS Gen2 account.
+      text: az storage fs exists -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs list'] = """
+type: command
+short-summary: List file systems in ADLS Gen2 account.
+examples:
+    - name: List file systems in ADLS Gen2 account.
+      text: az storage fs list --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs show'] = """
+type: command
+short-summary: Show properties of file system in ADLS Gen2 account.
+examples:
+    - name: Show properties of file system in ADLS Gen2 account.
+      text: az storage fs show -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory'] = """
+type: group
+short-summary: Manage directories in Azure Data Lake Storage Gen2 account.
+"""
+
+helps['storage fs directory create'] = """
+type: command
+short-summary: Create a directory in ADLS Gen2 file system.
+examples:
+    - name: Create a directory in ADLS Gen2 file system.
+      text: az storage fs directory create -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: Create a directory in ADLS Gen2 file system through connection string.
+      text: az storage fs directory create -n dir -f myfilesystem --connection-string myconnectionstring
+"""
+
+helps['storage fs directory delete'] = """
+type: command
+short-summary: Delete a directory in ADLS Gen2 file system.
+examples:
+    - name: Delete a directory in ADLS Gen2 file system.
+      text: az storage fs directory delete -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory exists'] = """
+type: command
+short-summary: Check for the existence of a directory in ADLS Gen2 file system.
+examples:
+    - name: Check for the existence of a directory in ADLS Gen2 file system.
+      text: az storage fs directory exists -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory list'] = """
+type: command
+short-summary: List directories in ADLS Gen2 file system.
+examples:
+    - name: List directories in ADLS Gen2 file system.
+      text: az storage fs directory list -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: List directories in "dir/" for ADLS Gen2 file system.
+      text: az storage fs directory list --path dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory metadata'] = """
+type: group
+short-summary: Manage the metadata for directory in file system.
+"""
+
+helps['storage fs directory metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified directory.
+examples:
+  - name: Return all user-defined metadata for the specified directory.
+    text: az storage fs directory metadata show -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory move'] = """
+type: command
+short-summary: Move a directory in ADLS Gen2 file system.
+examples:
+    - name: Move a directory a directory in ADLS Gen2 file system.
+      text: az storage fs directory move --new-directory newfs/dir -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs directory show'] = """
+type: command
+short-summary: Show properties of a directory in ADLS Gen2 file system.
+examples:
+    - name: Show properties of a directory in ADLS Gen2 file system.
+      text: az storage fs directory show -n dir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+    - name: Show properties of a subdirectory in ADLS Gen2 file system.
+      text: az storage fs directory show -n dir/subdir -f myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file'] = """
+type: group
+short-summary: Manage files in Azure Data Lake Storage Gen2 account.
+"""
+
+helps['storage fs file append'] = """
+type: command
+short-summary: Append content to a file in ADLS Gen2 file system.
+examples:
+  - name: Append content to a file in ADLS Gen2 file system.
+    text: |
+        az storage fs file append --content "test content test" -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file create'] = """
+type: command
+short-summary: Create a new file in ADLS Gen2 file system.
+examples:
+  - name: Create a new file in ADLS Gen2 file system.
+    text: |
+        az storage fs file create -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file delete'] = """
+type: command
+short-summary: Delete a file in ADLS Gen2 file system.
+examples:
+  - name: Delete a file in ADLS Gen2 file system.
+    text: |
+        az storage fs file delete -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file download'] = """
+type: command
+short-summary: Download a file from the specified path in ADLS Gen2 file system.
+examples:
+  - name: Download a file in ADLS Gen2 file system to current path.
+    text: |
+        az storage fs file download -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+  - name: Download a file in ADLS Gen2 file system to a specified directory.
+    text: |
+        az storage fs file download -p dir/a.txt -d test/ -f fsname --account-name myadlsaccount --account-key 0000-0000
+  - name: Download a file in ADLS Gen2 file system to a specified file path.
+    text: |
+        az storage fs file download -p dir/a.txt -d test/b.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file exists'] = """
+type: command
+short-summary: Check for the existence of a file in ADLS Gen2 file system.
+examples:
+  - name: Check for the existence of a file in ADLS Gen2 file system.
+    text: |
+        az storage fs file exists -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file list'] = """
+type: command
+short-summary: List files and directories in ADLS Gen2 file system.
+examples:
+  - name:  List files and directories in ADLS Gen2 file system.
+    text: |
+        az storage fs file list -f fsname --account-name myadlsaccount --account-key 0000-0000
+  - name:  List files in ADLS Gen2 file system.
+    text: |
+        az storage fs file list --exclude-dir -f fsname --account-name myadlsaccount --account-key 0000-0000
+  - name:  List files and directories in a specified path.
+    text: |
+        az storage fs file list --path dir -f fsname --account-name myadlsaccount --account-key 0000-0000
+  - name:  List files and directories from a specific marker.
+    text: |
+        az storage fs file list --marker "VBaS6LvPufaqrTANTQvbmV3dHJ5FgAAAA==" -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file metadata'] = """
+type: group
+short-summary: Manage the metadata for file in file system.
+"""
+
+helps['storage fs metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified file.
+examples:
+  - name: Return all user-defined metadata for the specified file.
+    text: az storage fs file metadata show -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file move'] = """
+type: command
+short-summary: Move a file in ADLS Gen2 Account.
+examples:
+  - name:  Move a file in ADLS Gen2 Account.
+    text: |
+        az storage fs file move --new-path new-fs/new-dir/b.txt -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file show'] = """
+type: command
+short-summary: Show properties of file in ADLS Gen2 file system.
+examples:
+  - name:  Show properties of file in ADLS Gen2 file system.
+    text: |
+        az storage fs file show -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs file upload'] = """
+type: command
+short-summary: Upload a file to a file path in ADLS Gen2 file system.
+examples:
+  - name:  Upload a file from local path to a file path in ADLS Gen2 file system.
+    text: |
+        az storage fs file upload --source a.txt -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
+"""
+
+helps['storage fs metadata'] = """
+type: group
+short-summary: Manage the metadata for file system.
+"""
+
+helps['storage fs metadata show'] = """
+type: command
+short-summary: Return all user-defined metadata for the specified file system.
+examples:
+  - name: Return all user-defined metadata for the specified file system.
+    text: az storage fs metadata show -n myfilesystem --account-name myadlsaccount --account-key 0000-0000
+"""
+
 helps['storage logging'] = """
 type: group
 short-summary: Manage storage service logging information.
+"""
+
+helps['storage logging off'] = """
+type: command
+short-summary: Turn off logging for a storage account.
+parameters:
+  - name: --services
+    short-summary: 'The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.'
+examples:
+  - name: Turn off logging for a storage account.
+    text: |
+        az storage logging off --account-name MyAccount
 """
 
 helps['storage logging show'] = """
@@ -1563,10 +1979,6 @@ examples:
   - name: Create a URI to access a file share. (autogenerated)
     text: |
         az storage share url --account-key 00000000 --account-name MyAccount --name MyFileShare
-    crafted: true
-  - name: Create a URI to access a file share. (autogenerated)
-    text: |
-        az storage share url --connection-string $connectionString --name MyFileShare
     crafted: true
 """
 

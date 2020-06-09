@@ -76,7 +76,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('agentPoolProfiles[0].nodeLabels.label1','value1'),
             self.check('agentPoolProfiles[0].nodeLabels.label2','value2'),
@@ -128,7 +128,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'service_principal': sp_name,
             'client_secret': sp_password,
             'k8s_version': create_version,
-            'vm_size': 'Standard_DS2_v2'
+            'vm_size': 'Standard_D2s_v3'
         })
 
         # create --no-wait
@@ -146,7 +146,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles', None)
@@ -183,7 +183,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
             self.check('addonProfiles.httpApplicationRouting.enabled', True)
@@ -415,7 +415,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
             self.check('addonProfiles.omsagent.enabled', True),
@@ -455,7 +455,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
             self.check('addonProfiles.omsagent.enabled', True),
@@ -520,7 +520,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'AvailabilitySet'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -591,7 +591,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -676,7 +676,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -765,7 +765,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -855,7 +855,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -965,7 +965,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -1069,7 +1069,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].type', 'VirtualMachineScaleSets'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
@@ -1151,7 +1151,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].mode', 'System'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion')
@@ -1257,7 +1257,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].mode', 'System'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion')
@@ -1368,7 +1368,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 3),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('agentPoolProfiles[0].availabilityZones[0]', '1'),
             self.check('agentPoolProfiles[0].availabilityZones[1]', '2'),
             self.check('agentPoolProfiles[0].availabilityZones[2]', '3'),
@@ -1400,7 +1400,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     @RoleBasedServicePrincipalPreparer()
-    def test_aks_managed_identity(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_managed_identity_with_service_principal(self, resource_group, resource_group_location, sp_name, sp_password):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
@@ -1450,7 +1450,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS2_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion'),
             self.exists('identity'),
@@ -1465,6 +1465,178 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
             os.close(fd)
+            os.remove(temp_path)
+
+        # scale up
+        self.cmd('aks scale -g {resource_group} -n {name} --node-count 3', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # show again
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('agentPoolProfiles[0].count', 3)
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_paid_sku(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} --uptime-sla '
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.tier', 'Paid')
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_windows(self, resource_group, resource_group_location, sp_name, sp_password):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'service_principal': sp_name,
+            'client_secret': sp_password,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'windows_admin_username': 'azureuser1',
+            'windows_admin_password': 'replacePassword1234$',
+            'nodepool2_name': 'npwin',
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--service-principal={service_principal} --client-secret={client_secret} ' \
+                     '--windows-admin-username={windows_admin_username} --windows-admin-password={windows_admin_password} ' \
+                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets --network-plugin=azure'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('windowsProfile.adminUsername', 'azureuser1')
+        ])
+
+        # nodepool add
+        self.cmd('aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --os-type Windows --node-count=1',checks=[
+            self.check('provisioningState', 'Succeeded')
+            ])
+
+        # #nodepool delete
+        self.cmd('aks nodepool delete --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} --no-wait', checks=[self.is_empty()])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    def test_aks_managed_identity_without_service_principal(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 --ssh-key-value={ssh_key_value} ' \
+                     '--enable-managed-identity'
+
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.exists('identity'),
+            self.exists('identityProfile'),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # list
+        self.cmd('aks list -g {resource_group}', checks=[
+            self.check('[0].type', '{resource_type}'),
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # list in tabular format
+        self.cmd('aks list -g {resource_group} -o table', checks=[
+            StringContainCheck(aks_name),
+            StringContainCheck(resource_group)
+        ])
+
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2s_v3'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.exists('kubernetesVersion'),
+            self.exists('identity'),
+            self.exists('identityProfile')
+        ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} --file "{file}"')
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # get-credentials to stdout
+        self.cmd('aks get-credentials -g {resource_group} -n {name} -f -')
+
+        # get-credentials without directory in path
+        temp_path = 'kubeconfig.tmp'
+        self.kwargs.update({'file': temp_path})
+        try:
+            self.cmd('aks get-credentials -g {resource_group} -n {name} -f "{file}"')
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
             os.remove(temp_path)
 
         # scale up

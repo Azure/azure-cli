@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from time import sleep
 from dateutil.tz import tzutc   # pylint: disable=import-error
-
+from azure_devtools.scenario_tests import AllowLargeResponse
 from msrestazure.azure_exceptions import CloudError
 from azure.cli.core.util import CLIError
 from azure.cli.core.util import parse_proxy_resource_id
@@ -32,7 +32,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westus',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='eastus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen5_2'):
@@ -72,16 +72,19 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class ServerMgmtScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_mariadb_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mariadb', resource_group_1, resource_group_2)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_mysql_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mysql', resource_group_1, resource_group_2)
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_postgres_server_mgmt(self, resource_group_1, resource_group_2):
@@ -101,11 +104,13 @@ class ServerMgmtScenarioTest(ScenarioTest):
         family = 'Gen5'
         skuname = 'GP_{}_{}'.format(family, old_cu)
         newskuname = 'GP_{}_{}'.format(family, new_cu)
-        loc = 'westus'
+        loc = 'eastus'
+        default_public_network_access = 'Enabled'
+        public_network_access = 'Disabled'
 
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
-        geoloc = 'westus'
+        geoloc = 'eastus'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
@@ -124,6 +129,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.capacity', old_cu),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                     JMESPathCheck('publicNetworkAccess', default_public_network_access),
                      JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
 
         # test show server
@@ -137,6 +143,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                               JMESPathCheck('tags.key', '1'),
                               JMESPathCheck('sku.capacity', old_cu),
                               JMESPathCheck('sku.tier', edition),
+                              JMESPathCheck('publicNetworkAccess', default_public_network_access),
                               JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
                               JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)]).get_output_in_json()  # pylint: disable=line-too-long
 
@@ -151,6 +158,13 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('tags.key', '2'),
                      JMESPathCheck('administratorLogin', admin_login)])
+
+        self.cmd('{} server update -g {} --name {} --public-network-access {}'
+                 .format(database_engine, resource_group_1, servers[0], public_network_access),
+                 checks=[
+                     JMESPathCheck('name', servers[0]),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('publicNetworkAccess', public_network_access)])
 
         self.cmd('{} server update -g {} --name {} --sku-name {}'
                  .format(database_engine, resource_group_1, servers[0], newskuname),
@@ -199,17 +213,6 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('sslEnforcement', 'Enabled'),
                      JMESPathCheck('tags.key', '3'),
-                     JMESPathCheck('sku.tier', edition),
-                     JMESPathCheck('administratorLogin', admin_login)])
-
-        self.cmd('{} server restore -g {} --name {} '
-                 '--source-server {} '
-                 '--restore-point-in-time {}'
-                 .format(database_engine, resource_group_2, servers[1], result['id'],
-                         datetime.utcnow().replace(tzinfo=tzutc()).isoformat()),
-                 checks=[
-                     JMESPathCheck('name', servers[1]),
-                     JMESPathCheck('resourceGroup', resource_group_2),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
 
@@ -273,6 +276,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, database_engine, 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
         self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('mysql', 24))
+        self._test_aad_admin(resource_group, server, database_engine)
 
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='postgres')
@@ -285,6 +289,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, database_engine, 'postgresqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine)
         self._test_data_encryption(resource_group, server, database_engine, self.create_random_name('pgsql', 24))
+        self._test_aad_admin(resource_group, server, database_engine)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
         firewall_rule_1 = 'rule1'
@@ -372,7 +377,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     def _test_vnet_firewall_mgmt(self, resource_group, server, database_engine):
         vnet_firewall_rule_1 = 'vnet_rule1'
         vnet_firewall_rule_2 = 'vnet_rule2'
-        location = 'westus'
+        location = 'eastus'
         vnet_name = 'clitestvnet'
         ignore_missing_endpoint = 'true'
         address_prefix = '10.0.0.0/16'
@@ -548,7 +553,6 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         approval_description = 'You are approved!'
         rejection_description = 'You are rejected!'
-        api_version = '2018-06-01' if database_engine == 'mariadb' else '2017-12-01'
         expectedError = 'Private Endpoint Connection Status is not Pending'
 
         # Testing Auto-Approval workflow
@@ -564,12 +568,12 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(private_endpoint['privateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
         # Get Private Endpoint Connection Name and Id
-        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
-                          .format(server_id, api_version, server)).get_output_in_json()
-        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
-        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Approved')
-        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        server_pec_id = result['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
@@ -605,12 +609,12 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
         # Get Private Endpoint Connection Name and Id
-        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
-                          .format(server_id, api_version, server)).get_output_in_json()
-        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
-        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Pending')
-        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        server_pec_id = result['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
@@ -650,12 +654,12 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertEqual(private_endpoint['manualPrivateLinkServiceConnections'][0]['groupIds'][0], group_id)
 
         # Get Private Endpoint Connection Name and Id
-        result = self.cmd('rest --method get --uri https://management.azure.com{}?api-version={}'
-                          .format(server_id, api_version, server)).get_output_in_json()
-        self.assertEqual(len(result['properties']['privateEndpointConnections']), 1)
-        self.assertEqual(result['properties']['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
+        result = self.cmd('{} server show -g {} -n {}'
+                          .format(database_engine, resource_group, server)).get_output_in_json()
+        self.assertEqual(len(result['privateEndpointConnections']), 1)
+        self.assertEqual(result['privateEndpointConnections'][0]['properties']['privateLinkServiceConnectionState']['status'],
                          'Pending')
-        server_pec_id = result['properties']['privateEndpointConnections'][0]['id']
+        server_pec_id = result['privateEndpointConnections'][0]['id']
         result = parse_proxy_resource_id(server_pec_id)
         server_pec_name = result['child_name_1']
 
@@ -692,7 +696,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         server_identity = server_resp['identity']['principalId']
 
         # create vault and acl server identity
-        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true --enable-purge-protection true'
+        self.cmd('keyvault create -g {} -n {} --location eastus --enable-soft-delete true --enable-purge-protection true'
                  .format(resource_group, vault_name))
 
         # create key
@@ -733,6 +737,45 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.cmd('{} server key list -g {} -s {}'
                  .format(database_engine, resource_group, server),
                  checks=[JMESPathCheck('length(@)', 0)])
+
+    def _test_aad_admin(self, resource_group, server, database_engine):
+        oid = '5e90ef3b-9b42-4777-819b-25c36961ea4d'
+        oid2 = 'e4d43337-d52c-4a0c-b581-09055e0359a0'
+        user = 'DSEngAll'
+        user2 = 'TestUser'
+
+        self.cmd('{} server ad-admin create --server-name {} -g {} -i {} -u {}'
+                 .format(database_engine, server, resource_group, oid, user),
+                 checks=[
+                     self.check('login', user),
+                     self.check('sid', oid)])
+
+        self.cmd('{} server ad-admin show --server-name {} -g {}'
+                 .format(database_engine, server, resource_group),
+                 checks=[
+                     self.check('login', user),
+                     self.check('sid', oid)])
+
+        self.cmd('{} server ad-admin list --server-name {} -g {}'
+                 .format(database_engine, server, resource_group),
+                 checks=[
+                     self.check('[0].login', user),
+                     self.check('[0].sid', oid)])
+
+        self.cmd('{} server ad-admin create --server-name {} -g {} -i {} -u {} --no-wait'
+                 .format(database_engine, server, resource_group, oid2, user2))
+
+        self.cmd('{} server ad-admin wait --server-name {} -g {} --created'
+                 .format(database_engine, server, resource_group))
+
+        self.cmd('{} server ad-admin delete --server-name {} -g {} --yes'
+                 .format(database_engine, server, resource_group))
+
+        self.cmd('{} server ad-admin list --server-name {} -g {}'
+                 .format(database_engine, server, resource_group),
+                 checks=[
+                     self.check('[0].login', None),
+                     self.check('[0].sid', None)])
 
 
 class ReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods

@@ -1780,69 +1780,69 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
 
 def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
-                        ttl=None):
+                        ttl=3600, if_none_match=None):
     AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
-                     ttl=None):
+                     ttl=3600, if_none_match=None):
     ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name, 'arecords',
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag,
-                       ttl=None):
+                       ttl=3600, if_none_match=None):
     CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
-def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=None):
+def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=3600, if_none_match=None):
     CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CnameRecord(cname=cname)
     record_type = 'cname'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False, ttl=ttl)
+                            is_list=False, ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
-                      ttl=None):
+                      ttl=3600, if_none_match=None):
     MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
 def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
-                      subscription_id=None, ttl=None):
+                      subscription_id=None, ttl=3600, if_none_match=None):
     NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            subscription_id=subscription_id, ttl=ttl)
+                            subscription_id=subscription_id, ttl=ttl, if_none_match=if_none_match)
 
 
-def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=None):
+def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=3600, if_none_match=None):
     PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            ttl=ttl)
+                            ttl=ttl, if_none_match=if_none_match)
 
 
 def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
                           serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
-                          minimum_ttl=None):
+                          minimum_ttl=3600, if_none_match=None):
     record_set_name = '@'
     record_type = 'soa'
 
@@ -1859,18 +1859,19 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
     record.minimum_ttl = minimum_ttl or record.minimum_ttl
 
     return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                            is_list=False)
+                            is_list=False, if_none_match=if_none_match)
 
 
 def add_dns_srv_record(cmd, resource_group_name, zone_name, record_set_name, priority, weight,
-                       port, target):
+                       port, target, if_none_match=None):
     SrvRecord = cmd.get_models('SrvRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = SrvRecord(priority=priority, weight=weight, port=port, target=target)
     record_type = 'srv'
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            if_none_match=if_none_match)
 
 
-def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value):
+def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, value, if_none_match=None):
     TxtRecord = cmd.get_models('TxtRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = TxtRecord(value=value)
     record_type = 'txt'
@@ -1884,7 +1885,8 @@ def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, val
     final_str = ''.join(record.value)
     final_len = len(final_str)
     assert original_len == final_len
-    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name)
+    return _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
+                            if_none_match=if_none_match)
 
 
 def remove_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
@@ -1982,23 +1984,23 @@ def _add_record(record_set, record, record_type, is_list=False):
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
-                     is_list=True, subscription_id=None, ttl=None):
+                     is_list=True, subscription_id=None, ttl=None, if_none_match=None):
     ncf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK_DNS,
                                   subscription_id=subscription_id).record_sets
     try:
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
-        logger.warning("The record set doesn't exist and is automatically created. "
-                       "In the future, an extra argument will be supported to confirm this auto creation.")
         RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        record_set = RecordSet()
+        record_set = RecordSet(ttl=3600)
 
-    record_set.ttl = ttl if ttl is not None else 3600
+    if ttl is not None:
+        record_set.ttl = ttl
 
     _add_record(record_set, record, record_type, is_list)
 
     return ncf.create_or_update(resource_group_name, zone_name, record_set_name,
-                                record_type, record_set)
+                                record_type, record_set,
+                                if_none_match='*' if if_none_match else None)
 
 
 def _remove_record(cli_ctx, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -2105,6 +2107,15 @@ def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location
             instance.bandwidth_in_gbps = (float(bandwidth_in_mbps) / 1000)
 
     return instance
+
+
+def list_express_route_route_tables(cmd, resource_group_name, circuit_name, peering_name, device_path):
+    from azure.cli.core.commands import LongRunningOperation
+
+    client = network_client_factory(cmd.cli_ctx).express_route_circuits
+
+    return LongRunningOperation(cmd.cli_ctx)(
+        client.list_routes_table(resource_group_name, circuit_name, peering_name, device_path)).value
 
 
 def create_express_route_peering_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
@@ -2488,6 +2499,51 @@ def list_private_endpoints(cmd, resource_group_name=None):
     if resource_group_name:
         return client.list(resource_group_name)
     return client.list_by_subscription()
+
+
+def create_private_endpoint_private_dns_zone_group(cmd, resource_group_name, private_endpoint_name,
+                                                   private_dns_zone_group_name,
+                                                   private_dns_zone_name, private_dns_zone):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    PrivateDnsZoneGroup, PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneGroup', 'PrivateDnsZoneConfig')
+    private_dns_zone_group = PrivateDnsZoneGroup(name=private_dns_zone_group_name,
+                                                 private_dns_zone_configs=[PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone,  # pylint: disable=line-too-long
+                                                                                                name=private_dns_zone_name)])  # pylint: disable=line-too-long
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zone_group)
+
+
+def add_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
+                                          private_dns_zone_group_name,
+                                          private_dns_zone_name, private_dns_zone):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    PrivateDnsZoneConfig = cmd.get_models('PrivateDnsZoneConfig')
+    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
+                                        private_endpoint_name=private_endpoint_name,
+                                        private_dns_zone_group_name=private_dns_zone_group_name)
+    private_dns_zone = PrivateDnsZoneConfig(private_dns_zone_id=private_dns_zone, name=private_dns_zone_name)
+    private_dns_zone_group.private_dns_zone_configs.append(private_dns_zone)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zone_group)
+
+
+def remove_private_endpoint_private_dns_zone(cmd, resource_group_name, private_endpoint_name,
+                                             private_dns_zone_group_name,
+                                             private_dns_zone_name):
+    client = network_client_factory(cmd.cli_ctx).private_dns_zone_groups
+    private_dns_zone_group = client.get(resource_group_name=resource_group_name,
+                                        private_endpoint_name=private_endpoint_name,
+                                        private_dns_zone_group_name=private_dns_zone_group_name)
+    private_dns_zone_configs = [item for item in private_dns_zone_group.private_dns_zone_configs if item.name != private_dns_zone_name]  # pylint: disable=line-too-long
+    private_dns_zone_group.private_dns_zone_configs = private_dns_zone_configs
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   private_endpoint_name=private_endpoint_name,
+                                   private_dns_zone_group_name=private_dns_zone_group_name,
+                                   parameters=private_dns_zone_group)
 # endregion
 
 
@@ -3485,7 +3541,7 @@ def _delete_network_watchers(cmd, client, watchers):
 def configure_network_watcher(cmd, client, locations, resource_group_name=None, enabled=None, tags=None):
     watcher_list = list(client.list_all())
     existing_watchers = [w for w in watcher_list if w.location in locations]
-    nonenabled_regions = list(set(locations) - set(l.location for l in existing_watchers))
+    nonenabled_regions = list(set(locations) - set(watcher.location for watcher in existing_watchers))
 
     if enabled is None:
         if resource_group_name is not None:
@@ -5736,6 +5792,37 @@ def create_bastion_host(cmd, resource_group_name, bastion_host_name, virtual_net
 
 def list_bastion_host(cmd, resource_group_name=None):
     client = network_client_factory(cmd.cli_ctx).bastion_hosts
+    if resource_group_name is not None:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+    return client.list()
+# endregion
+
+
+# region security partner provider
+def create_security_partner_provider(cmd, resource_group_name, security_partner_provider_name,
+                                     security_provider_name, virtual_hub, location=None, tags=None):
+    client = network_client_factory(cmd.cli_ctx).security_partner_providers
+    SecurityPartnerProvider, SubResource = cmd.get_models('SecurityPartnerProvider', 'SubResource')
+
+    security_partner_provider = SecurityPartnerProvider(security_provider_name=security_provider_name,
+                                                        virtual_hub=SubResource(id=virtual_hub),
+                                                        location=location,
+                                                        tags=tags)
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   security_partner_provider_name=security_partner_provider_name,
+                                   parameters=security_partner_provider)
+
+
+def update_security_partner_provider(instance, cmd, security_provider_name=None, virtual_hub=None, tags=None):
+    with cmd.update_context(instance) as c:
+        c.set_param('security_provider_name', security_provider_name)
+        c.set_param('virtual_hub', virtual_hub)
+        c.set_param('tags', tags)
+    return instance
+
+
+def list_security_partner_provider(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).security_partner_providers
     if resource_group_name is not None:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list()

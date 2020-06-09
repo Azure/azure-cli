@@ -47,6 +47,26 @@ examples:
             "isEnabled": "true",
             "value": "approver"
         }]
+  - name: Create an application with optional claims
+    text: |
+        az ad app create --display-name mytestapp --optional-claims @manifest.json
+        ("manifest.json" contains the following content)
+        {
+            "idToken": [
+                {
+                    "name": "auth_time",
+                    "source": null,
+                    "essential": false
+                }
+            ],
+            "accessToken": [
+                {
+                    "name": "email",
+                    "source": null,
+                    "essential": false
+                }
+            ]
+        }
 """
 
 helps['ad app credential'] = """
@@ -220,6 +240,26 @@ examples:
             "isEnabled": "true",
             "value": "approver"
         }]
+  - name: update optional claims
+    text: |
+        az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --optional-claims @manifest.json
+        ("manifest.json" contains the following content)
+        {
+            "idToken": [
+                {
+                    "name": "auth_time",
+                    "source": null,
+                    "essential": false
+                }
+            ],
+            "accessToken": [
+                {
+                    "name": "email",
+                    "source": null,
+                    "essential": false
+                }
+            ]
+        }
   - name: update an application's group membership claims to "All"
     text: >
         az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --set groupMembershipClaims=All

@@ -19,7 +19,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
-                   assign_identity=False):
+                   assign_identity=False, public_network_access=None):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
@@ -36,6 +36,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                public_network_access=public_network_access,
                 storage_profile=mysql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -54,6 +55,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                public_network_access=public_network_access,
                 storage_profile=postgresql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -72,6 +74,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 administrator_login_password=administrator_login_password,
                 version=version,
                 ssl_enforcement=ssl_enforcement,
+                public_network_access=public_network_access,
                 storage_profile=mariadb.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -289,7 +292,8 @@ def _server_update_custom_func(instance,
                                ssl_enforcement=None,
                                tags=None,
                                auto_grow=None,
-                               assign_identity=False):
+                               assign_identity=False,
+                               public_network_access=None):
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
@@ -317,7 +321,8 @@ def _server_update_custom_func(instance,
                                     administrator_login_password=administrator_login_password,
                                     version=None,
                                     ssl_enforcement=ssl_enforcement,
-                                    tags=tags)
+                                    tags=tags,
+                                    public_network_access=public_network_access)
 
     if assign_identity:
         if server_module_path.find('postgres'):
@@ -536,4 +541,38 @@ def _get_server_key_name_from_uri(uri):
     version = uri.split('/')[-1]
     return '{}_{}_{}'.format(vault, key, version)
 
+
+def server_ad_admin_set(client, resource_group_name, server_name, login=None, sid=None):
+    '''
+    Sets a server's AD admin.
+    '''
+
+    if isinstance(client, MySqlServersOperations):
+        from azure.mgmt.rdbms import mysql
+        parameters = mysql.models.ServerAdministratorResource(
+            login=login,
+            sid=sid,
+            tenant_id=_get_tenant_id())
+    else:
+        from azure.mgmt.rdbms import postgresql
+        parameters = postgresql.models.ServerAdministratorResource(
+            login=login,
+            sid=sid,
+            tenant_id=_get_tenant_id())
+
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        properties=parameters)
+
+
+def _get_tenant_id():
+    '''
+    Gets tenantId from current subscription.
+    '''
+    from azure.cli.core._profile import Profile
+
+    profile = Profile()
+    sub = profile.get_subscription()
+    return sub['tenantId']
 # endregion

@@ -181,6 +181,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#DiskEncryptionSetsOperations.{}',
         client_factory=cf_disk_encryption_set
     )
+
     monitor_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.custom#{}',
         exception_handler=monitor_exception_handler)
@@ -275,6 +276,7 @@ def load_command_table(self, _):
         g.command('reapply', 'reapply', supports_no_wait=True, min_api='2019-07-01')
         g.generic_update_command('update', setter_name='update_vm', setter_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
+        g.custom_command('auto-shutdown', 'auto_shutdown_vm')
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
@@ -400,6 +402,7 @@ def load_command_table(self, _):
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.command('get-os-upgrade-history', 'get_os_upgrade_history', min_api='2018-10-01')
+        g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
     with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')

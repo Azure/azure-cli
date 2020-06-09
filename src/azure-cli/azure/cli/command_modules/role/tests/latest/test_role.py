@@ -30,10 +30,19 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
         sp_name = self.create_random_name('cli-test-sp', 15)
         self.kwargs['sp'] = 'http://{}'.format(sp_name)
         self.kwargs['display_name'] = sp_name
+        self.kwargs['display_name_new'] = self.create_random_name('cli-test-sp', 15)
+
         try:
-            self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment', checks=self.check('name', '{sp}'))
+            sp_info = self.cmd('ad sp create-for-rbac -n {display_name} --skip-assignment').get_output_in_json()
+            self.assertTrue(sp_info['name'] == self.kwargs['sp'])
+            # verify password can be used in cli
+            self.kwargs['gen_password'] = sp_info['password']
+            sp_info2 = self.cmd('ad app create --display-name {display_name_new} --password {gen_password}')\
+                .get_output_in_json()
+            self.kwargs['sp_new'] = sp_info2['appId']
         finally:
             self.cmd('ad app delete --id {sp}')
+            self.cmd('ad app delete --id {sp_new}')
 
         # verify we can extrat out disply name from name which starts with protocol
         sp_name2 = self.create_random_name('cli-test-sp', 15)
@@ -102,7 +111,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
 
 class RbacSPKeyVaultScenarioTest2(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_new_kv_cert')
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
         KeyVaultErrorException = get_sdk(self.cli_ctx, ResourceType.DATA_KEYVAULT, 'models.key_vault_error#KeyVaultErrorException')
         subscription_id = self.get_subscription_id()
@@ -137,7 +146,7 @@ class RbacSPKeyVaultScenarioTest2(ScenarioTest):
 
 class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_existing_cert')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(name_prefix='test_create_for_rbac_with_existing_kv_cert')
     def test_create_for_rbac_with_existing_kv_cert(self, resource_group, key_vault):
 
         import time
@@ -348,7 +357,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
             self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
             time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
-            base_dir = os.curdir
+            base_dir = os.path.abspath(os.curdir)
+
             try:
                 temp_dir = self.create_temp_dir()
                 os.chdir(temp_dir)
@@ -368,7 +378,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list --assignee {upn} --role reader --scope ' + rg_id, checks=self.check('length([])', 0))
             finally:
                 self.cmd('configure --default group="" --scope local')
-                os.chdir(os.path.basename(base_dir))
+                os.chdir(base_dir)
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')

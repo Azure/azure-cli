@@ -173,7 +173,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
-        set_custom_properties(result, 'Installer', os.getenv('AZ_INSTALLER'))
+        from azure.cli.core._environment import _ENV_AZ_INSTALLER
+        set_custom_properties(result, 'Installer', os.getenv(_ENV_AZ_INSTALLER))
 
         return result
 
@@ -200,6 +201,10 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 
 
 _session = TelemetrySession()
+
+
+def has_exceptions():
+    return len(_session.exceptions) > 0
 
 
 def _user_agrees_to_telemetry(func):

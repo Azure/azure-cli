@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import LiveScenarioTest, ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from knack.util import CLIError
 
 
 class TestMonitorAutoscaleScenario(ScenarioTest):
@@ -97,6 +98,9 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
 
         # verify order is stable
         list_1 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
+        with self.assertRaisesRegexp(CLIError, 'Please double check the name of the autoscale profile.'):
+            self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name falseprofile')
+
         list_2 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
         self.assertTrue(len(list_1) == 3 and len(list_2) == 3)
         for x in range(len(list_1)):
