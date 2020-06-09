@@ -19,7 +19,8 @@ from azure.identity import (
     UsernamePasswordCredential,
     ClientSecretCredential,
     CertificateCredential,
-    ManagedIdentityCredential
+    ManagedIdentityCredential,
+    CredentialUnavailableError
 )
 
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
@@ -183,6 +184,9 @@ class Identity:
                     credential = ManagedIdentityCredential(client_id=identity_id)
                     id_type = self.MANAGED_IDENTITY_CLIENT_ID
                     authenticated = True
+                except CredentialUnavailableError as e:
+                    logger.debug('MSI authentication error: %s', e.message)
+                    logger.info('Sniff: not an MSI client id')
                 except HTTPError as ex:
                     if ex.response.reason == 'Bad Request' and ex.response.status == 400:
                         logger.info('Sniff: not an MSI client id')
