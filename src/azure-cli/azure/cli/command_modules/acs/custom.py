@@ -2135,6 +2135,7 @@ def aks_update(cmd, client, resource_group_name, name,
                                                           load_balancer_outbound_ports,
                                                           load_balancer_idle_timeout)
 
+     # pylint: disable=too-many-boolean-expressions
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
             not detach_acr and
