@@ -1535,11 +1535,59 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
 def create_shared_extension(cmd, client, resource_group_name, shared_vm_extension_name, label=None, description=None,
                             company_name=None, eula=None, privacy=None, homepage=None, location=None, tags=None,
                             no_wait=False):
-    pass
+    body = {}
+    if location is not None:
+        body['location'] = location
+    if tags is not None:
+        body['tags'] = tags
+    if label is not None:
+        body['label'] = label
+    if description is not None:
+        body['description'] = description
+    if company_name is not None:
+        body['company_name'] = company_name
+    if privacy is not None:
+        body['privacy_uri'] = privacy
+    if homepage is not None:
+        body['homepage_uri'] = homepage
+    if eula is not None:
+        body['eula'] = eula
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, shared_vm_extension_name, body)
 
 
-def create_shared_extension_version():
-    pass
+def create_shared_extension_version(cmd, client, resource_group_name, shared_vm_extension_name,
+                                    shared_vm_extension_version_name, media_link=None, regions=None, compute_role=None,
+                                    supported_os=None, support_multiple_extensions=None, is_internal_extension=None,
+                                    disallow_major_version_upgrade=None, rollback_supported=None,
+                                    block_role_upon_failure=None, safe_deployment_policy=None, location=None,
+                                    tags=None, no_wait=False):
+    body = {}
+    if media_link is not None:
+        body['media_link'] = media_link
+    if regions is not None:
+        body['regions'] = regions
+    if compute_role is not None:
+        body['compute_role'] = compute_role
+    if supported_os is not None:
+        body['supported_os'] = supported_os
+    if support_multiple_extensions is not None:
+        body['supports_multiple_extensions'] = support_multiple_extensions
+    if is_internal_extension is not None:
+        body['is_internal_extension'] = is_internal_extension
+    if disallow_major_version_upgrade is not None:
+        body['disallow_major_version_upgrade'] = disallow_major_version_upgrade
+    if rollback_supported is not None:
+        body['rollback_supported'] = rollback_supported
+    if block_role_upon_failure is not None:
+        body['block_role_upon_failure'] = block_role_upon_failure
+    if safe_deployment_policy is not None:
+        body['safe_deployment_policy'] = safe_deployment_policy
+    if location is not None:
+        body['location'] = location
+    if tags is not None:
+        body['tags'] = tags
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, shared_vm_extension_name,
+                       shared_vm_extension_version_name, body)
 # endregion
 
 

@@ -61,6 +61,9 @@ def load_arguments(self, _):
     image_template_name_type = CLIArgumentType(overrides=name_arg_type, id_part='name')
     disk_encryption_set_name = CLIArgumentType(overrides=name_arg_type, help='Name of disk encryption set.', id_part='name')
 
+    shared_vm_extension_name = CLIArgumentType(overrides=name_arg_type, help='Name of Shared VM Extension.',
+                                               id_part='name')
+
     # StorageAccountTypes renamed to DiskStorageAccountTypes in 2018_06_01 of azure-mgmt-compute
     DiskStorageAccountTypes = DiskStorageAccountTypes or StorageAccountTypes
 
@@ -379,13 +382,33 @@ def load_arguments(self, _):
     with self.argument_context('vm extension list') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
 
-    with self.argument_context('vm shared_extension') as c:
+    with self.argument_context('vm shared-extension') as c:
+        c.argument('shared_vm_extension_name', shared_vm_extension_name,
+                   help='The name of the Shared VM Extension. The allowed characters are alphabets and numbers with dots and periods allowed in the middle. The maximum length is 80 characters.')
         c.argument('label', help='The label of this Shared VM Extension.')
         c.argument('description', help='The description of this Shared VM Extension.')
         c.argument('company_name', help='The company name of this Shared VM Extension.')
         c.argument('eula', help='The privacy statement uri.')
         c.argument('privacy', help='The privacy statement URI.')
         c.argument('homepage', help='The homepage URI.')
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
+
+    with self.argument_context('vm shared-extension version') as c:
+        c.argument('shared_vm_extension_name', shared_vm_extension_name, help='The name of the shared VM Extension definition in which the Extension Version is to be created.')
+        c.argument('shared_vm_extension_version_name', options_list=['--version'], help='The name of the shared VM Extension Version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>')
+        c.argument('media_link', help='The link for the extension source package.')
+        c.argument('regions', nargs='+', help='Space-delimited regions to publish the extension version.')
+        c.argument('compute_role', arg_type=get_enum_type(['PaaS', 'IaaS', 'All']), help='Specify the classification of the extension.')
+        c.argument('supported_os', arg_type=get_enum_type(['Windows', 'Linux']), help='Specify the supported OS for this extension.')
+        c.argument('support_multiple_extensions', arg_type=get_three_state_flag(), help='Flag indicating if it supports multiple extensions.')
+        c.argument('is_internal_extension', arg_type=get_three_state_flag(), help='Flag indicating if it is internal extension.')
+        c.argument('disallow_major_version_upgrade', arg_type=get_three_state_flag(), help='Flag indicating if major version upgrade is disallowed.')
+        c.argument('rollback_supported', arg_type=get_three_state_flag(), help='Flag indicating if the extension version supports rollback or not.')
+        c.argument('block_role_upon_failure', arg_type=get_three_state_flag(), help='Flag indicating if extension role should be blocked upon failure.')
+        c.argument('safe_deployment_policy', arg_type=get_enum_type(['Standard', 'Hotfix', 'Minimal']), help='The safe deployment policy for artifact publishing that corresponds to appropriate wait time between each stage of regions.')
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
 
     with self.argument_context('vm secret') as c:
         c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
