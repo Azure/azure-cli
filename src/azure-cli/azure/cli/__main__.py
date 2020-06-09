@@ -29,9 +29,9 @@ logger = get_logger(__name__)
 def cli_main(cli, args):
     return cli.invoke(args)
 
+
 try:
     if sys.argv[1] == 'cloud' and sys.argv[2] == 'import':
-        import os
         from azure.cli.core.cloud import CLOUD_ENDPOINTS_FILE
         from azure.cli.core._session import CLOUD_ENDPOINTS
         CLOUD_ENDPOINTS.load(CLOUD_ENDPOINTS_FILE)
