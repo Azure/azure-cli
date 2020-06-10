@@ -89,7 +89,7 @@ class ProfileCommandTest(unittest.TestCase):
 
         # mock the instance
         profile_instance = mock.MagicMock()
-        profile_instance.find_subscriptions_in_vm_with_msi = test_login
+        profile_instance.login_with_managed_identity = test_login
         # mock the constructor
         profile_mock.return_value = profile_instance
 
