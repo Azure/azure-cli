@@ -385,25 +385,11 @@ def validate_storage_disabled_attribute(attr_arg_name, attr_type):
 
 
 def validate_encryption(ns):
-    if ns.value and ns.plaintext_file:
-        raise CLIError('incorrect usage: --value VALUE | --plaintext-file FILE')
-
-    if not ns.ciphertext_file:
-        raise CLIError('--ciphertext-file is required for encryption.')
-
-    if ns.value:
-        ns.value = _convert_encrypted_value(ns.value)
+    ns.value = _convert_encrypted_value(ns.value)
 
 
 def validate_decryption(ns):
-    if ns.value and ns.ciphertext_file:
-        raise CLIError('incorrect usage: --value VALUE | --ciphertext-file FILE')
-
-    if not ns.plaintext_file:
-        raise CLIError('--plaintext-file is required for decryption.')
-
-    if ns.value:
-        ns.value = _convert_decrypted_value(ns.value)
+    ns.value = _convert_decrypted_value(ns.value)
 
 
 def _convert_encrypted_value(value):

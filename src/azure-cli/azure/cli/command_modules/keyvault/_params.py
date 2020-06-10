@@ -227,8 +227,6 @@ def load_arguments(self, _):
     for scope in ['encrypt', 'decrypt']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
-            c.extra('plaintext_file', options_list=['--plaintext-file', '-p'])
-            c.extra('ciphertext_file', options_list=['--ciphertext-file', '-c'])
 
     with self.argument_context('keyvault key encrypt'.format(scope)) as c:
         c.argument('value', help='The value to be encrypted.'.format(scope), validator=validate_encryption)
