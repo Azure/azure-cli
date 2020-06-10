@@ -106,6 +106,19 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual(api_location, arg_list["static_site_envelope"].build_properties.api_location)
         self.assertEqual(app_artifact_location, arg_list["static_site_envelope"].build_properties.app_artifact_location)
 
+    def test_create_staticapp_missing_token(self):
+        app_location = './src'
+        api_location = './api/'
+        app_artifact_location = '/.git/'
+        tags = {'key1': 'value1'}
+
+        with self.assertRaises(CLIError):
+            create_staticsites(
+                self.mock_cmd, self.rg1, self.name1, self.location1,
+                self.source1, self.branch1,
+                app_location=app_location, api_location=api_location, app_artifact_location=app_artifact_location,
+                tags=tags)
+
 
 def _set_up_client_mock(self):
     self.mock_cmd = mock.MagicMock()
