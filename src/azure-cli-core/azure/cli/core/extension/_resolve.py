@@ -38,7 +38,7 @@ def _is_compatible_with_cli_version(item):
     return False
 
 
-def _is_greater_than_or_equal_to_cur_version(cur_version):
+def _is_greater_than_cur_version(cur_version):
     if not cur_version:
         return None
     cur_version_parsed = parse_version(cur_version)
@@ -65,7 +65,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
         raise NoExtensionCandidatesError("No extension found with name '{}'".format(extension_name))
 
     filters = [_is_not_platform_specific, _is_compatible_with_cli_version,
-               _is_greater_than_or_equal_to_cur_version(cur_version)]
+               _is_greater_than_cur_version(cur_version)]
 
     for f in filters:
         logger.debug("Candidates %s", [c['filename'] for c in candidates])
@@ -81,7 +81,7 @@ def resolve_from_index(extension_name, cur_version=None, index_url=None, target_
         try:
             chosen = [c for c in candidates_sorted if c['metadata']['version'] == target_version][0]
         except IndexError:
-            raise NoExtensionCandidatesError('Extension with version {} not found'.format(cur_version))
+            raise NoExtensionCandidatesError('Extension with version {} not found'.format(target_version))
     else:
         chosen = candidates_sorted[0]
 

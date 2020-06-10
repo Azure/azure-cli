@@ -6,7 +6,7 @@ import unittest
 
 from azure.cli.core.extension._resolve import (resolve_from_index, resolve_project_url_from_index,
                                                NoExtensionCandidatesError, _is_not_platform_specific,
-                                               _is_greater_than_or_equal_to_cur_version)
+                                               _is_greater_than_cur_version)
 from . import IndexPatch, mock_ext
 
 
@@ -64,9 +64,14 @@ class TestResolveFromIndex(unittest.TestCase):
             ]
         }
 
+        # resolve okay
         with IndexPatch(index_data):
             self.assertEqual(resolve_from_index(ext_name, target_version='0.1.0')[0], index_data[ext_name][0]['downloadUrl'])
             self.assertEqual(resolve_from_index(ext_name, target_version='0.2.0')[0], index_data[ext_name][1]['downloadUrl'])
+
+        with IndexPatch(index_data):
+            with self.assertRaisesRegex(NoExtensionCandidatesError, 'Extension with version 0.3.0 not found'):
+                resolve_from_index(ext_name, target_version='0.3.0')
 
 
 class TestResolveFilters(unittest.TestCase):
@@ -80,9 +85,9 @@ class TestResolveFilters(unittest.TestCase):
         self.assertFalse(_is_not_platform_specific(mock_ext('myext-1.1.26.0-py2-none-linux_armv7l.whl')))
 
     def test_greater_than_current(self):
-        self.assertIsNone(_is_greater_than_or_equal_to_cur_version(None))
-        self.assertIsNotNone(_is_greater_than_or_equal_to_cur_version('0.0.1'))
-        filter_func = _is_greater_than_or_equal_to_cur_version('0.0.1')
+        self.assertIsNone(_is_greater_than_cur_version(None))
+        self.assertIsNotNone(_is_greater_than_cur_version('0.0.1'))
+        filter_func = _is_greater_than_cur_version('0.0.1')
         filter_func
         self.assertTrue(filter_func(mock_ext('myext-0.0.2-py2.py3-none-any.whl', '0.0.2')))
         self.assertTrue(filter_func(mock_ext('myext-0.0.1+dev-py2.py3-none-any.whl', '0.0.1+dev')))
