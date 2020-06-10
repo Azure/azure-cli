@@ -6,7 +6,6 @@ import unittest
 import mock
 
 from azure.cli.command_modules.appservice.static_sites import *
-from azure.mgmt.web.models import StaticSiteARMResource
 
 
 class TestStaticAppCommands(unittest.TestCase):
@@ -28,7 +27,7 @@ class TestStaticAppCommands(unittest.TestCase):
 
         response = list_staticsites(self.mock_cmd, self.rg1)
 
-        self.staticapp_client.get_static_sites_by_resource_group.assert_called_with(self.rg1)
+        self.staticapp_client.get_static_sites_by_resource_group.assert_called_once_with(self.rg1)
         self.assertEqual(len(response), 1)
         self.assertIn(self.app1, response)
 
@@ -48,17 +47,8 @@ class TestStaticAppCommands(unittest.TestCase):
 
         response = show_staticsite(self.mock_cmd, self.name1, self.rg1)
 
-        self.staticapp_client.get_static_site.assert_called_with(self.rg1, self.name1)
+        self.staticapp_client.get_static_site.assert_called_once_with(self.rg1, self.name1)
         self.assertEqual(self.app1, response)
-
-
-    def test_show_staticapp_with_not_exist_resourcegroup(self):
-        self.staticapp_client.get_static_site.side_effect = KeyError('resource group')
-
-        with self.assertRaises(KeyError):
-            show_staticsite(self.mock_cmd, self.name1, self.rg1_not_exist)
-
-        self.staticapp_client.get_static_site.assert_called_with(self.rg1_not_exist, self.name1)
 
 
     def test_show_staticapp_without_resourcegroup(self):
@@ -67,25 +57,22 @@ class TestStaticAppCommands(unittest.TestCase):
 
         response = show_staticsite(self.mock_cmd, self.name1)
 
-        self.staticapp_client.get_static_site.assert_called_with(self.rg1, self.name1)
+        self.staticapp_client.get_static_site.assert_called_once_with(self.rg1, self.name1)
         self.assertEqual(self.app1, response)
 
 
-    #TODO implement this
     def test_show_staticapp_not_exist(self):
         self.staticapp_client.get_static_site.return_value = self.app1
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
-        response = show_staticsite(self.mock_cmd, self.name1)
-
-        self.staticapp_client.get_static_site.assert_called_with(self.rg1, self.name1)
-        self.assertEqual(self.app1, response)
+        with self.assertRaises(CLIError):
+            show_staticsite(self.mock_cmd, self.name1_not_exist)
 
 
     def test_delete_staticapp_with_resourcegroup(self):
         delete_staticsite(self.mock_cmd, self.name1, self.rg1)
 
-        self.staticapp_client.delete_static_site.assert_called_with(resource_group_name=self.rg1, name=self.name1)
+        self.staticapp_client.delete_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
 
 
     def test_delete_staticapp_without_resourcegroup(self):
@@ -93,61 +80,58 @@ class TestStaticAppCommands(unittest.TestCase):
 
         delete_staticsite(self.mock_cmd, self.name1)
 
-        self.staticapp_client.delete_static_site.assert_called_with(resource_group_name=self.rg1, name=self.name1)
+        self.staticapp_client.delete_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
 
 
-    #TODO implement this
     def test_delete_staticapp_not_exist(self):
-        self.staticapp_client.list.return_value = [self.app1, self.app2]
-
-        delete_staticsite(self.mock_cmd, self.name1)
-
-        self.staticapp_client.delete_static_site.assert_called_with(resource_group_name=self.rg1, name=self.name1)
+        with self.assertRaises(CLIError):
+            delete_staticsite(self.mock_cmd, self.name1_not_exist)
 
 
-    #TODO implement this
     def test_create_staticapp(self):
-        self.staticapp_client.list.return_value = [self.app1, self.app2]
+        from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
+        self.mock_cmd.get_models.return_value = StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
+        app_location = './src'
+        api_location = './api/'
+        app_artifact_location = '/.git/'
+        tags = { 'key1': 'value1' }
 
-        response = create_staticsites(
+        create_staticsites(
             self.mock_cmd, self.rg1, self.name1, self.location1,
-            self.source1, self.branch1, self.token1)
+            self.source1, self.branch1, self.token1,
+            app_location=app_location, api_location=api_location, app_artifact_location=app_artifact_location,
+            tags=tags)
 
         self.staticapp_client.create_or_update_static_site.assert_called_once()
-        self.assertEqual(type(response), StaticSiteARMResource)
-        self.assertEqual(response.name, self.name1)
-        self.assertEqual(response.resourceGroup, self.rg1)
-        self.assertEqual(response.location, self.location1)
-        self.assertEqual(response.repositoryUrl, self.source1)
-        self.assertEqual(response.branch, self.branch1)
-        self.assertEqual(response.sku.tier, 'Free')
-
-
-def _contruct_static_site_object(rg, app_name, location, source, branch):
-    app = StaticSiteARMResource(location=location, repository_url=source, branch=branch)
-    app.name = app_name
-    app.id = \
-        "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/staticSites/{}".format(rg, app_name)
-    return app
+        arg_list = self.staticapp_client.create_or_update_static_site.call_args.kwargs
+        self.assertEqual(self.name1, arg_list["name"])
+        self.assertEqual(self.rg1, arg_list["resource_group_name"])
+        self.assertEqual(self.location1, arg_list["static_site_envelope"].location)
+        self.assertEqual(self.source1, arg_list["static_site_envelope"].repository_url)
+        self.assertEqual(self.branch1, arg_list["static_site_envelope"].branch)
+        self.assertEqual(tags, arg_list["static_site_envelope"].tags)
+        self.assertEqual('Free', arg_list["static_site_envelope"].sku.name)
+        self.assertEqual(app_location, arg_list["static_site_envelope"].build_properties.app_location)
+        self.assertEqual(api_location, arg_list["static_site_envelope"].build_properties.api_location)
+        self.assertEqual(app_artifact_location, arg_list["static_site_envelope"].build_properties.app_artifact_location)
 
 
 def _set_up_client_mock(self):
-    self.mock_logger = mock.MagicMock()
     self.mock_cmd = mock.MagicMock()
     self.mock_cmd.cli_ctx = mock.MagicMock()
     self.staticapp_client = mock.MagicMock()
 
-    patcher = mock.patch('azure.cli.command_modules.appservice.static_sites._get_staticsites_client_factory',
-                         autospec=True)
-    self.addCleanup(patcher.stop)
-    self.mock_static_site_client_factory = patcher.start()
+    client_factory_patcher = mock.patch(
+        'azure.cli.command_modules.appservice.static_sites._get_staticsites_client_factory', autospec=True)
+    self.addCleanup(client_factory_patcher.stop)
+    self.mock_static_site_client_factory = client_factory_patcher.start()
     self.mock_static_site_client_factory.return_value = self.staticapp_client
 
 
 def _set_up_fake_apps(self):
     self.rg1 = 'rg1'
-    self.rg1_not_exist = 'rg1_not_exist'
     self.name1 = 'name1'
+    self.name1_not_exist = 'name1_not_exist'
     self.location1 = 'location1'
     self.source1 = 'https://github.com/Contoso/My-First-Static-App'
     self.branch1 = 'dev'
@@ -165,3 +149,12 @@ def _set_up_fake_apps(self):
     self.app2 = _contruct_static_site_object(
         self.rg2, self.name2, self.location2,
         self.source2, self.branch2)
+
+
+def _contruct_static_site_object(rg, app_name, location, source, branch):
+    from azure.mgmt.web.models import StaticSiteARMResource
+    app = StaticSiteARMResource(location=location, repository_url=source, branch=branch)
+    app.name = app_name
+    app.id = \
+        "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/staticSites/{}".format(rg, app_name)
+    return app

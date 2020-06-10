@@ -203,13 +203,10 @@ def create_staticsites(cmd, resource_group_name, name, location,
     sku = SkuDescription(name='Free', tier='Free')
 
     staticsite_deployment_properties = StaticSiteARMResource(
-        name=name,
         location=location,
-        type='Microsoft.Web/staticsites',
         tags=tags,
         repository_url=source,
         branch=branch,
-        custom_domains=None,
         repository_token=token,
         build_properties=build,
         sku=sku)
