@@ -212,14 +212,24 @@ def create_policy(client, resource_group_name, vault_name, policy_name, policy, 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 
 
-def set_policy(client, resource_group_name, vault_name, policy, policy_name):
+def set_policy(client, resource_group_name, vault_name, policy, policy_name, fix_for_inconsistent_items):
     if policy_name is None:
         raise CLIError(
             """
             Policy name is required for set policy.
             """)
 
-    policy_object = cust_help.get_policy_from_json(client, policy)
+    if policy is not None:
+        policy_object = cust_help.get_policy_from_json(client, policy)
+    else:
+        if fix_for_inconsistent_items:
+            policy_object = common.show_policy(client, resource_group_name, vault_name, policy_name)
+            policy_object.properties.make_policy_consistent = True
+        else:
+            raise CLIError(
+                """
+                Please provide policy object.
+                """)
 
     return client.create_or_update(vault_name, resource_group_name, policy_name, policy_object)
 

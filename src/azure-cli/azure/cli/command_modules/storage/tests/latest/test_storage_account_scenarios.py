@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
+from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -15,15 +15,14 @@ from azure_devtools.scenario_tests import AllowLargeResponse
 class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_service_endpoints')
-    @StorageAccountPreparer()
-    def test_storage_account_service_endpoints(self, resource_group, storage_account):
+    def test_storage_account_service_endpoints(self, resource_group):
         kwargs = {
             'rg': resource_group,
-            'acc': storage_account,
+            'acc': self.create_random_name(prefix='cli', length=24),
             'vnet': 'vnet1',
             'subnet': 'subnet1'
         }
-        self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny'.format(**kwargs),
+        self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny --https-only'.format(**kwargs),
                  checks=[
                      JMESPathCheck('networkRuleSet.bypass', 'Metrics'),
                      JMESPathCheck('networkRuleSet.defaultAction', 'Deny')])
@@ -323,6 +322,29 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('table.retentionPolicy.enabled', False),
             JMESPathCheck('table.retentionPolicy.days', None)
         ])
+
+    @live_only()
+    @ResourceGroupPreparer()
+    def test_logging_error_operations(self, resource_group):
+        # BlobStorage doesn't support logging for some services
+        blob_storage = self.create_random_name(prefix='blob', length=24)
+        self.cmd('storage account create -g {} -n {} --kind BlobStorage --access-tier hot --https-only'.format(
+            resource_group, blob_storage))
+
+        blob_connection_string = self.cmd(
+            'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, blob_storage)).output
+        with self.assertRaisesRegexp(CLIError, "Your storage account doesn't support logging"):
+            self.cmd('storage logging show --services q --connection-string {}'.format(blob_connection_string))
+
+        # PremiumStorage doesn't support logging for some services
+        premium_storage = self.create_random_name(prefix='premium', length=24)
+        self.cmd('storage account create -g {} -n {} --sku Premium_LRS --https-only'.format(
+            resource_group, premium_storage))
+
+        premium_connection_string = self.cmd(
+            'storage account show-connection-string -g {} -n {} -otsv'.format(resource_group, premium_storage)).output
+        with self.assertRaisesRegexp(CLIError, "Your storage account doesn't support logging"):
+            self.cmd('storage logging show --services q --connection-string {}'.format(premium_connection_string))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
@@ -838,6 +860,44 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result['deleteRetentionPolicy']['enabled'], False)
         self.assertEqual(result['deleteRetentionPolicy']['days'], None)
 
+    class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
+        @ResourceGroupPreparer(name_prefix='cli_file_soft_delete')
+        @StorageAccountPreparer(name_prefix='filesoftdelete', kind='StorageV2', location='eastus2euap')
+        def test_storage_account_file_delete_retention_policy(self, resource_group, storage_account):
+            self.kwargs.update({
+                'sa': storage_account,
+                'rg': resource_group,
+                'cmd': 'storage account file-service-properties'
+            })
+            self.cmd('{cmd} show --account-name {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy', None))
+
+            with self.assertRaises(SystemExit):
+                self.cmd('{cmd} update --enable-delete-retention true -n {sa} -g {rg}')
+
+            with self.assertRaisesRegexp(CLIError, "Delete Retention Policy hasn't been enabled,"):
+                self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}')
+
+            with self.assertRaises(SystemExit):
+                self.cmd('{cmd} update --enable-delete-retention false --delete-retention-days 1')
+
+            self.cmd(
+                '{cmd} update --enable-delete-retention true --delete-retention-days 10 -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', 10))
+
+            self.cmd('{cmd} update --delete-retention-days 1 -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', True),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', 1))
+
+            self.cmd('{cmd} update --enable-delete-retention false -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', None))
+
+            self.cmd('{cmd} show -n {sa} -g {rg}').assert_with_checks(
+                JMESPathCheck('shareDeleteRetentionPolicy.enabled', False),
+                JMESPathCheck('shareDeleteRetentionPolicy.days', 0))
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_test_sa_versioning")
     @StorageAccountPreparer(location="eastus2euap", kind="StorageV2")
@@ -964,3 +1024,47 @@ class StorageAccountSkuScenarioTest(ScenarioTest):
         ])
 
         self.cmd('az storage account delete -n {gzrs_sa} -g {rg} -y')
+
+
+class StorageAccountFailoverScenarioTest(ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    def test_storage_account_failover(self, resource_group):
+        self.kwargs = {
+            'sa': self.create_random_name(prefix="storagegrzs", length=24),
+            'rg': resource_group
+        }
+        self.cmd('storage account create -n {sa} -g {rg} -l westus2 --kind StorageV2 --sku Standard_GZRS --https-only',
+                 checks=[self.check('name', '{sa}'),
+                         self.check('sku.name', 'Standard_GZRS'),
+                         self.check('failoverInProgress', None)])
+
+        self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa}'),
+            self.check('sku.name', 'Standard_GZRS'),
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa} -g {rg} --no-wait -y')
+
+        self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa}'),
+            self.check('failoverInProgress', True)
+        ])
+
+
+class StorageAccountLocalContextScenarioTest(LocalContextScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='clistorage', location='westus2')
+    def test_storage_account_local_context(self):
+        self.kwargs.update({
+            'account_name': self.create_random_name(prefix='cli', length=24)
+        })
+        self.cmd('storage account create -g {rg} -n {account_name} --https-only',
+                 checks=[self.check('name', self.kwargs['account_name'])])
+        self.cmd('storage account show',
+                 checks=[self.check('name', self.kwargs['account_name'])])
+        with self.assertRaises(CLIError):
+            self.cmd('storage account delete')
+        self.cmd('storage account delete -n {account_name} -y')

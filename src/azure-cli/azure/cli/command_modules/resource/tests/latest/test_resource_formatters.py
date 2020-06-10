@@ -344,7 +344,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
                 change_type=ChangeType.modify,
                 delta=[
                     WhatIfPropertyChange(
-                        path="path.a.to.simple.change",
+                        path="path.a.to.change",
                         property_change_type=PropertyChangeType.modify,
                         before="foo",
                         after="bar",
@@ -383,7 +383,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 {Color.PURPLE}
   ~ p1/foo{Color.RESET}
-    {Color.PURPLE}~{Color.RESET} path.a.to.simple.change{Color.RESET}:{Color.RESET} {Color.ORANGE}"foo"{Color.RESET} => {Color.GREEN}"bar"{Color.RESET}
+    {Color.PURPLE}~{Color.RESET} path.a.to.change{Color.RESET}:{Color.RESET} {Color.ORANGE}"foo"{Color.RESET} => {Color.GREEN}"bar"{Color.RESET}
     {Color.PURPLE}~{Color.RESET} path.b.to.nested.change{Color.RESET}:{Color.RESET} [
       {Color.PURPLE}~{Color.RESET} 4{Color.RESET}:{Color.RESET}
 
@@ -401,7 +401,7 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 
         self.assertIn(expected, result)
 
-    def test_no_color_mode(self):
+    def test_json_alignment(self):
         changes = [
             WhatIfChange(
                 resource_id="subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
@@ -411,11 +411,14 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
                     "numberValue": 1.2,
                     "booleanValue": True,
                     "stringValue": "The quick brown fox jumps over the lazy dog.",
+                    "emptyArray": [],
+                    "emptyObject": {},
+                    "arrayContaingValues": ["foo", "bar"],
                 },
             ),
         ]
 
-        expected = f"""
+        expected = """
 Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
 
   - p1/foo [2020-04-01]
@@ -424,6 +427,48 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
       numberValue:  1.2
       booleanValue: true
       stringValue:  "The quick brown fox jumps over the lazy dog."
+      emptyArray:   []
+      emptyObject:  {}
+      arrayContaingValues: [
+        0: "foo"
+        1: "bar"
+      ]
+"""
+
+        result = format_what_if_operation_result(WhatIfOperationResult(changes=changes), False)
+
+        self.assertIn(expected, result)
+
+    def test_property_changes_alignment(self):
+        changes = [
+            WhatIfChange(
+                resource_id="subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1/providers/p1/foo",
+                change_type=ChangeType.modify,
+                delta=[
+                    WhatIfPropertyChange(path="path", property_change_type=PropertyChangeType.delete, before={},),
+                    WhatIfPropertyChange(path="long.path", property_change_type=PropertyChangeType.create, after=[],),
+                    WhatIfPropertyChange(
+                        path="long.nested.path",
+                        property_change_type=PropertyChangeType.array,
+                        children=[
+                            WhatIfPropertyChange(
+                                path="5", property_change_type=PropertyChangeType.delete, before=12345
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ]
+
+        expected = """
+Scope: /subscriptions/00000000-0000-0000-0000-000000000001/resourceGroups/rg1
+
+  ~ p1/foo
+    - path:      {}
+    + long.path: []
+    ~ long.nested.path: [
+      - 5: 12345
+      ]
 """
 
         result = format_what_if_operation_result(WhatIfOperationResult(changes=changes), False)

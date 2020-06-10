@@ -3,6 +3,18 @@
 Release History
 ===============
 
+2.7.0
+++++++
+* Enable local context for location (#13682)
+
+2.6.0
+++++++
+* Update local context on/off status to global user level (#13277)
+
+2.5.1
+++++++
+* Minor fixes
+
 2.5.0
 ++++++
 * Fix logging file fd leaking (#13102)

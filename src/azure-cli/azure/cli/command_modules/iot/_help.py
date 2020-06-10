@@ -685,6 +685,9 @@ examples:
         --endpoint-subscription-id {SubscriptionId} --connection-string {ConnectionString} \\
         --container-name {ContainerName} --batch-frequency 100 --chunk-size 100 \\
         --ff {iothub}-{partition}-{YYYY}-{MM}-{DD}-{HH}-{mm}
+  - name: Add a new identity-based EventHub endpoint named "EventHubIdentity"
+    text: >
+        az iot hub routing-endpoint create --resource-group MyResourceGroup --hub-name MyIotHub --endpoint-name EventHubIdentity --endpoint-type eventhub --endpoint-resource-group {ResourceGroup} --endpoint-subscription-id {SubscriptionId} --auth-type identityBased --endpoint-uri {EventHubEndpointUri} --entity-path {EntityPath}
 """
 
 helps['iot hub routing-endpoint delete'] = """

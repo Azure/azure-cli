@@ -192,7 +192,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
         # test updating updating other properties
         self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete '
                  '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
-                 '--bypass AzureServices --default-action Deny --retention-days 17',
+                 '--bypass AzureServices --default-action Deny',
                  checks=[
                      self.check('name', '{kv}'),
                      self.check('properties.enableSoftDelete', True),
@@ -201,8 +201,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                      self.check('properties.enabledForDiskEncryption', True),
                      self.check('properties.enabledForTemplateDeployment', True),
                      self.check('properties.networkAcls.bypass', 'AzureServices'),
-                     self.check('properties.networkAcls.defaultAction', 'Deny'),
-                     self.check('properties.softDeleteRetentionInDays', 17),
+                     self.check('properties.networkAcls.defaultAction', 'Deny')
                  ])
         # test policy set/delete
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --key-permissions get wrapkey wrapKey',
@@ -359,7 +358,7 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         if os.path.isfile(key_file):
             os.remove(key_file)
 
-        # import PEM
+        # import PEM from file
         self.kwargs.update({
             'key_enc_file': os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'),
             'key_enc_password': 'password',
@@ -367,6 +366,19 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         })
         self.cmd('keyvault key import --vault-name {kv} -n import-key-plain --pem-file "{key_plain_file}" -p software')
         self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password} -p hsm')
+
+        # import PEM from string
+        with open(os.path.join(TEST_DIR, 'mydomain.test.encrypted.pem'), 'rb') as f:
+            key_enc_string = f.read().decode('UTF-8')
+        with open(os.path.join(TEST_DIR, 'mydomain.test.pem'), 'rb') as f:
+            key_plain_string = f.read().decode('UTF-8')
+        self.kwargs.update({
+            'key_enc_string': key_enc_string,
+            'key_enc_password': 'password',
+            'key_plain_string': key_plain_string
+        })
+        self.cmd("keyvault key import --vault-name {kv} -n import-key-plain --pem-string '{key_plain_string}' -p software")
+        self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-string "{key_enc_string}" --pem-password {key_enc_password} -p hsm')
 
         # create ec keys
         self.cmd('keyvault key create --vault-name {kv} -n eckey1 --kty EC',
@@ -841,17 +853,45 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
 
         policy_path = os.path.join(TEST_DIR, 'policy.json')
         policy2_path = os.path.join(TEST_DIR, 'policy2.json')
+        policy3_path = os.path.join(TEST_DIR, 'policy3.json')
+        cert_secret_path = os.path.join(TEST_DIR, 'cert_secret')
         self.kwargs.update({
             'policy_path': policy_path,
-            'policy2_path': policy2_path
+            'policy2_path': policy2_path,
+            'policy3_path': policy3_path,
+            'cert_secret_path': cert_secret_path
         })
 
-        # create a certificate
+        # create certificates
         self.cmd('keyvault certificate create --vault-name {kv} -n cert1 -p @"{policy_path}"',
                  checks=[
                      self.check('status', 'completed'),
                      self.check('name', 'cert1')
                  ])
+        self.cmd('keyvault certificate create --vault-name {kv} -n cert2 -p @"{policy_path}"',
+                 checks=[
+                     self.check('status', 'completed'),
+                     self.check('name', 'cert2')
+                 ])
+
+        # import with same policy
+        policy = self.cmd('keyvault certificate show --vault-name {kv} -n cert2 --query policy').get_output_in_json()
+        if not os.path.exists(policy3_path) or self.is_live:
+            with open(policy3_path, "w") as f:
+                f.write(json.dumps(policy))
+
+        if not os.path.exists(cert_secret_path) or self.is_live:
+            if os.path.exists(cert_secret_path):
+                os.remove(cert_secret_path)
+            self.cmd('keyvault secret download --vault-name {kv} --file "{cert_secret_path}" -n cert2 --encoding base64')
+
+        self.cmd('keyvault certificate import --vault-name {kv} --file "{cert_secret_path}" -n cert2 -p @"{policy3_path}"',
+                 checks=[
+                     self.check('name', 'cert2'),
+                     self.check('policy.secretProperties.contentType',
+                                policy['secretProperties']['contentType'])
+                 ])
+        self.cmd('keyvault certificate delete --vault-name {kv} -n cert2')
 
         # list certificates
         self.cmd('keyvault certificate list --vault-name {kv}',
@@ -1056,7 +1096,7 @@ class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
 
         self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms}')
 
-        # create secrets keys and certifictes to delete recover and purge
+        # create secrets keys and certificates to delete recover and purge
         self.cmd('keyvault secret set --vault-name {kv} -n secret1 --value ABC123',
                  checks=self.check('value', 'ABC123'))
         self.cmd('keyvault secret set --vault-name {kv} -n secret2 --value ABC123',
