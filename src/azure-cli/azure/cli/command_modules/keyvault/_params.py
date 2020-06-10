@@ -228,11 +228,11 @@ def load_arguments(self, _):
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(JsonWebKeyEncryptionAlgorithm))
 
-    with self.argument_context('keyvault key encrypt'.format(scope)) as c:
-        c.argument('value', help='The value to be encrypted.'.format(scope), validator=validate_encryption)
+    with self.argument_context('keyvault key encrypt') as c:
+        c.argument('value', help='The value to be encrypted.', validator=validate_encryption)
 
-    with self.argument_context('keyvault key decrypt'.format(scope)) as c:
-        c.argument('value', help='The value to be decrypted.'.format(scope), validator=validate_decryption)
+    with self.argument_context('keyvault key decrypt') as c:
+        c.argument('value', help='The value to be decrypted.', validator=validate_decryption)
 
     for scope in ['list', 'list-deleted', 'list-versions']:
         with self.argument_context('keyvault key {}'.format(scope)) as c:
