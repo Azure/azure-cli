@@ -28,13 +28,14 @@ def _if_match(if_match, **kwargs):
     return kwargs
 
 
-def _if_none_match(if_none_match, kwargs):
+def _if_none_match(if_none_match, **kwargs):
     from azure.core import MatchConditions
     if if_none_match == '*':
         kwargs['match_condition'] = MatchConditions.IfMissing
     else:
         kwargs['etag'] = if_none_match
         kwargs['match_condition'] = MatchConditions.IfModified
+    return kwargs
 
 
 def _encode_bytes(b):
