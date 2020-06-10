@@ -14,7 +14,8 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_private_link, cf_private_endpoint,
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
                                                                cf_adls_file_system, cf_adls_directory,
-                                                               cf_adls_file, cf_adls_service)
+                                                               cf_adls_file, cf_adls_service,
+                                                               cf_blob_client)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -243,6 +244,19 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         client_factory=blob_data_service_factory,
         resource_type=ResourceType.DATA_STORAGE)
 
+    blob_client_sdk = CliCommandType(
+        operation_tmpl='azure.multiapi.storagev2.blob._blob_client#BlobClient.{}',
+        client_factory=cf_blob_client,
+        resource_type=ResourceType.DATA_STORAGE_BLOB
+    )
+
+    with self.command_group('storage blob', blob_client_sdk,
+                            custom_command_type=get_custom_sdk('blob_v2', client_factory=cf_blob_client,
+                                                               resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
+        from ._format import transform_blob_output
+        g.storage_custom_command_oauth('show', 'show_blob', table_transformer=transform_blob_output,
+                                       exception_handler=show_exception_handler)
+
     with self.command_group('storage blob', command_type=block_blob_sdk,
                             custom_command_type=get_custom_sdk('blob', blob_data_service_factory)) as g:
         from ._format import transform_boolean_for_table, transform_blob_output
@@ -277,11 +291,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        validator=process_blob_download_batch_parameters)
         g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch',
                                        validator=process_blob_delete_batch_parameters)
-        g.storage_custom_command_oauth('show', 'show_blob', table_transformer=transform_blob_output,
-                                       client_factory=page_blob_service_factory,
-                                       doc_string_source='blob#PageBlobService.get_blob_properties',
-                                       exception_handler=show_exception_handler)
-
         g.storage_command_oauth(
             'metadata show', 'get_blob_metadata', exception_handler=show_exception_handler)
         g.storage_command_oauth('metadata update', 'set_blob_metadata')
