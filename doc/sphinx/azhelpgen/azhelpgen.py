@@ -5,52 +5,26 @@
 
 import argparse
 import json
+from mock import patch
 from os.path import expanduser
 from docutils import nodes
 from docutils.statemachine import ViewList
-from sphinx.util.compat import Directive
+try:
+    # Deprecated in 1.6 and removed in 1.7
+    from sphinx.util.compat import Directive
+except ImportError:
+    from docutils.parsers.rst import Directive  # pylint: disable=import-error
 from sphinx.util.nodes import nested_parse_with_titles
 
-from knack.help_files import helps
 
-from knack.help import GroupHelpFile
 from azure.cli.core import MainCommandsLoader, AzCli
 from azure.cli.core.commands import AzCliCommandInvoker
 from azure.cli.core.parser import AzCliCommandParser
+from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args, get_all_help
 from azure.cli.core._help import AzCliHelp, CliCommandHelpFile, ArgumentGroupRegistry
 
 USER_HOME = expanduser('~')
 
-
-def get_help_files(cli_ctx):
-    cli_ctx.invocation = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls, parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
-    cli_ctx.invocation.commands_loader.load_command_table([])
-    cmd_table = cli_ctx.invocation.commands_loader.command_table
-    for command in cmd_table:
-        cli_ctx.invocation.commands_loader.load_arguments(command)
-    cli_ctx.invocation.parser.load_command_table(cli_ctx.invocation.commands_loader)
-
-    parser_keys = []
-    parser_values = []
-    sub_parser_keys = []
-    sub_parser_values = []
-    _store_parsers(cli_ctx.invocation.parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
-    for cmd, parser in zip(parser_keys, parser_values):
-        if cmd not in sub_parser_keys:
-            sub_parser_keys.append(cmd)
-            sub_parser_values.append(parser)
-
-    help_ctx = cli_ctx.help_cls(cli_ctx=cli_ctx)
-    help_files = []
-    for cmd, parser in zip(sub_parser_keys, sub_parser_values):
-        try:
-            help_file = GroupHelpFile(help_ctx, cmd, parser) if _is_group(parser) else CliCommandHelpFile(help_ctx, cmd, parser)
-            help_file.load(parser)
-            help_files.append(help_file)
-        except Exception as ex:
-            print("Skipped '{}' due to '{}'".format(cmd, ex))
-    help_files = sorted(help_files, key=lambda x: x.command)
-    return help_files
 
 class AzHelpGenDirective(Directive):
     def make_rst(self):
@@ -62,7 +36,9 @@ class AzHelpGenDirective(Directive):
                invocation_cls=AzCliCommandInvoker,
                parser_cls=AzCliCommandParser,
                help_cls=AzCliHelp)
-        help_files = get_help_files(az_cli)
+        with patch('getpass.getuser', return_value='your_system_user_login_name'):
+            create_invoker_and_load_cmds_and_args(az_cli)
+        help_files = get_all_help(az_cli)
 
         doc_source_map = _load_doc_source_map()
 
@@ -116,14 +92,14 @@ class AzHelpGenDirective(Directive):
                             pass
                         yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
                     if arg.value_sources:
-                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(arg.value_sources))
+                        yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(_get_populator_commands(arg)))
                     yield ''
             yield ''
             if len(help_file.examples) > 0:
                for e in help_file.examples:
-                  yield '{}.. cliexample:: {}'.format(INDENT, e.name)
+                  yield '{}.. cliexample:: {}'.format(INDENT, e.short_summary)
                   yield ''
-                  yield DOUBLEINDENT + e.text.replace("\\", "\\\\")
+                  yield DOUBLEINDENT + e.command.replace("\\", "\\\\")
                   yield ''
 
     def run(self):
@@ -160,3 +136,13 @@ def _is_group(parser):
 
 def _get_parser_name(s):
     return (s._prog_prefix if hasattr(s, '_prog_prefix') else s.prog)[3:]
+
+
+def _get_populator_commands(param):
+    commands = []
+    for value_source in param.value_sources:
+        try:
+            commands.append(value_source["link"]["command"])
+        except KeyError:
+            continue
+    return commands

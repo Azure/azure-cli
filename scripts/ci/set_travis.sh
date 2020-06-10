@@ -11,7 +11,7 @@
 # $1 - storage account name
 # $2 - travis CI repo name
 
-set -e
+set -ev
 
 export AZURE_STORAGE_ACCOUNT=$1
 

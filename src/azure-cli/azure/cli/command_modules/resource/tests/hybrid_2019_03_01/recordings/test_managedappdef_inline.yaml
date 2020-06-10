@@ -1,0 +1,381 @@
+interactions:
+- request:
+    body: '{"location": "eastus", "properties": {"lockLevel": "None", "displayName":
+      "test_appdef000003", "authorizations": [{"principalId": "5e91139a-c94b-462e-a6ff-1ee95e8aac07",
+      "roleDefinitionId": "8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}], "description":
+      "test_appdef_123", "mainTemplate": "{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#\",\r\n  \"contentVersion\":
+      \"1.0.0.0\",\r\n  \"parameters\": {\r\n    \"adminUsername\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"User name
+      for the Virtual Machine.\"\r\n      }\r\n    },\r\n    \"adminPassword\": {\r\n      \"type\":
+      \"securestring\",\r\n      \"metadata\": {\r\n        \"description\": \"Password
+      for the Virtual Machine.\"\r\n      }\r\n    },\r\n    \"dnsLabelPrefix\": {\r\n      \"type\":
+      \"string\",\r\n      \"metadata\": {\r\n        \"description\": \"Unique DNS
+      Name for the Public IP used to access the Virtual Machine.\"\r\n      }\r\n    },\r\n    \"ubuntuOSVersion\":
+      {\r\n      \"type\": \"string\",\r\n      \"defaultValue\": \"16.04.0-LTS\",\r\n      \"allowedValues\":
+      [\r\n        \"12.04.5-LTS\",\r\n        \"14.04.5-LTS\",\r\n        \"15.10\",\r\n        \"16.04.0-LTS\"\r\n      ],\r\n      \"metadata\":
+      {\r\n        \"description\": \"The Ubuntu version for the VM. This will pick
+      a fully patched image of this given Ubuntu version.\"\r\n      }\r\n    }\r\n  },\r\n  \"variables\":
+      {\r\n    \"storageAccountName\": \"[concat(uniquestring(resourceGroup().id),
+      ''salinuxvm'')]\",\r\n    \"imagePublisher\": \"Canonical\",\r\n    \"imageOffer\":
+      \"UbuntuServer\",\r\n    \"nicName\": \"myVMNic\",\r\n    \"addressPrefix\":
+      \"10.0.0.0/16\",\r\n    \"subnetName\": \"Subnet\",\r\n    \"subnetPrefix\":
+      \"10.0.0.0/24\",\r\n    \"storageAccountType\": \"Standard_LRS\",\r\n    \"publicIPAddressName\":
+      \"myPublicIP\",\r\n    \"publicIPAddressType\": \"Dynamic\",\r\n    \"vmName\":
+      \"MyUbuntuVM\",\r\n    \"vmSize\": \"Standard_A1\",\r\n    \"virtualNetworkName\":
+      \"MyVNET\",\r\n    \"vnetID\": \"[resourceId(''Microsoft.Network/virtualNetworks'',variables(''virtualNetworkName''))]\",\r\n    \"subnetRef\":
+      \"[concat(variables(''vnetID''),''/subnets/'',variables(''subnetName''))]\"\r\n  },\r\n  \"resources\":
+      [\r\n    {\r\n      \"type\": \"Microsoft.Storage/storageAccounts\",\r\n      \"name\":
+      \"[variables(''storageAccountName'')]\",\r\n      \"apiVersion\": \"2017-06-01\",\r\n      \"location\":
+      \"westus\",\r\n      \"sku\": {\r\n        \"name\": \"[variables(''storageAccountType'')]\"\r\n      },\r\n      \"kind\":
+      \"Storage\",\r\n      \"properties\": {}\r\n    },\r\n    {\r\n      \"apiVersion\":
+      \"2017-04-01\",\r\n      \"type\": \"Microsoft.Network/publicIPAddresses\",\r\n      \"name\":
+      \"[variables(''publicIPAddressName'')]\",\r\n      \"location\": \"westus\",\r\n      \"properties\":
+      {\r\n        \"publicIPAllocationMethod\": \"[variables(''publicIPAddressType'')]\",\r\n        \"dnsSettings\":
+      {\r\n          \"domainNameLabel\": \"[parameters(''dnsLabelPrefix'')]\"\r\n        }\r\n      }\r\n    },\r\n    {\r\n      \"apiVersion\":
+      \"2017-04-01\",\r\n      \"type\": \"Microsoft.Network/virtualNetworks\",\r\n      \"name\":
+      \"[variables(''virtualNetworkName'')]\",\r\n      \"location\": \"westus\",\r\n      \"properties\":
+      {\r\n        \"addressSpace\": {\r\n          \"addressPrefixes\": [\r\n            \"[variables(''addressPrefix'')]\"\r\n          ]\r\n        },\r\n        \"subnets\":
+      [\r\n          {\r\n            \"name\": \"[variables(''subnetName'')]\",\r\n            \"properties\":
+      {\r\n              \"addressPrefix\": \"[variables(''subnetPrefix'')]\"\r\n            }\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"apiVersion\":
+      \"2017-04-01\",\r\n      \"type\": \"Microsoft.Network/networkInterfaces\",\r\n      \"name\":
+      \"[variables(''nicName'')]\",\r\n      \"location\": \"westus\",\r\n      \"dependsOn\":
+      [\r\n        \"[resourceId(''Microsoft.Network/publicIPAddresses/'', variables(''publicIPAddressName''))]\",\r\n        \"[resourceId(''Microsoft.Network/virtualNetworks/'',
+      variables(''virtualNetworkName''))]\"\r\n      ],\r\n      \"properties\": {\r\n        \"ipConfigurations\":
+      [\r\n          {\r\n            \"name\": \"ipconfig1\",\r\n            \"properties\":
+      {\r\n              \"privateIPAllocationMethod\": \"Dynamic\",\r\n              \"publicIPAddress\":
+      {\r\n                \"id\": \"[resourceId(''Microsoft.Network/publicIPAddresses'',variables(''publicIPAddressName''))]\"\r\n              },\r\n              \"subnet\":
+      {\r\n                \"id\": \"[variables(''subnetRef'')]\"\r\n              }\r\n            }\r\n          }\r\n        ]\r\n      }\r\n    },\r\n    {\r\n      \"apiVersion\":
+      \"2017-03-30\",\r\n      \"type\": \"Microsoft.Compute/virtualMachines\",\r\n      \"name\":
+      \"[variables(''vmName'')]\",\r\n      \"location\": \"westus\",\r\n      \"dependsOn\":
+      [\r\n        \"[resourceId(''Microsoft.Storage/storageAccounts/'', variables(''storageAccountName''))]\",\r\n        \"[resourceId(''Microsoft.Network/networkInterfaces/'',
+      variables(''nicName''))]\"\r\n      ],\r\n      \"properties\": {\r\n        \"hardwareProfile\":
+      {\r\n          \"vmSize\": \"[variables(''vmSize'')]\"\r\n        },\r\n        \"osProfile\":
+      {\r\n          \"computerName\": \"[variables(''vmName'')]\",\r\n          \"adminUsername\":
+      \"[parameters(''adminUsername'')]\",\r\n          \"adminPassword\": \"[parameters(''adminPassword'')]\"\r\n        },\r\n        \"storageProfile\":
+      {\r\n          \"imageReference\": {\r\n            \"publisher\": \"[variables(''imagePublisher'')]\",\r\n            \"offer\":
+      \"[variables(''imageOffer'')]\",\r\n            \"sku\": \"[parameters(''ubuntuOSVersion'')]\",\r\n            \"version\":
+      \"latest\"\r\n          },\r\n          \"osDisk\": {\r\n            \"createOption\":
+      \"FromImage\"\r\n          },\r\n          \"dataDisks\": [\r\n            {\r\n              \"diskSizeGB\":
+      \"1023\",\r\n              \"lun\": 0,\r\n              \"createOption\": \"Empty\"\r\n            }\r\n          ]\r\n        },\r\n        \"networkProfile\":
+      {\r\n          \"networkInterfaces\": [\r\n            {\r\n              \"id\":
+      \"[resourceId(''Microsoft.Network/networkInterfaces'',variables(''nicName''))]\"\r\n            }\r\n          ]\r\n        },\r\n        \"diagnosticsProfile\":
+      {\r\n          \"bootDiagnostics\": {\r\n            \"enabled\": \"true\",\r\n            \"storageUri\":
+      \"[concat(reference(concat(''Microsoft.Storage/storageAccounts/'', variables(''storageAccountName'')),
+      ''2016-01-01'').primaryEndpoints.blob)]\"\r\n          }\r\n        }\r\n      }\r\n    }\r\n  ],\r\n  \"outputs\":
+      {\r\n    \"hostname\": {\r\n      \"type\": \"string\",\r\n      \"value\":
+      \"[reference(variables(''publicIPAddressName'')).dnsSettings.fqdn]\"\r\n    },\r\n    \"sshCommand\":
+      {\r\n      \"type\": \"string\",\r\n      \"value\": \"[concat(''ssh '', parameters(''adminUsername''),
+      ''@'', reference(variables(''publicIPAddressName'')).dnsSettings.fqdn)]\"\r\n    }\r\n  }\r\n}",
+      "createUiDefinition": "{\r\n    \"$schema\": \"https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#\",\r\n    \"handler\":
+      \"Microsoft.Compute.MultiVm\",\r\n    \"version\": \"0.1.2-preview\",\r\n    \"parameters\":
+      {\r\n        \"basics\": [\r\n            {\r\n                \"name\": \"adminUsername\",\r\n                \"type\":
+      \"Microsoft.Compute.UserNameTextBox\",\r\n                \"label\": \"Admin
+      Username\",\r\n                \"toolTip\": \"Admin user name for the virtual
+      machine\",\r\n                \"osPlatform\": \"Linux\"\r\n            },\r\n            {\r\n                \"name\":
+      \"adminPassword\",\r\n                \"type\": \"Microsoft.Common.PasswordBox\",\r\n                \"label\":
+      {\r\n                    \"password\": \"Admin Password\",\r\n                    \"confirmPassword\":
+      \"Confirm password\"\r\n                },\r\n                \"toolTip\": \"Admin
+      password for the virtual machine\",\r\n                \"constraints\": {\r\n                    \"required\":
+      true,\r\n                    \"regex\": \"^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\\\d\\\\W])|(?=.*\\\\W)(?=.*\\\\d))|(?=.*\\\\W)(?=.*[A-Z])(?=.*\\\\d)).{6,72}$\",\r\n                    \"validationMessage\":
+      \"The password must be between 6 and 72 characters long, and contain characters
+      from at least 3 of the following groups: uppercase characters, lowercase characters,
+      numbers, and special characters.\"\r\n                },\r\n                \"options\":
+      {\r\n                    \"hideConfirmation\": false\r\n                }\r\n            }\r\n        ],\r\n        \"steps\":
+      [\r\n            {\r\n                \"name\": \"ipConfig\",\r\n                \"label\":
+      \"IP Config\",\r\n                \"subLabel\": {\r\n                    \"preValidation\":
+      \"Configure the public IP address\",\r\n                    \"postValidation\":
+      \"Done\"\r\n                },\r\n                \"bladeTitle\": \"IP Settings\",\r\n                \"elements\":
+      [\r\n                    {\r\n                        \"name\": \"ipCombo\",\r\n                        \"type\":
+      \"Microsoft.Network.PublicIpAddressCombo\",\r\n                        \"label\":
+      {\r\n                            \"publicIpAddress\": \"Public IP address\",\r\n                            \"domainNameLabel\":
+      \"Domain name label\"\r\n                        },\r\n                        \"toolTip\":
+      {\r\n                            \"publicIpAddress\": \"\",\r\n                            \"domainNameLabel\":
+      \"\"\r\n                        },\r\n                        \"defaultValue\":
+      {\r\n                            \"publicIpAddressName\": \"myPublicIP\"\r\n                        },\r\n                        \"constraints\":
+      {\r\n                            \"required\": {\r\n                                \"domainNameLabel\":
+      true\r\n                            }\r\n                        },\r\n                        \"options\":
+      {\r\n                            \"hideNone\": true,\r\n                            \"hideDomainNameLabel\":
+      false,\r\n                            \"hideExisting\": true\r\n                        },\r\n                        \"visible\":
+      true\r\n                    }\r\n                ]\r\n            }\r\n        ],\r\n        \"outputs\":
+      {\r\n            \"adminUsername\": \"[basics(''adminUsername'')]\",\r\n            \"adminPassword\":
+      \"[basics(''adminPassword'')]\",\r\n            \"dnsLabelPrefix\": \"[steps(''ipConfig'').ipCombo.domainNameLabel]\",\r\n            \"applianceResourceNameForMainTemplate\":
+      \"testappname\"\r\n        }\r\n    }\r\n}"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - managedapp definition create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '10713'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -n --create-ui-definition --main-template --display-name --description -l
+        -a --lock-level -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/2017-09-01 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"isEnabled":true,"lockLevel":"None","displayName":"test_appdef000003","description":"test_appdef_123","artifacts":[{"name":"ApplicationResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbl01.blob.core.windows.net/applicationdefinitions/92ACA_F67CC918F64F4C3FAA24A855465F9D41_65B57E6F1B2F9386CA11AD7BFB285A7500EDE5CF/09be27d5361f4afe827914c9128740f8/applicationResourceTemplate.json"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002/applicationArtifacts/CreateUiDefinition?api-version=2017-09-01"},{"name":"MainTemplateParameters","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002/applicationArtifacts/MainTemplateParameters?api-version=2017-09-01"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002","name":"testappdefname000002","type":"Microsoft.Solutions/applicationDefinitions","location":"eastus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1611'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 Dec 2019 00:22:16 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1199'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - managedapp definition create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --create-ui-definition --main-template --display-name --description -l
+        -a --lock-level -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/2017-09-01 Azure-SDK-For-Python AZURECLI/2.0.77
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"isEnabled":true,"lockLevel":"None","displayName":"test_appdef000003","description":"test_appdef_123","artifacts":[{"name":"ApplicationResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbl01.blob.core.windows.net/applicationdefinitions/92ACA_F67CC918F64F4C3FAA24A855465F9D41_65B57E6F1B2F9386CA11AD7BFB285A7500EDE5CF/09be27d5361f4afe827914c9128740f8/applicationResourceTemplate.json"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002/applicationArtifacts/CreateUiDefinition?api-version=2017-09-01"},{"name":"MainTemplateParameters","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002/applicationArtifacts/MainTemplateParameters?api-version=2017-09-01"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002","name":"testappdefname000002","type":"Microsoft.Solutions/applicationDefinitions","location":"eastus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1611'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 Dec 2019 00:22:48 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - managedapp definition list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/2017-09-01 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions?api-version=2018-06-01
+  response:
+    body:
+      string: '{"value":[{"properties":{"authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"isEnabled":true,"lockLevel":"None","displayName":"test_appdef000003","description":"test_appdef_123","artifacts":[{"name":"ApplicationResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbl01.blob.core.windows.net/applicationdefinitions/92ACA_F67CC918F64F4C3FAA24A855465F9D41_65B57E6F1B2F9386CA11AD7BFB285A7500EDE5CF/09be27d5361f4afe827914c9128740f8/applicationResourceTemplate.json"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002/applicationArtifacts/CreateUiDefinition?api-version=2017-09-01"},{"name":"MainTemplateParameters","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002/applicationArtifacts/MainTemplateParameters?api-version=2017-09-01"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002","name":"testappdefname000002","type":"Microsoft.Solutions/applicationDefinitions","location":"eastus"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1623'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 Dec 2019 00:22:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - managedapp definition show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --ids
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/2017-09-01 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002?api-version=2018-06-01
+  response:
+    body:
+      string: '{"properties":{"authorizations":[{"principalId":"5e91139a-c94b-462e-a6ff-1ee95e8aac07","roleDefinitionId":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}],"isEnabled":true,"lockLevel":"None","displayName":"test_appdef000003","description":"test_appdef_123","artifacts":[{"name":"ApplicationResourceTemplate","type":"Template","uri":"https://prdsapplianceprodbl01.blob.core.windows.net/applicationdefinitions/92ACA_F67CC918F64F4C3FAA24A855465F9D41_65B57E6F1B2F9386CA11AD7BFB285A7500EDE5CF/09be27d5361f4afe827914c9128740f8/applicationResourceTemplate.json"},{"name":"CreateUiDefinition","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002/applicationArtifacts/CreateUiDefinition?api-version=2017-09-01"},{"name":"MainTemplateParameters","type":"Custom","uri":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002/applicationArtifacts/MainTemplateParameters?api-version=2017-09-01"}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002","name":"testappdefname000002","type":"Microsoft.Solutions/applicationDefinitions","location":"eastus"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1611'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 Dec 2019 00:22:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - managedapp definition delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/2017-09-01 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions/testappdefname000002?api-version=2018-06-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sat, 07 Dec 2019 00:22:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - managedapp definition list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.8.0 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/2017-09-01 Azure-SDK-For-Python AZURECLI/2.0.77
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Solutions/applicationDefinitions?api-version=2018-06-01
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 07 Dec 2019 00:22:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

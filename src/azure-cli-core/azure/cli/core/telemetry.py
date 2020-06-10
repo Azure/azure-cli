@@ -173,6 +173,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'Feedback', self.feedback)
         set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
         set_custom_properties(result, 'Mode', self.mode)
+        from azure.cli.core._environment import _ENV_AZ_INSTALLER
+        set_custom_properties(result, 'Installer', os.getenv(_ENV_AZ_INSTALLER))
 
         return result
 
@@ -201,10 +203,14 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 _session = TelemetrySession()
 
 
+def has_exceptions():
+    return len(_session.exceptions) > 0
+
+
 def _user_agrees_to_telemetry(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
-        if not _get_config().getboolean('core', 'collect_telemetry', fallback=True):
+        if not is_telemetry_enabled():
             return None
         return func(*args, **kwargs)
 
@@ -358,6 +364,14 @@ def _add_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATI
     })
 
 
+@decorators.suppress_all_exceptions()
+def is_telemetry_enabled():
+    from azure.cli.core.cloud import cloud_forbid_telemetry
+    if cloud_forbid_telemetry(_session.application):
+        return False
+    return _get_config().getboolean('core', 'collect_telemetry', fallback=True)
+
+
 # definitions
 
 @decorators.call_once
@@ -425,11 +439,11 @@ def _get_azure_subscription_id():
 def _get_shell_type():
     if 'ZSH_VERSION' in os.environ:
         return 'zsh'
-    elif 'BASH_VERSION' in os.environ:
+    if 'BASH_VERSION' in os.environ:
         return 'bash'
-    elif 'KSH_VERSION' in os.environ or 'FCEDIT' in os.environ:
+    if 'KSH_VERSION' in os.environ or 'FCEDIT' in os.environ:
         return 'ksh'
-    elif 'WINDIR' in os.environ:
+    if 'WINDIR' in os.environ:
         return 'cmd'
     return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 

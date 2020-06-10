@@ -16,19 +16,17 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "1.0.0"
+VERSION = "1.0.4"
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -49,14 +47,17 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     install_requires=[
-        'applicationinsights>=0.11.1',
-        'portalocker==1.2.1',
+        'applicationinsights>=0.11.1,<0.12',
+        'portalocker~=1.2',
     ],
     packages=[
         'azure',
         'azure.cli',
         'azure.cli.telemetry',
         'azure.cli.telemetry.components'
+    ],
+    test_requires=[
+        'mock'
     ],
     cmdclass=cmdclass
 )

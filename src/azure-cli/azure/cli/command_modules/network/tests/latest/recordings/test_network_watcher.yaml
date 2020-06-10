@@ -1,0 +1,566 @@
+interactions:
+- request:
+    body: '{"location": "westcentralus", "tags": {"product": "azurecli", "cause":
+      "automation", "date": "2018-08-28T17:33:22Z"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['117']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_watcher000001?api-version=2019-07-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001","name":"cli_test_network_watcher000001","location":"westcentralus","tags":{"product":"azurecli","cause":"automation","date":"2018-08-28T17:33:22Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['391']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:24 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westcentralus",
+      "properties": {"supportsHttpsTrafficOnly": false, "isHnsEnabled": false}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account create]
+      Connection: [keep-alive]
+      Content-Length: ['155']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Storage/storageAccounts/clitestnw000002?api-version=2018-07-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:26 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westcentralus/asyncoperations/831d52c0-fa4d-4026-b3f6-277ab5f38955?monitor=true&api-version=2018-03-01-preview']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account create]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.45]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westcentralus/asyncoperations/831d52c0-fa4d-4026-b3f6-277ab5f38955?monitor=true&api-version=2018-03-01-preview
+  response:
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Storage/storageAccounts/clitestnw000002","name":"clitestnw000002","type":"Microsoft.Storage/storageAccounts","location":"westcentralus","tags":{},"properties":{"isHnsEnabled":false,"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["72f988bf-86f1-41af-91ab-2d7cd011db47"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-08-28T17:33:26.5479032Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-08-28T17:33:26.5479032Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-08-28T17:33:26.4820097Z","primaryEndpoints":{"blob":"https://clitestnw000002.blob.core.windows.net/","queue":"https://clitestnw000002.queue.core.windows.net/","table":"https://clitestnw000002.table.core.windows.net/","file":"https://clitestnw000002.file.core.windows.net/"},"primaryLocation":"westcentralus","statusOfPrimary":"available"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1266']
+      content-type: [application/json]
+      date: ['Tue, 28 Aug 2018 17:33:43 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [storage account keys list]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 azure-mgmt-storage/2.0.0rc4 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Storage/storageAccounts/clitestnw000002/listKeys?api-version=2018-07-01
+  response:
+    body: {string: '{"keys":[{"keyName":"key1","value":"fevgcAhuN4Rq5FVuSob5qVPeakT18gxVC8sDvEtaw2Y9SicP7VQ4DY+/6ogEM1MLean686C4ABZA3tmArfu+/g==","permissions":"FULL"},{"keyName":"key2","value":"qhBO0usSRswxvjNm8k3VJdAZD6b0NEiOiIql2rjfljRROya7sAPd7cKXMzw//reIYMI94u3k32ygOZPClzxBuA==","permissions":"FULL"}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['288']
+      content-type: [application/json]
+      date: ['Tue, 28 Aug 2018 17:33:45 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
+          Microsoft-HTTPAPI/2.0']
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2018-07-01
+  response:
+    body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"westus-watcher\",\r\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher\",\r\n
+        \     \"etag\": \"W/\\\"9d8a151e-443d-4e1a-b0e7-9131dea6a16f\\\"\",\r\n      \"type\":
+        \"Microsoft.Network/networkWatchers\",\r\n      \"location\": \"westus\",\r\n
+        \     \"properties\": {\r\n        \"provisioningState\": \"Succeeded\",\r\n
+        \       \"flowLogs\": [],\r\n        \"runningOperationIds\": []\r\n      }\r\n
+        \   }\r\n  ]\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['496']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:46 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "westus2"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      Content-Length: ['23']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westus2-watcher?api-version=2018-07-01
+  response:
+    body: {string: "{\r\n  \"name\": \"westus2-watcher\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westus2-watcher\",\r\n
+        \ \"etag\": \"W/\\\"7fe8118f-0a83-4748-b75f-6a2c66b77a39\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkWatchers\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"flowLogs\":
+        [],\r\n    \"runningOperationIds\": []\r\n  }\r\n}"}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/14e12e01-adec-4f71-a8af-750b8fcfcee6?api-version=2018-07-01']
+      cache-control: [no-cache]
+      content-length: ['495']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:47 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: '{"location": "westcentralus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      Content-Length: ['29']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westcentralus-watcher?api-version=2018-07-01
+  response:
+    body: {string: "{\r\n  \"name\": \"westcentralus-watcher\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westcentralus-watcher\",\r\n
+        \ \"etag\": \"W/\\\"0fb27484-2d77-462e-b8ba-eb62f2017694\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkWatchers\",\r\n  \"location\": \"westcentralus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"flowLogs\":
+        [],\r\n    \"runningOperationIds\": []\r\n  }\r\n}"}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westcentralus/operations/fc4e0ff4-1670-44e5-afd9-f2a47c86ac5a?api-version=2018-07-01']
+      cache-control: [no-cache]
+      content-length: ['513']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:48 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      Content-Length: ['22']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher?api-version=2018-07-01
+  response:
+    body: {string: "{\r\n  \"name\": \"westus-watcher\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher\",\r\n
+        \ \"etag\": \"W/\\\"9d8a151e-443d-4e1a-b0e7-9131dea6a16f\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkWatchers\",\r\n  \"location\": \"westus\",\r\n
+        \ \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"flowLogs\":
+        [],\r\n    \"runningOperationIds\": []\r\n  }\r\n}"}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/2acd15cf-2f01-4b63-8f1a-d469774fbb41?api-version=2018-07-01']
+      cache-control: [no-cache]
+      content-length: ['423']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:48 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2018-07-01
+  response:
+    body: {string: '{"value":[{"name":"westus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher","etag":"W/\"9d8a151e-443d-4e1a-b0e7-9131dea6a16f\"","type":"Microsoft.Network/networkWatchers","location":"westus","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westcentralus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westcentralus-watcher","etag":"W/\"88e2075b-d8d7-44f3-8334-c337cac3a599\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westus2-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westus2-watcher","etag":"W/\"f57d9557-77c7-438c-b3c2-d6b2bef56714\"","type":"Microsoft.Network/networkWatchers","location":"westus2","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1274']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:49 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-original-request-ids: [7e7e96ed-40eb-4554-a089-ddb4540f5656, a4c9ebf1-b9ba-4c33-983a-9ce5b1a62296,
+        6cc71496-ceff-4126-8512-e05960c26d50]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2018-07-01
+  response:
+    body: {string: '{"value":[{"name":"westus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher","etag":"W/\"9d8a151e-443d-4e1a-b0e7-9131dea6a16f\"","type":"Microsoft.Network/networkWatchers","location":"westus","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westcentralus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westcentralus-watcher","etag":"W/\"88e2075b-d8d7-44f3-8334-c337cac3a599\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westus2-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westus2-watcher","etag":"W/\"f57d9557-77c7-438c-b3c2-d6b2bef56714\"","type":"Microsoft.Network/networkWatchers","location":"westus2","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1274']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:49 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-original-request-ids: [bd08def0-df76-4b96-b1c3-93f0e2583da7, daae8dfd-b546-453c-ad71-ad738d9a2201,
+        e77cb4cf-2cec-4f0d-befb-c513b9619e62]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "westus", "tags": {"foo": "doo"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      Content-Length: ['46']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher?api-version=2018-07-01
+  response:
+    body: {string: "{\r\n  \"name\": \"westus-watcher\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher\",\r\n
+        \ \"etag\": \"W/\\\"87dd7a09-8479-45be-9eb0-081dcbdc1f3e\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkWatchers\",\r\n  \"location\": \"westus\",\r\n
+        \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"flowLogs\": [],\r\n    \"runningOperationIds\": []\r\n
+        \ }\r\n}"}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d0bbe996-e04d-49b4-887d-f9b9844acd2b?api-version=2018-07-01']
+      cache-control: [no-cache]
+      content-length: ['460']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:50 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "westus2", "tags": {"foo": "doo"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      Content-Length: ['47']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westus2-watcher?api-version=2018-07-01
+  response:
+    body: {string: "{\r\n  \"name\": \"westus2-watcher\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westus2-watcher\",\r\n
+        \ \"etag\": \"W/\\\"e2e5be8f-fd12-4bd5-ad5d-e33123c55e3c\\\"\",\r\n  \"type\":
+        \"Microsoft.Network/networkWatchers\",\r\n  \"location\": \"westus2\",\r\n
+        \ \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\n    \"provisioningState\":
+        \"Succeeded\",\r\n    \"flowLogs\": [],\r\n    \"runningOperationIds\": []\r\n
+        \ }\r\n}"}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/62dd49c3-e6d3-4c30-868d-9ad9f42bd954?api-version=2018-07-01']
+      cache-control: [no-cache]
+      content-length: ['532']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:51 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2018-07-01
+  response:
+    body: {string: '{"value":[{"name":"westus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher","etag":"W/\"87dd7a09-8479-45be-9eb0-081dcbdc1f3e\"","type":"Microsoft.Network/networkWatchers","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westcentralus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westcentralus-watcher","etag":"W/\"88e2075b-d8d7-44f3-8334-c337cac3a599\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westus2-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westus2-watcher","etag":"W/\"e2e5be8f-fd12-4bd5-ad5d-e33123c55e3c\"","type":"Microsoft.Network/networkWatchers","location":"westus2","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1316']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:51 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-original-request-ids: [ab6b825d-2afa-4cc2-95a4-e9bcf4f5371d, ba34345f-ea0e-4282-850c-7b8cb99db3ee,
+        043e8735-7372-4783-9434-89032781858f]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2018-07-01
+  response:
+    body: {string: '{"value":[{"name":"westus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher","etag":"W/\"87dd7a09-8479-45be-9eb0-081dcbdc1f3e\"","type":"Microsoft.Network/networkWatchers","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westcentralus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westcentralus-watcher","etag":"W/\"88e2075b-d8d7-44f3-8334-c337cac3a599\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westus2-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westus2-watcher","etag":"W/\"e2e5be8f-fd12-4bd5-ad5d-e33123c55e3c\"","type":"Microsoft.Network/networkWatchers","location":"westus2","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1316']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:33:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-original-request-ids: [44cd8402-9d5c-4ea4-b73e-95f68519ae7f, ccbdf5f2-c8d0-419b-b9e4-c7b0dd9bc344,
+        b398f1e6-73f0-4057-a245-85c2cbeb69bc]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westus2-watcher?api-version=2018-07-01
+  response:
+    body: {string: ''}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/b736918e-93b5-4432-95d8-81942e512169?api-version=2018-07-01']
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Tue, 28 Aug 2018 17:33:53 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operationResults/b736918e-93b5-4432-95d8-81942e512169?api-version=2018-07-01']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/b736918e-93b5-4432-95d8-81942e512169?api-version=2018-07-01
+  response:
+    body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['29']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:34:03 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher configure]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2018-07-01
+  response:
+    body: {string: '{"value":[{"name":"westus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher","etag":"W/\"87dd7a09-8479-45be-9eb0-081dcbdc1f3e\"","type":"Microsoft.Network/networkWatchers","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westcentralus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westcentralus-watcher","etag":"W/\"88e2075b-d8d7-44f3-8334-c337cac3a599\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['856']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:34:04 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-original-request-ids: [c7a037a8-5201-4196-a672-2c58d004ea0d, 8c4ec49b-d00b-4fa0-9785-780e9e63e072]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network watcher list]
+      Connection: [keep-alive]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 networkmanagementclient/2.0.1 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/networkWatchers?api-version=2018-07-01
+  response:
+    body: {string: '{"value":[{"name":"westus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/tjp-rg/providers/Microsoft.Network/networkWatchers/westus-watcher","etag":"W/\"87dd7a09-8479-45be-9eb0-081dcbdc1f3e\"","type":"Microsoft.Network/networkWatchers","location":"westus","tags":{"foo":"doo"},"properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}},{"name":"westcentralus-watcher","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_watcher000001/providers/Microsoft.Network/networkWatchers/westcentralus-watcher","etag":"W/\"88e2075b-d8d7-44f3-8334-c337cac3a599\"","type":"Microsoft.Network/networkWatchers","location":"westcentralus","properties":{"provisioningState":"Succeeded","flowLogs":[],"runningOperationIds":[]}}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['856']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 28 Aug 2018 17:34:06 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-original-request-ids: [e2e98fd7-e4c7-4426-bb34-87e58c9d40f7, c715e275-5808-445a-95f7-ceaceb05ca25]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.5 (Windows-10-10.0.17134-SP0) requests/2.19.1 msrest/0.5.4
+          msrest_azure/0.5.0 resourcemanagementclient/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.45]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_watcher000001?api-version=2019-07-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Tue, 28 Aug 2018 17:34:07 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGTkVUV09SSzo1RldBVENIRVI0WEJCVFZNQUI1QUwzT0pHSnxFNzE4QUJGOUJEQjI1M0VFLVdFU1RDRU5UUkFMVVMiLCJqb2JMb2NhdGlvbiI6Indlc3RjZW50cmFsdXMifQ?api-version=2019-07-01']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-deletes: ['14999']
+    status: {code: 202, message: Accepted}
+version: 1

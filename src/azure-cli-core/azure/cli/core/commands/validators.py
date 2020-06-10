@@ -7,9 +7,10 @@ import argparse
 import time
 import random
 
-from knack.log import get_logger
-
 from azure.cli.core.profiles import ResourceType
+
+from knack.log import get_logger
+from knack.validators import DefaultStr, DefaultInt  # pylint: disable=unused-import
 
 logger = get_logger(__name__)
 
@@ -31,7 +32,7 @@ class IterateValue(list):
 
     Typical use is to allow multiple ID parameter to a show command etc.
     """
-    pass
+    pass  # pylint: disable=unnecessary-pass
 
 
 def validate_tags(ns):
@@ -118,19 +119,3 @@ def validate_parameter_set(namespace, required, forbidden, dest_to_options=None,
             forbidden_string = ', '.join(_dest_to_option(x) for x in included_forbidden)
             error = '{}\n\tnot applicable: {}'.format(error, forbidden_string)
         raise CLIError(error)
-
-
-class DefaultStr(str):
-
-    def __new__(cls, *args, **kwargs):
-        instance = str.__new__(cls, *args, **kwargs)
-        instance.is_default = True
-        return instance
-
-
-class DefaultInt(int):
-
-    def __new__(cls, *args, **kwargs):
-        instance = int.__new__(cls, *args, **kwargs)
-        instance.is_default = True
-        return instance

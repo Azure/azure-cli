@@ -18,6 +18,7 @@ class DummyCli(AzCli):
         from azure.cli.core.parser import AzCliCommandParser
         from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
         from azure.cli.core._help import AzCliHelp
+        from azure.cli.core._output import AzOutputProducer
 
         from knack.completion import ARGCOMPLETE_ENV_NAME
 
@@ -28,6 +29,7 @@ class DummyCli(AzCli):
             commands_loader_cls=commands_loader_cls or MainCommandsLoader,
             parser_cls=AzCliCommandParser,
             logging_cls=AzCliLogging,
+            output_cls=AzOutputProducer,
             help_cls=AzCliHelp,
             invocation_cls=AzCliCommandInvoker)
 

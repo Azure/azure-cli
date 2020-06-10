@@ -8,18 +8,14 @@
 import sys
 import os.path
 import subprocess
-import imp
 import glob
 import filecmp
-import zipfile
 import logging
 import unittest
 from pkg_resources import working_set
 
 import automation.utilities.path as automation_path
 from automation.utilities.const import COMMAND_MODULE_PREFIX
-
-EXCLUDE_MODULES = set(['azure-cli-taskhelp'])
 
 logger = logging.getLogger('azdev.verify.package')
 
@@ -56,34 +52,9 @@ class PackageVerifyTests(unittest.TestCase):
 
         logger.info('Installed command modules %s', installed_command_modules)
 
-        missing_modules = expected_modules - set(installed_command_modules) - EXCLUDE_MODULES
+        missing_modules = expected_modules - set(installed_command_modules)
         self.assertFalse(missing_modules,
                          msg='Following modules are not installed successfully: {}'.format(', '.join(missing_modules)))
-
-    def test_azure_cli_module_wheel(self):
-        wheel_path = self.test_data['wheel_path']
-        self.assertTrue(os.path.isfile(wheel_path))
-
-        if 'nspkg' in wheel_path:
-            return
-
-        wheel_zip = zipfile.ZipFile(wheel_path)
-        wheel_file_list = wheel_zip.namelist()
-
-        error_message = """
-        The wheel {} is incorrect.
-        A valid command module .whl for the CLI should:
-         - Not contain any __init__.py files in directories above azure.cli.command_modules.
-         
-        Does the package have a azure_bdist_wheel.py file?
-        Does the package have a setup.cfg file?
-        Does setup.py include 'cmdclass=cmdclass'?
-        """.format(wheel_path)
-
-        self.assertTrue(wheel_file_list)
-        self.assertNotIn('azure/__init__.py', wheel_file_list, msg=error_message)
-        self.assertNotIn('azure/cli/__init__.py', wheel_file_list, msg=error_message)
-        self.assertNotIn('azure/cli/command_modules/__init__.py', wheel_file_list, msg=error_message)
 
 
 def init(root):
@@ -98,8 +69,6 @@ def run_verifications(args):
     suite.addTest(PackageVerifyTests('test_azure_cli_module_installation'))
     for _, path in automation_path.get_all_module_paths():
         suite.addTest(PackageVerifyTests('test_azure_cli_module_manifest_and_azure_bdist', module_path=path))
-    for each in glob.glob(os.path.join(args.build_folder, '*.whl')):
-        suite.addTest(PackageVerifyTests('test_azure_cli_module_wheel', wheel_path=each))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
     sys.exit(not result.wasSuccessful())

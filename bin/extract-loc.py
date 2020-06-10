@@ -27,7 +27,7 @@ with open(str(OUTPUT), 'w', encoding='utf-8-sig') as f_out:
     for path in ROOT.rglob('*.py'):
         with open(str(path), 'r', encoding='utf-8') as f:
             content = f.read()
-        for m in re.finditer('[^\w_]_\(("(.+)"|\'(.+)\')\)', content):
+        for m in re.finditer(r'[^\w_]_\(("(.+)"|\'(.+)\')\)', content):
             print('# From', path, ':', m.span()[0], file=f_out)
             print('KEY:', m.group(2) or m.group(3), file=f_out)
             print(m.group(2) or m.group(3), file=f_out)

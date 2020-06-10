@@ -1,0 +1,57 @@
+class AzureCli < Formula
+  include Language::Python::Virtualenv
+
+  desc "Microsoft Azure CLI 2.0"
+  homepage "https://docs.microsoft.com/cli/azure/overview"
+  url "{{ upstream_url }}"
+  version "{{ cli_version }}"
+  sha256 "{{ upstream_sha }}"
+  head "https://github.com/Azure/azure-cli.git"
+
+{{ bottle_hash }}
+
+  depends_on "openssl@1.1"
+  depends_on "python@3.8"
+
+{{ resources }}
+
+  def install
+    # Work around Xcode 11 clang bug
+    # https://code.videolan.org/videolan/libbluray/issues/20
+    ENV.append_to_cflags "-fno-stack-check" if DevelopmentTools.clang_build_version >= 1010
+
+    venv = virtualenv_create(libexec, "python3")
+    venv.pip_install resources
+
+    # Get the CLI components we'll install
+    components = [
+      buildpath/"src/azure-cli",
+      buildpath/"src/azure-cli-telemetry",
+      buildpath/"src/azure-cli-core",
+      buildpath/"src/azure-cli-nspkg",
+      buildpath/"src/azure-cli-command_modules-nspkg",
+    ]
+
+    # Install CLI
+    components.each do |item|
+      cd item do
+        venv.pip_install item
+      end
+    end
+
+    (bin/"az").write <<~EOS
+      #!/usr/bin/env bash
+      AZ_INSTALLER=HOMEBREW #{libexec}/bin/python -m azure.cli \"$@\"
+    EOS
+
+    bash_completion.install "az.completion" => "az"
+  end
+
+  test do
+    json_text = shell_output("#{bin}/az cloud show --name AzureCloud")
+    azure_cloud = JSON.parse(json_text)
+    assert_equal azure_cloud["name"], "AzureCloud"
+    assert_equal azure_cloud["endpoints"]["management"], "https://management.core.windows.net/"
+    assert_equal azure_cloud["endpoints"]["resourceManager"], "https://management.azure.com/"
+  end
+end

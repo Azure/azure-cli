@@ -5,7 +5,7 @@
 
 import unittest
 from six import StringIO
-from azure.cli.core.extensions.transform import _parse_id, _add_resource_group
+from azure.cli.core.commands.transform import _parse_id, _add_resource_group
 
 
 class TestResourceGroupTransform(unittest.TestCase):

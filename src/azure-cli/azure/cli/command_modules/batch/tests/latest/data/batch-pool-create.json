@@ -1,0 +1,30 @@
+{
+  "id": "azure-cli-test-json",
+  "vmSize": "small",
+  "cloudServiceConfiguration": {
+    "osFamily": "4",
+    "targetOSVersion": "*"
+  },
+  "targetLowPriorityNodes": 2,
+  "resizeTimeout": "PT15M",
+  "environmentSettings": [
+    {
+      "name": "TEST_ENV",
+      "value": "TEST_VALUE"
+    }
+  ],
+  "startTask": {
+    "commandLine": "cmd /c echo test",
+    "waitForSuccess": true,
+    "userIdentity": {
+      "username": "cliTestUser"
+    }
+  },
+  "userAccounts": [
+    {
+      "name": "cliTestUser",
+      "password": "SRYES@#%#_DSFH",
+      "elevationLevel": "admin"
+    }
+  ]
+}

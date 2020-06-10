@@ -1,0 +1,256 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --gitrepo-url --gitrepo-dir --gitrepo-revision --gitrepo-mount-path
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-resource/4.0.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2019-10-21T11:21:34Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '428'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:21:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "tags": {}, "properties": {"containers": [{"name":
+      "clicontainer000002", "properties": {"image": "nginx", "resources": {"requests":
+      {"memoryInGB": 1.5, "cpu": 1.0}}, "volumeMounts": [{"name": "gitrepo", "mountPath":
+      "/src"}]}}], "restartPolicy": "Always", "osType": "Linux", "volumes": [{"name":
+      "gitrepo", "gitRepo": {"directory": "./test", "repository": "https://github.com/yolo3301/dumb-flow.git",
+      "revision": "5604f0a8f11bfe13e621418ab6f6a71973e208ce"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '481'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --image --gitrepo-url --gitrepo-dir --gitrepo-revision --gitrepo-mount-path
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Pending","containers":[{"name":"clicontainer000002","properties":{"image":"nginx","ports":[],"environmentVariables":[],"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}},"volumeMounts":[{"name":"gitrepo","mountPath":"/src"}]}}],"restartPolicy":"Always","osType":"Linux","volumes":[{"name":"gitrepo","gitRepo":{"repository":"https://github.com/yolo3301/dumb-flow.git","directory":"./test","revision":"5604f0a8f11bfe13e621418ab6f6a71973e208ce"}}],"instanceView":{"events":[],"state":"Pending"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/cb170d4d-876a-4165-932e-aad7dcfd5568?api-version=2018-06-01
+      cache-control:
+      - no-cache
+      content-length:
+      - '860'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:21:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-resource-requests-pt1h:
+      - '298'
+      x-ms-ratelimit-remaining-subscription-resource-requests-pt5m:
+      - '99'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1117'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --gitrepo-url --gitrepo-dir --gitrepo-revision --gitrepo-mount-path
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerInstance/locations/westus/operations/cb170d4d-876a-4165-932e-aad7dcfd5568?api-version=2018-06-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","status":"Succeeded","startTime":"2019-10-21T11:21:46.4294005Z","properties":{"events":[{"count":1,"firstTimestamp":"2019-10-21T11:21:51Z","lastTimestamp":"2019-10-21T11:21:51Z","name":"Pulling","message":"pulling
+        image \"nginx\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:21:59Z","lastTimestamp":"2019-10-21T11:21:59Z","name":"Pulled","message":"Successfully
+        pulled image \"nginx\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:22:02Z","lastTimestamp":"2019-10-21T11:22:02Z","name":"Created","message":"Created
+        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:22:02Z","lastTimestamp":"2019-10-21T11:22:02Z","name":"Started","message":"Started
+        container","type":"Normal"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '951'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:22:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --gitrepo-url --gitrepo-dir --gitrepo-revision --gitrepo-mount-path
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"nginx","ports":[],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-10-21T11:22:02Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-10-21T11:21:51Z","lastTimestamp":"2019-10-21T11:21:51Z","name":"Pulling","message":"pulling
+        image \"nginx\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:21:59Z","lastTimestamp":"2019-10-21T11:21:59Z","name":"Pulled","message":"Successfully
+        pulled image \"nginx\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:22:02Z","lastTimestamp":"2019-10-21T11:22:02Z","name":"Created","message":"Created
+        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:22:02Z","lastTimestamp":"2019-10-21T11:22:02Z","name":"Started","message":"Started
+        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}},"volumeMounts":[{"name":"gitrepo","mountPath":"/src"}]}}],"restartPolicy":"Always","osType":"Linux","volumes":[{"name":"gitrepo","gitRepo":{"repository":"https://github.com/yolo3301/dumb-flow.git","directory":"./test","revision":"5604f0a8f11bfe13e621418ab6f6a71973e208ce"}}],"instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1634'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:22:20 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - container show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-containerinstance/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.75
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002?api-version=2018-10-01
+  response:
+    body:
+      string: '{"properties":{"provisioningState":"Succeeded","containers":[{"name":"clicontainer000002","properties":{"image":"nginx","ports":[],"environmentVariables":[],"instanceView":{"restartCount":0,"currentState":{"state":"Running","startTime":"2019-10-21T11:22:02Z","detailStatus":""},"events":[{"count":1,"firstTimestamp":"2019-10-21T11:21:51Z","lastTimestamp":"2019-10-21T11:21:51Z","name":"Pulling","message":"pulling
+        image \"nginx\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:21:59Z","lastTimestamp":"2019-10-21T11:21:59Z","name":"Pulled","message":"Successfully
+        pulled image \"nginx\"","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:22:02Z","lastTimestamp":"2019-10-21T11:22:02Z","name":"Created","message":"Created
+        container","type":"Normal"},{"count":1,"firstTimestamp":"2019-10-21T11:22:02Z","lastTimestamp":"2019-10-21T11:22:02Z","name":"Started","message":"Started
+        container","type":"Normal"}]},"resources":{"requests":{"memoryInGB":1.5,"cpu":1.0}},"volumeMounts":[{"name":"gitrepo","mountPath":"/src"}]}}],"restartPolicy":"Always","osType":"Linux","volumes":[{"name":"gitrepo","gitRepo":{"repository":"https://github.com/yolo3301/dumb-flow.git","directory":"./test","revision":"5604f0a8f11bfe13e621418ab6f6a71973e208ce"}}],"instanceView":{"events":[],"state":"Running"}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ContainerInstance/containerGroups/clicontainer000002","name":"clicontainer000002","type":"Microsoft.ContainerInstance/containerGroups","location":"westus","tags":{}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1634'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 21 Oct 2019 11:22:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

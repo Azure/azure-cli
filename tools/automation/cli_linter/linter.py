@@ -5,7 +5,6 @@
 
 import os
 import inspect
-import argparse
 from importlib import import_module
 from pkgutil import iter_modules
 import yaml
@@ -20,7 +19,7 @@ class Linter(object):
         self._command_loader = command_loader
         self._parameters = {}
         self._help_file_entries = set(help_file_entries.keys())
-
+        self._command_parser = command_loader.cli_ctx.invocation.parser
         for command_name, command in self._command_loader.command_table.items():
             self._parameters[command_name] = set()
             for name, param in command.arguments.items():
@@ -37,6 +36,10 @@ class Linter(object):
     @property
     def help_file_entries(self):
         return self._help_file_entries
+
+    @property
+    def command_parser(self):
+        return self._command_parser
 
     def get_command_metadata(self, command_name):
         try:
@@ -178,7 +181,7 @@ class LinterManager(object):
 
         if paths:
             ci_exclusions_path = os.path.join(paths[0], 'ci_exclusions.yml')
-            self._ci_exclusions = yaml.load(open(ci_exclusions_path)) or {}
+            self._ci_exclusions = yaml.safe_load(open(ci_exclusions_path)) or {}
 
         # find all defined rules and check for name conflicts
         found_rules = set()

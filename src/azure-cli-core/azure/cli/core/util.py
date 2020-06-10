@@ -2,14 +2,21 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=too-many-lines
 
 from __future__ import print_function
 import sys
 import json
+import getpass
 import base64
 import binascii
+import platform
+import ssl
 import six
+import re
+import logging
 
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 
@@ -18,18 +25,92 @@ logger = get_logger(__name__)
 CLI_PACKAGE_NAME = 'azure-cli'
 COMPONENT_PREFIX = 'azure-cli-'
 
+SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens when using Azure CLI behind a proxy '
+                     'that intercepts traffic with a self-signed certificate. '
+                     # pylint: disable=line-too-long
+                     'Please add this certificate to the trusted CA bundle: https://github.com/Azure/azure-cli/blob/dev/doc/use_cli_effectively.md#work-behind-a-proxy. '
+                     'Error detail: {}')
 
-def handle_exception(ex):
+_PROXYID_RE = re.compile(
+    '(?i)/subscriptions/(?P<subscription>[^/]*)(/resourceGroups/(?P<resource_group>[^/]*))?'
+    '(/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)(?P<children>.*))?')
+
+_CHILDREN_RE = re.compile('(?i)/(?P<child_type>[^/]*)/(?P<child_name>[^/]*)')
+
+_PACKAGE_UPGRADE_INSTRUCTIONS = {"YUM": ("sudo yum update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliYum"),
+                                 "ZYPPER": ("sudo zypper refresh && sudo zypper update -y azure-cli", "https://aka.ms/doc/UpdateAzureCliZypper"),
+                                 "DEB": ("sudo apt-get update && sudo apt-get install --only-upgrade -y azure-cli", "https://aka.ms/doc/UpdateAzureCliApt"),
+                                 "HOMEBREW": ("brew update && brew upgrade azure-cli", "https://aka.ms/doc/UpdateAzureCliHomebrew"),
+                                 "PIP": ("curl -L https://aka.ms/InstallAzureCli | bash", "https://aka.ms/doc/UpdateAzureCliLinux"),
+                                 "MSI": ("https://aka.ms/installazurecliwindows", "https://aka.ms/doc/UpdateAzureCliMsi"),
+                                 "DOCKER": ("docker pull mcr.microsoft.com/azure-cli", "https://aka.ms/doc/UpdateAzureCliDocker")}
+
+_GENERAL_UPGRADE_INSTRUCTION = 'Instructions can be found at https://aka.ms/doc/InstallAzureCli'
+
+_VERSION_CHECK_TIME = 'check_time'
+_VERSION_UPDATE_TIME = 'update_time'
+
+
+def handle_exception(ex):  # pylint: disable=too-many-return-statements
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
+    from jmespath.exceptions import JMESPathTypeError
     from msrestazure.azure_exceptions import CloudError
-    if isinstance(ex, (CLIError, CloudError)):
-        logger.error(ex.args[0])
-        return ex.args[1] if len(ex.args) >= 2 else 1
-    elif isinstance(ex, KeyboardInterrupt):
-        return 1
+    from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
+    from azure.cli.core.azlogging import CommandLoggerContext
+    from azure.common import AzureException
+    from azure.core.exceptions import AzureError
 
-    logger.exception(ex)
-    return 1
+    with CommandLoggerContext(logger):
+        if isinstance(ex, JMESPathTypeError):
+            logger.error("\nInvalid jmespath query supplied for `--query`:\n%s", ex)
+            logger.error("To learn more about --query, please visit: "
+                         "https://docs.microsoft.com/cli/azure/query-azure-cli?view=azure-cli-latest")
+            return 1
+        if isinstance(ex, (CLIError, CloudError, AzureException, AzureError)):
+            logger.error(ex.args[0])
+            try:
+                for detail in ex.args[0].error.details:
+                    logger.error(detail)
+            except (AttributeError, TypeError):
+                pass
+            except:  # pylint: disable=bare-except
+                pass
+            return ex.args[1] if len(ex.args) >= 2 else 1
+        if isinstance(ex, ValidationError):
+            logger.error('validation error: %s', ex)
+            return 1
+        if isinstance(ex, ClientRequestError):
+            msg = str(ex)
+            if 'SSLError' in msg:
+                logger.error("request failed: %s", SSLERROR_TEMPLATE.format(msg))
+            else:
+                logger.error("request failed: %s", ex)
+            return 1
+        if isinstance(ex, KeyboardInterrupt):
+            return 1
+        if isinstance(ex, HttpOperationError):
+            try:
+                response_dict = json.loads(ex.response.text)
+                error = response_dict['error']
+
+                # ARM should use ODATA v4. So should try this first.
+                # http://docs.oasis-open.org/odata/odata-json-format/v4.0/os/odata-json-format-v4.0-os.html#_Toc372793091
+                if isinstance(error, dict):
+                    code = "{} - ".format(error.get('code', 'Unknown Code'))
+                    message = error.get('message', ex)
+                    logger.error("%s%s", code, message)
+                else:
+                    logger.error(error)
+
+            except (ValueError, KeyError):
+                logger.error(ex)
+            return 1
+
+        logger.error("The command failed with an unexpected error. Here is the traceback:\n")
+        logger.exception(ex)
+        logger.warning("\nTo open an issue, please run: 'az feedback'")
+
+        return 1
 
 
 # pylint: disable=inconsistent-return-statements
@@ -52,46 +133,209 @@ def get_installed_cli_distributions():
     return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
 
 
-def get_az_version_string():
-    import platform
-    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR
+def _update_latest_from_pypi(versions):
+    from subprocess import check_output, STDOUT, CalledProcessError
+
+    success = False
+
+    if not check_connectivity(max_retries=0):
+        return versions, success
+
+    try:
+        cmd = [sys.executable] + \
+            '-m pip search azure-cli -vv --disable-pip-version-check --no-cache-dir --retries 0'.split()
+        logger.debug('Running: %s', cmd)
+        log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
+        success = True
+        for line in log_output.splitlines():
+            if not line.startswith(CLI_PACKAGE_NAME):
+                continue
+            comps = line.split()
+            mod = comps[0].replace(COMPONENT_PREFIX, '') or CLI_PACKAGE_NAME
+            version = comps[1].replace('(', '').replace(')', '')
+            try:
+                versions[mod]['pypi'] = version
+            except KeyError:
+                pass
+    except CalledProcessError:
+        pass
+    return versions, success
+
+
+def get_cached_latest_versions(versions=None):
+    """ Get the latest versions from a cached file"""
+    import os
+    import datetime
+    from azure.cli.core._environment import get_config_dir
+    from azure.cli.core._session import VERSIONS
+
+    if not versions:
+        versions = _get_local_versions()
+
+    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
+    if VERSIONS[_VERSION_UPDATE_TIME]:
+        version_update_time = datetime.datetime.strptime(VERSIONS[_VERSION_UPDATE_TIME], '%Y-%m-%d %H:%M:%S.%f')
+        if datetime.datetime.now() < version_update_time + datetime.timedelta(days=1):
+            cache_versions = VERSIONS['versions']
+            if cache_versions and cache_versions['azure-cli']['local'] == versions['azure-cli']['local']:
+                return cache_versions.copy(), True
+
+    versions, success = _update_latest_from_pypi(versions)
+    if success:
+        VERSIONS['versions'] = versions
+        VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
+    return versions.copy(), success
+
+
+def _get_local_versions():
+    # get locally installed versions
+    versions = {}
+    for dist in get_installed_cli_distributions():
+        if dist.key == CLI_PACKAGE_NAME:
+            versions[CLI_PACKAGE_NAME] = {'local': dist.version}
+        elif dist.key.startswith(COMPONENT_PREFIX):
+            comp_name = dist.key.replace(COMPONENT_PREFIX, '')
+            versions[comp_name] = {'local': dist.version}
+    return versions
+
+
+def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statements
+    from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
 
     output = six.StringIO()
-    installed_dists = get_installed_cli_distributions()
+    versions = _get_local_versions()
 
-    cli_info = None
-    for dist in installed_dists:
-        if dist.key == CLI_PACKAGE_NAME:
-            cli_info = {'name': dist.key, 'version': dist.version}
-            break
+    # get the versions from pypi
+    versions, success = get_cached_latest_versions(versions) if use_cache else _update_latest_from_pypi(versions)
+    updates_available = 0
 
-    if cli_info:
-        print('{} ({})'.format(cli_info['name'], cli_info['version']), file=output)
+    def _print(val=''):
+        print(val, file=output)
 
-    component_version_info = sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''),
-                                      'version': dist.version}
-                                     for dist in installed_dists
-                                     if dist.key.startswith(COMPONENT_PREFIX)],
-                                    key=lambda x: x['name'])
-    print(file=output)
-    print('\n'.join(['{} ({})'.format(c['name'], c['version']) for c in component_version_info]),
-          file=output)
-    print(file=output)
+    def _get_version_string(name, version_dict):
+        from distutils.version import LooseVersion  # pylint: disable=import-error,no-name-in-module
+        local = version_dict['local']
+        pypi = version_dict.get('pypi', None)
+        if pypi and LooseVersion(pypi) > LooseVersion(local):
+            return name.ljust(25) + local.rjust(15) + ' *'
+        return name.ljust(25) + local.rjust(15)
+
+    ver_string = _get_version_string(CLI_PACKAGE_NAME, versions.pop(CLI_PACKAGE_NAME))
+    if '*' in ver_string:
+        updates_available += 1
+    _print(ver_string)
+    _print()
+    for name in sorted(versions.keys()):
+        ver_string = _get_version_string(name, versions.pop(name))
+        if '*' in ver_string:
+            updates_available += 1
+        _print(ver_string)
+    _print()
     extensions = get_extensions()
     if extensions:
-        print('Extensions:', file=output)
-        print('\n'.join(['{} ({})'.format(c.name, c.version) for c in extensions]),
-              file=output)
-        print(file=output)
-    print("Python location '{}'".format(sys.executable), file=output)
-    print("Extensions directory '{}'".format(EXTENSIONS_DIR), file=output)
-    print(file=output)
-    print('Python ({}) {}'.format(platform.system(), sys.version), file=output)
-    print(file=output)
-    print('Legal docs and information: aka.ms/AzureCliLegal', file=output)
-    print(file=output)
+        _print('Extensions:')
+        for ext in extensions:
+            if ext.ext_type == 'dev':
+                _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20) + ' (dev) ' + ext.path)
+            else:
+                _print(ext.name.ljust(20) + (ext.version or 'Unknown').rjust(20))
+        _print()
+    _print("Python location '{}'".format(sys.executable))
+    _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
+    import os
+    if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
+        _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))
+    if DEV_EXTENSION_SOURCES:
+        _print("Development extension sources:")
+        for source in DEV_EXTENSION_SOURCES:
+            _print('    {}'.format(source))
+    _print()
+    _print('Python ({}) {}'.format(platform.system(), sys.version))
+    _print()
+    _print('Legal docs and information: aka.ms/AzureCliLegal')
+    _print()
     version_string = output.getvalue()
-    return version_string
+
+    # if unable to query PyPI, use sentinel value to flag that
+    # we couldn't check for updates
+    if not success:
+        updates_available = -1
+    return version_string, updates_available
+
+
+def get_az_version_json():
+    from azure.cli.core.extension import get_extensions
+    versions = {'extensions': {}}
+
+    for dist in get_installed_cli_distributions():
+        versions[dist.key] = dist.version
+    extensions = get_extensions()
+    if extensions:
+        for ext in extensions:
+            versions['extensions'][ext.name] = ext.version or 'Unknown'
+    return versions
+
+
+def show_updates_available(new_line_before=False, new_line_after=False):
+    import os
+    from azure.cli.core._session import VERSIONS
+    import datetime
+    from azure.cli.core._environment import get_config_dir
+
+    VERSIONS.load(os.path.join(get_config_dir(), 'versionCheck.json'))
+    if VERSIONS[_VERSION_CHECK_TIME]:
+        version_check_time = datetime.datetime.strptime(VERSIONS[_VERSION_CHECK_TIME], '%Y-%m-%d %H:%M:%S.%f')
+        if datetime.datetime.now() < version_check_time + datetime.timedelta(days=7):
+            return
+
+    _, updates_available = get_az_version_string(use_cache=True)
+    if updates_available > 0:
+        if new_line_before:
+            logger.warning("")
+        show_updates(updates_available)
+        if new_line_after:
+            logger.warning("")
+    VERSIONS[_VERSION_CHECK_TIME] = str(datetime.datetime.now())
+
+
+def show_updates(updates_available):
+    if updates_available == -1:
+        logger.warning('Unable to check if your CLI is up-to-date. Check your internet connection.')
+    elif updates_available:  # pylint: disable=too-many-nested-blocks
+        if in_cloud_console():
+            warning_msg = 'You have %i updates available. They will be updated with the next build of Cloud Shell.'
+        else:
+            warning_msg = 'You have %i updates available. Consider updating your CLI installation'
+            from azure.cli.core._environment import _ENV_AZ_INSTALLER
+            import os
+            installer = os.getenv(_ENV_AZ_INSTALLER)
+            instruction_msg = ''
+            if installer in _PACKAGE_UPGRADE_INSTRUCTIONS:
+                if installer == 'RPM':
+                    distname, _ = get_linux_distro()
+                    if not distname:
+                        instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+                    else:
+                        distname = distname.lower().strip()
+                        if any(x in distname for x in ['centos', 'rhel', 'red hat', 'fedora']):
+                            installer = 'YUM'
+                        elif any(x in distname for x in ['opensuse', 'suse', 'sles']):
+                            installer = 'ZYPPER'
+                        else:
+                            instruction_msg = '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+                elif installer == 'PIP':
+                    system = platform.system()
+                    alternative_command = " or '{}' if you used our script for installation. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1]) if system != 'Windows' else ''
+                    instruction_msg = " with 'pip install --upgrade azure-cli'{}".format(alternative_command)
+                if instruction_msg:
+                    warning_msg += instruction_msg
+                else:
+                    warning_msg += " with '{}'. Detailed instructions can be found at {}".format(_PACKAGE_UPGRADE_INSTRUCTIONS[installer][0], _PACKAGE_UPGRADE_INSTRUCTIONS[installer][1])
+            else:
+                warning_msg += '. {}'.format(_GENERAL_UPGRADE_INSTRUCTION)
+        logger.warning(warning_msg, updates_available)
+    else:
+        print('Your CLI is up-to-date.')
 
 
 def get_json_object(json_string):
@@ -114,7 +358,10 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
     content = read_file_content(file_path)
     if not content and not throw_on_empty:
         return None
-    return shell_safe_json_parse(content, preserve_order)
+    try:
+        return shell_safe_json_parse(content, preserve_order)
+    except CLIError as ex:
+        raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
 
 
 def read_file_content(file_path, allow_binary=False):
@@ -153,6 +400,9 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False):
             return ast.literal_eval(json_or_dict_string)
         except SyntaxError:
             raise CLIError(json_ex)
+        except ValueError as ex:
+            logger.debug(ex)  # log the exception which could be a python dict parsing error.
+            raise CLIError(json_ex)  # raise json_ex error which is more readable and likely.
 
 
 def b64encode(s):
@@ -221,6 +471,15 @@ def get_arg_list(op):
         return sig.args
 
 
+def is_track2(client_class):
+    """ IS this client a autorestv3/track2 one?.
+    Could be refined later if necessary.
+    """
+    from inspect import getfullargspec as get_arg_spec
+    args = get_arg_spec(client_class.__init__).args
+    return "credential" in args
+
+
 DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 
 
@@ -232,7 +491,8 @@ def should_disable_connection_verify():
 def poller_classes():
     from msrestazure.azure_operation import AzureOperationPoller
     from msrest.polling.poller import LROPoller
-    return (AzureOperationPoller, LROPoller)
+    from azure.core.polling import LROPoller as AzureCoreLROPoller
+    return (AzureOperationPoller, LROPoller, AzureCoreLROPoller)
 
 
 def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
@@ -250,19 +510,21 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
 
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
-        kwargs.update({'raw': True, 'polling': False})
+        kwargs.update({'polling': False})
     return func(*args, **kwargs)
 
 
 def open_page_in_browser(url):
     import subprocess
     import webbrowser
-    platform_name, release = _get_platform_info()
+    platform_name, _ = _get_platform_info()
 
-    if _is_wsl(platform_name, release):   # windows 10 linux subsystem
+    if is_wsl():   # windows 10 linux subsystem
         try:
-            return subprocess.call(['cmd.exe', '/c', "start {}".format(url.replace('&', '^&'))])
-        except FileNotFoundError:  # WSL might be too old
+            # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe
+            # Ampersand (&) should be quoted
+            return subprocess.call(['powershell.exe', '-Command', 'Start-Process "{}"'.format(url)])
+        except OSError:  # WSL might be too old  # FileNotFoundError introduced in Python 3
             pass
     elif platform_name == 'darwin':
         # handle 2 things:
@@ -270,11 +532,13 @@ def open_page_in_browser(url):
         #    understand the "open location" message"
         # b. Python 2.x can't sniff out the default browser
         return subprocess.Popen(['open', url])
-    return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    try:
+        return webbrowser.open(url, new=2)  # 2 means: open in a new tab, if possible
+    except TypeError:  # See https://bugs.python.org/msg322439
+        return webbrowser.open(url, new=2)
 
 
 def _get_platform_info():
-    import platform
     uname = platform.uname()
     # python 2, `platform.uname()` returns: tuple(system, node, release, version, machine, processor)
     platform_name = getattr(uname, 'system', None) or uname[0]
@@ -282,16 +546,21 @@ def _get_platform_info():
     return platform_name.lower(), release.lower()
 
 
-def _is_wsl(platform_name, release):
+def is_wsl():
     platform_name, release = _get_platform_info()
     return platform_name == 'linux' and release.split('-')[-1] == 'microsoft'
+
+
+def is_windows():
+    platform_name, _ = _get_platform_info()
+    return platform_name == 'windows'
 
 
 def can_launch_browser():
     import os
     import webbrowser
-    platform_name, release = _get_platform_info()
-    if _is_wsl(platform_name, release) or platform_name != 'linux':
+    platform_name, _ = _get_platform_info()
+    if is_wsl() or platform_name != 'linux':
         return True
     # per https://unix.stackexchange.com/questions/46305/is-there-a-way-to-retrieve-the-name-of-the-desktop-environment
     # and https://unix.stackexchange.com/questions/193827/what-is-display-0
@@ -312,5 +581,412 @@ def can_launch_browser():
     return result
 
 
-def get_command_type_kwarg(custom_command):
+def get_command_type_kwarg(custom_command=False):
     return 'custom_command_type' if custom_command else 'command_type'
+
+
+def reload_module(module):
+    # reloading the imported module to update
+    try:
+        from importlib import reload
+    except ImportError:
+        pass  # for python 2
+    reload(sys.modules[module])
+
+
+def get_default_admin_username():
+    try:
+        return getpass.getuser()
+    except KeyError:
+        return None
+
+
+def _find_child(parent, *args, **kwargs):
+    # tuple structure (path, key, dest)
+    path = kwargs.get('path', None)
+    key_path = kwargs.get('key_path', None)
+    comps = zip(path.split('.'), key_path.split('.'), args)
+    current = parent
+    for path, key, val in comps:
+        current = getattr(current, path, None)
+        if current is None:
+            raise CLIError("collection '{}' not found".format(path))
+        match = next((x for x in current if getattr(x, key).lower() == val.lower()), None)
+        if match is None:
+            raise CLIError("item '{}' not found in {}".format(val, path))
+        current = match
+    return current
+
+
+def find_child_item(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
+    if len(args) != len(path.split('.')) != len(key_path.split('.')):
+        raise CLIError('command authoring error: args, path and key_path must have equal number of components.')
+    return _find_child(parent, *args, path=path, key_path=key_path)
+
+
+def find_child_collection(parent, *args, **kwargs):
+    path = kwargs.get('path', '')
+    key_path = kwargs.get('key_path', '')
+    arg_len = len(args)
+    key_len = len(key_path.split('.'))
+    path_len = len(path.split('.'))
+    if arg_len != key_len and path_len != arg_len + 1:
+        raise CLIError('command authoring error: args and key_path must have equal number of components, and '
+                       'path must have one extra component (the path to the collection of interest.')
+    parent = _find_child(parent, *args, path=path, key_path=key_path)
+    collection_path = path.split('.')[-1]
+    collection = getattr(parent, collection_path, None)
+    if collection is None:
+        raise CLIError("collection '{}' not found".format(collection_path))
+    return collection
+
+
+def check_connectivity(url='https://example.org', max_retries=5, timeout=1):
+    import requests
+    import timeit
+    start = timeit.default_timer()
+    success = None
+    try:
+        s = requests.Session()
+        s.mount(url, requests.adapters.HTTPAdapter(max_retries=max_retries))
+        s.head(url, timeout=timeout)
+        success = True
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as ex:
+        logger.info('Connectivity problem detected.')
+        logger.debug(ex)
+        success = False
+    stop = timeit.default_timer()
+    logger.debug('Connectivity check: %s sec', stop - start)
+    return success
+
+
+def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+                     body=None, skip_authorization_header=False, resource=None, output_file=None,
+                     generated_client_request_id_name='x-ms-client-request-id'):
+    import uuid
+    from requests import Session, Request
+    from requests.structures import CaseInsensitiveDict
+
+    result = CaseInsensitiveDict()
+    for s in headers or []:
+        try:
+            temp = shell_safe_json_parse(s)
+            result.update(temp)
+        except CLIError:
+            key, value = s.split('=', 1)
+            result[key] = value
+    headers = result
+
+    # If Authorization header is already provided, don't bother with the token
+    if 'Authorization' in headers:
+        skip_authorization_header = True
+
+    # Handle User-Agent
+    agents = [get_az_user_agent()]
+
+    # Borrow AZURE_HTTP_USER_AGENT from msrest
+    # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
+    _ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
+    import os
+    if _ENV_ADDITIONAL_USER_AGENT in os.environ:
+        agents.append(os.environ[_ENV_ADDITIONAL_USER_AGENT])
+
+    # Custom User-Agent provided as command argument
+    if 'User-Agent' in headers:
+        agents.append(headers['User-Agent'])
+    headers['User-Agent'] = ' '.join(agents)
+
+    if generated_client_request_id_name:
+        headers[generated_client_request_id_name] = str(uuid.uuid4())
+
+    # try to figure out the correct content type
+    if body:
+        try:
+            _ = shell_safe_json_parse(body)
+            if 'Content-Type' not in headers:
+                headers['Content-Type'] = 'application/json'
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+    # add telemetry
+    headers['CommandName'] = cli_ctx.data['command']
+    if cli_ctx.data.get('safe_params'):
+        headers['ParameterSetName'] = ' '.join(cli_ctx.data['safe_params'])
+
+    result = {}
+    for s in uri_parameters or []:
+        try:
+            temp = shell_safe_json_parse(s)
+            result.update(temp)
+        except CLIError:
+            key, value = s.split('=', 1)
+            result[key] = value
+    uri_parameters = result or None
+
+    endpoints = cli_ctx.cloud.endpoints
+    # If url is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
+    # default to Azure Resource Manager.
+    # https://management.azure.com + /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
+    if '://' not in url:
+        url = endpoints.resource_manager.rstrip('/') + url
+
+    # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
+    # Azure Rest API doc
+    from azure.cli.core._profile import Profile
+    profile = Profile()
+    if '{subscriptionId}' in url:
+        url = url.replace('{subscriptionId}', cli_ctx.data['subscription_id'] or profile.get_subscription_id())
+
+    if not skip_authorization_header and url.lower().startswith('https://'):
+        # Prepare `resource`
+        if not resource:
+            # If url starts with ARM endpoint, like https://management.azure.com/,
+            # use active_directory_resource_id for resource.
+            # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
+            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+                resource = endpoints.active_directory_resource_id
+            else:
+                from azure.cli.core.cloud import CloudEndpointNotSetException
+                for p in [x for x in dir(endpoints) if not x.startswith('_')]:
+                    try:
+                        value = getattr(endpoints, p)
+                    except CloudEndpointNotSetException:
+                        continue
+                    if isinstance(value, six.string_types) and url.lower().startswith(value.lower()):
+                        resource = value
+                        break
+        if resource:
+            # If this is an ARM request, extract subscription ID from the URL.
+            # In the future when multi-tenant subscription is supported, we won't be able to uniquely identity the token
+            # from subscription anymore.
+            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+                token_subscription = _extract_subscription_id(url)
+                logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
+                token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
+            else:
+                logger.debug('Retrieving token for resource %s', resource)
+                token_info, _, _ = profile.get_raw_token(resource)
+            token_type, token, _ = token_info
+            headers = headers or {}
+            headers['Authorization'] = '{} {}'.format(token_type, token)
+        else:
+            logger.warning("Can't derive appropriate Azure AD resource from --url to acquire an access token. "
+                           "If access token is required, use --resource to specify the resource")
+    try:
+        # https://requests.readthedocs.io/en/latest/user/advanced/#prepared-requests
+        s = Session()
+        req = Request(method=method, url=url, headers=headers, params=uri_parameters, data=body)
+        prepped = s.prepare_request(req)
+
+        # Merge environment settings into session
+        settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
+        _log_request(prepped)
+        r = s.send(prepped, **settings)
+        _log_response(r)
+    except Exception as ex:  # pylint: disable=broad-except
+        raise CLIError(ex)
+
+    if not r.ok:
+        reason = r.reason
+        if r.text:
+            reason += '({})'.format(r.text)
+        raise CLIError(reason)
+    if output_file:
+        with open(output_file, 'wb') as fd:
+            for chunk in r.iter_content(chunk_size=128):
+                fd.write(chunk)
+    return r
+
+
+def _extract_subscription_id(url):
+    """Extract the subscription ID from an ARM request URL."""
+    subscription_regex = '/subscriptions/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
+    match = re.search(subscription_regex, url, re.IGNORECASE)
+    if not match:
+        raise CLIError('No subscription ID specified in the URL')
+    return match.groups()[0]
+
+
+def _log_request(request):
+    """Log a client request. Copied from msrest
+    https://github.com/Azure/msrest-for-python/blob/3653d29fc44da408898b07c710290a83d196b777/msrest/http_logger.py#L39
+    """
+    if not logger.isEnabledFor(logging.DEBUG):
+        return
+
+    try:
+        logger.info("Request URL: %r", request.url)
+        logger.info("Request method: %r", request.method)
+        logger.info("Request headers:")
+        for header, value in request.headers.items():
+            if header.lower() == 'authorization':
+                # Trim at least half of the token but keep at most 20 characters
+                preserve_length = min(int(len(value) * 0.5), 20)
+                value = value[:preserve_length] + '...'
+            logger.info("    %r: %r", header, value)
+        logger.info("Request body:")
+
+        # We don't want to log the binary data of a file upload.
+        import types
+        if isinstance(request.body, types.GeneratorType):
+            logger.info("File upload")
+        else:
+            logger.info(str(request.body))
+    except Exception as err:  # pylint: disable=broad-except
+        logger.info("Failed to log request: %r", err)
+
+
+def _log_response(response, **kwargs):
+    """Log a server response. Copied from msrest
+    https://github.com/Azure/msrest-for-python/blob/3653d29fc44da408898b07c710290a83d196b777/msrest/http_logger.py#L68
+    """
+    if not logger.isEnabledFor(logging.DEBUG):
+        return None
+
+    try:
+        logger.info("Response status: %r", response.status_code)
+        logger.info("Response headers:")
+        for res_header, value in response.headers.items():
+            logger.info("    %r: %r", res_header, value)
+
+        # We don't want to log binary data if the response is a file.
+        logger.info("Response content:")
+        pattern = re.compile(r'attachment; ?filename=["\w.]+', re.IGNORECASE)
+        header = response.headers.get('content-disposition')
+
+        if header and pattern.match(header):
+            filename = header.partition('=')[2]
+            logger.info("File attachments: %s", filename)
+        elif response.headers.get("content-type", "").endswith("octet-stream"):
+            logger.info("Body contains binary data.")
+        elif response.headers.get("content-type", "").startswith("image"):
+            logger.info("Body contains image data.")
+        else:
+            if kwargs.get('stream', False):
+                logger.info("Body is streamable")
+            else:
+                logger.info(response.content.decode("utf-8-sig"))
+        return response
+    except Exception as err:  # pylint: disable=broad-except
+        logger.info("Failed to log response: %s", repr(err))
+        return response
+
+
+class ConfiguredDefaultSetter(object):
+
+    def __init__(self, cli_config, use_local_config=None):
+        self.use_local_config = use_local_config
+        if self.use_local_config is None:
+            self.use_local_config = False
+        self.cli_config = cli_config
+        # here we use getattr/setattr to prepare the situation that "use_local_config" might not be available
+        self.original_use_local_config = getattr(cli_config, 'use_local_config', None)
+
+    def __enter__(self):
+        self.cli_config.use_local_config = self.use_local_config
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        setattr(self.cli_config, 'use_local_config', self.original_use_local_config)
+
+
+def _ssl_context():
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+
+    return ssl.create_default_context()
+
+
+def urlretrieve(url):
+    req = urlopen(url, context=_ssl_context())
+    return req.read()
+
+
+def parse_proxy_resource_id(rid):
+    """Parses a resource_id into its various parts.
+
+    Return an empty dictionary, if invalid resource id.
+
+    :param rid: The resource id being parsed
+    :type rid: str
+    :returns: A dictionary with with following key/value pairs (if found):
+
+        - subscription:            Subscription id
+        - resource_group:          Name of resource group
+        - namespace:               Namespace for the resource provider (i.e. Microsoft.Compute)
+        - type:                    Type of the root resource (i.e. virtualMachines)
+        - name:                    Name of the root resource
+        - child_type_{level}:      Type of the child resource of that level
+        - child_name_{level}:      Name of the child resource of that level
+        - last_child_num:          Level of the last child
+
+    :rtype: dict[str,str]
+    """
+    if not rid:
+        return {}
+    match = _PROXYID_RE.match(rid)
+    if match:
+        result = match.groupdict()
+        children = _CHILDREN_RE.finditer(result['children'] or '')
+        count = None
+        for count, child in enumerate(children):
+            result.update({
+                key + '_%d' % (count + 1): group for key, group in child.groupdict().items()})
+        result['last_child_num'] = count + 1 if isinstance(count, int) else None
+        result.pop('children', None)
+        return {key: value for key, value in result.items() if value is not None}
+    return None
+
+
+def get_az_user_agent():
+    # Dynamically load the core version
+    from azure.cli.core import __version__ as core_version
+
+    agents = ["AZURECLI/{}".format(core_version)]
+
+    import os
+    from azure.cli.core._environment import _ENV_AZ_INSTALLER
+    if _ENV_AZ_INSTALLER in os.environ:
+        agents.append('({})'.format(os.environ[_ENV_AZ_INSTALLER]))
+
+    # msrest already has this
+    # https://github.com/Azure/msrest-for-python/blob/4cc8bc84e96036f03b34716466230fb257e27b36/msrest/pipeline/universal.py#L70
+    # if ENV_ADDITIONAL_USER_AGENT in os.environ:
+    #     agents.append(os.environ[ENV_ADDITIONAL_USER_AGENT])
+
+    return ' '.join(agents)
+
+
+def user_confirmation(message, yes=False):
+    if yes:
+        return
+    from knack.prompting import prompt_y_n, NoTTYException
+    try:
+        if not prompt_y_n(message):
+            raise CLIError('Operation cancelled.')
+    except NoTTYException:
+        raise CLIError(
+            'Unable to prompt for confirmation as no tty available. Use --yes.')
+
+
+def get_linux_distro():
+    if platform.system() != 'Linux':
+        return None, None
+
+    try:
+        with open('/etc/os-release') as lines:
+            tokens = [line.strip() for line in lines]
+    except Exception:  # pylint: disable=broad-except
+        return None, None
+
+    release_info = {}
+    for token in tokens:
+        if '=' in token:
+            k, v = token.split('=', 1)
+            release_info[k.lower()] = v.strip('"')
+
+    return release_info.get('name', None), release_info.get('version_id', None)

@@ -54,7 +54,7 @@ def _start(config_dir):
             kwargs['stderr'] = subprocess.STDOUT
 
     subprocess.Popen(**kwargs)
-    logger.info('Return from creating porcess')
+    logger.info('Return from creating process')
 
 
 def save(config_dir, payload):

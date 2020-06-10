@@ -1,0 +1,286 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --reservation-order-id --reservation-id
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e?api-version=2019-04-01
+  response:
+    body:
+      string: '{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/6dee7663-3e63-4115-aa4d-41e9a57f551e","etag":2,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Succeeded","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T04:59:41.4709954Z","lastUpdatedDateTime":"2019-11-15T04:59:41.4709954Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/4e66c701-c495-4518-b305-68778e9b63d6","/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/aee83380-71ab-47ba-bd74-73b45531b941"]},"capabilities":"ApiReturnEnabled,
+        ApiExchangeEnabled","renew":false,"term":"P1Y","billingScopeId":"/subscriptions/00000000-0000-0000-0000-000000000000","billingPlan":"Upfront"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1298'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 Nov 2019 05:04:29 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"quantities": [1, 2], "reservationId": "/providers/Microsoft.Capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation split
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '193'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --reservation-order-id --reservation-id -1 -2
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/split?api-version=2019-04-01
+  response:
+    body:
+      string: '[{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0771cff0-f3ab-461c-8616-2cd087fe5161","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/0771cff0-f3ab-461c-8616-2cd087fe5161","etag":2,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":1,"provisioningState":"Succeeded","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:31.5961308Z","lastUpdatedDateTime":"2019-11-15T05:04:33.8151027Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e"},"renew":false}},{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/58d17836-d8fb-4f1a-a75a-477f944db2cc","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/58d17836-d8fb-4f1a-a75a-477f944db2cc","etag":2,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Succeeded","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:31.5961308Z","lastUpdatedDateTime":"2019-11-15T05:04:33.8151027Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e"},"renew":false}},{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/6dee7663-3e63-4115-aa4d-41e9a57f551e","etag":5,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Cancelled","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:31.5961308Z","extendedStatusInfo":{"statusCode":"Split","message":"This
+        reservation was split and is no longer active"},"lastUpdatedDateTime":"2019-11-15T05:04:33.8151027Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitDestinations":["/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0771cff0-f3ab-461c-8616-2cd087fe5161","/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/58d17836-d8fb-4f1a-a75a-477f944db2cc"]},"mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/4e66c701-c495-4518-b305-68778e9b63d6","/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/aee83380-71ab-47ba-bd74-73b45531b941"]},"renew":false}}]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3555'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 Nov 2019 05:04:34 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Capacity/reservationorders/0af601f3-7868-44ee-b833-4d2e64ad3d70/splitoperationresults/6dee7663-3e63-4115-aa4d-41e9a57f551e_3?api-version=2019-04-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+      x-ms-test:
+      - '{"contact":"kgautam","scenarios":"RITesting","retention":"12/30/2019 8:29:59
+        PM"}'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation split
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --reservation-order-id --reservation-id -1 -2
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationorders/0af601f3-7868-44ee-b833-4d2e64ad3d70/splitoperationresults/6dee7663-3e63-4115-aa4d-41e9a57f551e_3?api-version=2019-04-01
+  response:
+    body:
+      string: '[{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0771cff0-f3ab-461c-8616-2cd087fe5161","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/0771cff0-f3ab-461c-8616-2cd087fe5161","etag":2,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":1,"provisioningState":"Succeeded","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:31.5961308Z","lastUpdatedDateTime":"2019-11-15T05:04:33.8151027Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e"},"renew":false}},{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/58d17836-d8fb-4f1a-a75a-477f944db2cc","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/58d17836-d8fb-4f1a-a75a-477f944db2cc","etag":2,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Succeeded","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:31.5961308Z","lastUpdatedDateTime":"2019-11-15T05:04:33.8151027Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e"},"renew":false}},{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/6dee7663-3e63-4115-aa4d-41e9a57f551e","etag":5,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Cancelled","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:31.5961308Z","extendedStatusInfo":{"statusCode":"Split","message":"This
+        reservation was split and is no longer active"},"lastUpdatedDateTime":"2019-11-15T05:04:33.8151027Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitDestinations":["/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0771cff0-f3ab-461c-8616-2cd087fe5161","/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/58d17836-d8fb-4f1a-a75a-477f944db2cc"]},"mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/4e66c701-c495-4518-b305-68778e9b63d6","/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/aee83380-71ab-47ba-bd74-73b45531b941"]},"renew":false}}]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3555'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 Nov 2019 05:04:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"sources": ["/providers/Microsoft.Capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0771cff0-f3ab-461c-8616-2cd087fe5161",
+      "/providers/Microsoft.Capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/58d17836-d8fb-4f1a-a75a-477f944db2cc"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation merge
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '305'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - --reservation-order-id -1 -2
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+      accept-language:
+      - en-US
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/merge?api-version=2019-04-01
+  response:
+    body:
+      string: '[{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0771cff0-f3ab-461c-8616-2cd087fe5161","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/0771cff0-f3ab-461c-8616-2cd087fe5161","etag":5,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":1,"provisioningState":"Cancelled","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:48.1377265Z","extendedStatusInfo":{"statusCode":"Merged","message":"This
+        reservation was merged and is no longer active"},"lastUpdatedDateTime":"2019-11-15T05:04:48.1377265Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e"},"mergeProperties":{"mergeDestination":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0dadde4b-b644-4df1-8b06-39f088e00aa5"},"renew":false}},{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/58d17836-d8fb-4f1a-a75a-477f944db2cc","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/58d17836-d8fb-4f1a-a75a-477f944db2cc","etag":4,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Cancelled","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:48.1377265Z","extendedStatusInfo":{"statusCode":"Merged","message":"This
+        reservation was merged and is no longer active"},"lastUpdatedDateTime":"2019-11-15T05:04:48.1377265Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e"},"mergeProperties":{"mergeDestination":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0dadde4b-b644-4df1-8b06-39f088e00aa5"},"renew":false}},{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0dadde4b-b644-4df1-8b06-39f088e00aa5","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/0dadde4b-b644-4df1-8b06-39f088e00aa5","etag":2,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Succeeded","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:48.1377265Z","lastUpdatedDateTime":"2019-11-15T05:04:48.1377265Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0771cff0-f3ab-461c-8616-2cd087fe5161","/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/58d17836-d8fb-4f1a-a75a-477f944db2cc"]},"renew":false}}]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3702'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 Nov 2019 05:04:47 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com/providers/Microsoft.Capacity/reservationorders/0af601f3-7868-44ee-b833-4d2e64ad3d70/mergeoperationresults/0771cff0-f3ab-461c-8616-2cd087fe5161_3?api-version=2019-04-01
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '1199'
+      x-ms-test:
+      - '{"contact":"kgautam","scenarios":"RITesting","retention":"12/30/2019 8:29:59
+        PM"}'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - reservations reservation merge
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --reservation-order-id -1 -2
+      User-Agent:
+      - python/3.7.5 (Windows-10-10.0.18362-SP0) msrest/0.6.10 msrest_azure/0.6.2
+        azure-mgmt-reservations/0.6.0 Azure-SDK-For-Python AZURECLI/2.0.76
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationorders/0af601f3-7868-44ee-b833-4d2e64ad3d70/mergeoperationresults/0771cff0-f3ab-461c-8616-2cd087fe5161_3?api-version=2019-04-01
+  response:
+    body:
+      string: '[{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0771cff0-f3ab-461c-8616-2cd087fe5161","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/0771cff0-f3ab-461c-8616-2cd087fe5161","etag":5,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":1,"provisioningState":"Cancelled","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:48.1377265Z","extendedStatusInfo":{"statusCode":"Merged","message":"This
+        reservation was merged and is no longer active"},"lastUpdatedDateTime":"2019-11-15T05:04:48.1377265Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e"},"mergeProperties":{"mergeDestination":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0dadde4b-b644-4df1-8b06-39f088e00aa5"},"renew":false}},{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/58d17836-d8fb-4f1a-a75a-477f944db2cc","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/58d17836-d8fb-4f1a-a75a-477f944db2cc","etag":4,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Cancelled","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:48.1377265Z","extendedStatusInfo":{"statusCode":"Merged","message":"This
+        reservation was merged and is no longer active"},"lastUpdatedDateTime":"2019-11-15T05:04:48.1377265Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/6dee7663-3e63-4115-aa4d-41e9a57f551e"},"mergeProperties":{"mergeDestination":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0dadde4b-b644-4df1-8b06-39f088e00aa5"},"renew":false}},{"sku":{"name":"Standard_D1"},"id":"/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0dadde4b-b644-4df1-8b06-39f088e00aa5","type":"Microsoft.Capacity/reservationOrders/reservations","name":"0af601f3-7868-44ee-b833-4d2e64ad3d70/0dadde4b-b644-4df1-8b06-39f088e00aa5","etag":2,"location":"westus","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Succeeded","expiryDate":"2020-10-01","displayName":"TestPurchaseReservation","effectiveDateTime":"2019-11-15T05:04:48.1377265Z","lastUpdatedDateTime":"2019-11-15T05:04:48.1377265Z","reservedResourceType":"VirtualMachines","instanceFlexibility":"On","skuDescription":"Reserved
+        VM Instance, Standard_D1, US West, 1 Year","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/0771cff0-f3ab-461c-8616-2cd087fe5161","/providers/microsoft.capacity/reservationOrders/0af601f3-7868-44ee-b833-4d2e64ad3d70/reservations/58d17836-d8fb-4f1a-a75a-477f944db2cc"]},"renew":false}}]'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3702'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 Nov 2019 05:04:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

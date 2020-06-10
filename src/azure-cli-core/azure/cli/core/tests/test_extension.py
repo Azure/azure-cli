@@ -10,7 +10,7 @@ import zipfile
 
 import mock
 
-from azure.cli.core.extension import (get_extensions, get_extension_path, extension_exists,
+from azure.cli.core.extension import (get_extensions, build_extension_path, extension_exists,
                                       get_extension, get_extension_names, get_extension_modname, ext_compat_with_cli,
                                       ExtensionNotInstalledException, WheelExtension,
                                       EXTENSIONS_MOD_PREFIX, EXT_METADATA_MINCLICOREVERSION, EXT_METADATA_MAXCLICOREVERSION)
@@ -19,25 +19,34 @@ from azure.cli.core.extension import (get_extensions, get_extension_path, extens
 # The test extension name
 EXT_NAME = 'myfirstcliextension'
 EXT_VERSION = '0.0.3+dev'
+SECOND_EXT_NAME = 'my_second_cli_extension'
 
 
 def _get_test_data_file(filename):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', filename)
 
 
-def _install_test_extension1():  # pylint: disable=no-self-use
+def _install_test_extension1(system=None):  # pylint: disable=no-self-use
     # We extract the extension into place as we aren't testing install here
     zip_file = _get_test_data_file('{}.zip'.format(EXT_NAME))
     zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(get_extension_path(EXT_NAME))
+    zip_ref.extractall(build_extension_path(EXT_NAME, system=system))
     zip_ref.close()
 
 
-def _install_test_extension2():  # pylint: disable=no-self-use
+def _install_test_extension2(system=None):  # pylint: disable=no-self-use
     # We extract the extension into place as we aren't testing install here
     zip_file = _get_test_data_file('myfirstcliextension_az_extmetadata.zip')
     zip_ref = zipfile.ZipFile(zip_file, 'r')
-    zip_ref.extractall(get_extension_path(EXT_NAME))
+    zip_ref.extractall(build_extension_path(EXT_NAME, system=system))
+    zip_ref.close()
+
+
+def _install_test_extension3(system=None):  # pylint: disable=no-self-use
+    # We extract the extension into place as we aren't testing install here
+    zip_file = _get_test_data_file('{}.zip'.format(SECOND_EXT_NAME))
+    zip_ref = zipfile.ZipFile(zip_file, 'r')
+    zip_ref.extractall(build_extension_path(SECOND_EXT_NAME, system=system))
     zip_ref.close()
 
 
@@ -45,12 +54,17 @@ class TestExtensionsBase(unittest.TestCase):
 
     def setUp(self):
         self.ext_dir = tempfile.mkdtemp()
-        self.patcher = mock.patch('azure.cli.core.extension.EXTENSIONS_DIR', self.ext_dir)
-        self.patcher.start()
+        self.ext_sys_dir = tempfile.mkdtemp()
+        self.patchers = [mock.patch('azure.cli.core.extension.EXTENSIONS_DIR', self.ext_dir),
+                         mock.patch('azure.cli.core.extension.EXTENSIONS_SYS_DIR', self.ext_sys_dir)]
+        for patcher in self.patchers:
+            patcher.start()
 
     def tearDown(self):
-        self.patcher.stop()
+        for patcher in self.patchers:
+            patcher.stop()
         shutil.rmtree(self.ext_dir, ignore_errors=True)
+        shutil.rmtree(self.ext_sys_dir, ignore_errors=True)
 
 
 class TestExtensions(TestExtensionsBase):
@@ -58,50 +72,50 @@ class TestExtensions(TestExtensionsBase):
     def test_no_extensions_dir(self):
         """ Extensions directory doesn't exist """
         shutil.rmtree(self.ext_dir)
-        actual = get_extensions()
+        actual = get_extensions(ext_type=WheelExtension)
         self.assertEqual(len(actual), 0)
 
     def test_no_extensions_in_dir(self):
         """ Directory exists but there are no extensions """
-        actual = get_extensions()
+        actual = get_extensions(ext_type=WheelExtension)
         self.assertEqual(len(actual), 0)
 
     def test_other_files_in_extensions_dir(self):
         tempfile.mkstemp(dir=self.ext_dir)
-        actual = get_extensions()
+        actual = get_extensions(ext_type=WheelExtension)
         self.assertEqual(len(actual), 0)
 
     def test_extension_list(self):
         _install_test_extension1()
-        actual = get_extensions()
+        actual = get_extensions(ext_type=WheelExtension)
         self.assertEqual(len(actual), 1)
 
     def test_extension_exists(self):
         _install_test_extension1()
-        actual = extension_exists(EXT_NAME)
+        actual = extension_exists(EXT_NAME, ext_type=WheelExtension)
         self.assertTrue(actual)
 
     def test_extension_not_exists(self):
-        actual = extension_exists(EXT_NAME)
+        actual = extension_exists(EXT_NAME, ext_type=WheelExtension)
         self.assertFalse(actual)
 
     def test_extension_not_exists_2(self):
         _install_test_extension1()
-        actual = extension_exists('notanextension')
+        actual = extension_exists('notanextension', ext_type=WheelExtension)
         self.assertFalse(actual)
 
     def test_get_extension(self):
         _install_test_extension1()
-        actual = get_extension(EXT_NAME)
+        actual = get_extension(EXT_NAME, ext_type=WheelExtension)
         self.assertEqual(actual.name, EXT_NAME)
 
     def test_get_extension_not_installed(self):
         with self.assertRaises(ExtensionNotInstalledException):
-            get_extension(EXT_NAME)
+            get_extension(EXT_NAME, ext_type=WheelExtension)
 
     def test_get_extension_names(self):
         _install_test_extension1()
-        actual = get_extension_names()
+        actual = get_extension_names(ext_type=WheelExtension)
         self.assertEqual(len(actual), 1)
         self.assertEqual(actual[0], EXT_NAME)
 
@@ -231,6 +245,56 @@ class TestWheelExtension(TestExtensionsBase):
 
     def test_wheel_metadata2(self):
         _install_test_extension2()
+        ext = get_extension(EXT_NAME)
+        # There should be no exceptions and metadata should have some value
+        self.assertTrue(ext.metadata)
+        # We check that we can retrieve any one of the az extension metadata values
+        self.assertTrue(ext.metadata.get(EXT_METADATA_MINCLICOREVERSION))
+
+
+class TestWheelSystemExtension(TestExtensionsBase):
+
+    def test_wheel_get_all(self):
+        _install_test_extension1(system=True)
+        whl_exts = WheelExtension.get_all()
+        self.assertEqual(len(whl_exts), 1)
+
+    def test_wheel_user_system_extensions(self):
+        _install_test_extension1()
+        _install_test_extension3(system=True)
+        whl_exts = WheelExtension.get_all()
+        self.assertEqual(len(whl_exts), 2)
+
+    def test_wheel_user_system_same_extension(self):
+        _install_test_extension1()
+        _install_test_extension1(system=True)
+        self.assertNotEqual(build_extension_path(EXT_NAME), build_extension_path(EXT_NAME, system=True))
+        actual = get_extension(EXT_NAME, ext_type=WheelExtension)
+        self.assertEqual(actual.name, EXT_NAME)
+        self.assertEqual(actual.path, build_extension_path(EXT_NAME))
+        shutil.rmtree(self.ext_dir)
+        actual = get_extension(EXT_NAME, ext_type=WheelExtension)
+        self.assertEqual(actual.name, EXT_NAME)
+        self.assertEqual(actual.path, build_extension_path(EXT_NAME, system=True))
+
+    def test_wheel_version(self):
+        _install_test_extension1(system=True)
+        ext = get_extension(EXT_NAME)
+        self.assertEqual(ext.version, EXT_VERSION)
+
+    def test_wheel_type(self):
+        _install_test_extension1(system=True)
+        ext = get_extension(EXT_NAME)
+        self.assertEqual(ext.ext_type, 'whl')
+
+    def test_wheel_metadata1(self):
+        _install_test_extension1(system=True)
+        ext = get_extension(EXT_NAME)
+        # There should be no exceptions and metadata should have some value
+        self.assertTrue(ext.metadata)
+
+    def test_wheel_metadata2(self):
+        _install_test_extension2(system=True)
         ext = get_extension(EXT_NAME)
         # There should be no exceptions and metadata should have some value
         self.assertTrue(ext.metadata)

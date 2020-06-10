@@ -1,14 +1,19 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python
 
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+import sys
+import os
 
-export PYTHONPATH="${DIR}/src:${PYTHONPATH}"
+dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'src')
 
-python -m azure.cli "$@"
+if os.environ.get('PYTHONPATH') == None:
+    os.environ['PYTHONPATH'] = dir
+else:
+    os.environ['PYTHONPATH'] = os.pathsep.join([
+        dir,
+        os.environ.get('PYTHONPATH'),
+    ])
 
+if os.environ.get('AZ_INSTALLER') is None:
+    os.environ['AZ_INSTALLER'] = 'PIP'
+
+os.execl(sys.executable, sys.executable, '-m', 'azure.cli', *sys.argv[1:])

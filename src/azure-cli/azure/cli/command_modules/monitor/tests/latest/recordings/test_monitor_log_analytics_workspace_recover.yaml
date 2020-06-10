@@ -1,0 +1,1010 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --quota --level --sku
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-resource/9.0.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001?api-version=2019-07-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_workspace_recover000001","name":"cli_test_monitor_workspace_recover000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2020-05-28T11:04:34Z","StorageType":"Standard_LRS","type":"test"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '471'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 28 May 2020 11:04:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"sku": {"name": "CapacityReservation",
+      "capacityReservationLevel": 100}, "retentionInDays": 30, "workspaceCapping":
+      {"dailyQuotaGb": 1.0}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '177'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --quota --level --sku
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2020-03-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"21d74fba-5140-470a-97a5-0781b7ef356b\",\r\n    \"provisioningState\": \"Creating\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"capacityreservation\",\r\n      \"capacityReservationLevel\":
+        100,\r\n      \"maxCapacityReservationLevel\": 1000,\r\n      \"lastSkuUpdate\":
+        \"Thu, 28 May 2020 11:04:49 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": -1.0,\r\n      \"quotaNextResetTime\":
+        \"Thu, 28 May 2020 23:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"publicNetworkAccessForIngestion\": \"Enabled\",\r\n    \"publicNetworkAccessForQuery\":
+        \"Enabled\",\r\n    \"createdDate\": \"Thu, 28 May 2020 11:04:49 GMT\",\r\n
+        \   \"modifiedDate\": \"Thu, 28 May 2020 11:04:49 GMT\"\r\n  },\r\n  \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/microsoft.operationalinsights/workspaces/clitest000002\",\r\n
+        \ \"name\": \"clitest000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westus\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1227'
+      content-type:
+      - application/json
+      date:
+      - Thu, 28 May 2020 11:04:50 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --quota --level --sku
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2020-03-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"21d74fba-5140-470a-97a5-0781b7ef356b\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"capacityreservation\",\r\n      \"capacityReservationLevel\":
+        100,\r\n      \"maxCapacityReservationLevel\": 1000,\r\n      \"lastSkuUpdate\":
+        \"Thu, 28 May 2020 11:04:49 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": 1.0,\r\n      \"quotaNextResetTime\":
+        \"Thu, 28 May 2020 23:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"enableFailover\": false,\r\n    \"publicNetworkAccessForIngestion\":
+        \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
+        \"Thu, 28 May 2020 11:04:49 GMT\",\r\n    \"modifiedDate\": \"Thu, 28 May
+        2020 11:04:53 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/microsoft.operationalinsights/workspaces/clitest000002\",\r\n
+        \ \"name\": \"clitest000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westus\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1257'
+      content-type:
+      - application/json
+      date:
+      - Thu, 28 May 2020 11:05:22 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --quota --level
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2020-03-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"21d74fba-5140-470a-97a5-0781b7ef356b\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"capacityreservation\",\r\n      \"capacityReservationLevel\":
+        100,\r\n      \"maxCapacityReservationLevel\": 1000,\r\n      \"lastSkuUpdate\":
+        \"Thu, 28 May 2020 11:04:49 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": 1.0,\r\n      \"quotaNextResetTime\":
+        \"Thu, 28 May 2020 23:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"enableFailover\": false,\r\n    \"publicNetworkAccessForIngestion\":
+        \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
+        \"Thu, 28 May 2020 11:04:49 GMT\",\r\n    \"modifiedDate\": \"Thu, 28 May
+        2020 11:04:53 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/microsoft.operationalinsights/workspaces/clitest000002\",\r\n
+        \ \"name\": \"clitest000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westus\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1257'
+      content-type:
+      - application/json
+      date:
+      - Thu, 28 May 2020 11:05:24 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"provisioningState": "Succeeded",
+      "sku": {"name": "capacityreservation", "capacityReservationLevel": 200}, "retentionInDays":
+      30, "workspaceCapping": {"dailyQuotaGb": 2.0}, "publicNetworkAccessForIngestion":
+      "Enabled", "publicNetworkAccessForQuery": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '299'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n --quota --level
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2020-03-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"21d74fba-5140-470a-97a5-0781b7ef356b\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"capacityreservation\",\r\n      \"capacityReservationLevel\":
+        200,\r\n      \"maxCapacityReservationLevel\": 1000,\r\n      \"lastSkuUpdate\":
+        \"Thu, 28 May 2020 11:05:27 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": 2.0,\r\n      \"quotaNextResetTime\":
+        \"Thu, 28 May 2020 23:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"enableFailover\": false,\r\n    \"publicNetworkAccessForIngestion\":
+        \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
+        \"Thu, 28 May 2020 11:04:49 GMT\",\r\n    \"modifiedDate\": \"Thu, 28 May
+        2020 11:04:53 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/microsoft.operationalinsights/workspaces/clitest000002\",\r\n
+        \ \"name\": \"clitest000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westus\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1257'
+      content-type:
+      - application/json
+      date:
+      - Thu, 28 May 2020 11:05:26 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1197'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --workspace-name
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables?api-version=2020-03-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/azureactivity","name":"AzureActivity"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/usage","name":"Usage"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appavailabilityresults","name":"AppAvailabilityResults"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appbrowsertimings","name":"AppBrowserTimings"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appdependencies","name":"AppDependencies"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appexceptions","name":"AppExceptions"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appevents","name":"AppEvents"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appmetrics","name":"AppMetrics"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/apppageviews","name":"AppPageViews"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appperformancecounters","name":"AppPerformanceCounters"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/apprequests","name":"AppRequests"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appsystemevents","name":"AppSystemEvents"},{"properties":{"RetentionInDays":90},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/apptraces","name":"AppTraces"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/aaddomainservicesaccountlogon","name":"AADDomainServicesAccountLogon"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/aaddomainservicesaccountmanagement","name":"AADDomainServicesAccountManagement"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/aaddomainservicesdirectoryserviceaccess","name":"AADDomainServicesDirectoryServiceAccess"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/aaddomainserviceslogonlogoff","name":"AADDomainServicesLogonLogoff"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/aaddomainservicespolicychange","name":"AADDomainServicesPolicyChange"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/aaddomainservicesprivilegeuse","name":"AADDomainServicesPrivilegeUse"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/aaddomainservicessystemsecurity","name":"AADDomainServicesSystemSecurity"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/addonazurebackupalerts","name":"AddonAzureBackupAlerts"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/addonazurebackupjobs","name":"AddonAzureBackupJobs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/addonazurebackuppolicy","name":"AddonAzureBackupPolicy"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/addonazurebackupprotectedinstance","name":"AddonAzureBackupProtectedInstance"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/addonazurebackupstorage","name":"AddonAzureBackupStorage"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/adfactivityrun","name":"ADFActivityRun"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/adfpipelinerun","name":"ADFPipelineRun"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/adfssisintegrationruntimelogs","name":"ADFSSISIntegrationRuntimeLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/adfssispackageeventmessagecontext","name":"ADFSSISPackageEventMessageContext"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/adfssispackageeventmessages","name":"ADFSSISPackageEventMessages"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/adfssispackageexecutablestatistics","name":"ADFSSISPackageExecutableStatistics"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/adfssispackageexecutioncomponentphases","name":"ADFSSISPackageExecutionComponentPhases"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/adfssispackageexecutiondatastatistics","name":"ADFSSISPackageExecutionDataStatistics"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/adftriggerrun","name":"ADFTriggerRun"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/aegdeliveryfailurelogs","name":"AegDeliveryFailureLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/aegpublishfailurelogs","name":"AegPublishFailureLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/alert","name":"Alert"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/amlcomputeclusterevent","name":"AmlComputeClusterEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/amlcomputeclusternodeevent","name":"AmlComputeClusterNodeEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/amlcomputejobevent","name":"AmlComputeJobEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/apimanagementgatewaylogs","name":"ApiManagementGatewayLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appcentererror","name":"AppCenterError"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appplatformlogsforspring","name":"AppPlatformLogsforSpring"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appplatformsystemlogs","name":"AppPlatformSystemLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appserviceapplogs","name":"AppServiceAppLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appserviceauditlogs","name":"AppServiceAuditLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appserviceconsolelogs","name":"AppServiceConsoleLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appserviceenvironmentplatformlogs","name":"AppServiceEnvironmentPlatformLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appservicefileauditlogs","name":"AppServiceFileAuditLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appservicehttplogs","name":"AppServiceHTTPLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/appserviceplatformlogs","name":"AppServicePlatformLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/auditlogs","name":"AuditLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/autoscaleevaluationslog","name":"AutoscaleEvaluationsLog"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/autoscalescaleactionslog","name":"AutoscaleScaleActionsLog"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/azuredevopsauditing","name":"AzureDevOpsAuditing"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/azurediagnostics","name":"AzureDiagnostics"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/azuremetrics","name":"AzureMetrics"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/baiclusterevent","name":"BaiClusterEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/baiclusternodeevent","name":"BaiClusterNodeEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/baijobevent","name":"BaiJobEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/blockchainapplicationlog","name":"BlockchainApplicationLog"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/computergroup","name":"ComputerGroup"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/containerregistryloginevents","name":"ContainerRegistryLoginEvents"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/containerregistryrepositoryevents","name":"ContainerRegistryRepositoryEvents"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/coreazurebackup","name":"CoreAzureBackup"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databricksaccounts","name":"DatabricksAccounts"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databricksclusters","name":"DatabricksClusters"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databricksdbfs","name":"DatabricksDBFS"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databricksinstancepools","name":"DatabricksInstancePools"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databricksjobs","name":"DatabricksJobs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databricksnotebook","name":"DatabricksNotebook"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databrickssecrets","name":"DatabricksSecrets"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databrickssqlpermissions","name":"DatabricksSQLPermissions"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databricksssh","name":"DatabricksSSH"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databrickstables","name":"DatabricksTables"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/databricksworkspace","name":"DatabricksWorkspace"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/etwevent","name":"ETWEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/event","name":"Event"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/failedingestion","name":"FailedIngestion"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/functionapplogs","name":"FunctionAppLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/heartbeat","name":"Heartbeat"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/intuneauditlogs","name":"IntuneAuditLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/intunedevicecomplianceorg","name":"IntuneDeviceComplianceOrg"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/intuneoperationallogs","name":"IntuneOperationalLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/iothubdistributedtracing","name":"IoTHubDistributedTracing"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/microsoftazurebastionauditlogs","name":"MicrosoftAzureBastionAuditLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/microsoftdatasharesentsnapshotlog","name":"MicrosoftDataShareSentSnapshotLog"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/microsoftdynamicstelemetryperformancelogs","name":"MicrosoftDynamicsTelemetryPerformanceLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/microsoftdynamicstelemetrysystemmetricslogs","name":"MicrosoftDynamicsTelemetrySystemMetricsLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/microsofthealthcareapisauditlogs","name":"MicrosoftHealthcareApisAuditLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/operation","name":"Operation"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/perf","name":"Perf"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/reservedcommonfields","name":"ReservedCommonFields"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/servicefabricoperationalevent","name":"ServiceFabricOperationalEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/servicefabricreliableactorevent","name":"ServiceFabricReliableActorEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/servicefabricreliableserviceevent","name":"ServiceFabricReliableServiceEvent"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/signalrservicediagnosticlogs","name":"SignalRServiceDiagnosticLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/signinlogs","name":"SigninLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/storagebloblogs","name":"StorageBlobLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/storagefilelogs","name":"StorageFileLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/storagequeuelogs","name":"StorageQueueLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/storagetablelogs","name":"StorageTableLogs"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/succeededingestion","name":"SucceededIngestion"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/syslog","name":"Syslog"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/w3ciislog","name":"W3CIISLog"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/wvdcheckpoints","name":"WVDCheckpoints"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/wvdconnections","name":"WVDConnections"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/wvderrors","name":"WVDErrors"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/wvdfeeds","name":"WVDFeeds"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/wvdhostregistrations","name":"WVDHostRegistrations"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/wvdmanagement","name":"WVDManagement"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '31759'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 28 May 2020 11:05:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"retentionInDays": 30}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace table update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '39'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g --workspace-name -n --retention-time --debug
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: PATCH
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002/tables/Syslog?api-version=2020-03-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"retentionInDays\": 30\r\n  },\r\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/microsoft.operationalinsights/workspaces/clitest000002/tables/syslog\",\r\n
+        \ \"name\": \"Syslog\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      cachecontrol:
+      - no-cache
+      content-length:
+      - '317'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 28 May 2020 11:05:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ams-apiversion:
+      - WebAPI1.0
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace list-deleted-workspaces
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/deletedWorkspaces?api-version=2020-03-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 28 May 2020 11:05:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - a5b8c447-4924-40a9-a5b3-d72f4469d4f1
+      - 194a3d66-9071-47c2-a323-7381b1ac17e6
+      - 9b6897e9-a3bf-45e2-a399-cf5842854b50
+      - 5510c79b-9e94-435f-a260-4caf1ede513d
+      - dcc715a1-479d-4eeb-8deb-7727635e3f46
+      - 3f35364d-f0e3-4ab8-a549-b9828baf0c49
+      - 3ea40a4a-9914-4daa-ab19-83a7de086452
+      - 8333ad6c-5a98-48f0-959c-a1fecc3ac6be
+      - 52831f10-609d-41b5-97a8-e8fe023e70a4
+      - 3babfa3e-cdf3-4370-99bf-db009bf0cefa
+      - 8613042d-81f1-416a-b37d-e53b30b4bdb0
+      - 189beae5-bbdd-4a35-9813-df0c9604d047
+      - bb51da0a-42f1-4867-a425-a6788ad80c3d
+      - 0b8b4ee5-fa74-45d3-bccd-52a2d8083b8a
+      - a0677198-217d-4111-828a-6e82c7782e2f
+      - 3d388555-f322-43d5-a0ef-e4560070cbaa
+      - 06fa5553-9ab3-45c0-94b4-2f4035d454d3
+      - 088ae6e4-3145-42e3-bf54-18a96989cc70
+      - 585580a8-2a55-4d48-b25b-0584fc622d5b
+      - aac42b81-077b-41f6-a7dd-5457c747bf94
+      - 29cc5b60-ab17-4b26-bfd9-7fb96f96b90b
+      - c581c0c0-e0df-4fb8-8f82-d3437e4bdb7d
+      - b65d108c-3619-44cd-beff-b0a6d4fa254f
+      - 79350b95-06a1-4bb0-be07-f0a8b97a6974
+      - 9f9a1b7a-8681-46a6-90b4-0d1dfd0443e7
+      - 0c795a1e-cf25-4a98-8f99-efc2a8eea25a
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n -y
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2020-03-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 28 May 2020 11:05:39 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14998'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace list-deleted-workspaces
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/deletedWorkspaces?api-version=2020-03-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"source":"Azure","customerId":"21d74fba-5140-470a-97a5-0781b7ef356b","provisioningState":"Succeeded","sku":{"name":"capacityreservation","capacityReservationLevel":200,"maxCapacityReservationLevel":1000,"lastSkuUpdate":"Thu,
+        28 May 2020 11:05:27 GMT"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":2.0,"quotaNextResetTime":"Thu,
+        28 May 2020 23:00:00 GMT","dataIngestionStatus":"RespectQuota"},"enableFailover":false,"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"Thu,
+        28 May 2020 11:04:49 GMT","modifiedDate":"Thu, 28 May 2020 11:05:35 GMT"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/microsoft.operationalinsights/workspaces/clitest000002","name":"clitest000002","type":"Microsoft.OperationalInsights/workspaces","location":"westus"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1046'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 28 May 2020 11:05:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 1c42a741-eb33-41da-8716-ded6a5002602
+      - b6973658-4d54-48d8-92b5-3617f107ab2e
+      - 7fc363b1-15eb-4437-9a57-b2f50c028259
+      - b23211c8-086f-4abb-8111-bdd08b1e038d
+      - f508f2e0-6845-4a39-8b9e-61b419918b87
+      - 848fd13c-8292-40d7-be13-addc407698af
+      - 6a0b4e89-5c37-4164-b519-7f70e711fd1c
+      - 2f64a377-72ab-44cd-9b35-c89b5633023b
+      - 72e75d37-3c36-4aff-9db6-9eee27ce4481
+      - 36ba482a-dfb4-48d7-a485-9c2c4c2cdbef
+      - 2a720cce-aba0-4f34-868e-91c0b0932e30
+      - 036436d5-6461-4e5c-8e06-600304a6c865
+      - 81dc7c90-8efc-41eb-abd0-b0f49bd92f08
+      - 24dd91a9-1002-445b-8fae-de487dc4ca0d
+      - f9aa822b-02c6-4100-9420-2291ef1eccdf
+      - 2de915c4-3b4b-4649-9790-fd45ee57cf10
+      - aadb9e2e-4c42-4088-989e-f17e9bdd7d7f
+      - 75ea487d-13d0-4b6b-a9ca-7b0ea0e83d25
+      - a3689b91-64d5-4a4d-82b7-d8c93323bb4f
+      - 0d0790c3-52b3-49a6-beaf-35e5df76f778
+      - ef3d5ce9-da85-43ec-aa5a-6dbebab5a9ca
+      - 965f7ef2-3b6d-458b-b8e3-77c4c1b14ee0
+      - 788f8b6d-3b85-42f9-b5e5-9939b7d6bdd6
+      - 96e19d67-5208-4ef7-9e3b-ae0f64ace10f
+      - 88a53df6-1bd3-4505-9d33-999277bcf68f
+      - 1d08d8db-d53d-4a4f-a208-e46956524c74
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace recover
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/deletedWorkspaces?api-version=2020-03-01-preview
+  response:
+    body:
+      string: '{"value":[{"properties":{"source":"Azure","customerId":"21d74fba-5140-470a-97a5-0781b7ef356b","provisioningState":"Succeeded","sku":{"name":"capacityreservation","capacityReservationLevel":200,"maxCapacityReservationLevel":1000,"lastSkuUpdate":"Thu,
+        28 May 2020 11:05:27 GMT"},"retentionInDays":30,"features":{"legacy":0,"searchVersion":1,"enableLogAccessUsingOnlyResourcePermissions":true},"workspaceCapping":{"dailyQuotaGb":2.0,"quotaNextResetTime":"Thu,
+        28 May 2020 23:00:00 GMT","dataIngestionStatus":"RespectQuota"},"enableFailover":false,"publicNetworkAccessForIngestion":"Enabled","publicNetworkAccessForQuery":"Enabled","createdDate":"Thu,
+        28 May 2020 11:04:49 GMT","modifiedDate":"Thu, 28 May 2020 11:05:35 GMT"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/microsoft.operationalinsights/workspaces/clitest000002","name":"clitest000002","type":"Microsoft.OperationalInsights/workspaces","location":"westus"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1046'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 28 May 2020 11:05:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - bd24a018-ea0f-420c-8101-d7a901e5186b
+      - 3e6e1505-1a9c-4dff-9e50-8c74caae2a99
+      - 73245c58-7112-4af5-a059-37ffc5cbc208
+      - debfd982-1cbe-4351-872a-51993b062ad9
+      - 23a92a43-e4c9-4c47-8af8-746490ce75a9
+      - 05fa08be-3412-4fa3-b1e8-cddf896576b7
+      - eb513aa5-2a40-4bb2-8585-4ebcd741df87
+      - f8a31f7a-e873-4a46-bb31-190b7bde7740
+      - 6dc1f74e-efe6-451f-9213-f786c3b0b490
+      - a2767d3f-b48c-4300-b1e5-f599f0eaeeca
+      - ff184ed4-9c75-4fb6-a2b4-68cb1af59da3
+      - 7ab2dc81-1083-4f6a-a26d-d5dd0aa2704c
+      - 13df5527-84db-4672-973b-df29c5045cfb
+      - 3087eb4a-7ca9-487a-b39a-8051c6d91800
+      - 54d22d02-a286-4e6e-b6b2-04786f4523d7
+      - 36925143-e473-47f4-8616-6d2d759b8b86
+      - 4b4cf792-f401-463f-883c-42b67a88b291
+      - a1f2e799-a7b7-4956-a3dd-637c784c6b3d
+      - 0945f206-f5ca-471a-9760-1e1f3a080eea
+      - 8cc7bda6-cdb4-4b93-bed2-aa9ee15b4ea5
+      - 247b2c2c-a6b2-4ff9-adab-cd547b80ff44
+      - 817dcfc3-5f9e-407f-b07b-895df191e163
+      - e2d4b38d-0c2f-481b-8760-010a2bda83ad
+      - 4fe4257f-5c4c-4b1a-821f-9cfd8b941f3a
+      - 3727f1f2-88cc-4564-a5e2-8f658e11ef66
+      - 4dd25e47-fe6e-4b67-8f79-11e5c3ae2442
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"publicNetworkAccessForIngestion":
+      "Enabled", "publicNetworkAccessForQuery": "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace recover
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '126'
+      Content-Type:
+      - application/json; charset=utf-8
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2020-03-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"21d74fba-5140-470a-97a5-0781b7ef356b\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"capacityreservation\",\r\n      \"capacityReservationLevel\":
+        200,\r\n      \"maxCapacityReservationLevel\": 1000,\r\n      \"lastSkuUpdate\":
+        \"Thu, 28 May 2020 11:05:27 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": 2.0,\r\n      \"quotaNextResetTime\":
+        \"Thu, 28 May 2020 23:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"enableFailover\": false,\r\n    \"publicNetworkAccessForIngestion\":
+        \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
+        \"Thu, 28 May 2020 11:04:49 GMT\",\r\n    \"modifiedDate\": \"Thu, 28 May
+        2020 11:05:35 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/microsoft.operationalinsights/workspaces/clitest000002\",\r\n
+        \ \"name\": \"clitest000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westus\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1257'
+      content-type:
+      - application/json
+      date:
+      - Thu, 28 May 2020 11:05:54 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '1198'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2020-03-01-preview
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"source\": \"Azure\",\r\n    \"customerId\":
+        \"21d74fba-5140-470a-97a5-0781b7ef356b\",\r\n    \"provisioningState\": \"Succeeded\",\r\n
+        \   \"sku\": {\r\n      \"name\": \"capacityreservation\",\r\n      \"capacityReservationLevel\":
+        200,\r\n      \"maxCapacityReservationLevel\": 1000,\r\n      \"lastSkuUpdate\":
+        \"Thu, 28 May 2020 11:05:27 GMT\"\r\n    },\r\n    \"retentionInDays\": 30,\r\n
+        \   \"features\": {\r\n      \"legacy\": 0,\r\n      \"searchVersion\": 1,\r\n
+        \     \"enableLogAccessUsingOnlyResourcePermissions\": true\r\n    },\r\n
+        \   \"workspaceCapping\": {\r\n      \"dailyQuotaGb\": 2.0,\r\n      \"quotaNextResetTime\":
+        \"Thu, 28 May 2020 23:00:00 GMT\",\r\n      \"dataIngestionStatus\": \"RespectQuota\"\r\n
+        \   },\r\n    \"enableFailover\": false,\r\n    \"publicNetworkAccessForIngestion\":
+        \"Enabled\",\r\n    \"publicNetworkAccessForQuery\": \"Enabled\",\r\n    \"createdDate\":
+        \"Thu, 28 May 2020 11:04:49 GMT\",\r\n    \"modifiedDate\": \"Thu, 28 May
+        2020 11:05:52 GMT\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/microsoft.operationalinsights/workspaces/clitest000002\",\r\n
+        \ \"name\": \"clitest000002\",\r\n  \"type\": \"Microsoft.OperationalInsights/workspaces\",\r\n
+        \ \"location\": \"westus\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1257'
+      content-type:
+      - application/json
+      date:
+      - Thu, 28 May 2020 11:05:54 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace list-deleted-workspaces
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/deletedWorkspaces?api-version=2020-03-01-preview
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 28 May 2020 11:05:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-ms-original-request-ids:
+      - 594262f1-8ef9-47cb-9547-c15cc5d9f706
+      - 625f9738-a970-4c5c-a41b-bed7d6ad0f03
+      - f21b607d-40f4-4390-ab47-1d5666a70c1d
+      - 613ea0bc-8f1c-4ed6-95b5-d7a2d3010dde
+      - 39702e6a-abd8-4d74-b0c2-c648902f2e58
+      - d5a851c1-e8a9-4cb4-bdec-8b9189e82573
+      - b9407f4d-0694-49b7-8943-f76b0655b4c6
+      - 0aaad507-9495-4e8c-9b7d-9a32e47b0c24
+      - 6e6e17d5-60bb-4cdf-81dc-25db66edf1fe
+      - 14b7afe7-d6f0-4dbf-b837-5c73c1b76cda
+      - f53c47a4-2310-4899-b803-ab470c943627
+      - 5b3f312f-7e2f-4df9-9dfe-2029a935f432
+      - 39817479-e8a9-4661-9faa-2e242442b61d
+      - f647eb55-a2cc-4a22-8bd2-e057a4dcb7da
+      - 86a42d19-51d6-4cc4-a111-3902a8338882
+      - 4ee1229c-b2b1-41bf-867a-06349369319d
+      - 409b5570-2b41-4d48-9f31-c5d0f63cb672
+      - ba91945f-b2d9-4270-95a1-ed73c00cd45e
+      - 6ae7bed7-b6d2-4bde-a60f-cd8b9d86f418
+      - dd2ef119-b306-4176-908b-3e003d874170
+      - f5c0406e-f7e8-43f7-a8c7-3ef1ccab0094
+      - bf0ccf96-502c-47e1-acde-39bebc50e05d
+      - 94cb084f-6bd2-4753-aaf0-038c7f34ce9a
+      - d815814a-9924-494a-9ca8-86f06ee30bef
+      - 4fb87053-4448-46f9-a5dc-a339a9e7052d
+      - ea8b7968-50d7-44bf-ae7e-92711dd48e92
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --force -y
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2020-03-01-preview&force=true
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 28 May 2020 11:06:05 GMT
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-IIS/10.0
+      - Microsoft-IIS/10.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '14999'
+      x-powered-by:
+      - ASP.NET
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor log-analytics workspace show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.7.4 (Windows-10-10.0.18362-SP0) msrest/0.6.9 msrest_azure/0.6.3 azure-mgmt-loganalytics/0.6.0
+        Azure-SDK-For-Python AZURECLI/2.6.0
+      accept-language:
+      - en-US
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_monitor_workspace_recover000001/providers/Microsoft.OperationalInsights/workspaces/clitest000002?api-version=2020-03-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.OperationalInsights/workspaces/clitest000002''
+        under resource group ''cli_test_monitor_workspace_recover000001'' was not
+        found."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '240'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 28 May 2020 11:06:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+    status:
+      code: 404
+      message: Not Found
+version: 1
