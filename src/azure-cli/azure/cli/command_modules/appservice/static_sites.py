@@ -248,10 +248,13 @@ def _get_staticsite_location(client, static_site_name, resource_group_name=None)
             if not resource_group_name:
                 return static_site.location
 
-            from .utils import _get_resource_group_from_id
-            found_rg = _get_resource_group_from_id(static_site.id)
-            if found_rg.lower() == resource_group_name.lower():
-                return static_site.location
+            from msrestazure.tools import parse_resource_id
+            components = parse_resource_id(static_site.id)
+            rg_key = 'resource_group'
+            if rg_key in components:
+                found_rg = components['resource_group']
+                if found_rg.lower() == resource_group_name.lower():
+                    return static_site.location
 
     raise CLIError("Static site was '{}' not found in subscription.".format(static_site_name))
 
