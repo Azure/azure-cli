@@ -81,7 +81,6 @@ def _get_authority_url(cli_ctx, tenant):
 
 
 def get_credential_types(cli_ctx):
-
     class CredentialType(Enum):  # pylint: disable=too-few-public-methods
         cloud = get_active_cloud(cli_ctx)
         management = cli_ctx.cloud.endpoints.management
@@ -110,6 +109,7 @@ class Profile(object):
         self._ad = self.cli_ctx.cloud.endpoints.active_directory
         self._adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
 
+    # pylint: disable=too-many-branches,too-many-statements
     def login(self,
               interactive,
               username,
@@ -428,9 +428,6 @@ class Profile(object):
             # Always remove credential from the legacy cred cache, regardless of MSAL cache, to be deprecated
             adal_cache = ADALCredentialCache(cli_ctx=self.cli_ctx)
             adal_cache.remove_cached_creds(user_or_sp)
-            # remove service principle secret
-            msal_cache = MSALSecretStore()
-            msal_cache.remove_cached_creds(user_or_sp)
 
             logger.warning('Account %s was logged out from Azure CLI', user_or_sp)
         else:
@@ -453,7 +450,8 @@ class Profile(object):
                                'To clear the credential, run `az logout --username %s --clear-credential`.',
                                user_or_sp, user_or_sp)
         else:
-            logger.warning("The credential of %s was not found from MSAL encrypted cache.", user_or_sp)
+            # remove service principle secret
+            identity.logout_sp(user_or_sp)
 
     def logout_all(self, clear_credential):
         self._storage[_SUBSCRIPTIONS] = []
@@ -637,8 +635,9 @@ class Profile(object):
                     subscriptions = subscription_finder.find_using_specific_tenant(tenant, identity_credential)
                 else:
                     # pylint: disable=protected-access
-                    subscriptions = subscription_finder.find_using_common_tenant(identity_credential._auth_record,
-                                                                                 identity_credential)
+                    subscriptions = subscription_finder. \
+                        find_using_common_tenant(identity_credential._auth_record,  # pylint: disable=protected-access
+                                                 identity_credential)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning("Refreshing for '%s' failed with an error '%s'. The existing accounts were not "
                                "modified. You can run 'az login' later to explicitly refresh them", user_name, ex)

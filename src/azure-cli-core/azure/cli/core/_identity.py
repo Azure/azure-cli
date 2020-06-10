@@ -88,10 +88,10 @@ class Identity:
         # Initialize _msal_app for logout, since Azure Identity doesn't provide the functionality for logout
         from msal import PublicClientApplication
         # sdk/identity/azure-identity/azure/identity/_internal/msal_credentials.py:95
-        from azure.identity._internal.persistent_cache import load_persistent_cache
+        from azure.identity._internal.persistent_cache import load_user_cache
 
         # Store for user token persistence
-        cache = load_persistent_cache(self.allow_unencrypted)
+        cache = load_user_cache(self.allow_unencrypted)
         # Build the authority in MSAL style
         msal_authority = "https://{}/{}".format(self.authority, self.tenant_id)
         return PublicClientApplication(authority=msal_authority, client_id=self.client_id, token_cache=cache)
@@ -168,38 +168,46 @@ class Identity:
     def login_with_managed_identity(self, resource, identity_id=None):
         from msrestazure.tools import is_valid_resource_id
         from requests import HTTPError
+        from azure.core.exceptions import ClientAuthenticationError
 
         credential = None
         id_type = None
+        scope = resource.rstrip('/') + '/.default'
         if identity_id:
             # Try resource ID
             if is_valid_resource_id(identity_id):
-                # TODO: Support resource ID in Azure Identity
-                credential = ManagedIdentityCredential(resource_id=identity_id)
+                credential = ManagedIdentityCredential(identity_config={"msi_res_id": identity_id})
                 id_type = self.MANAGED_IDENTITY_RESOURCE_ID
             else:
                 authenticated = False
                 try:
                     # Try client ID
                     credential = ManagedIdentityCredential(client_id=identity_id)
+                    credential.get_token(scope)
                     id_type = self.MANAGED_IDENTITY_CLIENT_ID
                     authenticated = True
+                except ClientAuthenticationError as e:
+                    logger.debug('Managed Identity authentication error: %s', e.message)
+                    logger.info('Username is not an MSI client id')
                 except HTTPError as ex:
                     if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                        logger.info('Sniff: not an MSI client id')
+                        logger.info('Username is not an MSI client id')
                     else:
                         raise
 
                 if not authenticated:
                     try:
                         # Try object ID
-                        # TODO: Support resource ID in Azure Identity
-                        credential = ManagedIdentityCredential(object_id=identity_id)
+                        credential = ManagedIdentityCredential(identity_config={"object_id": identity_id})
+                        credential.get_token(scope)
                         id_type = self.MANAGED_IDENTITY_OBJECT_ID
                         authenticated = True
+                    except ClientAuthenticationError as e:
+                        logger.debug('Managed Identity authentication error: %s', e.message)
+                        logger.info('Username is not an MSI object id')
                     except HTTPError as ex:
                         if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                            logger.info('Sniff: not an MSI object id')
+                            logger.info('Username is not an MSI object id')
                         else:
                             raise
 
@@ -258,12 +266,12 @@ class Identity:
         decoded = json.loads(decoded_str)
         return decoded
 
-    def get_user(self, user_or_sp=None):
-        accounts = self._msal_app.get_accounts(user_or_sp) if user_or_sp else self._msal_app.get_accounts()
+    def get_user(self, user=None):
+        accounts = self._msal_app.get_accounts(user) if user else self._msal_app.get_accounts()
         return accounts
 
-    def logout_user(self, user_or_sp):
-        accounts = self._msal_app.get_accounts(user_or_sp)
+    def logout_user(self, user):
+        accounts = self._msal_app.get_accounts(user)
         logger.info('Before account removal:')
         logger.info(json.dumps(accounts))
 
@@ -271,11 +279,13 @@ class Identity:
         for account in accounts:
             self._msal_app.remove_account(account)
 
-        accounts = self._msal_app.get_accounts(user_or_sp)
+        accounts = self._msal_app.get_accounts(user)
         logger.info('After account removal:')
         logger.info(json.dumps(accounts))
+
+    def logout_sp(self, sp):
         # remove service principal secrets
-        self._msal_store.remove_cached_creds(user_or_sp)
+        self._msal_store.remove_cached_creds(sp)
 
     def logout_all(self):
         # TODO: Support multi-authority logout
@@ -423,7 +433,7 @@ class ADALCredentialCache:
                 "refreshToken": refresh_token[0]['secret'],
                 "_clientId": _CLIENT_ID,
                 "_authority": self._cli_ctx.cloud.endpoints.active_directory.rstrip('/') +
-                "/" + credential._auth_record.tenant_id,
+                "/" + credential._auth_record.tenant_id,  # pylint: disable=bad-continuation
                 "isMRRT": True
             }
             self.adal_token_cache.add([entry])
