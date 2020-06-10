@@ -285,7 +285,7 @@ examples:
 
   - name: Add a windows update customizer to an image template in the cli object cache.
     text: |
-        az image builder customizer add -n mytemplate -g my-group --customizer-name win_update --type windows-update --search-criteria IsInstalled=0 --filters "exclude:$_.Title -like \\'*Preview*\\'" "include:$true" --update-limit 20 --defer
+        az image builder customizer add -n mytemplate -g my-group --customizer-name win_update --type windows-update --search-criteria IsInstalled=0 --filters "exclude:\$_.Title -like \\'*Preview*\\'" "include:\$true" --update-limit 20 --defer
 """
 
 helps['image builder customizer clear'] = """
