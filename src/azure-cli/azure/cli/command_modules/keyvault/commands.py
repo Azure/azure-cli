@@ -139,7 +139,7 @@ def load_command_table(self, _):
         g.keyvault_command('start', 'full_restore_operation_method')
         g.keyvault_command('status', 'full_restore_status')
 
-    with self.command_group('keyvault key', kv_private_data_v7_2_preview_sdk) as g:
+    with self.command_group('keyvault key', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_keys',
                            transform=multi_transformers(
                                filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))

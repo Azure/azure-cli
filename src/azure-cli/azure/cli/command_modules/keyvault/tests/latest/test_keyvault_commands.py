@@ -276,6 +276,8 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                          self.check('properties.enablePurgeProtection', True)])
 
         # test '--enable-rbac-authorization'
+        # Abandon the test due to: Message: Error at property "enableRbacAuthorization": RBAC authorization is not supported for subscription 0b1f6471-1bf0-4dda-aec3-cb9272f09590
+        """
         self.kwargs.update({
             'kv': self.create_random_name('cli-test-keyvault-', 24),
             'loc': 'eastus2'
@@ -294,6 +296,7 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
                  checks=self.check('properties.enableRbacAuthorization', False))
         self.cmd('keyvault update -n {kv} --enable-rbac-authorization true',
                  checks=self.check('properties.enableRbacAuthorization', True))
+        """
 
 
 class KeyVaultHSMRoleScenarioTest(ScenarioTest):
