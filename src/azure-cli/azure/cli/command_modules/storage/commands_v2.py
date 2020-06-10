@@ -253,8 +253,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage blob', blob_client_sdk,
                             custom_command_type=get_custom_sdk('blob_v2', client_factory=cf_blob_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
-        from ._format import transform_blob_output
-        g.storage_custom_command_oauth('show', 'show_blob', table_transformer=transform_blob_output,
+        from ._transformers_v2 import transform_blob_output
+        g.storage_custom_command_oauth('show', 'show_blob', transform=transform_blob_output,
                                        exception_handler=show_exception_handler)
 
     with self.command_group('storage blob', command_type=block_blob_sdk,

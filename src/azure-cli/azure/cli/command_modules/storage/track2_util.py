@@ -35,3 +35,9 @@ def _if_none_match(if_none_match, kwargs):
     else:
         kwargs['etag'] = if_none_match
         kwargs['match_condition'] = MatchConditions.IfModified
+
+
+def _encode_bytes(b):
+    import base64
+    if isinstance(b, (bytes, bytearray)):
+        return base64.b64encode(b).decode('utf-8')
