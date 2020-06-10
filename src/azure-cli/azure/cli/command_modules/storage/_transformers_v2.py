@@ -13,7 +13,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
 
 
-def transform_blob_output(result):
+def transform_blob_json_output(result):
     result = todict(result)
     new_result = {
         "content": "",
@@ -26,7 +26,7 @@ def transform_blob_output(result):
             "blobTierChangeTime": result.pop('blobTierChangeTime', None),
             "blobTierInferred": result.pop('blobTierInferred', None),
             "blobType": result.pop('blobType', None),
-            "contentLength": result.pop('Size', None),
+            "contentLength": result.pop('size', None),
             "contentRange": result.pop('contentRange', None),
             "contentSettings": {
                 "cacheControl": result['contentSettings']['cacheControl'],
