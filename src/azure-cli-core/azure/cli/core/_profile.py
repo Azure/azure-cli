@@ -533,10 +533,10 @@ class Profile(object):
 
     @staticmethod
     def _try_parse_msi_account_name(account):
-        user = account[_USER_ENTITY].get(_USER_NAME)
+        user_name = account[_USER_ENTITY].get(_USER_NAME)
 
-        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
-            return user[_USER_NAME], user[_CLIENT_ID]
+        if user_name in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
+            return user_name, account[_USER_ENTITY].get(_CLIENT_ID)
         return None, None
 
     def _create_identity_credential(self, account, aux_tenant_id=None):
