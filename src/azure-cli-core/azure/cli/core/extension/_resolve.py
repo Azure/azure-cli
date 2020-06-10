@@ -45,7 +45,7 @@ def _is_greater_than_cur_version(cur_version):
 
     def filter_func(item):
         item_version = parse_version(item['metadata']['version'])
-        if item_version >= cur_version_parsed:
+        if item_version > cur_version_parsed:
             return True
         logger.debug("Skipping '%s' as %s not greater than current version %s", item['filename'],
                      item_version, cur_version_parsed)

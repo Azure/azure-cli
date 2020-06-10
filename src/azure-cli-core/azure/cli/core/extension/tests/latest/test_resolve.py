@@ -92,9 +92,9 @@ class TestResolveFilters(unittest.TestCase):
         self.assertTrue(filter_func(mock_ext('myext-0.0.2-py2.py3-none-any.whl', '0.0.2')))
         self.assertTrue(filter_func(mock_ext('myext-0.0.1+dev-py2.py3-none-any.whl', '0.0.1+dev')))
         self.assertTrue(filter_func(mock_ext('myext-0.0.1.post1-py2.py3-none-any.whl', '0.0.1.post1')))
-        self.assertTrue(filter_func(mock_ext('myext-0.0.1-py2.py3-none-any.whl', '0.0.1')))
 
         self.assertFalse(filter_func(mock_ext('myext-0.0.1.pre1-py2.py3-none-any.whl', '0.0.1.pre1')))
+        self.assertFalse(filter_func(mock_ext('myext-0.0.1-py2.py3-none-any.whl', '0.0.1')))
 
 
 class TestResolveProjectUrlFromIndex(unittest.TestCase):
