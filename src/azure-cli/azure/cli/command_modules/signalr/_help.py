@@ -17,6 +17,26 @@ type: group
 short-summary: Manage CORS for Azure SignalR Service.
 """
 
+helps['signalr network-rule'] = """
+type: group
+short-summary: Manage network rules.
+"""
+
+helps['signalr private-endpoint-connection'] = """
+type: group
+short-summary: Manage private endpoint connection.
+"""
+
+helps['signalr private-link-resource'] = """
+type: group
+short-summary: Manage private link resources.
+"""
+
+helps['signalr upstream'] = """
+type: group
+short-summary: Manage upstream settings.
+"""
+
 helps['signalr cors add'] = """
 type: command
 short-summary: Add allowed origins to a SignalR Service
@@ -121,4 +141,76 @@ examples:
   - name: Update service mode.
     text: >
         az signalr update -n MySignalR -g MyResourceGroup --service-mode Serverless
+"""
+
+helps['signalr upstream list'] = """
+type: command
+short-summary: List upstream settings of an existing SignalR Service.
+"""
+
+helps['signalr upstream update'] = """
+type: command
+short-summary: Update order sensitive upstream settings for an existing SignalR Service.
+examples:
+  - name: Update two upstream settings to handle messages and connections separately.
+    text: >
+        az signalr upstream update -n MySignalR -g MyResourceGroup --template url-template="http://host-connections.com" category-pattern="connections" --template url-template="http://host-connections.com" category-pattern="messages"
+  - name: Update one upstream setting to handle a specific event in a specific hub.
+    text: >
+        az signalr upstream update -n MySignalR -g MyResourceGroup --template url-template="http://host.com/{hub}/{event}/{category}" category-pattern="messages" event-pattern="broadcast" hub-pattern="chat"
+"""
+
+helps['signalr upstream clear'] = """
+type: command
+short-summary: List upstream settings of an existing SignalR Service.
+"""
+
+helps['signalr private-endpoint-connection approve'] = """
+type: command
+short-summary: Approve a private endpoint connection.
+examples:
+  - name: Approve a pending private endpoint connection.
+    text: >
+        ID=$(az signalr show -n MySignalR -g MyResourceGroup --query privateEndpointConnections[0].id -o tsv)
+        az signalr private-endpoint-connection approve --id $ID
+"""
+
+helps['signalr private-endpoint-connection reject'] = """
+type: command
+short-summary: Reject a private endpoint connection.
+"""
+
+helps['signalr private-endpoint-connection delete'] = """
+type: command
+short-summary: Delete a private endpoint connection.
+"""
+
+helps['signalr private-endpoint-connection show'] = """
+type: command
+short-summary: Show details of a private endpoint connection.
+"""
+
+helps['signalr private-link-resource list'] = """
+type: command
+short-summary: Get the private link resources that need to be created for a SignalR Service.
+"""
+
+helps['signalr network-rule list'] = """
+type: command
+short-summary: Get the Network access control of SignalR Service.
+"""
+
+helps['signalr network-rule update'] = """
+type: command
+short-summary: Update the Network access control of SignalR Service.
+examples:
+  - name: Set allowing RESTAPI only for public network.
+    text: >
+        az signalr network-rule update --public-network -n MySignalR -g MyResourceGroup --allow RESTAPI
+  - name: Set allowing client connection and server connection for a private endpoint connection
+    text: >
+        az signalr network-rule update --connection-name MyPrivateEndpointConnection -n MySignalR -g MyResourceGroup --allow ClientConnection ServerConnection
+  - name: Set denying client connection for both public network and private endpoint connections
+    text: >
+        az signalr network-rule update --public-network --connection-name MyPrivateEndpointConnection1 MyPrivateEndpointConnection2 -n MySignalR -g MyResourceGroup --deny ClientConnection
 """
