@@ -19,6 +19,8 @@ helps['aro create'] = """
         text: az aro create --resource-group MyResourceGroup --name MyCluster  --vnet MyVnet --master-subnet MyMasterSubnet --worker-subnet MyWorkerSubnet
       - name: Create an OpenShift cluster with 5 compute nodes and Red Hat Pull Secret
         text: az aro create --resource-group MyResourceGroup --name MyCluster --vnet MyVnet --master-subnet MyMasterSubnet --worker-subnet MyWorkerSubnet --worker-count 5 --pull-secret @pullsecret.txt
+      - name: Create a Private OpenShift cluster
+        text: az aro create --resource-group MyResourceGroup --name MyCluster --vnet MyVnet --master-subnet MyMasterSubnet --worker-subnet MyWorkerSubnet --apiserver-visibility Private --ingress-visibility Private
 """
 
 helps['aro list'] = """

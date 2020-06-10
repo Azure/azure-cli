@@ -157,14 +157,18 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
     return None
 
 
-def set_policy(client, resource_group_name, vault_name, policy, name=None):
-    policy_object = custom_help.get_policy_from_json(client, policy)
-    if policy_object.properties.backup_management_type.lower() == "azureiaasvm":
+def set_policy(client, resource_group_name, vault_name, policy=None, name=None,
+               fix_for_inconsistent_items=None, backup_management_type=None):
+    if backup_management_type is None and policy is not None:
+        policy_object = custom_help.get_policy_from_json(client, policy)
+        backup_management_type = policy_object.properties.backup_management_type.lower()
+    if backup_management_type.lower() == "azureiaasvm":
         return custom.set_policy(client, resource_group_name, vault_name, policy, name)
-    if policy_object.properties.backup_management_type.lower() == "azurestorage":
+    if backup_management_type.lower() == "azurestorage":
         return custom_afs.set_policy(client, resource_group_name, vault_name, policy, name)
-    if policy_object.properties.backup_management_type == "AzureWorkload":
-        return custom_wl.set_policy(client, resource_group_name, vault_name, policy, name)
+    if backup_management_type.lower() == "azureworkload":
+        return custom_wl.set_policy(client, resource_group_name, vault_name, policy, name,
+                                    fix_for_inconsistent_items)
     return None
 
 
@@ -353,6 +357,8 @@ def resume_protection(cmd, client, resource_group_name, vault_name, container_na
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
     custom_help.validate_policy(policy)
 
+    if item.properties.backup_management_type.lower() == "azureiaasvm":
+        return custom.resume_protection(cmd, client, resource_group_name, vault_name, item, policy)
     if item.properties.backup_management_type.lower() == "azurestorage":
         return custom_afs.resume_protection(cmd, client, resource_group_name, vault_name, item, policy)
     if item.properties.backup_management_type.lower() == "azureworkload":

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
                                StorageAccountPreparer, api_version_constraint, live_only)
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType
 from knack.util import CLIError
 
@@ -11,6 +12,7 @@ from ..storage_test_util import StorageScenarioMixin
 
 
 class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
+    @AllowLargeResponse()
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_encryption')
     @StorageAccountPreparer(name_prefix='encryption', kind="StorageV2")
@@ -112,7 +114,7 @@ class StorageAccountEncryptionTests(StorageScenarioMixin, ScenarioTest):
             self.cmd("storage container create -n {con} --account-name {sa} -g {rg} --prevent-encryption-scope-override False")
 
         self.cmd(
-            "storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption} --prevent-encryption-scope-override false",
+            "storage container create -n {con} --account-name {sa} -g {rg} --default-encryption-scope {encryption} --prevent-encryption-scope-override false --public-access off",
             checks=[JMESPathCheck("created", True)])
 
         account_info = self.get_account_info(resource_group, storage_account)

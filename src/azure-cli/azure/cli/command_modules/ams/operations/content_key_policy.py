@@ -24,6 +24,7 @@ from azure.mgmt.media.models import (ContentKeyPolicyOption, ContentKeyPolicyCle
                                      ContentKeyPolicyRsaTokenKey, ContentKeyPolicyX509CertificateTokenKey,
                                      ContentKeyPolicyTokenRestriction, ContentKeyPolicyTokenClaim,
                                      ContentKeyPolicyWidevineConfiguration, ContentKeyPolicyFairPlayConfiguration,
+                                     ContentKeyPolicyFairPlayOfflineRentalConfiguration,
                                      ContentKeyPolicyPlayReadyConfiguration, ContentKeyPolicyPlayReadyLicense,
                                      ContentKeyPolicyPlayReadyContentEncryptionKeyFromHeader,
                                      ContentKeyPolicyPlayReadyContentEncryptionKeyFromKeyIdentifier,
@@ -38,7 +39,8 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                               alt_symmetric_token_keys=None, alt_rsa_token_keys=None, alt_x509_token_keys=None,
                               token_claims=None, token_type=None, open_id_connect_discovery_document=None,
                               widevine_template=None, ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
-                              rental_and_lease_key_type=None, rental_duration=None, play_ready_template=None):
+                              rental_and_lease_key_type=None, rental_duration=None, play_ready_template=None,
+                              fp_playback_duration_seconds=None, fp_storage_duration_seconds=None):
 
     policy_option = _generate_content_key_policy_option(policy_option_name, clear_key_configuration, open_restriction,
                                                         issuer, audience, token_key, token_key_type,
@@ -46,7 +48,8 @@ def create_content_key_policy(client, resource_group_name, account_name, content
                                                         alt_x509_token_keys, token_claims, token_type,
                                                         open_id_connect_discovery_document, widevine_template,
                                                         ask, fair_play_pfx_password, fair_play_pfx,
-                                                        rental_and_lease_key_type, rental_duration, play_ready_template)
+                                                        rental_and_lease_key_type, rental_duration, play_ready_template,
+                                                        fp_playback_duration_seconds, fp_storage_duration_seconds)
 
     return client.create_or_update(resource_group_name, account_name,
                                    content_key_policy_name, [policy_option], description)
@@ -86,7 +89,8 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                   alt_symmetric_token_keys=None, alt_rsa_token_keys=None, alt_x509_token_keys=None,
                                   token_claims=None, token_type=None, open_id_connect_discovery_document=None,
                                   widevine_template=None, ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
-                                  rental_and_lease_key_type=None, rental_duration=None, play_ready_template=None):
+                                  rental_and_lease_key_type=None, rental_duration=None, play_ready_template=None,
+                                  fp_playback_duration_seconds=None, fp_storage_duration_seconds=None):
 
     policy = client.get_policy_properties_with_secrets(resource_group_name, account_name, content_key_policy_name)
 
@@ -102,7 +106,8 @@ def add_content_key_policy_option(client, resource_group_name, account_name, con
                                                         alt_x509_token_keys, token_claims, token_type,
                                                         open_id_connect_discovery_document, widevine_template,
                                                         ask, fair_play_pfx_password, fair_play_pfx,
-                                                        rental_and_lease_key_type, rental_duration, play_ready_template)
+                                                        rental_and_lease_key_type, rental_duration, play_ready_template,
+                                                        fp_playback_duration_seconds, fp_storage_duration_seconds)
 
     options.append(policy_option)
 
@@ -133,8 +138,8 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
                                      add_alt_token_key_type=None, token_claims=None, token_type=None,
                                      open_id_connect_discovery_document=None, widevine_template=None,
                                      ask=None, fair_play_pfx_password=None, fair_play_pfx=None,
-                                     rental_and_lease_key_type=None, rental_duration=None,
-                                     play_ready_template=None):
+                                     rental_and_lease_key_type=None, rental_duration=None, play_ready_template=None,
+                                     fp_playback_duration_seconds=None, fp_storage_duration_seconds=None):
     policy = client.get_policy_properties_with_secrets(
         resource_group_name=resource_group_name,
         account_name=account_name,
@@ -209,6 +214,13 @@ def update_content_key_policy_option(client, resource_group_name, account_name, 
 
         if rental_duration is not None:
             policy_option.configuration.rental_duration = rental_duration
+
+        if fp_playback_duration_seconds is not None:
+            policy_option.configuration.fp_playback_duration_seconds = fp_playback_duration_seconds
+
+        if fp_storage_duration_seconds is not None:
+            policy_option.configuration.fp_storage_duration_seconds = fp_storage_duration_seconds
+
     elif isinstance(policy_option.configuration, ContentKeyPolicyPlayReadyConfiguration):
         if play_ready_template is not None and _valid_playready_configuration(play_ready_template):
             _play_ready_configuration_factory(json.loads(play_ready_template))
@@ -240,7 +252,8 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
                                         alt_symmetric_token_keys, alt_rsa_token_keys, alt_x509_token_keys,
                                         token_claims, token_type, open_id_connect_discovery_document,
                                         widevine_template, ask, fair_play_pfx_password, fair_play_pfx,
-                                        rental_and_lease_key_type, rental_duration, play_ready_template):
+                                        rental_and_lease_key_type, rental_duration, play_ready_template,
+                                        fp_playback_duration_seconds, fp_storage_duration_seconds):
 
     configuration = None
     restriction = None
@@ -268,11 +281,19 @@ def _generate_content_key_policy_option(policy_option_name, clear_key_configurat
         configuration = ContentKeyPolicyWidevineConfiguration(widevine_template=widevine_template)
 
     if valid_fairplay_configuration:
+        offline_configuration = None
+        if rental_and_lease_key_type == 'DualExpiry':
+            offline_configuration = ContentKeyPolicyFairPlayOfflineRentalConfiguration(
+                playback_duration_seconds=fp_playback_duration_seconds,
+                storage_duration_seconds=fp_storage_duration_seconds)
+        if ask is not None:
+            ask = bytearray.fromhex(ask)
         configuration = ContentKeyPolicyFairPlayConfiguration(
-            ask=bytearray.fromhex(ask), fair_play_pfx_password=fair_play_pfx_password,
+            ask=ask,
+            fair_play_pfx_password=fair_play_pfx_password,
             fair_play_pfx=_b64_to_str(_read_binary(fair_play_pfx)).decode('ascii'),
             rental_and_lease_key_type=rental_and_lease_key_type,
-            rental_duration=rental_duration)
+            rental_duration=rental_duration, offline_rental_configuration=offline_configuration)
 
     if valid_playready_configuration:
         configuration = _play_ready_configuration_factory(json.loads(play_ready_template))
@@ -503,5 +524,5 @@ def _valid_playready_configuration(play_ready_template):
     return any(
         [cfg.get('licenses') is not None,
          len(cfg.get('licenses')) > 0,
-         all(__valid_license(l) for l in cfg.get('licenses'))]
+         all(__valid_license(license) for license in cfg.get('licenses'))]
     )

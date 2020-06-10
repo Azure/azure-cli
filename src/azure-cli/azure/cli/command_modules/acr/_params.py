@@ -35,7 +35,8 @@ from ._validators import (
     validate_set,
     validate_set_secret,
     validate_retention_days,
-    validate_registry_name
+    validate_registry_name,
+    validate_expiration_time
 )
 from .scope_map import ScopeMapActions
 
@@ -154,6 +155,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr replication create') as c:
         c.argument('replication_name', help='The name of the replication. Default to the location name.', completer=None)
+
+    for scope in ['acr replication create', 'acr replication update']:
+        help_str = "Allow routing to this replication. Requests will not be routed to a disabled replication." \
+                   " Data syncing will continue regardless of the region endpoint status."
+        help_str += ' Default: true.' if 'create' in scope else ''  # suffix help with default if command is for create
+
+        with self.argument_context(scope) as c:
+            c.argument('region_endpoint_enabled', arg_type=get_three_state_flag(), help=help_str, is_preview=True)
 
     with self.argument_context('acr run') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
@@ -331,6 +340,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('password2', options_list=['--password2'], help='Flag indicating if password2 should be generated.', action='store_true', required=False)
         c.argument('expiration_in_days', options_list=['--expiration-in-days', c.deprecate(target='--days', redirect='--expiration-in-days', hide=True)],
                    help='Number of days for which the credentials will be valid. If not specified, the expiration will default to the max value "9999-12-31T23:59:59.999999+00:00"', type=int, required=False)
+
+    for scope in ['acr token create', 'acr token credential generate']:
+        with self.argument_context(scope) as c:
+            c.argument('expiration', validator=validate_expiration_time,
+                       help='UTC time for which the credentials will be valid. In the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2025-12-31T12:59:59Z')
 
     with self.argument_context('acr token credential delete') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)

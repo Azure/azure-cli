@@ -127,7 +127,8 @@ def validate_client_parameters(cmd, namespace):
             if is_storagev2(prefix):
                 from azure.cli.core._profile import Profile
                 profile = Profile(cli_ctx=cmd.cli_ctx)
-                n.token_credential, _, _ = profile.get_login_credentials(resource="https://storage.azure.com")
+                n.token_credential, _, _ = profile.get_login_credentials(
+                    resource="https://storage.azure.com", subscription_id=n._subscription)
             # Otherwise, we will assume it is in track1 and keep previous token updater
             else:
                 n.token_credential = _create_token_credential(cmd.cli_ctx)
@@ -638,6 +639,13 @@ def validate_container_public_access(cmd, namespace):
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
 
 
+def validate_fs_public_access(cmd, namespace):
+    from .sdkutil import get_fs_access_type
+
+    if namespace.public_access:
+        namespace.public_access = get_fs_access_type(cmd.cli_ctx, namespace.public_access.lower())
+
+
 def validate_select(namespace):
     if namespace.select:
         namespace.select = ','.join(namespace.select)
@@ -1071,7 +1079,7 @@ def blob_tier_validator(cmd, namespace):
 
 def validate_azcopy_upload_destination_url(cmd, namespace):
     client = blob_data_service_factory(cmd.cli_ctx, {
-        'account_name': namespace.account_name})
+        'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
     destination_path = namespace.destination_path
     if not destination_path:
         destination_path = ''
@@ -1224,6 +1232,9 @@ def pop_data_client_auth(ns):
 
 
 def validate_client_auth_parameter(cmd, ns):
+    from .sdkutil import get_container_access_type
+    if ns.public_access:
+        ns.public_access = get_container_access_type(cmd.cli_ctx, ns.public_access.lower())
     if ns.default_encryption_scope and ns.prevent_encryption_scope_override is not None:
         # simply try to retrieve the remaining variables from environment variables
         if not ns.account_name:
@@ -1244,3 +1255,8 @@ def validate_encryption_scope_client_params(ns):
     if ns.encryption_scope:
         # will use track2 client and socket_timeout is unused
         del ns.socket_timeout
+
+
+def validate_access_control(namespace):
+    if namespace.acl and namespace.permissions:
+        raise CLIError('usage error: invalid when specifying both --acl and --permissions.')

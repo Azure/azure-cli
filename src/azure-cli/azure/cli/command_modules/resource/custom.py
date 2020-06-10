@@ -76,7 +76,7 @@ def _process_parameters(template_param_defs, parameter_lists):  # pylint: disabl
                 content = read_file_content(file_path)
                 if not content:
                     return None
-                parsed = _remove_comments_from_json(content, False)
+                parsed = _remove_comments_from_json(content, False, file_path)
                 return parsed.get('parameters', parsed)
             except Exception as ex:
                 raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
@@ -265,7 +265,7 @@ def _urlretrieve(url):
     return req.read()
 
 
-def _remove_comments_from_json(template, preserve_order=True):
+def _remove_comments_from_json(template, preserve_order=True, file_path=None):
     from jsmin import jsmin
 
     # When commenting at the bottom of all elements in a JSON object, jsmin has a bug that will wrap lines.
@@ -274,7 +274,14 @@ def _remove_comments_from_json(template, preserve_order=True):
     minified = jsmin(template)
     # Get rid of multi-line strings. Note, we are not sending it on the wire rather just extract parameters to prompt for values
     result = re.sub(r'"[^"]*?\n[^"]*?(?<!\\)"', '"#Azure Cli#"', minified, re.DOTALL)
-    return shell_safe_json_parse(result, preserve_order)
+    try:
+        return shell_safe_json_parse(result, preserve_order)
+    except CLIError:
+        # Because the processing of removing comments and compression will lead to misplacement of error location,
+        # so the error message should be wrapped.
+        if file_path:
+            raise CLIError("Failed to parse '{}', please check whether it is a valid JSON format".format(file_path))
+        raise CLIError("Failed to parse the JSON data, please check whether it is a valid JSON format")
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-few-public-methods
@@ -291,10 +298,10 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
     template_content = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'))
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = read_file_content(template_file)
-        template_obj = _remove_comments_from_json(template_content)
+        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -654,6 +661,13 @@ def what_if_deploy_arm_template_at_subscription_scope(cmd,
 def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
     what_if_result = LongRunningOperation(cli_ctx)(what_if_poller)
 
+    if what_if_result.error:
+        # The status code is 200 even when there's an error, because
+        # it is technically a successful What-If operation. The error
+        # is on the ARM template but not the operation.
+        err_message = _build_what_if_error_message(what_if_result.error)
+        raise CLIError(err_message)
+
     if no_pretty_print:
         return what_if_result
 
@@ -678,6 +692,13 @@ def _what_if_deploy_arm_template_core(cli_ctx, what_if_poller, no_pretty_print):
     return None
 
 
+def _build_what_if_error_message(what_if_error):
+    err_messages = [f'{what_if_error.code} - {what_if_error.message}']
+    for detail in what_if_error.details or []:
+        err_messages.append(_build_what_if_error_message(detail))
+    return '\n'.join(err_messages)
+
+
 def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, template_uri=None, parameters=None,
                                               mode=None, rollback_on_error=None, no_prompt=False):
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
@@ -689,10 +710,10 @@ def _prepare_deployment_properties_unmodified(cli_ctx, template_file=None, templ
     template_content = None
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
-        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'))
+        template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     else:
         template_content = read_file_content(template_file)
-        template_obj = _remove_comments_from_json(template_content)
+        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -2456,27 +2477,7 @@ def list_resource_links(cmd, scope=None, filter_string=None):
 
 # endregion
 
-
-def rest_call(cmd, uri, method=None, headers=None, uri_parameters=None,
-              body=None, skip_authorization_header=False, resource=None, output_file=None):
-    from azure.cli.core.util import send_raw_request
-    r = send_raw_request(cmd.cli_ctx, method, uri, headers, uri_parameters, body,
-                         skip_authorization_header, resource, output_file)
-    if not output_file and r.content:
-        try:
-            return r.json()
-        except ValueError:
-            logger.warning('Not a json response, outputting to stdout. For binary data '
-                           'suggest use "--output-file" to write to a file')
-            print(r.text)
-
-
-def show_version(cmd):
-    from azure.cli.core.util import get_az_version_json
-    versions = get_az_version_json()
-    return versions
-
-
+# region tags
 def get_tag_at_scope(cmd, resource_id=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
     if resource_id is not None:
@@ -2510,7 +2511,8 @@ def update_tag_at_scope(cmd, resource_id, tags, operation):
     Tags = cmd.get_models('Tags')
     tag_obj = Tags(tags=tags)
     return rcf.tags.update_at_scope(scope=resource_id, properties=tag_obj, operation=operation)
-
+    
+# endregion
 
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
@@ -2630,7 +2632,8 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
         # please add the service type that needs to be requested with PATCH type here
         # for example: the properties of RecoveryServices/vaults must be filled, and a PUT request that passes back
         # to properties will fail due to the lack of properties, so the PATCH type should be used
-        need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups']
+        need_patch_service = ['Microsoft.RecoveryServices/vaults', 'Microsoft.Resources/resourceGroups',
+                              'Microsoft.ContainerRegistry/registries/webhooks']
 
         if resource is not None and resource.type in need_patch_service:
             parameters = GenericResource(tags=tags)

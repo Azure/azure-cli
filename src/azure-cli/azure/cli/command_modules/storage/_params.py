@@ -7,6 +7,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type,
                                                 get_three_state_flag)
+from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
@@ -16,7 +17,8 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_char_options_validator, validate_bypass, validate_encryption_source, validate_marker,
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
-                          validator_delete_retention_days, validate_delete_retention_days)
+                          validator_delete_retention_days, validate_delete_retention_days,
+                          validate_fs_public_access)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -41,7 +43,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     acct_name_type = CLIArgumentType(options_list=['--account-name', '-n'], help='The storage account name.',
                                      id_part='name',
-                                     completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+                                     completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'),
+                                     local_context_attribute=LocalContextAttribute(
+                                         name='storage_account_name', actions=[LocalContextAction.GET]))
     blob_name_type = CLIArgumentType(options_list=['--blob-name', '-b'], help='The blob name.',
                                      completer=get_storage_name_completion_list(t_base_blob_service, 'list_blobs',
                                                                                 parent='container_name'))
@@ -128,6 +132,21 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         arg_group='Routing Preference', arg_type=get_three_state_flag(), is_preview=True, min_api='2019-06-01',
         help='A boolean flag which indicates whether internet routing storage endpoints are to be published.')
 
+    umask_type = CLIArgumentType(
+        help='When creating a file or directory and the parent folder does not have a default ACL, the umask restricts '
+             'the permissions of the file or directory to be created. The resulting permission is given by p & ^u, '
+             'where p is the permission and u is the umask. For more information, please refer to '
+             'https://docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#umask.')
+    permissions_type = CLIArgumentType(
+        help='POSIX access permissions for the file owner, the file owning group, and others. Each class may be '
+             'granted read, write, or execute permission. The sticky bit is also supported. Both symbolic (rwxrw-rw-) '
+             'and 4-digit octal notation (e.g. 0766) are supported. For more information, please refer to https://'
+             'docs.microsoft.com/en-us/azure/storage/blobs/data-lake-storage-access-control#levels-of-permission.')
+
+    timeout_type = CLIArgumentType(
+        help='Request timeout in seconds. Applies to each call to the service.', type=int
+    )
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -158,6 +177,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage account check-name') as c:
         c.argument('name', options_list=['--name', '-n'])
 
+    with self.argument_context('storage account delete') as c:
+        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
+
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
         t_account_type, t_sku_name, t_kind = self.get_models('AccountType', 'SkuName', 'Kind',
                                                              resource_type=ResourceType.MGMT_STORAGE)
@@ -165,7 +187,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_common_storage_account_options()
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('account_type', help='The storage account type', arg_type=get_enum_type(t_account_type))
-        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None)
+        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None,
+                   local_context_attribute=LocalContextAttribute(
+                       name='storage_account_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('kind', help='Indicates the type of storage account.', min_api="2018-02-01",
                    arg_type=get_enum_type(t_kind), default='StorageV2')
         c.argument('kind', help='Indicates the type of storage account.', max_api="2017-10-01",
@@ -608,6 +632,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('include_path', include_path_type)
         c.argument('recursive', recursive_type)
         c.argument('content_type', arg_group='Additional Flags', help="Specify content type of the file. ")
+        c.argument('follow_symlinks', arg_group='Additional Flags', action='store_true',
+                   help='Follow symbolic links when uploading from local file system.')
 
     with self.argument_context('storage blob copy') as c:
         for item in ['destination', 'source']:
@@ -1085,3 +1111,126 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(['none', 'minimal', 'full']),
                    help='Specifies how much metadata to include in the response payload.')
         c.argument('marker', validator=validate_marker, nargs='+')
+
+    for item in ['create', 'show', 'delete', 'exists', 'metadata update', 'metadata show']:
+        with self.argument_context('storage fs {}'.format(item)) as c:
+            c.extra('file_system_name', options_list=['--name', '-n'],
+                    help="File system name.", required=True)
+            c.extra('timeout', timeout_type)
+
+    with self.argument_context('storage fs create') as c:
+        from .sdkutil import get_fs_access_type_names
+        c.argument('public_access', arg_type=get_enum_type(get_fs_access_type_names()),
+                   validator=validate_fs_public_access,
+                   help="Specify whether data in the file system may be accessed publicly and the level of access.")
+
+    with self.argument_context('storage fs list') as c:
+        c.argument('include_metadata', arg_type=get_three_state_flag(),
+                   help='Specify that file system metadata be returned in the response. The default value is "False".')
+        c.argument('name_starts_with', options_list=['--prefix'],
+                   help='Filter the results to return only file systems whose names begin with the specified prefix.')
+
+    for item in ['create', 'show', 'delete', 'exists', 'move', 'metadata update', 'metadata show']:
+        with self.argument_context('storage fs directory {}'.format(item)) as c:
+            c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+            c.extra('directory_path', options_list=['--name', '-n'],
+                    help="The name of directory.", required=True)
+            c.extra('timeout', timeout_type)
+
+    with self.argument_context('storage fs directory create') as c:
+        c.extra('permissions', permissions_type)
+        c.extra('umask', umask_type)
+
+    with self.argument_context('storage fs directory list') as c:
+        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+        c.argument('recursive', arg_type=get_three_state_flag(), default=True,
+                   help='Look into sub-directories recursively when set to true.')
+        c.argument('path', help="Filter the results to return only paths under the specified path.")
+        c.argument('num_results', type=int, help='Specify the maximum number of results to return.')
+
+    with self.argument_context('storage fs directory move') as c:
+        c.argument('new_name', options_list=['--new-directory', '-d'],
+                   help='The new directory name the users want to move to. The value must have the following format: '
+                        '"{filesystem}/{directory}/{subdirectory}".')
+
+    with self.argument_context('storage fs file list') as c:
+        c.extra('file_system_name', options_list=['-f', '--file-system'], help="File system name.", required=True)
+        c.argument('recursive', arg_type=get_three_state_flag(), default=True,
+                   help='Look into sub-directories recursively when set to true.')
+        c.argument('exclude_dir', action='store_true',
+                   help='List only files in the given file system.')
+        c.argument('path', help='Filter the results to return only paths under the specified path.')
+        c.argument('num_results', type=int, default=5000,
+                   help='Specify the maximum number of results to return. If the request does not specify num_results '
+                        'or specifies a value greater than 5,000, the server will return up to 5,000 items.')
+        c.argument('marker',
+                   help='An opaque continuation token. This value can be retrieved from the next_marker field of a '
+                   'previous generator object. If specified, this generator will begin returning results from this '
+                   'point.')
+
+    for item in ['create', 'show', 'delete', 'exists', 'upload', 'append', 'download', 'show', 'metadata update',
+                 'metadata show']:
+        with self.argument_context('storage fs file {}'.format(item)) as c:
+            c.extra('file_system_name', options_list=['-f', '--file-system'],
+                    help='File system name.', required=True)
+            c.extra('path', options_list=['-p', '--path'], help="The file path in a file system.",
+                    required=True)
+            c.extra('timeout', timeout_type)
+            c.argument('content', help='Content to be appended to file.')
+
+    with self.argument_context('storage fs file create') as c:
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_content_settings_argument(t_file_content_settings, update=False)
+        c.extra('permissions', permissions_type)
+        c.extra('umask', umask_type)
+        c.extra('timeout', timeout_type)
+
+    with self.argument_context('storage fs file download') as c:
+        c.argument('destination_path', options_list=['--destination', '-d'], type=file_type,
+                   help='The local file where the file or folder will be downloaded to. The source filename will be '
+                        'used if not specified.')
+        c.argument('overwrite', arg_type=get_three_state_flag(),
+                   help="Overwrite an existing file when specified. Default value is false.")
+
+    with self.argument_context('storage fs file move') as c:
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_content_settings_argument(t_file_content_settings, update=False)
+        c.extra('file_system_name', options_list=['-f', '--file-system'],
+                help='File system name.', required=True)
+        c.extra('path', options_list=['-p', '--path'], required=True,
+                help="The original file path users want to move in a file system.")
+        c.argument('new_name', options_list=['--new-path'],
+                   help='The new path the users want to move to. The value must have the following format: '
+                   '"{filesystem}/{directory}/{subdirectory}/{file}".')
+
+    with self.argument_context('storage fs file upload') as c:
+        t_file_content_settings = self.get_sdk('_models#ContentSettings',
+                                               resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_content_settings_argument(t_file_content_settings, update=False)
+        c.argument('local_path', options_list=['--source', '-s'],
+                   help='Path of the local file to upload as the file content.')
+        c.argument('overwrite', arg_type=get_three_state_flag(), help="Overwrite an existing file when specified.")
+        c.argument('if_match', arg_group='Precondition',
+                   help="An ETag value, or the wildcard character (*). Specify this header to perform the operation "
+                   "only if the resource's ETag matches the value specified.")
+        c.argument('if_none_match', arg_group='Precondition',
+                   help="An ETag value, or the wildcard character (*). Specify this header to perform the operation "
+                   "only if the resource's ETag does not match the value specified.")
+        c.argument('if_modified_since', arg_group='Precondition',
+                   help="A Commence only if modified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
+        c.argument('if_unmodified_since', arg_group='Precondition',
+                   help="A Commence only if unmodified since supplied UTC datetime (Y-m-d'T'H:M'Z').")
+        c.argument('permissions', permissions_type)
+        c.argument('umask', umask_type)
+
+    for item in ['set', 'show']:
+        with self.argument_context('storage fs access {}'.format(item)) as c:
+            from ._validators import validate_access_control
+            c.extra('file_system_name', options_list=['-f', '--file-system'],
+                    help='File system name.', required=True)
+            c.extra('directory_path', options_list=['-p', '--path'],
+                    help='The path to a file or directory in the specified file system.', required=True)
+            c.argument('permissions', validator=validate_access_control)
+            c.ignore('upn')
