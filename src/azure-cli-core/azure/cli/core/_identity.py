@@ -22,8 +22,6 @@ from azure.identity import (
     ManagedIdentityCredential
 )
 
-from azure.core.exceptions import ClientAuthenticationError
-
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 logger = get_logger(__name__)
 
@@ -170,6 +168,7 @@ class Identity:
     def login_with_managed_identity(self, resource, identity_id=None):
         from msrestazure.tools import is_valid_resource_id
         from requests import HTTPError
+        from azure.core.exceptions import ClientAuthenticationError
 
         credential = None
         id_type = None
@@ -188,11 +187,11 @@ class Identity:
                     id_type = self.MANAGED_IDENTITY_CLIENT_ID
                     authenticated = True
                 except ClientAuthenticationError as e:
-                    logger.debug('MSI authentication error: %s', e.message)
-                    logger.info('Sniff: not an MSI client id')
+                    logger.debug('Managed Identity authentication error: %s', e.message)
+                    logger.info('Username is not an MSI client id')
                 except HTTPError as ex:
                     if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                        logger.info('Sniff: not an MSI client id')
+                        logger.info('Username is not an MSI client id')
                     else:
                         raise
 
@@ -204,11 +203,11 @@ class Identity:
                         id_type = self.MANAGED_IDENTITY_OBJECT_ID
                         authenticated = True
                     except ClientAuthenticationError as e:
-                        logger.debug('MSI authentication error: %s', e.message)
-                        logger.info('Sniff: not an MSI object id')
+                        logger.debug('Managed Identity authentication error: %s', e.message)
+                        logger.info('Username is not an MSI object id')
                     except HTTPError as ex:
                         if ex.response.reason == 'Bad Request' and ex.response.status == 400:
-                            logger.info('Sniff: not an MSI object id')
+                            logger.info('Username is not an MSI object id')
                         else:
                             raise
 
