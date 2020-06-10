@@ -720,8 +720,8 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
 
         # Create endpoint
         result = self.cmd('network private-endpoint create -g {resource_group} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
-            '--connection-name {endpoint_conn_name} --private-connection-resource-id {webapp_id} '
-            '--group-id sites --manual-request').get_output_in_json()
+                          '--connection-name {endpoint_conn_name} --private-connection-resource-id {webapp_id} '
+                          '--group-id sites --manual-request').get_output_in_json()
         self.assertTrue(self.kwargs['endpoint_name'].lower() in result['name'].lower())
 
         result = self.cmd('network private-endpoint-connection list -g {resource_group} -n {webapp_name} --type Microsoft.Web/sites', checks=[
@@ -730,13 +730,12 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         self.kwargs['endpoint_request'] = result[0]['name']
 
         self.cmd('network private-endpoint-connection approve -g {resource_group} --resource-name {webapp_name} -n {endpoint_request} --type Microsoft.Web/sites',
-            checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')]
-        )
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Approved')])
 
         # Create second endpoint
         result = self.cmd('network private-endpoint create -g {resource_group} -n {second_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} '
-            '--connection-name {second_endpoint_conn_name} --private-connection-resource-id {webapp_id} '
-            '--group-id sites --manual-request').get_output_in_json()
+                          '--connection-name {second_endpoint_conn_name} --private-connection-resource-id {webapp_id} '
+                          '--group-id sites --manual-request').get_output_in_json()
         self.assertTrue(self.kwargs['second_endpoint_name'].lower() in result['name'].lower())
 
         result = self.cmd('network private-endpoint-connection list -g {resource_group} -n {webapp_name} --type Microsoft.Web/sites', checks=[
