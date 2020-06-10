@@ -5,7 +5,8 @@
 import unittest
 import mock
 
-from azure.cli.command_modules.appservice.static_sites import *
+from azure.cli.command_modules.appservice.static_sites import \
+    list_staticsites, show_staticsite, delete_staticsite, create_staticsites, CLIError
 
 
 class TestStaticAppCommands(unittest.TestCase):
@@ -13,14 +14,12 @@ class TestStaticAppCommands(unittest.TestCase):
         _set_up_client_mock(self)
         _set_up_fake_apps(self)
 
-
     def test_list_empty_staticapp(self):
         self.staticapp_client.list.return_value = []
 
         response = list_staticsites(self.mock_cmd)
 
         self.assertEqual(len(response), 0)
-
 
     def test_list_staticapp_with_resourcegroup(self):
         self.staticapp_client.get_static_sites_by_resource_group.return_value = [self.app1]
@@ -31,7 +30,6 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertEqual(len(response), 1)
         self.assertIn(self.app1, response)
 
-
     def test_list_staticapp_without_resourcegroup(self):
         self.staticapp_client.list.return_value = [self.app1, self.app2]
 
@@ -41,7 +39,6 @@ class TestStaticAppCommands(unittest.TestCase):
         self.assertIn(self.app1, response)
         self.assertIn(self.app2, response)
 
-
     def test_show_staticapp_with_resourcegroup(self):
         self.staticapp_client.get_static_site.return_value = self.app1
 
@@ -49,7 +46,6 @@ class TestStaticAppCommands(unittest.TestCase):
 
         self.staticapp_client.get_static_site.assert_called_once_with(self.rg1, self.name1)
         self.assertEqual(self.app1, response)
-
 
     def test_show_staticapp_without_resourcegroup(self):
         self.staticapp_client.get_static_site.return_value = self.app1
@@ -60,7 +56,6 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.get_static_site.assert_called_once_with(self.rg1, self.name1)
         self.assertEqual(self.app1, response)
 
-
     def test_show_staticapp_not_exist(self):
         self.staticapp_client.get_static_site.return_value = self.app1
         self.staticapp_client.list.return_value = [self.app1, self.app2]
@@ -68,12 +63,10 @@ class TestStaticAppCommands(unittest.TestCase):
         with self.assertRaises(CLIError):
             show_staticsite(self.mock_cmd, self.name1_not_exist)
 
-
     def test_delete_staticapp_with_resourcegroup(self):
         delete_staticsite(self.mock_cmd, self.name1, self.rg1)
 
         self.staticapp_client.delete_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
-
 
     def test_delete_staticapp_without_resourcegroup(self):
         self.staticapp_client.list.return_value = [self.app1, self.app2]
@@ -82,11 +75,9 @@ class TestStaticAppCommands(unittest.TestCase):
 
         self.staticapp_client.delete_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
 
-
     def test_delete_staticapp_not_exist(self):
         with self.assertRaises(CLIError):
             delete_staticsite(self.mock_cmd, self.name1_not_exist)
-
 
     def test_create_staticapp(self):
         from azure.mgmt.web.models import StaticSiteARMResource, StaticSiteBuildProperties, SkuDescription
@@ -94,7 +85,7 @@ class TestStaticAppCommands(unittest.TestCase):
         app_location = './src'
         api_location = './api/'
         app_artifact_location = '/.git/'
-        tags = { 'key1': 'value1' }
+        tags = {'key1': 'value1'}
 
         create_staticsites(
             self.mock_cmd, self.rg1, self.name1, self.location1,
