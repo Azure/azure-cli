@@ -1050,6 +1050,45 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
                  '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --rewrite-rule-set {set}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_url_path_map_edge_case')
+    def test_network_ag_url_path_map_edge_case(self, resource_group):
+        self.kwargs.update({
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'name': 'mypathmap',
+            'rulename': 'myurlrule',
+            'rulename2': 'myurlrule2',
+            'pool': 'mypool',
+            'set': 'myruleset',
+            'settings': 'http_settings',
+            'redirect_config': 'myconfig',
+            'rg': resource_group
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd(
+            'network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+
+        self.cmd(
+            'network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
+
+        self.cmd('network application-gateway rewrite-rule set create -g {rg} --gateway-name {ag} -n {set}')
+        self.cmd('network application-gateway redirect-config create -g {rg} --gateway-name {ag} -n {redirect_config} '
+                 '--target-listener mylistener --type Permanent')
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool} --no-wait')
+        self.cmd(
+            'network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {settings} --port 443 --protocol https')
+        self.cmd(
+            'network application-gateway url-path-map create -g {rg} --gateway-name {ag} -n {name} --rule-name {rulename} --paths /mypath1/* '
+            '--redirect-config {redirect_config} --default-redirect-config {redirect_config}')
+        self.cmd(
+            'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
+            '--paths /mypath122/* --address-pool {pool} --http-settings {settings}')
+        with self.assertRaisesRegexp(CLIError, "Cannot reference a BackendAddressPool when Redirect Configuration is specified."):
+            self.cmd(
+                'network application-gateway url-path-map rule create -g {rg} --gateway-name {ag} -n {rulename2} --path-map-name {name} '
+                '--paths /mypath122/* --address-pool {pool} --http-settings {settings} --redirect-config {redirect_config}')
+
 
 class NetworkAppGatewayRewriteRuleset(ScenarioTest):
 
@@ -2629,6 +2668,30 @@ class NetworkVNetScenarioTest(ScenarioTest):
                  checks=self.check("length([?name == '{vnet}'])", 1))
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_subnet_nsg_test')
+    def test_network_vnet_with_subnet_nsg(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'nsg': 'nsg',
+            'rt': 'Microsoft.Network/virtualNetworks',
+            'prefixes': '20.0.0.0/16 10.0.0.0/16'
+        })
+        result = self.cmd('network nsg create --resource-group {rg} --name {nsg}').get_output_in_json()
+        self.kwargs['nsg_id'] = result['NewNSG']['id']
+        self.cmd('network vnet create --resource-group {rg} --name {vnet} --address-prefixes {prefixes} '
+                 '--subnet-name {subnet} --subnet-prefixes 20.0.0.0/24 --nsg {nsg}')
+        self.cmd('network vnet subnet list --resource-group {rg} --vnet-name {vnet}',
+                 checks=self.check('type(@)', 'array'))
+        self.cmd('network vnet subnet show --resource-group {rg} --vnet-name {vnet} --name {subnet}', checks=[
+            self.check('type(@)', 'object'),
+            self.check('name', '{subnet}'),
+            self.check('networkSecurityGroup.id', '{nsg_id}')
+        ])
+
+        self.cmd('network vnet subnet delete --resource-group {rg} --vnet-name {vnet} --name {subnet}')
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_test')
     def test_network_vnet_list_available_ips(self, resource_group):

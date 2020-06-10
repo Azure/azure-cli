@@ -72,12 +72,12 @@ def load_arguments(self, _):
         c.argument('spn', help='name of a service principal that will receive permissions')
         c.argument('upn', help='name of a user principal that will receive permissions')
         c.argument('tags', tags_type)
-        c.argument('enabled_for_deployment', arg_type=get_three_state_flag(), help='Allow Virtual Machines to retrieve certificates stored as secrets from the vault.')
-        c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(), help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.')
-        c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(), help='Allow Resource Manager to retrieve secrets from the vault.')
-        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), help='Enable RBAC authorization for the vault, and all contained entities.')
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
-        c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Prevents manual purging of deleted vault, and all contained entities')
+        c.argument('enabled_for_deployment', arg_type=get_three_state_flag())
+        c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag())
+        c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag())
+        c.argument('enable_rbac_authorization', arg_type=get_three_state_flag(), is_preview=True)
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag())
+        c.argument('enable_purge_protection', arg_type=get_three_state_flag())
 
     with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions), help='Bypass traffic for space-separated uses.')
@@ -89,7 +89,7 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=get_enum_type(SkuName, default=SkuName.standard.value))
         c.argument('no_self_perms', arg_type=get_three_state_flag(), help="Don't add permissions for the current user/service principal in the new vault.")
         c.argument('location', validator=get_default_location_from_resource_group)
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help="Enable 'soft delete' functionality for this key vault and all contained entities. If omitted, it will be set to true by default. Once set to true, it cannot be reverted to false.")
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag())
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.', default='90')
 
     with self.argument_context('keyvault create', arg_group='Network Rule') as c:
@@ -101,7 +101,7 @@ def load_arguments(self, _):
                                                          'Vnet/subnet pairs or subnet resource ids.')
 
     with self.argument_context('keyvault update') as c:
-        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help="Enable 'soft delete' functionality for this key vault and all contained entities. Once set to true, it cannot be reverted to false.")
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag())
         c.argument('retention_days', help='Soft delete data retention days. It accepts >=7 and <=90.')
 
     with self.argument_context('keyvault recover') as c:
@@ -197,13 +197,17 @@ def load_arguments(self, _):
             c.argument('not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
 
     with self.argument_context('keyvault key create') as c:
-        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type)
-        c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName))
+        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
+                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeytype')
+        c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName),
+                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/en-us/rest/api/keyvault/createkey/createkey#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
         c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)
+        c.argument('pem_string', type=file_type, help='PEM string containing the key to be imported.', validator=validate_key_import_source)
         c.argument('pem_password', help='Password of PEM file.')
-        c.argument('byok_file', type=file_type, help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter())
+        c.argument('byok_file', type=file_type, help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter(), validator=validate_key_import_source)
+        c.argument('byok_string', type=file_type, help='BYOK string containing the key to be imported. Must not be password protected.', validator=validate_key_import_source)
 
     with self.argument_context('keyvault key backup') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local file path in which to store key backup.')

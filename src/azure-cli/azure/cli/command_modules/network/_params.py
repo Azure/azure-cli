@@ -653,7 +653,9 @@ def load_arguments(self, _):
         c.argument('bandwidth_in_mbps', er_bandwidth_type, validator=bandwidth_validator_factory(mbps=True), help='Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps')
         c.argument('service_provider_name', options_list='--provider', help="Name of the ExpressRoute Service Provider.")
         c.argument('peering_location', help="Name of the peering location.")
-        c.argument('device_path', options_list='--path', arg_type=get_enum_type(device_path_values))
+        c.argument('peering_name', help='The name of the peering')
+        c.argument('device_path', options_list='--path', arg_type=get_enum_type(device_path_values),
+                   help='The path of the device')
         c.argument('vlan_id', type=int)
         c.argument('allow_global_reach', arg_type=get_three_state_flag(), min_api='2018-07-01', help='Enable global reach on the circuit.')
         c.argument('express_route_port', help='Name or ID of an ExpressRoute port.', min_api='2018-08-01', validator=validate_express_route_port)
@@ -773,7 +775,7 @@ def load_arguments(self, _):
         c.argument('private_connection_resource_id', help='The resource id of which private enpoint connect to')
         c.argument('group_ids', nargs='+', options_list=[c.deprecate(target='--group-ids', redirect='--group-id'), '--group-id'], help='The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use "az network private-link-resource list" to obtain the list of group ids.')
         c.argument('request_message', help='A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.')
-        c.argument('manual_request', help='Use manual request to establish the connection', arg_type=get_three_state_flag())
+        c.argument('manual_request', help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.", arg_type=get_three_state_flag())
         c.argument('connection_name', help='Name of the private link service connection.')
         c.ignore('expand')
 
@@ -1602,6 +1604,7 @@ def load_arguments(self, _):
                    local_context_attribute=LocalContextAttribute(name='subnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX', max_api='2018-07-01')
         c.argument('subnet_prefix', options_list='--subnet-prefixes', nargs='+', min_api='2018-08-01', help='Space-separated list of address prefixes in CIDR format for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIXES')
+        c.argument('network_security_group', options_list=['--network-security-group', '--nsg'], validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
 
     with self.argument_context('network vnet update') as c:
         c.argument('address_prefixes', nargs='+')
@@ -1626,7 +1629,7 @@ def load_arguments(self, _):
         c.argument('address_prefix', metavar='PREFIX', help='Address prefix in CIDR format.', max_api='2018-07-01')
         c.argument('address_prefix', metavar='PREFIXES', options_list='--address-prefixes', nargs='+', help='Space-separated list of address prefixes in CIDR format.', min_api='2018-08-01')
         c.argument('virtual_network_name', virtual_network_name_type)
-        c.argument('network_security_group', validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
+        c.argument('network_security_group', options_list=['--network-security-group', '--nsg'], validator=get_nsg_validator(), help='Name or ID of a network security group (NSG).')
         c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
         c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
         c.argument('service_endpoint_policy', nargs='+', min_api='2018-07-01', help='Space-separated list of names or IDs of service endpoint policies to apply.', validator=validate_service_endpoint_policy)

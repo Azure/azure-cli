@@ -35,6 +35,12 @@ def web_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_APPSERVICE)
 
 
+def providers_client_factory(cli_ctx):
+    from azure.mgmt.resource import ResourceManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, ResourceManagementClient).providers
+
+
 def cf_plans(cli_ctx, _):
     return web_client_factory(cli_ctx).app_service_plans
 

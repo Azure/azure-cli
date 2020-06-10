@@ -17,12 +17,8 @@ import re
 import logging
 
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
-
-from azure.common import AzureException
-from azure.core.exceptions import AzureError
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
-from inspect import getfullargspec as get_arg_spec
 
 logger = get_logger(__name__)
 
@@ -61,6 +57,8 @@ def handle_exception(ex):  # pylint: disable=too-many-return-statements
     from msrestazure.azure_exceptions import CloudError
     from msrest.exceptions import HttpOperationError, ValidationError, ClientRequestError
     from azure.cli.core.azlogging import CommandLoggerContext
+    from azure.common import AzureException
+    from azure.core.exceptions import AzureError
 
     with CommandLoggerContext(logger):
         if isinstance(ex, JMESPathTypeError):
@@ -477,6 +475,7 @@ def is_track2(client_class):
     """ IS this client a autorestv3/track2 one?.
     Could be refined later if necessary.
     """
+    from inspect import getfullargspec as get_arg_spec
     args = get_arg_spec(client_class.__init__).args
     return "credential" in args
 
@@ -726,11 +725,12 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             result[key] = value
     uri_parameters = result or None
 
+    endpoints = cli_ctx.cloud.endpoints
     # If url is an ARM resource ID, like /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01,
     # default to Azure Resource Manager.
-    # https://management.azure.com/ + subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
+    # https://management.azure.com + /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
     if '://' not in url:
-        url = cli_ctx.cloud.endpoints.resource_manager + url.lstrip('/')
+        url = endpoints.resource_manager.rstrip('/') + url
 
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
@@ -739,18 +739,9 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if '{subscriptionId}' in url:
         url = url.replace('{subscriptionId}', cli_ctx.data['subscription_id'] or profile.get_subscription_id())
 
-    token_subscription = None
-    _subscription_regexes = [re.compile('https://management.azure.com/subscriptions/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'),
-                             re.compile('https://graph.windows.net/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})')]
-    for regex in _subscription_regexes:
-        match = regex.match(url)
-        if match:
-            token_subscription = match.groups()[0]
-            logger.debug('Retrieve token from subscription %s', token_subscription)
-
     if not skip_authorization_header and url.lower().startswith('https://'):
+        # Prepare `resource`
         if not resource:
-            endpoints = cli_ctx.cloud.endpoints
             # If url starts with ARM endpoint, like https://management.azure.com/,
             # use active_directory_resource_id for resource.
             # This follows the same behavior as azure.cli.core.commands.client_factory._get_mgmt_service_client
@@ -767,8 +758,16 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                         resource = value
                         break
         if resource:
-            token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
-            logger.debug('Retrievd AAD token for resource: %s', resource or 'ARM')
+            # If this is an ARM request, extract subscription ID from the URL.
+            # In the future when multi-tenant subscription is supported, we won't be able to uniquely identity the token
+            # from subscription anymore.
+            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+                token_subscription = _extract_subscription_id(url)
+                logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
+                token_info, _, _ = profile.get_raw_token(resource, subscription=token_subscription)
+            else:
+                logger.debug('Retrieving token for resource %s', resource)
+                token_info, _, _ = profile.get_raw_token(resource)
             token_type, token, _ = token_info
             headers = headers or {}
             headers['Authorization'] = '{} {}'.format(token_type, token)
@@ -799,6 +798,15 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             for chunk in r.iter_content(chunk_size=128):
                 fd.write(chunk)
     return r
+
+
+def _extract_subscription_id(url):
+    """Extract the subscription ID from an ARM request URL."""
+    subscription_regex = '/subscriptions/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'
+    match = re.search(subscription_regex, url, re.IGNORECASE)
+    if not match:
+        raise CLIError('No subscription ID specified in the URL')
+    return match.groups()[0]
 
 
 def _log_request(request):
