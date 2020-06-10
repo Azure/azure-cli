@@ -165,6 +165,14 @@ def _get_microsoft_graph_resource_id(cloud_name):
     return graph_endpoint_mapper.get(cloud_name, None)
 
 
+def _get_storage_sync_endpoint(cloud_name):
+    storage_sync_endpoint_mapper = {
+        'AzureCloud': 'afs.azure.net',
+        'AzureUSGovernment': 'afs.azure.us',
+    }
+    return storage_sync_endpoint_mapper.get(cloud_name, 'afs.azure.net')
+
+
 def _convert_arm_to_cli(arm_cloud_metadata_dict):
     cli_cloud_metadata_dict = {}
     for cloud in arm_cloud_metadata_dict:
@@ -193,7 +201,7 @@ def _arm_to_cli_mapper(arm_dict):
             log_analytics_resource_id=arm_dict['logAnalyticsResourceId'] if 'logAnalyticsResourceId' in arm_dict else None),  # pylint: disable=line-too-long
         suffixes=CloudSuffixes(
             storage_endpoint=arm_dict['suffixes']['storage'],
-            storage_sync_endpoint=arm_dict['suffix']['storageSyncEndpointSuffix'] if 'storageSyncEndpointSuffix' in arm_dict['suffixes'] else 'afs.azure.net',  # pylint: disable=line-too-long
+            storage_sync_endpoint=arm_dict['suffix']['storageSyncEndpointSuffix'] if 'storageSyncEndpointSuffix' in arm_dict['suffixes'] else _get_storage_sync_endpoint(arm_dict['name']),  # pylint: disable=line-too-long
             keyvault_dns=arm_dict['suffixes']['keyVaultDns'],
             sql_server_hostname=arm_dict['suffixes']['sqlServerHostname'],
             mysql_server_endpoint=arm_dict['suffixes']['mysqlServerEndpoint'],
