@@ -186,7 +186,7 @@ def acr_login(cmd,
               expose_token=False):
     if expose_token:
         if username or password:
-            raise CLIError("Exposing token for admin users and token users is unsupported.")
+            raise CLIError("`--expose-token` cannot be combined with `--username` or `--password`.")
 
         login_server, _, password = get_login_credentials(
             cmd=cmd,
