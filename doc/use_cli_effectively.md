@@ -128,7 +128,7 @@ This becomes an issue because when the command shell (Bash, Zsh, Windows Command
 
 - Bash: [Quoting](https://www.gnu.org/software/bash/manual/html_node/Quoting.html)
 - PowerShell: [About Quoting Rules](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_quoting_rules)
-    - Due to a known issue [#1995](https://github.com/PowerShell/PowerShell/issues/1995) of PowerShell, some extra escaping rules apply, see [Quoting issues with PowerShell](quoting-issues-with-powershell.md) for more information.
+    - Due to a known issue [#1995](https://github.com/PowerShell/PowerShell/issues/1995) of PowerShell, some extra escaping rules apply. See [Quoting issues with PowerShell](quoting-issues-with-powershell.md) for more information.
 - Windows Command Prompt: [How-to: Escape Characters, Delimiters and Quotes at the Windows command line](https://ss64.com/nt/syntax-esc.html)
 
 To avoid unanticipated results, here are a few suggestions:
