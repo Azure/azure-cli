@@ -165,7 +165,7 @@ class Identity:
         credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
         return credential
 
-    def login_with_managed_identity(self, resource, identity_id=None):
+    def login_with_managed_identity(self, resource, identity_id=None):  # pylint: disable=too-many-statements
         from msrestazure.tools import is_valid_resource_id
         from requests import HTTPError
         from azure.core.exceptions import ClientAuthenticationError

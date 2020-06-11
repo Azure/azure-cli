@@ -72,7 +72,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('logout') as c:
             c.argument('username', options_list=['--username', '-u'], help='account user, if missing, logout the current active account')
-            c.argument('clear_credential', clear_credential_type)
+            c.argument('clear_credential', clear_credential_type, help='Clear authentication secret from MSAL shared credential')
             c.ignore('_subscription')  # hide the global subscription parameter
 
         with self.argument_context('account') as c:
@@ -92,7 +92,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('tenant', options_list=['--tenant', '-t'], is_preview=True, help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
 
         with self.argument_context('account logout') as c:
-            c.argument('clear_credential', clear_credential_type)
+            c.argument('clear_credential', clear_credential_type, help='Clear authentication secret from MSAL shared credential')
 
 
 COMMAND_LOADER_CLS = ProfileCommandsLoader
