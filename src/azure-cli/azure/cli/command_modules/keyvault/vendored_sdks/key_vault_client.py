@@ -18,7 +18,7 @@ from azure.profiles.multiapiclient import MultiApiClientMixin
 from .version import VERSION
 from . import KeyVaultAuthentication
 
-from .v7_2_preview.version import VERSION as v7_2_PREVIEW_VERSION
+from .v7_2.version import VERSION as v7_2_PREVIEW_VERSION
 from .v7_0.version import VERSION as v7_0_VERSION
 from .v2016_10_01.version import VERSION as v2016_10_01_VERSION
 
@@ -106,7 +106,7 @@ class KeyVaultClient(MultiApiClientMixin):
         api_version = self._get_api_version(None)
 
         if api_version == v7_2_PREVIEW_VERSION:
-            from .v7_2_preview import models as implModels
+            from .v7_2 import models as implModels
         elif api_version == v7_0_VERSION:
             from .v7_0 import models as implModels
         elif api_version == v2016_10_01_VERSION:
@@ -132,7 +132,7 @@ class KeyVaultClient(MultiApiClientMixin):
         :return:
         """
         if api_version == v7_2_PREVIEW_VERSION:
-            from .v7_2_preview import KeyVaultClient as ImplClient
+            from .v7_2 import KeyVaultClient as ImplClient
         elif api_version == v7_0_VERSION:
             from .v7_0 import KeyVaultClient as ImplClient
         elif api_version == v2016_10_01_VERSION:
