@@ -227,7 +227,7 @@ class TestCommandRegistration(unittest.TestCase):
 
         from azure.cli.core.commands import _load_command_loader
         from azure.cli.core._session import INDEX
-        from azure.cli.core import _COMMAND_INDEX, invalidate_command_index
+        from azure.cli.core import _COMMAND_INDEX, _COMMAND_INDEX_VERSION, invalidate_command_index
 
         cli = DummyCli()
         # Clear the command index
@@ -241,8 +241,8 @@ class TestCommandRegistration(unittest.TestCase):
         hello_ext_only_cmd = cmd_tbl['hello ext-only']
         hello_overridden_cmd = cmd_tbl['hello overridden']
 
-        self.assertEquals(hello_mod_only_cmd.command_source, 'hello')
-        self.assertEquals(hello_mod_only_cmd.loader.__module__, 'azure.cli.command_modules.hello')
+        self.assertEqual(hello_mod_only_cmd.command_source, 'hello')
+        self.assertEqual(hello_mod_only_cmd.loader.__module__, 'azure.cli.command_modules.hello')
 
         self.assertTrue(isinstance(hello_ext_only_cmd.command_source, ExtensionCommandSource))
         self.assertFalse(hello_ext_only_cmd.command_source.overrides_command)
@@ -267,7 +267,30 @@ class TestCommandRegistration(unittest.TestCase):
         cli.loader.load_command_table(["hello", "mod-only"])
         self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
 
+        with mock.patch("azure.cli.core.__version__", "2.7.0"):
+            # Test rebuild command index if version is not present
+            del INDEX[_COMMAND_INDEX_VERSION]
+            del INDEX[_COMMAND_INDEX]
+            cli.loader.load_command_table(["hello", "mod-only"])
+            self.assertEqual(INDEX[_COMMAND_INDEX_VERSION], "2.7.0")
+            self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+
+            # Test rebuild command index if version is not valid
+            INDEX[_COMMAND_INDEX_VERSION] = ""
+            INDEX[_COMMAND_INDEX] = {}
+            cli.loader.load_command_table(["hello", "mod-only"])
+            self.assertEqual(INDEX[_COMMAND_INDEX_VERSION], "2.7.0")
+            self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+
+            # Test rebuild command index if version is outdated
+            INDEX[_COMMAND_INDEX_VERSION] = "2.6.0"
+            INDEX[_COMMAND_INDEX] = {}
+            cli.loader.load_command_table(["hello", "mod-only"])
+            self.assertEqual(INDEX[_COMMAND_INDEX_VERSION], "2.7.0")
+            self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+
         # Test rebuild command index if modules are found but outdated
+        # This only happens in dev environment. For users, the version check logic prevents it
         INDEX[_COMMAND_INDEX] = {"hello": ["azure.cli.command_modules.extra"]}
         cli.loader.load_command_table(["hello", "mod-only"])
         self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
@@ -275,7 +298,7 @@ class TestCommandRegistration(unittest.TestCase):
         # Test irrelevant commands are not loaded
         INDEX[_COMMAND_INDEX] = expected_command_index
         cmd_tbl = cli.loader.load_command_table(["hello", "mod-only"])
-        self.assertEquals(['hello mod-only', 'hello overridden', 'hello ext-only'], list(cmd_tbl.keys()))
+        self.assertEqual(['hello mod-only', 'hello overridden', 'hello ext-only'], list(cmd_tbl.keys()))
 
         # Full scenario test 1: Installing an extension 'azext_hello1' that extends 'hello' group
         outdated_command_index = {'hello': ['azure.cli.command_modules.hello'],
@@ -285,7 +308,7 @@ class TestCommandRegistration(unittest.TestCase):
         # Command for an outdated group
         cmd_tbl = cli.loader.load_command_table(["hello", "-h"])
         # Index is not updated, and only built-in commands are loaded
-        self.assertEquals(INDEX[_COMMAND_INDEX], outdated_command_index)
+        self.assertEqual(INDEX[_COMMAND_INDEX], outdated_command_index)
         self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden'])
 
         # Command index is explicitly invalidated by azure.cli.core.extension.operations.add_extension
@@ -293,7 +316,7 @@ class TestCommandRegistration(unittest.TestCase):
 
         cmd_tbl = cli.loader.load_command_table(["hello", "-h"])
         # Index is updated, and new commands are loaded
-        self.assertEquals(INDEX[_COMMAND_INDEX], expected_command_index)
+        self.assertEqual(INDEX[_COMMAND_INDEX], expected_command_index)
         self.assertListEqual(list(cmd_tbl), expected_command_table)
 
         # Full scenario test 2: Installing extension 'azext_hello2' that overrides existing command 'hello overridden'
@@ -303,10 +326,10 @@ class TestCommandRegistration(unittest.TestCase):
         # Command for an overridden command
         cmd_tbl = cli.loader.load_command_table(["hello", "overridden"])
         # Index is not updated
-        self.assertEquals(INDEX[_COMMAND_INDEX], outdated_command_index)
+        self.assertEqual(INDEX[_COMMAND_INDEX], outdated_command_index)
         # With the old command index, 'hello overridden' is loaded from the build-in module
         hello_overridden_cmd = cmd_tbl['hello overridden']
-        self.assertEquals(hello_overridden_cmd.command_source, 'hello')
+        self.assertEqual(hello_overridden_cmd.command_source, 'hello')
         self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
 
         # Command index is explicitly invalidated by azure.cli.core.extension.operations.add_extension
@@ -326,7 +349,8 @@ class TestCommandRegistration(unittest.TestCase):
         self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
         self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
 
-        INDEX[_COMMAND_INDEX] = {}
+        del INDEX[_COMMAND_INDEX_VERSION]
+        del INDEX[_COMMAND_INDEX]
 
     def test_argument_with_overrides(self):
 

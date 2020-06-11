@@ -31,6 +31,7 @@ EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 _COMMAND_INDEX = 'commandIndex'
+_COMMAND_INDEX_VERSION = 'version'
 # Extensions that will always be loaded if installed. These extensions don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSION_MODNAMES = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
 
@@ -351,6 +352,7 @@ class MainCommandsLoader(CLICommandsLoader):
 
         def _update_command_index():
             start_time = timeit.default_timer()
+            INDEX[_COMMAND_INDEX_VERSION] = __version__
             from collections import defaultdict
             index = defaultdict(list)
             for command_name, command in self.command_table.items():
@@ -387,6 +389,12 @@ class MainCommandsLoader(CLICommandsLoader):
         # Clear the tables to make this method idempotent
         self.command_group_table = {}
         self.command_table = {}
+
+        # If the command index version doesn't match the current command version, invalidate the command index
+        index_version = INDEX[_COMMAND_INDEX_VERSION]
+        if not (index_version and index_version == __version__):
+            logger.debug("Command index version is invalid or outdated.")
+            invalidate_command_index()
 
         if args and not args[0].startswith('-'):
             # A top level command is provided, like `az version`
@@ -760,5 +768,6 @@ def invalidate_command_index():
     This function can be called when removing extensions and updating cloud profiles for double insurance.
     """
     from azure.cli.core._session import INDEX
+    INDEX[_COMMAND_INDEX_VERSION] = ""
     INDEX[_COMMAND_INDEX] = {}
     logger.debug("Command index has been invalidated.")
