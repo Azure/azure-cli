@@ -31,12 +31,11 @@ class KeyVaultClientConfiguration(Configuration):
 
         super(KeyVaultClientConfiguration, self).__init__(**kwargs)
 
-        self.credentials = credentials
-        self.credential_scopes = ['https://vault.azure.com/']
         self._configure(**kwargs)
 
         self.user_agent_policy.add_user_agent('azsdk-python-azure-keyvault/{}'.format(VERSION))
         self.generate_client_request_id = True
+        self.credentials = credentials
 
     def _configure(self, **kwargs):
         self.user_agent_policy = kwargs.get('user_agent_policy') or policies.UserAgentPolicy(**kwargs)
@@ -46,7 +45,3 @@ class KeyVaultClientConfiguration(Configuration):
         self.retry_policy = kwargs.get('retry_policy') or policies.RetryPolicy(**kwargs)
         self.custom_hook_policy = kwargs.get('custom_hook_policy') or policies.CustomHookPolicy(**kwargs)
         self.redirect_policy = kwargs.get('redirect_policy') or policies.RedirectPolicy(**kwargs)
-        self.authentication_policy = kwargs.get('authentication_policy')
-        if self.credentials and not self.authentication_policy:
-            self.authentication_policy = policies.BearerTokenCredentialPolicy(
-                self.credentials, *self.credential_scopes, **kwargs)
