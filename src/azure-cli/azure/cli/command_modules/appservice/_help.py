@@ -1992,174 +1992,174 @@ helps['appservice ase delete'] = """
       text: az appservice ase delete -n MyAseName
 """
 
-helps['staticapp'] = """
+helps['staticwebapp'] = """
     type: group
     short-summary: Manage static apps.
 """
 
-helps['staticapp list'] = """
+helps['staticwebapp list'] = """
     type: command
     short-summary: List all static app resources in a subscription, or in resource group if provided
     examples:
     - name: List static apps in a subscription.
-      text: az staticapp list
+      text: az staticwebapp list
 """
 
-helps['staticapp browse'] = """
+helps['staticwebapp browse'] = """
     type: command
     short-summary: Show details of a static app.
     examples:
     - name: Show static app in a subscription.
-      text: az staticapp browse -n MyStaticAppName
+      text: az staticwebapp browse -n MyStaticAppName
 """
 
-helps['staticapp create'] = """
+helps['staticwebapp create'] = """
     type: command
     short-summary: Create a static app with content from GitHubRepository URL provided in source on provided branch. Return the app created.
     examples:
     - name: Create static app in a subscription.
-      text: az staticapp create -n MyStaticAppName -g MyExistingRg
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
        -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
 """
 
-helps['staticapp disconnect'] = """
+helps['staticwebapp disconnect'] = """
     type: command
     short-summary: Disconnect source control to enable connecting to a different repo.
     examples:
     - name: Disconnect static app.
-      text: az staticapp disconnect -n MyStaticAppName
+      text: az staticwebapp disconnect -n MyStaticAppName
 """
 
-helps['staticapp reconnect'] = """
+helps['staticwebapp reconnect'] = """
     type: command
     short-summary: Connect to a repo and branch following a disconnect command.
     examples:
     - name: Connect a repo and branch to static app.
-      text: az staticapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --token MyAccessToken
+      text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --token MyAccessToken
 """
 
-helps['staticapp delete'] = """
+helps['staticwebapp delete'] = """
     type: command
     short-summary: Delete a static app.
     examples:
     - name: Delete a static app.
-      text: az staticapp delete -n MyStaticAppName -g MyRg
+      text: az staticwebapp delete -n MyStaticAppName -g MyRg
 """
 
-helps['staticapp environment'] = """
+helps['staticwebapp environment'] = """
     type: group
     short-summary: Manage environment of the static app.
 """
 
-helps['staticapp environment list'] = """
+helps['staticwebapp environment list'] = """
     type: command
     short-summary: List all environment of the static app including production.
     examples:
     - name: List static app environment.
-      text: az staticapp environment list -n MyStaticAppName
+      text: az staticwebapp environment list -n MyStaticAppName
 """
 
-helps['staticapp environment show'] = """
+helps['staticwebapp environment show'] = """
     type: command
     short-summary: Show information about the production environment or the specified environment.
     examples:
     - name: Show a static app environment.
-      text: az staticapp environment show -n MyStaticAppName
+      text: az staticwebapp environment show -n MyStaticAppName
 """
 
-helps['staticapp environment functions'] = """
+helps['staticwebapp environment functions'] = """
     type: command
     short-summary: Show information about functions.
     examples:
     - name: Show static app functions.
-      text: az staticapp environment functions -n MyStaticAppName
+      text: az staticwebapp environment functions -n MyStaticAppName
 """
 
-helps['staticapp hostname'] = """
+helps['staticwebapp hostname'] = """
     type: group
     short-summary: Manage custom hostnames of Functions of the static app.
 """
 
-helps['staticapp hostname list'] = """
+helps['staticwebapp hostname list'] = """
     type: command
     short-summary: List custom hostnames of the static app.
     examples:
     - name: List custom hostnames of the static app.
-      text: az staticapp hostname list -n MyStaticAppName
+      text: az staticwebapp hostname list -n MyStaticAppName
 """
 
-helps['staticapp hostname set'] = """
+helps['staticwebapp hostname set'] = """
     type: command
     short-summary: Set given sub-domain hostname to the static app. Please configure a CNAME record with your DNS provider.
     examples:
     - name: Set hostname to the static app.
-      text: az staticapp hostname set -n MyStaticAppName --hostname www.example.com
+      text: az staticwebapp hostname set -n MyStaticAppName --hostname www.example.com
 """
 
-helps['staticapp hostname delete'] = """
+helps['staticwebapp hostname delete'] = """
     type: command
     short-summary: Delete given hostname of the static app.
     examples:
     - name: Delete given hostname of the static app.
-      text: az staticapp hostname delete -n MyStaticAppName --hostname HostnameToDelete
+      text: az staticwebapp hostname delete -n MyStaticAppName --hostname HostnameToDelete
 """
 
-helps['staticapp appsettings'] = """
+helps['staticwebapp appsettings'] = """
     type: group
     short-summary: Manage app settings of Functions of the static app.
 """
 
-helps['staticapp appsettings list'] = """
+helps['staticwebapp appsettings list'] = """
     type: command
     short-summary: List function app settings of the static app. A function must first be deployed to use this method.
     examples:
     - name: List function app settings of the static app.
-      text: az staticapp appsettings list -n MyStaticAppName
+      text: az staticwebapp appsettings list -n MyStaticAppName
 """
 
-helps['staticapp appsettings set'] = """
+helps['staticwebapp appsettings set'] = """
     type: command
     short-summary: Set (replace) function app settings of the static app.
     examples:
     - name: Set (replace) function app settings of the static app.
-      text: az staticapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2
+      text: az staticwebapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2
 """
 
-helps['staticapp appsettings delete'] = """
+helps['staticwebapp appsettings delete'] = """
     type: command
     short-summary: Delete function app settings with given keys of the static app.
     examples:
     - name: Delete given app settings of the static app.
-      text: az staticapp appsettings delete -n MyStaticAppName --setting-names key1 key2
+      text: az staticwebapp appsettings delete -n MyStaticAppName --setting-names key1 key2
 """
 
-helps['staticapp users'] = """
+helps['staticwebapp users'] = """
     type: group
     short-summary: Manage users of the static app.
 """
 
-helps['staticapp users list'] = """
+helps['staticwebapp users list'] = """
     type: command
     short-summary: Lists users and assigned roles, limited to users who accepted their invites.
     examples:
     - name: Lists users and assigned roles.
-      text: az staticapp users list -n MyStaticAppName
+      text: az staticwebapp users list -n MyStaticAppName
 """
 
-helps['staticapp users invite'] = """
+helps['staticwebapp users invite'] = """
     type: command
     short-summary: Create invitation link for specified user to the static app.
     examples:
     - name: Create invitation link for specified user to the static app.
-      text: az staticapp users invite -n MyStaticAppName --authentication-provider GitHub --user-details JohnDoe
+      text: az staticwebapp users invite -n MyStaticAppName --authentication-provider GitHub --user-details JohnDoe
        --role Contributor --domain static-app-001.azurestaticapps.net --invitation-expiration-in-hours 1
 
 """
 
-helps['staticapp users update'] = """
+helps['staticwebapp users update'] = """
     type: command
     short-summary: Updates a user entry with the listed roles. Either user details or user id is required.
     examples:
     - name: Updates a user entry with the listed roles.
-      text: az staticapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor
+      text: az staticwebapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor
 """

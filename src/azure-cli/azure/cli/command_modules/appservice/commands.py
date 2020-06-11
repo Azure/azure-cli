@@ -361,7 +361,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_appserviceenvironment', supports_no_wait=True)
         g.custom_command('delete', 'delete_appserviceenvironment', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('staticapp', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp', custom_command_type=staticsite_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_staticsites')
         g.custom_command('browse', 'show_staticsite')
         g.custom_command('create', 'create_staticsites', supports_no_wait=True)
@@ -369,22 +369,22 @@ def load_command_table(self, _):
         g.custom_command('disconnect', 'disconnect_staticsite', supports_no_wait=True)
         g.custom_command('reconnect', 'reconnect_staticsite', supports_no_wait=True)
 
-    with self.command_group('staticapp environment', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp environment', custom_command_type=staticsite_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_staticsite_environments')
         g.custom_show_command('show', 'show_staticsite_environment')
         g.custom_command('functions', 'list_staticsite_functions')
 
-    with self.command_group('staticapp hostname', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp hostname', custom_command_type=staticsite_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_staticsite_domains')
         g.custom_command('set', 'set_staticsite_domain', supports_no_wait=True)
         g.custom_command('delete', 'delete_staticsite_domain', supports_no_wait=True, confirmation=True)
 
-    with self.command_group('staticapp appsettings', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp appsettings', custom_command_type=staticsite_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_staticsite_function_app_settings')
         g.custom_command('set', 'set_staticsite_function_app_settings')
         g.custom_command('delete', 'delete_staticsite_function_app_settings')
 
-    with self.command_group('staticapp users', custom_command_type=staticsite_sdk, is_preview=True) as g:
+    with self.command_group('staticwebapp users', custom_command_type=staticsite_sdk, is_preview=True) as g:
         g.custom_command('list', 'list_staticsite_users')
         g.custom_command('invite', 'invite_staticsite_users')
         g.custom_command('update', 'update_staticsite_users')
