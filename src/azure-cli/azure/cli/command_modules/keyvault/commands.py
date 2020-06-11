@@ -11,7 +11,7 @@ from azure.cli.core.profiles import get_api_version, ResourceType
 from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_client_private_endpoint_connections_factory,
     keyvault_client_private_link_resources_factory, keyvault_data_plane_factory,
-    keyvault_private_data_plane_factory_v7_0, keyvault_private_data_plane_factory_v7_2_preview)
+    keyvault_private_data_plane_factory_v7_2_preview)
 
 from ._transformers import (
     extract_subresource_name, filter_out_managed_resources,
@@ -76,12 +76,6 @@ def load_command_table(self, _):
         client_factory=keyvault_private_data_plane_factory_v7_2_preview,
         resource_type=ResourceType.DATA_PRIVATE_KEYVAULT
     )
-
-    kv_private_data_v7_0_sdk = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.keyvault.vendored_sdks._key_vault_client#KeyVaultClient.{}',
-        client_factory=keyvault_private_data_plane_factory_v7_0,
-        resource_type=ResourceType.DATA_PRIVATE_KEYVAULT
-    )
     # endregion
 
     # Management Plane Commands
@@ -139,7 +133,7 @@ def load_command_table(self, _):
         g.keyvault_command('start', 'full_restore_operation_method')
         g.keyvault_command('status', 'full_restore_status')
 
-    with self.command_group('keyvault key', kv_data_sdk) as g:
+    with self.command_group('keyvault key', kv_private_data_v7_2_preview_sdk) as g:
         g.keyvault_command('list', 'get_keys',
                            transform=multi_transformers(
                                filter_out_managed_resources, extract_subresource_name(id_parameter='kid')))

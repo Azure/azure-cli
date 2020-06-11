@@ -224,6 +224,7 @@ class KeyVaultAuthentication(OAuthTokenAuthentication):
 
             authorization_callback = auth_callback
 
+        self.get_token = authorization_callback
         self.auth = KeyVaultAuthBase(authorization_callback)
         self._callback = authorization_callback
         
