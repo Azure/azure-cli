@@ -1829,7 +1829,6 @@ class KeyVaultClientOperationsMixin(object):
             'key-name': self._serialize.url("key_name", key_name, 'str', pattern=r'^[0-9a-zA-Z-]+$')
         }
         url = self._client.format_url(url, **path_format_arguments)
-
         # Construct parameters
         query_parameters = {}
         query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
