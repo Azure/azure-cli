@@ -40,6 +40,9 @@ def disconnect_staticsite(cmd, name, resource_group_name=None, no_wait=False):
 
 def reconnect_staticsite(cmd, name, source, branch, token=None, resource_group_name=None, no_wait=False):
     client = _get_staticsites_client_factory(cmd.cli_ctx)
+    if not resource_group_name:
+        resource_group_name = _get_resource_group_name_of_staticsite(client, name)
+
     location = _get_staticsite_location(client, name, resource_group_name)
 
     return create_staticsites(cmd, resource_group_name, name, location,
@@ -241,32 +244,38 @@ def _raise_missing_token_suggestion():
                    "please follow the steps found at the following link:\n{0}".format(pat_documentation))
 
 
-def _get_staticsite_location(client, static_site_name, resource_group_name=None):
+def _get_staticsite_location(client, static_site_name, resource_group_name):
     static_sites = client.list()
     for static_site in static_sites:
         if static_site.name.lower() == static_site_name.lower():
-            if not resource_group_name:
-                return static_site.location
-
-            from msrestazure.tools import parse_resource_id
-            components = parse_resource_id(static_site.id)
-            rg_key = 'resource_group'
-            if rg_key in components:
-                found_rg = components['resource_group']
+            found_rg = _parse_resource_group_from_arm_id(static_site.id)
+            if found_rg:
                 if found_rg.lower() == resource_group_name.lower():
                     return static_site.location
 
-    raise CLIError("Static site was '{}' not found in subscription.".format(static_site_name))
+    raise CLIError("Static site was '{}' not found in subscription and resource group '{}'."
+                   .format(static_site_name, resource_group_name))
 
 
 def _get_resource_group_name_of_staticsite(client, static_site_name):
     static_sites = client.list()
     for static_site in static_sites:
         if static_site.name.lower() == static_site_name.lower():
-            from .utils import _get_resource_group_from_id
-            return _get_resource_group_from_id(static_site.id)
+            resource_group = _parse_resource_group_from_arm_id(static_site.id)
+            if resource_group:
+                return resource_group
 
     raise CLIError("Static site was '{}' not found in subscription.".format(static_site_name))
+
+
+def _parse_resource_group_from_arm_id(id):
+    from msrestazure.tools import parse_resource_id
+    components = parse_resource_id(id)
+    rg_key = 'resource_group'
+    if rg_key in components:
+        return components['resource_group']
+    else:
+        return None
 
 
 def _get_staticsites_client_factory(cli_ctx, api_version=None):

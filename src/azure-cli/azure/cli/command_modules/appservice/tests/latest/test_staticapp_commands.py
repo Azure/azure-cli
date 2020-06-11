@@ -6,7 +6,11 @@ import unittest
 import mock
 
 from azure.cli.command_modules.appservice.static_sites import \
-    list_staticsites, show_staticsite, delete_staticsite, create_staticsites, CLIError
+    list_staticsites, show_staticsite, delete_staticsite, create_staticsites, CLIError, disconnect_staticsite,\
+    reconnect_staticsite, list_staticsite_environments, show_staticsite_environment, list_staticsite_domains,\
+    set_staticsite_domain, delete_staticsite_domain, list_staticsite_functions, list_staticsite_function_app_settings,\
+    set_staticsite_function_app_settings, delete_staticsite_function_app_settings, list_staticsite_users,\
+    invite_staticsite_users, update_staticsite_users
 
 
 class TestStaticAppCommands(unittest.TestCase):
@@ -118,6 +122,37 @@ class TestStaticAppCommands(unittest.TestCase):
                 self.source1, self.branch1,
                 app_location=app_location, api_location=api_location, app_artifact_location=app_artifact_location,
                 tags=tags)
+
+    def test_disconnect_staticapp_with_resourcegroup(self):
+        disconnect_staticsite(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.detach_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
+
+    def test_disconnect_staticapp_without_resourcegroup(self):
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
+
+        disconnect_staticsite(self.mock_cmd, self.name1)
+
+        self.staticapp_client.detach_static_site.assert_called_once_with(resource_group_name=self.rg1, name=self.name1)
+
+    @mock.patch('azure.cli.command_modules.appservice.static_sites.create_staticsites', autospec=True)
+    def test_reconnect_staticapp_with_resourcegroup(self, create_staticsites_mock):
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
+
+        reconnect_staticsite(self.mock_cmd, self.name1, self.source1, self.branch1, self.token1,
+                             resource_group_name=self.rg1)
+
+        create_staticsites_mock.assert_called_once_with(self.mock_cmd, self.rg1, self.name1, self.location1,
+                                                        self.source1, self.branch1, self.token1, no_wait=False)
+
+    @mock.patch('azure.cli.command_modules.appservice.static_sites.create_staticsites', autospec=True)
+    def test_reconnect_staticapp_without_resourcegroup(self, create_staticsites_mock):
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
+
+        reconnect_staticsite(self.mock_cmd, self.name1, self.source1, self.branch1, self.token1)
+
+        create_staticsites_mock.assert_called_once_with(self.mock_cmd, self.rg1, self.name1, self.location1,
+                                                        self.source1, self.branch1, self.token1, no_wait=False)
 
 
 def _set_up_client_mock(self):
