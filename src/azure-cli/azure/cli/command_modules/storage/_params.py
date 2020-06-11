@@ -470,7 +470,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
         c.ignore('sas_token')
-        c.ignore('auth_mode')
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import BlobRangeAddAction
@@ -795,7 +794,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
         c.ignore('sas_token')
-        c.ignore('auth_mode')
 
     with self.argument_context('storage container lease') as c:
         c.argument('lease_duration', type=int)

@@ -456,6 +456,11 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         b = self.create_random_name('blob', 24)
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegexp(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions r --https-only '
+                     '--auth-mode login'.format(storage_account, b, c, expiry))
+
         blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
                             'r --https-only --as-user --auth-mode login'.format(storage_account, b, c, expiry)).output
         self.assertIn('&sig=', blob_sas)
