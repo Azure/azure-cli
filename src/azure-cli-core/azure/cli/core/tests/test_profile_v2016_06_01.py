@@ -1310,10 +1310,14 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(self.subscription1_output, subs)
 
     @mock.patch('azure.identity.InteractiveBrowserCredential.get_token', autospec=True)
+    @mock.patch('azure.identity.DeviceCodeCredential.get_token', autospec=True)
     @mock.patch('azure.identity.InteractiveBrowserCredential.authenticate', autospec=True)
-    def test_login_through_authorization_code_flow(self, authenticate, get_token):
+    @mock.patch('azure.identity.DeviceCodeCredential.authenticate', autospec=True)
+    def test_login_through_authorization_code_flow(self, authenticate, authenticate2, get_token, get_token2):
         get_token.return_value = self.access_token
         authenticate.return_value = self.authentication_record
+        get_token2.return_value = self.access_token
+        authenticate2.return_value = self.authentication_record
         cli = DummyCli()
         mock_arm_client = mock.MagicMock()
         mock_arm_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
