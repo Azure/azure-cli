@@ -302,14 +302,149 @@ class TestStaticAppCommands(unittest.TestCase):
         self.staticapp_client.list_static_site_users.assert_called_once_with(
             self.rg1, self.name1, authentication_provider)
 
-    def test_list_staticsite_function_app_settings_without_resourcegroup(self):
+    def test_list_staticsite_users_without_resourcegroup(self):
         self.staticapp_client.list.return_value = [self.app1, self.app2]
         authentication_provider = 'GitHub'
 
-        list_staticsite_users(self.mock_cmd, self.name1, self.rg1, authentication_provider=authentication_provider)
+        list_staticsite_users(self.mock_cmd, self.name1, authentication_provider=authentication_provider)
 
         self.staticapp_client.list_static_site_users.assert_called_once_with(
             self.rg1, self.name1, authentication_provider)
+
+    def test_invite_staticsite_users_with_resourcegroup(self):
+        authentication_provider = 'GitHub'
+        user_details = 'JohnDoe'
+        roles = 'Contributor,Reviewer'
+        invitation_expiration_in_hours = 2
+        from azure.mgmt.web.models import StaticSiteUserInvitationRequestResource
+        self.mock_cmd.get_models.return_value = StaticSiteUserInvitationRequestResource
+
+        invite_staticsite_users(self.mock_cmd, self.name1, authentication_provider, user_details, self.hostname1,
+                                roles, invitation_expiration_in_hours, self.rg1)
+
+        arg_list = self.staticapp_client.create_user_roles_invitation_link.call_args.args
+
+        self.assertEqual(self.rg1, arg_list[0])
+        self.assertEqual(self.name1, arg_list[1])
+        self.assertEqual(self.hostname1, arg_list[2].domain)
+        self.assertEqual(authentication_provider, arg_list[2].provider)
+        self.assertEqual(user_details, arg_list[2].user_details)
+        self.assertEqual(invitation_expiration_in_hours, arg_list[2].num_hours_to_expiration)
+
+    def test_invite_staticsite_users_without_resourcegroup(self):
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
+        authentication_provider = 'GitHub'
+        user_details = 'JohnDoe'
+        roles = 'Contributor,Reviewer'
+        invitation_expiration_in_hours = 2
+        from azure.mgmt.web.models import StaticSiteUserInvitationRequestResource
+        self.mock_cmd.get_models.return_value = StaticSiteUserInvitationRequestResource
+
+        invite_staticsite_users(self.mock_cmd, self.name1, authentication_provider, user_details, self.hostname1,
+                                roles, invitation_expiration_in_hours)
+
+        arg_list = self.staticapp_client.create_user_roles_invitation_link.call_args.args
+
+        self.assertEqual(self.rg1, arg_list[0])
+        self.assertEqual(self.name1, arg_list[1])
+        self.assertEqual(self.hostname1, arg_list[2].domain)
+        self.assertEqual(authentication_provider, arg_list[2].provider)
+        self.assertEqual(user_details, arg_list[2].user_details)
+        self.assertEqual(invitation_expiration_in_hours, arg_list[2].num_hours_to_expiration)
+
+    def test_update_staticsite_users_with_resourcegroup_with_all_args(self):
+        roles = 'Contributor,Reviewer'
+        authentication_provider = 'GitHub'
+        user_details = 'JohnDoe'
+        user_id = 100
+
+        update_staticsite_users(self.mock_cmd, self.name1, roles, authentication_provider=authentication_provider,
+                                user_details=user_details, user_id=user_id, resource_group_name=self.rg1)
+
+        self.staticapp_client.update_static_site_user.assert_called_once_with(
+            self.rg1, self.name1, authentication_provider, user_id, roles=roles)
+
+    def test_update_staticsite_users_with_resourcegroup_without_auth_provider(self):
+        roles = 'Contributor,Reviewer'
+        user_details = 'JohnDoe'
+        authentication_provider = 'GitHub'
+        user_id = '100'
+        _mock_list_users_for_without_auth_provider(self, user_id, authentication_provider, user_details)
+
+        update_staticsite_users(self.mock_cmd, self.name1, roles,
+                                user_details=user_details, user_id=user_id, resource_group_name=self.rg1)
+
+        self.staticapp_client.update_static_site_user.assert_called_once_with(
+            self.rg1, self.name1, authentication_provider, user_id, roles=roles)
+
+    def test_update_staticsite_users_with_resourcegroup_without_auth_provider_user_not_found(self):
+        roles = 'Contributor,Reviewer'
+        user_details = 'JohnDoe'
+        user_id = '100'
+        _mock_list_users_for_without_auth_provider(self, 'other_user_id',
+                                                   'dummy_authentication_provider', 'dummy_user_details')
+
+        with self.assertRaises(CLIError):
+            update_staticsite_users(self.mock_cmd, self.name1, roles,
+                                    user_details=user_details, user_id=user_id, resource_group_name=self.rg1)
+
+    def test_update_staticsite_users_with_resourcegroup_without_user_id_without_auth_provider(self):
+        roles = 'Contributor,Reviewer'
+        user_details = 'JohnDoe'
+        authentication_provider = 'GitHub'
+        user_id = '100'
+        _mock_list_users_for_without_auth_provider(self, user_id, authentication_provider, user_details)
+
+        update_staticsite_users(self.mock_cmd, self.name1, roles,
+                                user_details=user_details, resource_group_name=self.rg1)
+
+        self.staticapp_client.update_static_site_user.assert_called_once_with(
+            self.rg1, self.name1, authentication_provider, user_id, roles=roles)
+
+    def test_update_staticsite_users_with_resourcegroup_without_user_id_without_auth_provider_user_not_found(self):
+        roles = 'Contributor,Reviewer'
+        user_details = 'JohnDoe'
+        _mock_list_users_for_without_auth_provider(self, 'dummy_user_id', 'dummy_authentication_provider',
+                                                   'other_user_details')
+
+        with self.assertRaises(CLIError):
+            update_staticsite_users(self.mock_cmd, self.name1, roles,
+                                    user_details=user_details, resource_group_name=self.rg1)
+
+    def test_update_staticsite_users_with_resourcegroup_without_user_id(self):
+        roles = 'Contributor,Reviewer'
+        user_details = 'JohnDoe'
+        authentication_provider = 'GitHub'
+        user_id = '100'
+        _mock_list_users_for_without_auth_provider(self, user_id, authentication_provider, user_details)
+
+        update_staticsite_users(self.mock_cmd, self.name1, roles, authentication_provider=authentication_provider,
+                                user_details=user_details, resource_group_name=self.rg1)
+
+        self.staticapp_client.update_static_site_user.assert_called_once_with(
+            self.rg1, self.name1, authentication_provider, user_id, roles=roles)
+
+    def test_update_staticsite_users_with_resourcegroup_without_user_id_user_not_found(self):
+        roles = 'Contributor,Reviewer'
+        user_details = 'JohnDoe'
+        authentication_provider = 'GitHub'
+        _mock_list_users_for_without_auth_provider(self, 'dummy_user_id', 'dummy_authentication_provider',
+                                                   'other_user_details')
+
+        with self.assertRaises(CLIError):
+            update_staticsite_users(self.mock_cmd, self.name1, roles, authentication_provider=authentication_provider,
+                                    user_details=user_details, resource_group_name=self.rg1)
+
+    def test_update_staticsite_users_with_resourcegroup_without_user_id_without_user_details(self):
+        roles = 'Contributor,Reviewer'
+        user_details = 'JohnDoe'
+        authentication_provider = 'GitHub'
+        user_id = '100'
+        _mock_list_users_for_without_auth_provider(self, user_id, authentication_provider, user_details)
+
+        with self.assertRaises(CLIError):
+            update_staticsite_users(self.mock_cmd, self.name1, roles, authentication_provider=authentication_provider,
+                                    resource_group_name=self.rg1)
 
 
 def _set_up_client_mock(self):
@@ -358,3 +493,15 @@ def _contruct_static_site_object(rg, app_name, location, source, branch):
     app.id = \
         "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/staticSites/{}".format(rg, app_name)
     return app
+
+def _mock_list_users_for_without_auth_provider(self, user_id, authentication_provider, user_details):
+    class User:
+        def __init__(self, name, provider, display_name):
+            self.name = name
+            self.provider = provider
+            self.display_name = display_name
+
+    user1 = User(user_id, authentication_provider, user_details)
+    user2 = User(user_id+'2', authentication_provider+'2', user_details+'2')
+
+    self.staticapp_client.list_static_site_users.return_value = [user1, user2]

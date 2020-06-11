@@ -307,7 +307,7 @@ def _find_user_id_and_authentication_provider(client, resource_group_name, name,
                 authentication_provider = user.provider
                 user_id = user.name
             else:
-                if user.provider.lower() == authentication_provider:
+                if user.provider.lower() == authentication_provider.lower():
                     user_id = user.name
 
     if not user_id or not authentication_provider:
