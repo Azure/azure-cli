@@ -128,7 +128,6 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
                           enabled=None, skip_empty_archives=None, capture_interval_seconds=None,
                           capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
                           blob_container=None, archive_name_format=None):
-    # from azure.mgmt.eventhub.models import CaptureDescription, Destination, EncodingCaptureDescription
     capturedescription, destination, encodingcapturedescription = cmd.get_models('CaptureDescription', 'Destination', 'EncodingCaptureDescription')
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2017-04-01'):
@@ -150,9 +149,9 @@ def cli_eheventhub_update(cmd, instance, message_retention_in_days=None, partiti
         if enabled and instance.capture_description:
             instance.capture_description.enabled = enabled
             if capture_interval_seconds:
-                instance.interval_in_seconds = capture_interval_seconds
+                instance.capture_description.interval_in_seconds = capture_interval_seconds
             if capture_size_limit_bytes:
-                instance.size_limit_in_bytes = capture_size_limit_bytes
+                instance.capture_description.size_limit_in_bytes = capture_size_limit_bytes
             if destination_name:
                 instance.capture_description.destination.name = destination_name
             if storage_account_resource_id:

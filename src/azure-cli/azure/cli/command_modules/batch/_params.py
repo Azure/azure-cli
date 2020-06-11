@@ -7,22 +7,38 @@ from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.batch.models import AccountKeyType
+from azure.mgmt.batch.models import (
+    AccountKeyType,
+    KeySource,
+    PublicNetworkAccessType,
+    ResourceIdentityType)
 from azure.batch.models import ComputeNodeDeallocationOption
 
-from azure.cli.core.commands.parameters import \
-    (tags_type, get_location_type, resource_group_name_type,
-     get_resource_name_completion_list, file_type, get_enum_type)
+from azure.cli.core.commands.parameters import (
+    tags_type,
+    get_location_type,
+    resource_group_name_type,
+    get_resource_name_completion_list,
+    file_type,
+    get_enum_type)
 
 from azure.cli.command_modules.batch._completers import load_supported_images
-from azure.cli.command_modules.batch._validators import \
-    (application_enabled, application_package_reference_format,
-     certificate_reference_format, datetime_format,
-     disk_encryption_configuration_format, environment_setting_format,
-     keyvault_id, metadata_item_format, resource_file_format,
-     storage_account_id, validate_cert_file, validate_cert_settings,
-     validate_client_parameters, validate_json_file,
-     validate_pool_resize_parameters)
+from azure.cli.command_modules.batch._validators import (
+    application_enabled,
+    application_package_reference_format,
+    certificate_reference_format,
+    datetime_format,
+    disk_encryption_configuration_format,
+    environment_setting_format,
+    keyvault_id,
+    metadata_item_format,
+    resource_file_format,
+    storage_account_id,
+    validate_cert_file,
+    validate_cert_settings,
+    validate_client_parameters,
+    validate_json_file,
+    validate_pool_resize_parameters)
 
 
 # pylint: disable=line-too-long, too-many-statements
@@ -51,11 +67,19 @@ def load_arguments(self, _):
         c.argument('tags', tags_type, help="Space-separated tags in 'key[=value]' format.")
         c.argument('storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
         c.argument('keyvault', help='The KeyVault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
+        c.argument('public_network_access', help="The network access type for accessing Azure Batch account. Values can either be enabled or disabled.", arg_type=get_enum_type(PublicNetworkAccessType))
+        c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault', arg_type=get_enum_type(KeySource))
+        c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. '
+                                                     'Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
         c.ignore('keyvault_url')
 
     with self.argument_context('batch account set') as c:
         c.argument('tags', tags_type)
         c.argument('storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
+        c.argument('encryption_key_source', help='Part of the encryption configuration for the Batch account. Type of the key source. Can be either Microsoft.Batch or Microsoft.KeyVault')
+        c.argument('encryption_key_identifier', help='Part of the encryption configuration for the Batch account. Full path to the versioned secret. Example https://mykeyvault.vault.azure.net/keys/testkey/6e34a81fef704045975661e297a4c053.')
+        c.argument('identity_type', help="The type of identity used for the Batch account. Possible values include: 'SystemAssigned', 'None'.", arg_type=get_enum_type(ResourceIdentityType))
 
     with self.argument_context('batch account keys renew') as c:
         c.argument('key_name', arg_type=get_enum_type(AccountKeyType))
@@ -124,7 +148,7 @@ def load_arguments(self, _):
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
         c.extra('disk_encryption_targets',
                 arg_group="Pool: Virtual Machine Configuration",
-                help='A space seperated list of DiskEncryptionTargets. current possible values include OsDisk and TemporaryDisk.', type=disk_encryption_configuration_format)
+                help='A space separated list of DiskEncryptionTargets. current possible values include OsDisk and TemporaryDisk.', type=disk_encryption_configuration_format)
         c.extra('image', completer=load_supported_images, arg_group="Pool: Virtual Machine Configuration",
                 help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool supported-images list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
 

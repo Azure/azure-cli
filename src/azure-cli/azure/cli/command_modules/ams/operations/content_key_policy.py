@@ -524,5 +524,5 @@ def _valid_playready_configuration(play_ready_template):
     return any(
         [cfg.get('licenses') is not None,
          len(cfg.get('licenses')) > 0,
-         all(__valid_license(l) for l in cfg.get('licenses'))]
+         all(__valid_license(license) for license in cfg.get('licenses'))]
     )

@@ -133,6 +133,7 @@ class AzCliCommandParser(CLICommandParser):
                 param.deprecate_info = arg.deprecate_info
                 param.preview_info = arg.preview_info
                 param.experimental_info = arg.experimental_info
+                param.default_value_source = arg.default_value_source
             command_parser.set_defaults(
                 func=metadata,
                 command=command_name,
@@ -142,7 +143,7 @@ class AzCliCommandParser(CLICommandParser):
                 _parser=command_parser)
 
     def validation_error(self, message):
-        telemetry.set_user_fault('validation error')
+        telemetry.set_user_fault('validation error: {}'.format(message))
         return super(AzCliCommandParser, self).error(message)
 
     def error(self, message):
@@ -151,6 +152,9 @@ class AzCliCommandParser(CLICommandParser):
         with CommandLoggerContext(logger):
             logger.error('%(prog)s: error: %(message)s', args)
         self.print_usage(sys.stderr)
+        # Manual recommendations
+        self._set_manual_recommendations(args['message'])
+        # AI recommendations
         failure_recovery_recommendations = self._get_failure_recovery_recommendations()
         self._suggestion_msg.extend(failure_recovery_recommendations)
         self._print_suggestion_msg(sys.stderr)
@@ -177,6 +181,14 @@ class AzCliCommandParser(CLICommandParser):
         argcomplete.autocomplete = AzCompletionFinder()
         argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
                                  default_completer=lambda _: ())
+
+    def _set_manual_recommendations(self, error_msg):
+        recommendations = []
+        # recommendation for --query value error
+        if '--query' in error_msg:
+            recommendations.append('To learn more about [--query JMESPATH] usage in AzureCLI, '
+                                   'visit https://aka.ms/CLIQuery')
+        self._suggestion_msg.extend(recommendations)
 
     def _get_failure_recovery_arguments(self, action=None):
         # Strip the leading "az " and any extraneous whitespace.

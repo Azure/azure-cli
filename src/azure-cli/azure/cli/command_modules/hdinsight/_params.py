@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands.parameters import get_enum_type, name_type, tags_type, \
     get_generic_completion_list, get_three_state_flag, get_resource_name_completion_list
-from azure.cli.core.util import get_json_object
+from azure.cli.core.util import shell_safe_json_parse
 from ._validators import (validate_component_version,
                           validate_storage_account,
                           validate_msi,
@@ -58,7 +58,7 @@ def load_arguments(self, _):
                         'See also: https://docs.microsoft.com/azure/hdinsight/hdinsight'
                         '-component-versioning#hadoop-components-available-with-different-'
                         'hdinsight-versions')
-        c.argument('cluster_configurations', arg_group='Cluster', type=get_json_object,
+        c.argument('cluster_configurations', arg_group='Cluster', type=shell_safe_json_parse,
                    completer=FilesCompleter(),
                    help='Extra configurations of various components. '
                         'Configurations may be supplied from a file using the `@{path}` syntax or a JSON string. '

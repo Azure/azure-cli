@@ -217,7 +217,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='update_image')
 
-    with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom, is_preview=True) as g:
+    with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('create', 'create_image_template', supports_no_wait=True, supports_local_cache=True, validator=process_image_template_create_namespace)
         g.custom_command('list', 'list_image_templates')
         g.command('show', 'get')
@@ -226,6 +226,7 @@ def load_command_table(self, _):
         g.wait_command('wait')
         g.command('run', 'run', supports_no_wait=True)
         g.custom_command('show-runs', 'show_build_output')
+        g.command('cancel', 'cancel')
 
     with self.command_group('image builder customizer', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
         g.custom_command('add', 'add_template_customizer', supports_local_cache=True, validator=process_img_tmpl_customizer_add_namespace)
@@ -276,6 +277,7 @@ def load_command_table(self, _):
         g.command('reapply', 'reapply', supports_no_wait=True, min_api='2019-07-01')
         g.generic_update_command('update', setter_name='update_vm', setter_type=compute_custom, supports_no_wait=True)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
+        g.custom_command('auto-shutdown', 'auto_shutdown_vm')
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')

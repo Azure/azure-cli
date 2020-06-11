@@ -114,13 +114,14 @@ def load_arguments(self, _):
     # region MetricAlerts
     with self.argument_context('monitor metrics alert') as c:
         c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-        c.argument('severity', type=int, help='Severity of the alert from 0 (low) to 4 (high).')
+        c.argument('severity', type=int, help='Severity of the alert from 0 (critical) to 4 (verbose).')
         c.argument('window_size', type=get_period_type(), help='Time over which to aggregate metrics in "##h##m##s" format.')
         c.argument('evaluation_frequency', type=get_period_type(), help='Frequency with which to evaluate the rule in "##h##m##s" format.')
         c.argument('auto_mitigate', arg_type=get_three_state_flag(), help='Automatically resolve the alert.')
         c.argument('condition', options_list=['--condition'], action=MetricAlertConditionAction, nargs='+')
         c.argument('description', help='Free-text description of the rule.')
-        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to.')
+        c.argument('scopes', nargs='+', help='Space-separated list of scopes the rule applies to. '
+                                             'The resources specified in this parameter must be of the same type and exist in the same location.')
         c.argument('disabled', arg_type=get_three_state_flag())
         c.argument('enabled', arg_type=get_three_state_flag(), help='Whether the metric alert rule is enabled.')
 
@@ -232,6 +233,11 @@ def load_arguments(self, _):
         c.resource_parameter('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
         c.argument('logs', type=get_json_object)
         c.argument('metrics', type=get_json_object)
+        c.argument('export_to_resource_specific', arg_type=get_three_state_flag(),
+                   help='Indicate that the export to LA must be done to a resource specific table, '
+                        'a.k.a. dedicated or fixed schema table, '
+                        'as opposed to the default dynamic schema table called AzureDiagnostics. '
+                        'This argument is effective only when the argument --workspace is also given.')
 
     with self.argument_context('monitor diagnostic-settings categories list') as c:
         c.resource_parameter('resource_uri', required=True)
@@ -337,17 +343,42 @@ def load_arguments(self, _):
     with self.argument_context('monitor log-analytics workspace') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('workspace_name', options_list=['--workspace-name', '-n'], help="Name of the Log Analytics Workspace.")
-        c.ignore('sku')
+        c.argument('sku', help="The supported value: PerGB2018, CapacityReservation.")
+        c.argument('capacity_reservation_level', options_list=['--capacity-reservation-level', '--level'], help='The capacity reservation level for this workspace, when CapacityReservation sku is selected. The maximum value is 1000 and must be in multiples of 100. If you want to increase the limit, please contact LAIngestionRate@microsoft.com.')
+        c.argument('daily_quota_gb', options_list=['--quota'], help='The workspace daily quota for ingestion in gigabytes. The minimum value is 0.023 and default is -1 which means unlimited.')
         c.argument('retention_time', help="The workspace data retention in days.", type=int, default=30)
         from azure.mgmt.loganalytics.models import PublicNetworkAccessType
         c.argument('public_network_access_for_ingestion', options_list=['--ingestion-access'], help='The public network access type to access workspace ingestion.',
                    arg_type=get_enum_type(PublicNetworkAccessType))
         c.argument('public_network_access_for_query', options_list=['--query-access'], help='The public network access type to access workspace query.',
                    arg_type=get_enum_type(PublicNetworkAccessType))
+        c.argument('force', options_list=['--force', '-f'], arg_type=get_three_state_flag())
 
     with self.argument_context('monitor log-analytics workspace pack') as c:
         c.argument('intelligence_pack_name', options_list=['--name', '-n'])
         c.argument('workspace_name', options_list='--workspace-name')
+
+    with self.argument_context('monitor log-analytics workspace saved-search') as c:
+        c.argument('saved_search_id', options_list=['--name', '-n'], help="Name of the saved search and it's unique in a given workspace.")
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('category', help='The category of the saved search. This helps the user to find a saved search faster.')
+        c.argument('display_name', help='Display name of the saved search.')
+        c.argument('saved_query', options_list=['--saved-query', '-q'], help='The query expression for the saved search.')
+        c.argument('function_alias', options_list=['--func-alias', '--fa'],
+                   help='Function Aliases are short names given to Saved Searches so they can be easily referenced in query. They are required for Computer Groups.')
+        c.argument('function_parameters', options_list=['--func-param', '--fp'],
+                   help="The optional function parameters if query serves as a function. "
+                        "Value should be in the following format: 'param-name1:type1 = default_value1, param-name2:type2 = default_value2'. "
+                        "For more examples and proper syntax please refer to "
+                        "https://docs.microsoft.com/en-us/azure/kusto/query/functions/user-defined-functions.")
+        c.argument('tags', tags_type)
+    # endregion
+
+    # region Log Analytics Workspace table
+    with self.argument_context('monitor log-analytics workspace table') as c:
+        c.argument('table_name', name_arg_type, help='Name of the table.')
+        c.argument('workspace_name', options_list='--workspace-name')
+        c.argument('retention_in_days', options_list='--retention-time', type=int, required=True)
     # endregion
 
     # region Log Analytics Workspace Linked Service

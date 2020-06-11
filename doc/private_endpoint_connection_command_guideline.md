@@ -1,4 +1,41 @@
 ## Command Guideline
+Please support them in `az network` command group for private link scenario. It's easy to support such scenario in Azure CLI.
+There are two things you need to do.
+- Register your service into generic implementation
+- Add test case for new command
+
+#### Register the service into `az ntwork private-endpoint-connection`
+You need provide the service's namespace, type, api-version and 
+whether the service supports list private endpoint connection operation or not in to this [file](https://github.com/Azure/azure-cli/blob/49c0e1adc873581311406a11b04715af732cf4f8/src/azure-cli/azure/cli/command_modules/network/private_link_resource_and_endpoint_connections/custom.py#L14-L23).
+
+```python
+def register_providers():
+    _register_one_provider('Microsoft.Storage/storageAccounts', '2019-06-01', False)
+    _register_one_provider('Microsoft.Keyvault/vaults', '2019-09-01', False)
+    _register_one_provider('Microsoft.ContainerRegistry/registries', '2019-12-01-preview', True)
+    _register_one_provider('microsoft.insights/privateLinkScopes', '2019-10-17-preview', True)
+    _register_one_provider('Microsoft.DBforMySQL/servers', '2018-06-01', False, '2017-12-01-preview')
+    _register_one_provider('Microsoft.DBforMariaDB/servers', '2018-06-01', False)
+    _register_one_provider('Microsoft.DBforPostgreSQL/servers', '2018-06-01', False, '2017-12-01-preview')
+    _register_one_provider('Microsoft.DocumentDB/databaseAccounts', '2019-08-01-preview', False, '2020-03-01')
+    _register_one_provider('Microsoft.Devices/IotHubs', '2020-03-01', True)
+```
+
+#### Add test case for your new service
+Add enough test cases for your new service into this [file](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure/cli/command_modules/network/tests/latest/test_private_endpoint_commands.py). You can find enough test examples in this file.
+- Integration test is mandatory. It should contain the following steps at least.
+    - Create a resource such as storage account or key vault.
+    - List all private link resources for the created resource.
+    - Create a private endpoint for the resource.
+    - Approve the private endpoint connection.
+    - Reject the private endpoint connection.
+    - Show the private endpoint connection.
+    - Delete the private endpoint connection.
+
+
+## Depracted
+
+The following documentations are depracated.
 
 #### Private Endpoint Connection
 

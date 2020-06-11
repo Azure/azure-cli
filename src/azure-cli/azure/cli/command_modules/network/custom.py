@@ -970,13 +970,15 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
                                 item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
                                 firewall_policy=None, no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
+    if address_pool and redirect_config:
+        raise CLIError("Cannot reference a BackendAddressPool when Redirect Configuration is specified.")
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
     if not url_map:
         raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
     default_backend_pool = SubResource(id=url_map.default_backend_address_pool.id) \
-        if url_map.default_backend_address_pool else None
+        if (url_map.default_backend_address_pool and not redirect_config) else None
     default_http_settings = SubResource(id=url_map.default_backend_http_settings.id) \
         if url_map.default_backend_http_settings else None
     new_rule = ApplicationGatewayPathRule(
@@ -986,7 +988,7 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings)
     if cmd.supported_api_version(min_api='2017-06-01'):
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
-            if url_map.default_redirect_configuration else None
+            if (url_map.default_redirect_configuration and not address_pool) else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
 
     rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
@@ -1780,7 +1782,7 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
 
 def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ipv6_address,
-                        ttl=None, if_none_match=None):
+                        ttl=3600, if_none_match=None):
     AaaaRecord = cmd.get_models('AaaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = AaaaRecord(ipv6_address=ipv6_address)
     record_type = 'aaaa'
@@ -1789,7 +1791,7 @@ def add_dns_aaaa_record(cmd, resource_group_name, zone_name, record_set_name, ip
 
 
 def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_address,
-                     ttl=None, if_none_match=None):
+                     ttl=3600, if_none_match=None):
     ARecord = cmd.get_models('ARecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = ARecord(ipv4_address=ipv4_address)
     record_type = 'a'
@@ -1798,7 +1800,7 @@ def add_dns_a_record(cmd, resource_group_name, zone_name, record_set_name, ipv4_
 
 
 def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, value, flags, tag,
-                       ttl=None, if_none_match=None):
+                       ttl=3600, if_none_match=None):
     CaaRecord = cmd.get_models('CaaRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CaaRecord(flags=flags, tag=tag, value=value)
     record_type = 'caa'
@@ -1806,7 +1808,7 @@ def add_dns_caa_record(cmd, resource_group_name, zone_name, record_set_name, val
                             ttl=ttl, if_none_match=if_none_match)
 
 
-def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=None, if_none_match=None):
+def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, cname, ttl=3600, if_none_match=None):
     CnameRecord = cmd.get_models('CnameRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = CnameRecord(cname=cname)
     record_type = 'cname'
@@ -1815,7 +1817,7 @@ def add_dns_cname_record(cmd, resource_group_name, zone_name, record_set_name, c
 
 
 def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, preference, exchange,
-                      ttl=None, if_none_match=None):
+                      ttl=3600, if_none_match=None):
     MxRecord = cmd.get_models('MxRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = MxRecord(preference=int(preference), exchange=exchange)
     record_type = 'mx'
@@ -1824,7 +1826,7 @@ def add_dns_mx_record(cmd, resource_group_name, zone_name, record_set_name, pref
 
 
 def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dname,
-                      subscription_id=None, ttl=None, if_none_match=None):
+                      subscription_id=None, ttl=3600, if_none_match=None):
     NsRecord = cmd.get_models('NsRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = NsRecord(nsdname=dname)
     record_type = 'ns'
@@ -1832,7 +1834,7 @@ def add_dns_ns_record(cmd, resource_group_name, zone_name, record_set_name, dnam
                             subscription_id=subscription_id, ttl=ttl, if_none_match=if_none_match)
 
 
-def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=None, if_none_match=None):
+def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dname, ttl=3600, if_none_match=None):
     PtrRecord = cmd.get_models('PtrRecord', resource_type=ResourceType.MGMT_NETWORK_DNS)
     record = PtrRecord(ptrdname=dname)
     record_type = 'ptr'
@@ -1842,7 +1844,7 @@ def add_dns_ptr_record(cmd, resource_group_name, zone_name, record_set_name, dna
 
 def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=None,
                           serial_number=None, refresh_time=None, retry_time=None, expire_time=None,
-                          minimum_ttl=None, if_none_match=None):
+                          minimum_ttl=3600, if_none_match=None):
     record_set_name = '@'
     record_type = 'soa'
 
@@ -1991,9 +1993,10 @@ def _add_save_record(cmd, record, record_type, record_set_name, resource_group_n
         record_set = ncf.get(resource_group_name, zone_name, record_set_name, record_type)
     except CloudError:
         RecordSet = cmd.get_models('RecordSet', resource_type=ResourceType.MGMT_NETWORK_DNS)
-        record_set = RecordSet()
+        record_set = RecordSet(ttl=3600)
 
-    record_set.ttl = ttl if ttl is not None else 3600
+    if ttl is not None:
+        record_set.ttl = ttl
 
     _add_record(record_set, record, record_type, is_list)
 
@@ -2106,6 +2109,15 @@ def update_express_route(instance, cmd, bandwidth_in_mbps=None, peering_location
             instance.bandwidth_in_gbps = (float(bandwidth_in_mbps) / 1000)
 
     return instance
+
+
+def list_express_route_route_tables(cmd, resource_group_name, circuit_name, peering_name, device_path):
+    from azure.cli.core.commands import LongRunningOperation
+
+    client = network_client_factory(cmd.cli_ctx).express_route_circuits
+
+    return LongRunningOperation(cmd.cli_ctx)(
+        client.list_routes_table(resource_group_name, circuit_name, peering_name, device_path)).value
 
 
 def create_express_route_peering_connection(cmd, resource_group_name, circuit_name, peering_name, connection_name,
@@ -3531,7 +3543,7 @@ def _delete_network_watchers(cmd, client, watchers):
 def configure_network_watcher(cmd, client, locations, resource_group_name=None, enabled=None, tags=None):
     watcher_list = list(client.list_all())
     existing_watchers = [w for w in watcher_list if w.location in locations]
-    nonenabled_regions = list(set(locations) - set(l.location for l in existing_watchers))
+    nonenabled_regions = list(set(locations) - set(watcher.location for watcher in existing_watchers))
 
     if enabled is None:
         if resource_group_name is not None:
@@ -4966,9 +4978,10 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None, vm_protection=None, ddos_protection=None,
-                ddos_protection_plan=None):
-    AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource = \
-        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork', 'SubResource')
+                ddos_protection_plan=None, network_security_group=None):
+    AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
+        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
+                       'SubResource', 'NetworkSecurityGroup')
     client = network_client_factory(cmd.cli_ctx).virtual_networks
     tags = tags or {}
 
@@ -4980,7 +4993,9 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         if cmd.supported_api_version(min_api='2018-08-01'):
             vnet.subnets = [Subnet(name=subnet_name,
                                    address_prefix=subnet_prefix[0] if len(subnet_prefix) == 1 else None,
-                                   address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None)]
+                                   address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None,
+                                   network_security_group=NetworkSecurityGroup(id=network_security_group)
+                                   if network_security_group else None)]
         else:
             vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
     if cmd.supported_api_version(min_api='2017-09-01'):
