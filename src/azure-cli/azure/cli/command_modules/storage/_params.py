@@ -472,7 +472,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('sas_token')
         c.ignore('auth_mode')
 
-
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import BlobRangeAddAction
         c.argument('blob_ranges', options_list=['--blob-range', '-r'], action=BlobRangeAddAction, nargs='+',
