@@ -154,6 +154,30 @@ class TestStaticAppCommands(unittest.TestCase):
         create_staticsites_mock.assert_called_once_with(self.mock_cmd, self.rg1, self.name1, self.location1,
                                                         self.source1, self.branch1, self.token1, no_wait=False)
 
+    def test_list_staticsite_environments_with_resourcegroup(self):
+        list_staticsite_environments(self.mock_cmd, self.name1, self.rg1)
+
+        self.staticapp_client.get_static_site_builds.assert_called_once_with(self.rg1, self.name1)
+
+    def test_list_staticsite_environments_without_resourcegroup(self):
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
+
+        list_staticsite_environments(self.mock_cmd, self.name1)
+
+        self.staticapp_client.get_static_site_builds.assert_called_once_with(self.rg1, self.name1)
+
+    def test_show_staticsite_environment_with_resourcegroup(self):
+        show_staticsite_environment(self.mock_cmd, self.name1, self.environment1, self.rg1)
+
+        self.staticapp_client.get_static_site_build.assert_called_once_with(self.rg1, self.name1, self.environment1)
+
+    def test_show_staticsite_environment_without_resourcegroup(self):
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
+
+        show_staticsite_environment(self.mock_cmd, self.name1, self.environment1)
+
+        self.staticapp_client.get_static_site_build.assert_called_once_with(self.rg1, self.name1, self.environment1)
+
 
 def _set_up_client_mock(self):
     self.mock_cmd = mock.MagicMock()
@@ -175,6 +199,7 @@ def _set_up_fake_apps(self):
     self.source1 = 'https://github.com/Contoso/My-First-Static-App'
     self.branch1 = 'dev'
     self.token1 = 'TOKEN_1'
+    self.environment1 = 'default'
     self.app1 = _contruct_static_site_object(
         self.rg1, self.name1, self.location1,
         self.source1, self.branch1)
@@ -185,6 +210,7 @@ def _set_up_fake_apps(self):
     self.source2 = 'https://github.com/Contoso/My-Second-Static-App'
     self.branch2 = 'master'
     self.token2 = 'TOKEN_2'
+    self.environment1 = 'prod'
     self.app2 = _contruct_static_site_object(
         self.rg2, self.name2, self.location2,
         self.source2, self.branch2)
