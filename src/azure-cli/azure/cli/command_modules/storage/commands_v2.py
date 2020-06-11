@@ -250,7 +250,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         resource_type=ResourceType.DATA_STORAGE_BLOB
     )
 
-    with self.command_group('storage blob', blob_client_sdk,
+    with self.command_group('storage blob', blob_client_sdk, resource_type=ResourceType.DATA_STORAGE_BLOB,
+                            min_api='2019-02-02',
                             custom_command_type=get_custom_sdk('blob_v2', client_factory=cf_blob_client,
                                                                resource_type=ResourceType.DATA_STORAGE_BLOB)) as g:
         from ._transformers_v2 import transform_blob_json_output

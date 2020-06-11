@@ -13,6 +13,14 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 logger = get_logger(__name__)
 
 
+def _transform_page_ranges(page_ranges):
+    if page_ranges:
+        result = page_ranges[0]
+        result[0]['isCleared'] = True if page_ranges[1] else False
+        return result
+    return None
+    
+
 def transform_blob_json_output(result):
     result = todict(result)
     new_result = {
@@ -43,7 +51,7 @@ def transform_blob_json_output(result):
             "lastModified": result.pop('lastModified', None),
             "lease": result.pop('lease', None),
             "pageBlobSequenceNumber": result.pop('pageBlobSequenceNumber', None),
-            "pageRanges": result.pop('pageRanges', None),
+            "pageRanges": _transform_page_ranges(result.pop('pageRanges', None)),
             "remainingRetentionDays": result.pop('remainingRetentionDays', None),
             "serverEncrypted": result.pop('serverEncrypted', None)
         },
