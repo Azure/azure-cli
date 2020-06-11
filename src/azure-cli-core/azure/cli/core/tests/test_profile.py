@@ -1598,7 +1598,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
     @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
     def test_credscache_add_preexisting_sp_creds(self, mock_open_for_write1, mock_open_for_write2, mock_open_for_write3,
-                                         mock_read_file1, mock_read_file2, mock_read_file3):
+                                                 mock_read_file1, mock_read_file2, mock_read_file3):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1625,8 +1625,9 @@ class TestProfile(unittest.TestCase):
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.save', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
     @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
-    def test_credscache_add_preexisting_sp_new_secret(self, mock_open_for_write1, mock_open_for_write2, mock_open_for_write3,
-                                         mock_read_file1, mock_read_file2, mock_read_file3):
+    def test_credscache_add_preexisting_sp_new_secret(self, mock_open_for_write1, mock_open_for_write2,
+                                                      mock_open_for_write3, mock_read_file1,
+                                                      mock_read_file2, mock_read_file3):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1655,7 +1656,7 @@ class TestProfile(unittest.TestCase):
     @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
     @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
     def test_credscache_remove_creds(self, mock_open_for_write1, mock_open_for_write2, mock_open_for_write3,
-                                         mock_read_file1, mock_read_file2, mock_read_file3):
+                                     mock_read_file1, mock_read_file2, mock_read_file3):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
