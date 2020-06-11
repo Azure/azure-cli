@@ -1016,8 +1016,8 @@ def _load_command_loader(loader, args, name, prefix):
     loader_cls = getattr(module, 'COMMAND_LOADER_CLS', None)
     if not loader_cls:
         try:
-            _get_command_loader = getattr(module, '_get_command_loader')
-            loader_cls = _get_command_loader(loader.cli_ctx)
+            get_command_loader = getattr(module, 'get_command_loader', None)
+            loader_cls = get_command_loader(loader.cli_ctx)
         except (ImportError, AttributeError) as ex:
             pass
 
