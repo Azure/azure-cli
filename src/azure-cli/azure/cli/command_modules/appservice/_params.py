@@ -834,7 +834,9 @@ def load_arguments(self, _):
         c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
         c.argument('token', options_list=['--token', '-t'],
                    help="A user's github repository token. This is used to setup the Github Actions workflow file and "
-                        "API secrets.")
+                        "API secrets. If you need to create a Github Personal Access Token, "
+                        "please follow the steps found at the following link:\n"
+                        "https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line")
         c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.")
     with self.argument_context('staticwebapp environment') as c:
         c.argument('environment_name',
