@@ -1503,7 +1503,8 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
-    def test_credscache_load_tokens_and_sp_creds_with_secret(self, mock_read_file, mock_read_file2):
+    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
+    def test_credscache_load_tokens_and_sp_creds_with_secret(self, mock_read_file, mock_read_file2, mock_read_file3):
         test_sp = [{
             'servicePrincipalId': 'myapp',
             'servicePrincipalTenant': 'mytenant',
@@ -1511,6 +1512,7 @@ class TestProfile(unittest.TestCase):
         }]
         mock_read_file.return_value = json.dumps(test_sp)
         mock_read_file2.return_value = json.dumps(test_sp)
+        mock_read_file3.return_value = json.dumps(test_sp)
         from azure.cli.core._identity import MSALSecretStore
         # action
         creds_cache = MSALSecretStore()
@@ -1520,7 +1522,8 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
-    def test_credscache_load_tokens_and_sp_creds_with_cert(self, mock_read_file, mock_read_file2):
+    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
+    def test_credscache_load_tokens_and_sp_creds_with_cert(self, mock_read_file, mock_read_file2, mock_read_file3):
         test_sp = [{
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1528,6 +1531,7 @@ class TestProfile(unittest.TestCase):
         }]
         mock_read_file.return_value = json.dumps(test_sp)
         mock_read_file2.return_value = json.dumps(test_sp)
+        mock_read_file3.return_value = json.dumps(test_sp)
         from azure.cli.core._identity import MSALSecretStore
         # action
         creds_cache = MSALSecretStore()
@@ -1538,10 +1542,12 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
+    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.save', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
-    def test_credscache_add_new_sp_creds(self, mock_open_for_write1, mock_open_for_write2,
-                                         mock_read_file1, mock_read_file2):
+    @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
+    def test_credscache_add_new_sp_creds(self, mock_open_for_write1, mock_open_for_write2, mock_open_for_write3,
+                                         mock_read_file1, mock_read_file2, mock_read_file3):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1554,8 +1560,10 @@ class TestProfile(unittest.TestCase):
         }
         mock_open_for_write1.return_value = None
         mock_open_for_write2.return_value = None
+        mock_open_for_write3.return_value = None
         mock_read_file1.return_value = json.dumps([test_sp])
         mock_read_file2.return_value = json.dumps([test_sp])
+        mock_read_file3.return_value = json.dumps([test_sp])
         from azure.cli.core._identity import MSALSecretStore
         creds_cache = MSALSecretStore()
 
@@ -1567,10 +1575,12 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
+    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.save', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
-    def test_credscache_add_preexisting_sp_creds(self, mock_open_for_write1, mock_open_for_write2,
-                                                 mock_read_file1, mock_read_file2):
+    @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
+    def test_credscache_add_preexisting_sp_creds(self, mock_open_for_write1, mock_open_for_write2, mock_open_for_write3,
+                                                 mock_read_file1, mock_read_file2, mock_read_file3):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1578,8 +1588,10 @@ class TestProfile(unittest.TestCase):
         }
         mock_open_for_write1.return_value = None
         mock_open_for_write2.return_value = None
+        mock_open_for_write3.return_value = None
         mock_read_file1.return_value = json.dumps([test_sp])
         mock_read_file2.return_value = json.dumps([test_sp])
+        mock_read_file3.return_value = json.dumps([test_sp])
         from azure.cli.core._identity import MSALSecretStore
         creds_cache = MSALSecretStore()
 
@@ -1591,10 +1603,13 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
+    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.save', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
+    @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
     def test_credscache_add_preexisting_sp_new_secret(self, mock_open_for_write1, mock_open_for_write2,
-                                                      mock_read_file1, mock_read_file2):
+                                                      mock_open_for_write3,
+                                                      mock_read_file1, mock_read_file2, mock_read_file3):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1602,8 +1617,10 @@ class TestProfile(unittest.TestCase):
         }
         mock_open_for_write1.return_value = None
         mock_open_for_write2.return_value = None
+        mock_open_for_write3.return_value = None
         mock_read_file1.return_value = json.dumps([test_sp])
         mock_read_file2.return_value = json.dumps([test_sp])
+        mock_read_file3.return_value = json.dumps([test_sp])
         from azure.cli.core._identity import MSALSecretStore
         creds_cache = MSALSecretStore()
         new_creds = test_sp.copy()
@@ -1616,10 +1633,12 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
+    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.save', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.save', autospec=True)
-    def test_credscache_remove_creds(self, mock_open_for_write1, mock_open_for_write2,
-                                     mock_read_file1, mock_read_file2):
+    @mock.patch('msal_extensions.FilePersistence.save', autospec=True)
+    def test_credscache_remove_creds(self, mock_open_for_write1, mock_open_for_write2, mock_open_for_write3,
+                                     mock_read_file1, mock_read_file2, mock_read_file3):
         test_sp = {
             "servicePrincipalId": "myapp",
             "servicePrincipalTenant": "mytenant",
@@ -1627,8 +1646,10 @@ class TestProfile(unittest.TestCase):
         }
         mock_open_for_write1.return_value = None
         mock_open_for_write2.return_value = None
+        mock_open_for_write3.return_value = None
         mock_read_file1.return_value = json.dumps([test_sp])
         mock_read_file2.return_value = json.dumps([test_sp])
+        mock_read_file3.return_value = json.dumps([test_sp])
         from azure.cli.core._identity import MSALSecretStore
         creds_cache = MSALSecretStore()
 
@@ -1640,9 +1661,11 @@ class TestProfile(unittest.TestCase):
 
     @mock.patch('msal_extensions.FilePersistenceWithDataProtection.load', autospec=True)
     @mock.patch('msal_extensions.LibsecretPersistence.load', autospec=True)
-    def test_credscache_good_error_on_file_corruption(self, mock_read_file1, mock_read_file2):
+    @mock.patch('msal_extensions.FilePersistence.load', autospec=True)
+    def test_credscache_good_error_on_file_corruption(self, mock_read_file1, mock_read_file2, mock_read_file3):
         mock_read_file1.side_effect = ValueError('a bad error for you')
         mock_read_file2.side_effect = ValueError('a bad error for you')
+        mock_read_file3.side_effect = ValueError('a bad error for you')
 
         from azure.cli.core._identity import MSALSecretStore
         creds_cache = MSALSecretStore()
