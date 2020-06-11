@@ -178,6 +178,38 @@ class TestStaticAppCommands(unittest.TestCase):
 
         self.staticapp_client.get_static_site_build.assert_called_once_with(self.rg1, self.name1, self.environment1)
 
+    def test_set_staticsite_domain_with_resourcegroup(self):
+        set_staticsite_domain(self.mock_cmd, self.name1, self.hostname1, self.rg1)
+
+        self.staticapp_client.validate_custom_domain_can_be_added_to_static_site.assert_called_once_with(
+            self.rg1, self.name1, self.hostname1)
+        self.staticapp_client.create_or_update_static_site_custom_domain.assert_called_once_with(
+            resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
+
+    def test_set_staticsite_domain_without_resourcegroup(self):
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
+
+        set_staticsite_domain(self.mock_cmd, self.name1, self.hostname1)
+
+        self.staticapp_client.validate_custom_domain_can_be_added_to_static_site.assert_called_once_with(
+            self.rg1, self.name1, self.hostname1)
+        self.staticapp_client.create_or_update_static_site_custom_domain.assert_called_once_with(
+            resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
+
+    def test_delete_staticsite_domain_with_resourcegroup(self):
+        delete_staticsite_domain(self.mock_cmd, self.name1, self.hostname1, self.rg1)
+
+        self.staticapp_client.delete_static_site_custom_domain.assert_called_once_with(
+            resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
+
+    def test_delete_staticsite_domain_without_resourcegroup(self):
+        self.staticapp_client.list.return_value = [self.app1, self.app2]
+
+        delete_staticsite_domain(self.mock_cmd, self.name1, self.hostname1)
+
+        self.staticapp_client.delete_static_site_custom_domain.assert_called_once_with(
+            resource_group_name=self.rg1, name=self.name1, domain_name=self.hostname1)
+
 
 def _set_up_client_mock(self):
     self.mock_cmd = mock.MagicMock()
@@ -200,6 +232,7 @@ def _set_up_fake_apps(self):
     self.branch1 = 'dev'
     self.token1 = 'TOKEN_1'
     self.environment1 = 'default'
+    self.hostname1 = 'www.app1.com'
     self.app1 = _contruct_static_site_object(
         self.rg1, self.name1, self.location1,
         self.source1, self.branch1)
@@ -211,6 +244,7 @@ def _set_up_fake_apps(self):
     self.branch2 = 'master'
     self.token2 = 'TOKEN_2'
     self.environment1 = 'prod'
+    self.hostname1 = 'www.app2.com'
     self.app2 = _contruct_static_site_object(
         self.rg2, self.name2, self.location2,
         self.source2, self.branch2)
