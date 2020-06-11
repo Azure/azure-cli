@@ -309,7 +309,8 @@ class Identity:
         auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
                                            home_account_id, username)
         return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
-                                            enable_persistent_cache=True)
+                                            enable_persistent_cache=True,
+                                            allow_unencrypted_cache=self.allow_unencrypted)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
         client_secret, certificate_path = self._msal_store.retrieve_secret_of_service_principal(client_id,
