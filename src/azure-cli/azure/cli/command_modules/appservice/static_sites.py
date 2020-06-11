@@ -8,7 +8,6 @@ from azure.cli.core.util import sdk_no_wait
 from knack.util import CLIError
 from knack.log import get_logger
 
-
 logger = get_logger(__name__)
 
 
@@ -268,14 +267,14 @@ def _get_resource_group_name_of_staticsite(client, static_site_name):
     raise CLIError("Static site was '{}' not found in subscription.".format(static_site_name))
 
 
-def _parse_resource_group_from_arm_id(id):
+def _parse_resource_group_from_arm_id(arm_id):
     from msrestazure.tools import parse_resource_id
-    components = parse_resource_id(id)
+    components = parse_resource_id(arm_id)
     rg_key = 'resource_group'
     if rg_key in components:
-        return components['resource_group']
-    else:
         return None
+
+    return components['resource_group']
 
 
 def _get_staticsites_client_factory(cli_ctx, api_version=None):

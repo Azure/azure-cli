@@ -494,6 +494,7 @@ def _contruct_static_site_object(rg, app_name, location, source, branch):
         "/subscriptions/sub/resourceGroups/{}/providers/Microsoft.Web/staticSites/{}".format(rg, app_name)
     return app
 
+
 def _mock_list_users_for_without_auth_provider(self, user_id, authentication_provider, user_details):
     class User:
         def __init__(self, name, provider, display_name):
@@ -502,6 +503,6 @@ def _mock_list_users_for_without_auth_provider(self, user_id, authentication_pro
             self.display_name = display_name
 
     user1 = User(user_id, authentication_provider, user_details)
-    user2 = User(user_id+'2', authentication_provider+'2', user_details+'2')
+    user2 = User(user_id + '2', authentication_provider + '2', user_details + '2')
 
     self.staticapp_client.list_static_site_users.return_value = [user1, user2]
