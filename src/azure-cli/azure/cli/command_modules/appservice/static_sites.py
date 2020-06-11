@@ -271,7 +271,7 @@ def _parse_resource_group_from_arm_id(arm_id):
     from msrestazure.tools import parse_resource_id
     components = parse_resource_id(arm_id)
     rg_key = 'resource_group'
-    if rg_key in components:
+    if rg_key not in components:
         return None
 
     return components['resource_group']
