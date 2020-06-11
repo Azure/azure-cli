@@ -633,7 +633,8 @@ class MSALSecretStore:
             try:
                 return LibsecretPersistence(
                     self._token_file,
-                    schema_name="msalCustomToken"
+                    schema_name="msalCustomToken",
+                    attributes={"MsalClientID": "Microsoft.Developer.IdentityService"},
                 )
             except:  # pylint: disable=bare-except
                 if not self._fallback_to_plaintext:
