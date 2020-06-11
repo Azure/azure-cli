@@ -290,6 +290,36 @@ class WebAppUpE2ETests(ScenarioTest):
         import shutil
         shutil.rmtree(temp_dir)
 
+    @ResourceGroupPreparer()
+    def test_webapp_up_invalid_name(self, resource_group):
+        webapp_name = self.create_random_name('invalid_name', 40)
+        zip_file_name = os.path.join(TEST_DIR, 'python-hello-world-up.zip')
+
+        # create a temp directory and unzip the code to this folder
+        import zipfile
+        import tempfile
+        temp_dir = tempfile.mkdtemp()
+        zip_ref = zipfile.ZipFile(zip_file_name, 'r')
+        zip_ref.extractall(temp_dir)
+        current_working_dir = os.getcwd()
+
+        # change the working dir to the dir where the code has been extracted to
+        up_working_dir = os.path.join(temp_dir, 'python-docs-hello-world')
+        os.chdir(up_working_dir)
+
+        from azure.cli.core.util import CLIError
+        with self.assertRaises(CLIError):
+            self.cmd('webapp up -n {} --dryrun'.format(webapp_name))
+        with self.assertRaises(CLIError):
+            self.cmd('webapp up -n {}'.format(webapp_name))
+
+        # cleanup
+        # switch back the working dir
+        os.chdir(current_working_dir)
+        # delete temp_dir
+        import shutil
+        shutil.rmtree(temp_dir)
+
 
 if __name__ == '__main__':
     unittest.main()
