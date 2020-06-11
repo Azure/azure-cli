@@ -829,27 +829,27 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='Name of the app service environment',
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
 
-    with self.argument_context('staticapp') as c:
+    with self.argument_context('staticwebapp') as c:
         c.argument('name', options_list=['--name', '-n'], metavar='NAME', help="Name of the static site")
         c.argument('source', options_list=['--source', '-s'], help="URL for the repository of the static site.")
         c.argument('token', options_list=['--token', '-t'],
                    help="A user's github repository token. This is used to setup the Github Actions workflow file and "
                         "API secrets.")
         c.argument('branch', options_list=['--branch', '-b'], help="The target branch in the repository.")
-    with self.argument_context('staticapp environment') as c:
+    with self.argument_context('staticwebapp environment') as c:
         c.argument('environment_name',
                    options_list=['--environment-name'], help="Name of the environment of static site")
-    with self.argument_context('staticapp hostname') as c:
+    with self.argument_context('staticwebapp hostname') as c:
         c.argument('hostname',
                    options_list=['--hostname'],
                    help="custom hostname such as www.example.com. Only support sub domain in preview.")
-    with self.argument_context('staticapp appsettings') as c:
+    with self.argument_context('staticwebapp appsettings') as c:
         c.argument('setting_pairs', options_list=['--setting-names'],
                    help="Space-separated app settings in 'key=value' format. ",
                    nargs='*')
         c.argument('setting_names', options_list=['--setting-names'], help="Space-separated app setting names.",
                    nargs='*')
-    with self.argument_context('staticapp users') as c:
+    with self.argument_context('staticwebapp users') as c:
         c.argument('authentication_provider', options_list=['--authentication-provider'],
                    help="Authentication provider of the user identity such as AAD, Facebook, GitHub, Google, Twitter.")
         c.argument('user_details', options_list=['--user-details'],
@@ -865,7 +865,7 @@ def load_arguments(self, _):
                         "Define roles in routes.json during root directory of your GitHub repo.")
         c.argument('invitation_expiration_in_hours', options_list=['--invitation-expiration-in-hours'],
                    help="This value sets when the link will expire in hours. The maximum is 168 (7 days).")
-    with self.argument_context('staticapp create') as c:
+    with self.argument_context('staticwebapp create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
         c.argument('tags', arg_type=tags_type)
         c.argument('app_location', options_list=['--app-location'],
