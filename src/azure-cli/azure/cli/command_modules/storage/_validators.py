@@ -1136,7 +1136,7 @@ def validate_azcopy_remove_arguments(cmd, namespace):
 
 
 def as_user_validator(namespace):
-    if namespace.token_credential and not namespace.as_user:
+    if hasattr(namespace, 'token_credential') and not namespace.as_user:
         raise CLIError('incorrect usage: specify --as-user when --auth-mode login is used to get user delegation key.')
     if namespace.as_user:
         if namespace.expiry is None:
