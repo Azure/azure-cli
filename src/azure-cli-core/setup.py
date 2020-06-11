@@ -60,6 +60,7 @@ DEPENDENCIES = [
     'msal~=1.3.0',
     'msal-extensions~=0.2.2',
     'azure-identity==1.4.0b4',
+    'PyGObject==3.36.1',
     'msrest>=0.4.4',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',

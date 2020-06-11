@@ -629,8 +629,7 @@ class MSALSecretStore:
             try:
                 return LibsecretPersistence(
                     self._token_file,
-                    schema_name="my_schema_name",
-                    attributes={"my_attr1": "foo", "my_attr2": "bar"},
+                    schema_name="msalCustomToken"
                 )
             except:  # pylint: disable=bare-except
                 if not self._fallback_to_plaintext:
