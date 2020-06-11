@@ -111,10 +111,11 @@ class KeyVaultCommandGroup(AzCommandGroup):
                 if 'expires' in command_args:
                     command_args['expires_on'] = command_args.pop('expires')
 
-                if command_args.get('disabled') is not None:
-                    command_args['enabled'] = not command_args.pop('disabled')
-                else:
-                    command_args.pop('disabled')
+                if 'disabled' in command_args:
+                    if command_args.get('disabled') is not None:
+                        command_args['enabled'] = not command_args.pop('disabled')
+                    else:
+                        command_args.pop('disabled')
 
             try:
                 result = op(**command_args)
