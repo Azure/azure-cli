@@ -3,10 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import base64
 from knack.log import get_logger
 from knack.util import todict
-from .url_quote_util import encode_url_path
 from .track2_util import _encode_bytes
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
@@ -16,10 +14,10 @@ logger = get_logger(__name__)
 def _transform_page_ranges(page_ranges):
     if page_ranges:
         result = page_ranges[0]
-        result[0]['isCleared'] = True if page_ranges[1] else False
+        result[0]['isCleared'] = bool(page_ranges[1])
         return result
     return None
-    
+
 
 def transform_blob_json_output(result):
     result = todict(result)

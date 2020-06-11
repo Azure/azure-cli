@@ -42,3 +42,4 @@ def _encode_bytes(b):
     import base64
     if isinstance(b, (bytes, bytearray)):
         return base64.b64encode(b).decode('utf-8')
+    return b
