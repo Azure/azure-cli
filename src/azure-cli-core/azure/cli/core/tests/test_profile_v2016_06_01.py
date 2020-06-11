@@ -510,13 +510,13 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(result[0]['tenantId'], self.tenant_id)
         self.assertEqual(result[0]['name'], 'N/A(tenant level account)')
 
-    @mock.patch('azure.cli.core._identity.Identity.login_with_interactive_browser', autospec=True)
-    def test_create_account_without_subscriptions_without_tenant(self, login_with_interactive_browser):
+    @mock.patch('azure.cli.core._identity.Identity.login_with_username_password', autospec=True)
+    def test_create_account_without_subscriptions_without_tenant(self, login_with_username_password):
         cli = DummyCli()
-        from azure.identity import InteractiveBrowserCredential
+        from azure.identity import UsernamePasswordCredential
         auth_profile = self.authentication_record
-        credential = InteractiveBrowserCredential()
-        login_with_interactive_browser.return_value = [credential, auth_profile]
+        credential = UsernamePasswordCredential(self.client_id, '1234', 'my-secret')
+        login_with_username_password.return_value = [credential, auth_profile]
 
         mock_arm_client = mock.MagicMock()
         mock_arm_client.subscriptions.list.return_value = []
@@ -526,7 +526,7 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
 
         # action
-        result = profile.login(True,
+        result = profile.login(False,
                                '1234',
                                'my-secret',
                                False,
