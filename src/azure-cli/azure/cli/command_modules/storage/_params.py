@@ -469,6 +469,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
+        c.ignore('sas_token')
+        c.ignore('auth_mode')
+
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import BlobRangeAddAction
@@ -792,6 +795,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=as_user_validator,
                    help="Indicates that this command return the SAS signed with the user delegation key. "
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.ignore('sas_token')
+        c.ignore('auth_mode')
+
     with self.argument_context('storage container lease') as c:
         c.argument('lease_duration', type=int)
         c.argument('lease_break_period', type=int)
@@ -858,6 +864,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
+        c.ignore('sas_token')
 
     with self.argument_context('storage directory') as c:
         c.argument('directory_name', directory_type, options_list=('--name', '-n'))
@@ -908,6 +915,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_file_permissions)),
                    validator=get_permission_validator(t_file_permissions))
+        c.ignore('sas_token')
 
     with self.argument_context('storage file list') as c:
         from .completers import dir_path_completer
@@ -1017,6 +1025,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format(get_permission_help_string(t_queue_permissions)),
                    validator=get_permission_validator(t_queue_permissions))
+        c.ignore('sas_token')
+        c.ignore('auth_mode')
 
     with self.argument_context('storage queue') as c:
         c.argument('queue_name', queue_name_type, options_list=('--name', '-n'))
@@ -1096,6 +1106,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('permission', options_list='--permissions',
                    help=sas_help.format('(r)ead/query (a)dd (u)pdate (d)elete'),
                    validator=table_permission_validator)
+        c.ignore('sas_token')
 
     with self.argument_context('storage entity') as c:
         c.ignore('property_resolver')
