@@ -27,7 +27,7 @@ def load_arguments(self, _):
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction,
         validate_msi)
 
-    DeploymentMode, WhatIfResultFormat = self.get_models('DeploymentMode', 'WhatIfResultFormat', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -64,6 +64,10 @@ def load_arguments(self, _):
     deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
                                                            help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.',
                                                            is_preview=True, min_api='2019-07-01')
+    deployment_what_if_exclude_change_types_type = CLIArgumentType(nargs="+", options_list=['--exclude-change-types', '-x'],
+                                                                   arg_type=get_enum_type(ChangeType),
+                                                                   help='Space-separated list of resource change types to be excluded from What-If results.',
+                                                                   is_preview=True, min_api='2019-07-01')
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
 
@@ -245,6 +249,9 @@ def load_arguments(self, _):
         c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
                    arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -269,12 +276,16 @@ def load_arguments(self, _):
         c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
                    arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('no_prompt', arg_type=no_prompt)
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
 
     with self.argument_context('deployment sub validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -302,7 +313,11 @@ def load_arguments(self, _):
                    help='Auxiliary tenants which will be used during deployment across tenants.')
         c.argument('no_prompt', arg_type=no_prompt)
         c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
-        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'], arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
+                   arg_type=deployment_what_if_result_format_type)
+        c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
+                   arg_type=deployment_what_if_exclude_change_types_type,
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -311,6 +326,7 @@ def load_arguments(self, _):
         c.argument('no_prompt', arg_type=no_prompt)
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+        c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
         c.ignore("rollback_on_error")
 
     with self.argument_context('deployment group validate') as c:
