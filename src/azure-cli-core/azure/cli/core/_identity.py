@@ -101,7 +101,8 @@ class Identity:
         credential = InteractiveBrowserCredential(authority=self.authority,
                                                   tenant_id=self.tenant_id,
                                                   client_id=self.client_id,
-                                                  enable_persistent_cache=True)
+                                                  enable_persistent_cache=True,
+                                                  allow_unencrypted_cache=self.allow_unencrypted)
         auth_record = credential.authenticate()
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
@@ -118,7 +119,8 @@ class Identity:
                                           tenant_id=self.tenant_id,
                                           client_id=self.client_id,
                                           enable_persistent_cache=True,
-                                          prompt_callback=prompt_callback)
+                                          prompt_callback=prompt_callback,
+                                          allow_unencrypted_cache=self.allow_unencrypted)
         auth_record = credential.authenticate()
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
@@ -131,7 +133,8 @@ class Identity:
                                                 client_id=self.client_id,
                                                 username=username,
                                                 password=password,
-                                                enable_persistent_cache=True)
+                                                enable_persistent_cache=True,
+                                                allow_unencrypted_cache=self.allow_unencrypted)
         auth_record = credential.authenticate()
 
         # todo: remove after ADAL token deprecation
