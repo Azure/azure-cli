@@ -14,7 +14,7 @@ def load_arguments(self, _):
     from azure.cli.core.api import get_subscription_id_list
     from azure.cli.core.commands.parameters import (
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
-        get_enum_type, get_three_state_flag, TagUpdateOperation)
+        get_enum_type, get_three_state_flag)
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
@@ -402,7 +402,7 @@ def load_arguments(self, _):
         c.argument('resource_id', options_list=['--resourceid', '-id'],
                    help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.')
         c.argument('tags', tags_type)
-        c.argument('operation', arg_type=get_enum_type([item.value for item in list(TagUpdateOperation)]),
+        c.argument('operation', options_list='--operation',
                    help='The update operation: options include Merge, Replace and Delete.')
 
     with self.argument_context('lock') as c:

@@ -506,9 +506,3 @@ class AzArgumentContext(ArgumentsContext):
             merged_kwargs.pop('dest', None)
             self.command_loader.extra_argument_registry[self.command_scope][dest] = CLICommandArgument(
                 dest, **merged_kwargs)
-
-
-class TagUpdateOperation(str, Enum):
-    merge = "Merge"
-    replace = "Replace"
-    delete = "Delete"
