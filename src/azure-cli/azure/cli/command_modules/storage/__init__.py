@@ -285,5 +285,5 @@ def _merge_new_exception_handler(kwargs, handler):
 def get_command_loader(cli_ctx):
     if cli_ctx.cloud.profile != 'latest':
         return AzureStackStorageCommandsLoader
-    else:
-        return StorageCommandsLoader
+
+    return StorageCommandsLoader
