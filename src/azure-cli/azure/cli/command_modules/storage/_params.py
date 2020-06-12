@@ -519,6 +519,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Represents the path to the error document that should be shown when an error 404 is issued,'
                         ' in other words, when a browser requests a page that does not exist.')
 
+    with self.argument_context('storage blob show') as c:
+        c.argument('lease_id', help='Required if the blob has an active lease.')
+        c.argument('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                    'specifies the blob snapshot to retrieve.')
+        c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                                    "the operation only if the resource's ETag matches the value specified.")
+        c.argument('if_none_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                                         "the operation only if the resource's ETag does not match the value specified."
+                                         " Specify the wildcard character (*) to perform the operation only if the "
+                                         "resource does not exist, and fail the operation if it does exist.")
+
     with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
         from .sdkutil import get_blob_types, get_blob_tier_names
