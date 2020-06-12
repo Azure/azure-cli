@@ -14,7 +14,7 @@ interactions:
       - --namespace
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
@@ -41,7 +41,9 @@ interactions:
         Virtual Machine","description":"Deletes the virtual machine","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/start/action","displayName":"Start
         Virtual Machine","description":"Starts the virtual machine","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/powerOff/action","displayName":"Power
         Off Virtual Machine","description":"Powers off the virtual machine. Note that
-        the virtual machine will continue to be billed.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/redeploy/action","displayName":"Redeploy
+        the virtual machine will continue to be billed.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/reapply/action","displayName":"Reapply
+        a virtual machine''s current model","description":"Reapplies a virtual machine''s
+        current model","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/redeploy/action","displayName":"Redeploy
         Virtual Machine","description":"Redeploys virtual machine","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/restart/action","displayName":"Restart
         Virtual Machine","description":"Restarts the virtual machine","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/deallocate/action","displayName":"Deallocate
         Virtual Machine","description":"Powers off the virtual machine and releases
@@ -70,7 +72,9 @@ interactions:
         virtual machine for available OS update patches","description":"Assesses the
         virtual machine and finds list of available OS update patches for it.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/cancelPatchInstallation/action","displayName":"Cancel
         install OS update patch operation on virtual machine","description":"Cancels
-        the ongoing install OS update patch operation on the virtual machine.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachines/instanceView","displayName":"Virtual
+        the ongoing install OS update patch operation on the virtual machine.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/simulateEviction/action","displayName":"Simulate
+        Eviction of spot Virtual Machine","description":"Simulates the eviction of
+        spot Virtual Machine","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachines/instanceView","displayName":"Virtual
         Machine Instance View","operations":[{"name":"Microsoft.Compute/virtualMachines/instanceView/read","displayName":"Get
         Virtual Machine Instance View","description":"Gets the detailed runtime status
         of the virtual machine and its resources","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachines/vmSizes","displayName":"Virtual
@@ -229,7 +233,10 @@ interactions:
         Set to finish a pending update that is stuck","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/osRollingUpgrade/action","displayName":"Upgrades
         OS on Virtual Machine Scale Set instances to the latest available Platform
         Image OS version.","description":"Starts a rolling upgrade to move all Virtual
-        Machine Scale Set instances to the latest available Platform Image OS version.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/rollingUpgrades/action","displayName":"Cancel
+        Machine Scale Set instances to the latest available Platform Image OS version.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/setOrchestrationServiceState/action","displayName":"Sets
+        the state of an orchestration service in a Virtual Machine Scale Set.","description":"Sets
+        the state of an orchestration service based on the action provided in operation
+        input.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/rollingUpgrades/action","displayName":"Cancel
         Virtual Machine Scale Set Rolling Upgrade operation","description":"Cancels
         the rolling upgrade of a Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/instanceView","displayName":"Virtual
         Machine Scale Set Instance View","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/instanceView/read","displayName":"Get
@@ -360,7 +367,9 @@ interactions:
         in a Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/virtualMachines/runCommand/action","displayName":"Run
         Command on a Virtual Machine instance in a Virtual Machine Scale Set.","description":"Executes
         a predefined script on a Virtual Machine instance in a Virtual Machine Scale
-        Set.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/instanceView","displayName":"Instance
+        Set.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/virtualMachines/simulateEviction/action","displayName":"Simulate
+        Eviction of spot Virtual Machine in Virtual Machine Scale Set","description":"Simulates
+        the eviction of spot Virtual Machine in Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/instanceView","displayName":"Instance
         View of Virtual Machine in Scale Set","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/virtualMachines/instanceView/read","displayName":"Gets
         Instance View of a Virtual Machine in a Virtual Machine Scale Set","description":"Retrieves
         the instance view of a Virtual Machine in a VM Scale Set.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/providers/Microsoft.Insights/metricDefinitions","displayName":"Virtual
@@ -656,11 +665,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '85514'
+      - '86690'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 May 2020 04:36:31 GMT
+      - Fri, 12 Jun 2020 03:42:54 GMT
       expires:
       - '-1'
       pragma:
@@ -693,7 +702,7 @@ interactions:
       - --namespace
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
@@ -720,7 +729,9 @@ interactions:
         Virtual Machine","description":"Deletes the virtual machine","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/start/action","displayName":"Start
         Virtual Machine","description":"Starts the virtual machine","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/powerOff/action","displayName":"Power
         Off Virtual Machine","description":"Powers off the virtual machine. Note that
-        the virtual machine will continue to be billed.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/redeploy/action","displayName":"Redeploy
+        the virtual machine will continue to be billed.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/reapply/action","displayName":"Reapply
+        a virtual machine''s current model","description":"Reapplies a virtual machine''s
+        current model","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/redeploy/action","displayName":"Redeploy
         Virtual Machine","description":"Redeploys virtual machine","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/restart/action","displayName":"Restart
         Virtual Machine","description":"Restarts the virtual machine","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/deallocate/action","displayName":"Deallocate
         Virtual Machine","description":"Powers off the virtual machine and releases
@@ -749,7 +760,9 @@ interactions:
         virtual machine for available OS update patches","description":"Assesses the
         virtual machine and finds list of available OS update patches for it.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/cancelPatchInstallation/action","displayName":"Cancel
         install OS update patch operation on virtual machine","description":"Cancels
-        the ongoing install OS update patch operation on the virtual machine.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachines/instanceView","displayName":"Virtual
+        the ongoing install OS update patch operation on the virtual machine.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachines/simulateEviction/action","displayName":"Simulate
+        Eviction of spot Virtual Machine","description":"Simulates the eviction of
+        spot Virtual Machine","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachines/instanceView","displayName":"Virtual
         Machine Instance View","operations":[{"name":"Microsoft.Compute/virtualMachines/instanceView/read","displayName":"Get
         Virtual Machine Instance View","description":"Gets the detailed runtime status
         of the virtual machine and its resources","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachines/vmSizes","displayName":"Virtual
@@ -908,7 +921,10 @@ interactions:
         Set to finish a pending update that is stuck","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/osRollingUpgrade/action","displayName":"Upgrades
         OS on Virtual Machine Scale Set instances to the latest available Platform
         Image OS version.","description":"Starts a rolling upgrade to move all Virtual
-        Machine Scale Set instances to the latest available Platform Image OS version.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/rollingUpgrades/action","displayName":"Cancel
+        Machine Scale Set instances to the latest available Platform Image OS version.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/setOrchestrationServiceState/action","displayName":"Sets
+        the state of an orchestration service in a Virtual Machine Scale Set.","description":"Sets
+        the state of an orchestration service based on the action provided in operation
+        input.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/rollingUpgrades/action","displayName":"Cancel
         Virtual Machine Scale Set Rolling Upgrade operation","description":"Cancels
         the rolling upgrade of a Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/instanceView","displayName":"Virtual
         Machine Scale Set Instance View","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/instanceView/read","displayName":"Get
@@ -1039,7 +1055,9 @@ interactions:
         in a Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/virtualMachines/runCommand/action","displayName":"Run
         Command on a Virtual Machine instance in a Virtual Machine Scale Set.","description":"Executes
         a predefined script on a Virtual Machine instance in a Virtual Machine Scale
-        Set.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/instanceView","displayName":"Instance
+        Set.","origin":"user,system","properties":null,"isDataAction":false},{"name":"Microsoft.Compute/virtualMachineScaleSets/virtualMachines/simulateEviction/action","displayName":"Simulate
+        Eviction of spot Virtual Machine in Virtual Machine Scale Set","description":"Simulates
+        the eviction of spot Virtual Machine in Virtual Machine Scale Set","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/instanceView","displayName":"Instance
         View of Virtual Machine in Scale Set","operations":[{"name":"Microsoft.Compute/virtualMachineScaleSets/virtualMachines/instanceView/read","displayName":"Gets
         Instance View of a Virtual Machine in a Virtual Machine Scale Set","description":"Retrieves
         the instance view of a Virtual Machine in a VM Scale Set.","origin":"user,system","properties":null,"isDataAction":false}]},{"name":"virtualMachineScaleSets/virtualMachines/providers/Microsoft.Insights/metricDefinitions","displayName":"Virtual
@@ -1335,11 +1353,11 @@ interactions:
       cache-control:
       - no-cache
       content-length:
-      - '85514'
+      - '86690'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 May 2020 04:36:33 GMT
+      - Fri, 12 Jun 2020 03:42:54 GMT
       expires:
       - '-1'
       pragma:
@@ -1372,7 +1390,7 @@ interactions:
       - --namespace
       User-Agent:
       - python/3.8.2 (Windows-10-10.0.18362-SP0) msrest/0.6.11 msrest_azure/0.6.3
-        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.3.1
+        azure-mgmt-authorization/0.52.0 Azure-SDK-For-Python AZURECLI/2.7.0
       accept-language:
       - en-US
     method: GET
@@ -1384,7 +1402,8 @@ interactions:
         for the storage resource provider and enables the creation of storage accounts.\",\"origin\":null,\"properties\":null,\"isDataAction\":false}],\"resourceTypes\":[{\"name\":\"locations\",\"displayName\":\"Location\",\"operations\":[{\"name\":\"Microsoft.Storage/locations/deleteVirtualNetworkOrSubnets/action\",\"displayName\":\"Delete
         virtual network or subnets notifications\",\"description\":\"Notifies Microsoft.Storage
         that virtual network or subnet is being deleted\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/blobServices\",\"displayName\":\"Storage
-        Blob Services\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/generateUserDelegationKey/action\",\"displayName\":\"Generate
+        Blob Services\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/read\",\"displayName\":\"List
+        Blob Services\",\"description\":\"List blob services\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/generateUserDelegationKey/action\",\"displayName\":\"Generate
         a user delegation key\",\"description\":\"Returns a user delegation key for
         the blob service\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/write\",\"displayName\":\"Put
         blob service properties\",\"description\":\"Returns the result of put blob
@@ -1424,13 +1443,13 @@ interactions:
         immutability policy\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies/read\",\"displayName\":\"Get
         blob container immutability policy\",\"description\":\"Get blob container
         immutability policy\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/queueServices\",\"displayName\":\"Storage
-        Queue Services\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/read\",\"displayName\":\"Get
+        Queue Services\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/read\",\"displayName\":\"Get
         Queue service properties\",\"description\":\"Get Queue service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/read\",\"displayName\":\"Get
         queue service properties or statistics\",\"description\":\"Returns queue service
         properties or statistics.\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/write\",\"displayName\":\"Set
         queue service properties\",\"description\":\"Returns the result of setting
         queue service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/queueServices/queues\",\"displayName\":\"Storage
-        Queue Service Queues\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/queues/read\",\"displayName\":\"Read
+        Queue Service Queues\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/queues/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/queues/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/queues/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/queues/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/queues/read\",\"displayName\":\"Read
         a queue or list queues\",\"description\":\"Returns a queue or a list of queues.\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/queues/write\",\"displayName\":\"Write
         queue\",\"description\":\"Returns the result of writing a queue\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/queues/delete\",\"displayName\":\"Delete
         queue\",\"description\":\"Returns the result of deleting a queue\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/queueServices/queues/messages\",\"displayName\":\"Storage
@@ -1469,7 +1488,10 @@ interactions:
         Accounts\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/providers/Microsoft.Insights/metricDefinitions/read\",\"displayName\":\"Get
         list of Microsoft Storage Metrics definitions\",\"description\":\"Get list
         of Microsoft Storage Metrics definitions.\",\"origin\":\"system\",\"properties\":{\"serviceSpecification\":{\"metricSpecifications\":[{\"name\":\"UsedCapacity\",\"displayName\":\"Used
-        capacity\",\"displayDescription\":\"Account used capacity\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"displayDescription\":\"The
+        capacity\",\"displayDescription\":\"The amount of storage used by the storage
+        account. For standard storage accounts, it's the sum of capacity used by blob,
+        table, file, and queue. For premium storage accounts and Blob storage accounts,
+        it is the same as BlobCapacity or FileCapacity.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"displayDescription\":\"The
         number of requests made to a storage service or the specified API operation.
         This number includes successful and failed requests, as well as requests which
         produced errors. Use ResponseType dimension for the number of different type
@@ -1481,14 +1503,14 @@ interactions:
         client into Azure Storage as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
-        amount of egress data, in bytes. This number includes egress from an external
-        client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        amount of egress data. This number includes egress to external client from
+        Azure Storage as well as egress within Azure. As a result, this number does
+        not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
-        Server Latency\",\"displayDescription\":\"The average latency used by Azure
-        Storage to process a successful request, in milliseconds. This value does
-        not include the network latency specified in AverageE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        Server Latency\",\"displayDescription\":\"The average time used to process
+        a successful request by Azure Storage. This value does not include the network
+        latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"resourceIdDimensionNameOverride\":\"AccountResourceId\",\"supportedAggregationTypes\":[\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessE2ELatency\",\"displayName\":\"Success
         E2E Latency\",\"displayDescription\":\"The average end-to-end latency of successful
@@ -1516,8 +1538,8 @@ interactions:
         account\u2019s Blob service in bytes.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"BlobType\",\"displayName\":\"Blob
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"Tier\",\"displayName\":\"Blob
         tier\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"BlobCount\",\"displayName\":\"Blob
-        Count\",\"displayDescription\":\"The number of Blob in the storage account\u2019s
-        Blob service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"BlobType\",\"displayName\":\"Blob
+        Count\",\"displayDescription\":\"The number of blob objects stored in the
+        storage account.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"BlobType\",\"displayName\":\"Blob
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"Tier\",\"displayName\":\"Blob
         tier\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"BlobProvisionedSize\",\"displayName\":\"Blob
         Provisioned Size\",\"displayDescription\":\"The amount of storage provisioned
@@ -1525,9 +1547,9 @@ interactions:
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"Tier\",\"displayName\":\"Blob
         tier\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"],\"metricFilterPattern\":\"Premium\"},{\"name\":\"ContainerCount\",\"displayName\":\"Blob
         Container Count\",\"displayDescription\":\"The number of containers in the
-        storage account\u2019s Blob service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"IndexCapacity\",\"displayName\":\"Index
-        Capacity\",\"displayDescription\":\"The amount of storage used by ADLS Gen2
-        (Hierarchical) Index in bytes.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"displayDescription\":\"The
+        storage account.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"IndexCapacity\",\"displayName\":\"Index
+        Capacity\",\"displayDescription\":\"The amount of storage used by Azure Data
+        Lake Storage Gen2 hierarchical index.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"displayDescription\":\"The
         number of requests made to a storage service or the specified API operation.
         This number includes successful and failed requests, as well as requests which
         produced errors. Use ResponseType dimension for the number of different type
@@ -1539,14 +1561,14 @@ interactions:
         client into Azure Storage as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
-        amount of egress data, in bytes. This number includes egress from an external
-        client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        amount of egress data. This number includes egress to external client from
+        Azure Storage as well as egress within Azure. As a result, this number does
+        not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
-        Server Latency\",\"displayDescription\":\"The average latency used by Azure
-        Storage to process a successful request, in milliseconds. This value does
-        not include the network latency specified in AverageE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        Server Latency\",\"displayDescription\":\"The average time used to process
+        a successful request by Azure Storage. This value does not include the network
+        latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessE2ELatency\",\"displayName\":\"Success
         E2E Latency\",\"displayDescription\":\"The average end-to-end latency of successful
@@ -1570,12 +1592,11 @@ interactions:
         service\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/providers/Microsoft.Insights/metricDefinitions/read\",\"displayName\":\"Get
         list of Microsoft Storage Metrics definitions\",\"description\":\"Get list
         of Microsoft Storage Metrics definitions.\",\"origin\":\"system\",\"properties\":{\"serviceSpecification\":{\"metricSpecifications\":[{\"name\":\"TableCapacity\",\"displayName\":\"Table
-        Capacity\",\"displayDescription\":\"The amount of storage used by the storage
-        account\u2019s Table service in bytes.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"TableCount\",\"displayName\":\"Table
-        Count\",\"displayDescription\":\"The number of table in the storage account\u2019s
-        Table service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"TableEntityCount\",\"displayName\":\"Table
+        Capacity\",\"displayDescription\":\"The amount of Table storage used by the
+        storage account.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"TableCount\",\"displayName\":\"Table
+        Count\",\"displayDescription\":\"The number of tables in the storage account.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"TableEntityCount\",\"displayName\":\"Table
         Entity Count\",\"displayDescription\":\"The number of table entities in the
-        storage account\u2019s Table service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"displayDescription\":\"The
+        storage account.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"displayDescription\":\"The
         number of requests made to a storage service or the specified API operation.
         This number includes successful and failed requests, as well as requests which
         produced errors. Use ResponseType dimension for the number of different type
@@ -1587,14 +1608,14 @@ interactions:
         client into Azure Storage as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
-        amount of egress data, in bytes. This number includes egress from an external
-        client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        amount of egress data. This number includes egress to external client from
+        Azure Storage as well as egress within Azure. As a result, this number does
+        not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
-        Server Latency\",\"displayDescription\":\"The average latency used by Azure
-        Storage to process a successful request, in milliseconds. This value does
-        not include the network latency specified in AverageE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        Server Latency\",\"displayDescription\":\"The average time used to process
+        a successful request by Azure Storage. This value does not include the network
+        latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessE2ELatency\",\"displayName\":\"Success
         E2E Latency\",\"displayDescription\":\"The average end-to-end latency of successful
@@ -1618,14 +1639,13 @@ interactions:
         service\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/providers/Microsoft.Insights/metricDefinitions/read\",\"displayName\":\"Get
         list of Microsoft Storage Metrics definitions\",\"description\":\"Get list
         of Microsoft Storage Metrics definitions.\",\"origin\":\"system\",\"properties\":{\"serviceSpecification\":{\"metricSpecifications\":[{\"name\":\"FileCapacity\",\"displayName\":\"File
-        Capacity\",\"displayDescription\":\"The amount of storage used by the storage
-        account\u2019s File service in bytes.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"FileShare\",\"displayName\":\"File
+        Capacity\",\"displayDescription\":\"The amount of File storage used by the
+        storage account.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"FileShare\",\"displayName\":\"File
         Share\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"FileCount\",\"displayName\":\"File
-        Count\",\"displayDescription\":\"The number of file in the storage account\u2019s
-        File service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"FileShare\",\"displayName\":\"File
+        Count\",\"displayDescription\":\"The number of files in the storage account.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"FileShare\",\"displayName\":\"File
         Share\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"FileShareCount\",\"displayName\":\"File
         Share Count\",\"displayDescription\":\"The number of file shares in the storage
-        account\u2019s File service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"FileShareSnapshotCount\",\"displayName\":\"File
+        account.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"FileShareSnapshotCount\",\"displayName\":\"File
         Share Snapshot Count\",\"displayDescription\":\"The number of snapshots present
         on the share in storage account\u2019s Files Service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"lockAggregationType\":\"Total\",\"dimensions\":[{\"name\":\"FileShare\",\"displayName\":\"File
         Share\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"FileShareSnapshotSize\",\"displayName\":\"File
@@ -1652,15 +1672,15 @@ interactions:
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true},{\"name\":\"FileShare\",\"displayName\":\"File
         Share\",\"toBeExportedForShoebox\":true,\"internalName\":\"Container\"}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
-        amount of egress data, in bytes. This number includes egress from an external
-        client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        amount of egress data. This number includes egress to external client from
+        Azure Storage as well as egress within Azure. As a result, this number does
+        not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true},{\"name\":\"FileShare\",\"displayName\":\"File
         Share\",\"toBeExportedForShoebox\":true,\"internalName\":\"Container\"}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
-        Server Latency\",\"displayDescription\":\"The average latency used by Azure
-        Storage to process a successful request, in milliseconds. This value does
-        not include the network latency specified in AverageE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        Server Latency\",\"displayDescription\":\"The average time used to process
+        a successful request by Azure Storage. This value does not include the network
+        latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true},{\"name\":\"FileShare\",\"displayName\":\"File
         Share\",\"toBeExportedForShoebox\":true,\"internalName\":\"Container\"}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessE2ELatency\",\"displayName\":\"Success
@@ -1687,12 +1707,11 @@ interactions:
         service\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/queueServices/providers/Microsoft.Insights/metricDefinitions/read\",\"displayName\":\"Get
         list of Microsoft Storage Metrics definitions\",\"description\":\"Get list
         of Microsoft Storage Metrics definitions.\",\"origin\":\"system\",\"properties\":{\"serviceSpecification\":{\"metricSpecifications\":[{\"name\":\"QueueCapacity\",\"displayName\":\"Queue
-        Capacity\",\"displayDescription\":\"The amount of storage used by the storage
-        account\u2019s Queue service in bytes.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"QueueCount\",\"displayName\":\"Queue
-        Count\",\"displayDescription\":\"The number of queue in the storage account\u2019s
-        Queue service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"QueueMessageCount\",\"displayName\":\"Queue
-        Message Count\",\"displayDescription\":\"The approximate number of queue messages
-        in the storage account\u2019s Queue service.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"displayDescription\":\"The
+        Capacity\",\"displayDescription\":\"The amount of Queue storage used by the
+        storage account.\",\"unit\":\"Bytes\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"QueueCount\",\"displayName\":\"Queue
+        Count\",\"displayDescription\":\"The number of queues in the storage account.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"QueueMessageCount\",\"displayName\":\"Queue
+        Message Count\",\"displayDescription\":\"The number of unexpired queue messages
+        in the storage account.\",\"unit\":\"Count\",\"aggregationType\":\"Average\",\"fillGapWithZero\":false,\"category\":\"Capacity\",\"supportedTimeGrainTypes\":[\"PT1H\"],\"supportedAggregationTypes\":[\"Average\"]},{\"name\":\"Transactions\",\"displayName\":\"Transactions\",\"displayDescription\":\"The
         number of requests made to a storage service or the specified API operation.
         This number includes successful and failed requests, as well as requests which
         produced errors. Use ResponseType dimension for the number of different type
@@ -1704,14 +1723,14 @@ interactions:
         client into Azure Storage as well as ingress within Azure.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"Egress\",\"displayName\":\"Egress\",\"displayDescription\":\"The
-        amount of egress data, in bytes. This number includes egress from an external
-        client into Azure Storage as well as egress within Azure. As a result, this
-        number does not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        amount of egress data. This number includes egress to external client from
+        Azure Storage as well as egress within Azure. As a result, this number does
+        not reflect billable egress.\",\"unit\":\"Bytes\",\"aggregationType\":\"Total\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Total\",\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessServerLatency\",\"displayName\":\"Success
-        Server Latency\",\"displayDescription\":\"The average latency used by Azure
-        Storage to process a successful request, in milliseconds. This value does
-        not include the network latency specified in AverageE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
+        Server Latency\",\"displayDescription\":\"The average time used to process
+        a successful request by Azure Storage. This value does not include the network
+        latency specified in SuccessE2ELatency.\",\"unit\":\"Milliseconds\",\"aggregationType\":\"Average\",\"dimensions\":[{\"name\":\"GeoType\",\"displayName\":\"Geo
         type\",\"toBeExportedForShoebox\":true},{\"name\":\"ApiName\",\"displayName\":\"API
         name\",\"toBeExportedForShoebox\":true},{\"name\":\"Authentication\",\"displayName\":\"Authentication\",\"toBeExportedForShoebox\":true}],\"fillGapWithZero\":false,\"category\":\"Transaction\",\"supportedAggregationTypes\":[\"Average\",\"Minimum\",\"Maximum\"]},{\"name\":\"SuccessE2ELatency\",\"displayName\":\"Success
         E2E Latency\",\"displayDescription\":\"The average end-to-end latency of successful
@@ -1761,11 +1780,14 @@ interactions:
         storage account management policies\",\"description\":\"Get storage management
         account policies\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/managementPolicies/write\",\"displayName\":\"Put
         storage account management policies\",\"description\":\"Put storage account
-        management policies\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices\",\"displayName\":\"Storage
-        File Service\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/action\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/read\",\"displayName\":\"Get
+        management policies\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices\",\"displayName\":\"File
+        Service\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/action\",\"displayName\":\"Restore
+        File Share\",\"description\":\"Restore file share\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/read\",\"displayName\":\"List
+        File Services\",\"description\":\"List file services\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/write\",\"displayName\":\"Put
+        File Service Properties\",\"description\":\"Put file service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/read\",\"displayName\":\"Get
         file service properties\",\"description\":\"Get file service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/tableServices\",\"displayName\":\"Storage
-        Table Service\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/read\",\"displayName\":\"Get
-        Table service properties\",\"description\":\"Get Table service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices/fileshares/files\",\"displayName\":\"Storage
+        Table Service\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/read\",\"displayName\":\"Get
+        Table service properties\",\"description\":\"Get Table service properties\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices/fileshares/files\",\"displayName\":\"Storage
         File Service Files\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/fileshares/files/read\",\"displayName\":\"Read
         Files\",\"description\":\"Returns a file/folder or a list of files/folders\",\"origin\":null,\"properties\":null,\"isDataAction\":true},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/fileshares/files/write\",\"displayName\":\"Write
         Files\",\"description\":\"Returns the result of writing a file or creating
@@ -1790,16 +1812,33 @@ interactions:
         StorageAccount groupids\",\"description\":\"Get StorageAccount groupids\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"locations/checknameavailability\",\"displayName\":\"Name
         Availability\",\"operations\":[{\"name\":\"Microsoft.Storage/locations/checknameavailability/read\",\"displayName\":\"Check
         Name Availability\",\"description\":\"Checks that account name is valid and
-        is not in use.\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices/shares\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/encryptionScopes\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/objectReplicationPolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/objectReplicationPolicies/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/objectReplicationPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/objectReplicationPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/objectReplicationPolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/dataSharePolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/dataSharePolicies/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/dataSharePolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/dataSharePolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/dataSharePolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/localUsers\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/localUsers/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/listKeys/action\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]}],\"id\":\"/providers/Microsoft.Authorization/providerOperations/Microsoft.Storage\",\"type\":\"Microsoft.Authorization/providerOperations\",\"name\":\"Microsoft.Storage\"}"
+        is not in use.\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/fileServices/shares\",\"displayName\":\"File
+        Share\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/delete\",\"displayName\":\"Delete
+        File Share\",\"description\":\"Delete file share\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/read\",\"displayName\":\"Get
+        File Share\",\"description\":\"Get file share\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/read\",\"displayName\":\"List
+        File Shares\",\"description\":\"List file shares\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/fileServices/shares/write\",\"displayName\":\"Put
+        File Share\",\"description\":\"Create or update file share\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/encryptionScopes\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/encryptionScopes/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/objectReplicationPolicies\",\"displayName\":\"Object
+        Replication Policy\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/objectReplicationPolicies/delete\",\"displayName\":\"Delete
+        Object Replication Policy\",\"description\":\"Delete object replication policy\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/objectReplicationPolicies/read\",\"displayName\":\"Get
+        Object Replication Policy\",\"description\":\"Get object replication policy\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/objectReplicationPolicies/read\",\"displayName\":\"List
+        Object Replication Policies\",\"description\":\"List object replication policies\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/objectReplicationPolicies/write\",\"displayName\":\"Put
+        Object Replication Policy\",\"description\":\"Create or update object replication
+        policy\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/dataSharePolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/dataSharePolicies/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/dataSharePolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/dataSharePolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/dataSharePolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/localUsers\",\"displayName\":\"Local
+        User\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/localUsers/delete\",\"displayName\":\"Delete
+        Local User\",\"description\":\"Delete local user\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/listKeys/action\",\"displayName\":\"List
+        Local User Keys\",\"description\":\"List local user keys\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/read\",\"displayName\":\"List
+        Local Users\",\"description\":\"List local users\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/read\",\"displayName\":\"Get
+        Local User\",\"description\":\"Get local user\",\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/localusers/write\",\"displayName\":\"Put
+        Local User\",\"description\":\"Create or update local user\",\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"deletedAccounts\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/deletedAccounts/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/tableServices/tables\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/tableServices/tables/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]},{\"name\":\"storageAccounts/inventoryPolicies\",\"displayName\":\"\",\"operations\":[{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/delete\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/read\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false},{\"name\":\"Microsoft.Storage/storageAccounts/inventoryPolicies/write\",\"displayName\":null,\"description\":null,\"origin\":null,\"properties\":null,\"isDataAction\":false}]}],\"id\":\"/providers/Microsoft.Authorization/providerOperations/Microsoft.Storage\",\"type\":\"Microsoft.Authorization/providerOperations\",\"name\":\"Microsoft.Storage\"}"
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '64005'
+      - '67337'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 01 May 2020 04:36:33 GMT
+      - Fri, 12 Jun 2020 03:42:55 GMT
       expires:
       - '-1'
       pragma:
