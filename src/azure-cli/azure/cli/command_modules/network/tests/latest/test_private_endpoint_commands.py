@@ -745,6 +745,9 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
                                                   self.kwargs['second_endpoint_name'].lower() in
                                                   conn['properties']['privateEndpoint']['id'].lower()][0]
 
+        self.cmd('network private-endpoint-connection reject -g {resource_group} --resource-name {webapp_name} -n {second_endpoint_request} --type Microsoft.Web/sites',
+                 checks=[self.check('properties.privateLinkServiceConnectionState.status', 'Rejecting')])
+
         # Remove endpoints
         self.cmd('network private-endpoint-connection delete -g {resource_group} --resource-name {webapp_name} -n {second_endpoint_request} --type Microsoft.Web/sites -y')
         self.cmd('network private-endpoint-connection show -g {resource_group} --resource-name {webapp_name} -n {second_endpoint_request} --type Microsoft.Web/sites', checks=[
