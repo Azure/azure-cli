@@ -511,7 +511,9 @@ class CommandIndex:
         return None, None
 
     def update(self, command_table):
-        """Update the command index according to cli_ctx.invocation.commands_loader.command_table
+        """Update the command index according to the given command table.
+
+        :param command_table: The command table built by azure.cli.core.MainCommandsLoader.load_command_table
         """
         start_time = timeit.default_timer()
         self.INDEX[self._COMMAND_INDEX_VERSION] = __version__
