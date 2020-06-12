@@ -712,17 +712,23 @@ class CommandIndex:
     _COMMAND_INDEX_CLOUD_PROFILE = 'cloudProfile'
 
     def __init__(self, cli_ctx=None, enabled=True):
+        """Class to manage command index.
+
+        :param cli_ctx: Only needed when `get` or `update` is called.
+        :param enabled: Whether command index is enabled. If set to `False`, `get` will bypass the index.
+        """
         from azure.cli.core._session import INDEX
         self.INDEX = INDEX
-        self.version = __version__
-        self.cloud_profile = cli_ctx.cloud.profile
+        if cli_ctx:
+            self.version = __version__
+            self.cloud_profile = cli_ctx.cloud.profile
         self.enabled = enabled
 
     def get(self, args):
-        """Get the corresponding module and extension list from the command
+        """Get the corresponding module and extension list of a command.
 
-        :param args: command sections separated by spaces, like ['network', 'vnet', 'create', '-h']
-        :return: list for modules and list for extensions
+        :param args: command arguments, like ['network', 'vnet', 'create', '-h']
+        :return: a tuple containing a list of modules and a list of extensions.
         """
 
         if not self.enabled:
