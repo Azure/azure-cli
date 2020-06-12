@@ -100,14 +100,14 @@ def call_aladdin_service(query):
     version = str(parse_version(core_version))
 
     context = {
-        "sessionId": "",
+        "correlationId": "",
         "subscriptionId": "",
         "versionNumber": version
     }
 
     # Only pull in the other values if we have consent
     if telemetry_core.is_telemetry_enabled():
-        context.update(sessionId=correlation_id, subscriptionId=subscription_id)
+        context.update(correlationId=correlation_id, subscriptionId=subscription_id)
 
     api_url = 'https://app.aladdin.microsoft.com/api/v1.0/examples'
     headers = {'Content-Type': 'application/json'}

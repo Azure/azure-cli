@@ -7,6 +7,7 @@ import os
 import unittest
 import tempfile
 import shutil
+import mock
 
 
 def get_test_data_file(filename):
@@ -20,3 +21,34 @@ class ExtensionTypeTestMixin(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.ext_dir, ignore_errors=True)
+
+
+class IndexPatch:
+    def __init__(self, data=None):
+        self.patcher = mock.patch('azure.cli.core.extension._resolve.get_index_extensions', return_value=data)
+
+    def __enter__(self):
+        self.patcher.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.patcher.stop()
+
+
+def mock_ext(filename, version=None, download_url=None, digest=None, project_url=None):
+    d = {
+        'filename': filename,
+        'metadata': {
+            'version': version,
+            'extensions': {
+                'python.details': {
+                    'project_urls': {
+                        'Home': project_url or 'https://github.com/azure/some-extension'
+                    }
+                }
+            }
+        },
+        'downloadUrl': download_url or 'http://contoso.com/{}'.format(filename),
+        'sha256Digest': digest
+    }
+    return d

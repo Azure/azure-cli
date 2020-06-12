@@ -3,8 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import unittest
+import os
 import time
+import unittest
 
 from azure.cli.testsdk import (
     ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
@@ -12,6 +13,7 @@ from azure.cli.core.util import parse_proxy_resource_id, CLIError
 
 from azure.cli.command_modules.keyvault.tests.latest.test_keyvault_commands import _create_keyvault
 from azure.cli.command_modules.rdbms.tests.latest.test_rdbms_commands import ServerPreparer
+from azure.cli.command_modules.batch.tests.latest.batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 
 class NetworkPrivateLinkKeyVaultScenarioTest(ScenarioTest):
@@ -595,6 +597,79 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
 
         self.cmd('network private-endpoint-connection delete --id {} -y'
                  .format(server_pec_id))
+
+
+class NetworkPrivateLinkBatchAccountScenarioTest(ScenarioTest):
+    def _get_test_data_file(self, filename):
+        filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
+        self.assertTrue(os.path.isfile(filepath), 'File {} does not exist.'.format(filepath))
+        return filepath
+
+    # Currently private-link-resource and private-endpoint-connection are whitelist only features so scenario tests are limited
+    @ResourceGroupPreparer(location='westcentralus')
+    def test_private_link_resource_batch_account(self, resource_group, batch_account_name='testplinksbatch'):
+        self.kwargs.update({
+            'vnet_name': self.create_random_name('testvnet', 20),
+            'subnet_name': self.create_random_name('testsubnet', 20),
+            'second_endpoint_name': self.create_random_name('priv_endpoint', 25),
+            'second_endpoint_conn_name': self.create_random_name('priv_endpointconn', 25),
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!',
+            'rg': resource_group,
+            'acc_n': batch_account_name,
+            'loc': 'westcentralus'
+        })
+        account = self.cmd('batch account create -g {rg} -n {acc_n} -l {loc} --public-network-access disabled').assert_with_checks([
+            self.check('name', '{acc_n}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')]).get_output_in_json()
+        self.kwargs['acc_id'] = account['id']
+        # create subnet with disabled endpoint network policies
+        self.cmd('network vnet create -g {rg} -n {vnet_name} --subnet-name {subnet_name}')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
+
+        # add an endpoint and then reject it
+        self.cmd(
+            'network private-endpoint create '
+            '-n {second_endpoint_name} '
+            '-g {rg} '
+            '--subnet {subnet_name} '
+            '--vnet-name {vnet_name} '
+            '--private-connection-resource-id {acc_id} '
+            '--group-ids batchAccount '
+            '--connection-name {second_endpoint_conn_name} '
+            '--manual-request').get_output_in_json()
+        private_endpoints = self.cmd('network private-endpoint-connection list --name {acc_n} --resource-group {rg} --type Microsoft.Batch/batchAccounts', checks=[
+            self.check('length(@)', 1)
+        ]).get_output_in_json()
+        self.cmd('batch account show --name {acc_n} --resource-group {rg}', checks=[
+            self.check('length(privateEndpointConnections[*])', 1),
+            self.check('privateEndpointConnections[0].id', private_endpoints[0]['id'])
+        ])
+        self.kwargs['pe_id'] = private_endpoints[0]["id"]
+        self.kwargs['pe_name'] = private_endpoints[0]['name']
+
+        self.cmd(
+            'network private-endpoint-connection approve --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts '
+            '--description "{approval_desc}"')
+        self.cmd(
+            'network private-endpoint-connection show --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts',
+            checks=[
+                self.check('name', '{pe_name}'),
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved'),
+                self.check('properties.privateLinkServiceConnectionState.description', '{approval_desc}')])
+
+        self.cmd('network private-endpoint-connection reject --resource-name {acc_n} --name {pe_name} --resource-group {rg} --type Microsoft.Batch/batchAccounts '
+                 '--description "{rejection_desc}"')
+        self.cmd('network private-endpoint-connection show --id {pe_id}',
+                 checks=[
+                     self.check('id', '{pe_id}'),
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected'),
+                     self.check('properties.privateLinkServiceConnectionState.description', '{rejection_desc}')])
+
+        # Test delete
+        self.cmd('network private-endpoint-connection delete --id {pe_id} -y')
+        self.cmd('network private-endpoint delete -n {second_endpoint_name} -g {rg}')
 
 
 class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):

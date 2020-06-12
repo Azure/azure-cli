@@ -970,13 +970,15 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
                                 item_name, paths, address_pool=None, http_settings=None, redirect_config=None,
                                 firewall_policy=None, no_wait=False, rewrite_rule_set=None):
     ApplicationGatewayPathRule, SubResource = cmd.get_models('ApplicationGatewayPathRule', 'SubResource')
+    if address_pool and redirect_config:
+        raise CLIError("Cannot reference a BackendAddressPool when Redirect Configuration is specified.")
     ncf = network_client_factory(cmd.cli_ctx)
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
     if not url_map:
         raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
     default_backend_pool = SubResource(id=url_map.default_backend_address_pool.id) \
-        if url_map.default_backend_address_pool else None
+        if (url_map.default_backend_address_pool and not redirect_config) else None
     default_http_settings = SubResource(id=url_map.default_backend_http_settings.id) \
         if url_map.default_backend_http_settings else None
     new_rule = ApplicationGatewayPathRule(
@@ -986,7 +988,7 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings)
     if cmd.supported_api_version(min_api='2017-06-01'):
         default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
-            if url_map.default_redirect_configuration else None
+            if (url_map.default_redirect_configuration and not address_pool) else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
 
     rewrite_rule_set_name = next(key for key, value in locals().items() if id(value) == id(rewrite_rule_set))
@@ -4976,9 +4978,10 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None, vm_protection=None, ddos_protection=None,
-                ddos_protection_plan=None):
-    AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource = \
-        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork', 'SubResource')
+                ddos_protection_plan=None, network_security_group=None):
+    AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
+        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
+                       'SubResource', 'NetworkSecurityGroup')
     client = network_client_factory(cmd.cli_ctx).virtual_networks
     tags = tags or {}
 
@@ -4990,7 +4993,9 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         if cmd.supported_api_version(min_api='2018-08-01'):
             vnet.subnets = [Subnet(name=subnet_name,
                                    address_prefix=subnet_prefix[0] if len(subnet_prefix) == 1 else None,
-                                   address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None)]
+                                   address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None,
+                                   network_security_group=NetworkSecurityGroup(id=network_security_group)
+                                   if network_security_group else None)]
         else:
             vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
     if cmd.supported_api_version(min_api='2017-09-01'):

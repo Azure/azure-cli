@@ -33,6 +33,29 @@ class StorageCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
+class AzureStackStorageCommandsLoader(AzCommandsLoader):
+    def __init__(self, cli_ctx=None):
+        from azure.cli.core.commands import CliCommandType
+
+        storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
+        super(AzureStackStorageCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                              resource_type=ResourceType.DATA_STORAGE,
+                                                              custom_command_type=storage_custom,
+                                                              command_group_cls=StorageCommandGroup,
+                                                              argument_context_cls=StorageArgumentContext)
+
+    def load_command_table(self, args):
+        super(AzureStackStorageCommandsLoader, self).load_command_table(args)
+        from azure.cli.command_modules.storage.commands_azure_stack import load_command_table
+        load_command_table(self, args)
+        return self.command_table
+
+    def load_arguments(self, command):
+        super(AzureStackStorageCommandsLoader, self).load_arguments(command)
+        from azure.cli.command_modules.storage._params_azure_stack import load_arguments
+        load_arguments(self, command)
+
+
 class StorageArgumentContext(AzArgumentContext):
     def register_sas_arguments(self):
         from azure.cli.command_modules.storage._validators import ipv4_range_type, get_datetime_type
@@ -259,4 +282,8 @@ def _merge_new_exception_handler(kwargs, handler):
     kwargs['exception_handler'] = new_handler
 
 
-COMMAND_LOADER_CLS = StorageCommandsLoader
+def get_command_loader(cli_ctx):
+    if cli_ctx.cloud.profile.lower() != 'latest':
+        return AzureStackStorageCommandsLoader
+
+    return StorageCommandsLoader
