@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.7.10
+++++++
+* Migrate authentication from ADAL to MSAL
+
 2.7.0
 ++++++
 * Enable local context for location (#13682)

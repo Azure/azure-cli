@@ -38,6 +38,7 @@ _HOME_TENANT_ID = 'homeTenantId'
 _MANAGED_BY_TENANTS = 'managedByTenants'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
+_CLIENT_ID = 'clientId'
 _USER_HOME_ACCOUNT_ID = 'homeAccountId'
 _CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
@@ -532,14 +533,10 @@ class Profile(object):
 
     @staticmethod
     def _try_parse_msi_account_name(account):
-        msi_info, user = account[_USER_ENTITY].get(_ASSIGNED_IDENTITY_INFO), account[_USER_ENTITY].get(_USER_NAME)
+        user_name = account[_USER_ENTITY].get(_USER_NAME)
 
-        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
-            if not msi_info:
-                msi_info = account[_SUBSCRIPTION_NAME]  # fall back to old persisting way
-            parts = msi_info.split('-', 1)
-            if parts[0] in MsiAccountTypes.valid_msi_account_types():
-                return parts[0], (None if len(parts) <= 1 else parts[1])
+        if user_name in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
+            return user_name, account[_USER_ENTITY].get(_CLIENT_ID)
         return None, None
 
     def _create_identity_credential(self, account, aux_tenant_id=None):

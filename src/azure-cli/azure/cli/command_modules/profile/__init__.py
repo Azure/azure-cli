@@ -91,7 +91,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('resource_type', get_enum_type(cloud_resource_types), options_list=['--resource-type'], arg_group='', help='Type of well-known resource.')
             c.argument('tenant', options_list=['--tenant', '-t'], is_preview=True, help='Tenant ID for which the token is acquired. Only available for user and service principal account, not for MSI or Cloud Shell account')
 
-        with self.argument_context('account logout') as c:
+        with self.argument_context('account clear') as c:
             c.argument('clear_credential', clear_credential_type)
 
 

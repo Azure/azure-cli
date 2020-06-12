@@ -101,7 +101,8 @@ class Identity:
         credential = InteractiveBrowserCredential(authority=self.authority,
                                                   tenant_id=self.tenant_id,
                                                   client_id=self.client_id,
-                                                  enable_persistent_cache=True)
+                                                  enable_persistent_cache=True,
+                                                  allow_unencrypted_cache=self.allow_unencrypted)
         auth_record = credential.authenticate()
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
@@ -118,7 +119,8 @@ class Identity:
                                           tenant_id=self.tenant_id,
                                           client_id=self.client_id,
                                           enable_persistent_cache=True,
-                                          prompt_callback=prompt_callback)
+                                          prompt_callback=prompt_callback,
+                                          allow_unencrypted_cache=self.allow_unencrypted)
         auth_record = credential.authenticate()
         # todo: remove after ADAL token deprecation
         self._cred_cache.add_credential(credential)
@@ -131,7 +133,8 @@ class Identity:
                                                 client_id=self.client_id,
                                                 username=username,
                                                 password=password,
-                                                enable_persistent_cache=True)
+                                                enable_persistent_cache=True,
+                                                allow_unencrypted_cache=self.allow_unencrypted)
         auth_record = credential.authenticate()
 
         # todo: remove after ADAL token deprecation
@@ -165,7 +168,7 @@ class Identity:
         credential = CertificateCredential(self.tenant_id, client_id, certificate_path, authority=self.authority)
         return credential
 
-    def login_with_managed_identity(self, resource, identity_id=None):
+    def login_with_managed_identity(self, resource, identity_id=None):  # pylint: disable=too-many-statements
         from msrestazure.tools import is_valid_resource_id
         from requests import HTTPError
         from azure.core.exceptions import ClientAuthenticationError
@@ -306,7 +309,8 @@ class Identity:
         auth_record = AuthenticationRecord(self.tenant_id, self.client_id, self.authority,
                                            home_account_id, username)
         return InteractiveBrowserCredential(authentication_record=auth_record, disable_automatic_authentication=True,
-                                            enable_persistent_cache=True)
+                                            enable_persistent_cache=True,
+                                            allow_unencrypted_cache=self.allow_unencrypted)
 
     def get_service_principal_credential(self, client_id, use_cert_sn_issuer):
         client_secret, certificate_path = self._msal_store.retrieve_secret_of_service_principal(client_id,
@@ -320,7 +324,6 @@ class Identity:
 
     @staticmethod
     def get_msi_credential(client_id=None):
-        # TODO: support object_id and msi_res_id
         return ManagedIdentityCredential(client_id=client_id)
 
 
@@ -630,8 +633,8 @@ class MSALSecretStore:
             try:
                 return LibsecretPersistence(
                     self._token_file,
-                    schema_name="my_schema_name",
-                    attributes={"my_attr1": "foo", "my_attr2": "bar"},
+                    schema_name="msalCustomToken",
+                    attributes={"MsalClientID": "Microsoft.Developer.IdentityService"},
                 )
             except:  # pylint: disable=bare-except
                 if not self._fallback_to_plaintext:
