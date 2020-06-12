@@ -68,6 +68,6 @@ def keyvault_private_data_plane_factory_v7_2_preview(cli_ctx, _):
     version = str(get_api_version(cli_ctx, ResourceType.DATA_PRIVATE_KEYVAULT))
 
     profile = Profile(cli_ctx=cli_ctx)
-    credential, _, _ = profile.get_login_credentials(resource='https://vault.azure.net')
+    credential, _, _ = profile.get_login_credentials(resource='https://managedhsm.azure.net')
     client = KeyVaultClient(credentials=credential, api_version=version)
     return client
