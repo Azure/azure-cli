@@ -23,13 +23,13 @@ class StorageCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         super(StorageCommandsLoader, self).load_command_table(args)
-        from azure.cli.command_modules.storage.commands_v2 import load_command_table
+        from azure.cli.command_modules.storage.commands import load_command_table
         load_command_table(self, args)
         return self.command_table
 
     def load_arguments(self, command):
         super(StorageCommandsLoader, self).load_arguments(command)
-        from azure.cli.command_modules.storage._params_v2 import load_arguments
+        from azure.cli.command_modules.storage._params import load_arguments
         load_arguments(self, command)
 
 
