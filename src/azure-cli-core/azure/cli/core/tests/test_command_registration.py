@@ -225,19 +225,10 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_register_command_from_extension(self):
 
-        from azure.cli.core.commands import _load_command_loader
-        from azure.cli.core._session import INDEX
-        from azure.cli.core import _COMMAND_INDEX, _COMMAND_INDEX_VERSION, _COMMAND_INDEX_CLOUD_PROFILE, \
-            invalidate_command_index
-
         cli = DummyCli()
-        # Clear the command index
-        INDEX[_COMMAND_INDEX] = {}
-        self.assertFalse(INDEX[_COMMAND_INDEX])
-        main_loader = MainCommandsLoader(cli)
-        cli.loader = main_loader
+        loader = cli.commands_loader
 
-        cmd_tbl = cli.loader.load_command_table(None)
+        cmd_tbl = loader.load_command_table(None)
         hello_mod_only_cmd = cmd_tbl['hello mod-only']
         hello_ext_only_cmd = cmd_tbl['hello ext-only']
         hello_overridden_cmd = cmd_tbl['hello overridden']
@@ -251,113 +242,139 @@ class TestCommandRegistration(unittest.TestCase):
         self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
         self.assertTrue(hello_overridden_cmd.command_source.overrides_command)
 
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index(self):
+
+        from azure.cli.core._session import INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+        command_index = CommandIndex(cli)
+
         expected_command_index = {'hello': ['azure.cli.command_modules.hello', 'azext_hello2', 'azext_hello1'],
                                   'extra': ['azure.cli.command_modules.extra']}
         expected_command_table = ['hello mod-only', 'hello overridden', 'extra unused', 'hello ext-only']
 
+        def _set_index(dict_):
+            INDEX[CommandIndex._COMMAND_INDEX] = dict_
+
+        def _check_index():
+            self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], __version__)
+            self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE], cli.cloud.profile)
+            self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], expected_command_index)
+
+        # Clear the command index
+        _set_index({})
+        self.assertFalse(INDEX[CommandIndex._COMMAND_INDEX])
+        loader.load_command_table(None)
         # Test command index is built for None args
-        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+        _check_index()
 
         # Test command index is built when `args` is provided
-        INDEX[_COMMAND_INDEX] = {}
-        cmd_tbl = cli.loader.load_command_table(["hello", "mod-only"])
-        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+        _set_index({})
+        loader.load_command_table(["hello", "mod-only"])
+        _check_index()
 
         # Test rebuild command index if no module found
-        INDEX[_COMMAND_INDEX] = {"network": ["azure.cli.command_modules.network"]}
-        cli.loader.load_command_table(["hello", "mod-only"])
-        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+        _set_index({"network": ["azure.cli.command_modules.network"]})
+        loader.load_command_table(["hello", "mod-only"])
+        _check_index()
 
         with mock.patch("azure.cli.core.__version__", "2.7.0"), mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
             def update_and_check_index():
-                cli.loader.load_command_table(["hello", "mod-only"])
-                self.assertEqual(INDEX[_COMMAND_INDEX_VERSION], "2.7.0")
-                self.assertEqual(INDEX[_COMMAND_INDEX_CLOUD_PROFILE], "2019-03-01-hybrid")
-                self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+                loader.load_command_table(["hello", "mod-only"])
+                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], "2.7.0")
+                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE], "2019-03-01-hybrid")
+                self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], expected_command_index)
 
             # Test rebuild command index if version is not present
-            del INDEX[_COMMAND_INDEX_VERSION]
-            del INDEX[_COMMAND_INDEX]
+            del INDEX[CommandIndex._COMMAND_INDEX_VERSION]
+            del INDEX[CommandIndex._COMMAND_INDEX]
             update_and_check_index()
 
             # Test rebuild command index if version is not valid
-            INDEX[_COMMAND_INDEX_VERSION] = ""
-            INDEX[_COMMAND_INDEX] = {}
+            INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+            _set_index({})
             update_and_check_index()
 
             # Test rebuild command index if version is outdated
-            INDEX[_COMMAND_INDEX_VERSION] = "2.6.0"
-            INDEX[_COMMAND_INDEX] = {}
+            INDEX[CommandIndex._COMMAND_INDEX_VERSION] = "2.6.0"
+            _set_index({})
             update_and_check_index()
 
             # Test rebuild command index if profile is outdated
-            INDEX[_COMMAND_INDEX_CLOUD_PROFILE] = "2017-03-09-profile"
-            INDEX[_COMMAND_INDEX] = {}
+            INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = "2017-03-09-profile"
+            _set_index({})
             update_and_check_index()
 
         # Test rebuild command index if modules are found but outdated
         # This only happens in dev environment. For users, the version check logic prevents it
-        INDEX[_COMMAND_INDEX] = {"hello": ["azure.cli.command_modules.extra"]}
-        cli.loader.load_command_table(["hello", "mod-only"])
-        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+        _set_index({"hello": ["azure.cli.command_modules.extra"]})
+        loader.load_command_table(["hello", "mod-only"])
+        _check_index()
 
         # Test irrelevant commands are not loaded
-        INDEX[_COMMAND_INDEX] = expected_command_index
-        cmd_tbl = cli.loader.load_command_table(["hello", "mod-only"])
+        _set_index(expected_command_index)
+        cmd_tbl = loader.load_command_table(["hello", "mod-only"])
         self.assertEqual(['hello mod-only', 'hello overridden', 'hello ext-only'], list(cmd_tbl.keys()))
 
         # Full scenario test 1: Installing an extension 'azext_hello1' that extends 'hello' group
         outdated_command_index = {'hello': ['azure.cli.command_modules.hello'],
                                   'extra': ['azure.cli.command_modules.extra']}
-        INDEX[_COMMAND_INDEX] = outdated_command_index
+        _set_index(outdated_command_index)
 
         # Command for an outdated group
-        cmd_tbl = cli.loader.load_command_table(["hello", "-h"])
+        cmd_tbl = loader.load_command_table(["hello", "-h"])
         # Index is not updated, and only built-in commands are loaded
-        self.assertEqual(INDEX[_COMMAND_INDEX], outdated_command_index)
+        _set_index(outdated_command_index)
         self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden'])
 
         # Command index is explicitly invalidated by azure.cli.core.extension.operations.add_extension
-        invalidate_command_index()
+        command_index.invalidate()
 
-        cmd_tbl = cli.loader.load_command_table(["hello", "-h"])
+        cmd_tbl = loader.load_command_table(["hello", "-h"])
         # Index is updated, and new commands are loaded
-        self.assertEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+        _check_index()
         self.assertListEqual(list(cmd_tbl), expected_command_table)
 
         # Full scenario test 2: Installing extension 'azext_hello2' that overrides existing command 'hello overridden'
         outdated_command_index = {'hello': ['azure.cli.command_modules.hello', 'azext_hello1'],
                                   'extra': ['azure.cli.command_modules.extra']}
-        INDEX[_COMMAND_INDEX] = outdated_command_index
+        _set_index(outdated_command_index)
         # Command for an overridden command
-        cmd_tbl = cli.loader.load_command_table(["hello", "overridden"])
+        cmd_tbl = loader.load_command_table(["hello", "overridden"])
         # Index is not updated
-        self.assertEqual(INDEX[_COMMAND_INDEX], outdated_command_index)
+        self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX], outdated_command_index)
         # With the old command index, 'hello overridden' is loaded from the build-in module
         hello_overridden_cmd = cmd_tbl['hello overridden']
         self.assertEqual(hello_overridden_cmd.command_source, 'hello')
         self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
 
         # Command index is explicitly invalidated by azure.cli.core.extension.operations.add_extension
-        invalidate_command_index()
+        command_index.invalidate()
 
         # Command index is updated, and 'hello overridden' is loaded from the new extension
-        cmd_tbl = cli.loader.load_command_table(["hello", "overridden"])
+        cmd_tbl = loader.load_command_table(["hello", "overridden"])
         hello_overridden_cmd = cmd_tbl['hello overridden']
         self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
-        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+        _check_index()
         self.assertListEqual(list(cmd_tbl), expected_command_table)
 
         # Call again with the new command index. Irrelevant commands are not loaded
-        cmd_tbl = cli.loader.load_command_table(["hello", "overridden"])
+        cmd_tbl = loader.load_command_table(["hello", "overridden"])
         hello_overridden_cmd = cmd_tbl['hello overridden']
         self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
-        self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+        _check_index()
         self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
 
-        del INDEX[_COMMAND_INDEX_VERSION]
-        del INDEX[_COMMAND_INDEX_CLOUD_PROFILE]
-        del INDEX[_COMMAND_INDEX]
+        del INDEX[CommandIndex._COMMAND_INDEX_VERSION]
+        del INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE]
+        del INDEX[CommandIndex._COMMAND_INDEX]
 
     def test_argument_with_overrides(self):
 
