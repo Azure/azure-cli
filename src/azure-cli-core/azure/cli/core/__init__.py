@@ -439,6 +439,115 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
 
+class CommandIndex:
+
+    _COMMAND_INDEX = 'commandIndex'
+    _COMMAND_INDEX_VERSION = 'version'
+    _COMMAND_INDEX_CLOUD_PROFILE = 'cloudProfile'
+
+    def __init__(self, cli_ctx=None, enabled=True):
+        """Class to manage command index.
+
+        :param cli_ctx: Only needed when `get` or `update` is called.
+        :param enabled: Whether command index is enabled. If set to `False`, `get` will bypass the index.
+        """
+        from azure.cli.core._session import INDEX
+        self.INDEX = INDEX
+        if cli_ctx:
+            self.version = __version__
+            self.cloud_profile = cli_ctx.cloud.profile
+        self.enabled = enabled
+
+    def get(self, args):
+        """Get the corresponding module and extension list of a command.
+
+        :param args: command arguments, like ['network', 'vnet', 'create', '-h']
+        :return: a tuple containing a list of modules and a list of extensions.
+        """
+
+        if not self.enabled:
+            return None, None
+
+        # If the command index version or cloud profile doesn't match those of the current command,
+        # invalidate the command index.
+        index_version = self.INDEX[self._COMMAND_INDEX_VERSION]
+        cloud_profile = self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE]
+        if not (index_version and index_version == self.version and
+                cloud_profile and cloud_profile == self.cloud_profile):
+            logger.debug("Command index version or cloud profile is invalid or doesn't match the current command.")
+            self.invalidate()
+            return None, None
+
+        # Make sure the top-level command is provided, like `az version`.
+        # Skip command index for `az` or `az --help`.
+        if not args or args[0].startswith('-'):
+            return None, None
+
+        # Get the top-level command, like `network` in `network vnet create -h`
+        top_command = args[0]
+        index = self.INDEX[self._COMMAND_INDEX]
+        # Check the command index for (command: [module]) mapping, like
+        # "network": ["azure.cli.command_modules.natgateway", "azure.cli.command_modules.network", "azext_firewall"]
+        index_modules_extensions = index.get(top_command)
+
+        if index_modules_extensions:
+            # This list contains both built-in modules and extensions
+            index_builtin_modules = []
+            index_extensions = []
+            # Found modules from index
+            logger.debug("Modules found from index for '%s': %s", top_command, index_modules_extensions)
+            command_module_prefix = 'azure.cli.command_modules.'
+            for m in index_modules_extensions:
+                if m.startswith(command_module_prefix):
+                    # The top-level command is from a command module
+                    index_builtin_modules.append(m[len(command_module_prefix):])
+                elif m.startswith('azext_'):
+                    # The top-level command is from an extension
+                    index_extensions.append(m)
+                else:
+                    logger.warning("Unrecognized module: %s", m)
+            return index_builtin_modules, index_extensions
+
+        return None, None
+
+    def update(self, command_table):
+        """Update the command index according to cli_ctx.invocation.commands_loader.command_table
+        """
+        start_time = timeit.default_timer()
+        self.INDEX[self._COMMAND_INDEX_VERSION] = __version__
+        self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = self.cloud_profile
+        from collections import defaultdict
+        index = defaultdict(list)
+
+        # self.cli_ctx.invocation.commands_loader.command_table doesn't exist in DummyCli due to the lack of invocation
+        for command_name, command in command_table.items():
+            # Get the top-level name: <vm> create
+            top_command = command_name.split()[0]
+            # Get module name, like azure.cli.command_modules.vm, azext_webapp
+            module_name = command.loader.__module__
+            if module_name not in index[top_command]:
+                index[top_command].append(module_name)
+        elapsed_time = timeit.default_timer() - start_time
+        self.INDEX[self._COMMAND_INDEX] = index
+        logger.debug("Updated command index in %.3f seconds.", elapsed_time)
+
+    def invalidate(self):
+        """Invalidate the command index.
+
+        This function MUST be called when installing or updating extensions. Otherwise, when an extension
+          1. overrides a built-in command, or
+          2. extends an existing command group,
+        the command or command group will only be loaded from the command modules as per the stale command index,
+        making the newly installed extension be ignored.
+
+        This function can be called when removing extensions and updating cloud profiles for double insurance.
+        """
+        self.INDEX[self._COMMAND_INDEX_VERSION] = ""
+        self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        self.INDEX[self._COMMAND_INDEX] = {}
+        logger.debug("Command index has been invalidated.")
+
+
 class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False,
@@ -703,112 +812,3 @@ def get_default_cli():
                  logging_cls=AzCliLogging,
                  output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)
-
-
-class CommandIndex:
-
-    _COMMAND_INDEX = 'commandIndex'
-    _COMMAND_INDEX_VERSION = 'version'
-    _COMMAND_INDEX_CLOUD_PROFILE = 'cloudProfile'
-
-    def __init__(self, cli_ctx=None, enabled=True):
-        """Class to manage command index.
-
-        :param cli_ctx: Only needed when `get` or `update` is called.
-        :param enabled: Whether command index is enabled. If set to `False`, `get` will bypass the index.
-        """
-        from azure.cli.core._session import INDEX
-        self.INDEX = INDEX
-        if cli_ctx:
-            self.version = __version__
-            self.cloud_profile = cli_ctx.cloud.profile
-        self.enabled = enabled
-
-    def get(self, args):
-        """Get the corresponding module and extension list of a command.
-
-        :param args: command arguments, like ['network', 'vnet', 'create', '-h']
-        :return: a tuple containing a list of modules and a list of extensions.
-        """
-
-        if not self.enabled:
-            return None, None
-
-        # If the command index version or cloud profile doesn't match those of the current command,
-        # invalidate the command index.
-        index_version = self.INDEX[self._COMMAND_INDEX_VERSION]
-        cloud_profile = self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE]
-        if not (index_version and index_version == self.version and
-                cloud_profile and cloud_profile == self.cloud_profile):
-            logger.debug("Command index version or cloud profile is invalid or doesn't match the current command.")
-            self.invalidate()
-            return None, None
-
-        # Make sure the top-level command is provided, like `az version`.
-        # Skip command index for `az` or `az --help`.
-        if not args or args[0].startswith('-'):
-            return None, None
-
-        # Get the top-level command, like `network` in `network vnet create -h`
-        top_command = args[0]
-        index = self.INDEX[self._COMMAND_INDEX]
-        # Check the command index for (command: [module]) mapping, like
-        # "network": ["azure.cli.command_modules.natgateway", "azure.cli.command_modules.network", "azext_firewall"]
-        index_modules_extensions = index.get(top_command)
-
-        if index_modules_extensions:
-            # This list contains both built-in modules and extensions
-            index_builtin_modules = []
-            index_extensions = []
-            # Found modules from index
-            logger.debug("Modules found from index for '%s': %s", top_command, index_modules_extensions)
-            command_module_prefix = 'azure.cli.command_modules.'
-            for m in index_modules_extensions:
-                if m.startswith(command_module_prefix):
-                    # The top-level command is from a command module
-                    index_builtin_modules.append(m[len(command_module_prefix):])
-                elif m.startswith('azext_'):
-                    # The top-level command is from an extension
-                    index_extensions.append(m)
-                else:
-                    logger.warning("Unrecognized module: %s", m)
-            return index_builtin_modules, index_extensions
-
-        return None, None
-
-    def update(self, command_table):
-        """Update the command index according to cli_ctx.invocation.commands_loader.command_table
-        """
-        start_time = timeit.default_timer()
-        self.INDEX[self._COMMAND_INDEX_VERSION] = __version__
-        self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = self.cloud_profile
-        from collections import defaultdict
-        index = defaultdict(list)
-
-        # self.cli_ctx.invocation.commands_loader.command_table doesn't exist in DummyCli due to the lack of invocation
-        for command_name, command in command_table.items():
-            # Get the top-level name: <vm> create
-            top_command = command_name.split()[0]
-            # Get module name, like azure.cli.command_modules.vm, azext_webapp
-            module_name = command.loader.__module__
-            if module_name not in index[top_command]:
-                index[top_command].append(module_name)
-        elapsed_time = timeit.default_timer() - start_time
-        self.INDEX[self._COMMAND_INDEX] = index
-        logger.debug("Updated command index in %.3f seconds.", elapsed_time)
-
-    def invalidate(self):
-        """Invalidate the command index.
-
-        This function MUST be called when installing or updating extensions. Otherwise, when an extension
-          1. overrides a built-in command, or
-          2. extends an existing command group,
-        the command or command group will only be loaded from the command modules as per the stale command index,
-        making the newly installed extension be ignored.
-
-        This function can be called when removing extensions and updating cloud profiles for double insurance.
-        """
-        self.INDEX[self._COMMAND_INDEX_VERSION] = ""
-        self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = ""
-        self.INDEX[self._COMMAND_INDEX] = {}
-        logger.debug("Command index has been invalidated.")
