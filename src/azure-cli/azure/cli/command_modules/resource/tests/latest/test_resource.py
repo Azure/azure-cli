@@ -326,7 +326,7 @@ class TagScenarioTest(ScenarioTest):
 
         # Test Microsoft.Resources/resourceGroups
         self.cmd('resource tag --ids {resource_group_id} --tags {tag}',
-                 checks=self.check('tags', {'StorageType': 'Standard_LRS', 'cli-test': 'test', 'type': 'test'}))
+                 checks=self.check('tags', {'cli-test': 'test'}))
 
         # Test Microsoft.ContainerRegistry/registries/webhooks
         self.kwargs.update({
