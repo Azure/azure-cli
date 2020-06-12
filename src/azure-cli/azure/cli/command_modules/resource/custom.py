@@ -452,6 +452,8 @@ def _deploy_arm_template_at_subscription_scope(cli_ctx,
     if validate_only:
         return validation_result
 
+    a = 1
+
     return sdk_no_wait(no_wait, mgmt_client.create_or_update_at_subscription_scope,
                        deployment_name, deployment_properties, deployment_location)
 
