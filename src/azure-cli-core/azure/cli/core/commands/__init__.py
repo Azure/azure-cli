@@ -1018,7 +1018,7 @@ def _load_command_loader(loader, args, name, prefix):
         try:
             get_command_loader = getattr(module, 'get_command_loader', None)
             loader_cls = get_command_loader(loader.cli_ctx)
-        except (ImportError, AttributeError, TypeError) as ex:
+        except (ImportError, AttributeError, TypeError):
             logger.debug("Module '%s' is missing `get_command_loader` entry.", name)
 
     command_table = {}
