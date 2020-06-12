@@ -28,7 +28,7 @@ class AmsLiveEventTests(ScenarioTest):
             'previewLocator': self.create_guid(),
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
-            'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
+            'accessToken': str(self.create_guid()).replace("-", ""),
             'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
             'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
         })
@@ -339,7 +339,6 @@ class AmsLiveEventTests(ScenarioTest):
     def test_live_event_show(self, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
         live_event_name = self.create_random_name(prefix='le', length=12)
-
         self.kwargs.update({
             'amsname': amsname,
             'storageAccount': storage_account_for_create,
@@ -351,7 +350,7 @@ class AmsLiveEventTests(ScenarioTest):
             'previewLocator': self.create_guid(),
             'keyFrameIntervalDuration': 'PT2S',
             'description': 'asd',
-            'accessToken': '0abf356884d74b4aacbd7b1ebd3da0f7',
+            'accessToken': str(self.create_guid()).replace("-", ""),
             'clientAccessPolicy': '@' + _get_test_data_file('clientAccessPolicy.xml'),
             'crossDomainPolicy': '@' + _get_test_data_file('crossDomainPolicy.xml')
         })
