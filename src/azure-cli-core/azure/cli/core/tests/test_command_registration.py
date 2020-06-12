@@ -227,7 +227,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         from azure.cli.core.commands import _load_command_loader
         from azure.cli.core._session import INDEX
-        from azure.cli.core import _COMMAND_INDEX, _COMMAND_INDEX_VERSION, invalidate_command_index
+        from azure.cli.core import _COMMAND_INDEX, _COMMAND_INDEX_VERSION, _COMMAND_INDEX_CLOUD_PROFILE, \
+            invalidate_command_index
 
         cli = DummyCli()
         # Clear the command index
@@ -267,27 +268,32 @@ class TestCommandRegistration(unittest.TestCase):
         cli.loader.load_command_table(["hello", "mod-only"])
         self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
 
-        with mock.patch("azure.cli.core.__version__", "2.7.0"):
+        with mock.patch("azure.cli.core.__version__", "2.7.0"), mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
+            def update_and_check_index():
+                cli.loader.load_command_table(["hello", "mod-only"])
+                self.assertEqual(INDEX[_COMMAND_INDEX_VERSION], "2.7.0")
+                self.assertEqual(INDEX[_COMMAND_INDEX_CLOUD_PROFILE], "2019-03-01-hybrid")
+                self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+
             # Test rebuild command index if version is not present
             del INDEX[_COMMAND_INDEX_VERSION]
             del INDEX[_COMMAND_INDEX]
-            cli.loader.load_command_table(["hello", "mod-only"])
-            self.assertEqual(INDEX[_COMMAND_INDEX_VERSION], "2.7.0")
-            self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+            update_and_check_index()
 
             # Test rebuild command index if version is not valid
             INDEX[_COMMAND_INDEX_VERSION] = ""
             INDEX[_COMMAND_INDEX] = {}
-            cli.loader.load_command_table(["hello", "mod-only"])
-            self.assertEqual(INDEX[_COMMAND_INDEX_VERSION], "2.7.0")
-            self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+            update_and_check_index()
 
             # Test rebuild command index if version is outdated
             INDEX[_COMMAND_INDEX_VERSION] = "2.6.0"
             INDEX[_COMMAND_INDEX] = {}
-            cli.loader.load_command_table(["hello", "mod-only"])
-            self.assertEqual(INDEX[_COMMAND_INDEX_VERSION], "2.7.0")
-            self.assertDictEqual(INDEX[_COMMAND_INDEX], expected_command_index)
+            update_and_check_index()
+
+            # Test rebuild command index if profile is outdated
+            INDEX[_COMMAND_INDEX_CLOUD_PROFILE] = "2017-03-09-profile"
+            INDEX[_COMMAND_INDEX] = {}
+            update_and_check_index()
 
         # Test rebuild command index if modules are found but outdated
         # This only happens in dev environment. For users, the version check logic prevents it
@@ -350,6 +356,7 @@ class TestCommandRegistration(unittest.TestCase):
         self.assertListEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
 
         del INDEX[_COMMAND_INDEX_VERSION]
+        del INDEX[_COMMAND_INDEX_CLOUD_PROFILE]
         del INDEX[_COMMAND_INDEX]
 
     def test_argument_with_overrides(self):

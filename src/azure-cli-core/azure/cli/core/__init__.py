@@ -32,6 +32,7 @@ EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 _COMMAND_INDEX = 'commandIndex'
 _COMMAND_INDEX_VERSION = 'version'
+_COMMAND_INDEX_CLOUD_PROFILE = 'cloudProfile'
 # Extensions that will always be loaded if installed. These extensions don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSION_MODNAMES = ['azext_ai_examples', 'azext_ai_did_you_mean_this']
 
@@ -353,6 +354,8 @@ class MainCommandsLoader(CLICommandsLoader):
         def _update_command_index():
             start_time = timeit.default_timer()
             INDEX[_COMMAND_INDEX_VERSION] = __version__
+            INDEX[_COMMAND_INDEX_CLOUD_PROFILE] = self.cli_ctx.cloud.profile
+            INDEX[_COMMAND_INDEX] = {}
             from collections import defaultdict
             index = defaultdict(list)
             for command_name, command in self.command_table.items():
@@ -390,10 +393,13 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_group_table = {}
         self.command_table = {}
 
-        # If the command index version doesn't match the current command version, invalidate the command index
+        # If the command index version or cloud profile doesn't match those of the current command,
+        # invalidate the command index
         index_version = INDEX[_COMMAND_INDEX_VERSION]
-        if not (index_version and index_version == __version__):
-            logger.debug("Command index version is invalid or outdated.")
+        cloud_profile = INDEX[_COMMAND_INDEX_CLOUD_PROFILE]
+        if not (index_version and index_version == __version__ and
+                cloud_profile and self.cli_ctx.cloud.profile):
+            logger.debug("Command index version or cloud profile is invalid or doesn't match the current command.")
             invalidate_command_index()
 
         if args and not args[0].startswith('-'):
