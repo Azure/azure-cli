@@ -28,7 +28,7 @@ class ApimScenarioTest(ScenarioTest):
             'service_name': service_name,
             'rg_loc': resource_group_location,
             'rg_loc_displayName': KNOWN_LOCS.get(resource_group_location),
-            'notification_sender_email': 'notifications@contsoso.com',
+            'notification_sender_email': 'notifications@contoso.com',
             'publisher_email': 'publisher@contoso.com',
             'publisher_name': 'Contoso',
             'sku_name': 'Developer',

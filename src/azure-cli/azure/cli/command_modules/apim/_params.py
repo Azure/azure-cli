@@ -9,7 +9,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type,
                                                 get_three_state_flag)
 
-from azure.mgmt.apimanagement.models import (SkuType, VirtualNetworkType, Protocol, ApiType, AuthenticationSettingsContract)
+from azure.mgmt.apimanagement.models import (SkuType, VirtualNetworkType, Protocol, ApiType)
 
 
 SKU_TYPES = SkuType
