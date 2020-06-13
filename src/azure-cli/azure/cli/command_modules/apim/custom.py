@@ -118,8 +118,8 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
 
 # API Operations
 
-def create_apim_api(client, resource_group_name, service_name, api_id, description=None, subscription_key_parameter_names=None, 
-                    api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=Protocol.https.value, path=None, 
+def create_apim_api(client, resource_group_name, service_name, api_id, description=None, subscription_key_parameter_names=None,
+                    api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=Protocol.https.value, path=None,
                     api_type=ApiType.http.value, subscription_required=False, tags=None, no_wait=False):
     """Creates a new API. """
     resource = ApiContract(
@@ -156,14 +156,15 @@ def list_apim_api(client, resource_group_name, service_name):
 
     return client.api.list_by_service(resource_group_name, service_name)
 
+
 def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=True):
     """Deletes an existing API. """
 
     return client.api.delete(resource_group_name, service_name, api_id, if_match='*', delete_revisions=delete_revisions)
 
 
-def update_apim_api(instance, description=None, subscription_key_parameter_names=None, 
-                    api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=Protocol.https.value, path=None, 
+def update_apim_api(instance, description=None, subscription_key_parameter_names=None,
+                    api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=Protocol.https.value, path=None,
                     api_type=ApiType.http.value, subscription_required=False, tags=None):
     """Updates an existing API. """
 

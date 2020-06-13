@@ -90,6 +90,7 @@ class ApimScenarioTest(ScenarioTest):
         # api operations
         api_id = 'cli-test-apim-api'
         self.kwargs.update({
+            'api_id': api_id,
             'api_revision': None,
             'api_type': None,
             'api_version': None,
@@ -105,8 +106,8 @@ class ApimScenarioTest(ScenarioTest):
         })
 
         # create api
-        self.cmd('apim api create -g {rg} --service-name {service_name} --api-id {api_id} --api-revision {api_revision} --api-type {api_type} --api-version {api_version} --is-current {is_current} --path {path} --protocols {protocols} --service-url {service_url} --subscription-key-parameter-names {subscription_key_parameter_names} --subscription-required {subscription_required} --tags {tags}', checks=[
-            self.check('provisioningState', 'Succeeded'),            
+        self.cmd('apim api create -g {rg} --service-name {service_name} --api-id {api_id} --display-name {display_name} --api-revision {api_revision} --api-type {api_type} --api-version {api_version} --is-current {is_current} --path {path} --protocols {protocols} --service-url {service_url} --subscription-key-parameter-names {subscription_key_parameter_names} --subscription-required {subscription_required} --tags {tags}', checks=[
+            self.check('provisioningState', 'Succeeded'),
             self.check('path', '{path}'),
             self.check('displayName', '{display_name}'),
             self.check('serviceUrl', '{service_url}')
@@ -120,11 +121,9 @@ class ApimScenarioTest(ScenarioTest):
         ])
 
         # update api
-        self.cmd('apim api update -g {rg} --service-name {service_name} --api-id {api_id} --description {description} --display-name {display_name}', checks=[
+        self.cmd('apim api update -g {rg} --service-name {service_name} --api-id {api_id} --description {description} ', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('path', '{path}'),
-            self.check('description', '{description}'),
-            self.check('displayName', '{display_name}')
+            self.check('description', '{description}')
         ])
 
         # list apis
@@ -136,12 +135,11 @@ class ApimScenarioTest(ScenarioTest):
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
         self.assertEqual(api_count, 0)
 
-        # service delete command        
+        # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
 
         final_count = len(self.cmd('apim list').get_output_in_json())
         self.assertEqual(final_count, count - 1)
-
 
 
 KNOWN_LOCS = {'eastasia': 'East Asia',
