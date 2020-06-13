@@ -44,6 +44,35 @@ def patch_main_exception_handler(unit_test):
     mock_in_unit_test(unit_test, 'azure.cli.core.util.handle_exception', _handle_main_exception)
 
 
+def patch_get_subscription(unit_test):
+    def _get_subscription(*args, **kwargs):  # pylint: disable=unused-argument
+        # Build a map
+        if not hasattr(unit_test, 'subs_map'):
+            unit_test.subs_map = {}
+        subs_map = unit_test.subs_map
+        sub = args[1]
+        if sub is None or sub not in subs_map and sub.count('0') < 20:
+            size = len(subs_map)
+            moniker = '00000000-0000-0000-0000-' + '%012d' % size
+            subs_map[sub] = moniker
+
+        return {
+            "id": subs_map[sub],
+            "user": {
+                "name": MOCKED_USER_NAME,
+                "type": "user"
+            },
+            "state": "Enabled",
+            "name": "Example",
+            "tenantId": MOCKED_TENANT_ID,
+            "isDefault": True
+        }
+
+    mock_in_unit_test(unit_test,
+                      'azure.cli.core._profile.Profile.get_subscription',
+                      _get_subscription)
+
+
 def patch_load_cached_subscriptions(unit_test):
     def _handle_load_cached_subscription(*args, **kwargs):  # pylint: disable=unused-argument
 
