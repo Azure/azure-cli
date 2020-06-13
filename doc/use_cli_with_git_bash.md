@@ -1,7 +1,7 @@
 # Use Azure CLI with Git Bash
 
 ## Introduction
-The MSI package for Windows now contains an entry script for running az on Git Bash. You can directly call `az` on Git Bash now. While using Git Bash on Windows gives you a similar experience on a Linux shell, it has some unexpected issues that impact the user experience of Azure CLI.
+The MSI package for Windows now contains an entry script for running `az` on Git Bash. You can directly call `az` on Git Bash now. While using Git Bash on Windows gives you a similar experience on a Linux shell, it has some unexpected issues that impact the user experience of Azure CLI.
 
 ## Issues
 
