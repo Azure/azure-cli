@@ -7,7 +7,7 @@
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties, ApiManagementServiceBackupRestoreParameters,
-                                             ApiContract, ApiUpdateContract, ApiType, Protocol,
+                                             ApiContract, ApiType, Protocol,
                                              VirtualNetworkType, SkuType)
 
 # Service Operations
@@ -118,10 +118,17 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
 
 # API Operations
 
-def create_apim_api(client, resource_group_name, service_name, api_id, display_name, service_url, protocols=Protocol.https.value, path=None, api_type=ApiType.http.value, subscription_required=False, tags=None, no_wait=False):
+def create_apim_api(client, resource_group_name, service_name, api_id, description=None, subscription_key_parameter_names=None, 
+                    api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=Protocol.https.value, path=None, 
+                    api_type=ApiType.http.value, subscription_required=False, tags=None, no_wait=False):
     """Creates a new API. """
     resource = ApiContract(
         api_id=api_id,
+        description=description,
+        subscription_key_parameter_names=subscription_key_parameter_names,
+        api_revision=api_revision,
+        api_version=api_version,
+        is_current=is_current,
         display_name=display_name,
         service_url=service_url,
         protocols=protocols.split(','),
@@ -149,9 +156,31 @@ def list_apim_api(client, resource_group_name, service_name):
 
     return client.api.list_by_service(resource_group_name, service_name)
 
+def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=True):
+    """Deletes an existing API. """
 
-def update_apim_api(instance, display_name=None, service_url=None, protocols=Protocol.https.value, path=None, api_type=ApiType.http.value, subscription_required=False, tags=None):
+    return client.api.delete(resource_group_name, service_name, api_id, if_match='*', delete_revisions=delete_revisions)
+
+
+def update_apim_api(instance, description=None, subscription_key_parameter_names=None, 
+                    api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=Protocol.https.value, path=None, 
+                    api_type=ApiType.http.value, subscription_required=False, tags=None):
     """Updates an existing API. """
+
+    if description is not None:
+        instance.description = description
+
+    if subscription_key_parameter_names is not None:
+        instance.subscription_key_parameter_names = subscription_key_parameter_names
+
+    if api_revision is not None:
+        instance.authentication_settings = api_revision
+
+    if api_version is not None:
+        instance.api_version = api_version
+
+    if is_current is not None:
+        instance.is_current = is_current
 
     if display_name is not None:
         instance.display_name = display_name
@@ -175,4 +204,3 @@ def update_apim_api(instance, display_name=None, service_url=None, protocols=Pro
         instance.tags = tags
 
     return instance
-    
