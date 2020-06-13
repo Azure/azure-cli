@@ -126,5 +126,5 @@ parameters:
 examples:
   - name: Create a basic API.
     text: |-
-        az apim api create --service-name MyApim -g MyResourceGroup --api-id MyApi --description foo
+        az apim api update --service-name MyApim -g MyResourceGroup --api-id MyApi --description foo
 """

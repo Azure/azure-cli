@@ -58,6 +58,7 @@ def load_arguments(self, _):
     with self.argument_context('apim api show') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
+        c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
 
     with self.argument_context('apim api create') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type, help='The name of the resource group.')
