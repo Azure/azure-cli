@@ -198,6 +198,7 @@ def load_arguments(self, _):
 
         c.argument('build_timeout', type=int, help="The Maximum duration to wait while building the image template, in minutes. Default is 60.")
         c.argument('image_template', help='Local path or URL to an image template file. When using --image-template, all other parameters are ignored except -g and -n. Reference: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-json')
+        c.argument('identity', nargs='+', help='List of user assigned identities (name or ID, space delimited) of the image template.')
 
         # Image Source Arguments
         c.argument('source', arg_type=ib_source_type)
@@ -238,6 +239,7 @@ def load_arguments(self, _):
 
     with self.argument_context('image builder customizer') as c:
         ib_win_restart_type = CLIArgumentType(arg_group="Windows Restart")
+        ib_win_update_type = CLIArgumentType(arg_group="Windows Update")
         ib_script_type = CLIArgumentType(arg_group="Shell and Powershell")
         ib_powershell_type = CLIArgumentType(arg_group="Powershell")
         ib_file_customizer_type = CLIArgumentType(arg_group="File")
@@ -256,6 +258,11 @@ def load_arguments(self, _):
         c.argument('restart_command', arg_type=ib_win_restart_type, help="Command to execute the restart operation.")
         c.argument('restart_check_command', arg_type=ib_win_restart_type, help="Command to verify that restart succeeded.")
         c.argument('restart_timeout', arg_type=ib_win_restart_type, help="Restart timeout specified as a string consisting of a magnitude and unit, e.g. '5m' (5 minutes) or '2h' (2 hours)", default="5m")
+
+        # Windows Update Specific Args
+        c.argument('search_criteria', arg_type=ib_win_update_type, help='Criteria to search updates. Omit or specify empty string to use the default (search all). Refer to above link for examples and detailed description of this field.')
+        c.argument('filters', arg_type=ib_win_update_type, nargs='+', help='Space delimited filters to select updates to apply. Omit or specify empty array to use the default (no filter)')
+        c.argument('update_limit', arg_type=ib_win_update_type, help='Maximum number of updates to apply at a time. Omit or specify 0 to use the default (1000)')
 
         # File Args
         c.argument('file_source', arg_type=ib_file_customizer_type, help="The URI of the file to be downloaded into the image. It can be a github link, SAS URI for Azure Storage, etc.")

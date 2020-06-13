@@ -4,10 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 from .resource_providers import GeneralPrivateEndpointClient
+from .resource_providers.batch_provider import BatchPrivateEndpointClient
 from knack.util import CLIError
 
 TYPE_CLIENT_MAPPING = {
     # 'Microsoft.Keyvault/vaults': KeyVaultPrivateEndpointClient # vaults
+    'Microsoft.Batch/batchAccounts': BatchPrivateEndpointClient
 }
 
 
