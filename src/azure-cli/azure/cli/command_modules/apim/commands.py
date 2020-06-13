@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.apim._format import (service_output_format)
-from azure.cli.command_modules.apim._client_factory import (cf_service)
+from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api)
 
 
 def load_command_table(self, _):
@@ -16,7 +16,7 @@ def load_command_table(self, _):
 
     api_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#ApiOperations.{}',
-        client_factory=cf_service
+        client_factory=cf_api
     )
 
     # pylint: disable=line-too-long
@@ -31,6 +31,8 @@ def load_command_table(self, _):
         g.custom_command('apply-network-updates', 'apim_apply_network_configuration_updates', supports_no_wait=True)
 
     with self.command_group('apim api', api_sdk, is_preview=True) as g:
-        g.custom_command('list', 'list_api')
-        g.custom_show_command('show', 'get_api')
-        
+        g.custom_command('create', 'create_apim_api', supports_no_wait=True)
+        g.custom_show_command('show', 'get_apim_api')
+        g.custom_command('list', 'list_apim_api')
+        g.command('delete', 'delete_apim_api', confirmation=True, supports_no_wait=True)
+        g.generic_update_command('update', custom_func_name='update_apim_api', supports_no_wait=True)

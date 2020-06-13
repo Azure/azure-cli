@@ -7,6 +7,7 @@
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiManagementServiceIdentity,
                                              ApiManagementServiceSkuProperties, ApiManagementServiceBackupRestoreParameters,
+                                             ApiContract, ApiUpdateContract, ApiType, Protocol,
                                              VirtualNetworkType, SkuType)
 
 # Service Operations
@@ -115,16 +116,63 @@ def apim_apply_network_configuration_updates(client, resource_group_name, name, 
     return client.api_management_service.apply_network_configuration_updates(resource_group_name, name, properties)
 
 
-
 # API Operations
 
+def create_apim_api(client, resource_group_name, service_name, api_id, display_name, service_url, protocols=Protocol.https.value, path=None, api_type=ApiType.http.value, subscription_required=False, tags=None, no_wait=False):
+    """Creates a new API. """
+    resource = ApiContract(
+        api_id=api_id,
+        display_name=display_name,
+        service_url=service_url,
+        protocols=protocols.split(','),
+        path=path,
+        api_type=api_type,
+        subscription_required=subscription_required,
+        tags=tags
+    )
 
-def list_api(client, resource_group_name, service_name):
+    cms = client.api
+
+    return sdk_no_wait(no_wait, cms.create_or_update,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name, api_id=api_id, parameters=resource)
+
+
+def get_apim_api(client, resource_group_name, service_name, api_id):
+    """Shows details of an API. """
+
+    return client.api.get(resource_group_name, service_name, api_id)
+
+
+def list_apim_api(client, resource_group_name, service_name):
     """List all APIs of an API Management instance. """
 
     return client.api.list_by_service(resource_group_name, service_name)
 
-def get_api(client, resource_group_name, service_name, name):
-    """Shows details of an API. """
 
-    return client.api.get(resource_group_name, service_name, name)
+def update_apim_api(instance, display_name=None, service_url=None, protocols=Protocol.https.value, path=None, api_type=ApiType.http.value, subscription_required=False, tags=None):
+    """Updates an existing API. """
+
+    if display_name is not None:
+        instance.display_name = display_name
+
+    if service_url is not None:
+        instance.service_url = service_url
+
+    if protocols is not None:
+        instance.protocols = protocols.split(',')
+
+    if path is not None:
+        instance.path = path
+
+    if api_type is not None:
+        instance.api_type = api_type
+
+    if subscription_required is not None:
+        instance.subscription_required = subscription_required
+
+    if tags is not None:
+        instance.tags = tags
+
+    return instance
+    

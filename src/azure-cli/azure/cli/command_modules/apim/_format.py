@@ -13,7 +13,6 @@ logger = get_logger(__name__)
 def service_output_format(result):
     return _output_format(result, _service_format_group)
 
-
 def _service_format_group(item):
     return OrderedDict([
         ('NAME', _get_value_as_str(item, 'name')),
