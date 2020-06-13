@@ -66,9 +66,14 @@ class StorageBlobUploadLiveTests(LiveScenarioTest):
 
         self.cmd('storage blob exists -n {} -c {}'.format(blob_name, container),
                  checks=JMESPathCheck('exists', False))
-
+        import time
+        from knack.log import get_logger
+        logger = get_logger(__name__)
+        start = time.time()
         self.cmd('storage blob upload -c {} -f "{}" -n {} --type {}'
                  .format(container, local_file, blob_name, blob_type))
+        end = time.time()
+        logger.warning("time span: {}".format(str(end-start)))
 
         self.cmd('storage blob exists -n {} -c {}'.format(blob_name, container),
                  checks=JMESPathCheck('exists', True))

@@ -14,7 +14,7 @@ from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_co
                                                                cf_private_link, cf_private_endpoint,
                                                                cf_mgmt_encryption_scope, cf_mgmt_file_services,
                                                                cf_adls_file_system, cf_adls_directory,
-                                                               cf_adls_file, cf_adls_service)
+                                                               cf_adls_file, cf_adls_service, cf_blob_client)
 from azure.cli.command_modules.storage.sdkutil import cosmosdb_table_exists
 from azure.cli.command_modules.storage._format import transform_immutability_policy
 from azure.cli.core.commands import CliCommandType
@@ -270,6 +270,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
         g.storage_custom_command_oauth('set-tier', 'set_blob_tier')
         g.storage_custom_command_oauth('upload', 'upload_blob',
+                                       custom_command_type=get_custom_sdk('blob', cf_blob_client),
                                        doc_string_source='blob#BlockBlobService.create_blob_from_path')
         g.storage_custom_command_oauth('upload-batch', 'storage_blob_upload_batch',
                                        validator=process_blob_upload_batch_parameters)
