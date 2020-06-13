@@ -130,7 +130,7 @@ class ApimScenarioTest(ScenarioTest):
         # list apis
         #api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
         #self.assertEqual(api_count, 1)
-        
+
         # api delete command
         #self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {api_id} -y')
         #api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
