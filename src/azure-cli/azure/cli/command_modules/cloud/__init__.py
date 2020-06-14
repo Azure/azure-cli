@@ -30,6 +30,7 @@ class CloudCommandsLoader(AzCommandsLoader):
             g.command('set', 'set_cloud')
             g.command('update', 'modify_cloud')
             g.command('list-profiles', 'list_profiles')
+            g.command('import', 'import_cloud_endpoints')
 
         return self.command_table
 
@@ -74,6 +75,9 @@ class CloudCommandsLoader(AzCommandsLoader):
 
         with self.argument_context('cloud unregister') as c:
             c.argument('cloud_name', completer=get_custom_cloud_name_completion_list)
+
+        with self.argument_context('cloud import') as c:
+            c.argument('endpoint', help='URL for cloud endpoint metadata. If not provided, will use environment variable ARM_CLOUD_METADATA_URL or discover.azure.com',)
 
 
 COMMAND_LOADER_CLS = CloudCommandsLoader

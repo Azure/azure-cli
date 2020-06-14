@@ -62,3 +62,12 @@ examples:
         az cloud update --profile latest
     crafted: true
 """
+
+helps['cloud import'] = """
+type: command
+short-summary: Import cloud endpoints.
+examples:
+  - name: Import cloud endpoints from a metadata URL
+    text: |
+        az cloud import --endpoint https://management.azure.com/metadata/endpoints?api-version=2019-05-01
+"""

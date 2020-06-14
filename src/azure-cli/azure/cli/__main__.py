@@ -31,6 +31,19 @@ def cli_main(cli, args):
     return cli.invoke(args)
 
 
+try:
+    if sys.argv[1] == 'cloud' and sys.argv[2] == 'import':
+        from azure.cli.core.cloud import CLOUD_ENDPOINTS_FILE
+        from azure.cli.core._session import CLOUD_ENDPOINTS
+        CLOUD_ENDPOINTS.load(CLOUD_ENDPOINTS_FILE)
+        CLOUD_ENDPOINTS['clouds'] = {}
+        if len(sys.argv) == 3:
+            CLOUD_ENDPOINTS['metadata_url'] = ''
+        elif sys.argv[3] == '--endpoint':
+            CLOUD_ENDPOINTS['metadata_url'] = sys.argv[4]
+except Exception:  # pylint: disable=broad-except
+    pass
+
 az_cli = get_default_cli()
 
 telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
