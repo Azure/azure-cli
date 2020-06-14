@@ -7,7 +7,7 @@ The MSI package for Windows now contains an entry script for running `az` on Git
 
 ### Auto-translation of Resource IDs
 
-On Git Bash, if you specify command-line options starting with a slash, POSIX-to-Windows path conversion will kick in converting. This causes an issue for passing ARM Resource IDs e.g.:
+On Git Bash, if you specify command-line options starting with a slash, POSIX-to-Windows path conversion will kick in. This causes an issue for passing ARM Resource IDs, like:
 ```
 $ az vm show --ids "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/virtualMachines/my-vm"
 
