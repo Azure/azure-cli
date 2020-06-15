@@ -76,7 +76,9 @@ class AzCopy(object):
         env_kwargs = {}
         if self.creds and self.creds.token_info:
             env_kwargs = {'AZCOPY_OAUTH_TOKEN_INFO': json.dumps(self.creds.token_info)}
-        subprocess.call(args, env=dict(os.environ, **env_kwargs))
+        result = subprocess.call(args, env=dict(os.environ, **env_kwargs))
+        if result > 0:
+            raise CLIError('Failed to perform {} operation.'.format(args[1]))
 
     def copy(self, source, destination, flags=None):
         flags = flags or []
