@@ -8,7 +8,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands import AzCommandGroup, AzArgumentContext
 
 import azure.cli.command_modules.storage._help  # pylint: disable=unused-import
-
+from knack.util import CLIError
 
 class StorageCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
@@ -65,7 +65,7 @@ class StorageArgumentContext(AzArgumentContext):
         self.argument('ip', type=ipv4_range_type,
                       help='Specifies the IP address or range of IP addresses from which to accept requests. Supports '
                            'only IPv4 style addresses.')
-        self.argument('expiry', type=get_datetime_type(True), required=True,
+        self.argument('expiry', type=get_datetime_type(True),
                       help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid. Do not '
                            'use if a stored access policy is referenced with --id that specifies this value.')
         self.argument('start', type=get_datetime_type(True),
@@ -193,9 +193,11 @@ class StorageCommandGroup(AzCommandGroup):
         self._register_data_plane_account_arguments(command_name)
         if oauth:
             self._register_data_plane_oauth_arguments(command_name)
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
 
     def storage_command_oauth(self, *args, **kwargs):
         _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
         self.storage_command(*args, oauth=True, **kwargs)
 
     def storage_custom_command(self, name, method_name, oauth=False, **kwargs):
@@ -203,13 +205,14 @@ class StorageCommandGroup(AzCommandGroup):
         self._register_data_plane_account_arguments(command_name)
         if oauth:
             self._register_data_plane_oauth_arguments(command_name)
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
 
     def storage_custom_command_oauth(self, *args, **kwargs):
         _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
+        _merge_new_exception_handler(kwargs, self.account_key_exception_handler())
         self.storage_custom_command(*args, oauth=True, **kwargs)
 
-    @classmethod
-    def get_handler_suppress_some_400(cls):
+    def get_handler_suppress_some_400(self):
         def handler(ex):
             if hasattr(ex, 'status_code') and ex.status_code == 403 and hasattr(ex, 'error_code'):
                 # TODO: Revisit the logic here once the service team updates their response
@@ -238,6 +241,17 @@ Authentication failure. This may be caused by either invalid account key, connec
                     ex.args = (message,)
             if hasattr(ex, 'status_code') and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
                 pass
+
+        return handler
+
+    def account_key_exception_handler(self):
+        def handler(ex):
+            from azure.common import AzureException
+            from azure.core.exceptions import ClientAuthenticationError
+            if isinstance(ex, AzureException) and 'incorrect padding' in ex.args[0]:
+                raise CLIError('incorrect usage: the given account key may be not valid.')
+            if isinstance(ex, ClientAuthenticationError) and 'incorrect padding' in ex.args[0]:
+                raise CLIError('incorrect usage: the given account key may be not valid.')
 
         return handler
 
