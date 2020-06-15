@@ -58,7 +58,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            detect_os_form_src)
 from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
                          FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT,
-                         DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION)
+                         DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION, RUNTIME_STACKS)
 
 logger = get_logger(__name__)
 
@@ -134,6 +134,14 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     elif plan_info.is_xenon:  # windows container webapp
         site_config.windows_fx_version = _format_fx_version(deployment_container_image_name)
+        # set the needed app settings for container image validation
+        if name_validation.name_available:
+            site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
+                                                          value=docker_registry_server_user))
+            site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_PASSWORD",
+                                                          value=docker_registry_server_password))
+            site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_URL",
+                                                          value=docker_registry_server_url))
 
     elif runtime:  # windows webapp with runtime specified
         if any([startup_file, deployment_container_image_name, multicontainer_config_file, multicontainer_config_type]):
@@ -723,8 +731,28 @@ def get_auth_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_auth_settings', slot)
 
 
+def is_auth_runtime_version_valid(runtime_version=None):
+    if runtime_version is None:
+        return True
+    if runtime_version.startswith("~") and len(runtime_version) > 1:
+        try:
+            int(runtime_version[1:])
+        except ValueError:
+            return False
+        return True
+    split_versions = runtime_version.split('.')
+    if len(split_versions) != 3:
+        return False
+    for version in split_versions:
+        try:
+            int(version)
+        except ValueError:
+            return False
+    return True
+
+
 def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
-                         client_id=None, token_store_enabled=None,  # pylint: disable=unused-argument
+                         client_id=None, token_store_enabled=None, runtime_version=None,  # pylint: disable=unused-argument
                          token_refresh_extension_hours=None,  # pylint: disable=unused-argument
                          allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
                          allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
@@ -741,6 +769,9 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     elif action:
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.redirect_to_login_page
         auth_settings.default_provider = AUTH_TYPES[action]
+    # validate runtime version
+    if not is_auth_runtime_version_valid(runtime_version):
+        raise CLIError('Usage Error: --runtime-version set to invalid value')
 
     import inspect
     frame = inspect.currentframe()
@@ -756,11 +787,20 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_auth_settings', slot, auth_settings)
 
 
+# Currently using hardcoded values instead of this function. This function calls the stacks API;
+# Stacks API is updated with Antares deployments,
+# which are infrequent and don't line up with stacks EOL schedule.
 def list_runtimes(cmd, linux=False):
     client = web_client_factory(cmd.cli_ctx)
     runtime_helper = _StackRuntimeHelper(cmd=cmd, client=client, linux=linux)
 
     return [s['displayName'] for s in runtime_helper.stacks]
+
+
+def list_runtimes_hardcoded(linux=False):
+    if linux:
+        return RUNTIME_STACKS['linux']
+    return RUNTIME_STACKS['windows']
 
 
 def _rename_server_farm_props(webapp):
@@ -886,6 +926,8 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
 
 
 def _format_fx_version(custom_image_name, container_config_type=None):
+    custom_image_name = custom_image_name.lower()
+    custom_image_name = custom_image_name.replace("https://", "").replace("http://", "")
     fx_version = custom_image_name.strip()
     fx_version_lower = fx_version.lower()
     # handles case of only spaces
@@ -1147,14 +1189,14 @@ def update_container_settings(cmd, resource_group_name, name, docker_registry_se
         settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + docker_registry_server_user)
     if docker_registry_server_password is not None:
         settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + docker_registry_server_password)
-    if docker_custom_image_name is not None:
-        _add_fx_version(cmd, resource_group_name, name, docker_custom_image_name, slot)
     if websites_enable_app_service_storage:
         settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=' + websites_enable_app_service_storage)
 
     if docker_registry_server_user or docker_registry_server_password or docker_registry_server_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
         update_app_settings(cmd, resource_group_name, name, settings, slot)
     settings = get_app_settings(cmd, resource_group_name, name, slot)
+    if docker_custom_image_name is not None:
+        _add_fx_version(cmd, resource_group_name, name, docker_custom_image_name, slot)
 
     if multicontainer_config_file and multicontainer_config_type:
         encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
@@ -1292,9 +1334,10 @@ def _resolve_hostname_through_dns(hostname):
 
 
 def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_source=None):
-    Site, SiteConfig = cmd.get_models('Site', 'SiteConfig')
+    Site, SiteConfig, NameValuePair = cmd.get_models('Site', 'SiteConfig', 'NameValuePair')
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, webapp)
+    site_config = get_site_configs(cmd, resource_group_name, webapp, None)
     if not site:
         raise CLIError("'{}' app doesn't exist".format(webapp))
     if 'functionapp' in site.kind:
@@ -1302,6 +1345,21 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     location = site.location
     slot_def = Site(server_farm_id=site.server_farm_id, location=location)
     slot_def.site_config = SiteConfig()
+
+    # if it is a Windows Container site, at least pass the necessary
+    # app settings to perform the container image validation:
+    if configuration_source and site_config.windows_fx_version:
+        # get settings from the source
+        clone_from_prod = configuration_source.lower() == webapp.lower()
+        src_slot = None if clone_from_prod else configuration_source
+        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp,
+                                               'list_application_settings', src_slot)
+        settings = []
+        for k, v in app_settings.properties.items():
+            if k in ("DOCKER_REGISTRY_SERVER_USERNAME", "DOCKER_REGISTRY_SERVER_PASSWORD",
+                     "DOCKER_REGISTRY_SERVER_URL"):
+                settings.append(NameValuePair(name=k, value=v))
+        slot_def.site_config = SiteConfig(app_settings=settings)
 
     poller = client.web_apps.create_or_update_slot(resource_group_name, webapp, slot_def, slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -1913,6 +1971,55 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
 
 def show_diagnostic_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_diagnostic_logs_configuration', slot)
+
+
+def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    if deployment_id:
+        deployment_log_url = '{}/api/deployments/{}'.format(scm_url, deployment_id)
+    else:
+        deployment_log_url = '{}/api/deployments/'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+
+    import urllib3
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    import requests
+    response = requests.get(deployment_log_url, headers=headers)
+
+    if response.status_code != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            scm_url, response.status_code, response.reason))
+
+    if deployment_id:
+        return response.json() or {}
+
+    sortedLogs = sorted(
+        response.json(),
+        key=lambda x: x['start_time'],
+        reverse=True
+    )
+    if sortedLogs:
+        return sortedLogs[0]
+    return {}
+
+
+def list_deployment_logs(cmd, resource_group, name, slot=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    deployment_log_url = '{}/api/deployments/'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+
+    import urllib3
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    import requests
+    response = requests.get(deployment_log_url, headers=headers)
+
+    if response.status_code != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            scm_url, response.status_code, response.reason))
+
+    return response.json() or []
 
 
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
@@ -2786,7 +2893,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
 
         if res_dict.get('status', 0) == 3:
             _configure_default_logging(cmd, rg_name, name)
-            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
+            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log deployment show
                            -n {} -g {}""".format(res_dict, name, rg_name))
         if res_dict.get('status', 0) == 4:
             break

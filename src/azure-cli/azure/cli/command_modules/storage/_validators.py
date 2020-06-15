@@ -127,7 +127,8 @@ def validate_client_parameters(cmd, namespace):
             if is_storagev2(prefix):
                 from azure.cli.core._profile import Profile
                 profile = Profile(cli_ctx=cmd.cli_ctx)
-                n.token_credential, _, _ = profile.get_login_credentials(resource="https://storage.azure.com")
+                n.token_credential, _, _ = profile.get_login_credentials(
+                    resource="https://storage.azure.com", subscription_id=n._subscription)
             # Otherwise, we will assume it is in track1 and keep previous token updater
             else:
                 n.token_credential = _create_token_credential(cmd.cli_ctx)
@@ -1135,6 +1136,8 @@ def validate_azcopy_remove_arguments(cmd, namespace):
 
 
 def as_user_validator(namespace):
+    if hasattr(namespace, 'token_credential') and not namespace.as_user:
+        raise CLIError('incorrect usage: specify --as-user when --auth-mode login is used to get user delegation key.')
     if namespace.as_user:
         if namespace.expiry is None:
             raise argparse.ArgumentError(

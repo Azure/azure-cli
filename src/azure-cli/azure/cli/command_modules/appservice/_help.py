@@ -1298,9 +1298,9 @@ examples:
   - name: Create a web app with the default configuration.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName
-  - name: Create a web app with a NodeJS 6.2 runtime and deployed from a local git repository.
+  - name: Create a web app with a NodeJS 10.14 runtime and deployed from a local git repository.
     text: >
-        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|6.2" --deployment-local-git
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --runtime "node|10.14" --deployment-local-git
   - name: Create a web app with an image from DockerHub.
     text: >
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName -i nginx
@@ -1668,6 +1668,52 @@ short-summary: Start live log tracing for a web app.
 long-summary: This command may not work with web apps running on Linux.
 """
 
+helps['webapp log deployment'] = """
+type: group
+short-summary: Manage web app deployment logs.
+"""
+
+helps['webapp log deployment show'] = """
+type: command
+short-summary: Show deployment logs of the latest deployment, or a specific deployment if deployment-id is specified.
+examples:
+  - name: Show the deployment logs of the latest deployment
+    text: az webapp log deployment show --name MyWebApp --resource-group MyResourceGroup
+  - name: Show the deployment logs of a particular deployment
+    text: az webapp log deployment show --name MyWebApp --resource-group MyResourceGroup --deployment-id MyDeploymentId
+"""
+
+helps['webapp log deployment list'] = """
+type: command
+short-summary: List deployment logs of the deployments associated with web app
+examples:
+  - name: List the deployment logs
+    text: az webapp log deployment list --name MyWebApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp log deployment'] = """
+type: group
+short-summary: Manage function app deployment logs.
+"""
+
+helps['functionapp log deployment show'] = """
+type: command
+short-summary: Show deployment logs of the latest deployment, or a specific deployment if deployment-id is specified.
+examples:
+  - name: Show the deployment logs of the latest deployment
+    text: az functionapp log deployment show --name MyFunctionApp --resource-group MyResourceGroup
+  - name: Show the deployment logs of a particular deployment
+    text: az functionapp log deployment show --name MyFunctionApp --resource-group MyResourceGroup --deployment-id MyDeploymentId
+"""
+
+helps['functionapp log deployment list'] = """
+type: command
+short-summary: List deployment logs of the deployments associated with function app
+examples:
+  - name: List the deployment logs
+    text: az functionapp log deployment list --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
 helps['webapp restart'] = """
 type: command
 short-summary: Restart a web app.
@@ -1912,7 +1958,7 @@ helps['appservice ase list'] = """
     examples:
     - name: List all app service environments in subscription.
       text: az appservice ase list
-    - name: List all app service environments in resource group.
+    - name: List all app service environment in resource group.
       text: az appservice ase list --resource-group MyResourceGroup
 """
 
@@ -1990,4 +2036,176 @@ helps['appservice ase delete'] = """
     examples:
     - name: Delete app service environment.
       text: az appservice ase delete -n MyAseName
+"""
+
+helps['staticwebapp'] = """
+    type: group
+    short-summary: Manage static apps.
+"""
+
+helps['staticwebapp list'] = """
+    type: command
+    short-summary: List all static app resources in a subscription, or in resource group if provided
+    examples:
+    - name: List static apps in a subscription.
+      text: az staticwebapp list
+"""
+
+helps['staticwebapp browse'] = """
+    type: command
+    short-summary: Show details of a static app.
+    examples:
+    - name: Show static app in a subscription.
+      text: az staticwebapp browse -n MyStaticAppName
+"""
+
+helps['staticwebapp create'] = """
+    type: command
+    short-summary: Create a static app with content from GitHubRepository URL provided in source on provided branch. Return the app created.
+    examples:
+    - name: Create static app in a subscription.
+      text: az staticwebapp create -n MyStaticAppName -g MyExistingRg
+       -s https://github.com/JohnDoe/my-first-static-web-app -l WestUs2 -b master
+"""
+
+helps['staticwebapp disconnect'] = """
+    type: command
+    short-summary: Disconnect source control to enable connecting to a different repo.
+    examples:
+    - name: Disconnect static app.
+      text: az staticwebapp disconnect -n MyStaticAppName
+"""
+
+helps['staticwebapp reconnect'] = """
+    type: command
+    short-summary: Connect to a repo and branch following a disconnect command.
+    examples:
+    - name: Connect a repo and branch to static app.
+      text: az staticwebapp reconnect -n MyStaticAppName --source MyGitHubRepo -b master --token MyAccessToken
+"""
+
+helps['staticwebapp delete'] = """
+    type: command
+    short-summary: Delete a static app.
+    examples:
+    - name: Delete a static app.
+      text: az staticwebapp delete -n MyStaticAppName -g MyRg
+"""
+
+helps['staticwebapp environment'] = """
+    type: group
+    short-summary: Manage environment of the static app.
+"""
+
+helps['staticwebapp environment list'] = """
+    type: command
+    short-summary: List all environment of the static app including production.
+    examples:
+    - name: List static app environment.
+      text: az staticwebapp environment list -n MyStaticAppName
+"""
+
+helps['staticwebapp environment show'] = """
+    type: command
+    short-summary: Show information about the production environment or the specified environment.
+    examples:
+    - name: Show a static app environment.
+      text: az staticwebapp environment show -n MyStaticAppName
+"""
+
+helps['staticwebapp environment functions'] = """
+    type: command
+    short-summary: Show information about functions.
+    examples:
+    - name: Show static app functions.
+      text: az staticwebapp environment functions -n MyStaticAppName
+"""
+
+helps['staticwebapp hostname'] = """
+    type: group
+    short-summary: Manage custom hostnames of Functions of the static app.
+"""
+
+helps['staticwebapp hostname list'] = """
+    type: command
+    short-summary: List custom hostnames of the static app.
+    examples:
+    - name: List custom hostnames of the static app.
+      text: az staticwebapp hostname list -n MyStaticAppName
+"""
+
+helps['staticwebapp hostname set'] = """
+    type: command
+    short-summary: Set given sub-domain hostname to the static app. Please configure a CNAME record with your DNS provider.
+    examples:
+    - name: Set hostname to the static app.
+      text: az staticwebapp hostname set -n MyStaticAppName --hostname www.example.com
+"""
+
+helps['staticwebapp hostname delete'] = """
+    type: command
+    short-summary: Delete given hostname of the static app.
+    examples:
+    - name: Delete given hostname of the static app.
+      text: az staticwebapp hostname delete -n MyStaticAppName --hostname HostnameToDelete
+"""
+
+helps['staticwebapp appsettings'] = """
+    type: group
+    short-summary: Manage app settings of Functions of the static app.
+"""
+
+helps['staticwebapp appsettings list'] = """
+    type: command
+    short-summary: List function app settings of the static app. A function must first be deployed to use this method.
+    examples:
+    - name: List function app settings of the static app.
+      text: az staticwebapp appsettings list -n MyStaticAppName
+"""
+
+helps['staticwebapp appsettings set'] = """
+    type: command
+    short-summary: Set (replace) function app settings of the static app.
+    examples:
+    - name: Set (replace) function app settings of the static app.
+      text: az staticwebapp appsettings set -n MyStaticAppName --setting-names key1=val1 key2=val2
+"""
+
+helps['staticwebapp appsettings delete'] = """
+    type: command
+    short-summary: Delete function app settings with given keys of the static app.
+    examples:
+    - name: Delete given app settings of the static app.
+      text: az staticwebapp appsettings delete -n MyStaticAppName --setting-names key1 key2
+"""
+
+helps['staticwebapp users'] = """
+    type: group
+    short-summary: Manage users of the static app.
+"""
+
+helps['staticwebapp users list'] = """
+    type: command
+    short-summary: Lists users and assigned roles, limited to users who accepted their invites.
+    examples:
+    - name: Lists users and assigned roles.
+      text: az staticwebapp users list -n MyStaticAppName
+"""
+
+helps['staticwebapp users invite'] = """
+    type: command
+    short-summary: Create invitation link for specified user to the static app.
+    examples:
+    - name: Create invitation link for specified user to the static app.
+      text: az staticwebapp users invite -n MyStaticAppName --authentication-provider GitHub --user-details JohnDoe
+       --role Contributor --domain static-app-001.azurestaticapps.net --invitation-expiration-in-hours 1
+
+"""
+
+helps['staticwebapp users update'] = """
+    type: command
+    short-summary: Updates a user entry with the listed roles. Either user details or user id is required.
+    examples:
+    - name: Updates a user entry with the listed roles.
+      text: az staticwebapp users update -n MyStaticAppName --user-details JohnDoe --role Contributor
 """
