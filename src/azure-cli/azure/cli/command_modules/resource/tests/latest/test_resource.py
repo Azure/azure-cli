@@ -482,22 +482,22 @@ class TagScenarioTest(ScenarioTest):
 
         # 1. pass in an empty tag set, should throw error
         with self.assertRaises(IncorrectUsageError):
-            self.cmd('tag create -id {resource_id} --tags', checks=self.check('tags', {}))
+            self.cmd('tag create --resource-id {resource_id} --tags', checks=self.check('tags', {}))
 
         # 2. pass in a complete tag string
         tag_dict1 = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2'}
-        self.cmd('tag create -id {resource_id} --tags {expected_tags1}', checks=[
+        self.cmd('tag create --resource-id {resource_id} --tags {expected_tags1}', checks=[
             self.check('properties.tags', tag_dict1)
         ])
 
         # 3. pass in one incomplete tag string
         tag_dict2 = {'cliName1': 'cliValue1', 'cliName2': ''}
-        self.cmd('tag create -id {resource_id} --tags {expected_tags2}', checks=[
+        self.cmd('tag create --resource-id {resource_id} --tags {expected_tags2}', checks=[
             self.check('properties.tags', tag_dict2)
         ])
 
         # 4. clean up: delete the existing tags
-        self.cmd('tag delete --resourceid {resource_id}', checks=self.is_empty())
+        self.cmd('tag delete --resource-id {resource_id}', checks=self.is_empty())
 
     def test_tag_update_subscription(self):
         subscription_id = '/subscriptions/' + self.get_subscription_id()
@@ -535,28 +535,28 @@ class TagScenarioTest(ScenarioTest):
         })
 
         # setup original
-        self.cmd('tag create -id {resource_id} --tags {original_tags}')
+        self.cmd('tag create --resource-id {resource_id} --tags {original_tags}')
 
         # 1. test merge operation
         after_merge_tags_dict = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2', 'cliName3': 'cliValue3'}
-        self.cmd('tag update -id {resource_id} --operation {merge_operation} --tags {merge_tags}', checks=[
+        self.cmd('tag update --resource-id {resource_id} --operation {merge_operation} --tags {merge_tags}', checks=[
             self.check('properties.tags', after_merge_tags_dict)
         ])
 
         # 2. test replace operation
         after_replace_tags_dict = {'cliName1': 'cliValue1', 'cliName4': 'cliValue4'}
-        self.cmd('tag update -id {resource_id} --operation {replace_operation} --tags {replace_tags}', checks=[
+        self.cmd('tag update --resource-id {resource_id} --operation {replace_operation} --tags {replace_tags}', checks=[
             self.check('properties.tags', after_replace_tags_dict)
         ])
 
         # 3. test delete operation
         after_delete_tags_dict = {'cliName1': 'cliValue1'}
-        self.cmd('tag update -id {resource_id} --operation {delete_operation} --tags {delete_tags}', checks=[
+        self.cmd('tag update --resource-id {resource_id} --operation {delete_operation} --tags {delete_tags}', checks=[
             self.check('properties.tags', after_delete_tags_dict)
         ])
 
         # 4. clean up: delete the existing tags
-        self.cmd('tag delete -id {resource_id}', checks=self.is_empty())
+        self.cmd('tag delete --resource-id {resource_id}', checks=self.is_empty())
 
     def test_tag_get_subscription(self):
         subscription_id = '/subscriptions/' + self.get_subscription_id()
@@ -588,16 +588,16 @@ class TagScenarioTest(ScenarioTest):
         })
 
         # setup original
-        self.cmd('tag create -id {resource_id} --tags {original_tags}')
+        self.cmd('tag create --resource-id {resource_id} --tags {original_tags}')
 
         # test get operation
         expected_tags_dict = {'cliName1': 'cliValue1', 'cliName2': 'cliValue2'}
-        self.cmd('tag list -id {resource_id}', checks=[
+        self.cmd('tag list --resource-id {resource_id}', checks=[
             self.check('properties.tags', expected_tags_dict)
         ])
 
         # clean up: delete the existing tags
-        self.cmd('tag delete -id {resource_id}', checks=self.is_empty())
+        self.cmd('tag delete --resource-id {resource_id}', checks=self.is_empty())
 
 
 class ProviderRegistrationTest(ScenarioTest):
