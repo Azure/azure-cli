@@ -142,7 +142,7 @@ See [Extension Metadata](metadata.md) for more information.
 
 Also, see the [FAQ](faq.md).
 
-### What's differencies between hosting and not hosting source code in Azure/azure-cli-extensions
+### Differences between hosting and not hosting source code in Azure/azure-cli-extensions
 
 An advantage of hosting extension in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensionsb) is that you could save the time to repeatedly build and upload the WHL file to pass CI checks.
 
