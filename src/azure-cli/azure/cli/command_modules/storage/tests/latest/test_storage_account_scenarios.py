@@ -296,6 +296,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage logging update --services b --log r --retention 1 '
                  '--service b --connection-string {}'.format(connection_string))
+        with self.assertRaisesRegexp(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
+            self.cmd('storage logging update --services t --log r --retention 1 '
+                     '--service t --connection-string {}'.format(connection_string))
 
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('blob.read', True),
