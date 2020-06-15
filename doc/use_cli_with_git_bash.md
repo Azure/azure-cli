@@ -45,5 +45,5 @@ The [entry script](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/az)
 
 According to [_exec, _wexec Functions](https://docs.microsoft.com/en-us/cpp/c-runtime-library/exec-wexec-functions?view=vs-2019), `os.exec` internally uses [CreateProcess](https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw) which doesn't wait for the sub-process.
 
-#### Exit Code is 0 even the command fails
+#### Exit Code is 0 even when the command fails
 Related to the above issue, Windows creates a new process and exits the current one with `os.exec`. Hence the calling program only sees that the script has terminated without an issue (See this [comment](https://bugs.python.org/issue9148#msg109179)). The exit code does not reflect the actual result of the command execution in the new process.
