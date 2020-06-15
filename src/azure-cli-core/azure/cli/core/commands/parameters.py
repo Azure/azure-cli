@@ -18,7 +18,6 @@ from knack.arguments import (
     CLIArgumentType, CaseInsensitiveList, ignore_type, ArgumentsContext)
 from knack.log import get_logger
 from knack.util import CLIError
-from enum import Enum
 
 logger = get_logger(__name__)
 
