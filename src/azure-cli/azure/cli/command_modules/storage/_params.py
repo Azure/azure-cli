@@ -404,7 +404,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry', type=get_datetime_type(True))
         c.argument('start', type=get_datetime_type(True))
         c.argument('account_name', acct_name_type, options_list=['--account-name'])
-        c.argument('permission', options_list=('--permissions',),
+        c.argument('permission', options_list=('--permissions',), required=True,
                    help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
                        get_permission_help_string(t_account_permissions)),
                    validator=get_permission_validator(t_account_permissions))
@@ -466,7 +466,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
                                                                   'get_container_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_blob_permissions)),
                    validator=get_permission_validator(t_blob_permissions))
         c.ignore('sas_token')
@@ -776,7 +776,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_container_permissions, 'container_name',
                                                                   'get_container_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_container_permissions)),
                    validator=get_permission_validator(t_container_permissions))
         c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
@@ -858,7 +858,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_share_permissions, 'share_name', 'get_share_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
         c.ignore('sas_token')
@@ -909,7 +909,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the container\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_file_svc, 'container_name', 'get_container_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_file_permissions)),
                    validator=get_permission_validator(t_file_permissions))
         c.ignore('sas_token')
@@ -1019,7 +1019,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the share\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_queue_permissions, 'queue_name', 'get_queue_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format(get_permission_help_string(t_queue_permissions)),
                    validator=get_permission_validator(t_queue_permissions))
         c.ignore('sas_token')
@@ -1100,7 +1100,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('id', options_list='--policy-name',
                    help='The name of a stored access policy within the table\'s ACL.',
                    completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_acl'))
-        c.argument('permission', options_list='--permissions',
+        c.argument('permission', options_list='--permissions', required=True,
                    help=sas_help.format('(r)ead/query (a)dd (u)pdate (d)elete'),
                    validator=table_permission_validator)
         c.ignore('sas_token')
