@@ -185,6 +185,14 @@ def load_command_table(self, _):
         g.custom_command('config', 'config_diagnostics', validator=validate_app_or_slot_exists_in_rg)
         g.custom_show_command('show', 'show_diagnostic_settings', validator=validate_app_or_slot_exists_in_rg)
 
+    with self.command_group('webapp log deployment') as g:
+        g.custom_show_command('show', 'show_deployment_log')
+        g.custom_command('list', 'list_deployment_logs')
+
+    with self.command_group('functionapp log deployment') as g:
+        g.custom_show_command('show', 'show_deployment_log')
+        g.custom_command('list', 'list_deployment_logs')
+
     with self.command_group('webapp deployment slot') as g:
         g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
         g.custom_command('delete', 'delete_slot')
