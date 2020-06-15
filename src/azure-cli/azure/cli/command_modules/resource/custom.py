@@ -290,8 +290,8 @@ def _deploy_arm_template_core_unmodified(cli_ctx, resource_group_name, template_
                                          mode=None, rollback_on_error=None, validate_only=False, no_wait=False,
                                          aux_subscriptions=None, aux_tenants=None, no_prompt=False):
     DeploymentProperties, TemplateLink, OnErrorDeployment, Deployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
-                                                                    'DeploymentProperties', 'TemplateLink',
-                                                                    'OnErrorDeployment', 'Deployment', mod='models')
+                                                                                'DeploymentProperties', 'TemplateLink',
+                                                                                'OnErrorDeployment', 'Deployment', mod='models')
     template_link = None
     template_obj = None
     on_error_deployment = None
@@ -1560,7 +1560,7 @@ def invoke_resource_action(cmd, action, request_body=None, resource_ids=None,
                                                                               resource_name)]
 
     return _single_or_collection([_get_rsrc_util_from_parsed_id(cmd.cli_ctx, id_dict, api_version)
-                                 .invoke_action(action, request_body) for id_dict in parsed_ids])
+                                  .invoke_action(action, request_body) for id_dict in parsed_ids])
 
 
 def get_deployment_operations(client, resource_group_name, deployment_name, operation_ids):
@@ -2515,28 +2515,28 @@ def get_tag_at_scope(cmd, resource_id=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
     if resource_id is not None:
         return rcf.tags.get_at_scope(scope=resource_id)
-    else:
-        return rcf.tags.list()
+
+    return rcf.tags.list()
 
 
 def create_or_update_tag_at_scope(cmd, resource_id=None, tags=None, tag_name=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
     if resource_id is not None:
-        if tags is None or len(tags) == 0:
+        if tags is None or bool(tags) is False:
             raise IncorrectUsageError("Tags could not be empty.")
         Tags = cmd.get_models('Tags')
         tag_obj = Tags(tags=tags)
         return rcf.tags.create_or_update_at_scope(scope=resource_id, properties=tag_obj)
-    else:
-        return rcf.tags.create_or_update(tag_name=tag_name)
+
+    return rcf.tags.create_or_update(tag_name=tag_name)
 
 
 def delete_tag_at_scope(cmd, resource_id=None, tag_name=None):
     rcf = _resource_client_factory(cmd.cli_ctx)
     if resource_id is not None:
         return rcf.tags.delete_at_scope(scope=resource_id)
-    else:
-        return rcf.tags.delete(tag_name=tag_name)
+
+    return rcf.tags.delete(tag_name=tag_name)
 
 
 def update_tag_at_scope(cmd, resource_id, tags, operation):
@@ -2544,7 +2544,6 @@ def update_tag_at_scope(cmd, resource_id, tags, operation):
     Tags = cmd.get_models('Tags')
     tag_obj = Tags(tags=tags)
     return rcf.tags.update_at_scope(scope=resource_id, properties=tag_obj, operation=operation)
-    
 # endregion
 
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
@@ -2787,7 +2786,7 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
             return npv[0] if npv else rt[0].api_versions[0]
         raise IncorrectUsageError(
             'API version is required and could not be resolved for resource {}'
-                .format(resource_type))
+            .format(resource_type))
 
     @staticmethod
     def _resolve_api_version_by_id(rcf, resource_id):
