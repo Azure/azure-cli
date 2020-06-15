@@ -2402,6 +2402,125 @@ class WebappNetworkConnectionTests(ScenarioTest):
         ])
 
 
+# LiveScenarioTest due to issue https://github.com/Azure/azure-cli/issues/10705
+class FunctionappDeploymentLogsScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_functionapp_show_deployment_logs(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='show-deployment-funcapp', length=40)
+        plan_name = self.create_random_name(prefix='show-deployment-funcapp', length=40)
+        zip_file = os.path.join(TEST_DIR, 'sample_dotnet_function/sample_dotnet_function.zip')
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp log deployment show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+        deployment_1 = self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)
+        ]).get_output_in_json()
+        self.cmd('functionapp log deployment show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('id', deployment_1['id'])
+        ])
+
+        deployment_2 = self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)
+        ]).get_output_in_json()
+        self.cmd('functionapp log deployment show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('id', deployment_2['id'])
+        ])
+        self.cmd('functionapp log deployment show -g {} -n {} --deployment-id {}'.format(resource_group, functionapp_name, deployment_1['id']), checks=[
+            JMESPathCheck('id', deployment_1['id'])
+        ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_functionapp_list_deployment_logs(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(prefix='show-deployment-funcapp', length=40)
+        plan_name = self.create_random_name(prefix='show-deployment-funcapp', length=40)
+        zip_file = os.path.join(TEST_DIR, 'sample_dotnet_function/sample_dotnet_function.zip')
+        self.cmd('functionapp plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime dotnet'.format(resource_group, functionapp_name, plan_name, storage_account))
+        self.cmd('functionapp log deployment list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+        deployment_1 = self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)
+        ]).get_output_in_json()
+        self.cmd('functionapp log deployment list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].id', deployment_1['id']),
+        ])
+
+        self.cmd('functionapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, functionapp_name, zip_file)).assert_with_checks([
+            JMESPathCheck('status', 4),
+            JMESPathCheck('deployer', 'ZipDeploy'),
+            JMESPathCheck('complete', True)
+        ]).get_output_in_json()
+        self.cmd('functionapp log deployment list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('length(@)', 2)
+        ])
+
+
+class WebappDeploymentLogsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_webapp_show_deployment_logs(self, resource_group):
+        webapp_name = self.create_random_name('show-deployment-webapp', 40)
+        plan_name = self.create_random_name('show-deployment-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'test.zip')
+
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+        deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('id', deployment_1['id']),
+        ])
+
+        deployment_2 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp log deployment show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('id', deployment_2['id']),
+        ])
+        self.cmd('webapp log deployment show -g {} -n {} --deployment-id {}'.format(resource_group, webapp_name, deployment_1['id']), checks=[
+            JMESPathCheck('id', deployment_1['id']),
+        ])
+
+    @ResourceGroupPreparer()
+    def test_webapp_list_deployment_logs(self, resource_group):
+        webapp_name = self.create_random_name('list-deployment-webapp', 40)
+        plan_name = self.create_random_name('list-deployment-plan', 40)
+        zip_file = os.path.join(TEST_DIR, 'test.zip')
+
+        self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 0)
+        ])
+
+        deployment_1 = self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].id', deployment_1['id']),
+        ])
+
+        self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).get_output_in_json()
+        self.cmd('webapp log deployment list -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('length(@)', 2)
+        ])
+
+
 class WebappLocalContextScenarioTest(LocalContextScenarioTest):
     @ResourceGroupPreparer(location='westus2')
     def test_webapp_local_context(self, resource_group):
