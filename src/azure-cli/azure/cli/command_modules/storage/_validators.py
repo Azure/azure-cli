@@ -1260,3 +1260,10 @@ def validate_encryption_scope_client_params(ns):
 def validate_access_control(namespace):
     if namespace.acl and namespace.permissions:
         raise CLIError('usage error: invalid when specifying both --acl and --permissions.')
+
+
+def validate_logging_version(namespace):
+    if 't' in namespace.services and namespace.version != '1.0':
+        raise CLIError(
+            'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
+            'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
