@@ -65,7 +65,7 @@ class StorageArgumentContext(AzArgumentContext):
         self.argument('ip', type=ipv4_range_type,
                       help='Specifies the IP address or range of IP addresses from which to accept requests. Supports '
                            'only IPv4 style addresses.')
-        self.argument('expiry', type=get_datetime_type(True),
+        self.argument('expiry', type=get_datetime_type(True), required=True,
                       help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid. Do not '
                            'use if a stored access policy is referenced with --id that specifies this value.')
         self.argument('start', type=get_datetime_type(True),
