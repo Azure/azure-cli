@@ -321,8 +321,6 @@ def load_command_table(self, _):
         g.show_command('show', 'get', table_transformer=transform_extension_show_table_output)
         g.custom_command('set', 'set_extension', supports_no_wait=True)
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
-        g.custom_command('publish', 'publish_extension')
-        g.custom_command('publish-version', 'publish_extension_version')
         g.wait_command('wait')
 
     with self.command_group('vm shared-extension', compute_vm_shared_extension_sdk) as g:

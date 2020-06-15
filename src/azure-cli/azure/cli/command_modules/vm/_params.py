@@ -391,6 +391,8 @@ def load_arguments(self, _):
         c.argument('eula', help='The privacy statement uri.')
         c.argument('privacy', help='The privacy statement URI.')
         c.argument('homepage', help='The homepage URI.')
+        c.argument('publisher', help='The name of the Shared VM Extension publisher.')
+        c.argument('type0', options_list=['--type'], help='The name of the Shared VM Extension type.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('tags', tags_type)
 

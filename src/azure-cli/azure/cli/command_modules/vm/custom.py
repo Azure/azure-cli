@@ -1534,7 +1534,7 @@ def set_extension(cmd, resource_group_name, vm_name, vm_extension_name, publishe
 
 def create_shared_extension(cmd, client, resource_group_name, shared_vm_extension_name, label=None, description=None,
                             company_name=None, eula=None, privacy=None, homepage=None, location=None, tags=None,
-                            no_wait=False):
+                            no_wait=False, publisher=None, type0=None):
     body = {}
     if location is not None:
         body['location'] = location
@@ -1552,6 +1552,13 @@ def create_shared_extension(cmd, client, resource_group_name, shared_vm_extensio
         body['homepage_uri'] = homepage
     if eula is not None:
         body['eula'] = eula
+    body['identifier'] = {}
+    if publisher is not None:
+        body['identifier']['publisher'] = publisher
+    if type0 is not None:
+        body['identifier']['type'] = type0
+    if body['identifier'] == {}:
+        del body['identifier']
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, shared_vm_extension_name, body)
 
 

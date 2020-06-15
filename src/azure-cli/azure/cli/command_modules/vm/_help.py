@@ -1145,9 +1145,39 @@ type: group
 short-summary: Manage shared VM extensions.
 """
 
+helps['vm shared-extension create'] = """
+type: command
+short-summary: Create a shared VM extension.
+"""
+
+helps['vm shared-extension show'] = """
+type: command
+short-summary: Show a shared VM extension.
+"""
+
+helps['vm shared-extension delete'] = """
+type: command
+short-summary: Delete a shared VM extension.
+"""
+
 helps['vm shared-extension version'] = """
 type: group
 short-summary: Manage shared VM extension versions.
+"""
+
+helps['vm shared-extension version create'] = """
+type: command
+short-summary: Create a shared VM extension version.
+"""
+
+helps['vm shared-extension version show'] = """
+type: command
+short-summary: Show a shared VM extension version.
+"""
+
+helps['vm shared-extension version delete'] = """
+type: command
+short-summary: Delete a shared VM extension version.
 """
 
 helps['vm extension delete'] = """
