@@ -169,9 +169,11 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('No connection string, account key or sas token found, we will query account keys for your '
-                       'storage account. Please try to use --auth-mode login or provide one of the following parameters'
-                       ': connection string, account key or sas token for your storage account.')
+        logger.warning('There is no credential provided in your command and environment, we will query account key '
+                       'for your storage account. \nPlease provide connection string, account key or sas token as '
+                       'credential, or use `--auth-mode login` if you have required RBAC roles in your command or '
+                       'environment. For more information, '
+                       'you can see https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
