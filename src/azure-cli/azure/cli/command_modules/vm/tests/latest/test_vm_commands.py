@@ -4532,5 +4532,17 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
         self.cmd('vm auto-shutdown -g {rg} -n {vm} --off')
 
 
+class SharedVMExtensionTest(ScenarioTest):
+
+    def test_shared_vm_extension(self):
+        """
+        az vm shared-extension create -g rg -n ext1 --publisher testPublisher --type testType --label testLabel --description "This is the description." --company-name Microsoft
+        az vm shared-extension show -g rg -n ext1
+        az vm shared-extension delete -g rg -n ext1
+        :return:
+        """
+        pass
+
+
 if __name__ == '__main__':
     unittest.main()

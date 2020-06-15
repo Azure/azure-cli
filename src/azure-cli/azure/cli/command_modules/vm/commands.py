@@ -323,12 +323,12 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
         g.wait_command('wait')
 
-    with self.command_group('vm shared-extension', compute_vm_shared_extension_sdk) as g:
+    with self.command_group('vm shared-extension', compute_vm_shared_extension_sdk, client_factory=cf_vm_shared_ext) as g:
         g.custom_command('create', 'create_shared_extension')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
 
-    with self.command_group('vm shared-extension version', compute_vm_shared_extension_version_sdk) as g:
+    with self.command_group('vm shared-extension version', compute_vm_shared_extension_version_sdk, client_factory=cf_vm_shared_ext_version) as g:
         g.custom_command('create', 'create_shared_extension_version')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
