@@ -2001,7 +2001,7 @@ long-summary:
 parameters:
   - name: --name -n
     short-summary: The name of the tag to be deleted.
-  - name: --resource-id 
+  - name: --resource-id
     short-summary: The resource identifier for the entity being tagged. A resource, a resource group or a subscription may be tagged.
 examples:
   - name: Delete a tag from the subscription.
@@ -2043,9 +2043,9 @@ short-summary: Selectively updates the set of tags on a specific resource.
 long-summary: >
     The az tag update cmdlet with an id selectively updates the set of tags on a resource, resource group or subscription.
     This operation allows replacing, merging or selectively deleting tags on the specified resource, resource group or subscription.
-    The specified entity can have a maximum of 50 tags at the end of the operation. 
-    The 'replace' option replaces the entire set of existing tags with a new set. 
-    The 'merge' option allows adding tags with new names and updating the values of tags with existing names. 
+    The specified entity can have a maximum of 50 tags at the end of the operation.
+    The 'replace' option replaces the entire set of existing tags with a new set.
+    The 'merge' option allows adding tags with new names and updating the values of tags with existing names.
     The 'delete' option allows selectively deleting tags based on given names or name/value pairs.
 parameters:
   - name: --resource-id

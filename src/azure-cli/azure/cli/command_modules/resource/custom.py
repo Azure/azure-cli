@@ -2546,6 +2546,7 @@ def update_tag_at_scope(cmd, resource_id, tags, operation):
     return rcf.tags.update_at_scope(scope=resource_id, properties=tag_obj, operation=operation)
 # endregion
 
+
 class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
     def __init__(self, cli_ctx,
                  resource_group_name=None, resource_provider_namespace=None,
