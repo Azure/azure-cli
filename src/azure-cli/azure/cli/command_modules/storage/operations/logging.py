@@ -28,8 +28,11 @@ def get_logging(client, timeout=None):
             # pylint: disable = no-member
             if ex.args and isinstance(ex.args, tuple) and hasattr(ex.args[0], 'args') and ex.args[0].args \
                     and 'Max retries exceeded with url: /?restype=service&comp=properties' in ex.args[0].args[0]:
-                raise CLIError("Your storage account doesn't support logging for {} service. Please change value for "
-                               "--services in your commands.".format(s.name))
+                raise CLIError(
+                    'Please check the existence of your storage account first. \nThis error may also occur when logging '
+                    'for {} service is not supported in this storage account, '
+                    'and you need to set the service type value in --services to skip get logging for {} service. '
+                    .format(s.name))
             raise ex
 
     return results
