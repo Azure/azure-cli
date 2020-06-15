@@ -41,11 +41,21 @@ Address comments as appropriate and consult the CLI team if something is unclear
 
 ### Publish
 
-Once your extension is ready, you need to build and publish the WHL file to a public location and optionally advertise the new extension in the repo's index.json file for discoverability. For public extensions that are published to a storage account, the following command will accomplish all of this.
+**For the extension that source code is hosted in** [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensionsb), we will help to release once your code is merged into master branch. You must not update [index.json](https://github.com/Azure/azure-cli-extensions/blob/master/src/index.json) manually in this case.
+
+We detect Python package version via `python setup.py --version`. Only when the version is upgraded, the release process is triggered to help you build and upload the extension WHL file, then update the `index.json` automatically. Subsequently, a PR with newer extension info will be created to update `index.json`, we will merge it once CI is passed. Then, a newer extension is published.
+
+**For the extension that source code is not hosted in** [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensionsb), you need to build and upload the WHL file to a public location and optionally advertise the new extension in the repo's index.json file for discoverability. For public extensions that are published to a storage account, the following command will accomplish all of this.
 
 `azdev extension publish <NAME> --update-index [--storage-account NAME --storage-container NAME --storage-subscription GUID]`
 
 The storage fields can be stored in your config file or as environment variables so you need not supply them every time. Once the publish command has been run (you must be logged in to the Azure CLI for it to succeed), you can open a PR that will contain your code changes and the index update. This used to be done in two steps.
+
+_An advantage that host extension in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensionsb) is that you could save the time to repeatedly build and upload the WHL file to pass some CI checks._
+
+Once your extension is published, you can view it via `az extension list-avaliable -o table`.
+
+However, if you want your extension listed in [Official Available Extensions for Azure CLI](https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-list?view=azure-cli-latest), you have to wait until next [Azure CLI release](https://github.com/Azure/azure-cli/milestones). We will update that documantion everytime Azure CLI is released. Or, you could fire an PR to update it manually if it's urgent.
 
 ## Uncommon Flows
 
