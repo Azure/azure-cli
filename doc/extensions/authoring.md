@@ -51,8 +51,6 @@ We detect Python package version via `python setup.py --version`. Only when the 
 
 The storage fields can be stored in your config file or as environment variables so you need not supply them every time. Once the publish command has been run (you must be logged in to the Azure CLI for it to succeed), you can open a PR that will contain your code changes and the index update. This used to be done in two steps.
 
-_An advantage that host extension in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensionsb) is that you could save the time to repeatedly build and upload the WHL file to pass some CI checks._
-
 Once your extension is published, you can view it via `az extension list-avaliable -o table`.
 
 However, if you want your extension listed in [Official Available Extensions for Azure CLI](https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-list?view=azure-cli-latest), you have to wait until next [Azure CLI release](https://github.com/Azure/azure-cli/milestones). We will update that documantion everytime Azure CLI is released. Or, you could fire an PR to update it manually if it's urgent.
@@ -143,3 +141,10 @@ See [Extension Metadata](metadata.md) for more information.
 
 
 Also, see the [FAQ](faq.md).
+
+### What's differencies between host and not host source code in Azure/azure-cli-extensions
+
+An advantage that hosting extension in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensionsb) is that you could save the time to repeatedly build and upload the WHL file to pass some CI checks.
+
+As for hosting outside, you could easily provide a direct and explicit entry to end user with your customized introduction page, like [Azure DevOps Extension for Azure CLI](https://github.com/Azure/azure-devops-cli-extension), which is fit to popularize your Azure CLI extension if you plan to.
+Otherwise, user have to go deeper to find the detail page in Azure/azure-cli-extensions, such as `src/azure-firewall`, `vm-repair`.
