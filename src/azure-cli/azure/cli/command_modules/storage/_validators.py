@@ -1263,7 +1263,7 @@ def validate_access_control(namespace):
 
 
 def validate_logging_version(namespace):
-    if 't' in namespace.services and namespace.version != '1.0':
+    if 't' in namespace.services and namespace.version != 1.0:
         raise CLIError(
             'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
             'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
