@@ -175,7 +175,7 @@ def transform_metadata(result):
 def _transform_page_ranges(page_ranges):
     # in track 2 sdk, page ranges result is tuple(list(dict(str, str), list(dict(str, str))
     if page_ranges and len(page_ranges) == 2:
-        result = page_ranges[0]
+        result = page_ranges[0] if page_ranges[0] else [{}]
         result[0]['isCleared'] = bool(page_ranges[1])
         return result
     return None
