@@ -407,6 +407,7 @@ class TestExtensionCommands(unittest.TestCase):
         old_path_1 = azure.__path__[:]
         old_path_2 = azure.mgmt.__path__[:]
 
+        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = get_extension('myfirstcliextension')
         azure_dir = os.path.join(ext.path, "azure")
         azure_mgmt_dir = os.path.join(azure_dir, "mgmt")
@@ -414,7 +415,6 @@ class TestExtensionCommands(unittest.TestCase):
         os.mkdir(azure_mgmt_dir)
 
         try:
-            add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
             add_extension_to_path(ext.name)
             self.assertSequenceEqual(old_path_1, azure.__path__[:-1])
             self.assertSequenceEqual(old_path_2, azure.mgmt.__path__[:-1])
