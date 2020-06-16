@@ -20,6 +20,7 @@ from azure.cli.command_modules.cosmosdb.actions import (
 from azure.cli.command_modules.cosmosdb.custom import (
     CosmosKeyTypes)
 
+
 SQL_GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{ \\"path\\": \\"/headquarters/employees/?\\"}, { \\"path\\": \\"/\\\\"_etag\\\\"/?\\"}]}"
 """
 
@@ -128,6 +129,7 @@ def load_arguments(self, _):
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', help='The throughput of SQL database (RU/s). Default value is 400')
+        c.argument('max_throughput', help='The maximum throughput of SQL database can scale to (RU/s). Provided when the container is autoscale enabled.')
 
 # SQL container
     with self.argument_context('cosmosdb sql container') as c:
@@ -140,6 +142,7 @@ def load_arguments(self, _):
         c.argument('unique_key_policy', options_list=['--unique-key-policy', '-u'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Unique Key Policy, you can enter it as a string or as a file, e.g., --unique-key-policy @policy-file.json or ' + SQL_UNIQUE_KEY_POLICY_EXAMPLE)
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('throughput', help='The throughput of SQL container (RU/s). Default value is 400')
+        c.argument('max_throughput', help='The maximum throughput of SQL container can scale to (RU/s). Provided when the container is autoscale enabled.')
 
 # SQL stored procedure
     with self.argument_context('cosmosdb sql stored-procedure') as c:
@@ -172,6 +175,7 @@ def load_arguments(self, _):
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', help='The throughput of MongoDB database (RU/s). Default value is 400')
+        c.argument('max_throughput', help='The maximum throughput of MongoDB database can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb mongodb collection') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -180,12 +184,14 @@ def load_arguments(self, _):
         c.argument('shard_key_path', options_list=['--shard'], help="Sharding key path.")
         c.argument('indexes', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexes, you can enter it as a string or as a file, e.g., --idx @indexes-file.json or ' + MONGODB_INDEXES_EXAMPLE)
         c.argument('throughput', help='The throughput of MongoDB collection (RU/s). Default value is 400')
+        c.argument('max_throughput', help='The maximum throughput of MongoDB collection can scale to (RU/s). Provided when the container is autoscale enabled.')
 
 # Cassandra
     with self.argument_context('cosmosdb cassandra keyspace') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('keyspace_name', options_list=['--name', '-n'], help="Keyspace name")
         c.argument('throughput', help='The throughput of Cassandra keyspace (RU/s). Default value is 400')
+        c.argument('max_throughput', help='The maximum throughput of Cassandra keyspace can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb cassandra table') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -194,12 +200,14 @@ def load_arguments(self, _):
         c.argument('default_ttl', options_list=['--ttl'], type=int, help='Default TTL. If the value is missing or set to "-1", items don’t expire. If the value is set to "n", items will expire "n" seconds after last modified time.')
         c.argument('schema', type=shell_safe_json_parse, completer=FilesCompleter(), help='Schema, you can enter it as a string or as a file, e.g., --schema @schema-file.json or ' + CASSANDRA_SCHEMA_EXAMPLE)
         c.argument('throughput', help='The throughput of Cassandra table (RU/s). Default value is 400')
+        c.argument('max_throughput', help='The maximum throughput of Cassandra table can scale to (RU/s). Provided when the container is autoscale enabled.')
 
 # Gremlin
     with self.argument_context('cosmosdb gremlin database') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', help='The throughput Gremlin database (RU/s). Default value is 400')
+        c.argument('max_throughput', help='The maximum throughput of Gremlin database can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb gremlin graph') as c:
         c.argument('account_name', account_name_type, id_part=None)
@@ -210,59 +218,70 @@ def load_arguments(self, _):
         c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or ' + SQL_GREMLIN_INDEXING_POLICY_EXAMPLE)
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('throughput', help='The throughput of Gremlin graph (RU/s). Default value is 400')
+        c.argument('max_throughput', help='The maximum throughput of Gremlin graph can scale to (RU/s). Provided when the container is autoscale enabled.')
 
 # Table
     with self.argument_context('cosmosdb table') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('throughput', help='The throughput of Table (RU/s). Default value is 400')
+        c.argument('max_throughput', help='The maximum throughput Table can scale to (RU/s). Provided when the container is autoscale enabled.')
 
 # Throughput
     with self.argument_context('cosmosdb sql database throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', type=int, help='The throughput of SQL database (RU/s).')
+        c.argument('max_throughput', help='The maximum throughput SQL database can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb sql container throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', database_name_type)
         c.argument('container_name', options_list=['--name', '-n'], help="Container name")
         c.argument('throughput', type=int, help='The throughput of SQL container (RU/s).')
+        c.argument('max_throughput', help='The maximum throughput SQL container can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb mongodb database throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', type=int, help='The throughput of MongoDB database (RU/s).')
+        c.argument('max_throughput', help='The maximum throughput MongoDB database can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb mongodb collection throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', database_name_type)
         c.argument('collection_name', options_list=['--name', '-n'], help="Collection name")
         c.argument('throughput', type=int, help='The throughput of MongoDB collection (RU/s).')
+        c.argument('max_throughput', help='The maximum throughput Table can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb cassandra keyspace throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('keyspace_name', options_list=['--name', '-n'], help="Keyspace name")
         c.argument('throughput', type=int, help='The throughput of Cassandra keyspace (RU/s).')
+        c.argument('max_throughput', help='The maximum throughput Cassandra keyspace can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb cassandra table throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('keyspace_name', options_list=['--keyspace-name', '-k'], help="Keyspace name")
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('throughput', type=int, help='The throughput of Cassandra table (RU/s).')
+        c.argument('max_throughput', help='The maximum throughput Cassandra table can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb gremlin database throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', options_list=['--name', '-n'], help="Database name")
         c.argument('throughput', type=int, help='The throughput of Gremlin database (RU/s).')
+        c.argument('max_throughput', help='The maximum throughput Gremlin database can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb gremlin graph throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('database_name', database_name_type)
         c.argument('graph_name', options_list=['--name', '-n'], help="Grapth name")
         c.argument('throughput', type=int, help='The throughput Gremlin graph (RU/s).')
+        c.argument('max_throughput', help='The maximum throughput Gremlin graph can scale to (RU/s). Provided when the container is autoscale enabled.')
 
     with self.argument_context('cosmosdb table throughput') as c:
         c.argument('account_name', account_name_type, id_part=None)
         c.argument('table_name', options_list=['--name', '-n'], help="Table name")
         c.argument('throughput', type=int, help='The throughput of Table (RU/s).')
+        c.argument('max_throughput', help='The maximum throughput of Table can scale to (RU/s). Provided when the container is autoscale enabled.')

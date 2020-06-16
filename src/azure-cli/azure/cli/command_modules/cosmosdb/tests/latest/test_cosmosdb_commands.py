@@ -48,16 +48,16 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-rules 10.10.10.10')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-rules "{\\"ipAddressOrRange\\": \\"10.10.10.10\\"}" ')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
-            self.check('ipRules', "10.10.10.10"),
+            self.check('ipRules[0].ipAddressOrRange', "10.10.10.10"),
         ])
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
-            self.check('ipRules', "10.10.10.10"),
+            self.check('ipRules[0].ipAddressOrRange', "10.10.10.10"),
         ]).get_output_in_json()
         assert len(account['capabilities']) == 1
         assert account['capabilities'][0]['name'] == "EnableAggregationPipeline"
@@ -881,6 +881,36 @@ class CosmosDBTests(ScenarioTest):
 
         ctn_througput_update = self.cmd('az cosmosdb sql container throughput update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --throughput {tp2}').get_output_in_json()
         assert ctn_througput_update["resource"]["throughput"] == tp2
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_resource_max_throughput')
+    def test_cosmosdb_sql_resource_max_throughput(self, resource_group):
+        tp1 = 6000
+        tp2 = 8000
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=15),
+            'db_name': self.create_random_name(prefix='cli', length=15),
+            'ctn_name': self.create_random_name(prefix='cli', length=15),
+            'part': "/thePartitionKey",
+            'tp1': tp1,
+            'tp2': tp2,
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+
+        self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name} --max-throughput {tp1}')
+        db_throughput_show = self.cmd('az cosmosdb sql database throughput show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
+        assert db_throughput_show["resource"]["autoscaleSettings"].max-throughput == tp1
+
+        db_througput_update = self.cmd('az cosmosdb sql database throughput update -g {rg} -a {acc} -n {db_name} --max-throughput {tp2}').get_output_in_json()
+        assert db_througput_update["resource"]["autoscaleSettings"].max-throughput == tp2
+
+        self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --max-throughput {tp1}')
+        ctn_throughput_show = self.cmd('az cosmosdb sql container throughput show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
+        assert ctn_throughput_show["resource"]["autoscaleSettings"].max-throughput == tp1
+
+        ctn_througput_update = self.cmd('az cosmosdb sql container throughput update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --max-throughput {tp2}').get_output_in_json()
+        assert ctn_througput_update["resource"]["autoscaleSettings"].max-throughput == tp2
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongodb_resource_throughput')
     def test_cosmosdb_mongodb_resource_throughput(self, resource_group):
