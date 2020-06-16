@@ -160,7 +160,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     def test_create_storage_account_with_double_encryption(self, resource_group):
         name = self.create_random_name(prefix='cli', length=24)
         self.cmd('az storage account create -n {} -g {} --require-infrastructure-encryption'.format(
-            name, resource_group))
+            name, resource_group), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('encryption.requireInfrastructureEncryption', True)
+        ])
         self.cmd('az storage account show -n {} -g {}'.format(name, resource_group), checks=[
             JMESPathCheck('name', name),
             JMESPathCheck('encryption.requireInfrastructureEncryption', True)

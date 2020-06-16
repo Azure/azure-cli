@@ -117,6 +117,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if require_infrastructure_encryption:
         params.encryption.require_infrastructure_encryption = require_infrastructure_encryption
+        # TODO: remove this part when server side remove the constraint
+        if encryption_services is None:
+            params.encryption.services = {'blob': {}}
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
