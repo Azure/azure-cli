@@ -87,12 +87,12 @@ def load_command_table(self, _):
     )
 
     compute_vm_shared_extension_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#SharedVmExtensionsOperations.{}',
         client_factory=cf_vm_shared_ext
     )
 
     compute_vm_shared_extension_version_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionsOperations.{}',
+        operations_tmpl='azure.mgmt.compute.operations#SharedVmExtensionVersionsOperations.{}',
         client_factory=cf_vm_shared_ext_version
     )
 
@@ -327,11 +327,13 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_shared_extension')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
+        g.generic_update_command('update')
 
     with self.command_group('vm shared-extension version', compute_vm_shared_extension_version_sdk, client_factory=cf_vm_shared_ext_version) as g:
         g.custom_command('create', 'create_shared_extension_version')
         g.show_command('show', 'get')
         g.command('delete', 'delete')
+        g.generic_update_command('update')
 
     with self.command_group('vm extension image', compute_vm_extension_image_sdk) as g:
         g.show_command('show', 'get')

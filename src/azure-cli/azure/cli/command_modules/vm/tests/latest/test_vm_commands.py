@@ -4536,9 +4536,13 @@ class SharedVMExtensionTest(ScenarioTest):
 
     def test_shared_vm_extension(self):
         """
-        az vm shared-extension create -g rg -n ext1 --publisher testPublisher --type testType --label testLabel --description "This is the description." --company-name Microsoft
-        az vm shared-extension show -g rg -n ext1
-        az vm shared-extension delete -g rg -n ext1
+        az vm shared-extension create -g rg -n Microsoft.Azure.CLI.ext1 --publisher Microsoft.Azure.CLI --type ext1 --label testLabel --description "This is the description." --company-name Microsoft -l centraluseuap
+        az vm shared-extension show -g rg -n Microsoft.Azure.CLI.ext1
+        az vm shared-extension delete -g rg -n Microsoft.Azure.CLI.ext1
+
+        az vm shared-extension version create -g rg -n Microsoft.Azure.CLI.ext1 --version 1.0.0 --media-link http://www.foo.com --regions westus --compute-role PaaS --supported-os Windows -l centraluseuap
+        az vm shared-extension version show -g rg -n Microsoft.Azure.CLI.ext1 --version 1.0.0
+        az vm shared-extension version delete -g rg -n Microsoft.Azure.CLI.ext1 --version 1.0.0
         :return:
         """
         pass
