@@ -149,7 +149,11 @@ jobs:
       pip install virtualenv
       python -m virtualenv venv/
       . ./venv/bin/activate
-      pip install azdev
+      git clone https://github.com/Azure/azure-cli-dev-tools.git
+      cd azure-cli-dev-tools
+      git checkout pep420
+      pip install -e .
+      cd ..
       azdev setup -c $(pwd)
     displayName: 'Install azdev'
 

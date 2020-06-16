@@ -14,7 +14,16 @@ steps:
       chmod +x env/bin/activate
       . env/bin/activate
 
+<<<<<<< HEAD
       pip install -q git+https://github.com/Azure/azure-cli-dev-tools.git@master
+=======
+      git clone https://github.com/Azure/azure-cli-dev-tools.git
+      cd azure-cli-dev-tools
+      git checkout pep420
+      pip install -e .
+      cd ..
+
+>>>>>>> update setup azdev in pipelines
       azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then

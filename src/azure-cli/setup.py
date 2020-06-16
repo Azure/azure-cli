@@ -119,8 +119,13 @@ DEPENDENCIES = [
     'azure-mgmt-sqlvirtualmachine~=0.5.0',
     'azure-mgmt-storage~=11.1.0',
     'azure-mgmt-trafficmanager~=0.51.0',
+<<<<<<< HEAD
     'azure-mgmt-web~=0.47.0',
     'azure-multiapi-storage~=0.3.2',
+=======
+    'azure-mgmt-web~=0.46.0',
+    'azure-multiapi-storage~=0.3.3',
+>>>>>>> update setup azdev in pipelines
     'azure-loganalytics~=0.1.0',
     'azure-storage-blob>=1.3.1,<2.0.0',
     'cryptography>=2.3.1,<3.0.0',
