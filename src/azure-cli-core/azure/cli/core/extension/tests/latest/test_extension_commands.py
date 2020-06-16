@@ -404,28 +404,25 @@ class TestExtensionCommands(unittest.TestCase):
     def test_add_extension_azure_to_path(self):
         import azure
         import azure.mgmt
-        old_path_1 = azure.__path__
-        old_path_2 = azure.mgmt.__path__
-        azure.__path__ = list(old_path_1)
-        azure.mgmt.__path__ = list(old_path_2)
+        old_path_1 = azure.__path__[:]
+        old_path_2 = azure.mgmt.__path__[:]
 
-        add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = get_extension('myfirstcliextension')
-
         azure_dir = os.path.join(ext.path, "azure")
         azure_mgmt_dir = os.path.join(azure_dir, "mgmt")
         os.mkdir(azure_dir)
         os.mkdir(azure_mgmt_dir)
 
         try:
+            add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
             add_extension_to_path(ext.name)
             self.assertSequenceEqual(old_path_1, azure.__path__[:-1])
             self.assertSequenceEqual(old_path_2, azure.mgmt.__path__[:-1])
             self.assertEqual(azure_dir, azure.__path__[-1])
             self.assertEqual(azure_mgmt_dir, azure.mgmt.__path__[-1])
         finally:
-            azure.__path__ = old_path_1
-            azure.mgmt.__path__ = old_path_2
+            azure.__path__[:] = old_path_1
+            azure.mgmt.__path__[:] = old_path_2
 
     def _setup_cmd(self):
         cmd = mock.MagicMock()
