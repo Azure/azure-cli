@@ -353,6 +353,9 @@ examples:
 helps['ad sp create-for-rbac'] = """
 type: command
 short-summary: Create a service principal and configure its access to Azure resources.
+long-summary: >
+    When --skip-assignment is specified, --scopes will be ignored. You may use `az role assignment create` to create
+    role assignments for this service principal later.
 parameters:
   - name: --name -n
     short-summary: a URI to use as the logic name. It doesn't need to exist. If not present, CLI will generate one.
@@ -369,7 +372,9 @@ parameters:
   - name: --scopes
     short-summary: >
         Space-separated list of scopes the service principal's role assignment applies to.
-        Defaults to the root of the current subscription.
+        Defaults to the root of the current subscription. e.g., /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333,
+        /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup, or
+        /subscriptions/0b1f6471-1bf0-4dda-aec3-111122223333/resourceGroups/myGroup/providers/Microsoft.Compute/virtualMachines/myVM
   - name: --role
     short-summary: Role of the service principal.
 examples:
