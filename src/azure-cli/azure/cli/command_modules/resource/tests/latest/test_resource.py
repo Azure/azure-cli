@@ -1219,6 +1219,10 @@ class FeatureScenarioTest(ScenarioTest):
         # Once a feature goes GA , it will be removed from the feature list. Once that happens, use other ones to test
         self.cmd('feature show --namespace Microsoft.Network -n AllowLBPreview')
 
+    @AllowLargeResponse(8192)
+    def test_feature_unregister(self):
+        self.cmd('feature unregister --namespace Microsoft.Network --name AllowLBPreview', checks=self.check('properties.state', 'Unregistered'))
+
 
 class PolicyScenarioTest(ScenarioTest):
 
