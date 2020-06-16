@@ -123,15 +123,12 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
         queue = self.create_random_name('queue', 24)
 
-        self.cmd('storage queue create -n {} --fail-on-exist --metadata a=b c=d'.format(queue),
-                 checks=JMESPathCheck('created', True))
-        self.cmd('storage queue exists -n {}'.format(queue),
-                 checks=JMESPathCheck('exists', True))
+        self.storage_cmd('storage queue create -n {} --fail-on-exist --metadata a=b c=d', account_info, queue)\
+            .assert_with_checks(JMESPathCheck('created', True))
 
-        res = self.cmd('storage queue list').get_output_in_json()
-        self.assertIn(queue, [x['name'] for x in res], 'The newly created queue is not listed.')
-
-        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
-        sas = self.cmd('storage queue generate-sas -n {} --permissions r --expiry {}'.format(queue, expiry)).output
+        sas = self.storage_cmd('storage queue generate-sas -n {} --permissions r --expiry {}',
+                               account_info, queue, expiry).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
 
+        self.cmd('storage queue exists -n {} --account-name {} --sas-token {}'.format(queue, storage_account, sas),
+                 checks=JMESPathCheck('exists', True))
