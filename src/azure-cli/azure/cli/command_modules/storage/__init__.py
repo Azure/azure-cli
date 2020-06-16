@@ -188,7 +188,7 @@ class StorageCommandGroup(AzCommandGroup):
 
     def get_handler_suppress_some_400(self):
         def handler(ex):
-            if ex.status_code == 403:
+            if hasattr(ex, 'status_code') and ex.status_code == 403:
                 # TODO: Revisit the logic here once the service team updates their response
                 if ex.error_code == 'AuthorizationPermissionMismatch':
                     message = """
@@ -213,7 +213,7 @@ If you want to change the default action to apply when no rule matches, please u
 Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
                     """
                     ex.args = (message,)
-            if ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
+            if hasattr(ex, 'status_code') and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
                 pass
 
         return handler
