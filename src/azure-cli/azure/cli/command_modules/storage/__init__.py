@@ -186,7 +186,8 @@ class StorageCommandGroup(AzCommandGroup):
         _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
         self.storage_custom_command(*args, oauth=True, **kwargs)
 
-    def get_handler_suppress_some_400(self):
+    @classmethod
+    def get_handler_suppress_some_400(cls):
         def handler(ex):
             if hasattr(ex, 'status_code') and ex.status_code == 403:
                 # TODO: Revisit the logic here once the service team updates their response
