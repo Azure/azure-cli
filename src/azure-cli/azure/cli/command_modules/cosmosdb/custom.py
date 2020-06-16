@@ -91,7 +91,10 @@ def cli_cosmosdb_create(cmd, client,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
                         key_uri=None,
-                        enable_public_network=None):
+                        enable_public_network=None,
+                        enable_analytical_storage=None,
+                        enable_free_tier=None,
+                        server_version=None):
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
@@ -117,6 +120,10 @@ def cli_cosmosdb_create(cmd, client,
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
+
+    api_properties= {}
+    if kind == DatabaseAccountKind.MongoDB.value:
+        api_properties['ServerVersion'] = server_version 
     
     params = DatabaseAccountCreateUpdateParameters(
         location=resource_group_location,
@@ -132,7 +139,10 @@ def cli_cosmosdb_create(cmd, client,
         enable_multiple_write_locations=enable_multiple_write_locations,
         disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
         key_vault_key_uri=key_uri,
-        public_network_access=public_network_access)
+        public_network_access=public_network_access,
+        api_properties = api_properties,
+        enable_analytical_storage=enable_analytical_storage,
+        enable_free_tier=enable_free_tier)
 
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
@@ -156,7 +166,8 @@ def cli_cosmosdb_update(client,
                         virtual_network_rules=None,
                         enable_multiple_write_locations=None,
                         disable_key_based_metadata_write_access=None,
-                        enable_public_network=None):
+                        enable_public_network=None,
+                        enable_analytical_storage=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -200,7 +211,8 @@ def cli_cosmosdb_update(client,
         virtual_network_rules=virtual_network_rules,
         enable_multiple_write_locations=enable_multiple_write_locations,
         disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
-        public_network_access=public_network_access)
+        public_network_access=public_network_access,
+        enable_analytical_storage=enable_analytical_storage)
 
     async_docdb_update = client.update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
