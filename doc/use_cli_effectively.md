@@ -122,7 +122,7 @@ az rest --method PATCH
         --body '{"web":{"redirectUris":["https://myapp.com"]}}'
 ```
 
-When using `--url-parameters`/`--uri-parameters` for requests in the form of OData, please pay attention to handling the escape `$` in different environments: in `Bash`, escape `$` as `\$` and in `PowerShell`, escape `$` as `` `$``
+When using `--url-parameters` for requests in the form of OData, please make sure to escape `$` in different environments: in `Bash`, escape `$` as `\$` and in `PowerShell`, escape `$` as `` `$``
 
 ## Quoting issues
 
