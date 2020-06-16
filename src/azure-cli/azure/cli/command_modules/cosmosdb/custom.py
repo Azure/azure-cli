@@ -110,7 +110,7 @@ def cli_cosmosdb_create(cmd, client,
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
-
+    
     params = DatabaseAccountCreateUpdateParameters(
         location=resource_group_location,
         locations=locations,
