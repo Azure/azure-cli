@@ -486,7 +486,8 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
             role_id = _resolve_role_id(role, scope, definitions_client)
             assignments = [i for i in assignments if worker.get_role_property(i, 'role_definition_id') == role_id]
 
-        # filter the assignee if "include_groups" is not provided because service side does not accept filter "principalId eq and atScope()" 
+        # filter the assignee if "include_groups" is not provided because service side
+        # does not accept filter "principalId eq and atScope()"
         if assignee_object_id and not include_groups:
             assignments = [i for i in assignments if worker.get_role_property(i, 'principal_id') == assignee_object_id]
 
