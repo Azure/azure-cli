@@ -1912,3 +1912,14 @@ def process_private_endpoint_connection_id_argument(cmd, namespace):
     namespace.resource_provider = '{}/{}'.format(result['namespace'], result['type'])
     namespace.name = result['child_name_1']
     del namespace.connection_id
+
+
+def process_vnet_name_or_id(cmd, namespace):
+    from azure.mgmt.core.tools import is_valid_resource_id, resource_id
+    if namespace.vnet and not is_valid_resource_id(namespace.vnet):
+        namespace.vnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=namespace.vnet)

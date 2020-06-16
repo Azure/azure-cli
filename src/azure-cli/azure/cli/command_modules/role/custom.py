@@ -461,7 +461,10 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
 
     # always use "scope" if provided, so we can get assignments beyond subscription e.g. management groups
     if scope:
-        assignments = list(assignments_client.list_for_scope(scope=scope, filter='atScope()'))
+        f = 'atScope()'
+        if assignee_object_id and include_groups:
+            f = f + " and assignedTo('{}')".format(assignee_object_id)
+        assignments = list(assignments_client.list_for_scope(scope=scope, filter=f))
     elif assignee_object_id:
         if include_groups:
             f = "assignedTo('{}')".format(assignee_object_id)
@@ -483,7 +486,9 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
             role_id = _resolve_role_id(role, scope, definitions_client)
             assignments = [i for i in assignments if worker.get_role_property(i, 'role_definition_id') == role_id]
 
-        if assignee_object_id:
+        # filter the assignee if "include_groups" is not provided because service side
+        # does not accept filter "principalId eq and atScope()"
+        if assignee_object_id and not include_groups:
             assignments = [i for i in assignments if worker.get_role_property(i, 'principal_id') == assignee_object_id]
 
     return assignments
@@ -1090,7 +1095,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None, key_u
         start_date = dateutil.parser.parse(start_date)
 
     if not end_date:
-        end_date = start_date + relativedelta(years=1)
+        end_date = start_date + relativedelta(years=1) - relativedelta(hours=24)
     elif isinstance(end_date, str):
         end_date = dateutil.parser.parse(end_date)
 
