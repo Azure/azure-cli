@@ -1090,7 +1090,7 @@ def _build_application_creds(password=None, key_value=None, key_type=None, key_u
         start_date = dateutil.parser.parse(start_date)
 
     if not end_date:
-        end_date = start_date + relativedelta(years=1)
+        end_date = start_date + relativedelta(years=1) - relativedelta(hours=24)
     elif isinstance(end_date, str):
         end_date = dateutil.parser.parse(end_date)
 
