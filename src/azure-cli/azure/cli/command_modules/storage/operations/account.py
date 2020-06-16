@@ -39,6 +39,10 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                        "in the future")
     params = StorageAccountCreateParameters(sku=Sku(name=sku), kind=Kind(kind), location=location, tags=tags,
                                             encryption=Encryption())
+    # TODO: remove this part when server side remove the constraint
+    if encryption_services is None:
+        params.encryption.services = {'blob': {}}
+
     if custom_domain:
         params.custom_domain = CustomDomain(name=custom_domain, use_sub_domain=None)
     if encryption_services:
@@ -117,9 +121,6 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if require_infrastructure_encryption:
         params.encryption.require_infrastructure_encryption = require_infrastructure_encryption
-        # TODO: remove this part when server side remove the constraint
-        if encryption_services is None:
-            params.encryption.services = {'blob': {}}
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
