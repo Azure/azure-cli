@@ -363,27 +363,30 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_group_table.clear()
         self.command_table.clear()
 
-        command_index = CommandIndex(self.cli_ctx)
-        # command_index = CommandIndex(self.cli_ctx, False)
-        index_modules, index_extensions = command_index.get(args)
-        if index_modules or index_extensions:
-            if index_modules:
-                _update_command_table_from_modules(args, index_modules)
-            if index_extensions:
-                # The index won't contain suppressed extensions
-                _update_command_table_from_extensions([], index_extensions)
+        command_index = None
+        use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=False)
+        if use_command_index:
+            command_index = CommandIndex(self.cli_ctx)
+            index_result = command_index.get(args)
+            if index_result:
+                index_modules, index_extensions = index_result
+                if index_modules:
+                    _update_command_table_from_modules(args, index_modules)
+                if index_extensions:
+                    # The index won't contain suppressed extensions
+                    _update_command_table_from_extensions([], index_extensions)
 
-            logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
-            # The index may be outdated. Make sure the command appears in the loaded command table
-            command_str = _roughly_parse_command(args)
-            if command_str in self.command_table or command_str in self.command_group_table:
-                logger.debug("Found a match in the command table for '%s'", command_str)
-                return self.command_table
+                logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
+                # The index may be outdated. Make sure the command appears in the loaded command table
+                command_str = _roughly_parse_command(args)
+                if command_str in self.command_table or command_str in self.command_group_table:
+                    logger.debug("Found a match in the command table for '%s'", command_str)
+                    return self.command_table
 
-            logger.debug("Could not find a match in the command table for '%s'. The index may be outdated",
-                         command_str)
-        else:
-            logger.debug("No module found from index for '%s'", args)
+                logger.debug("Could not find a match in the command table for '%s'. The index may be outdated",
+                             command_str)
+            else:
+                logger.debug("No module found from index for '%s'", args)
 
         # No module found from the index. Load all command modules and extensions
         logger.debug("Loading all modules and extensions")
@@ -394,7 +397,9 @@ class MainCommandsLoader(CLICommandsLoader):
         # as an extension could override the commands already loaded.
         _update_command_table_from_extensions(ext_suppressions)
         logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
-        command_index.update(self.command_table)
+
+        if use_command_index:
+            command_index.update(self.command_table)
 
         return self.command_table
 
@@ -445,18 +450,16 @@ class CommandIndex:
     _COMMAND_INDEX_VERSION = 'version'
     _COMMAND_INDEX_CLOUD_PROFILE = 'cloudProfile'
 
-    def __init__(self, cli_ctx=None, enabled=True):
+    def __init__(self, cli_ctx=None):
         """Class to manage command index.
 
         :param cli_ctx: Only needed when `get` or `update` is called.
-        :param enabled: Whether command index is enabled. If set to `False`, `get` will bypass the index.
         """
         from azure.cli.core._session import INDEX
         self.INDEX = INDEX
         if cli_ctx:
             self.version = __version__
             self.cloud_profile = cli_ctx.cloud.profile
-        self.enabled = enabled
 
     def get(self, args):
         """Get the corresponding module and extension list of a command.
@@ -464,10 +467,6 @@ class CommandIndex:
         :param args: command arguments, like ['network', 'vnet', 'create', '-h']
         :return: a tuple containing a list of modules and a list of extensions.
         """
-
-        if not self.enabled:
-            return None, None
-
         # If the command index version or cloud profile doesn't match those of the current command,
         # invalidate the command index.
         index_version = self.INDEX[self._COMMAND_INDEX_VERSION]
@@ -476,12 +475,12 @@ class CommandIndex:
                 cloud_profile and cloud_profile == self.cloud_profile):
             logger.debug("Command index version or cloud profile is invalid or doesn't match the current command.")
             self.invalidate()
-            return None, None
+            return None
 
         # Make sure the top-level command is provided, like `az version`.
         # Skip command index for `az` or `az --help`.
         if not args or args[0].startswith('-'):
-            return None, None
+            return None
 
         # Get the top-level command, like `network` in `network vnet create -h`
         top_command = args[0]
@@ -508,7 +507,7 @@ class CommandIndex:
                     logger.warning("Unrecognized module: %s", m)
             return index_builtin_modules, index_extensions
 
-        return None, None
+        return None
 
     def update(self, command_table):
         """Update the command index according to the given command table.
