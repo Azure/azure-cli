@@ -420,6 +420,7 @@ class TestExtensionCommands(unittest.TestCase):
             new_path_1 = list(azure.__path__)
             new_path_2 = list(azure.mgmt.__path__)
         finally:
+            sys.path.remove(ext.path)
             remove_extension(ext.name)
             if isinstance(azure.__path__, list):
                 azure.__path__[:] = old_path_1
