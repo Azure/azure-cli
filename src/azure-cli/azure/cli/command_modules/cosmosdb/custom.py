@@ -122,7 +122,7 @@ def cli_cosmosdb_create(cmd, client,
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
     api_properties= {}
-    if kind == DatabaseAccountKind.MongoDB.value:
+    if kind == DatabaseAccountKind.mongo_db.value:
         api_properties['ServerVersion'] = server_version 
     
     params = DatabaseAccountCreateUpdateParameters(
