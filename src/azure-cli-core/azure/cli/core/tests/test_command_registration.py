@@ -242,6 +242,7 @@ class TestCommandRegistration(unittest.TestCase):
         self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
         self.assertTrue(hello_overridden_cmd.command_source.overrides_command)
 
+    @mock.patch.dict("os.environ", {"AZURE_CORE_USE_COMMAND_INDEX": "True"})
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
