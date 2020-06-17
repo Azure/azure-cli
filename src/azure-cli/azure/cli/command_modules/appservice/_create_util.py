@@ -293,12 +293,10 @@ def should_create_new_rg(cmd, rg_name, is_linux):
     return True
 
 
-def does_app_already_exist(cmd, name):
+def get_site_availability(cmd, name):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
     client = web_client_factory(cmd.cli_ctx)
-    site_availability = client.check_name_availability(name, 'Microsoft.Web/sites')
-    # check availability returns true to name_available  == site does not exist
-    return site_availability.name_available
+    return client.check_name_availability(name, 'Microsoft.Web/sites')
 
 
 def get_app_details(cmd, name):
