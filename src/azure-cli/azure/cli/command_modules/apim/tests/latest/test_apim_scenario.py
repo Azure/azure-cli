@@ -106,7 +106,7 @@ class ApimScenarioTest(ScenarioTest):
         })
 
         # create api
-        self.cmd('apim api create -g {rg} --service-name {service_name} --api-id {api_id} --display-name {display_name} --api-revision {api_revision} --api-type {api_type} --api-version {api_version} --is-current {is_current} --path {path} --protocols {protocols} --service-url {service_url} --subscription-key-parameter-names {subscription_key_parameter_names} --subscription-required {subscription_required} --tags {tags}', checks=[        
+        self.cmd('apim api create -g {rg} --service-name {service_name} --api-id {api_id} --display-name {display_name} --api-revision {api_revision} --api-type {api_type} --api-version {api_version} --is-current {is_current} --path {path} --protocols {protocols} --service-url {service_url} --subscription-key-parameter-names {subscription_key_parameter_names} --subscription-required {subscription_required} --tags {tags}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('path', '{path}'),
             self.check('displayName', '{display_name}'),
