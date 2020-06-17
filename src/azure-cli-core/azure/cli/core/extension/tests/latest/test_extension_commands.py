@@ -404,8 +404,8 @@ class TestExtensionCommands(unittest.TestCase):
     def test_add_extension_azure_to_path(self):
         import azure
         import azure.mgmt
-        old_path_1 = azure.__path__[:]
-        old_path_2 = azure.mgmt.__path__[:]
+        old_path_1 = list(azure.__path__)
+        old_path_2 = list(azure.mgmt.__path__)
 
         add_extension(cmd=self.cmd, source=MY_EXT_SOURCE)
         ext = get_extension('myfirstcliextension')
@@ -421,8 +421,10 @@ class TestExtensionCommands(unittest.TestCase):
             self.assertEqual(azure_dir, azure.__path__[-1])
             self.assertEqual(azure_mgmt_dir, azure.mgmt.__path__[-1])
         finally:
-            azure.__path__[:] = old_path_1
-            azure.mgmt.__path__[:] = old_path_2
+            azure.__path__.clear()
+            azure.__path__.extend(old_path_1)
+            azure.mgmt.__path__.clear()
+            azure.mgmt.__path__.extend(old_path_2)
 
     def _setup_cmd(self):
         cmd = mock.MagicMock()
