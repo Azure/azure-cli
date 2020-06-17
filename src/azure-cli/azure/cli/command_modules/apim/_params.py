@@ -57,12 +57,10 @@ def load_arguments(self, _):
         c.argument('storage_account_container', arg_group='Storage', help='The name of the storage account container used to place the backup.')
 
     with self.argument_context('apim api show') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
         c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
 
     with self.argument_context('apim api create') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type, help='The name of the resource group.')
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
         c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
         c.argument('path', help='Required. Relative URL uniquely identifying this API and all of its resource paths within the API Management service instance.', required=True)
@@ -79,13 +77,11 @@ def load_arguments(self, _):
         c.argument('tags', tags_type)
 
     with self.argument_context('apim api delete') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type, help='The name of the resource group.')
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
         c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
         c.argument('delete_revisions', help='Delete all revisions of the Api.')
 
     with self.argument_context('apim api update') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type, help='The name of the resource group.')
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
         c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.', required=True)
         c.argument('display_name', help='API name. Must be 1 to 300 characters long.')

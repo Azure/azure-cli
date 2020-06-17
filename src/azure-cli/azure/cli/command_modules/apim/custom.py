@@ -157,15 +157,17 @@ def list_apim_api(client, resource_group_name, service_name):
     return client.api.list_by_service(resource_group_name, service_name)
 
 
-def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=True):
+def delete_apim_api(client, resource_group_name, service_name, api_id, delete_revisions=True, no_wait=False):
     """Deletes an existing API. """
 
-    return client.api.delete(resource_group_name, service_name, api_id, if_match='*', delete_revisions=delete_revisions)
+    cms = client.api
+
+    return sdk_no_wait(no_wait, cms.delete, resource_group_name=resource_group_name, service_name=service_name, api_id=api_id, if_match='*', delete_revisions=delete_revisions)
 
 
 def update_apim_api(instance, description=None, subscription_key_parameter_names=None,
-                    api_revision=None, api_version=None, is_current=True, display_name=None, service_url=None, protocols=Protocol.https.value, path=None,
-                    api_type=ApiType.http.value, subscription_required=False, tags=None):
+                    api_revision=None, api_version=None, is_current=None, display_name=None, service_url=None, protocols=None, path=None,
+                    api_type=None, subscription_required=None, tags=None):
     """Updates an existing API. """
 
     if description is not None:
