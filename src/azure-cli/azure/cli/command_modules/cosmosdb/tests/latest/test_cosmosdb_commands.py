@@ -53,8 +53,8 @@ class CosmosDBTests(ScenarioTest):
             JMESPathCheck('kind', 'MongoDB'),
             self.check('ipRules[0].ipAddressOrRange', '20.10.10.10'),
             self.check('apiProperties.serverVersion', '3.2'),
-            self.check('enableAnalyticalStorage','true'),
-            self.check('enableFreeTier','false')
+            self.check('enableAnalyticalStorage','True'),
+            self.check('enableFreeTier','False')
         ])
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline')
@@ -322,7 +322,7 @@ class CosmosDBTests(ScenarioTest):
     def test_cosmosdb_private_endpoint(self, resource_group):
         self.kwargs.update({
             'acc': self.create_random_name('cli-test-cosmosdb-pe-', 28),
-            'loc': 'centraluseuap',
+            'loc': 'eastus2',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
             'pe': self.create_random_name('cli-pe-', 24),
@@ -679,19 +679,21 @@ class CosmosDBTests(ScenarioTest):
             'db_name': self.create_random_name(prefix='cli', length=15),
             'col_name': col_name,
             'shard_key': "theShardKey",
-            'indexes': '"[{\\"key\\": {\\"keys\\": [\\"_ts\\"]},\\"options\\": {\\"expireAfterSeconds\\": 1000}}]"'
+            'indexes': '"[{\\"key\\": {\\"keys\\": [\\"_ts\\"]},\\"options\\": {\\"expireAfterSeconds\\": 1000}}]"',
+            'ttl': "3000",
+            'new_ttl': "6000"
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --enable-analytical-storage true')
         self.cmd('az cosmosdb mongodb database create -g {rg} -a {acc} -n {db_name}')
 
         collection_create = self.cmd(
-            'az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --shard {shard_key}').get_output_in_json()
+            'az cosmosdb mongodb collection create -g {rg} -a {acc} -d {db_name} -n {col_name} --shard {shard_key} --analytical-storage-ttl {ttl}').get_output_in_json()
         assert collection_create["name"] == col_name
 
         indexes_size = len(collection_create["resource"]["indexes"])
         collection_update = self.cmd(
-            'az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col_name} --idx {indexes}').get_output_in_json()
+            'az cosmosdb mongodb collection update -g {rg} -a {acc} -d {db_name} -n {col_name} --idx {indexes} --analytical-storage-ttl {new_ttl}').get_output_in_json()
         assert len(collection_update["resource"]["indexes"]) == indexes_size + 1
 
         collection_show = self.cmd(
@@ -741,16 +743,18 @@ class CosmosDBTests(ScenarioTest):
             'table_name': table_name,
             'schema': '"{\\"columns\\": [{\\"name\\": \\"columnA\\",\\"type\\": \\"Ascii\\"}],\\"partitionKeys\\": [{\\"name\\": \\"columnA\\"}]}"',
             'new_schema': '"{\\"columns\\": [{\\"name\\": \\"columnA\\",\\"type\\": \\"Ascii\\"}, {\\"name\\": \\"columnB\\",\\"type\\": \\"Ascii\\"}],\\"partitionKeys\\": [{\\"name\\": \\"columnA\\"}]}"',
+            'ttl': "3000",
+            'new_ttl': "6000"
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableCassandra')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableCassandra --enable-analytical-storage true')
         self.cmd('az cosmosdb cassandra keyspace create -g {rg} -a {acc} -n {ks_name}').get_output_in_json()
 
-        table_create = self.cmd('az cosmosdb cassandra table create -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {schema}').get_output_in_json()
+        table_create = self.cmd('az cosmosdb cassandra table create -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {schema} --analytical-storage-ttl {ttl}').get_output_in_json()
         assert table_create["name"] == table_name
         assert len(table_create["resource"]["schema"]["columns"]) == 1
 
-        table_update = self.cmd('az cosmosdb cassandra table update -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {new_schema}').get_output_in_json()
+        table_update = self.cmd('az cosmosdb cassandra table update -g {rg} -a {acc} -k {ks_name} -n {table_name} --schema {new_schema} --analytical-storage-ttl {new_ttl}').get_output_in_json()
         assert len(table_update["resource"]["schema"]["columns"]) == 2
 
         table_show = self.cmd('az cosmosdb cassandra table show -g {rg} -a {acc} -k {ks_name} -n {table_name}').get_output_in_json()
