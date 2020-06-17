@@ -97,10 +97,10 @@ type: command
 short-summary: append or overwrite an application's password or certificate credentials
 examples:
   - name: Append a certificate to the application with the certificate string.
-    text: az ad app credential reset --name myapp --cert "MIICoT..." --append
+    text: az ad app credential reset ---id 00000000-0000-0000-0000-000000000000 --cert "MIICoT..." --append
   - name: Append a certificate to the application with the certificate file.
     text: |-
-        az ad app credential reset --name myapp --cert "@~/cert.pem" --append
+        az ad app credential reset --id 00000000-0000-0000-0000-000000000000 --cert "@~/cert.pem" --append
         `cert.pem` contains the following content
         -----BEGIN CERTIFICATE-----  <<< this line is optional
         MIICoT...
