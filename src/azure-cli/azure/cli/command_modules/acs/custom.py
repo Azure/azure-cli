@@ -2146,7 +2146,7 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--load-balancer-outbound-ip-prefixes" or'
                        '"--load-balancer-outbound-ports" or'
                        '"--load-balancer-idle-timeout" or'
-                       '"--attach-acr" or "--dettach-acr" or'
+                       '"--attach-acr" or "--detach-acr" or'
                        '"--"api-server-authorized-ip-ranges')
 
     instance = client.get(resource_group_name, name)
