@@ -731,8 +731,28 @@ def get_auth_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_auth_settings', slot)
 
 
+def is_auth_runtime_version_valid(runtime_version=None):
+    if runtime_version is None:
+        return True
+    if runtime_version.startswith("~") and len(runtime_version) > 1:
+        try:
+            int(runtime_version[1:])
+        except ValueError:
+            return False
+        return True
+    split_versions = runtime_version.split('.')
+    if len(split_versions) != 3:
+        return False
+    for version in split_versions:
+        try:
+            int(version)
+        except ValueError:
+            return False
+    return True
+
+
 def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
-                         client_id=None, token_store_enabled=None,  # pylint: disable=unused-argument
+                         client_id=None, token_store_enabled=None, runtime_version=None,  # pylint: disable=unused-argument
                          token_refresh_extension_hours=None,  # pylint: disable=unused-argument
                          allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
                          allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
@@ -749,6 +769,9 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     elif action:
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.redirect_to_login_page
         auth_settings.default_provider = AUTH_TYPES[action]
+    # validate runtime version
+    if not is_auth_runtime_version_valid(runtime_version):
+        raise CLIError('Usage Error: --runtime-version set to invalid value')
 
     import inspect
     frame = inspect.currentframe()
@@ -1950,6 +1973,55 @@ def show_diagnostic_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_diagnostic_logs_configuration', slot)
 
 
+def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    if deployment_id:
+        deployment_log_url = '{}/api/deployments/{}'.format(scm_url, deployment_id)
+    else:
+        deployment_log_url = '{}/api/deployments/'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+
+    import urllib3
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    import requests
+    response = requests.get(deployment_log_url, headers=headers)
+
+    if response.status_code != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            scm_url, response.status_code, response.reason))
+
+    if deployment_id:
+        return response.json() or {}
+
+    sortedLogs = sorted(
+        response.json(),
+        key=lambda x: x['start_time'],
+        reverse=True
+    )
+    if sortedLogs:
+        return sortedLogs[0]
+    return {}
+
+
+def list_deployment_logs(cmd, resource_group, name, slot=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    deployment_log_url = '{}/api/deployments/'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+
+    import urllib3
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    import requests
+    response = requests.get(deployment_log_url, headers=headers)
+
+    if response.status_code != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            scm_url, response.status_code, response.reason))
+
+    return response.json() or []
+
+
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory(cmd.cli_ctx)
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
@@ -2821,7 +2893,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
 
         if res_dict.get('status', 0) == 3:
             _configure_default_logging(cmd, rg_name, name)
-            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
+            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log deployment show
                            -n {} -g {}""".format(res_dict, name, rg_name))
         if res_dict.get('status', 0) == 4:
             break

@@ -209,7 +209,8 @@ examples:
 
         az image builder create --image-source $imagesource -n mytemplate -g my-group \\
             --scripts $scripts --managed-image-destinations image_1=westus \\
-            --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth
+            --shared-image-destinations my_shared_gallery/linux_image_def=westus,brazilsouth \\
+            --identity myidentity
 
   - name: Create an image builder template using an image template file.
     text: |
@@ -224,7 +225,7 @@ examples:
         # create and update template object in local cli cache. Defers put request to ARM
         # Cache object ttl set via az configure.
         az image builder create --image-source $imagesource -n mytemplate \\
-            -g my-group --scripts $script --defer
+            -g my-group --scripts $script --identity myidentity --defer
 
         # add customizers
         az image builder customizer add -n mytemplate -g my-group  \\
@@ -282,6 +283,9 @@ examples:
                                 c:\\buildArtifacts\\restart.txt" \\
             --type windows-restart --restart-timeout 10m --defer
 
+  - name: Add a windows update customizer to an image template in the cli object cache.
+    text: |
+        az image builder customizer add -n mytemplate -g my-group --customizer-name win_update --type windows-update --search-criteria IsInstalled=0 --filters "exclude:\\$_.Title -like \\'*Preview*\\'" "include:\\$true" --update-limit 20 --defer
 """
 
 helps['image builder customizer clear'] = """
@@ -368,6 +372,15 @@ examples:
         az image builder show -n mytemplate -g my-group
 """
 
+helps['image builder cancel'] = """
+type: command
+short-summary: Cancel the long running image build based on the image template.
+examples:
+  - name: Cancel an image build.
+    text: |
+        az image builder cancel -n mytemplate -g my-group
+"""
+
 helps['image builder show'] = """
 type: command
 short-summary: Show an image builder template.
@@ -407,7 +420,7 @@ examples:
     text: |
         # create and write template object to local cli cache
         az image builder create --image-source {image_source} -n mytemplate -g my-group \\
-            --scripts {script} --managed-image-destinations image_1=westus --defer
+            --scripts {script} --managed-image-destinations image_1=westus --identity myidentity --defer
 
         # add customizers and outputs to local cache template object via az image template output / customizer add
         # one can also update cache object properties through generic update options, such as: --set
