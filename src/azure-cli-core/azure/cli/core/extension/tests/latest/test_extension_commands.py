@@ -404,6 +404,7 @@ class TestExtensionCommands(unittest.TestCase):
     def test_add_extension_azure_to_path(self):
         import azure
         import azure.mgmt
+        old_path_0 = list(sys.path)
         old_path_1 = list(azure.__path__)
         old_path_2 = list(azure.mgmt.__path__)
 
@@ -432,6 +433,7 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertSequenceEqual(old_path_2, new_path_2[:-1])
         self.assertEqual(azure_dir, new_path_1[-1])
         self.assertEqual(azure_mgmt_dir, new_path_2[-1])
+        self.assertEqual(old_path_0, sys.path)
         self.assertEqual(old_path_1, azure.__path__)
         self.assertEqual(old_path_2, azure.mgmt.__path__)
 
