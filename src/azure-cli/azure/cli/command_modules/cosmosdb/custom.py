@@ -115,7 +115,7 @@ def cli_cosmosdb_create(cmd, client,
 
     _ip_rules = None
     if ip_rules is not None:
-        _ip_rules = _get_ip_rules(ip_rules)
+        _ip_rules = get_ip_rules(ip_rules)
 
     public_network_access = None
     if enable_public_network is not None:
@@ -692,7 +692,6 @@ def cli_cosmosdb_mongodb_collection_update(client,
                                            collection_name,
                                            indexes=None,
                                            analytical_storage_ttl=None):
-
     """Updates an Azure Cosmos DB MongoDB collection """
     logger.debug('reading MongoDB collection')
     mongodb_collection = client.get_mongo_db_collection(resource_group_name,
@@ -704,7 +703,7 @@ def cli_cosmosdb_mongodb_collection_update(client,
     mongodb_collection_resource.indexes = mongodb_collection.resource.indexes
     mongodb_collection_resource.analytical_storage_ttl = mongodb_collection.resource.analytical_storage_ttl
 
-    if _populate_mongodb_collection_definition(mongodb_collection_resource, None, indexes):
+    if _populate_mongodb_collection_definition(mongodb_collection_resource, None, indexes, analytical_storage_ttl):
         logger.debug('replacing MongoDB collection')
 
     mongodb_collection_create_update_resource = MongoDBCollectionCreateUpdateParameters(

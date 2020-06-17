@@ -48,7 +48,7 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-rules "20.10.10.10" --server_version 3.2 --enable-analytical-storage true --enable-free-tier false')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-rules "20.10.10.10" --server-version 3.2 --enable-analytical-storage true --enable-free-tier false')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
             self.check('ipRules[0].ipAddressOrRange', '20.10.10.10'),
