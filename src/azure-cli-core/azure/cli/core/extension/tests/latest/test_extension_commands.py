@@ -434,9 +434,9 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertSequenceEqual(old_path_2, new_path_2[:-1])
         self.assertEqual(azure_dir, new_path_1[-1])
         self.assertEqual(azure_mgmt_dir, new_path_2[-1])
-        self.assertSequenceEqual(old_path_0, sys.path)
-        self.assertSequenceEqual(old_path_1, azure.__path__)
-        self.assertSequenceEqual(old_path_2, azure.mgmt.__path__)
+        self.assertSequenceEqual(old_path_0, list(sys.path))
+        self.assertSequenceEqual(old_path_1, list(azure.__path__))
+        self.assertSequenceEqual(old_path_2, list(azure.mgmt.__path__))
 
     def _setup_cmd(self):
         cmd = mock.MagicMock()
