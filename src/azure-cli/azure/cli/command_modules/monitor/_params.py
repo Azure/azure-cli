@@ -247,7 +247,8 @@ def load_arguments(self, _):
         c.resource_parameter('resource_uri', required=True)
 
     with self.argument_context('monitor diagnostic-settings subscription') as c:
-        c.argument('subscription_id', validator=process_subscription_id, deprecate_info=c.deprecate(hide=True))
+        c.argument('subscription_id', validator=process_subscription_id, deprecate_info=c.deprecate(hide=True), required=False)
+        c.argument('logs', type=get_json_object)
     # endregion
 
     # region LogProfiles

@@ -4,20 +4,53 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+import json
 
 
-class TestLogProfileScenarios(ScenarioTest):
+class TestDiagnosticSettingsSubscriptionScenarios(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
-    def test_monitor_create_log_profile(self, resource_group, storage_account):
+    def test_monitor_diagnostic_settings_subscription(self, resource_group, storage_account):
         self.kwargs.update({
             'name': self.create_random_name('clitest', 20)
         })
         self.kwargs['storage'] = self.cmd('storage account show -n {sa} -g {rg} --query id -otsv').output.strip()
-        self.cmd("monitor diagnostic-settings subscription create --location southcentralus --name {name} --storage-account-id {storage} "
-                 "--logs '[{'category': 'Security','enabled': true},{'category': 'Administrative','enabled': true},{'category': 'ServiceHealth','enabled': true},"
-                 "{'category': 'Alert','enabled': true},{'category': 'Recommendation','enabled': true},{'category': 'Policy','enabled': true},"
-                 "{'category': 'Autoscale','enabled': true},{'category': 'ResourceHealth','enabled': true}]'", checks=[
+        self.kwargs['log_config'] = json.dumps([
+            {
+                "category": "Security",
+                "enabled": True,
+            },
+            {
+                "category": "Administrative",
+                "enabled": True,
+            },
+            {
+                "category": "ServiceHealth",
+                "enabled": True,
+            },
+            {
+                "category": "Alert",
+                "enabled": True,
+            },
+            {
+                "category": "Recommendation",
+                "enabled": True,
+            },
+            {
+                "category": "Policy",
+                "enabled": True,
+            },
+            {
+                "category": "Autoscale",
+                "enabled": True,
+            },
+            {
+                "category": "ResourceHealth",
+                "enabled": True,
+            }
+        ])
+        self.cmd("monitor diagnostic-settings subscription create --location southcentralus --name {name} --storage-account {storage} "
+                 "--logs \'{log_config}\'", checks=[
             self.check('storageAccountId', '{storage}'),
             self.check('serviceBusRuleId', None),
         ])

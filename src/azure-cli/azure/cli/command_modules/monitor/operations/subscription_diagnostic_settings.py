@@ -22,4 +22,4 @@ def create_subscription_diagnostic_settings(cmd, client,
                                                         service_bus_rule_id=service_bus_rule_id,
                                                         logs=logs,
                                                         location=location)
-    return client.create_or_update(subscription_id=get_subscription_id(cmd), parameters=parameters, name=name)
+    return client.create_or_update(subscription_id=get_subscription_id(cmd.cli_ctx), parameters=parameters, name=name)
