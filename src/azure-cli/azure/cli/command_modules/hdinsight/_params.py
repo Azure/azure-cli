@@ -237,3 +237,9 @@ def load_arguments(self, _):
         c.argument('primary_key', help='The certificate for the Log Analytics workspace. '
                                        'Required when workspace ID is provided.')
         c.ignore('workspace_type')
+
+    with self.argument_context('hdinsight host') as c:
+        c.argument('cluster_name', options_list=['--cluster-name'],
+                   completer=get_resource_name_completion_list('Microsoft.HDInsight/clusters'),
+                   help='The name of the cluster.')
+        c.argument('hosts', nargs="+", help='The host name of the cluster.')

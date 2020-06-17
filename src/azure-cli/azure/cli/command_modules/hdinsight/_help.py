@@ -162,6 +162,29 @@ examples:
         --persist-on-success
 """
 
+helps['hdinsight host'] = """
+type: group
+short-summary: Manage HDInsight cluster's virtual hosts.
+"""
+
+helps['hdinsight host list'] = """
+type: command
+short-summary: List the hosts of the specified HDInsight cluster.
+examples:
+  - name: List the hosts of the specified HDInsight cluster.
+    text: |-
+        az hdinsight host list --resource-group MyResourceGroup --cluster-name MyCluster
+"""
+
+helps['hdinsight host restart'] = """
+type: command
+short-summary: Restart the specific hosts of the specified HDInsight cluster.
+examples:
+  - name: Restart the specific hosts of the specified HDInsight cluster.
+    text: |-
+        az hdinsight host restart --resource-group MyResourceGroup --cluster-name MyCluster --hosts hostname
+"""
+
 helps['hdinsight wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until an operation is complete.
