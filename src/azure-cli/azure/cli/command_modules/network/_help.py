@@ -2821,7 +2821,7 @@ parameters:
         Usage: --backend-address name=addr1 vnet=MyVnet ip-address=10.0.0.1
 
         name: Required. The name of the backend address.
-        vnet: Required. Name or ID of the virtual network.
+        vnet: Optional. Name or ID of the virtual network. You can also specify vnet through `--vnet` argument.
         ip-address: Required. Ip Address within the Virtual Network.
 
         Multiple backend addresses can be specified by using more than one `--backend-address` argument.

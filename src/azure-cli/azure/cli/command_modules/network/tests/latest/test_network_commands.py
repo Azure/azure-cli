@@ -2096,10 +2096,17 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network nic create -g {rg} -n {nic} --subnet subnet1 --vnet-name {vnet}')
         self.cmd('network lb create -g {rg} -n {lb} --sku Standard')
 
-        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 '
+        with self.assertRaisesRegexp(CLIError, 'Each backend address must have name, vnet and ip-address information.'):
+            self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} --backend-address name=addr2')
+        with self.assertRaisesRegexp(CLIError, 'Each backend address must have name, vnet and ip-address information.'):
+            self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --backend-address name=addr2 ip-address=10.0.0.3')
+        with self.assertRaisesRegexp(CLIError, 'Each backend address must have name, vnet and ip-address information.'):
+            self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} --backend-address ip-address=10.0.0.3')
+
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} '
                  '--backend-address name=addr1 vnet={vnet} ip-address=10.0.0.1 '
-                 '--backend-address name=addr2 vnet={vnet} ip-address=10.0.0.2 '
-                 '--backend-address name=addr3 vnet={vnet} ip-address=10.0.0.3',
+                 '--backend-address name=addr2 ip-address=10.0.0.2 '
+                 '--backend-address name=addr3 ip-address=10.0.0.3',
                  checks=self.check('name', 'bap1'))
 
         self.cmd('network lb address-pool address add -g {rg} --lb-name {lb} --pool-name bap1 --name addr6 --vnet {vnet} --ip-address 10.0.0.6', checks=self.check('name', 'bap1'))
@@ -2117,7 +2124,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
         self.cmd('network lb address-pool list -g {rg} --lb-name {lb}',
                  checks=self.check('length(@)', 1))
 
-        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 '
+        self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} '
                  '--backend-addresses-config-file @"{lb_address_pool_file_path}"',
                  checks=self.check('name', 'bap1'))
         self.cmd('network lb address-pool address list -g {rg} --lb-name {lb} --pool-name bap1', checks=self.check('length(@)', '2'))
