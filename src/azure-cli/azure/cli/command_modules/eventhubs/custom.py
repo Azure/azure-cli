@@ -11,17 +11,14 @@ from azure.cli.core.profiles import ResourceType
 
 # , resource_type = ResourceType.MGMT_EVENTHUB
 # Namespace Region
-def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None,
-                         is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None,
-                         default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None ):
-    # from azure.mgmt.eventhub.models import EHNamespace, Sku
+def cli_namespace_create(cmd, client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None, is_kafka_enabled=None, default_action=None, identity=None, zone_redundant=None, cluster_arm_id=None):
     EHNamespace = cmd.get_models('EHNamespace', resource_type=ResourceType.MGMT_EVENTHUB)
     Sku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_EVENTHUB)
     Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
     IdentityType = cmd.get_models('IdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
-        ehparam=EHNamespace()
+        ehparam = EHNamespace()
         ehparam.location = location
         ehparam.tags = tags
         ehparam.sku = Sku(name=sku, tier=sku, capacity=capacity)
@@ -29,9 +26,9 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
         ehparam.maximum_throughput_units = maximum_throughput_units
         ehparam.kafka_enabled = is_kafka_enabled
         ehparam.zone_redundant = zone_redundant
-        ehparam.cluster_arm_id=cluster_arm_id
+        ehparam.cluster_arm_id = cluster_arm_id
         if identity:
-            ehparam.identity=Identity(type=IdentityType.system_assigned)
+            ehparam.identity = Identity(type=IdentityType.system_assigned)
 
         client.create_or_update(
             resource_group_name=resource_group_name,
@@ -73,11 +70,11 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
             instance.kafka_enabled = is_kafka_enabled
 
         if instance.identity and instance.encryption is None:
-            instance.encryption=Encryption()
+            instance.encryption = Encryption()
 
 
         if key_source:
-            instance.encryption.key_source=key_source
+            instance.encryption.key_source = key_source
 
         if key_properties:
             keyprop = []
@@ -85,7 +82,7 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
                 keyprop.append(KeyVaultProperties(key_name=key_properties[0],key_vault_uri=key_properties[1]))
                 instance.encryption.key_vault_properties = keyprop
             elif len(key_properties) == 3:
-                keyprop.append(KeyVaultProperties(key_name=key_properties[0],key_vault_uri=key_properties[1],key_version=key_properties[2]))
+                keyprop.append(KeyVaultProperties(key_name=key_properties[0], key_vault_uri=key_properties[1], key_version=key_properties[2]))
                 instance.encryption.key_vault_properties = keyprop
 
         if user_identity:
