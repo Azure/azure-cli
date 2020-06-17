@@ -736,8 +736,8 @@ def cli_cosmosdb_cassandra_keyspace_create(client,
                                                    cassandra_keyspace_resource)
 
 
-def _populate_cassandra_table_definition(cassandra_table_resource, default_ttl, schema):
-    if all(arg is None for arg in [default_ttl, schema]):
+def _populate_cassandra_table_definition(cassandra_table_resource, default_ttl, schema, analytical_storage_ttl):
+    if all(arg is None for arg in [default_ttl, schema, analytical_storage_ttl]):
         return False
 
     if default_ttl is not None:
@@ -745,6 +745,9 @@ def _populate_cassandra_table_definition(cassandra_table_resource, default_ttl, 
 
     if schema is not None:
         cassandra_table_resource.schema = schema
+
+    if analytical_storage_ttl is not None:
+        cassandra_table_resource.analytical_storage_ttl = analytical_storage_ttl
 
     return True
 
@@ -757,11 +760,12 @@ def cli_cosmosdb_cassandra_table_create(client,
                                         schema,
                                         default_ttl=None,
                                         throughput=None,
-                                        max_throughput=None):
+                                        max_throughput=None,
+                                        analytical_storage_ttl=None):
     """Create an Azure Cosmos DB Cassandra table"""
     cassandra_table_resource = CassandraTableResource(id=table_name)
 
-    _populate_cassandra_table_definition(cassandra_table_resource, default_ttl, schema)
+    _populate_cassandra_table_definition(cassandra_table_resource, default_ttl, schema, analytical_storage_ttl)
 
     options = _get_options(throughput, max_throughput)
 
@@ -782,7 +786,8 @@ def cli_cosmosdb_cassandra_table_update(client,
                                         keyspace_name,
                                         table_name,
                                         default_ttl=None,
-                                        schema=None):
+                                        schema=None,
+                                        analytical_storage_ttl=None):
     """Update an Azure Cosmos DB Cassandra table"""
     logger.debug('reading Cassandra table')
     cassandra_table = client.get_cassandra_table(resource_group_name, account_name, keyspace_name, table_name)
@@ -790,8 +795,9 @@ def cli_cosmosdb_cassandra_table_update(client,
     cassandra_table_resource = CassandraTableResource(id=table_name)
     cassandra_table_resource.default_ttl = cassandra_table.resource.default_ttl
     cassandra_table_resource.schema = cassandra_table.resource.schema
+    cassandra_table_resource.analytical_storage_ttl = cassandra_table.resource.analytical_storage_ttl
 
-    if _populate_cassandra_table_definition(cassandra_table_resource, default_ttl, schema):
+    if _populate_cassandra_table_definition(cassandra_table_resource, default_ttl, schema, analytical_storage_ttl):
         logger.debug('replacing Cassandra table')
 
     cassandra_table_create_update_resource = CassandraTableCreateUpdateParameters(
