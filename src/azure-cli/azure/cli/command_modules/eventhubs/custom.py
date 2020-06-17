@@ -72,14 +72,13 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
         if instance.identity and instance.encryption is None:
             instance.encryption = Encryption()
 
-
         if key_source:
             instance.encryption.key_source = key_source
 
         if key_properties:
             keyprop = []
             if len(key_properties) == 2:
-                keyprop.append(KeyVaultProperties(key_name=key_properties[0],key_vault_uri=key_properties[1]))
+                keyprop.append(KeyVaultProperties(key_name=key_properties[0], key_vault_uri=key_properties[1]))
                 instance.encryption.key_vault_properties = keyprop
             elif len(key_properties) == 3:
                 keyprop.append(KeyVaultProperties(key_name=key_properties[0], key_vault_uri=key_properties[1], key_version=key_properties[2]))

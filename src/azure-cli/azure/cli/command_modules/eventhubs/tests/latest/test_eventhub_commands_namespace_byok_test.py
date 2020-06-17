@@ -53,13 +53,13 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         })
 
         # Check for the NameSpace name Availability
-        self.cmd('eventhubs namespace exists --name {namespacename}',checks=[self.check('nameAvailable', True)])
+        self.cmd('eventhubs namespace exists --name {namespacename}', checks=[self.check('nameAvailable', True)])
 
         # Create Namespace
         self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid} --enable-identity {enableidentity}')
 
         # Get Created Namespace
-        principal_id=self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}').get_output_in_json().get("identity").get("principalId")
+        principal_id = self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}').get_output_in_json().get("identity").get("principalId")
 
         self.kwargs.update({
             'principal_id': principal_id,
@@ -73,8 +73,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.cmd('keyvault key create -n {key_name} --vault-name {kv_name} -p software')
 
         # Update Namespace
-        self.cmd(
-            'eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-properties {key_properties}')
+        self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-properties {key_properties}')
 
         # Get Created Namespace list by subscription
         listnamespaceresult = self.cmd('eventhubs namespace list').output
@@ -86,8 +85,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
 
         # Create Authoriazation Rule
         self.cmd(
-            'eventhubs namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights {accessrights}',
-            checks=[self.check('name', self.kwargs['authoname'])])
+            'eventhubs namespace authorization-rule create --resource-group {rg} --namespace-name {namespacename} --name {authoname} --rights {accessrights}', checks=[self.check('name', self.kwargs['authoname'])])
 
         # Get Authorization Rule
         self.cmd(
