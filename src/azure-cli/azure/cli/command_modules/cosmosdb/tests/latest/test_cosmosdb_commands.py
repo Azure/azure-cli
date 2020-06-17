@@ -48,16 +48,16 @@ class CosmosDBTests(ScenarioTest):
             'acc': self.create_random_name(prefix='cli', length=40)
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-rules "{\\"ipAddressOrRange\\": \\"10.10.10.10\\"}" ')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --kind MongoDB --ip-rules "20.10.10.10" ')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
-            self.check('ipRules[0].ipAddressOrRange', "10.10.10.10"),
+            self.check('ipRules[0].ipAddressOrRange', "20.10.10.10"),
         ])
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
-            self.check('ipRules[0].ipAddressOrRange', "10.10.10.10"),
+            self.check('ipRules[0].ipAddressOrRange', "20.10.10.10"),
         ]).get_output_in_json()
         assert len(account['capabilities']) == 1
         assert account['capabilities'][0]['name'] == "EnableAggregationPipeline"
