@@ -232,6 +232,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_three_state_flag(),
                    help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
                    'platform managed keys for data at rest.')
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(),
+                   help='Allow or disallow public access to all blobs or containers in the storage account. '
+                   'The default interpretation is true for this property.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
