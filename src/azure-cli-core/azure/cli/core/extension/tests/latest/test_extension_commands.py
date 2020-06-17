@@ -416,15 +416,24 @@ class TestExtensionCommands(unittest.TestCase):
 
         try:
             add_extension_to_path(ext.name)
-            self.assertSequenceEqual(old_path_1, azure.__path__[:-1])
-            self.assertSequenceEqual(old_path_2, azure.mgmt.__path__[:-1])
-            self.assertEqual(azure_dir, azure.__path__[-1])
-            self.assertEqual(azure_mgmt_dir, azure.mgmt.__path__[-1])
+            new_path_1 = list(azure.__path__)
+            new_path_2 = list(azure.mgmt.__path__)
         finally:
-            azure.__path__.clear()
-            azure.__path__.extend(old_path_1)
-            azure.mgmt.__path__.clear()
-            azure.mgmt.__path__.extend(old_path_2)
+            remove_extension(ext.name)
+            if isinstance(azure.__path__, list):
+                azure.__path__[:] = old_path_1
+            else:
+                list(azure.__path__)
+            if isinstance(azure.mgmt.__path__, list):
+                azure.mgmt.__path__[:] = old_path_2
+            else:
+                list(azure.mgmt.__path__)
+        self.assertSequenceEqual(old_path_1, new_path_1[:-1])
+        self.assertSequenceEqual(old_path_2, new_path_2[:-1])
+        self.assertEqual(azure_dir, new_path_1[-1])
+        self.assertEqual(azure_mgmt_dir, new_path_2[-1])
+        self.assertEqual(old_path_1, azure.__path__)
+        self.assertEqual(old_path_2, azure.mgmt.__path__)
 
     def _setup_cmd(self):
         cmd = mock.MagicMock()
