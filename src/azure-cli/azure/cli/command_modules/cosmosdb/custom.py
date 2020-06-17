@@ -123,7 +123,9 @@ def cli_cosmosdb_create(cmd, client,
 
     api_properties= {}
     if kind == DatabaseAccountKind.mongo_db.value:
-        api_properties['ServerVersion'] = server_version 
+        api_properties['ServerVersion'] = server_version
+    elif server_version is not None:
+        raise CLIError('server-version is a valid argument only when kind is MongoDB.')
     
     params = DatabaseAccountCreateUpdateParameters(
         location=resource_group_location,
