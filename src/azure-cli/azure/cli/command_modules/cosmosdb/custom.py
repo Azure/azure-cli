@@ -641,7 +641,7 @@ def cli_cosmosdb_mongodb_database_create(client,
                                                   mongodb_database_resource)
 
 
-def _populate_mongodb_collection_definition(mongodb_collection_resource, shard_key_path, indexes):
+def _populate_mongodb_collection_definition(mongodb_collection_resource, shard_key_path, indexes, analytical_storage_ttl):
     if all(arg is None for arg in [shard_key_path, indexes]):
         return False
 
@@ -650,6 +650,9 @@ def _populate_mongodb_collection_definition(mongodb_collection_resource, shard_k
 
     if indexes is not None:
         mongodb_collection_resource.indexes = indexes
+
+    if analytical_storage_ttl is not None:
+        mongodb_collection_resource.analytical_storage_ttl = analytical_storage_ttl
 
     return True
 
@@ -662,11 +665,12 @@ def cli_cosmosdb_mongodb_collection_create(client,
                                            shard_key_path,
                                            indexes=None,
                                            throughput=None,
-                                           max_throughput=None):
+                                           max_throughput=None,
+                                           analytical_storage_ttl=None):
     """Create an Azure Cosmos DB MongoDB collection"""
     mongodb_collection_resource = MongoDBCollectionResource(id=collection_name)
 
-    _populate_mongodb_collection_definition(mongodb_collection_resource, shard_key_path, indexes)
+    _populate_mongodb_collection_definition(mongodb_collection_resource, shard_key_path, indexes, analytical_storage_ttl)
 
     options = _get_options(throughput, max_throughput)
 
@@ -686,7 +690,8 @@ def cli_cosmosdb_mongodb_collection_update(client,
                                            account_name,
                                            database_name,
                                            collection_name,
-                                           indexes=None):
+                                           indexes=None,
+                                           analytical_storage_ttl=None):
 
     """Updates an Azure Cosmos DB MongoDB collection """
     logger.debug('reading MongoDB collection')
@@ -697,6 +702,7 @@ def cli_cosmosdb_mongodb_collection_update(client,
     mongodb_collection_resource = MongoDBCollectionResource(id=collection_name)
     mongodb_collection_resource.shard_key = mongodb_collection.resource.shard_key
     mongodb_collection_resource.indexes = mongodb_collection.resource.indexes
+    mongodb_collection_resource.analytical_storage_ttl = mongodb_collection.resource.analytical_storage_ttl
 
     if _populate_mongodb_collection_definition(mongodb_collection_resource, None, indexes):
         logger.debug('replacing MongoDB collection')

@@ -187,6 +187,7 @@ def load_arguments(self, _):
         c.argument('indexes', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexes, you can enter it as a string or as a file, e.g., --idx @indexes-file.json or ' + MONGODB_INDEXES_EXAMPLE)
         c.argument('throughput', help='The throughput of MongoDB collection (RU/s). Default value is 400')
         c.argument('max_throughput', help='The maximum throughput of MongoDB collection can scale to (RU/s). Provided when the container is autoscale enabled.')
+        c.argument('analytical_storage_ttl', help='Analytical TTL, when analytical storage is enabled.')
 
 # Cassandra
     with self.argument_context('cosmosdb cassandra keyspace') as c:
@@ -203,6 +204,7 @@ def load_arguments(self, _):
         c.argument('schema', type=shell_safe_json_parse, completer=FilesCompleter(), help='Schema, you can enter it as a string or as a file, e.g., --schema @schema-file.json or ' + CASSANDRA_SCHEMA_EXAMPLE)
         c.argument('throughput', help='The throughput of Cassandra table (RU/s). Default value is 400')
         c.argument('max_throughput', help='The maximum throughput of Cassandra table can scale to (RU/s). Provided when the container is autoscale enabled.')
+        #c.argument('analytical_storage_ttl', help='Analytical TTL, when analytical storage is enabled.')
 
 # Gremlin
     with self.argument_context('cosmosdb gremlin database') as c:
