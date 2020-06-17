@@ -633,7 +633,7 @@ def cli_cosmosdb_mongodb_collection_create(client,
                                            account_name,
                                            database_name,
                                            collection_name,
-                                           shard_key_path,
+                                           shard_key_path=None,
                                            indexes=None,
                                            throughput=None):
     """Create an Azure Cosmos DB MongoDB collection"""
