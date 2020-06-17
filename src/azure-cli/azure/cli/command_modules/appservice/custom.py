@@ -53,7 +53,7 @@ from ._client_factory import web_client_factory, ex_handler_factory, providers_c
 from ._appservice_utils import _generic_site_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
-                           should_create_new_rg, set_location, does_app_already_exist, get_profile_username,
+                           should_create_new_rg, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
 from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
@@ -1973,6 +1973,55 @@ def show_diagnostic_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_diagnostic_logs_configuration', slot)
 
 
+def show_deployment_log(cmd, resource_group, name, slot=None, deployment_id=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    if deployment_id:
+        deployment_log_url = '{}/api/deployments/{}'.format(scm_url, deployment_id)
+    else:
+        deployment_log_url = '{}/api/deployments/'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+
+    import urllib3
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    import requests
+    response = requests.get(deployment_log_url, headers=headers)
+
+    if response.status_code != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            scm_url, response.status_code, response.reason))
+
+    if deployment_id:
+        return response.json() or {}
+
+    sortedLogs = sorted(
+        response.json(),
+        key=lambda x: x['start_time'],
+        reverse=True
+    )
+    if sortedLogs:
+        return sortedLogs[0]
+    return {}
+
+
+def list_deployment_logs(cmd, resource_group, name, slot=None):
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    deployment_log_url = '{}/api/deployments/'.format(scm_url)
+    username, password = _get_site_credential(cmd.cli_ctx, resource_group, name, slot)
+
+    import urllib3
+    headers = urllib3.util.make_headers(basic_auth='{}:{}'.format(username, password))
+
+    import requests
+    response = requests.get(deployment_log_url, headers=headers)
+
+    if response.status_code != 200:
+        raise CLIError("Failed to connect to '{}' with status code '{}' and reason '{}'".format(
+            scm_url, response.status_code, response.reason))
+
+    return response.json() or []
+
+
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory(cmd.cli_ctx)
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
@@ -2844,7 +2893,7 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, auth
 
         if res_dict.get('status', 0) == 3:
             _configure_default_logging(cmd, rg_name, name)
-            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log tail
+            raise CLIError("""Zip deployment failed. {}. Please run the command az webapp log deployment show
                            -n {} -g {}""".format(res_dict, name, rg_name))
         if res_dict.get('status', 0) == 4:
             break
@@ -3264,7 +3313,8 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     client = web_client_factory(cmd.cli_ctx)
     user = get_profile_username()
     _create_new_rg = False
-    _create_new_app = does_app_already_exist(cmd, name)
+    _site_availability = get_site_availability(cmd, name)
+    _create_new_app = _site_availability.name_available
     os_name = detect_os_form_src(src_dir, html)
     lang_details = get_lang_from_content(src_dir, html)
     language = lang_details.get('language')
@@ -3276,7 +3326,9 @@ def webapp_up(cmd, name, resource_group_name=None, plan=None, location=None, sku
     runtime_version = "{}|{}".format(language, version_used_create) if \
         version_used_create != "-" else version_used_create
     site_config = None
-    if not _create_new_app:  # App exists
+    if not _create_new_app:  # App exists, or App name unavailable
+        if _site_availability.reason == 'Invalid':
+            raise CLIError(_site_availability.message)
         # Get the ASP & RG info, if the ASP & RG parameters are provided we use those else we need to find those
         logger.warning("Webapp %s already exists. The command will deploy contents to the existing app.", name)
         app_details = get_app_details(cmd, name)

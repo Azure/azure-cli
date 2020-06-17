@@ -2116,6 +2116,7 @@ def aks_update(cmd, client, resource_group_name, name,
                disable_cluster_autoscaler=False,
                update_cluster_autoscaler=False,
                min_count=None, max_count=None,
+               uptime_sla=False,
                load_balancer_managed_outbound_ip_count=None,
                load_balancer_outbound_ips=None,
                load_balancer_outbound_ip_prefixes=None,
@@ -2132,9 +2133,11 @@ def aks_update(cmd, client, resource_group_name, name,
                                                           load_balancer_outbound_ports,
                                                           load_balancer_idle_timeout)
 
+    # pylint: disable=too-many-boolean-expressions
     if (update_autoscaler != 1 and not update_lb_profile and
             not attach_acr and
             not detach_acr and
+            not uptime_sla and
             api_server_authorized_ip_ranges is None):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
@@ -2145,6 +2148,7 @@ def aks_update(cmd, client, resource_group_name, name,
                        '"--load-balancer-outbound-ports" or'
                        '"--load-balancer-idle-timeout" or'
                        '"--attach-acr" or "--dettach-acr" or'
+                       '"--uptime-sla" or'
                        '"--"api-server-authorized-ip-ranges')
 
     instance = client.get(resource_group_name, name)
@@ -2209,6 +2213,12 @@ def aks_update(cmd, client, resource_group_name, name,
                         acr_name_or_id=detach_acr,
                         subscription_id=subscription_id,
                         detach=True)
+
+    if uptime_sla:
+        instance.sku = ManagedClusterSKU(
+            name="Basic",
+            tier="Paid"
+        )
 
     if update_lb_profile:
         instance.network_profile.load_balancer_profile = update_load_balancer_profile(

@@ -1132,22 +1132,25 @@ class ServicePrincipalAuth(object):
     def __init__(self, password_arg_value, use_cert_sn_issuer=None):
         if not password_arg_value:
             raise CLIError('missing secret or certificate in order to '
-                           'authnenticate through a service principal')
+                           'authenticate through a service principal')
         if os.path.isfile(password_arg_value):
             certificate_file = password_arg_value
             from OpenSSL.crypto import load_certificate, FILETYPE_PEM
             self.certificate_file = certificate_file
             self.public_certificate = None
-            with open(certificate_file, 'r') as file_reader:
-                self.cert_file_string = file_reader.read()
-                cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
-                self.thumbprint = cert.digest("sha1").decode()
-                if use_cert_sn_issuer:
-                    # low-tech but safe parsing based on
-                    # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
-                    match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
-                                      self.cert_file_string, re.I)
-                    self.public_certificate = match.group('public').strip()
+            try:
+                with open(certificate_file, 'r') as file_reader:
+                    self.cert_file_string = file_reader.read()
+                    cert = load_certificate(FILETYPE_PEM, self.cert_file_string)
+                    self.thumbprint = cert.digest("sha1").decode()
+                    if use_cert_sn_issuer:
+                        # low-tech but safe parsing based on
+                        # https://github.com/libressl-portable/openbsd/blob/master/src/lib/libcrypto/pem/pem.h
+                        match = re.search(r'\-+BEGIN CERTIFICATE.+\-+(?P<public>[^-]+)\-+END CERTIFICATE.+\-+',
+                                          self.cert_file_string, re.I)
+                        self.public_certificate = match.group('public').strip()
+            except UnicodeDecodeError:
+                raise CLIError('Invalid certificate, please use a valid PEM file.')
         else:
             self.secret = password_arg_value
 
