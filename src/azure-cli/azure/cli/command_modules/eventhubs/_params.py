@@ -17,7 +17,7 @@ def load_arguments_eh(self, _):
     from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace, validate_rights
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
-    (KeyType, AccessRights, SkuName) = self.get_models('KeyType', 'AccessRights', 'SkuName', resource_type=ResourceType.MGMT_EVENTHUB)
+    (KeyType, AccessRights, SkuName, KeySource) = self.get_models('KeyType', 'AccessRights', 'SkuName', 'KeySource', resource_type=ResourceType.MGMT_EVENTHUB)
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), validator=validate_rights, help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -44,6 +44,17 @@ def load_arguments_eh(self, _):
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
         c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
                    help='Default Action for Network Rule Set.')
+        c.argument('zone_redundant', options_list=['--zone-redundant'], arg_type=get_three_state_flag(),
+                   help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
+
+    with self.argument_context('eventhubs namespace create') as c:
+        c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='luster ARM ID of the Namespace')
+        c.argument('identity', options_list=['--enable-identity'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether Managed Identity is enabled.')
+
+    with self.argument_context('eventhubs namespace update') as c:
+        c.argument('key_source', options_list=['--key-source'], arg_type=get_enum_type(KeySource), help='A boolean value that indicates whether Zone Redundant is enabled for Namespace.')
+        c.argument('key_properties', options_list=['--key-properties'], nargs='+', help='List of Key Properties [[keyname,keyvaulturi,keyversion],[keyname,keyvaulturi,keyversion]]')
+        c.argument('user_identity', options_list=['--user-identity'], help='when \'none\' provided Managed Identity is disabled or can set user defined Identity')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:
