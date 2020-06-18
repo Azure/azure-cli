@@ -57,6 +57,9 @@ class AuthenticationWrapper(Authentication):
                 AuthenticationWrapper._log_hostname()
 
             err = getattr(err, 'message', None) or ''
+            if 'authentication is required' in err:
+                raise CLIError("Authentication is migrated to Microsoft identity platform (v2.0). {}".format(
+                    "Please run 'az login' to login." if not in_cloud_console() else ''))
             if 'AADSTS70008' in err:  # all errors starting with 70008 should be creds expiration related
                 raise CLIError("Credentials have expired due to inactivity. {}".format(
                     "Please run 'az login'" if not in_cloud_console() else ''))
