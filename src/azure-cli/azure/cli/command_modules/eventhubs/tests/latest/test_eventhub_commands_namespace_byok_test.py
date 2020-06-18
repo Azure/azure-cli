@@ -56,7 +56,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs namespace exists --name {namespacename}', checks=[self.check('nameAvailable', True)])
 
         # Create Namespace
-        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid} --enable-identity {enableidentity}')
+        self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid} --assign-identity {enableidentity}')
 
         # Get Created Namespace
         principal_id = self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}').get_output_in_json().get("identity").get("principalId")
@@ -73,7 +73,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.cmd('keyvault key create -n {key_name} --vault-name {kv_name} -p software')
 
         # Update Namespace
-        self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-properties {key_properties}')
+        self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
 
         # Get Created Namespace list by subscription
         listnamespaceresult = self.cmd('eventhubs namespace list').output

@@ -49,12 +49,18 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs namespace create') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='luster ARM ID of the Namespace')
-        c.argument('identity', options_list=['--enable-identity'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether Managed Identity is enabled.')
+        c.argument('identity', options_list=['--assign-identity'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether Managed Identity is enabled.')
 
-    with self.argument_context('eventhubs namespace update') as c:
-        c.argument('key_source', options_list=['--key-source'], arg_type=get_enum_type(KeySource), help='A boolean value that indicates whether Zone Redundant is enabled for Namespace.')
-        c.argument('key_properties', options_list=['--key-properties'], nargs='+', help='List of Key Properties [[keyname,keyvaulturi,keyversion],[keyname,keyvaulturi,keyversion]]')
-        c.argument('user_identity', options_list=['--user-identity'], help='when \'none\' provided Managed Identity is disabled or can set user defined Identity')
+    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity') as c:
+        c.argument('key_source', options_list=['--key-source'], arg_type=get_enum_type(KeySource),
+                   help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
+        c.argument('key_name', help='The name of the KeyVault key.', )
+        c.argument('key_vault_uri', help='The Uri of the KeyVault.')
+        c.argument('key_version',
+                   help='The version of the KeyVault key to use, which will opt out of implicit key rotation. '
+                        'Please use "" to opt in key auto-rotation again.')
+        c.argument('user_identity', options_list=['--user-identity'],
+                   help='when \'none\' provided Managed Identity is disabled')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:

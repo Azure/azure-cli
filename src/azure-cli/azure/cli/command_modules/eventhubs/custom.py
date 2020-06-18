@@ -45,7 +45,7 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
 def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
                          maximum_throughput_units=None, is_kafka_enabled=None, default_action=None,
-                         user_identity=None, key_source=None, key_properties=None):
+                         user_identity=None, key_source=None, key_name=None, key_vault_uri=None, key_version=None):
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
     KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
 
@@ -75,14 +75,12 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
         if key_source:
             instance.encryption.key_source = key_source
 
-        if key_properties:
+        if key_name and key_vault_uri:
             keyprop = []
-            if len(key_properties) == 2:
-                keyprop.append(KeyVaultProperties(key_name=key_properties[0], key_vault_uri=key_properties[1]))
-                instance.encryption.key_vault_properties = keyprop
-            elif len(key_properties) == 3:
-                keyprop.append(KeyVaultProperties(key_name=key_properties[0], key_vault_uri=key_properties[1], key_version=key_properties[2]))
-                instance.encryption.key_vault_properties = keyprop
+            keyprop.append(KeyVaultProperties(key_name=key_name, key_vault_uri=key_vault_uri,
+                                              key_version=key_version))
+
+        instance.encryption.key_vault_properties = keyprop
 
         if user_identity:
             if user_identity == 'None':
