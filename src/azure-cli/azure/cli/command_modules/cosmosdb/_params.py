@@ -49,7 +49,7 @@ def load_arguments(self, _):
         c.argument('account_name', completer=None)
         c.argument('key_uri', help="The URI of the key vault", is_preview=True)
         c.argument('enable_free_tier', arg_type=get_three_state_flag(), help="If enabled the account is free-tier.", is_preview=True)
-        c.argument('server_version',arg_type=get_enum_type(ServerVersion) , help="Valid only for MongoDB accounts.", is_preview=True)
+        c.argument('server_version', arg_type=get_enum_type(ServerVersion), help="Valid only for MongoDB accounts.", is_preview=True)
 
     for scope in ['cosmosdb create', 'cosmosdb update']:
         with self.argument_context(scope) as c:
@@ -67,7 +67,7 @@ def load_arguments(self, _):
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
             c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
             c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
-            c.argument('enable_public_network', options_list=['--enable-public-network', '-e'],arg_type=get_three_state_flag(), help="Enable or disable public network access to server.")
+            c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(), help="Enable or disable public network access to server.")
             c.argument('enable_analytical_storage', arg_type=get_three_state_flag(), help="Flag to enable log storage on the account.", is_preview=True)
 
     for scope in ['cosmosdb regenerate-key', 'cosmosdb keys regenerate']:

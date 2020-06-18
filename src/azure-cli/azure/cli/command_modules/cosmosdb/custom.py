@@ -44,9 +44,7 @@ from azure.mgmt.cosmosdb.models import (
     GremlinGraphCreateUpdateParameters,
     ThroughputSettingsResource,
     ThroughputSettingsUpdateParameters,
-    CreateUpdateOptions,
     AutoscaleSettings,
-    IpAddressOrRange
 )
 
 logger = get_logger(__name__)
@@ -122,12 +120,12 @@ def cli_cosmosdb_create(cmd, client,
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
-    api_properties= {}
+    api_properties = {}
     if kind == DatabaseAccountKind.mongo_db.value:
         api_properties['ServerVersion'] = server_version
     elif server_version is not None:
         raise CLIError('server-version is a valid argument only when kind is MongoDB.')
-    
+
     params = DatabaseAccountCreateUpdateParameters(
         location=resource_group_location,
         locations=locations,
@@ -143,7 +141,7 @@ def cli_cosmosdb_create(cmd, client,
         disable_key_based_metadata_write_access=disable_key_based_metadata_write_access,
         key_vault_key_uri=key_uri,
         public_network_access=public_network_access,
-        api_properties = api_properties,
+        api_properties=api_properties,
         enable_analytical_storage=enable_analytical_storage,
         enable_free_tier=enable_free_tier)
 
@@ -223,11 +221,11 @@ def cli_cosmosdb_update(client,
     return docdb_account
 
 def get_ip_rules(ip_rules):
-    _ip_rules=[]
+    _ip_rules = []
     if ip_rules:
         for ip_address in ip_rules:
             _ip_address_or_range = {}
-            _ip_address_or_range['IpAddressOrRange'] = ip_address 
+            _ip_address_or_range['IpAddressOrRange'] = ip_address
             _ip_rules.append(_ip_address_or_range)
     return _ip_rules
 
@@ -958,7 +956,7 @@ def cli_cosmosdb_table_exists(client,
 
 def cli_cosmosdb_sql_database_throughput_update(client, resource_group_name, account_name, database_name, throughput=None, max_throughput=None):
     """Update an Azure Cosmos DB SQL database throughput"""
-    throughput_update_resource = _get_throughput_settings_update_parameters(throughput,max_throughput)
+    throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_sql_database_throughput(resource_group_name, account_name, database_name, throughput_update_resource)
 
 
@@ -967,10 +965,10 @@ def cli_cosmosdb_sql_container_throughput_update(client,
                                                  account_name,
                                                  database_name,
                                                  container_name,
-                                                 throughput=None, 
+                                                 throughput=None,
                                                  max_throughput=None):
     """Update an Azure Cosmos DB SQL container throughput"""
-    throughput_update_resource = _get_throughput_settings_update_parameters(throughput,max_throughput)
+    throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_sql_container_throughput(resource_group_name,
                                                   account_name,
                                                   database_name,
@@ -985,7 +983,7 @@ def cli_cosmosdb_mongodb_database_throughput_update(client,
                                                     throughput=None,
                                                     max_throughput=None):
     """Update an Azure Cosmos DB MongoDB database throughput"""
-    throughput_update_resource = _get_throughput_settings_update_parameters(throughput,max_throughput)
+    throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_mongo_db_database_throughput(resource_group_name,
                                                       account_name,
                                                       database_name,
@@ -1000,7 +998,7 @@ def cli_cosmosdb_mongodb_collection_throughput_update(client,
                                                       throughput=None,
                                                       max_throughput=None):
     """Update an Azure Cosmos DB MongoDB collection throughput"""
-    throughput_update_resource = _get_throughput_settings_update_parameters(throughput,max_throughput)
+    throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_mongo_db_collection_throughput(resource_group_name,
                                                         account_name,
                                                         database_name,
@@ -1015,7 +1013,7 @@ def cli_cosmosdb_cassandra_keyspace_throughput_update(client,
                                                       throughput=None,
                                                       max_throughput=None):
     """Update an Azure Cosmos DB Cassandra keyspace throughput"""
-    throughput_update_resource = _get_throughput_settings_update_parameters(throughput,max_throughput)
+    throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_cassandra_keyspace_throughput(resource_group_name,
                                                        account_name,
                                                        keyspace_name,
@@ -1030,7 +1028,7 @@ def cli_cosmosdb_cassandra_table_throughput_update(client,
                                                    throughput=None,
                                                    max_throughput=None):
     """Update an Azure Cosmos DB Cassandra table throughput"""
-    throughput_update_resource = _get_throughput_settings_update_parameters(throughput,max_throughput)
+    throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_cassandra_table_throughput(resource_group_name,
                                                     account_name,
                                                     keyspace_name,
@@ -1045,7 +1043,7 @@ def cli_cosmosdb_gremlin_database_throughput_update(client,
                                                     throughput=None,
                                                     max_throughput=None):
     """Update an Azure Cosmos DB Gremlin database throughput"""
-    throughput_update_resource = _get_throughput_settings_update_parameters(throughput,max_throughput)
+    throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_gremlin_database_throughput(resource_group_name,
                                                      account_name,
                                                      database_name,
@@ -1060,7 +1058,7 @@ def cli_cosmosdb_gremlin_graph_throughput_update(client,
                                                  throughput=None,
                                                  max_throughput=None):
     """Update an Azure Cosmos DB Gremlin graph throughput"""
-    throughput_update_resource = _get_throughput_settings_update_parameters(throughput,max_throughput)
+    throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_gremlin_graph_throughput(resource_group_name,
                                                   account_name,
                                                   database_name,
@@ -1075,7 +1073,7 @@ def cli_cosmosdb_table_throughput_update(client,
                                          throughput=None,
                                          max_throughput=None):
     """Update an Azure Cosmos DB table throughput"""
-    throughput_update_resource = _get_throughput_settings_update_parameters(throughput,max_throughput)
+    throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_table_throughput(resource_group_name, account_name, table_name, throughput_update_resource)
 
 def _get_throughput_settings_update_parameters(throughput=None, max_throughput=None):
@@ -1085,8 +1083,8 @@ def _get_throughput_settings_update_parameters(throughput=None, max_throughput=N
     if throughput:
         throughput_resource = ThroughputSettingsResource(throughput=throughput)
     elif max_throughput:
-        throughput_resource = ThroughputSettingsResource(autoscale_settings = AutoscaleSettings(max_throughput=max_throughput))
-    
+        throughput_resource = ThroughputSettingsResource(autoscale_settings=AutoscaleSettings(max_throughput=max_throughput))
+
     return ThroughputSettingsUpdateParameters(resource=throughput_resource)
 
 def cli_cosmosdb_network_rule_list(client, resource_group_name, account_name):
