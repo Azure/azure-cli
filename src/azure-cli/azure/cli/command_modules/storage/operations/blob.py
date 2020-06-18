@@ -602,3 +602,33 @@ def _get_datetime_from_string(dt_str):
         except ValueError:
             continue
     raise ValueError("datetime string '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(dt_str))
+
+
+# ------------------Track2 Support-----------------------
+def show_blob_v2(cmd, client, container_name, blob_name, snapshot=None, lease_id=None,
+                 if_modified_since=None, if_unmodified_since=None, if_match=None,
+                 if_none_match=None, timeout=None):
+    property_kwargs = {
+        'lease': lease_id,
+        'if_modified_since': if_modified_since,
+        'if_unmodified_since': if_unmodified_since,
+        'timeout': timeout
+    }
+
+    # Precondition Check
+    from ..track2_util import _if_match, _if_none_match
+    if if_match:
+        property_kwargs = _if_match(if_match, **property_kwargs)
+
+    if if_none_match:
+        property_kwargs = _if_none_match(if_none_match, **property_kwargs)
+
+    blob = client.get_blob_properties(**property_kwargs)
+
+    page_ranges = None
+    if blob.blob_type == cmd.get_models('_models#BlobType', resource_type=ResourceType.DATA_STORAGE_BLOB).PageBlob:
+        page_ranges = client.get_page_ranges(**property_kwargs)
+
+    blob.page_ranges = page_ranges
+
+    return blob

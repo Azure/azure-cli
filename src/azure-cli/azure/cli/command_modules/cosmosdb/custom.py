@@ -825,7 +825,6 @@ def cli_cosmosdb_cassandra_keyspace_create(client,
                                                    cassandra_keyspace_resource)
 
 
-
 def cli_cosmosdb_cassandra_keyspace_exists(client,
                                            resource_group_name,
                                            account_name,

@@ -18,7 +18,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
-                          validate_fs_public_access)
+                          validate_fs_public_access, validate_logging_version)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -228,6 +228,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
+        c.argument('require_infrastructure_encryption', options_list=['--require-infrastructure-encryption', '-i'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
+                   'platform managed keys for data at rest.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -419,7 +423,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 required=True)
         c.argument('log', validator=get_char_options_validator('rwd', 'log'))
         c.argument('retention', type=int)
-        c.argument('version', type=float)
+        c.argument('version', type=float, validator=validate_logging_version)
 
     with self.argument_context('storage metrics show') as c:
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bfqt')
@@ -518,6 +522,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('error_document_404_path', options_list=['--404-document'], arg_group='Static Website',
                    help='Represents the path to the error document that should be shown when an error 404 is issued,'
                         ' in other words, when a browser requests a page that does not exist.')
+
+    with self.argument_context('storage blob show') as c:
+        c.argument('lease_id', help='Required if the blob has an active lease.')
+        c.argument('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                    'specifies the blob snapshot to retrieve.')
+        c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                                    "the operation only if the resource's ETag matches the value specified.")
+        c.argument('if_none_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                                         "the operation only if the resource's ETag does not match the value specified."
+                                         " Specify the wildcard character (*) to perform the operation only if the "
+                                         "resource does not exist, and fail the operation if it does exist.")
 
     with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
@@ -802,17 +817,28 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage share') as c:
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
 
-    for item in ['create', 'delete', 'exists', 'list', 'show', 'update']:
+    with self.argument_context('storage share-rm', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('resource_group_name', required=False)
+        c.argument('account_name', storage_account_type)
+        c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
+        c.ignore('filter', 'maxpagesize')
+
+    for item in ['create', 'update']:
         with self.argument_context('storage share-rm {}'.format(item), resource_type=ResourceType.MGMT_STORAGE) as c:
-            c.argument('resource_group_name', required=False)
-            c.argument('account_name', storage_account_type)
-            c.argument('share_name', share_name_type, options_list=('--name', '-n'), id_part='child_name_2')
-            c.argument('share_quota', type=int, options_list='--quota')
+            t_enabled_protocols, t_root_squash = self.get_models('EnabledProtocols', 'RootSquashType',
+                                                                 resource_type=ResourceType.MGMT_STORAGE)
+            c.argument('share_quota', type=int, options_list=['--quota', '-q'],
+                       help='The maximum size of the share in gigabytes. Must be greater than 0, and less than or '
+                            'equal to 5TB (5120). For Large File Shares, the maximum size is 102400.')
             c.argument('metadata', nargs='+',
                        help='Metadata in space-separated key=value pairs that is associated with the share. '
                             'This overwrites any existing metadata',
                        validator=validate_metadata)
-            c.ignore('filter', 'maxpagesize', 'skip_token')
+            c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols), is_preview=True,
+                       min_api='2019-06-01', help='Immutable property for file shares protocol. NFS protocol will be '
+                       'only available for premium file shares (file shares in the FileStorage account type).')
+            c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
+                       min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
         c.argument('account_name', storage_account_type, id_part=None)
