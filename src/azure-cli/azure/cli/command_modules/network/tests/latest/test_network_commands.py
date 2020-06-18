@@ -2326,6 +2326,7 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_nic_app_gateway')
     def test_network_nic_app_gateway(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
+        import json
 
         self.kwargs.update({
             'nic': 'nic1',
@@ -2346,6 +2347,22 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
         self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet2} --address-prefix 10.0.1.0/24')
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
+        self.kwargs['ipaddres'] = json.dumps(
+            {
+                "ip_address": "10.20.0.69"
+            }
+        )
+        self.cmd("network application-gateway address-pool update -g {rg} --gateway-name {ag} -n {pool1} --add backendAddresses \'{ipaddres}\'", checks=[
+            self.check('length(backendAddresses)', 1)
+        ])
+        self.kwargs['ipaddres'] = json.dumps(
+            {
+                "ip_address": "10.20.0.70"
+            }
+        )
+        self.cmd("network application-gateway address-pool update -g {rg} --gateway-name {ag} -n {pool1} --add backendAddresses \'{ipaddres}\'", checks=[
+            self.check('length(backendAddresses)', 2)
+        ])
         self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool2} --no-wait')
         self.cmd('network lb create -g {rg} -n {lb}')
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n {bap}')
