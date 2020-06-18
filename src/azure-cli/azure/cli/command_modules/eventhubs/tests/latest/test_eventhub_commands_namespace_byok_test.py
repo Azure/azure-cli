@@ -22,7 +22,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
     def test_eh_namespace_byok(self, resource_group):
         self.kwargs.update({
             'loc': 'westus',
-            'rg': resource_group,
+            'rg': 'v-ajnavtestcli',
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename1': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename2': self.create_random_name(prefix='eventhubs-nscli', length=20),
@@ -45,8 +45,8 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
 
         })
 
-        kv_name = self.create_random_name(prefix='cli', length=15)
-        key_name = self.create_random_name(prefix='cli', length=15)
+        kv_name = 'testingvault1cli'  # self.create_random_name(prefix='cli', length=15)
+        key_name = 'testingkey1'  #self.create_random_name(prefix='cli', length=15)
         key_uri = "https://{}.vault.azure.net/".format(kv_name)
         self.kwargs.update({
             'kv_name': kv_name,
@@ -74,9 +74,9 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         })
 
         # Create AzKeyvault
-        self.cmd('keyvault create --resource-group {rg} -n {kv_name} --enable-soft-delete true --enable-purge-protection true')
+        # self.cmd('keyvault create --resource-group {rg} -n {kv_name} --enable-soft-delete true --enable-purge-protection true')
         self.cmd('keyvault set-policy -n {kv_name} -g {rg} --object-id {principal_id} --key-permissions  get unwrapKey wrapKey')
-        self.cmd('keyvault key create -n {key_name} --vault-name {kv_name}')
+        # self.cmd('keyvault key create -n {key_name} --vault-name {kv_name}')
 
         # Update Namespace
         self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
@@ -112,21 +112,10 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
             'eventhubs namespace authorization-rule show --resource-group {rg} --namespace-name {namespacename} --name {defaultauthorizationrule}',
             checks=[self.check('name', self.kwargs['defaultauthorizationrule'])])
 
-        # Get Authorization Rule Listkeys
-        self.cmd(
-            'eventhubs namespace authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
-
-        # Regeneratekeys - Primary
-        self.cmd(
-            'eventhubs namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary}')
-
-        # Regeneratekeys - Secondary
-        self.cmd(
-            'eventhubs namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary}')
-
         # Delete Authorization Rule
         self.cmd(
             'eventhubs namespace authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
 
         # Delete Namespace list by ResourceGroup
         self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename}')
+        self.cmd('eventhubs namespace delete --resource-group {rg} --name {namespacename1}')
