@@ -18,7 +18,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_storage_data_plane_list, validate_azcopy_upload_destination_url,
                           validate_azcopy_remove_arguments, as_user_validator, parse_storage_account,
                           validator_delete_retention_days, validate_delete_retention_days,
-                          validate_fs_public_access)
+                          validate_fs_public_access, validate_logging_version)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines
@@ -419,7 +419,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 required=True)
         c.argument('log', validator=get_char_options_validator('rwd', 'log'))
         c.argument('retention', type=int)
-        c.argument('version', type=float)
+        c.argument('version', type=float, validator=validate_logging_version)
 
     with self.argument_context('storage metrics show') as c:
         c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bfqt')
@@ -518,6 +518,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('error_document_404_path', options_list=['--404-document'], arg_group='Static Website',
                    help='Represents the path to the error document that should be shown when an error 404 is issued,'
                         ' in other words, when a browser requests a page that does not exist.')
+
+    with self.argument_context('storage blob show') as c:
+        c.argument('lease_id', help='Required if the blob has an active lease.')
+        c.argument('snapshot', help='The snapshot parameter is an opaque DateTime value that, when present, '
+                                    'specifies the blob snapshot to retrieve.')
+        c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                                    "the operation only if the resource's ETag matches the value specified.")
+        c.argument('if_none_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                                         "the operation only if the resource's ETag does not match the value specified."
+                                         " Specify the wildcard character (*) to perform the operation only if the "
+                                         "resource does not exist, and fail the operation if it does exist.")
 
     with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator, validate_encryption_scope_client_params
