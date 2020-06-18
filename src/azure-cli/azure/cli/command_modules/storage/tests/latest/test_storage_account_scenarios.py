@@ -155,6 +155,20 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('largeFileSharesState', 'Enabled')
         ])
 
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(location='eastus2euap')
+    def test_create_storage_account_with_double_encryption(self, resource_group):
+        name = self.create_random_name(prefix='cli', length=24)
+        self.cmd('az storage account create -n {} -g {} --require-infrastructure-encryption'.format(
+            name, resource_group), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('encryption.requireInfrastructureEncryption', True)
+        ])
+        self.cmd('az storage account show -n {} -g {}'.format(name, resource_group), checks=[
+            JMESPathCheck('name', name),
+            JMESPathCheck('encryption.requireInfrastructureEncryption', True)
+        ])
+
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-10-01')
     @ResourceGroupPreparer(parameter_name_for_location='location', location='southcentralus')
     def test_create_storage_account_v2(self, resource_group, location):

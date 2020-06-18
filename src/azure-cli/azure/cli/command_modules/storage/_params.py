@@ -228,6 +228,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
+        c.argument('require_infrastructure_encryption', options_list=['--require-infrastructure-encryption', '-i'],
+                   arg_type=get_three_state_flag(),
+                   help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
+                   'platform managed keys for data at rest.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
