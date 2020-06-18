@@ -790,10 +790,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Metadata in space-separated key=value pairs that is associated with the share. '
                             'This overwrites any existing metadata',
                        validator=validate_metadata)
-            c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols, default="SMB"),
+            c.argument('enabled_protocols', arg_type=get_enum_type(t_enabled_protocols), is_preview=True,
                        min_api='2019-06-01', help='Immutable property for file shares protocol. NFS protocol will be '
                        'only available for premium file shares (file shares in the FileStorage account type).')
-            c.argument('root_squash', arg_type=get_enum_type(t_root_squash),
+            c.argument('root_squash', arg_type=get_enum_type(t_root_squash), is_preview=True,
                        min_api='2019-06-01', help='Reduction of the access rights for the remote superuser.')
 
     with self.argument_context('storage share-rm list', resource_type=ResourceType.MGMT_STORAGE) as c:
