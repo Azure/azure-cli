@@ -108,6 +108,9 @@ class TunnelServer(object):
         resp_msg = r.read().decode('utf-8')
         json_data = json.loads(resp_msg)
 
+        if json_data.get('state', None) is None:
+            return False
+
         if 'STARTED' in json_data["state"].upper():
             if json_data["canReachPort"] is False:
                 raise CLIError('SSH is not enabled for this app. To enable SSH follow this instructions: https://go.microsoft.com/fwlink/?linkid=2132395')
