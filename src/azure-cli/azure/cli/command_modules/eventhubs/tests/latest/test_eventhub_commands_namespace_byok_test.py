@@ -61,8 +61,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid} --assign-identity {enableidentity}')
 
         # Create Namespace
-        self.cmd(
-            'eventhubs namespace create --resource-group {rg} --name {namespacename1} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid}')
+        # self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename1} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid}')
 
         # Get Created Namespace
         principal_id = self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}').get_output_in_json().get("identity").get("principalId")
@@ -82,8 +81,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
 
         # Update Namespace
-        self.cmd(
-            'eventhubs namespace update --resource-group {rg} --name {namespacename1} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --assign-identity {enableidentity} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
+        # self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename1} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --assign-identity {enableidentity} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
 
         # Get Created Namespace list by subscription
         listnamespaceresult = self.cmd('eventhubs namespace list').output
