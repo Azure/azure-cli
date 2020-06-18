@@ -113,12 +113,18 @@ class TunnelServer(object):
 
         if 'STARTED' in json_data["state"].upper():
             if json_data["canReachPort"] is False:
-                raise CLIError('SSH is not enabled for this app. To enable SSH follow this instructions: https://go.microsoft.com/fwlink/?linkid=2132395')
-            elif json_data["canReachPort"] is True:
+                raise CLIError(
+                    'SSH is not enabled for this app. '
+                    'To enable SSH follow this instructions: '
+                    'https://go.microsoft.com/fwlink/?linkid=2132395')
+            if json_data["canReachPort"] is True:
                 logger.warning("App is running. Trying to establish tunnel connection...")
                 return True
         elif 'STOPPED' in json_data["state"].upper():
-            raise CLIError("SSH endpoint unreachable, your app must be running before it can accept SSH connections. Use `az webapp log tail` to review the app startup logs.")
+            raise CLIError(
+                'SSH endpoint unreachable, your app must be '
+                'running before it can accept SSH connections.'
+                'Use `az webapp log tail` to review the app startup logs.')
         elif 'STARTING' in json_data["state"].upper():
             logger.warning('Waiting for app to start up... ')
         return False

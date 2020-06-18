@@ -3467,7 +3467,9 @@ def _wait_for_webapp(tunnel_server):
         if tries == 0:
             logger.warning('Connection is not ready yet, please wait')
         if tries == 60:
-            raise CLIError("SSH timeout, your app must be running before it can accept SSH connections. Use `az webapp log tail` to review the app startup logs.")
+            raise CLIError('SSH timeout, your app must be running before'
+                           ' it can accept SSH connections. '
+                           'Use `az webapp log tail` to review the app startup logs.')
         tries = tries + 1
         logger.warning('.')
         time.sleep(1)
