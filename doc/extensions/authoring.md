@@ -120,8 +120,7 @@ See [Extension Metadata](metadata.md) for more information.
 ### Limit dependencies in setup.py
 
 - Before adding a dependency to your setup.py, check that it's not already available in [azure-cli-core setup.py](https://github.com/Azure/azure-cli/blob/master/src/azure-cli-core/setup.py).
-- For Azure SDKs, use autorest to generate your SDK into a package that isn't under the `azure` directory.
-- You can verify that your extension doesn't use the `azure` directory by opening your `.whl` and opening the `top_level.txt` file in the `*.dist-info` directory. It should not contain `azure`.
+- Azure SDK or Azure Management SDK dependencies may be overridden by the versions installed as requirements of azure-cli-core. If you use any, test carefully, gracefully handle API changes, and be prepared to release updates. You might also consider rebasing the libraries under a different namespace (besides `azure`) to avoid conflicting with core CLI functionality.
 
 ### How do I know I'm using my dev extension(s)?
 
@@ -132,12 +131,6 @@ See [Extension Metadata](metadata.md) for more information.
 - The CLI supports Python 3.6, 3.7, 3.8 so verify that your extension does the same.
 - You can create virtual environments for different versions and run your extension in them.
 - e.g. `python3.6 -m venv env36` and `python3.8 -m venv env38`.
-
-
-:zap: IMPORTANT :zap:
-- Since azure-cli uses the `azure` directory, no extension can use this.
-- This applies to all other dependencies used by azure-cli-core.
-- See [this Stack Overflow question](https://stackoverflow.com/questions/8936884/python-import-path-packages-with-the-same-name-in-different-folders).
 
 
 Also, see the [FAQ](faq.md).

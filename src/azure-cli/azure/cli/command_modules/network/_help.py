@@ -2816,12 +2816,11 @@ type: command
 short-summary: Create an address pool.
 parameters:
   - name: --backend-address
-    short-summary: Backend addresses information for backend address pool.
+    short-summary: Backend addresses information for backend address pool. If it's used, --vnet is also required.
     long-summary: |
-        Usage: --backend-address name=addr1 vnet=MyVnet ip-address=10.0.0.1
+        Usage: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
 
         name: Required. The name of the backend address.
-        vnet: Required. Name or ID of the virtual network.
         ip-address: Required. Ip Address within the Virtual Network.
 
         Multiple backend addresses can be specified by using more than one `--backend-address` argument.
@@ -2847,9 +2846,9 @@ examples:
   - name: Create an address pool.
     text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
   - name: Create an address pool with several backend addresses using key-value arguments.
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-address name=addr1 vnet=MyVnet ip-address=10.0.0.1 --backend-address name=addr2 vnet={VnetResourceId} ip-address=10.0.0.3
+    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
   - name: Create an address pool with several backend addresses using config file
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-address name=addr1 vnet=MyVnet ip-address=10.0.0.1 --backend-addresses-config-file @config_file.json
+    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --backend-addresses-config-file @config_file.json
 """
 
 helps['network lb address-pool delete'] = """
