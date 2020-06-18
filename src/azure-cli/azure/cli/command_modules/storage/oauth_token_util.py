@@ -35,7 +35,7 @@ class TokenUpdater(object):
             seconds_left = (datetime.fromtimestamp(int(token['expires_on'])) - datetime.now()).seconds
         if seconds_left < 180:
             # acquired token expires in less than 3 mins
-            raise Exception("Acquired a token expiring in less than 4 minutes")
+            raise Exception("Acquired a token expiring in less than 3 minutes")
 
         with self.lock:
             self.timer = threading.Timer(seconds_left - 180, self.timer_callback)
