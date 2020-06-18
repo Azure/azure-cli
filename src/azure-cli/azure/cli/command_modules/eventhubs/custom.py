@@ -79,8 +79,7 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
                 instance.encryption.key_source = key_source
             if key_name and key_vault_uri:
                 keyprop = []
-                keyprop.append(KeyVaultProperties(key_name=key_name, key_vault_uri=key_vault_uri,
-                                              key_version=key_version))
+                keyprop.append(KeyVaultProperties(key_name=key_name, key_vault_uri=key_vault_uri, key_version=key_version))
                 instance.encryption.key_vault_properties = keyprop
 
         if default_action:
