@@ -2341,13 +2341,17 @@ class NetworkNicAppGatewayScenarioTest(ScenarioTest):
         self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet1} --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists --timeout 120')
         self.kwargs['ipaddres'] = json.dumps(
-            {"ip_address":"10.20.0.69"}
+            {
+                "ip_address": "10.20.0.69"
+            }
         )
         self.cmd("network application-gateway address-pool update -g {rg} --gateway-name {ag} -n {pool1} --add backendAddresses \'{ipaddres}\'", checks=[
             self.check('length(backendAddresses)', 1)
         ])
         self.kwargs['ipaddres'] = json.dumps(
-            {"ip_address":"10.20.0.70"}
+            {
+                "ip_address": "10.20.0.70"
+            }
         )
         self.cmd("network application-gateway address-pool update -g {rg} --gateway-name {ag} -n {pool1} --add backendAddresses \'{ipaddres}\'", checks=[
             self.check('length(backendAddresses)', 2)
