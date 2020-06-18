@@ -22,7 +22,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
     def test_eh_namespace_byok(self, resource_group):
         self.kwargs.update({
             'loc': 'westus',
-            'rg': 'v-ajnavtestcli',
+            'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename1': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacename2': self.create_random_name(prefix='eventhubs-nscli', length=20),
@@ -45,8 +45,8 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
 
         })
 
-        kv_name = 'testingvault1cli'
-        key_name = 'testingkey1'
+        kv_name = self.create_random_name(prefix='cli', length=15)
+        key_name = self.create_random_name(prefix='cli', length=15)
         key_uri = "https://{}.vault.azure.net/".format(kv_name)
         self.kwargs.update({
             'kv_name': kv_name,
@@ -74,9 +74,9 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         })
 
         # Create AzKeyvault
-        # self.cmd('keyvault create --resource-group {rg} -n {kv_name} --enable-soft-delete true --enable-purge-protection true')
+        self.cmd('keyvault create --resource-group {rg} -n {kv_name} --enable-soft-delete true --enable-purge-protection true')
         self.cmd('keyvault set-policy -n {kv_name} -g {rg} --object-id {principal_id} --key-permissions  get unwrapKey wrapKey')
-        # self.cmd('keyvault key create -n {key_name} --vault-name {kv_name}')
+        self.cmd('keyvault key create -n {key_name} --vault-name {kv_name}')
 
         # Update Namespace
         self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
