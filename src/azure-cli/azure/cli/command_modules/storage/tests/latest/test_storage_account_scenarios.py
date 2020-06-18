@@ -323,6 +323,12 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('table.retentionPolicy.days', None)
         ])
 
+        with self.assertRaisesRegexp(CLIError, "incorrect usage: for table service, the supported version for logging is `1.0`"):
+            self.cmd('storage logging update --services t --log r --retention 1 '
+                     '--version 2.0 --connection-string {}'.format(connection_string))
+        self.cmd('storage logging update --services t --log r --retention 1 '
+                 '--version 1.0 --connection-string {}'.format(connection_string))
+
     @live_only()
     @ResourceGroupPreparer()
     def test_logging_error_operations(self, resource_group):
