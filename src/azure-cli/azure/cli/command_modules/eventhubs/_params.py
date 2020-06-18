@@ -49,17 +49,16 @@ def load_arguments_eh(self, _):
         c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Managed Identity is enabled.')
 
-    with self.argument_context('eventhubs namespace create') as c:
+    with self.argument_context('eventhubs namespace create', min_api='2018-01-01-preview') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='luster ARM ID of the Namespace')
 
-    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity') as c:
+    with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2018-01-01-preview') as c:
         c.argument('key_source', options_list=['--key-source'], arg_type=get_enum_type(KeySource),
                    help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
         c.argument('key_name', help='The name of the KeyVault key.', )
         c.argument('key_vault_uri', help='The Uri of the KeyVault.')
         c.argument('key_version',
-                   help='The version of the KeyVault key to use, which will opt out of implicit key rotation. '
-                        'Please use "" to opt in key auto-rotation again.')
+                   help='The version of the KeyVault key to use.')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:

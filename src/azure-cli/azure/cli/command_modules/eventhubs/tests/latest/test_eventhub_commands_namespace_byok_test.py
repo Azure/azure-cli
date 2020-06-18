@@ -76,7 +76,7 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         # Create AzKeyvault
         self.cmd('keyvault create --resource-group {rg} -n {kv_name} --enable-soft-delete true --enable-purge-protection true')
         self.cmd('keyvault set-policy -n {kv_name} -g {rg} --object-id {principal_id} --key-permissions  get unwrapKey wrapKey')
-        self.cmd('keyvault key create -n {key_name} --vault-name {kv_name} -p software')
+        self.cmd('keyvault key create -n {key_name} --vault-name {kv_name}')
 
         # Update Namespace
         self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
