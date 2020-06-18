@@ -38,7 +38,7 @@ class TokenUpdater(object):
             raise Exception("Acquired a token expiring in less than 4 minutes")
 
         with self.lock:
-            self.timer = threading.Timer(seconds_left - 240, self.timer_callback)
+            self.timer = threading.Timer(seconds_left - 180, self.timer_callback)
             self.timer.daemon = True
             self.timer.start()
 
