@@ -2896,7 +2896,7 @@ def set_lb_frontend_ip_configuration(
 
 
 def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
-                                   backend_addresses=None, backend_addresses_config_file=None):
+                                   vnet=None, backend_addresses=None, backend_addresses_config_file=None):
     def _process_vnet_name_and_id(vnet):
         if vnet and not is_valid_resource_id(vnet):
             vnet = resource_id(
@@ -2907,7 +2907,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                 name=vnet)
         return vnet
     if backend_addresses and backend_addresses_config_file:
-        raise CLIError('usage error: --backend-address [--backend-address] | --backend-addresses-config-file')
+        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
     if backend_addresses_config_file:
         if not isinstance(backend_addresses_config_file, list):
             raise CLIError('Config file must be a list. Please see example as a reference.')
@@ -2935,10 +2935,16 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
         addresses_pool.extend(backend_addresses)
     if backend_addresses_config_file:
         addresses_pool.extend(backend_addresses_config_file)
+    for addr in addresses_pool:
+        if 'virtual_network' not in addr and vnet:
+            addr['virtual_network'] = vnet
     # pylint: disable=line-too-long
-    new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
-                                                virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])),
-                                                ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
+    try:
+        new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
+                                                    virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])),
+                                                    ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
+    except KeyError:
+        raise CLIError('Each backend address must have name, vnet and ip-address information.')
     new_pool = BackendAddressPool(name=backend_address_pool_name,
                                   load_balancer_backend_addresses=new_addresses)
     return ncf.load_balancer_backend_address_pools.create_or_update(resource_group_name,
