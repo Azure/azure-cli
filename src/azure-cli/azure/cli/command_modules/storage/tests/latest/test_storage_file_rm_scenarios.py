@@ -12,8 +12,8 @@ from ..storage_test_util import StorageScenarioMixin
 
 class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
-    @ResourceGroupPreparer(name_prefix="cli", location="eastus2euap")
-    @StorageAccountPreparer(name_prefix="sharerm", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus")
+    @StorageAccountPreparer(name_prefix="sharerm", location="eastus")
     def test_storage_file_using_rm_main_scenario(self):
         # 1. Test create command.
 
