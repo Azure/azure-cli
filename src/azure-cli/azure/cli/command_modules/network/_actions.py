@@ -28,10 +28,8 @@ class AddBackendAddressCreate(argparse._AppendAction):
             v = properties[k]
             if kl == 'name':
                 d['name'] = v[0]
-            elif kl == 'vnet':
-                d['virtual_network'] = v[0]
             elif kl == 'ip-address':
                 d['ip_address'] = v[0]
             else:
-                raise CLIError('key error: key must be one of name, vnet or ip-address.')
+                raise CLIError('key error: key must be one of name and ip-address.')
         return d

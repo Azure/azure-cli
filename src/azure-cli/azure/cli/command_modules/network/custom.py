@@ -2938,6 +2938,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
     for addr in addresses_pool:
         if 'virtual_network' not in addr and vnet:
             addr['virtual_network'] = vnet
+    # pylint: disable=line-too-long
     try:
         new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
                                                     virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])),

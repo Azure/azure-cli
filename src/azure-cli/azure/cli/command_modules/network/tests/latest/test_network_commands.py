@@ -2104,7 +2104,7 @@ class NetworkLoadBalancerSubresourceScenarioTest(ScenarioTest):
             self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} --backend-address ip-address=10.0.0.3')
 
         self.cmd('network lb address-pool create -g {rg} --lb-name {lb} -n bap1 --vnet {vnet} '
-                 '--backend-address name=addr1 vnet={vnet} ip-address=10.0.0.1 '
+                 '--backend-address name=addr1 ip-address=10.0.0.1 '
                  '--backend-address name=addr2 ip-address=10.0.0.2 '
                  '--backend-address name=addr3 ip-address=10.0.0.3',
                  checks=self.check('name', 'bap1'))
