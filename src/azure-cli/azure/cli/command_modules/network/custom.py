@@ -2907,7 +2907,7 @@ def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name,
                 name=vnet)
         return vnet
     if backend_addresses and backend_addresses_config_file:
-        raise CLIError('usage error: --backend-address [--backend-address] [--vnet] | --backend-addresses-config-file [--vnet]')  # pylint: disable=line-too-long
+        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
     if backend_addresses_config_file:
         if not isinstance(backend_addresses_config_file, list):
             raise CLIError('Config file must be a list. Please see example as a reference.')

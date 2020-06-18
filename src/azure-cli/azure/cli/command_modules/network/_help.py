@@ -2816,9 +2816,9 @@ type: command
 short-summary: Create an address pool.
 parameters:
   - name: --backend-address
-    short-summary: Backend addresses information for backend address pool.
+    short-summary: Backend addresses information for backend address pool. If it's used, --vnet is also required.
     long-summary: |
-        Usage: --backend-address name=addr1 ip-address=10.0.0.1
+        Usage: --backend-address name=addr1 ip-address=10.0.0.1 --vnet MyVnet
 
         name: Required. The name of the backend address.
         ip-address: Required. Ip Address within the Virtual Network.
