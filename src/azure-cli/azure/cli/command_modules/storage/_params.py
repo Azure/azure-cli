@@ -495,11 +495,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     'this query parameter indicates the snapshot version.')
 
     with self.argument_context('storage blob set-tier') as c:
-        from azure.cli.command_modules.storage._validators import blob_tier_validator
+        from azure.cli.command_modules.storage._validators import (blob_tier_validator,
+                                                                   blob_rehydrate_priority_validator)
 
+        c.argument('container_name', container_name_type)
+        c.argument('blob_name', options_list=('--name', '-n'), help="The blob name")
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
         c.argument('tier', validator=blob_tier_validator)
         c.argument('timeout', type=int)
+        c.argument('rehydrate_priority', options_list=('--rehydrate-priority', '-r'),
+                   arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
+                   help="Indicates the priority with which to rehydrate an archived blob. "
+                        "The priority can be set on a blob only once, default value is Standard.")
 
     with self.argument_context('storage blob service-properties delete-policy update') as c:
         c.argument('enable', arg_type=get_enum_type(['true', 'false']), help='Enables/disables soft-delete.')

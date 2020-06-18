@@ -632,3 +632,12 @@ def show_blob_v2(cmd, client, container_name, blob_name, snapshot=None, lease_id
     blob.page_ranges = page_ranges
 
     return blob
+
+
+def set_blob_tier_v2(client, container_name, blob_name, tier, blob_type='block', rehydrate_priority=None, timeout=None):
+    if blob_type == 'block':
+        return client.set_standard_blob_tier(standard_blob_tier=tier, rehydrate_priority=rehydrate_priority,
+                                             timeout=timeout)
+    if blob_type == 'page':
+        return client.set_premium_page_blob_tier(premium_page_blob_tier=tier, timeout=timeout)
+    raise ValueError('Blob tier is only applicable to block or page blob.')
