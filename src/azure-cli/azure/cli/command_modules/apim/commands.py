@@ -36,3 +36,4 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_apim_api')
         g.custom_command('delete', 'delete_apim_api', confirmation=True, supports_no_wait=True)
         g.generic_update_command('update', custom_func_name='update_apim_api', supports_no_wait=True)
+        g.wait_command('wait')
