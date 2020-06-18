@@ -257,7 +257,8 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-policy',
                             database_long_term_retention_policies_operations,
-                            client_factory=get_sql_database_long_term_retention_policies_operations) as g:
+                            client_factory=get_sql_database_long_term_retention_policies_operations,
+                            is_preview=True) as g:
 
         g.custom_command('set', 'update_long_term_retention')
         g.show_command('show', 'get')
@@ -268,16 +269,17 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-backup',
                             database_long_term_retention_backups_operations,
-                            client_factory=get_sql_database_long_term_retention_backups_operations) as g:
+                            client_factory=get_sql_database_long_term_retention_backups_operations, 
+                            is_preview=True) as g:
 
         g.show_command('show', 'get')
         g.custom_command('list', 'list_long_term_retention_backups')
-        g.command('delete', 'delete',
-                  confirmation=True)
+        g.command('delete', 'delete', confirmation=True)
 
     with self.command_group('sql db ltr-backup',
                             database_operations,
-                            client_factory=get_sql_databases_operations) as g:
+                            client_factory=get_sql_databases_operations, 
+                            is_preview=True) as g:
         g.custom_command(
             'restore',
             'restore_long_term_retention_backup',
