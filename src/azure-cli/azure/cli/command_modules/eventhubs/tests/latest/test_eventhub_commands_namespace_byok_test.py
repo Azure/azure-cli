@@ -45,8 +45,8 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
 
         })
 
-        kv_name = 'testingvault1cli'  # self.create_random_name(prefix='cli', length=15)
-        key_name = 'testingkey1'  #self.create_random_name(prefix='cli', length=15)
+        kv_name = 'testingvault1cli'
+        key_name = 'testingkey1'
         key_uri = "https://{}.vault.azure.net/".format(kv_name)
         self.kwargs.update({
             'kv_name': kv_name,
