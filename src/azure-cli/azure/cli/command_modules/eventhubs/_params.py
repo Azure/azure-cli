@@ -46,10 +46,11 @@ def load_arguments_eh(self, _):
                    help='Default Action for Network Rule Set.')
         c.argument('zone_redundant', options_list=['--zone-redundant'], arg_type=get_three_state_flag(),
                    help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
+        c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], arg_type=get_three_state_flag(),
+                   help='A boolean value that indicates whether Managed Identity is enabled.')
 
     with self.argument_context('eventhubs namespace create') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='luster ARM ID of the Namespace')
-        c.argument('identity', options_list=['--assign-identity'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether Managed Identity is enabled.')
 
     with self.argument_context('eventhubs namespace update', arg_group='Managed Identity') as c:
         c.argument('key_source', options_list=['--key-source'], arg_type=get_enum_type(KeySource),
@@ -59,8 +60,6 @@ def load_arguments_eh(self, _):
         c.argument('key_version',
                    help='The version of the KeyVault key to use, which will opt out of implicit key rotation. '
                         'Please use "" to opt in key auto-rotation again.')
-        c.argument('user_identity', options_list=['--user-identity'],
-                   help='when \'none\' provided Managed Identity is disabled')
 
     # region Namespace Authorizationrule
     with self.argument_context('eventhubs namespace authorization-rule list') as c:

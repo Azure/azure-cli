@@ -45,9 +45,11 @@ def cli_namespace_create(cmd, client, resource_group_name, namespace_name, locat
 
 def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=None, is_auto_inflate_enabled=None,
                          maximum_throughput_units=None, is_kafka_enabled=None, default_action=None,
-                         user_identity=None, key_source=None, key_name=None, key_vault_uri=None, key_version=None):
+                         identity=None, key_source=None, key_name=None, key_vault_uri=None, key_version=None):
     Encryption = cmd.get_models('Encryption', resource_type=ResourceType.MGMT_EVENTHUB)
     KeyVaultProperties = cmd.get_models('KeyVaultProperties', resource_type=ResourceType.MGMT_EVENTHUB)
+    Identity = cmd.get_models('Identity', resource_type=ResourceType.MGMT_EVENTHUB)
+    IdentityType = cmd.get_models('IdentityType', resource_type=ResourceType.MGMT_EVENTHUB)
 
     if cmd.supported_api_version(resource_type=ResourceType.MGMT_EVENTHUB, min_api='2018-01-01-preview'):
         if tags:
@@ -69,22 +71,17 @@ def cli_namespace_update(cmd, client, instance, tags=None, sku=None, capacity=No
         if is_kafka_enabled:
             instance.kafka_enabled = is_kafka_enabled
 
-        if instance.identity and instance.encryption is None:
+        if identity is True and instance.identity is None:
+            instance.identity = Identity(type=IdentityType.system_assigned)
+        elif instance.identity and instance.encryption is None:
             instance.encryption = Encryption()
-
-        if key_source:
-            instance.encryption.key_source = key_source
-
-        if key_name and key_vault_uri:
-            keyprop = []
-            keyprop.append(KeyVaultProperties(key_name=key_name, key_vault_uri=key_vault_uri,
+            if key_source:
+                instance.encryption.key_source = key_source
+            if key_name and key_vault_uri:
+                keyprop = []
+                keyprop.append(KeyVaultProperties(key_name=key_name, key_vault_uri=key_vault_uri,
                                               key_version=key_version))
-
-        instance.encryption.key_vault_properties = keyprop
-
-        if user_identity:
-            if user_identity == 'None':
-                instance.identity = None
+                instance.encryption.key_vault_properties = keyprop
 
         if default_action:
             resourcegroup = instance.id.split('/')[4]

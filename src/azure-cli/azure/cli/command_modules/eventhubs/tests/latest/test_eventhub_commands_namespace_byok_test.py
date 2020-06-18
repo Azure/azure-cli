@@ -24,6 +24,8 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
             'loc': 'westus',
             'rg': resource_group,
             'namespacename': self.create_random_name(prefix='eventhubs-nscli', length=20),
+            'namespacename1': self.create_random_name(prefix='eventhubs-nscli', length=20),
+            'namespacename2': self.create_random_name(prefix='eventhubs-nscli', length=20),
             'namespacenamekafka': self.create_random_name(prefix='eventhubs-nscli1', length=20),
             'tags': {'tag1=value1'},
             'tags2': {'tag2=value2'},
@@ -58,6 +60,10 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
         # Create Namespace
         self.cmd('eventhubs namespace create --resource-group {rg} --name {namespacename} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid} --assign-identity {enableidentity}')
 
+        # Create Namespace
+        self.cmd(
+            'eventhubs namespace create --resource-group {rg} --name {namespacename1} --location {loc} --tags {tags} --sku {sku} --enable-auto-inflate {isautoinflateenabled} --maximum-throughput-units {maximumthroughputunits} --cluster-arm-id {clusterarmid}')
+
         # Get Created Namespace
         principal_id = self.cmd('eventhubs namespace show --resource-group {rg} --name {namespacename}').get_output_in_json().get("identity").get("principalId")
 
@@ -74,6 +80,10 @@ class EHNamespaceBYOKCURDScenarioTest(ScenarioTest):
 
         # Update Namespace
         self.cmd('eventhubs namespace update --resource-group {rg} --name {namespacename} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
+
+        # Update Namespace
+        self.cmd(
+            'eventhubs namespace update --resource-group {rg} --name {namespacename1} --tags {tags2} --maximum-throughput-units {maximumthroughputunits_update} --assign-identity {enableidentity} --key-source {key_source} --key-name {key_name} --key-vault-uri {key_uri} --key-version ""')
 
         # Get Created Namespace list by subscription
         listnamespaceresult = self.cmd('eventhubs namespace list').output
