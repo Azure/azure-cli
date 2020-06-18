@@ -212,6 +212,7 @@ def transform_blob_json_output(result):
             "lease": result.pop('lease', None),
             "pageBlobSequenceNumber": result.pop('pageBlobSequenceNumber', None),
             "pageRanges": _transform_page_ranges(result.pop('pageRanges', None)),
+            "rehydrationStatus": result.pop('archiveStatus', None),
             "remainingRetentionDays": result.pop('remainingRetentionDays', None),
             "serverEncrypted": result.pop('serverEncrypted', None)
         },
