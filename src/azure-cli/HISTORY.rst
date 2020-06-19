@@ -129,7 +129,7 @@ Release History
 
 **Network**
 
-* : Refine help message and add examples for az network application-gateway address-pool update (#13780)
+* `az network application-gateway address-pool update`: Refine help message and add examples. (#13780)
 * `az network vnet create`: support --nsg argument (#13842)
 * `az network lb address-pool`: support create lb backend pool with backend address. (#13700)
 * `az network application-gateway address-pool`: fix for --add argument (#14010)
