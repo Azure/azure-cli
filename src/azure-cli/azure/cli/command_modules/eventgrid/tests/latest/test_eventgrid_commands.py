@@ -891,7 +891,7 @@ class EventGridTests(ScenarioTest):
         endpoint_url = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid?functionName=EventGridTrigger1&code=<HIDDEN>'
         endpoint_baseurl = 'https://devexpfuncappdestination.azurewebsites.net/runtime/webhooks/EventGrid'
 
-        endpoint_url_for_validation = 'https://devexpfuncappdestination.azurewebsites.net/api/DevExpFunc?code=7jTiaEBVeYjC8X6gPDUhIhAnFRjaxZaGyS3hBbr09bmj3heQNhvrbA=='
+        endpoint_url_for_validation = 'https://devexpfuncappdestination.azurewebsites.net/api/DevExpFunc?code=<HIDDEN>'
         endpoint_baseurl_for_validation = 'https://devexpfuncappdestination.azurewebsites.net/api/DevExpFunc'
 
         # Make sure to replace these with proper values for re-recording the tests.
