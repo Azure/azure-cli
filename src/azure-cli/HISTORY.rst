@@ -102,9 +102,6 @@ Release History
 **Extension**
 
 * Add --version to support to install from a specific version (#13789)
-
-**Extensions**
-
 * Enable CLI extensions to include packages in the 'azure' namespace (#13163)
 
 **Iot Hub**
