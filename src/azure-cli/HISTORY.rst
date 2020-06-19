@@ -109,7 +109,7 @@ Release History
 
 **KeyVault**
 
-* 'az keyvault key import' now supports importing from strings via two new parameters. (#13771)
+* `az keyvault key import`: Supports importing from strings via two new parameters. (#13771)
 * Support string/bytes encryption and decryption with stored keys (#13916)
 
 **Monitor**
