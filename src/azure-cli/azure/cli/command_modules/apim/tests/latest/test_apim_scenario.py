@@ -16,7 +16,7 @@ class ApimScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
     def test_apim_core_service(self, resource_group, resource_group_location, storage_account_for_backup):
-        service_name = 'dsdev-azurecli' #self.create_random_name('cli-test-apim-', 50)
+        service_name = self.create_random_name('cli-test-apim-', 50)
 
         # try to use the injected location, but if the location is not known
         # fall back to west us, otherwise we can't validate since the sdk returns displayName
@@ -83,7 +83,7 @@ class ApimScenarioTest(ScenarioTest):
         })
 
         self.cmd('apim backup -g {rg} -n {service_name} --backup-name {backup_name} --storage-account-name {storage_account_name} --storage-account-container {storage_account_container} --storage-account-key {storage_account_key}', checks=[
-            self.check('provisioningState', 'Succeeded') 
+            self.check('provisioningState', 'Succeeded')
         ])
 
         # api operations
