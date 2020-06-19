@@ -62,9 +62,6 @@ Release History
 * `az batch account set`: Added new parameter `--identity-type` (#13796)
 * [BREAKING CHANGE] az batch pool create: When creating a pool using a custom image, the --image property of can now only refer to a Shared Image Gallery image. (#13796)
 * [BREAKING CHANGE] az batch pool create: When creating a pool with --json-file option and specifying a networkConfiguration, the publicIPs property has moved in to a new property publicIPAddressConfiguration. This new property also supports a new ipAddressProvisioningType property which specifies how the pool should allocate IP's and a publicIPs property which allows for configuration of a list of PublicIP resources to use in the case ipAddressProvisioningType is set to UserManaged (#13796)
-
-**Batch/Network**
-
 * `az network private-link-resource`: Add support for the Microsoft.Batch batchAccount resource (#13796)
 * `az network private-endpoint-connection`: Add support for the Microsoft.Batch batchAccount resource (#13796)
 
