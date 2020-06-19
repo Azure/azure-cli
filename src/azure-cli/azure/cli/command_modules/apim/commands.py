@@ -29,6 +29,7 @@ def load_command_table(self, _):
         g.custom_command('check-name', 'check_name_availability')
         g.custom_command('backup', 'apim_backup', supports_no_wait=True)
         g.custom_command('apply-network-updates', 'apim_apply_network_configuration_updates', supports_no_wait=True)
+        g.wait_command('wait')
 
     with self.command_group('apim api', api_sdk, is_preview=True) as g:
         g.custom_command('create', 'create_apim_api', supports_no_wait=True)

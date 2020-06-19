@@ -62,7 +62,7 @@ def load_arguments(self, _):
 
     with self.argument_context('apim api create') as c:
         c.argument('service_name', options_list=['--service-name'], help='The name of the API Management service instance.')
-        c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+        c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.', required=True)
         c.argument('path', help='Required. Relative URL uniquely identifying this API and all of its resource paths within the API Management service instance.', required=True)
         c.argument('display_name', help='API name. Must be 1 to 300 characters long.', required=True)
         c.argument('description', help='Description of the API. May include HTML formatting tags.')

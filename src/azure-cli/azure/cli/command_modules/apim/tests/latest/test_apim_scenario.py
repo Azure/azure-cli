@@ -16,7 +16,7 @@ class ApimScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
     def test_apim_core_service(self, resource_group, resource_group_location, storage_account_for_backup):
-        service_name = self.create_random_name('cli-test-apim-', 50)
+        service_name = 'dsdev-azurecli' #self.create_random_name('cli-test-apim-', 50)
 
         # try to use the injected location, but if the location is not known
         # fall back to west us, otherwise we can't validate since the sdk returns displayName
@@ -27,8 +27,8 @@ class ApimScenarioTest(ScenarioTest):
             'service_name': service_name,
             'rg_loc': resource_group_location,
             'rg_loc_displayName': KNOWN_LOCS.get(resource_group_location),
-            'notification_sender_email': 'notifications@contsoso.com',
-            'publisher_email': 'publisher@contsoso.com',
+            'notification_sender_email': 'notifications@contoso.com',
+            'publisher_email': 'publisher@contoso.com',
             'publisher_name': 'Contoso',
             'sku_name': 'Developer',
             'skucapacity': 1,
@@ -83,21 +83,20 @@ class ApimScenarioTest(ScenarioTest):
         })
 
         self.cmd('apim backup -g {rg} -n {service_name} --backup-name {backup_name} --storage-account-name {storage_account_name} --storage-account-container {storage_account_container} --storage-account-key {storage_account_key}', checks=[
-            self.check('provisioningState', 'Succeeded')
+            self.check('provisioningState', 'Succeeded') 
         ])
 
         # api operations
-        api_id = 'cli-test-apim-api'
-
         self.kwargs.update({
-            'api_id': api_id,
+            'rg': '{rg}',
+            'api_id': self.create_random_name('az-cli', 10),
             'api_revision': None,
             'api_type': 'http',
             'api_version': None,
             'description': 'Contoso API Description',
             'display_name': 'Contoso API',
             'is_current': True,
-            'path': '/test',
+            'path': 'test',
             'protocols': 'https',
             'service_url': 'https://contoso.com',
             'subscription_key_parameter_names': None,
@@ -106,34 +105,31 @@ class ApimScenarioTest(ScenarioTest):
         })
 
         # create api
-        self.cmd('apim api create -g {rg} --service-name {service_name} --api-id {api_id} --display-name {display_name} --api-revision {api_revision} --api-type {api_type} --api-version {api_version} --is-current {is_current} --path {path} --protocols {protocols} --service-url {service_url} --subscription-key-parameter-names {subscription_key_parameter_names} --subscription-required {subscription_required} --tags {tags}', checks=[
-            self.check('provisioningState', 'Succeeded'),
-            self.check('path', '{path}'),
+        self.cmd('apim api create -g "{rg}" --service-name "{service_name}" --display-name "{display_name}" --path "{path}" --api-id "{api_id}" --protocols "{protocols}" --service-url "{service_url}" --tags "{tags}"', checks=[
             self.check('displayName', '{display_name}'),
+            self.check('path', '{path}'),
             self.check('serviceUrl', '{service_url}')
         ])
 
         # get api
         self.cmd('apim api show -g {rg} --service-name {service_name} --api-id {api_id}', checks=[
-            self.check('provisioningState', 'Succeeded'),
             self.check('displayName', '{display_name}'),
             self.check('serviceUrl', '{service_url}')
         ])
 
         # update api
-        self.cmd('apim api update -g {rg} --service-name {service_name} --api-id {api_id} --description {description}', checks=[
-            self.check('provisioningState', 'Succeeded'),
+        self.cmd('apim api update -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --description "{description}"', checks=[
             self.check('description', '{description}')
         ])
 
         # list apis
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
-        self.assertEqual(api_count, 1)
+        self.assertEqual(api_count, 2)
 
         # api delete command
         self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {api_id} -y')
         api_count = len(self.cmd('apim api list -g {rg} -n {service_name}').get_output_in_json())
-        self.assertEqual(api_count, 0)
+        self.assertEqual(api_count, 1)
 
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
