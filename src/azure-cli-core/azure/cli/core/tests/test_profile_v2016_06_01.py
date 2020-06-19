@@ -910,7 +910,7 @@ class TestProfile(unittest.TestCase):
             resource=cli.cloud.endpoints.active_directory_data_lake_resource_id)
         _, _ = cred._get_token()
         # verify
-        get_token.assert_called_once_with(mock.ANY, 'https://datalake.azure.net/.default')
+        get_token.assert_called_once_with(mock.ANY, 'https://datalake.azure.net//.default')
         self.assertEqual(tenant_id, self.tenant_id)
 
     @mock.patch('msal.PublicClientApplication.remove_account', autospec=True)
