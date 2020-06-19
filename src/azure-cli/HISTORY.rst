@@ -57,9 +57,9 @@ Release History
 
 **Batch**
 
-* `az batch account create`: Added new parameter `--public-network-access` (#13796)
-* `az batch account create`: Added new parameter `--identity-type` (#13796)
-* `az batch account set`: Added new parameter `--identity-type` (#13796)
+* `az batch account create`: Add new parameter `--public-network-access` (#13796)
+* `az batch account create`: Add new parameter `--identity-type` (#13796)
+* `az batch account set`: Add new parameter `--identity-type` (#13796)
 * [BREAKING CHANGE] az batch pool create: When creating a pool using a custom image, the --image property of can now only refer to a Shared Image Gallery image. (#13796)
 * [BREAKING CHANGE] az batch pool create: When creating a pool with --json-file option and specifying a networkConfiguration, the publicIPs property has moved in to a new property publicIPAddressConfiguration. This new property also supports a new ipAddressProvisioningType property which specifies how the pool should allocate IP's and a publicIPs property which allows for configuration of a list of PublicIP resources to use in the case ipAddressProvisioningType is set to UserManaged (#13796)
 * `az network private-link-resource`: Add support for the Microsoft.Batch batchAccount resource (#13796)
@@ -85,12 +85,12 @@ Release History
 
 **Cosmos DB**
 
-* `az cosmosdb`: add exists command to database and container groups (#12774)
+* `az cosmosdb`: Add exists command to database and container groups (#12774)
 * Allow creating fixed collections (#13950)
 
 **EventHub**
 
-* `az eventhubs namespace create` : add managed identity parameters (#13992)
+* `az eventhubs namespace create` : Add managed identity parameters (#13992)
 
 **Extension**
 
@@ -114,14 +114,14 @@ Release History
 **Network**
 
 * `az network application-gateway address-pool update`: Refine help message and add examples. (#13780)
-* `az network vnet create`: support --nsg argument (#13842)
-* `az network lb address-pool`: support create lb backend pool with backend address. (#13700)
-* `az network application-gateway address-pool`: fix for --add argument (#14010)
+* `az network vnet create`: Support --nsg argument (#13842)
+* `az network lb address-pool`: Support create lb backend pool with backend address. (#13700)
+* `az network application-gateway address-pool`: Fix for --add argument (#14010)
 
 **RBAC**
 
-* `az ad sp create-for-rabc`: support name with space, slash and back slash (#13875)
-* `az ad sp create-for-rbac`: refine error message when user specify an invalid scope (#13117)
+* `az ad sp create-for-rabc`: Support name with space, slash and back slash (#13875)
+* `az ad sp create-for-rbac`: Refine error message when user specify an invalid scope (#13117)
 
 **Security**
 
