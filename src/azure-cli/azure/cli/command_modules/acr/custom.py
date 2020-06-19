@@ -201,6 +201,9 @@ def acr_login(cmd,
               password=None,
               expose_token=False):
     if expose_token:
+        if username or password:
+            raise CLIError("`--expose-token` cannot be combined with `--username` or `--password`.")
+
         login_server, _, password = get_login_credentials(
             cmd=cmd,
             registry_name=registry_name,

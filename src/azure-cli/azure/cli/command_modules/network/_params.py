@@ -880,6 +880,7 @@ def load_arguments(self, _):
                    help='The name of the backend address pool. {}'.format(default_existing))
         c.argument('backend_addresses', options_list=['--backend-address'], nargs='+', action=AddBackendAddressCreate, is_preview=True)
         c.argument('backend_addresses_config_file', type=get_json_object, is_preview=True)
+        c.argument('vnet', help='Name or Id of the virtual network applied to all backend addresses.', validator=process_vnet_name_or_id)
 
     with self.argument_context('network lb address-pool address') as c:
         c.argument('backend_address_pool_name',
