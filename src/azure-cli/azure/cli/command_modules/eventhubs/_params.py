@@ -44,20 +44,20 @@ def load_arguments_eh(self, _):
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
         c.argument('default_action', arg_group='networkrule', options_list=['--default-action'], arg_type=get_enum_type(['Allow', 'Deny']),
                    help='Default Action for Network Rule Set.')
-        c.argument('zone_redundant', options_list=['--zone-redundant'], arg_type=get_three_state_flag(),
+        c.argument('zone_redundant', options_list=['--zone-redundant'], is_preview=True, arg_type=get_three_state_flag(),
                    help='Enabling this property creates a Standard EventHubs Namespace in regions supported availability zones')
-        c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], arg_type=get_three_state_flag(),
+        c.argument('identity', arg_group='Managed Identity', options_list=['--assign-identity'], is_preview=True, arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Managed Identity is enabled.')
 
     with self.argument_context('eventhubs namespace create', min_api='2018-01-01-preview') as c:
-        c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='luster ARM ID of the Namespace')
+        c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], is_preview=True, help='luster ARM ID of the Namespace')
 
     with self.argument_context('eventhubs namespace update', arg_group='Managed Identity', min_api='2018-01-01-preview') as c:
-        c.argument('key_source', options_list=['--key-source'], arg_type=get_enum_type(KeySource),
+        c.argument('key_source', options_list=['--key-source'], is_preview=True, arg_type=get_enum_type(KeySource),
                    help='Encryption key source. Possible values include: \'Microsoft.KeyVault\'.')
-        c.argument('key_name', help='The name of the KeyVault key.', )
-        c.argument('key_vault_uri', help='The Uri of the KeyVault.')
-        c.argument('key_version',
+        c.argument('key_name', is_preview=True, help='The name of the KeyVault key.', )
+        c.argument('key_vault_uri', is_preview=True, help='The Uri of the KeyVault.')
+        c.argument('key_version', is_preview=True,
                    help='The version of the KeyVault key to use.')
 
     # region Namespace Authorizationrule
