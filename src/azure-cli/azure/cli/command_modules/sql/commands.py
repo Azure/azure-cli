@@ -269,7 +269,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-backup',
                             database_long_term_retention_backups_operations,
-                            client_factory=get_sql_database_long_term_retention_backups_operations, 
+                            client_factory=get_sql_database_long_term_retention_backups_operations,
                             is_preview=True) as g:
 
         g.show_command('show', 'get')
