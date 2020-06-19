@@ -25,6 +25,7 @@ class ApimScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'service_name': service_name,
+            'rg': resource_group,
             'rg_loc': resource_group_location,
             'rg_loc_displayName': KNOWN_LOCS.get(resource_group_location),
             'notification_sender_email': 'notifications@contoso.com',
@@ -88,7 +89,6 @@ class ApimScenarioTest(ScenarioTest):
 
         # api operations
         self.kwargs.update({
-            'rg': '{rg}',
             'api_id': self.create_random_name('az-cli', 10),
             'api_revision': None,
             'api_type': 'http',
