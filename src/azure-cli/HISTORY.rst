@@ -48,7 +48,7 @@ Release History
 
 **ARM**
 
-* Add examples for az tag -h (#10880)
+* `az tag`: Add examples for -h (#10880)
 * `az deployment group/sub what-if`: Add --exclude-change-types/-x parameter. (#13748)
 * `az deployment group/sub/mg/tenant create`: Add --what-if-exclude-change-types/-x parameter. (#13748)
 * `az deployment group/sub/mg/tenant validate`: Show error messages in a better format. (#13748)
