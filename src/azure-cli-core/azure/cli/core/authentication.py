@@ -21,7 +21,7 @@ def _convert_token_entry(token):
 
 
 def _create_scopes(resource):
-    if resource == 'https://datalake.azure.net/':
+    if 'datalake' in resource or 'batch' in resource or 'database' in resource:
         scope = resource + '/.default'
     else:
         scope = resource.rstrip('/') + '/.default'
