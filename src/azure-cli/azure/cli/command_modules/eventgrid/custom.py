@@ -457,7 +457,7 @@ def cli_event_channel_create_or_update(
         event_channel_name,
         partner_topic_source,
         destination_subscription_id,
-        destination_resource_group,
+        destination_resource_group_name,
         desination_topic_name,
         activation_expiration_date=None,
         partner_topic_description=None,
@@ -467,7 +467,7 @@ def cli_event_channel_create_or_update(
 
     destination_info = EventChannelDestination(
         azure_subscription_id=destination_subscription_id,
-        resource_group=destination_resource_group,
+        resource_group=destination_resource_group_name,
         partner_topic_name=desination_topic_name)
 
     event_channel_filter = None
