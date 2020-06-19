@@ -29,14 +29,11 @@ Release History
 
 * CHANGE help text for "--expiry" parameter. (#13940)
 
-**App Service**
+**AppService**
 
 * `az webapp log deployment show`: Show the latest deployment log, or the deployment logs of a specific deployment if deployment-id is specified (#13889)
 * `az webapp log deployment list`: List of deployment logs available (#13889)
 * Fix: Surface error when invalid webapp name provided (#13939)
-
-**AppService**
-
 * Fix #13261 az webapp list-runtimes use static list until new Available Stacks API is available (#13688)
 * `az appservice ase create`: Fix create issue #13361 (#13744)
 * `az appservice ase list-addresses`: Fix change of SDK #13140. (#13744)
