@@ -95,9 +95,9 @@ Release History
 
 * Allow creating fixed collections (#13950)
 
-**eventhubs**
+**EventHub**
 
-* [][]: az eventhubs namespace create : add managed identity parameters (#13992)
+* `az eventhubs namespace create` : add managed identity parameters (#13992)
 
 **Extension**
 
