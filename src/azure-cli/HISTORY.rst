@@ -10,7 +10,6 @@ Release History
 
 * Add support for region endpoint disable / routing disable (#13617)
 * [BREAKING CHANGE] `az acr login --expose-token` does not accept username and password (#13874)
-* `az acr agentpool`: New CLI testing (#12914)
 
 **ACS**
 
