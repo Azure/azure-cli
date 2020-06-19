@@ -86,9 +86,6 @@ Release History
 **Cosmos DB**
 
 * `az cosmosdb`: add exists command to database and container groups (#12774)
-
-**CosmosDB**
-
 * Allow creating fixed collections (#13950)
 
 **EventHub**
@@ -141,7 +138,7 @@ Release History
 * Fix issues #13012, #13632 and #13657 to remove unused arguments for generate-sas related commands (#13936)
 * `az storage logging update`: Add check for logging version (#13962)
 * `az storage blob show`: Add more properties for blob with track 2 SDK (#13920)
-* Fix issue 13708 to refine warning message for credential (#13963)
+* Fix #13708: Refine warning message for credential (#13963)
 * `az storage share-rm create/update`: Add NFS protocol and root squash support (#12359)
 * `az storage account create`: Add support for double encryption (#13765)
 * [BREAKING CHANGE] `az storage blob/container/file/share/table/queue generate-sas`: make --expiry and --permissions required (#13964)

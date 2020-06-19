@@ -5,7 +5,7 @@ Release History
 
 2.8.0
 ++++++
-* Add new get command loader mechanism when loading CommandLoader (#13763)
+* Add get_command_loader() entry to support to load customized CommandLoader (#13763)
 
 2.7.0
 ++++++
