@@ -278,7 +278,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-backup',
                             database_operations,
-                            client_factory=get_sql_databases_operations, 
+                            client_factory=get_sql_databases_operations,
                             is_preview=True) as g:
         g.custom_command(
             'restore',
