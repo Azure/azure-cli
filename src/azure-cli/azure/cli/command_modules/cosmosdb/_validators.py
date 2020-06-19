@@ -15,6 +15,7 @@ def validate_failover_policies(ns):
         fp_dict.append(FailoverPolicy(location_name=comps[0], failover_priority=int(comps[1])))
     ns.failover_policies = fp_dict
 
+
 def validate_private_endpoint_connection_id(ns):
     if ns.connection_id:
         from azure.cli.core.util import parse_proxy_resource_id

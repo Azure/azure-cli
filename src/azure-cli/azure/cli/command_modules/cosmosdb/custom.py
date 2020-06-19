@@ -220,6 +220,7 @@ def cli_cosmosdb_update(client,
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
+
 def get_ip_rules(ip_rules):
     _ip_rules = []
     if ip_rules:
@@ -229,12 +230,14 @@ def get_ip_rules(ip_rules):
             _ip_rules.append(_ip_address_or_range)
     return _ip_rules
 
+
 def cli_cosmosdb_list(client, resource_group_name=None):
     """ Lists all Azure Cosmos DB database accounts within a given resource group or subscription. """
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
 
     return client.list()
+
 
 # pylint: disable=line-too-long
 def cli_cosmosdb_keys(client, resource_group_name, account_name, key_type=CosmosKeyTypes.keys.value):
@@ -1076,6 +1079,7 @@ def cli_cosmosdb_table_throughput_update(client,
     throughput_update_resource = _get_throughput_settings_update_parameters(throughput, max_throughput)
     return client.update_table_throughput(resource_group_name, account_name, table_name, throughput_update_resource)
 
+
 def _get_throughput_settings_update_parameters(throughput=None, max_throughput=None):
 
     if throughput and max_throughput:
@@ -1086,6 +1090,7 @@ def _get_throughput_settings_update_parameters(throughput=None, max_throughput=N
         throughput_resource = ThroughputSettingsResource(autoscale_settings=AutoscaleSettings(max_throughput=max_throughput))
 
     return ThroughputSettingsUpdateParameters(resource=throughput_resource)
+
 
 def cli_cosmosdb_network_rule_list(client, resource_group_name, account_name):
     """ Lists the virtual network accounts associated with a Cosmos DB account """
@@ -1207,6 +1212,7 @@ def reject_private_endpoint_connection(client, resource_group_name, account_name
         description=description
     )
 
+
 def _get_options(throughput=None, max_throughput=None):
     options = {}
     if throughput and max_throughput:
@@ -1216,6 +1222,7 @@ def _get_options(throughput=None, max_throughput=None):
     if max_throughput:
         options['autoscaleSettings'] = AutoscaleSettings(max_throughput=max_throughput)
     return options
+
 
 ######################
 # data plane APIs

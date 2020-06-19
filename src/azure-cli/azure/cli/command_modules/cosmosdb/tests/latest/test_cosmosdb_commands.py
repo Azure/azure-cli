@@ -53,8 +53,8 @@ class CosmosDBTests(ScenarioTest):
             JMESPathCheck('kind', 'MongoDB'),
             self.check('ipRules[0].ipAddressOrRange', '20.10.10.10'),
             self.check('apiProperties.serverVersion', '3.2'),
-            self.check('enableAnalyticalStorage','True'),
-            self.check('enableFreeTier','False')
+            self.check('enableAnalyticalStorage', 'True'),
+            self.check('enableFreeTier', 'False')
         ])
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline')
