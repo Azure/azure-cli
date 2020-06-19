@@ -139,7 +139,7 @@ Release History
 * `az ad sp create-for-rabc`: support name with space, slash and back slash (#13875)
 * `az ad sp create-for-rbac`: refine error message when user specify an invalid scope (#13117)
 
-**security**
+**Security**
 
 * Add security assessment commands (#13978)
 
