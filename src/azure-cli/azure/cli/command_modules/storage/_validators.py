@@ -1082,6 +1082,15 @@ def blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
+def blob_rehydrate_priority_validator(namespace):
+    if namespace.blob_type == 'page' and namespace.rehydrate_priority:
+        raise ValueError('--rehydrate-priority is only applicable to block blob.')
+    if namespace.tier == 'Archive' and namespace.rehydrate_priority:
+        raise ValueError('--rehydrate-priority is only applicable to rehydrate blob data from the archive tier.')
+    if namespace.rehydrate_priority is None:
+        namespace.rehydrate_priority = 'Standard'
+
+
 def validate_azcopy_upload_destination_url(cmd, namespace):
     client = blob_data_service_factory(cmd.cli_ctx, {
         'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
