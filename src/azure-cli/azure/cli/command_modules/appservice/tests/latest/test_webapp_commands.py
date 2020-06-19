@@ -745,7 +745,7 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
                 self.cmd('webapp ssh -g {} -n {} --timeout 5'.format("foo", "bar"))
             return
 
-        runtime = 'node|8.11'
+        runtime = 'node|12-lts'
         plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-ssh', length=24)
         self.cmd(
@@ -779,7 +779,7 @@ class LinuxASESSHScenarioTest(ScenarioTest):
 class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_remote_ssh(self, resource_group):
-        runtime = 'node|8.11'
+        runtime = 'node|12-lts'
         plan = self.create_random_name(
             prefix='webapp-remote-ssh-plan', length=40)
         webapp = self.create_random_name(prefix='webapp-remote-ssh', length=40)
@@ -798,7 +798,7 @@ class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
 class LinuxWebappRemoteDebugScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp_remote_debug(self, resource_group):
-        runtime = 'node|8.11'
+        runtime = 'node|12-lts'
         plan = self.create_random_name(
             prefix='webapp-remote-debug-plan', length=40)
         webapp = self.create_random_name(

@@ -84,7 +84,7 @@ DEPENDENCIES = [
     'azure-mgmt-devtestlabs~=4.0',
     'azure-mgmt-dns~=2.1',
     'azure-mgmt-eventgrid~=2.2',
-    'azure-mgmt-eventhub~=3.0.0',
+    'azure-mgmt-eventhub~=4.0.0',
     'azure-mgmt-hdinsight~=1.4.0',
     'azure-mgmt-imagebuilder~=0.4.0',
     'azure-mgmt-iotcentral~=3.0.0',
@@ -113,7 +113,7 @@ DEPENDENCIES = [
     # 'azure-mgmt-reservations~=0.6.0',
     'azure-mgmt-reservations==0.6.0',  # TODO: Use requirements.txt instead of '==' #9781
     'azure-mgmt-search~=2.0',
-    'azure-mgmt-security~=0.1.0',
+    'azure-mgmt-security~=0.4.1',
     'azure-mgmt-servicebus~=0.6.0',
     'azure-mgmt-servicefabric~=0.4.0',
     'azure-mgmt-signalr~=0.3.0',
