@@ -504,8 +504,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tier', validator=blob_tier_validator)
         c.argument('timeout', type=int)
         c.argument('rehydrate_priority', options_list=('--rehydrate-priority', '-r'),
-                   arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator,
-                   help="Indicates the priority with which to rehydrate an archived blob. "
+                   arg_type=get_enum_type(('High', 'Standard')), validator=blob_rehydrate_priority_validator, is_preview=True,
+                   help="Indicate the priority with which to rehydrate an archived blob. "
                         "The priority can be set on a blob only once, default value is Standard.")
 
     with self.argument_context('storage blob service-properties delete-policy update') as c:
