@@ -16,7 +16,10 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_pricings,
                               cf_security_topology,
                               cf_security_workspace_settings,
-                              cf_security_advanced_threat_protection)
+                              cf_security_advanced_threat_protection,
+                              cf_security_assessment,
+                              cf_security_assessment_metadata,
+                              cf_security_sub_assessment)
 
 
 # pylint: disable=line-too-long
@@ -98,6 +101,21 @@ def load_command_table(self, _):
     security_advanced_threat_protection_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#AdvancedThreatProtectionOperations.{}',
         client_factory=cf_security_advanced_threat_protection
+    )
+
+    security_assessment_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#AssessmentsOperations.{}',
+        client_factory=cf_security_assessment
+    )
+
+    security_assessment_metadata_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#AssessmentMetadataOperations.{}',
+        client_factory=cf_security_assessment_metadata
+    )
+
+    security_sub_assessment_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#SubAssessmentsOperations.{}',
+        client_factory=cf_security_sub_assessment
     )
 
     with self.command_group('security task',
@@ -184,6 +202,28 @@ def load_command_table(self, _):
         g.custom_command('show', 'get_security_workspace_setting')
         g.custom_command('create', 'create_security_workspace_setting')
         g.custom_command('delete', 'delete_security_workspace_setting')
+
+    with self.command_group('security assessment',
+                            security_assessment_sdk,
+                            client_factory=cf_security_assessment) as g:
+        g.custom_command('list', 'list_security_assessments')
+        g.custom_command('show', 'get_security_assessment')
+        g.custom_command('create', 'create_security_assessment')
+        g.custom_command('delete', 'delete_security_assessment')
+
+    with self.command_group('security assessment-metadata',
+                            security_assessment_metadata_sdk,
+                            client_factory=cf_security_assessment_metadata) as g:
+        g.custom_command('list', 'list_security_assessment_metadata')
+        g.custom_command('show', 'get_security_assessment_metadata')
+        g.custom_command('create', 'create_security_assessment_metadata')
+        g.custom_command('delete', 'delete_security_assessment_metadata')
+
+    with self.command_group('security sub-assessment',
+                            security_sub_assessment_sdk,
+                            client_factory=cf_security_sub_assessment) as g:
+        g.custom_command('list', 'list_security_sub_assessments')
+        g.custom_command('show', 'get_security_sub_assessment')
 
     with self.command_group('security', is_preview=True):
         pass
