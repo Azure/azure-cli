@@ -21,7 +21,8 @@ def load_arguments(self, _):
         c.argument('headers', nargs='+',
                    help="Space-separated headers in KEY=VALUE format or JSON string. Use @{file} to load from a file")
         c.argument('uri_parameters', options_list=['--uri-parameters', '--url-parameters'], nargs='+',
-                   help='Space-separated queries in KEY=VALUE format or JSON string. Use @{file} to load from a file')
+                   help='Query parameters in the URL. Space-separated queries in KEY=VALUE format or JSON string. '
+                        'Use @{file} to load from a file')
         c.argument('skip_authorization_header', action='store_true', help='Do not auto-append Authorization header')
         c.argument('body', options_list=['--body', '-b'],
                    help='Request body. Use @{file} to load from a file. For quoting issues in different terminals, '
