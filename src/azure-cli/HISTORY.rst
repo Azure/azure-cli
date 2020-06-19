@@ -111,12 +111,9 @@ Release History
 
 * [BREAKING CHANGE] az iot hub job: Remove deprecated job commands (#13955)
 
-**Keyvault**
-
-* 'az keyvault key import' now supports importing from strings via two new parameters. (#13771)
-
 **KeyVault**
 
+* 'az keyvault key import' now supports importing from strings via two new parameters. (#13771)
 * Support string/bytes encryption and decryption with stored keys (#13916)
 
 **Monitor**
