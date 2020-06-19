@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.8.0
+++++++
+* Add new get command loader mechanism when loading CommandLoader (#13763)
+
 2.7.0
 ++++++
 * Enable local context for location (#13682)
