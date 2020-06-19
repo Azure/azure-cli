@@ -151,6 +151,80 @@ examples:
     text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
 """
 
+helps['sql db ltr-policy'] = """
+type: group
+short-summary: Manage SQL database long term retention policy.
+"""
+
+helps['sql db ltr-policy set'] = """
+type: command
+short-summary: Update long term retention settings for a database.
+examples:
+  - name: Set long term retention for a database.
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26
+"""
+
+helps['sql db ltr-policy show'] = """
+type: command
+short-summary: Show the long term retention policy for a database.
+examples:
+  - name: Show long term retention policy for a database.
+    text: az sql db ltr-policy show -g mygroup -s myserver -n mydb
+"""
+
+helps['sql db ltr-backup'] = """
+type: group
+short-summary: Manage SQL database long term retention backups.
+"""
+
+helps['sql db ltr-backup show'] = """
+type: command
+short-summary: Get a long term retention backup for a database.
+examples:
+  - name: Show long term retention backup for a database.
+    text: az sql db ltr-backup show -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup list'] = """
+type: command
+short-summary: List the long term retention backups for a location, server or database.
+examples:
+  - name: List long term retention backups for a database.
+    text: az sql db ltr-backup list -l southeastasia -s myserver -d mydb
+  - name: List long term retention backups for a server (list only the latest LTR backups, which belong to live databases).
+    text: az sql db ltr-backup list -l southeastasia -s myserver --database-state Live --only-latest-per-database True
+  - name: List long term retention backups for a server (with resource group argument).
+    text: az sql db ltr-backup list -l southeastasia -g mygroup -s myserver
+  - name: List long term retention backups for a location (list only the latest LTR backups, which belong to live databases).
+    text: az sql db ltr-backup list -l southeastasia --database-state Live --only-latest-per-database True
+  - name: List long term retention backups for a location (with resource group argument).
+    text: az sql db ltr-backup list -l southeastasia -g mygroup
+"""
+
+helps['sql db ltr-backup delete'] = """
+type: command
+short-summary: Delete a long term retention backup.
+examples:
+  - name: Delete long term retention backup for database.
+    text: az sql db ltr-backup delete -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup restore'] = """
+type: command
+short-summary: Restore a long term retention backup to a new database.
+examples:
+  - name: Restore LTR backup.
+    text: |
+        az sql db ltr-backup restore \\
+        --dest-database targetdb --dest-server myserver --dest-resource-group mygroup \\
+        --backup-id "/subscriptions/6caa113c-794c-42f8-ab9d-878d8aa104dc/resourceGroups/mygroup/providers/Microsoft.Sql/locations/southeastasia/longTermRetentionServers/myserver/longTermRetentionDatabases/sourcedb/longTermRetentionBackups/3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of the database is met.
+"""
+
 helps['sql db op'] = """
 type: group
 short-summary: Manage operations on a database.
