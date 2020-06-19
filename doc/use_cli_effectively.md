@@ -122,6 +122,8 @@ az rest --method PATCH
         --body '{"web":{"redirectUris":["https://myapp.com"]}}'
 ```
 
+When using `--url-parameters` for requests in the form of OData, please make sure to escape `$` in different environments: in `Bash`, escape `$` as `\$` and in `PowerShell`, escape `$` as `` `$``
+
 ## Quoting issues
 
 This becomes an issue because when the command shell (Bash, Zsh, Windows Command Prompt, PowerShell, etc) parses the CLI command, it will interpret the quotes and spaces. Always refer to the documents when you are uncertain about the usage of a shell:

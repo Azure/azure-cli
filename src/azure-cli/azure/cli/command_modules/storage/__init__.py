@@ -41,7 +41,7 @@ class AzureStackStorageCommandsLoader(AzCommandsLoader):
         super(AzureStackStorageCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                               resource_type=ResourceType.DATA_STORAGE,
                                                               custom_command_type=storage_custom,
-                                                              command_group_cls=StorageCommandGroup,
+                                                              command_group_cls=AzureStackStorageCommandGroup,
                                                               argument_context_cls=StorageArgumentContext)
 
     def load_command_table(self, args):
@@ -62,7 +62,7 @@ class StorageArgumentContext(AzArgumentContext):
         self.argument('ip', type=ipv4_range_type,
                       help='Specifies the IP address or range of IP addresses from which to accept requests. Supports '
                            'only IPv4 style addresses.')
-        self.argument('expiry', type=get_datetime_type(True),
+        self.argument('expiry', type=get_datetime_type(True), required=True,
                       help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid. Do not '
                            'use if a stored access policy is referenced with --id that specifies this value.')
         self.argument('start', type=get_datetime_type(True),
@@ -186,14 +186,10 @@ class StorageCommandGroup(AzCommandGroup):
         _merge_new_exception_handler(kwargs, self.get_handler_suppress_some_400())
         self.storage_custom_command(*args, oauth=True, **kwargs)
 
-    def get_handler_suppress_some_400(self):
+    @classmethod
+    def get_handler_suppress_some_400(cls):
         def handler(ex):
-            from azure.cli.core.profiles import get_sdk
-
-            t_error = get_sdk(self.command_loader.cli_ctx,
-                              ResourceType.DATA_STORAGE,
-                              'common._error#AzureHttpError')
-            if isinstance(ex, t_error) and ex.status_code == 403:
+            if hasattr(ex, 'status_code') and ex.status_code == 403 and hasattr(ex, 'error_code'):
                 # TODO: Revisit the logic here once the service team updates their response
                 if ex.error_code == 'AuthorizationPermissionMismatch':
                     message = """
@@ -218,7 +214,7 @@ If you want to change the default action to apply when no rule matches, please u
 Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
                     """
                     ex.args = (message,)
-            if isinstance(ex, t_error) and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
+            if hasattr(ex, 'status_code') and ex.status_code == 409 and ex.error_code == 'NoPendingCopyOperation':
                 pass
 
         return handler
@@ -269,6 +265,42 @@ Authentication failure. This may be caused by either invalid account key, connec
                          'for the authentication. The legacy "key" mode will attempt to query for '
                          'an account key if no authentication parameters for the account are provided. '
                          'Environment variable: AZURE_STORAGE_AUTH_MODE')
+
+
+class AzureStackStorageCommandGroup(StorageCommandGroup):
+
+    @classmethod
+    def get_handler_suppress_some_400(cls):
+        def handler(ex):
+            if hasattr(ex, 'status_code') and ex.status_code == 403:
+                # TODO: Revisit the logic here once the service team updates their response
+                if 'AuthorizationPermissionMismatch' in ex.args[0]:
+                    message = """
+You do not have the required permissions needed to perform this operation.
+Depending on your operation, you may need to be assigned one of the following roles:
+    "Storage Blob Data Contributor"
+    "Storage Blob Data Reader"
+    "Storage Queue Data Contributor"
+    "Storage Queue Data Reader"
+
+If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
+                    """
+                    ex.args = (message,)
+                elif 'AuthorizationFailure' in ex.args[0]:
+                    message = """
+The request may be blocked by network rules of storage account. Please check network rule set using 'az storage account show -n accountname --query networkRuleSet'.
+If you want to change the default action to apply when no rule matches, please use 'az storage account update'.
+                    """
+                    ex.args = (message,)
+                elif 'AuthenticationFailed' in ex.args[0]:
+                    message = """
+Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
+                    """
+                    ex.args = (message,)
+            if hasattr(ex, 'status_code') and ex.status_code == 409 and 'NoPendingCopyOperation' in ex.args[0]:
+                pass
+
+        return handler
 
 
 def _merge_new_exception_handler(kwargs, handler):

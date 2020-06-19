@@ -316,8 +316,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.lease.state', 'available'),
                                 JMESPathCheck('properties.lease.status', 'unlocked'))
 
-        self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {}', account_info,
-                                               c).output)
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {} --permissions r --expiry {}',
+                                               account_info, c, expiry).output)
 
         # verify delete operation
         self.storage_cmd('storage container delete --name {} --fail-not-exist', account_info, c) \
@@ -484,6 +486,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
+    @api_version_constraint(resource_type=ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
     def test_storage_blob_suppress_400(self, resource_group, storage_account):
         # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
         # test 404
@@ -492,8 +495,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(ex.exception.code, 3)
 
         # test 403
-        from azure.common import AzureException
-        with self.assertRaisesRegexp(AzureException, "Authentication failure"):
+        from azure.core.exceptions import ClientAuthenticationError
+        with self.assertRaisesRegexp(ClientAuthenticationError, "Authentication failure"):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
 

@@ -4,15 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint,
+                               JMESPathCheck)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-class StorageFileShareUsingResourceProviderScenarios(StorageScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus")
+    @StorageAccountPreparer(name_prefix="sharerm", location="eastus")
     def test_storage_file_using_rm_main_scenario(self):
         # 1. Test create command.
 
@@ -140,3 +141,39 @@ class StorageFileShareUsingResourceProviderScenarios(StorageScenarioMixin, Scena
 
         result = self.cmd('storage share-rm exists --ids {share_id_2}').get_output_in_json()
         self.assertEqual(result['exists'], False)
+
+    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
+    @ResourceGroupPreparer(name_prefix="cli_nfs", location="eastus2euap")
+    @StorageAccountPreparer(name_prefix="nfs", location="eastus2euap")
+    def test_storage_share_rm_with_NFS(self):
+
+        self.kwargs.update({
+            'share': self.create_random_name('share', 24),
+        })
+        self.cmd('storage share-rm create --storage-account {sa} -g {rg} -n {share} --enabled-protocols NFS --root-squash AllSquash', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('enabledProtocol', 'NFS'),
+            JMESPathCheck('rootSquash', 'AllSquash')
+        })
+
+        self.cmd('storage share-rm update --storage-account {sa} -g {rg} -n {share} --root-squash NoRootSquash', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('rootSquash', 'NoRootSquash')
+        })
+
+        self.cmd('storage share-rm show --storage-account {sa} -g {rg} -n {share}', checks={
+            JMESPathCheck('name', self.kwargs['share']),
+            JMESPathCheck('enabledProtocol', 'NFS'),
+            JMESPathCheck('rootSquash', 'NoRootSquash')
+        })
+
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('[0].name', self.kwargs['share']),
+            JMESPathCheck('[0].enabledProtocol', 'NFS'),
+            JMESPathCheck('[0].rootSquash', 'NoRootSquash')
+        })
+
+        self.cmd('storage share-rm delete --storage-account {sa} -g {rg} -n {share} -y')
+        self.cmd('storage share-rm list --storage-account {sa} -g {rg}', checks={
+            JMESPathCheck('length(@)', 0)
+        })

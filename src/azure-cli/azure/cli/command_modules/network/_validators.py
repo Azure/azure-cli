@@ -682,7 +682,7 @@ def get_servers_validator(camel_case=False):
                 servers.append({'ipAddress' if camel_case else 'ip_address': item})
             except socket.error:  # pylint:disable=no-member
                 servers.append({'fqdn': item})
-        namespace.servers = servers
+        namespace.servers = servers if servers else None
 
     return validate_servers
 
