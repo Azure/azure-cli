@@ -202,7 +202,7 @@ def _stream_logs(no_format,  # pylint: disable=too-many-locals, too-many-stateme
             raise CLIError("Run was canceled")
 
 
-def _stream_artifact_logs(log_file_sas,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
+def _stream_artifact_logs(log_file_sas,
                           no_format):
 
     if not no_format:
