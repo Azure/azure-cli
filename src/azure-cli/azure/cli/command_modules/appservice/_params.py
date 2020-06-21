@@ -10,11 +10,12 @@ from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 get_three_state_flag, get_enum_type, tags_type)
+from azure.cli.core.util import get_file_json
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS
+from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_RUNTIME_STACKS_JSON_PATHS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address)
 
@@ -62,19 +63,25 @@ def load_arguments(self, _):
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
-    # combine all runtime versions for all functions versions
-    functionapp_runtime_to_version = {}
-    for functions_version in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS.values():
-        for runtime, val in functions_version.items():
-            # dotnet version is not configurable, so leave out of help menu
-            if runtime != 'dotnet':
-                functionapp_runtime_to_version[runtime] = functionapp_runtime_to_version.get(runtime, set()).union(val)
+    # set up functionapp create help menu
+    functionapp_runtime_stacks_json_list = []
+    functionapp_runtime_stacks_json_list.append(get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['windows']))
+    functionapp_runtime_stacks_json_list.append(get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['linux']))
 
-    functionapp_runtime_to_version_texts = []
+    functionapp_runtime_to_version = {}
+    for runtime_stacks_json in functionapp_runtime_stacks_json_list:
+        for runtime_json in runtime_stacks_json['value']:
+            for runtime_version_json in runtime_json['properties']['majorVersions']:
+                functionapp_runtime_to_version[runtime_json['name']] = functionapp_runtime_to_version.get(runtime_json['name'], set()).union([runtime_version_json['displayVersion']])
+
+    functionapp_runtime_to_version_strings = []
     for runtime, runtime_versions in functionapp_runtime_to_version.items():
+        # dotnet version is not configurable, so leave out of help menu
+        if runtime == 'dotnet':
+            continue
         runtime_versions_list = list(runtime_versions)
         runtime_versions_list.sort(key=float)
-        functionapp_runtime_to_version_texts.append(runtime + ' -> [' + ', '.join(runtime_versions_list) + ']')
+        functionapp_runtime_to_version_strings.append(runtime + ' -> [' + ', '.join(runtime_versions_list) + ']')
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -657,10 +664,10 @@ def load_arguments(self, _):
                    help="Geographic location where Function App will be hosted. Use `az functionapp list-consumption-locations` to view available locations.")
         c.argument('functions_version', help='The functions app version.', arg_type=get_enum_type(FUNCTIONS_VERSIONS))
         c.argument('runtime', help='The functions runtime stack.',
-                   arg_type=get_enum_type(set(LINUX_RUNTIMES).union(set(WINDOWS_RUNTIMES))))
+                   arg_type=get_enum_type(functionapp_runtime_to_version.keys()))
         c.argument('runtime_version',
                    help='The version of the functions runtime stack. '
-                        'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_texts))
+                        'Allowed values for each --runtime are: ' + ', '.join(functionapp_runtime_to_version_strings))
         c.argument('os_type', arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
         c.argument('app_insights_key', help="Instrumentation key of App Insights to be added.")
         c.argument('app_insights',

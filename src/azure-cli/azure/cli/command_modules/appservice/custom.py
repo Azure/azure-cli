@@ -41,14 +41,14 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter, sdk_no_wait
+    ConfiguredDefaultSetter, sdk_no_wait, get_file_json
 from azure.cli.core.util import get_az_user_agent
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from .tunnel import TunnelServer
 
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
-from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES, LINUX_RUNTIMES, WINDOWS_RUNTIMES
+from ._params import AUTH_TYPES, MULTI_CONTAINER_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory, providers_client_factory
 from ._appservice_utils import _generic_site_operation
 from .utils import _normalize_sku, get_sku_name, retryable_method
@@ -56,9 +56,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            should_create_new_rg, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
-from ._constants import (FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
-                         FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS, NODE_VERSION_DEFAULT,
-                         DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION, RUNTIME_STACKS)
+from ._constants import (FUNCTIONS_RUNTIME_STACKS_JSON_PATHS, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
+                         NODE_VERSION_DEFAULT, RUNTIME_STACKS)
 
 logger = get_logger(__name__)
 
@@ -2615,31 +2614,51 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         raise CLIError(
             "usage error: --runtime RUNTIME required for linux functions apps without custom image.")
 
-    if runtime:
-        if is_linux and runtime not in LINUX_RUNTIMES:
-            raise CLIError("usage error: Currently supported runtimes (--runtime) in linux function apps are: {}."
-                           .format(', '.join(LINUX_RUNTIMES)))
-        if not is_linux and runtime not in WINDOWS_RUNTIMES:
-            raise CLIError("usage error: Currently supported runtimes (--runtime) in windows function apps are: {}."
-                           .format(', '.join(WINDOWS_RUNTIMES)))
-        site_config.app_settings.append(NameValuePair(name='FUNCTIONS_WORKER_RUNTIME', value=runtime))
+    runtime_stacks_json = _load_runtime_stacks_json_functionapp(is_linux)
 
-    if runtime_version is not None:
-        if runtime is None:
-            raise CLIError('Must specify --runtime to use --runtime-version')
-        allowed_versions = FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version][runtime]
-        if runtime_version not in allowed_versions:
+    if runtime is None and runtime_version is not None:
+        raise CLIError('Must specify --runtime to use --runtime-version')
+
+    # get the matching runtime stack object
+    runtime_json = _get_matching_runtime_json_functionapp(runtime_stacks_json, runtime if runtime else 'dotnet')
+    if not runtime_json:
+        # no matching runtime for os
+        os_string = "linux" if is_linux else "windows"
+        supported_runtimes = list(map(lambda x: x['name'], runtime_stacks_json))
+        raise CLIError("usage error: Currently supported runtimes (--runtime) in {} function apps are: {}."
+                       .format(os_string, ', '.join(supported_runtimes)))
+
+    runtime_version_json = _get_matching_runtime_version_json_functionapp(runtime_json,
+                                                                          functions_version,
+                                                                          runtime_version)
+    if not runtime_version_json:
+        supported_runtime_versions = list(map(lambda x: x['displayVersion'],
+                                              _get_supported_runtime_versions_functionapp(runtime_json,
+                                                                                          functions_version)))
+        if runtime_version:
             if runtime == 'dotnet':
                 raise CLIError('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined '
                                'by --functions-version. Dotnet version {} is not supported by Functions version {}.'
                                .format(runtime_version, functions_version))
             raise CLIError('--runtime-version {} is not supported for the selected --runtime {} and '
                            '--functions-version {}. Supported versions are: {}.'
-                           .format(runtime_version, runtime, functions_version, ', '.join(allowed_versions)))
-        if runtime == 'dotnet':
-            logger.warning('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined by '
-                           '--functions-version. Dotnet version will be %s for this function app.',
-                           FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime])
+                           .format(runtime_version,
+                                   runtime,
+                                   functions_version,
+                                   ', '.join(supported_runtime_versions)))
+
+        # if runtime_version was not specified, then that runtime is not supported for that functions version
+        raise CLIError('no supported --runtime-version found for the selected --runtime {} and '
+                       '--functions-version {}'
+                       .format(runtime, functions_version))
+
+    if runtime == 'dotnet':
+        logger.warning('--runtime-version is not supported for --runtime dotnet. Dotnet version is determined by '
+                       '--functions-version. Dotnet version will be %s for this function app.',
+                       runtime_version_json['displayVersion'])
+
+    site_config_json = runtime_version_json['siteConfigPropertiesDictionary']
+    app_settings_json = runtime_version_json['appSettingsDictionary']
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
 
@@ -2661,24 +2680,30 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             else:
                 site_config.app_settings.append(NameValuePair(name='WEBSITES_ENABLE_APP_SERVICE_STORAGE',
                                                               value='true'))
-                if runtime not in FUNCTIONS_VERSION_TO_SUPPORTED_RUNTIME_VERSIONS[functions_version]:
-                    raise CLIError("An appropriate linux image for runtime:'{}', "
-                                   "functions_version: '{}' was not found".format(runtime, functions_version))
         if deployment_container_image_name is None:
-            site_config.linux_fx_version = _get_linux_fx_functionapp(functions_version, runtime, runtime_version)
+            site_config.linux_fx_version = site_config_json['linuxFxVersion']
+        if 'Use32BitWorkerProcess' in site_config_json:
+            site_config.use32_bit_worker_process = site_config_json['Use32BitWorkerProcess']
     else:
         functionapp_def.kind = 'functionapp'
-        if runtime == "java":
-            site_config.java_version = _get_java_version_functionapp(functions_version, runtime_version)
+        if runtime == "java" and 'JavaVersion' in site_config_json:
+            site_config.java_version = site_config_json['JavaVersion']
+        elif runtime == "powershell" and 'PowerShellVersion' in site_config_json:
+            site_config.power_shell_version = site_config_json['PowerShellVersion']
 
     # adding appsetting to site to make it a function
+    for app_setting, value in app_settings_json.items():
+        site_config.app_settings.append(NameValuePair(name=app_setting, value=value))
+
+    if not _get_app_setting_set_functionapp(site_config, 'WEBSITE_NODE_DEFAULT_VERSION'):
+        site_config.app_settings.append(NameValuePair(
+            name='WEBSITE_NODE_DEFAULT_VERSION',
+            value=FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]))
+
     site_config.app_settings.append(NameValuePair(name='FUNCTIONS_EXTENSION_VERSION',
                                                   value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
-    site_config.app_settings.append(NameValuePair(name='WEBSITE_NODE_DEFAULT_VERSION',
-                                                  value=_get_website_node_version_functionapp(functions_version,
-                                                                                              runtime,
-                                                                                              runtime_version)))
+
     if disable_app_insights:
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
 
@@ -2733,36 +2758,58 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     return functionapp
 
 
+def _load_runtime_stacks_json_functionapp(is_linux):
+    if is_linux:
+        return get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['linux'])['value']
+    return get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['windows'])['value']
+
+
+def _get_matching_runtime_json_functionapp(stacks_json, runtime):
+    matching_runtime_json = list(filter(lambda x: x['name'] == runtime, stacks_json))
+    if matching_runtime_json:
+        return matching_runtime_json[0]
+    return None
+
+
+def _get_supported_runtime_versions_functionapp(runtime_json, functions_version):
+    extension_version = _get_extension_version_functionapp(functions_version)
+    supported_versions_list = []
+
+    for runtime_version_json in runtime_json['properties']['majorVersions']:
+        if extension_version in runtime_version_json['supportedFunctionsExtensionVersions']:
+            supported_versions_list.append(runtime_version_json)
+    return supported_versions_list
+
+
+def _get_matching_runtime_version_json_functionapp(runtime_json, functions_version, runtime_version):
+    extension_version = _get_extension_version_functionapp(functions_version)
+    if runtime_version:
+        for runtime_version_json in runtime_json['properties']['majorVersions']:
+            if (runtime_version_json['displayVersion'] == runtime_version and
+                    extension_version in runtime_version_json['supportedFunctionsExtensionVersions']):
+                return runtime_version_json
+        return None
+
+    # find the most recent matching runtime version
+    supported_versions_list = _get_supported_runtime_versions_functionapp(runtime_json, functions_version)
+    default_version_json = {}
+    for runtime_version_json in supported_versions_list:
+        # TODO(gzuber): fix/remove/or something
+        # if runtime_version_json['isDefault']:
+        if (not default_version_json or
+                float(default_version_json['displayVersion']) < float(runtime_version_json['displayVersion'])):
+            default_version_json = runtime_version_json
+    return default_version_json
+
+
 def _get_extension_version_functionapp(functions_version):
     if functions_version is not None:
         return '~{}'.format(functions_version)
     return '~2'
 
 
-def _get_linux_fx_functionapp(functions_version, runtime, runtime_version):
-    if runtime_version is None:
-        runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version][runtime]
-    if runtime == 'dotnet':
-        runtime_version = DOTNET_RUNTIME_VERSION_TO_DOTNET_LINUX_FX_VERSION[runtime_version]
-    else:
-        runtime = runtime.upper()
-    return '{}|{}'.format(runtime, runtime_version)
-
-
-def _get_website_node_version_functionapp(functions_version, runtime, runtime_version):
-    if runtime is None or runtime != 'node':
-        return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
-    if runtime_version is not None:
-        return '~{}'.format(runtime_version)
-    return FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION[functions_version]
-
-
-def _get_java_version_functionapp(functions_version, runtime_version):
-    if runtime_version is None:
-        runtime_version = FUNCTIONS_VERSION_TO_DEFAULT_RUNTIME_VERSION[functions_version]['java']
-    if runtime_version == '8':
-        return '1.8'
-    return runtime_version
+def _get_app_setting_set_functionapp(site_config, app_setting):
+    return list(filter(lambda x: x.name == app_setting, site_config.app_settings))
 
 
 def try_create_application_insights(cmd, functionapp):
