@@ -65,6 +65,9 @@ To onboard a new rule, generally we need the following steps.
 - Develop the rule and open a PR.
 - Review the PR and get approval.
 - Exclude or fix all existing commands which violate the new rule in both [Azure/azure-cli](https://github.com/Azure/azure-cli) and [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensions)
+- Merge the PR and release new version of azdev.
+
+Better to make new rule in Medium or Low severity first and collect some telemetry to see whether we need this rule as high or not.
 
 ## Rule Descriptions
 
