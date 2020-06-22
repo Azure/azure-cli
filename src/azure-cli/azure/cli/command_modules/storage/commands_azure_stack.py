@@ -629,4 +629,3 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                           exception_handler=show_exception_handler,
                           transform=transform_entity_result)
         g.storage_custom_command('insert', 'insert_table_entity')
-
