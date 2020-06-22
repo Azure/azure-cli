@@ -49,6 +49,7 @@ def load_arguments(self, _):
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
                                                     help="a template file path in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
+    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], completer=FilesCompleter(), type=file_type, help='The resource id to the template-spec', is_preview=True, min_api='2019-06-01')
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
@@ -206,6 +207,7 @@ def load_arguments(self, _):
         c.argument('deployment_name', arg_type=deployment_name_type)
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'),
                    help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
         c.argument('parameters', arg_type=deployment_parameters_type)
@@ -239,6 +241,7 @@ def load_arguments(self, _):
         c.argument('deployment_location', arg_type=get_location_type(self.cli_ctx), required=True)
         c.argument('template_file', arg_type=deployment_template_file_type)
         c.argument('template_uri', arg_type=deployment_template_uri_type)
+        c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('parameters', arg_type=deployment_parameters_type)
 
     with self.argument_context('deployment create') as c:
