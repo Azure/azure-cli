@@ -357,6 +357,24 @@ def reload_extension(extension_name, extension_module=None):
 def add_extension_to_path(extension_name, ext_dir=None):
     ext_dir = ext_dir or get_extension(extension_name).path
     sys.path.append(ext_dir)
+    # If this path update should have made a new "azure" module available,
+    # extend the existing module with its path. This allows extensions to
+    # include (or depend on) Azure SDK modules that are not yet part of
+    # the CLI. This applies to both the "azure" and "azure.mgmt" namespaces,
+    # but ensures that modules installed by the CLI take priority.
+    azure_dir = os.path.join(ext_dir, "azure")
+    if os.path.isdir(azure_dir):
+        import azure
+        azure.__path__.append(azure_dir)
+        azure_mgmt_dir = os.path.join(azure_dir, "mgmt")
+        if os.path.isdir(azure_mgmt_dir):
+            try:
+                # Should have been imported already, so this will be quick
+                import azure.mgmt
+            except ImportError:
+                pass
+            else:
+                azure.mgmt.__path__.append(azure_mgmt_dir)
 
 
 def get_lsb_release():

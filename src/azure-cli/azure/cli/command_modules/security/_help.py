@@ -412,3 +412,108 @@ examples:
     text: >
         az security workspace-setting show -n default
 """
+
+helps['security assessment'] = """
+type: group
+short-summary: View your security assessment results.
+"""
+
+helps['security assessment create'] = """
+type: command
+short-summary: Creates a customer managed security assessment.
+examples:
+  - name: Creates a security assessment.
+    text: >
+        az security assessment create -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d' --status-code  'unhealthy'
+"""
+
+helps['security assessment delete'] = """
+type: command
+short-summary: Deletes a security assessment.
+examples:
+  - name: Deletes a security assessment.
+    text: >
+        az security assessment delete -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d'
+"""
+
+helps['security assessment list'] = """
+type: command
+short-summary: List all security assessment results.
+examples:
+  - name: Get security assessments.
+    text: >
+        az security assessment list
+"""
+
+helps['security assessment show'] = """
+type: command
+short-summary: Shows a security assessment.
+examples:
+  - name: Get a security assessment.
+    text: >
+        az security assessment show -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d'
+"""
+
+helps['security assessment-metadata'] = """
+type: group
+short-summary: View your security assessment metadata.
+"""
+
+helps['security assessment-metadata create'] = """
+type: command
+short-summary: Creates a customer managed security assessment type.
+examples:
+  - name: Creates a security assessment type.
+    text: >
+        az security assessment-metadata create -n "4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d" --display-name  "Resource should be secured" --severity "high" --description "The resource should be secured according to my company security policy"
+"""
+
+helps['security assessment-metadata delete'] = """
+type: command
+short-summary: Deletes a security assessment type and all it's assessment results.
+examples:
+  - name: Deletes a security assessment type.
+    text: >
+        az security assessment-metadata delete -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d'
+"""
+
+helps['security assessment-metadata list'] = """
+type: command
+short-summary: List all security assessment results.
+examples:
+  - name: Get security assessment metadata.
+    text: >
+        az security assessment-metadata list
+"""
+
+helps['security assessment-metadata show'] = """
+type: command
+short-summary: Shows a security assessment.
+examples:
+  - name: Get a security assessment metadata.
+    text: >
+        az security assessment-metadata show -n '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d'
+"""
+
+helps['security sub-assessment'] = """
+type: group
+short-summary: View your security sub assessments.
+"""
+
+helps['security sub-assessment list'] = """
+type: command
+short-summary: List all security sub assessment results.
+examples:
+  - name: Get security sub assessments.
+    text: >
+        az security sub-assessment list
+"""
+
+helps['security sub-assessment show'] = """
+type: command
+short-summary: Shows a security sub assessment.
+examples:
+  - name: Get a security sub assessment.
+    text: >
+        az security sub-assessment show --assessed-resource-id '/subscriptions/f8b197db-3b2b-4404-a3a3-0dfec293d0d0/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1' --assessment-name '4fb6c0a0-1137-42c7-a1c7-4bd37c91de8d' -n 'd7c4d9ec-227c-4fb3-acf9-25fdd97c1bf1'
+"""
