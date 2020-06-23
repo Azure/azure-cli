@@ -3861,3 +3861,23 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
             verified_hostname_found = True
 
     return verified_hostname_found
+
+
+def update_function_key(cmd, resource_group_name, name, key_name, key_value, function_name=None, slot=None):
+    # def create_or_update_function_secret(
+    #         self, resource_group_name, name, function_name, key_name, name1=None, value=None, custom_headers=None, raw=False, **operation_config):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.create_or_update_function_secret(resource_group_name, name, function_name, key_name, name1=key_name, value=key_value)
+    # functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    # logger.warning('yo')
+
+
+def list_function_keys(cmd, resource_group_name, name, function_name=None, slot=None):
+    # def list_function_keys(
+    #         self, resource_group_name, name, function_name, custom_headers=None, raw=False, **operation_config):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.list_function_keys(resource_group_name, name, function_name)
+
+
+def delete_function_key(cmd, resource_group_name, name, key_name, function_name=None, slot=None):
+    logger.warning('yo')
