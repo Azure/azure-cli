@@ -67,7 +67,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
 
         # Assert listvips is called
         list_appserviceenvironment_addresses(self.mock_cmd, ase_name_1)
-        ase_client.list_vips.assert_called_with(rg_name_1, ase_name_1)
+        ase_client.get_vip_info.assert_called_with(rg_name_1, ase_name_1)
 
         # Assert list_app_service_plans is called
         list_appserviceenvironment_plans(self.mock_cmd, ase_name_2)
@@ -78,11 +78,11 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         self.assertEqual(len(result), 2)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_deployment_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_network_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_create(self, ase_client_factory_mock, network_client_factory_mock,
-                                            deployment_client_factory_mock, deployment_name_mock):
+                                            resource_client_factory_mock, deployment_name_mock):
         ase_name = 'mock_ase_name'
         rg_name = 'mock_rg_name'
         vnet_name = 'mock_vnet_name'
@@ -92,8 +92,9 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         ase_client = mock.MagicMock()
         ase_client_factory_mock.return_value = ase_client
 
-        deployment_client = mock.MagicMock()
-        deployment_client_factory_mock.return_value = deployment_client
+        resource_client_mock = mock.MagicMock()
+        resource_client_factory_mock.return_value = resource_client_mock
+
         deployment_name_mock.return_value = deployment_name
 
         network_client = mock.MagicMock()
@@ -115,9 +116,9 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
                                          location='westeurope')
 
         # Assert create_or_update is called with correct rg and deployment name
-        deployment_client.create_or_update.assert_called_once()
-        self.assertEqual(deployment_client.create_or_update.call_args[0][0], rg_name)
-        self.assertEqual(deployment_client.create_or_update.call_args[0][1], deployment_name)
+        resource_client_mock.deployments.create_or_update.assert_called_once()
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][0], rg_name)
+        self.assertEqual(resource_client_mock.deployments.create_or_update.call_args[0][1], deployment_name)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_location_from_resource_group', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)

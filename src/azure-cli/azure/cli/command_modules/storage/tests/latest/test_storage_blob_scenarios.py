@@ -316,8 +316,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.lease.state', 'available'),
                                 JMESPathCheck('properties.lease.status', 'unlocked'))
 
-        self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {}', account_info,
-                                               c).output)
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        self.assertIn('sig=', self.storage_cmd('storage container generate-sas -n {} --permissions r --expiry {}',
+                                               account_info, c, expiry).output)
 
         # verify delete operation
         self.storage_cmd('storage container delete --name {} --fail-not-exist', account_info, c) \
@@ -456,6 +458,11 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         b = self.create_random_name('blob', 24)
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegexp(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions r --https-only '
+                     '--auth-mode login'.format(storage_account, b, c, expiry))
+
         blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
                             'r --https-only --as-user --auth-mode login'.format(storage_account, b, c, expiry)).output
         self.assertIn('&sig=', blob_sas)
@@ -479,6 +486,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
+    @api_version_constraint(resource_type=ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
     def test_storage_blob_suppress_400(self, resource_group, storage_account):
         # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
         # test 404
@@ -487,9 +495,92 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(ex.exception.code, 3)
 
         # test 403
-        from azure.common import AzureException
-        with self.assertRaisesRegexp(AzureException, "Authentication failure"):
+        from azure.core.exceptions import ClientAuthenticationError
+        with self.assertRaisesRegexp(ClientAuthenticationError, "Authentication failure"):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
+
+
+@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
+class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2', sku='Premium_LRS')
+    def test_storage_page_blob_set_tier(self, resource_group, storage_account):
+
+        source_file = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+        container_name = self.create_container(account_info)
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}" -t page --tier P10', account_info,
+                         container_name, blob_name, source_file)
+
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name)\
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'P10'))
+
+        with self.assertRaises(SystemExit):
+            self.storage_cmd('storage blob set-tier -c {} -n {} --tier P20 -r High -t page', account_info,
+                             container_name, blob_name)
+
+        self.storage_cmd('storage blob set-tier -c {} -n {} --tier P20 -t page', account_info,
+                         container_name, blob_name)
+
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name)\
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'P20'))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind='StorageV2')
+    def test_storage_block_blob_set_tier(self, resource_group, storage_account):
+
+        source_file = self.create_temp_file(16)
+        account_info = self.get_account_info(resource_group, storage_account)
+        container_name = self.create_container(account_info)
+
+        # test rehydrate from Archive to Cool by High priority
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info,
+                         container_name, blob_name, source_file)
+
+        with self.assertRaises(SystemExit):
+            self.storage_cmd('storage blob set-tier -c {} -n {} --tier Cool -r Middle', account_info,
+                             container_name, blob_name)
+
+        with self.assertRaises(SystemExit):
+            self.storage_cmd('storage blob set-tier -c {} -n {} --tier Archive -r High', account_info,
+                             container_name, blob_name)
+
+        self.storage_cmd('storage blob set-tier -c {} -n {} --tier Archive', account_info,
+                         container_name, blob_name)
+
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name) \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        self.storage_cmd('storage blob set-tier -c {} -n {} --tier Cool -r High', account_info,
+                         container_name, blob_name)
+
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name) \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
+                                JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cool'))
+
+        # test rehydrate from Archive to Hot by Standard priority
+        blob_name2 = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info,
+                         container_name, blob_name2, source_file)
+
+        self.storage_cmd('storage blob set-tier -c {} -n {} --tier Archive', account_info,
+                         container_name, blob_name2)
+
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name2) \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'))
+
+        self.storage_cmd('storage blob set-tier -c {} -n {} --tier Hot', account_info,
+                         container_name, blob_name2)
+
+        self.storage_cmd('az storage blob show -c {} -n {} ', account_info, container_name, blob_name2) \
+            .assert_with_checks(JMESPathCheck('properties.blobTier', 'Archive'),
+                                JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-hot'))
 
 
 if __name__ == '__main__':

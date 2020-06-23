@@ -205,8 +205,12 @@ def check_version_compatibility(azext_metadata):
 
 
 def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
-                  pip_extra_index_urls=None, pip_proxy=None, system=None):
+                  pip_extra_index_urls=None, pip_proxy=None, system=None,
+                  version=None):
     ext_sha256 = None
+
+    version = None if version == 'latest' else version
+
     if extension_name:
         cmd.cli_ctx.get_progress_controller().add(message='Searching')
         ext = None
@@ -220,10 +224,16 @@ def add_extension(cmd, source=None, extension_name=None, index_url=None, yes=Non
                 return
             logger.warning("Overriding development version of '%s' with production version.", extension_name)
         try:
-            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url)
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url, target_version=version)
         except NoExtensionCandidatesError as err:
             logger.debug(err)
-            raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
+
+            if version:
+                err = "No matching extensions for '{} ({})'. Use --debug for more information.".format(extension_name, version)
+            else:
+                err = "No matching extensions for '{}'. Use --debug for more information.".format(extension_name)
+            raise CLIError(err)
+
     extension_name = _add_whl_ext(cmd=cmd, source=source, ext_sha256=ext_sha256,
                                   pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy, system=system)
     try:
@@ -347,6 +357,24 @@ def reload_extension(extension_name, extension_module=None):
 def add_extension_to_path(extension_name, ext_dir=None):
     ext_dir = ext_dir or get_extension(extension_name).path
     sys.path.append(ext_dir)
+    # If this path update should have made a new "azure" module available,
+    # extend the existing module with its path. This allows extensions to
+    # include (or depend on) Azure SDK modules that are not yet part of
+    # the CLI. This applies to both the "azure" and "azure.mgmt" namespaces,
+    # but ensures that modules installed by the CLI take priority.
+    azure_dir = os.path.join(ext_dir, "azure")
+    if os.path.isdir(azure_dir):
+        import azure
+        azure.__path__.append(azure_dir)
+        azure_mgmt_dir = os.path.join(azure_dir, "mgmt")
+        if os.path.isdir(azure_mgmt_dir):
+            try:
+                # Should have been imported already, so this will be quick
+                import azure.mgmt
+            except ImportError:
+                pass
+            else:
+                azure.mgmt.__path__.append(azure_mgmt_dir)
 
 
 def get_lsb_release():

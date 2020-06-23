@@ -125,13 +125,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('delete', 'iot_hub_policy_delete', transform=PolicyUpdateResultTransform(self.cli_ctx))
         g.custom_command('renew-key', 'iot_hub_policy_key_renew', supports_no_wait=True)
 
-    # iot hub job commands
-    with self.command_group('iot hub job', deprecate_info=self.deprecate(redirect=JOB_DEPRECATION_INFO),
-                            client_factory=iot_hub_service_factory) as g:
-        g.custom_command('list', 'iot_hub_job_list')
-        g.custom_command('show', 'iot_hub_job_get')
-        g.custom_command('cancel', 'iot_hub_job_cancel')
-
     # iot hub routing endpoint commands
     with self.command_group('iot hub routing-endpoint', client_factory=iot_hub_service_factory) as g:
         g.custom_command('create', 'iot_hub_routing_endpoint_create',
