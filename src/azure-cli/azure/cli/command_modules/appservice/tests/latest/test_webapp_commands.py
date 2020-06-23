@@ -1468,6 +1468,31 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'Java|8')])
 
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_on_linux_app_service_java_with_runtime_version(self, resource_group, storage_account):
+        plan = self.create_random_name(prefix='funcapplinplan', length=24)
+        functionapp = self.create_random_name(
+            prefix='functionapp-linux', length=24)
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan), checks=[
+            # this weird field means it is a linux
+            JMESPathCheck('reserved', True),
+            JMESPathCheck('sku.name', 'S1'),
+        ])
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime java --runtime-version 11 --functions-version 3'
+                 .format(resource_group, functionapp, plan, storage_account),
+                 checks=[
+                     JMESPathCheck('name', functionapp)
+                 ])
+        result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].name', functionapp)
+        ]).get_output_in_json()
+        self.assertTrue('functionapp,linux' in result[0]['kind'])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
+            JMESPathCheck('linuxFxVersion', 'Java|11')])
+
 
 class FunctionUpdatePlan(ScenarioTest):
     @ResourceGroupPreparer(location='centralus')
@@ -1625,6 +1650,25 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck('javaVersion', '1.8')])
+
+    @ResourceGroupPreparer(location='westus')
+    @StorageAccountPreparer()
+    def test_functionapp_windows_runtime_powershell(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappwindowsruntime', 40)
+
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Windows --runtime powershell'
+                 .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
+                     JMESPathCheck('state', 'Running'),
+                     JMESPathCheck('name', functionapp_name),
+                     JMESPathCheck('kind', 'functionapp'),
+                     JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell')])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
+            JMESPathCheck('powerShellVersion', '~6')])
 
     @ResourceGroupPreparer(location='westus')
     @StorageAccountPreparer()
