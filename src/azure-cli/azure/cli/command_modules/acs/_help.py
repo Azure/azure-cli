@@ -222,6 +222,12 @@ parameters:
   - name: --windows-admin-password
     type: string
     short-summary: Password to create on Windows node VMs.
+  - name: --enable-aad
+    type: bool
+    short-summary: Enable managed AAD feature for cluster.
+  - name: --aad-admin-group-object-ids
+    type: string
+    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
   - name: --aad-client-app-id
     type: string
     short-summary: The ID of an Azure Active Directory client application of type "Native". This application is for user login via kubectl.
@@ -350,6 +356,12 @@ parameters:
   - name: --enable-managed-identity
     type: bool
     short-summary: Using a system assigned managed identity to manage cluster resource group.
+  - name: --aad-admin-group-object-ids
+    type: string
+    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
+  - name: --aad-tenant-id
+    type: string
+    short-summary: The ID of an Azure Active Directory tenant.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
