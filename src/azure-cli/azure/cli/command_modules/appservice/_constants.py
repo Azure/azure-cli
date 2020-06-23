@@ -21,8 +21,8 @@ DOTNET_VERSIONS = ['3.5', '4.7']
 LINUX_SKU_DEFAULT = "P1V2"
 FUNCTIONS_VERSIONS = ['2', '3']
 FUNCTIONS_RUNTIME_STACKS_JSON_PATHS = {
-    'windows': os.path.abspath(os.path.join(os.path.abspath(__file__), '../WindowsFunctionsStacks.json')),
-    'linux': os.path.abspath(os.path.join(os.path.abspath(__file__), '../LinuxFunctionsStacks.json'))
+    'windows': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WindowsFunctionsStacks.json')),
+    'linux': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/LinuxFunctionsStacks.json'))
 }
 # functions version : default node version
 FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION = {
