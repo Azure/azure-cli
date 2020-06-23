@@ -29,7 +29,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            azure_storage_sid=None, enable_hierarchical_namespace=None,
                            encryption_key_type_for_table=None, encryption_key_type_for_queue=None,
                            routing_choice=None, publish_microsoft_endpoints=None, publish_internet_endpoints=None,
-                           require_infrastructure_encryption=None, allow_blob_public_access=None):
+                           require_infrastructure_encryption=None, allow_blob_public_access=None,
+                           min_tls_version=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -123,6 +124,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if require_infrastructure_encryption:
         params.encryption.require_infrastructure_encryption = require_infrastructure_encryption
+
+    if min_tls_version:
+        params.minimum_tls_version = min_tls_version
 
     return scf.storage_accounts.create(resource_group_name, account_name, params)
 
