@@ -88,7 +88,8 @@ from ._client_factory import cf_resources
 from ._client_factory import get_resource_by_name
 from ._client_factory import cf_container_registry_service
 
-from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type, _parse_comma_separated_list)
+from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type, _set_outbound_type,
+                       _parse_comma_separated_list)
 
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)

@@ -356,12 +356,6 @@ parameters:
   - name: --enable-managed-identity
     type: bool
     short-summary: Using a system assigned managed identity to manage cluster resource group.
-  - name: --aad-admin-group-object-ids
-    type: string
-    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
-  - name: --aad-tenant-id
-    type: string
-    short-summary: The ID of an Azure Active Directory tenant.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -444,6 +438,12 @@ parameters:
   - name: --api-server-authorized-ip-ranges
     type: string
     short-summary: Comma seperated list of authorized apiserver IP ranges. Set to "" to allow all traffic on a previously restricted cluster. Set to 0.0.0.0/32 to restrict apiserver traffic to node pools.
+  - name: --aad-admin-group-object-ids
+    type: string
+    short-summary: Comma seperated list of aad group object IDs that will be set as cluster admin.
+  - name: --aad-tenant-id
+    type: string
+    short-summary: The ID of an Azure Active Directory tenant.
 examples:
   - name: Update a kubernetes cluster with standard SKU load balancer to use two AKS created IPs for the load balancer outbound connection usage.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --load-balancer-managed-outbound-ip-count 2
