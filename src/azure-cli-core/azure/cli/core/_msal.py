@@ -10,6 +10,7 @@ class AdalRefreshTokenBasedClientApplication(ClientApplication):
     """
     This is added only for vmssh feature.
     It is a temporary solution and will deprecate after MSAL adopted completely.
+    todo: msal
     """
     def _acquire_token_silent_by_finding_rt_belongs_to_me_or_my_family(
             self, authority, scopes, account, **kwargs):
@@ -17,6 +18,7 @@ class AdalRefreshTokenBasedClientApplication(ClientApplication):
         return self._acquire_token_silent_by_finding_specific_refresh_token(
             authority, scopes, None, **kwargs)
 
+    # pylint:disable=arguments-differ
     def _acquire_token_silent_by_finding_specific_refresh_token(
             self, authority, scopes, query,
             rt_remover=None, break_condition=lambda response: False, **kwargs):

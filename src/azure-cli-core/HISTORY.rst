@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.8.10
+++++++
+* Migrate authentication from ADAL to MSAL
+
 2.8.0
 ++++++
 * Add get_command_loader() entry to support to load customized CommandLoader (#13763)

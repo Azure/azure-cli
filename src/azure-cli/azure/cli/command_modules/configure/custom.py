@@ -84,7 +84,7 @@ def _config_env_public_azure(cli_ctx, _):
             elif method_index == 3:  # skip
                 return
             try:
-                profile.find_subscriptions_on_login(
+                profile.login(
                     interactive,
                     username,
                     password,

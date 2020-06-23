@@ -17,7 +17,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.8.0"
+VERSION = "2.8.10"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -57,8 +57,9 @@ DEPENDENCIES = [
     'humanfriendly>=4.7,<9.0',
     'jmespath',
     'knack==0.7.1',
-    'msal~=1.0.0',
-    'msal-extensions~=0.1.3',
+    'msal~=1.3.0',
+    'msal-extensions~=0.2.2',
+    'azure-identity==1.4.0b5',
     'msrest>=0.4.4',
     'msrestazure>=0.6.3',
     'paramiko>=2.0.8,<3.0.0',
