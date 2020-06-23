@@ -57,7 +57,8 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
 from ._constants import (FUNCTIONS_RUNTIME_STACKS_JSON_PATHS, FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION,
-                         NODE_VERSION_DEFAULT, RUNTIME_STACKS)
+                         FUNCTIONS_LINUX_RUNTIME_REGEX, FUNCTIONS_WINDOWS_RUNTIME_REGEX, NODE_VERSION_DEFAULT,
+                         RUNTIME_STACKS)
 
 logger = get_logger(__name__)
 
@@ -2630,7 +2631,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
 
     runtime_version_json = _get_matching_runtime_version_json_functionapp(runtime_json,
                                                                           functions_version,
-                                                                          runtime_version)
+                                                                          runtime_version,
+                                                                          is_linux)
     if not runtime_version_json:
         supported_runtime_versions = list(map(lambda x: x['displayVersion'],
                                               _get_supported_runtime_versions_functionapp(runtime_json,
@@ -2682,14 +2684,15 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                               value='true'))
         if deployment_container_image_name is None:
             site_config.linux_fx_version = site_config_json['linuxFxVersion']
-        if 'Use32BitWorkerProcess' in site_config_json:
-            site_config.use32_bit_worker_process = site_config_json['Use32BitWorkerProcess']
     else:
         functionapp_def.kind = 'functionapp'
         if runtime == "java" and 'JavaVersion' in site_config_json:
             site_config.java_version = site_config_json['JavaVersion']
         elif runtime == "powershell" and 'PowerShellVersion' in site_config_json:
             site_config.power_shell_version = site_config_json['PowerShellVersion']
+
+    if 'Use32BitWorkerProcess' in site_config_json:
+        site_config.use32_bit_worker_process = site_config_json['Use32BitWorkerProcess']
 
     # adding appsetting to site to make it a function
     for app_setting, value in app_settings_json.items():
@@ -2704,7 +2707,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                                                   value=_get_extension_version_functionapp(functions_version)))
     site_config.app_settings.append(NameValuePair(name='AzureWebJobsStorage', value=con_string))
 
-    if disable_app_insights:
+    if disable_app_insights or not runtime_version_json['applicationInsights']:
         site_config.app_settings.append(NameValuePair(name='AzureWebJobsDashboard', value=con_string))
 
     # If plan is not consumption or elastic premium, we need to set always on
@@ -2727,7 +2730,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         instrumentation_key = get_app_insights_key(cmd.cli_ctx, resource_group_name, app_insights)
         site_config.app_settings.append(NameValuePair(name='APPINSIGHTS_INSTRUMENTATIONKEY',
                                                       value=instrumentation_key))
-    elif not disable_app_insights:
+    elif not disable_app_insights and runtime_version_json['applicationInsights']:
         create_app_insights = True
 
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
@@ -2781,7 +2784,7 @@ def _get_supported_runtime_versions_functionapp(runtime_json, functions_version)
     return supported_versions_list
 
 
-def _get_matching_runtime_version_json_functionapp(runtime_json, functions_version, runtime_version):
+def _get_matching_runtime_version_json_functionapp(runtime_json, functions_version, runtime_version, is_linux):
     extension_version = _get_extension_version_functionapp(functions_version)
     if runtime_version:
         for runtime_version_json in runtime_json['properties']['majorVersions']:
@@ -2790,15 +2793,16 @@ def _get_matching_runtime_version_json_functionapp(runtime_json, functions_versi
                 return runtime_version_json
         return None
 
-    # find the most recent matching runtime version
+    # find the matching default runtime version
     supported_versions_list = _get_supported_runtime_versions_functionapp(runtime_json, functions_version)
     default_version_json = {}
-    for runtime_version_json in supported_versions_list:
-        # TODO(gzuber): fix/remove/or something
-        # if runtime_version_json['isDefault']:
-        if (not default_version_json or
-                float(default_version_json['displayVersion']) < float(runtime_version_json['displayVersion'])):
-            default_version_json = runtime_version_json
+    default_version = 0.0
+    for current_runtime_version_json in supported_versions_list:
+        if current_runtime_version_json['isDefault']:
+            current_version = _get_runtime_version_functionapp(current_runtime_version_json['runtimeVersion'], is_linux)
+            if not default_version_json or default_version < current_version:
+                default_version_json = current_runtime_version_json
+                default_version = current_version
     return default_version_json
 
 
@@ -2810,6 +2814,19 @@ def _get_extension_version_functionapp(functions_version):
 
 def _get_app_setting_set_functionapp(site_config, app_setting):
     return list(filter(lambda x: x.name == app_setting, site_config.app_settings))
+
+
+def _get_runtime_version_functionapp(version_string, is_linux):
+    import re
+    windows_match = re.fullmatch(FUNCTIONS_WINDOWS_RUNTIME_REGEX, version_string)
+    if windows_match:
+        return float(windows_match.group(1))
+
+    linux_match = re.fullmatch(FUNCTIONS_LINUX_RUNTIME_REGEX, version_string)
+    if linux_match:
+        return float(linux_match.group(1))
+
+    return float(version_string)
 
 
 def try_create_application_insights(cmd, functionapp):

@@ -1454,7 +1454,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime java'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime java --functions-version 3'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -1466,7 +1466,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'JAVA|8')])
+            JMESPathCheck('linuxFxVersion', 'Java|8')])
 
 
 class FunctionUpdatePlan(ScenarioTest):
@@ -1578,7 +1578,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionapplinuxconsumption', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Linux --runtime java'
+        self.cmd('functionapp create -g {} -n {} -c westus -s {} --os-type Linux --runtime java --functions-version 3'
                  .format(resource_group, functionapp_name, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),

@@ -29,6 +29,8 @@ FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION = {
     '2': '~10',
     '3': '~12'
 }
+FUNCTIONS_LINUX_RUNTIME_REGEX = r"^.*\|(.*)$"
+FUNCTIONS_WINDOWS_RUNTIME_REGEX = r"^~(.*)$"
 
 RUNTIME_STACKS = {
     'windows': [
