@@ -180,7 +180,7 @@ setup(
             'template/service/parameter.json'
         ],
         'azure.cli.command_modules.appservice': [
-            'resources/WindowsFunctionsStacks.json'
+            'resources/WindowsFunctionsStacks.json',
             'resources/LinuxFunctionsStacks.json'
         ]
     },
