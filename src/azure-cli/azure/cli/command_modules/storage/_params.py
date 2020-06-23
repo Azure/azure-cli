@@ -147,6 +147,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Request timeout in seconds. Applies to each call to the service.', type=int
     )
 
+    blob_public_access_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
+        help='Allow or disallow public access to all blobs or containers in the storage account. '
+        'The default interpretation is true for this property.')
+
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
@@ -232,7 +237,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_three_state_flag(),
                    help='A boolean indicating whether or not the service applies a secondary layer of encryption with '
                    'platform managed keys for data at rest.')
-        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(),
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
                    help='Allow or disallow public access to all blobs or containers in the storage account. '
                    'The default interpretation is true for this property.')
 
@@ -274,6 +279,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('routing_choice', routing_choice_type)
         c.argument('publish_microsoft_endpoints', publish_microsoft_endpoints_type)
         c.argument('publish_internet_endpoints', publish_internet_endpoints_type)
+        c.argument('allow_blob_public_access', arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
+                   help='Allow or disallow public access to all blobs or containers in the storage account. '
+                   'The default interpretation is true for this property.')
 
     with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
         t_key_source = self.get_models('KeySource', resource_type=ResourceType.MGMT_STORAGE)
