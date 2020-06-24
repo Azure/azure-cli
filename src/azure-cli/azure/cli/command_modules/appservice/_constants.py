@@ -20,13 +20,13 @@ NETCORE_VERSIONS = ['1.0', '1.1', '2.1', '2.2']
 DOTNET_VERSIONS = ['3.5', '4.7']
 LINUX_SKU_DEFAULT = "P1V2"
 FUNCTIONS_VERSIONS = ['2', '3']
-FUNCTIONS_RUNTIME_STACKS_JSON_PATHS = {
+FUNCTIONS_STACKS_API_JSON_PATHS = {
     'windows': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WindowsFunctionsStacks.json')),
     'linux': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/LinuxFunctionsStacks.json'))
 }
-FUNCTIONS_LINUX_RUNTIME_REGEX = r"^.*\|(.*)$"
-FUNCTIONS_WINDOWS_RUNTIME_REGEX = r"^~(.*)$"
-class FUNCTIONS_RUNTIME_STACKS_API_KEYS():
+FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
+FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
+class FUNCTIONS_STACKS_API_KEYS():
     def __init__(self):
         self.NAME = 'name'
         self.VALUE = 'value'

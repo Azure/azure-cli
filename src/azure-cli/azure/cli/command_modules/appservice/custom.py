@@ -57,9 +57,9 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            should_create_new_rg, set_location, get_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_form_src)
-from ._constants import (FUNCTIONS_RUNTIME_STACKS_JSON_PATHS, FUNCTIONS_RUNTIME_STACKS_API_KEYS,
-                         FUNCTIONS_LINUX_RUNTIME_REGEX, FUNCTIONS_WINDOWS_RUNTIME_REGEX, NODE_VERSION_DEFAULT,
-                         RUNTIME_STACKS)
+from ._constants import (FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS,
+                         FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX,
+                         NODE_VERSION_DEFAULT, RUNTIME_STACKS)
 
 logger = get_logger(__name__)
 
@@ -2584,7 +2584,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
 
     site_config = SiteConfig(app_settings=[])
     functionapp_def = Site(location=None, site_config=site_config, tags=tags)
-    KEYS = FUNCTIONS_RUNTIME_STACKS_API_KEYS()
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
     client = web_client_factory(cmd.cli_ctx)
     plan_info = None
     if runtime is not None:
@@ -2757,14 +2757,14 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
 
 
 def _load_runtime_stacks_json_functionapp(is_linux):
-    KEYS = FUNCTIONS_RUNTIME_STACKS_API_KEYS()
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
     if is_linux:
-        return get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['linux'])[KEYS.VALUE]
-    return get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['windows'])[KEYS.VALUE]
+        return get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['linux'])[KEYS.VALUE]
+    return get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['windows'])[KEYS.VALUE]
 
 
 def _get_matching_runtime_json_functionapp(stacks_json, runtime):
-    KEYS = FUNCTIONS_RUNTIME_STACKS_API_KEYS()
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
     matching_runtime_json = list(filter(lambda x: x[KEYS.NAME] == runtime, stacks_json))
     if matching_runtime_json:
         return matching_runtime_json[0]
@@ -2772,7 +2772,7 @@ def _get_matching_runtime_json_functionapp(stacks_json, runtime):
 
 
 def _get_supported_runtime_versions_functionapp(runtime_json, functions_version):
-    KEYS = FUNCTIONS_RUNTIME_STACKS_API_KEYS()
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
     extension_version = _get_extension_version_functionapp(functions_version)
     supported_versions_list = []
 
@@ -2783,7 +2783,7 @@ def _get_supported_runtime_versions_functionapp(runtime_json, functions_version)
 
 
 def _get_matching_runtime_version_json_functionapp(runtime_json, functions_version, runtime_version, is_linux):
-    KEYS = FUNCTIONS_RUNTIME_STACKS_API_KEYS()
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
     extension_version = _get_extension_version_functionapp(functions_version)
     if runtime_version:
         for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
@@ -2821,11 +2821,11 @@ def _convert_camel_to_snake_case(str):
 
 def _get_runtime_version_functionapp(version_string, is_linux):
     import re
-    windows_match = re.fullmatch(FUNCTIONS_WINDOWS_RUNTIME_REGEX, version_string)
+    windows_match = re.fullmatch(FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, version_string)
     if windows_match:
         return float(windows_match.group(1))
 
-    linux_match = re.fullmatch(FUNCTIONS_LINUX_RUNTIME_REGEX, version_string)
+    linux_match = re.fullmatch(FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX, version_string)
     if linux_match:
         return float(linux_match.group(1))
 

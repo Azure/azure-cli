@@ -15,7 +15,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_RUNTIME_STACKS_JSON_PATHS, FUNCTIONS_RUNTIME_STACKS_API_KEYS
+from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_STACKS_API_JSON_PATHS, FUNCTIONS_STACKS_API_KEYS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address)
 
@@ -893,15 +893,15 @@ def load_arguments(self, _):
 
 def _get_functionapp_runtime_versions():
     # set up functionapp create help menu
-    KEYS = FUNCTIONS_RUNTIME_STACKS_API_KEYS()
-    runtime_stacks_json_list = []
-    runtime_stacks_json_list.append(get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['windows']))
-    runtime_stacks_json_list.append(get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['linux']))
+    KEYS = FUNCTIONS_STACKS_API_KEYS()
+    stacks_api_json_list = []
+    stacks_api_json_list.append(get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['windows']))
+    stacks_api_json_list.append(get_file_json(FUNCTIONS_STACKS_API_JSON_PATHS['linux']))
 
     # build a map of runtime -> runtime version -> runtime version properties
     runtime_to_version = {}
-    for runtime_stacks_json in runtime_stacks_json_list:
-        for runtime_json in runtime_stacks_json[KEYS.VALUE]:
+    for stacks_api_json in stacks_api_json_list:
+        for runtime_json in stacks_api_json[KEYS.VALUE]:
             runtime_name = runtime_json[KEYS.NAME]
             for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
                 runtime_version = runtime_version_json[KEYS.DISPLAY_VERSION]
