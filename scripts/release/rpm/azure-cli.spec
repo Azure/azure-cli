@@ -2,6 +2,8 @@
 # Definition of macros used - https://fedoraproject.org/wiki/Packaging:RPMMacros?rd=Packaging/RPMMacros
 
 %global __python %{__python3}
+# Turn off python byte compilation
+%global __os_install_post %(echo '%{__os_install_post}' | sed -e 's!/usr/lib[^[:space:]]*/brp-python-bytecompile[[:space:]].*$!!g')
 
 # .el7.centos -> .el7
 %if 0%{?rhel}
@@ -15,9 +17,6 @@
 %define version        %{getenv:CLI_VERSION}
 %define repo_path      %{getenv:REPO_PATH}
 %define cli_lib_dir    %{_libdir}/az
-
-# Turn off automatic python bytecompilation
-%undefine __brp_python_bytecompile
 
 Summary:        Azure CLI
 License:        MIT
