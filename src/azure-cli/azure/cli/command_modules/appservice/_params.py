@@ -15,7 +15,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider, AzureStorageType
 
 from ._completers import get_hostname_completion_list
-from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_RUNTIME_STACKS_JSON_PATHS
+from ._constants import FUNCTIONS_VERSIONS, FUNCTIONS_RUNTIME_STACKS_JSON_PATHS, FUNCTIONS_RUNTIME_STACKS_API_KEYS
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_add_vnet, validate_front_end_scale_factor, validate_ase_create, validate_ip_address)
 
@@ -63,25 +63,7 @@ def load_arguments(self, _):
         help='The Isolated pricing tiers, e.g., I1 (Isolated Small), I2 (Isolated Medium), I3 (Isolated Large)',
         arg_type=get_enum_type(['I1', 'I2', 'I3']))
 
-    # set up functionapp create help menu
-    functionapp_runtime_stacks_json_list = []
-    functionapp_runtime_stacks_json_list.append(get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['windows']))
-    functionapp_runtime_stacks_json_list.append(get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['linux']))
-
-    functionapp_runtime_to_version = {}
-    for runtime_stacks_json in functionapp_runtime_stacks_json_list:
-        for runtime_json in runtime_stacks_json['value']:
-            for runtime_version_json in runtime_json['properties']['majorVersions']:
-                functionapp_runtime_to_version[runtime_json['name']] = functionapp_runtime_to_version.get(runtime_json['name'], set()).union([runtime_version_json['displayVersion']])
-
-    functionapp_runtime_to_version_strings = []
-    for runtime, runtime_versions in functionapp_runtime_to_version.items():
-        # dotnet version is not configurable, so leave out of help menu
-        if runtime == 'dotnet':
-            continue
-        runtime_versions_list = list(runtime_versions)
-        runtime_versions_list.sort(key=float)
-        functionapp_runtime_to_version_strings.append(runtime + ' -> [' + ', '.join(runtime_versions_list) + ']')
+    functionapp_runtime_to_version, functionapp_runtime_to_version_strings = _get_functionapp_runtime_versions()
 
     # use this hidden arg to give a command the right instance, that functionapp commands
     # work on function app and webapp ones work on web app
@@ -908,3 +890,45 @@ def load_arguments(self, _):
                    help="The path of your build output relative to your apps location. For example, setting a value "
                         "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
                         "be served.")
+
+def _get_functionapp_runtime_versions():
+    # set up functionapp create help menu
+    KEYS = FUNCTIONS_RUNTIME_STACKS_API_KEYS()
+    runtime_stacks_json_list = []
+    runtime_stacks_json_list.append(get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['windows']))
+    runtime_stacks_json_list.append(get_file_json(FUNCTIONS_RUNTIME_STACKS_JSON_PATHS['linux']))
+
+    # build a map of runtime -> runtime version -> runtime version properties
+    runtime_to_version = {}
+    for runtime_stacks_json in runtime_stacks_json_list:
+        for runtime_json in runtime_stacks_json[KEYS.VALUE]:
+            runtime_name = runtime_json[KEYS.NAME]
+            for runtime_version_json in runtime_json[KEYS.PROPERTIES][KEYS.MAJOR_VERSIONS]:
+                runtime_version = runtime_version_json[KEYS.DISPLAY_VERSION]
+                runtime_version_properties = {
+                    KEYS.IS_HIDDEN: runtime_version_json[KEYS.IS_HIDDEN],
+                    KEYS.IS_PREVIEW: runtime_version_json[KEYS.IS_PREVIEW],
+                }
+                runtime_to_version[runtime_name] = runtime_to_version.get(runtime_name, dict())
+                runtime_to_version[runtime_name][runtime_version] = runtime_version_properties
+
+    # traverse the map to build an ordered string of runtimes -> runtime versions,
+    # taking their properties into account (i.e. isHidden, isPreview)
+    runtime_to_version_strings = []
+    for runtime, runtime_versions in runtime_to_version.items():
+        # dotnet version is not configurable, so leave out of help menu
+        if runtime == 'dotnet':
+            continue
+        ordered_runtime_versions = list(runtime_versions.keys())
+        ordered_runtime_versions.sort(key=float)
+        ordered_runtime_versions_strings = []
+        for version in ordered_runtime_versions:
+            if runtime_versions[version][KEYS.IS_HIDDEN]:
+                continue
+            if runtime_versions[version][KEYS.IS_PREVIEW]:
+                ordered_runtime_versions_strings.append(version + ' (preview)')
+            else:
+                ordered_runtime_versions_strings.append(version)
+        runtime_to_version_strings.append(runtime + ' -> [' + ', '.join(ordered_runtime_versions_strings) + ']')
+
+    return runtime_to_version, runtime_to_version_strings

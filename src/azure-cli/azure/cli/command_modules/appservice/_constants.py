@@ -24,13 +24,24 @@ FUNCTIONS_RUNTIME_STACKS_JSON_PATHS = {
     'windows': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/WindowsFunctionsStacks.json')),
     'linux': os.path.abspath(os.path.join(os.path.abspath(__file__), '../resources/LinuxFunctionsStacks.json'))
 }
-# functions version : default node version
-FUNCTIONS_VERSION_TO_DEFAULT_NODE_VERSION = {
-    '2': '~10',
-    '3': '~12'
-}
 FUNCTIONS_LINUX_RUNTIME_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_REGEX = r"^~(.*)$"
+class FUNCTIONS_RUNTIME_STACKS_API_KEYS():
+    def __init__(self):
+        self.NAME = 'name'
+        self.VALUE = 'value'
+        self.PROPERTIES = 'properties'
+        self.MAJOR_VERSIONS = 'majorVersions'
+        self.DISPLAY_VERSION = 'displayVersion'
+        self.RUNTIME_VERSION = 'runtimeVersion'
+        self.IS_HIDDEN = 'isHidden'
+        self.IS_PREVIEW = 'isPreview'
+        self.IS_DEFAULT = 'isDefault'
+        self.SITE_CONFIG_DICT = 'siteConfigPropertiesDictionary'
+        self.APP_SETTINGS_DICT = 'appSettingsDictionary'
+        self.LINUX_FX_VERSION = 'linuxFxVersion'
+        self.APPLICATION_INSIGHTS = 'applicationInsights'
+        self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
 
 RUNTIME_STACKS = {
     'windows': [
