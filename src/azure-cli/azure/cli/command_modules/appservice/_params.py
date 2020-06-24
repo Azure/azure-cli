@@ -891,6 +891,7 @@ def load_arguments(self, _):
                         "of 'build' when your app location is set to '/app' will cause the content at '/app/build' to "
                         "be served.")
 
+
 def _get_functionapp_runtime_versions():
     # set up functionapp create help menu
     KEYS = FUNCTIONS_STACKS_API_KEYS()

@@ -2798,7 +2798,8 @@ def _get_matching_runtime_version_json_functionapp(runtime_json, functions_versi
     default_version = 0.0
     for current_runtime_version_json in supported_versions_list:
         if current_runtime_version_json[KEYS.IS_DEFAULT]:
-            current_version = _get_runtime_version_functionapp(current_runtime_version_json[KEYS.RUNTIME_VERSION], is_linux)
+            current_version = _get_runtime_version_functionapp(current_runtime_version_json[KEYS.RUNTIME_VERSION],
+                                                               is_linux)
             if not default_version_json or default_version < current_version:
                 default_version_json = current_runtime_version_json
                 default_version = current_version
@@ -2815,8 +2816,8 @@ def _get_app_setting_set_functionapp(site_config, app_setting):
     return list(filter(lambda x: x.name == app_setting, site_config.app_settings))
 
 
-def _convert_camel_to_snake_case(str):
-    return reduce(lambda x, y: x + ('_' if y.isupper() else '') + y, str).lower()
+def _convert_camel_to_snake_case(text):
+    return reduce(lambda x, y: x + ('_' if y.isupper() else '') + y, text).lower()
 
 
 def _get_runtime_version_functionapp(version_string, is_linux):

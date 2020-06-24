@@ -26,7 +26,10 @@ FUNCTIONS_STACKS_API_JSON_PATHS = {
 }
 FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX = r"^.*\|(.*)$"
 FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX = r"^~(.*)$"
+
+
 class FUNCTIONS_STACKS_API_KEYS():
+    # pylint:disable=too-few-public-methods,too-many-instance-attributes
     def __init__(self):
         self.NAME = 'name'
         self.VALUE = 'value'
@@ -42,6 +45,7 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.LINUX_FX_VERSION = 'linuxFxVersion'
         self.APPLICATION_INSIGHTS = 'applicationInsights'
         self.SUPPORTED_EXTENSION_VERSIONS = 'supportedFunctionsExtensionVersions'
+
 
 RUNTIME_STACKS = {
     'windows': [
