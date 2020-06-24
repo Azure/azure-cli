@@ -46,13 +46,37 @@ class AzureSignalRServicePrivateEndpointScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint create --resource-group {rg} --vnet-name {vnet} --subnet {subnet} --name {private_endpoint}  --private-connection-resource-id {signalr_id} --group-ids signalr --connection-name {private_endpoint_connection} --location {location} --manual-request')
 
         # Test private link resource list
-        p_e_c = self.cmd('signalr private-link-resource list -n {signalr_name} -g {rg}', checks=[
+        self.cmd('network private-link-resource list -n {signalr_name} -g {rg} --type Microsoft.SignalRService/signalr', checks=[
             self.check('length(@)', 1)
-        ]).get_output_in_json()
+        ])
 
+        s_r = self.cmd('signalr show -n {signalr_name} -g {rg}').get_output_in_json()
         self.kwargs.update({
-            'private_endpoint_connection_id': p_e_c[0]['id']
+            'private_endpoint_connection_id': s_r['privateEndpointConnections'][0]['id']
         })
+
+        # Test show private endpoint connection
+        self.cmd('network private-endpoint-connection show --id {private_endpoint_connection_id}', checks=[
+            self.check('id', '{private_endpoint_connection_id}'),
+            self.check('properties.privateLinkServiceConnectionState.status', 'Pending')
+        ])
+
+        # Test list private endpoint connection
+        self.cmd('network private-endpoint-connection list --id {signalr_id}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        # Test approve private endpoint connection
+        self.cmd('network private-endpoint-connection approve --id {private_endpoint_connection_id}', checks=[
+            self.check('id', '{private_endpoint_connection_id}'),
+            self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+        ])
+
+        # Test reject private endpoint connection
+        self.cmd('network private-endpoint-connection reject --id {private_endpoint_connection_id}', checks=[
+            self.check('id', '{private_endpoint_connection_id}'),
+            self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+        ])
 
         # Test update public network rules
         self.cmd('signalr network-rule update --public-network -n {signalr_name} -g {rg} --allow RESTAPI', checks=[

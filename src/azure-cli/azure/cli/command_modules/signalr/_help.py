@@ -22,16 +22,6 @@ type: group
 short-summary: Manage network rules.
 """
 
-helps['signalr private-endpoint-connection'] = """
-type: group
-short-summary: Manage private endpoint connection.
-"""
-
-helps['signalr private-link-resource'] = """
-type: group
-short-summary: Manage private link resources.
-"""
-
 helps['signalr upstream'] = """
 type: group
 short-summary: Manage upstream settings.
@@ -163,36 +153,6 @@ examples:
 helps['signalr upstream clear'] = """
 type: command
 short-summary: List upstream settings of an existing SignalR Service.
-"""
-
-helps['signalr private-endpoint-connection approve'] = """
-type: command
-short-summary: Approve a private endpoint connection.
-examples:
-  - name: Approve a pending private endpoint connection.
-    text: >
-        ID=$(az signalr show -n MySignalR -g MyResourceGroup --query privateEndpointConnections[0].id -o tsv)
-        az signalr private-endpoint-connection approve --id $ID
-"""
-
-helps['signalr private-endpoint-connection reject'] = """
-type: command
-short-summary: Reject a private endpoint connection.
-"""
-
-helps['signalr private-endpoint-connection delete'] = """
-type: command
-short-summary: Delete a private endpoint connection.
-"""
-
-helps['signalr private-endpoint-connection show'] = """
-type: command
-short-summary: Show details of a private endpoint connection.
-"""
-
-helps['signalr private-link-resource list'] = """
-type: command
-short-summary: Get the private link resources that need to be created for a SignalR Service.
 """
 
 helps['signalr network-rule list'] = """

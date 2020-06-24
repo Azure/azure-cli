@@ -75,18 +75,6 @@ def load_arguments(self, _):
     with self.argument_context('signalr network-rule remove') as c:
         c.argument('connection_name', help='Name of private endpoint connection.')
 
-    # Private Endpoint
-    for item in ['approve', 'reject', 'show', 'delete']:
-        with self.argument_context('signalr private-endpoint-connection {}'.format(item)) as c:
-            c.argument('private_endpoint_connection_name', required=False,
-                       help='The name of the private endpoint connection associated with the SignalR Service.')
-            c.extra('connection_id', options_list=['--id'], help='The ID of the private endpoint connection associated with the SignalR Service.')
-            c.argument('resource_group_name', arg_type=resource_group_name_type, required=False)
-            c.argument('signalr_name', options_list=['--name', '-n'],
-                       completer=get_resource_name_completion_list(SIGNALR_RESOURCE_TYPE),
-                       help='Name of signalr service.', required=False)
-            c.argument('description', help='Comments for {} operation.'.format(item))
-
     # Upstream Settings
     with self.argument_context('signalr upstream update') as c:
         c.argument('template', action=UpstreamTemplateAddAction, nargs='+', help='Template item for upstream settings. Use key=value pattern to set properties. Supported keys are "url-template", "hub-pattern", "event-pattern", "category-pattern".')

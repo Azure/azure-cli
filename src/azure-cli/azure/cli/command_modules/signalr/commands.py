@@ -35,16 +35,6 @@ def load_command_table(self, _):
         client_factory=cf_signalr
     )
 
-    signalr_private_endpoint_utils = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.signalr.private_endpoint#{}',
-        client_factory=cf_private_endpoint_connections
-    )
-
-    signalr_private_link_resources_utils = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.signalr.private_endpoint#{}',
-        client_factory=cf_private_link_resources
-    )
-
     signalr_upstream_utils = CliCommandType(
         operations_tmpl='azure.cli.command_modules.signalr.upstream#{}',
         client_factory=cf_signalr
@@ -72,17 +62,6 @@ def load_command_table(self, _):
     with self.command_group('signalr network-rule', signalr_network_utils) as g:
         g.command('list', 'list_network_rules')
         g.command('update', 'update_network_rules')
-
-    with self.command_group('signalr private-endpoint-connection', signalr_private_endpoint_utils) as g:
-        from ._validators import validate_private_endpoint_connection_id
-        g.command('approve', 'approve_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
-        g.command('reject', 'reject_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
-        g.command('delete', 'delete_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
-        g.show_command('show', 'get_private_endpoint_connection', validator=validate_private_endpoint_connection_id)
-
-    with self.command_group('signalr private-link-resource', signalr_private_link_resources_utils) as g:
-        from azure.cli.core.commands.transform import gen_dict_to_list_transform
-        g.command('list', 'list_by_signalr', transform=gen_dict_to_list_transform(key='value'))
 
     with self.command_group('signalr upstream', signalr_upstream_utils) as g:
         g.command('list', 'signalr_upstream_list')
