@@ -347,8 +347,17 @@ def load_command_table(self, _):
         g.custom_command('auto-swap', 'config_slot_auto_swap')
         g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_functionapp_slot', exception_handler=ex_handler_factory())
-
+    
     with self.command_group('functionapp keys') as g:
+        g.custom_command('set', 'update_host_key')
+        g.custom_command('list', 'list_host_keys')
+        g.custom_command('delete', 'delete_host_key')
+
+    with self.command_group('functionapp function') as g:
+        g.custom_command('show', 'show_function')
+        g.custom_command('delete', 'delete_function')
+
+    with self.command_group('functionapp function keys') as g:
         g.custom_command('set', 'update_function_key')
         g.custom_command('list', 'list_function_keys')
         g.custom_command('delete', 'delete_function_key')

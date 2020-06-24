@@ -780,7 +780,24 @@ def load_arguments(self, _):
     with self.argument_context('functionapp keys set', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
         c.argument('key_value', help="Value of the new key.")
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
     with self.argument_context('functionapp keys delete', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_type', help="Type of key.", arg_type=get_enum_type(['systemKey', 'functionKeys', 'masterKey']))
+
+    with self.argument_context('functionapp function', id_part=None) as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type,)
+        c.argument('name', arg_type=functionapp_name_arg_type,
+                   completer=get_resource_name_completion_list('Microsoft.Web/sites'),
+                   help='Name of the function app')
+        c.argument('function_name', help="Name of the Function")
+    with self.argument_context('functionapp function keys', id_part=None) as c:
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="The name of the slot. Defaults to the productions slot if not specified")
+    with self.argument_context('functionapp function keys set', id_part=None) as c:
+        c.argument('key_name', help="Name of the key to set.")
+        c.argument('key_value', help="Value of the new key.")
+    with self.argument_context('functionapp function keys delete', id_part=None) as c:
         c.argument('key_name', help="Name of the key to set.")
 
     # Access Restriction Commands

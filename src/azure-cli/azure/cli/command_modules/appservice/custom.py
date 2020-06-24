@@ -3863,21 +3863,59 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
     return verified_hostname_found
 
 
-def update_function_key(cmd, resource_group_name, name, key_name, key_value, function_name=None, slot=None):
-    # def create_or_update_function_secret(
-    #         self, resource_group_name, name, function_name, key_name, name1=None, value=None, custom_headers=None, raw=False, **operation_config):
+def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_value, slot=None):
     client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.create_or_update_host_secret_slot(resource_group_name, name, key_type, key_name, slot, name1=key_name, value=key_value)
+    return client.web_apps.create_or_update_host_secret(resource_group_name, name, key_type, key_name, name1=key_name, value=key_value)
+
+
+def list_host_keys(cmd, resource_group_name, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_host_keys_slot(resource_group_name, name, slot)
+    return client.web_apps.list_host_keys(resource_group_name, name)
+
+
+def delete_host_key(cmd, resource_group_name, name, key_type, key_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_host_secret_slot(resource_group_name, name, key_type, key_name, slot)
+    return client.web_apps.delete_host_secret(resource_group_name, name, key_type, key_name)
+
+
+def show_function(cmd, resource_group_name, name, function_name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.get_function(resource_group_name, name, function_name)
+
+
+def delete_function(cmd, resource_group_name, name, function_name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.web_apps.delete_function(resource_group_name, name, function_name)
+
+
+def update_function_key(cmd, resource_group_name, name, function_name, key_name, key_value, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.create_or_update_function_secret_slot(resource_group_name,
+                                                                     name,
+                                                                     function_name,
+                                                                     key_name,
+                                                                     slot,
+                                                                     name1=key_name,
+                                                                     value=key_value)
     return client.web_apps.create_or_update_function_secret(resource_group_name, name, function_name, key_name, name1=key_name, value=key_value)
-    # functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
-    # logger.warning('yo')
 
 
-def list_function_keys(cmd, resource_group_name, name, function_name=None, slot=None):
-    # def list_function_keys(
-    #         self, resource_group_name, name, function_name, custom_headers=None, raw=False, **operation_config):
+def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_function_keys_slot(resource_group_name, name, function_name, slot)
     return client.web_apps.list_function_keys(resource_group_name, name, function_name)
 
 
 def delete_function_key(cmd, resource_group_name, name, key_name, function_name=None, slot=None):
-    logger.warning('yo')
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_function_secret_slot(resource_group_name, name, function_name, key_name, slot)
+    return client.web_apps.delete_function_secret(resource_group_name, name, function_name, key_name)
