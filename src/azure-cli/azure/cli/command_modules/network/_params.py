@@ -604,7 +604,7 @@ def load_arguments(self, _):
         c.argument('tag', help='Record tag')
 
     with self.argument_context('network dns record-set cname') as c:
-        c.argument('cname', options_list=['--cname', '-c'], help='Canonical name.')
+        c.argument('cname', options_list=['--cname', '-c'], help='Value of the cname record-set. It should be Canonical name.')
 
     with self.argument_context('network dns record-set mx') as c:
         c.argument('exchange', options_list=['--exchange', '-e'], help='Exchange metric.')
