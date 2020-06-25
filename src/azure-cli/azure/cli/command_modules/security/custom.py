@@ -455,3 +455,40 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
     return client.get(sub_assessment_name=resource_name,
                       assessment_name=assessment_name,
                       scope=assessed_resource_id)
+
+# --------------------------------------------------------------------------------------------
+# Security Regulatory Compliance
+# --------------------------------------------------------------------------------------------
+
+def list_regulatory_compliance_standards(client):
+
+    return client.list()
+
+
+def get_regulatory_compliance_standard(client, resource_name):
+
+    return client.get(regulatory_compliance_standard_name=resource_name)
+
+
+def list_regulatory_compliance_controls(client, standard_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name)
+
+
+def get_regulatory_compliance_control(client, resource_name, standard_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=resource_name)
+
+
+def list_regulatory_compliance_assessments(client, standard_name, control_name):
+
+    return client.list(regulatory_compliance_standard_name=standard_name,
+                       regulatory_compliance_control_name=control_name)
+
+
+def get_regulatory_compliance_assessment(client, resource_name, standard_name, control_name):
+
+    return client.get(regulatory_compliance_standard_name=standard_name,
+                      regulatory_compliance_control_name=control_name,
+                      regulatory_compliance_assessment_name=resource_name)
