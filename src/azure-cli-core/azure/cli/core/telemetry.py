@@ -437,7 +437,7 @@ def _get_azure_subscription_id():
 
 
 def _get_shell_type():
-    ## This method is not accurate and needs improvement, for instance all shells on Windows return 'cmd'.
+    # This method is not accurate and needs improvement, for instance all shells on Windows return 'cmd'.
     if 'ZSH_VERSION' in os.environ:
         return 'zsh'
     if 'BASH_VERSION' in os.environ:
