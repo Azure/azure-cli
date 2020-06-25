@@ -460,6 +460,7 @@ def get_security_sub_assessment(client, resource_name, assessment_name, assessed
 # Security Regulatory Compliance
 # --------------------------------------------------------------------------------------------
 
+
 def list_regulatory_compliance_standards(client):
 
     return client.list()
