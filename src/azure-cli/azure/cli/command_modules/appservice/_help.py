@@ -790,6 +790,8 @@ short-summary: add a regional virtual network integration to a functionapp
 examples:
   - name: add a regional virtual network integration to a functionapp
     text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet MyVnetName --subnet MySubnetName -s [slot]
+  - name: add a regional virtual network integration to a functionapp using resource id
+    text: az functionapp vnet-integration add -g MyResourceGroup -n MyFunctionapp --vnet '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.Network/virtualNetworks/[virtual network name]' --subnet MySubnetName -s [slot]
 """
 
 helps['functionapp vnet-integration list'] = """
@@ -1842,6 +1844,8 @@ short-summary: add a regional virtual network integration to a webapp
 examples:
   - name: add a regional virtual network integration to a webapp
     text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet MyVnetName --subnet MySubnetName -s [slot]
+  - name: add a regional virtual network integration to a webapp using resource id
+    text: az webapp vnet-integration add -g MyResourceGroup -n MyWebapp --vnet '/subscriptions/[sub id]/resourceGroups/[rg]/providers/Microsoft.Network/virtualNetworks/[virtual network name]' --subnet MySubnetName -s [slot]
 """
 
 helps['webapp vnet-integration list'] = """

@@ -3225,8 +3225,12 @@ def add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=None
 
     vnet_id = ''
     for v in list_all_vnets:
-        if v.name == vnet:
+        if vnet in (v.name, v.id):
             vnet_id = v.id
+            vnet = v.name
+
+    if not vnet_id:
+        return logger.warning("The Virtual Network %s was not found in the subscription.", vnet)
 
     # parsing the arm uri in order to extract vnet_name and vnet_resource_group
     vnet_id_strings = vnet_id.split('/')
