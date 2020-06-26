@@ -82,7 +82,7 @@ def cli_cosmosdb_create(cmd, client,
                         default_consistency_level=None,
                         max_staleness_prefix=100,
                         max_interval=5,
-                        ip_rules=None,
+                        ip_range_filter=None,
                         enable_automatic_failover=None,
                         capabilities=None,
                         enable_virtual_network=None,
@@ -112,10 +112,6 @@ def cli_cosmosdb_create(cmd, client,
         locations = []
         locations.append(Location(location_name=resource_group_location, failover_priority=0, is_zone_redundant=False))
 
-    _ip_rules = None
-    if ip_rules is not None:
-        _ip_rules = get_ip_rules(ip_rules)
-
     public_network_access = None
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
@@ -132,7 +128,7 @@ def cli_cosmosdb_create(cmd, client,
         tags=tags,
         kind=kind,
         consistency_policy=consistency_policy,
-        ip_rules=_ip_rules,
+        ip_rules=ip_range_filter,
         is_virtual_network_filter_enabled=enable_virtual_network,
         enable_automatic_failover=enable_automatic_failover,
         capabilities=capabilities,
@@ -160,7 +156,7 @@ def cli_cosmosdb_update(client,
                         default_consistency_level=None,
                         max_staleness_prefix=None,
                         max_interval=None,
-                        ip_rules=None,
+                        ip_range_filter=None,
                         enable_automatic_failover=None,
                         capabilities=None,
                         enable_virtual_network=None,
@@ -197,15 +193,11 @@ def cli_cosmosdb_update(client,
     if enable_public_network is not None:
         public_network_access = 'Enabled' if enable_public_network else 'Disabled'
 
-    _ip_rules = None
-    if ip_rules is not None:
-        _ip_rules = get_ip_rules(ip_rules)
-
     params = DatabaseAccountUpdateParameters(
         locations=locations,
         tags=tags,
         consistency_policy=consistency_policy,
-        ip_rules=_ip_rules,
+        ip_rules=ip_range_filter,
         is_virtual_network_filter_enabled=enable_virtual_network,
         enable_automatic_failover=enable_automatic_failover,
         capabilities=capabilities,
@@ -219,16 +211,6 @@ def cli_cosmosdb_update(client,
     docdb_account = async_docdb_update.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
-
-
-def get_ip_rules(ip_rules):
-    _ip_rules = []
-    if ip_rules:
-        for ip_address in ip_rules:
-            _ip_address_or_range = {}
-            _ip_address_or_range['IpAddressOrRange'] = ip_address
-            _ip_rules.append(_ip_address_or_range)
-    return _ip_rules
 
 
 def cli_cosmosdb_list(client, resource_group_name=None):
