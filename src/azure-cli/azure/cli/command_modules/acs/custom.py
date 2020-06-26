@@ -2625,7 +2625,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
 
     # sanity check that locations and clouds match.
     if ((cloud_name.lower() == 'azurecloud' and AzureChinaRegionToOmsRegionMap.get(rg_location, False)) or
-            (cloud_name.lower() == 'azurecloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False)) or 
+            (cloud_name.lower() == 'azurecloud' and AzureFairfaxRegionToOmsRegionMap.get(rg_location, False)) or
             (cloud_name.lower() == 'azurecloud' and AzureUSNatRegionToOmsRegionMap.get(rg_location, False)) or
             (cloud_name.lower() == 'azurecloud' and AzureUSSecRegionToOmsRegionMap.get(rg_location, False))):
         raise CLIError('Wrong cloud (azurecloud) setting for region {}, please use "az cloud set ..."'
