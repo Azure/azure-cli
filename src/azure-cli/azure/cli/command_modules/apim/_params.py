@@ -8,11 +8,13 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 get_location_type,
                                                 resource_group_name_type,
                                                 get_three_state_flag)
-from azure.mgmt.apimanagement.models import (SkuType, VirtualNetworkType)
+from azure.mgmt.apimanagement.models import (SkuType, VirtualNetworkType, Protocol, ApiType)
 
 
 SKU_TYPES = SkuType
 VNET_TYPES = VirtualNetworkType
+API_PROTOCOLS = Protocol
+API_TYPES = ApiType
 
 
 def load_arguments(self, _):
@@ -51,3 +53,25 @@ def load_arguments(self, _):
         c.argument('storage_account_name', arg_group='Storage', help='The name of the storage account used to place the backup.')
         c.argument('storage_account_key', arg_group='Storage', help='The access key of the storage account used to place the backup.')
         c.argument('storage_account_container', arg_group='Storage', help='The name of the storage account container used to place the backup.')
+
+    with self.argument_context('apim api import') as c:
+        c.argument('service_name', options_list=['--service_name', '-n'], help="The name of the api management service instance", id_part=None)
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('api_path', help='Required. Relative URL uniquely identifying this API and all of its resource paths within the API Management service instance.', required=True)
+        c.argument('description', help='Description of the API. May include HTML formatting tags.')
+        c.argument('subscription_key_parameter_names', help='Protocols over which API is made available.')
+        c.argument('api_id', help='API revision identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+        c.argument('api_revision', help='Describes the Revision of the Api. If no value is provided, default revision 1 is created.')
+        c.argument('api_version', help='Indicates the Version identifier of the API if the API is versioned.')
+        c.argument('service_url', help='Absolute URL of the backend service implementing this API. Cannot be more than 2000 characters long.')
+        c.argument('protocols', arg_type=get_enum_type(API_PROTOCOLS), help='Describes on which protocols the operations in this API can be invoked.')
+        c.argument('api_type', arg_type=get_enum_type(API_TYPES), help='The type of the API.')
+        c.argument('subscription_required', arg_type=get_three_state_flag(), help='If true, the API requires a subscription key on requests.')
+        c.argument('display_name', help='Display name of this API.')
+        c.argument('api_version_set_id', help='The Id of the API version identifier.')
+        c.argument('specificationPath', help='Specify the file path to import the API.')
+        c.argument('specificationUrl', help='Specify the url to import the API.')
+        c.argument('specificationFormat', help='Specify the format of the imported API.')
+        c.argument('soap_api_type', help='The type of API when file format is WSDL.')
+        c.argument('wsdl_service_name', help='Local name of WSDL Service to be imported.')
+        c.argument('wsdl_endpoint_name', help='Local name of WSDL Endpoint (port) to be imported.')

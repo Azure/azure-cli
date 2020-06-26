@@ -66,3 +66,8 @@ helps['apim update'] = """
 type: command
 short-summary: Update an API Management service instance.
 """
+
+helps['apim api import'] = """
+type: command
+short-summary: Import an API Management service instance.
+"""
