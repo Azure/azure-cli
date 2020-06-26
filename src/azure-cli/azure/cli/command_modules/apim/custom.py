@@ -129,8 +129,7 @@ def import_apim_api(client, resource_group_name, service_name, api_path, descrip
     """Import a new API"""
     cms = client.api
 
-    # should check api revision
-    # should check apiId is not provided
+    # api_type: Type of API. Possible values include: 'http', 'soap'
     # possible format is 'wadl-xml', 'wadl-link-json', 'swagger-json', 'swagger-link-json', 'wsdl', 'wsdl-link', 'openapi', 'openapi+json', 'openapi-link'
 
     resource = ApiCreateOrUpdateParameter(
