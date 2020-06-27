@@ -507,26 +507,39 @@ def _deploy_arm_template_at_resource_group(cmd,
                                            deployment_name=None, mode=None, rollback_on_error=None,
                                            validate_only=False, no_wait=False,
                                            aux_subscriptions=None, aux_tenants=None, no_prompt=False):
-    deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
-                                                                      template_uri=template_uri,
-                                                                      template_spec=template_spec,
-                                                                      parameters=parameters, mode=mode,
-                                                                      rollback_on_error=rollback_on_error,
-                                                                      no_prompt=no_prompt)
+#     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
+#                                                                       template_uri=template_uri,
+#                                                                       template_spec=template_spec,
+#                                                                       parameters=parameters, mode=mode,
+#                                                                       rollback_on_error=rollback_on_error,
+#                                                                       no_prompt=no_prompt)
 
-    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions=aux_subscriptions,
+    cli_ctx=cmd.cli_ctx
+    mgmt_client = _get_deployment_management_client(cli_ctx, aux_subscriptions=aux_subscriptions,
                                                     aux_tenants=aux_tenants, plug_pipeline=(template_uri is None))
 
-    validation_result = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, properties=deployment_properties)
+    Deployment, DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment', 'DeploymentProperties', 'TemplateLink', mod='models')
+    template_link = TemplateLink(id="/subscriptions/996a2f3f-ee01-4ffd-9765-d2c3fc98f30a/resourceGroups/giants-deep/providers/Microsoft.Resources/templateSpecs/BasicLinked01/versions/1.0")
+    deployment_properties = DeploymentProperties(template_link=template_link, mode="Incremental")
+    deployment = Deployment(properties=deployment_properties)
 
-    if validation_result and validation_result.error:
-        err_message = _build_preflight_error_message(validation_result.error)
-        raise CLIError(err_message)
-    if validate_only:
-        return validation_result
+    print(deployment)
 
-    return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name,
-                       deployment_name, deployment_properties)
+    validation_poller = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, parameters=deployment)
+    validation_result = LongRunningOperation(cli_ctx)(validation_poller)
+
+    print(validation_result)
+
+    # if validation_result and validation_result.error:
+    #     err_message = _build_preflight_error_message(validation_result.error)
+    #     raise CLIError(err_message)
+    # if validate_only:
+    #     return validation_result
+
+    # return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name,
+    #                    deployment_name, deployment_properties)
+    return None
+
 
 
 # pylint: disable=unused-argument
