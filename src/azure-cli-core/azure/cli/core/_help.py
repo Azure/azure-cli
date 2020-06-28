@@ -45,6 +45,10 @@ WELCOME_MESSAGE = r"""
 Welcome to the cool new Azure CLI!
 
 Use `az --version` to display the current version.
+
+Documentation: https://docs.microsoft.com/en-us/cli/azure
+GitHub repo: https://github.com/Azure/azure-cli
+
 Here are the base commands:
 """
 
