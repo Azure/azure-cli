@@ -19,7 +19,11 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_advanced_threat_protection,
                               cf_security_assessment,
                               cf_security_assessment_metadata,
-                              cf_security_sub_assessment)
+                              cf_security_sub_assessment,
+                              cf_security_iot_solution,
+                              cf_security_iot_analytics,
+                              cf_security_iot_alerts,
+                              cf_security_iot_recommendations)
 
 
 # pylint: disable=line-too-long
@@ -116,6 +120,26 @@ def load_command_table(self, _):
     security_sub_assessment_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#SubAssessmentsOperations.{}',
         client_factory=cf_security_sub_assessment
+    )
+
+    security_iot_solution_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#IotSolutionOperations.{}',
+        client_factory=cf_security_iot_solution
+    )
+
+    security_iot_analytics_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#IotAnalyticsOperations.{}',
+        client_factory=cf_security_iot_analytics
+    )
+
+    security_iot_alerts_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#IotAlertsOperations.{}',
+        client_factory=cf_security_iot_alerts
+    )
+
+    security_iot_recommendations_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#IotRecommendationsOperations.{}',
+        client_factory=cf_security_iot_recommendations
     )
 
     with self.command_group('security task',
@@ -224,6 +248,33 @@ def load_command_table(self, _):
                             client_factory=cf_security_sub_assessment) as g:
         g.custom_command('list', 'list_security_sub_assessments')
         g.custom_command('show', 'get_security_sub_assessment')
+
+    with self.command_group('security iot-solution',
+                            security_iot_solution_sdk,
+                            client_factory=cf_security_iot_solution) as g:
+        g.custom_command('list', 'list_security_iot_solution')
+        g.custom_command('show', 'get_security_iot_solution')
+        g.custom_command('create', 'create_security_iot_solution')
+        g.custom_command('delete', 'delete_security_iot_solution')
+
+    with self.command_group('security iot-analytics',
+                            security_iot_analytics_sdk,
+                            client_factory=cf_security_iot_analytics) as g:
+        g.custom_command('list', 'list_security_iot_analytics')
+        g.custom_command('show', 'get_security_iot_analytics')
+
+    with self.command_group('security iot-alerts',
+                            security_iot_alerts_sdk,
+                            client_factory=cf_security_iot_alerts) as g:
+        g.custom_command('list', 'list_security_iot_alerts')
+        g.custom_command('show', 'get_security_iot_alerts')
+        g.custom_command('delete', 'dismiss_security_iot_alerts')
+
+    with self.command_group('security iot-recommendations',
+                            security_iot_recommendations_sdk,
+                            client_factory=cf_security_iot_recommendations) as g:
+        g.custom_command('list', 'list_security_iot_recommendations')
+        g.custom_command('show', 'get_security_iot_recommendations')
 
     with self.command_group('security', is_preview=True):
         pass

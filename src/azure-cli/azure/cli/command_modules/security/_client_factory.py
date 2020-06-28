@@ -77,3 +77,19 @@ def cf_security_assessment_metadata(cli_ctx, _):
 
 def cf_security_sub_assessment(cli_ctx, _):
     return _cf_security(cli_ctx).sub_assessments
+
+
+def cf_security_iot_solution(cli_ctx, _):
+    return _cf_security(cli_ctx).iot_security_solution
+
+
+def cf_security_iot_analytics(cli_ctx, _):
+    return _cf_security(cli_ctx).iot_security_solution_analytics
+
+
+def cf_security_iot_alerts(cli_ctx, _):
+    return _cf_security(cli_ctx).iot_security_solutions_analytics_aggregated_alert
+
+
+def cf_security_iot_recommendations(cli_ctx, _):
+    return _cf_security(cli_ctx).iot_security_solutions_analytics_recommendation

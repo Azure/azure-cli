@@ -54,6 +54,11 @@ assessment_metadata_severity_arg_type = CLIArgumentType(options_list=('--severit
 # Sub Assessment
 sub_assessment_assessment_name_arg_type = CLIArgumentType(options_list=('--assessment-name'), metavar='ASSESSMENTNAME', help='Name of the assessment resource')
 
+# IoT Solution 
+iot_solution_name_arg_type = CLIArgumentType(options_list=('--solution-name'), metavar='SOLUTIONNAME', help='Name of the IoT Security solution')
+iot_solution_display_name_arg_type = CLIArgumentType(options_list=('--display-name'), metavar='DISPLAYNAME', help='Resource display name')
+iot_solution_iot_hubs_arg_type = CLIArgumentType(options_list=('--iot-hubs'), metavar='IOTHUBS', help='IoT Hub resource IDs')
+
 
 def load_arguments(self, _):
     for scope in ['alert',
@@ -71,7 +76,11 @@ def load_arguments(self, _):
                   'workspace-setting',
                   'assessment',
                   'assessment-metadata',
-                  'sub-assessment']:
+                  'sub-assessment',
+                  'iot-solution',
+                  'iot-analytics',
+                  'iot-alerts',
+                  'iot-recommendations']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'resource_group_name',
@@ -178,3 +187,33 @@ def load_arguments(self, _):
             c.argument(
                 'assessment_name',
                 arg_type=sub_assessment_assessment_name_arg_type)
+    
+    for scope in ['iot-solution']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'iot_solution_name',
+                arg_type=iot_solution_name_arg_type)
+            c.argument(
+                'iot_solution_display_name',
+                arg_type=iot_solution_display_name_arg_type)
+            c.argument(
+                'iot_solution_iot_hubs',
+                arg_type=iot_solution_iot_hubs_arg_type)
+
+    for scope in ['iot-analytics']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'iot_solution_name',
+                arg_type=iot_solution_name_arg_type)
+
+    for scope in ['iot-alerts']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'iot_solution_name',
+                arg_type=iot_solution_name_arg_type)
+            
+    for scope in ['iot-recommendations']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'iot_solution_name',
+                arg_type=iot_solution_name_arg_type)
