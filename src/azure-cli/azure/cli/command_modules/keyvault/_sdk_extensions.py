@@ -96,8 +96,10 @@ def create_role_assignment(self, vault_base_url, scope, name, principal_id, role
     url = self._client.format_url(url, **path_format_arguments)
 
     return send_generic_request(self, "PUT", url, body={
-        "principalId": principal_id,
-        "roleDefinitionId": role_definition_id
+        "properties": {
+            "principalId": principal_id,
+            "roleDefinitionId": role_definition_id
+        }
     }, custom_headers=custom_headers)
 
 
