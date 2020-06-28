@@ -47,8 +47,8 @@ Welcome to the cool new Azure CLI!
 Documentation: https://docs.microsoft.com/en-us/cli/azure
 GitHub repo: https://github.com/Azure/azure-cli
 
-Use `az --version` to display the current version.
-Use `--help` to display the help message for a command group or command, like `az vm --help`, `az vm create -h`.
+Use `az --version` to display the current version in human-readable format, `az version` to display the current version in JSON format.
+Use `--help/-h` to display the help message for a command group or command, like `az vm --help`, `az vm create -h`.
 
 Here are the base command groups and commands:
 """
