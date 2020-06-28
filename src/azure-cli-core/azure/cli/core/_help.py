@@ -44,12 +44,13 @@ WELCOME_MESSAGE = r"""
 
 Welcome to the cool new Azure CLI!
 
-Use `az --version` to display the current version.
-
 Documentation: https://docs.microsoft.com/en-us/cli/azure
 GitHub repo: https://github.com/Azure/azure-cli
 
-Here are the base commands:
+Use `az --version` to display the current version.
+Use `--help` to display the help message for a command group or command, like `az vm --help`, `az vm create -h`.
+
+Here are the base command groups and commands:
 """
 
 
