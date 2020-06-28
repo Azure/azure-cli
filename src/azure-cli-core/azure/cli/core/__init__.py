@@ -364,7 +364,7 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_table.clear()
 
         command_index = None
-        use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=False)
+        use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
