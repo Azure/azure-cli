@@ -67,13 +67,10 @@ def load_arguments(self, _):
 
     # Network Rule
     with self.argument_context('signalr network-rule update') as c:
-        c.argument('connection_name', nargs='*', help='Space-separeted list of private endpoint connection name.', required=False)
-        c.argument('public_network', arg_type=get_three_state_flag(), help='The rules for public network.', required=False)
+        c.argument('connection_name', nargs='*', help='Space-separeted list of private endpoint connection name.', required=False, arg_group='Private Endpoint Connection')
+        c.argument('public_network', arg_type=get_three_state_flag(), help='Set rules for public network.', required=False, arg_group='Public Network')
         c.argument('allow', nargs='*', help='The allowed virtual network rule. Space-separeted list of scope to assign. Allowed values: ClientConnection, ServerConnection, RESTAPI', type=SignalRRequestType, required=False)
         c.argument('deny', nargs='*', help='The denied virtual network rule. Space-separeted list of scope to assign. Allowed values: ClientConnection, ServerConnection, RESTAPI', type=SignalRRequestType, required=False)
-
-    with self.argument_context('signalr network-rule remove') as c:
-        c.argument('connection_name', help='Name of private endpoint connection.')
 
     # Upstream Settings
     with self.argument_context('signalr upstream update') as c:
