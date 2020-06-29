@@ -15,8 +15,6 @@ from ._client_factory import (
     system_topic_event_subscriptions_factory,
     event_subscriptions_factory,
     topic_types_factory,
-    private_endpoint_connections_factory,
-    private_link_resources_factory,
     extension_topics_factory,
     partner_registrations_factory,
     partner_namespaces_factory,
@@ -99,18 +97,6 @@ def load_command_table(self, _):
         client_arg_name='self'
     )
 
-    private_endpoint_connections_mgmt_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventgrid.operations.#PrivateEndpointConnectionsOperations.{}',
-        client_factory=private_endpoint_connections_factory,
-        client_arg_name='self'
-    )
-
-    private_link_resources_mgmt_util = CliCommandType(
-        operations_tmpl='azure.mgmt.eventgrid.operations#PrivateLinkResourcesOperations.{}',
-        client_factory=private_link_resources_factory,
-        client_arg_name='self'
-    )
-
     with self.command_group('eventgrid topic', topics_mgmt_util, client_factory=topics_factory) as g:
         g.show_command('show', 'get')
         g.command('key list', 'list_shared_access_keys')
@@ -137,28 +123,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'cli_domain_create_or_update')
         g.command('delete', 'delete')
         g.custom_command('update', 'cli_domain_update')
-
-    with self.command_group('eventgrid topic private-endpoint-connection', private_endpoint_connections_mgmt_util, client_factory=private_endpoint_connections_factory) as g:
-        g.custom_show_command('show', 'cli_topic_private_endpoint_connection_get')
-        g.custom_command('list', 'cli_topic_private_endpoint_connection_list')
-        g.custom_command('delete', 'cli_topic_private_endpoint_connection_delete')
-        g.custom_command('approve', 'cli_topic_private_endpoint_connection_approve')
-        g.custom_command('reject', 'cli_topic_private_endpoint_connection_reject')
-
-    with self.command_group('eventgrid domain private-endpoint-connection', private_endpoint_connections_mgmt_util, client_factory=private_endpoint_connections_factory) as g:
-        g.custom_show_command('show', 'cli_domain_private_endpoint_connection_get')
-        g.custom_command('list', 'cli_domain_private_endpoint_connection_list')
-        g.custom_command('delete', 'cli_domain_private_endpoint_connection_delete')
-        g.custom_command('approve', 'cli_domain_private_endpoint_connection_approve')
-        g.custom_command('reject', 'cli_domain_private_endpoint_connection_reject')
-
-    with self.command_group('eventgrid topic private-link-resource', private_link_resources_mgmt_util, client_factory=private_link_resources_factory) as g:
-        g.custom_show_command('show', 'cli_topic_private_link_resource_get')
-        g.custom_command('list', 'cli_topic_private_link_resource_list')
-
-    with self.command_group('eventgrid domain private-link-resource', private_link_resources_mgmt_util, client_factory=private_link_resources_factory) as g:
-        g.custom_show_command('show', 'cli_domain_private_link_resource_get')
-        g.custom_command('list', 'cli_domain_private_link_resource_list')
 
     with self.command_group('eventgrid system-topic', system_topics_mgmt_util, client_factory=system_topics_factory, is_preview=True) as g:
         g.show_command('show', 'get')

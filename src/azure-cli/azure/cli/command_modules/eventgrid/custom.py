@@ -40,8 +40,6 @@ from azure.mgmt.eventgrid.models import (
     EventChannelSource,
     EventChannelDestination,
     SystemTopic,
-    PrivateEndpointConnection,
-    ConnectionState,
     EventSubscriptionIdentity,
     DeliveryWithResourceIdentity,
     DeadLetterWithResourceIdentity,
@@ -61,7 +59,6 @@ EVENTGRID_PARTNER_REGISTRATIONS = "partnerregistration"
 EVENTGRID_PARTNER_NAMESPACES = "partnernamespace"
 EVENTGRID_EVENT_CHANNELS = "eventchannel"
 EVENTGRID_PARTNER_TOPIC = "partnertopic"
-EVENTGRID_PRIVATE_ENDPOINT_CONNECTION = "privateendpointconnections"
 EVENTGRID_RESOURCE_SKU = "resourceSku"
 SKU_BASIC = "Basic"
 SKU_PREMIUM = "Premium"
@@ -907,160 +904,6 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
         topic_type_name,
         odata_query,
         DEFAULT_TOP)
-
-
-def cli_topic_private_endpoint_connection_get(
-        client,
-        resource_group_name,
-        topic_name,
-        private_endpoint_connection_name):
-
-    return client.get(resource_group_name, EVENTGRID_TOPICS, topic_name, private_endpoint_connection_name)
-
-
-def cli_topic_private_endpoint_connection_delete(
-        client,
-        resource_group_name,
-        topic_name,
-        private_endpoint_connection_name):
-
-    return client.delete(resource_group_name, EVENTGRID_TOPICS, topic_name, private_endpoint_connection_name)
-
-
-def cli_topic_private_endpoint_connection_list(
-        client,
-        resource_group_name,
-        topic_name):
-
-    return client.list_by_resource(resource_group_name, EVENTGRID_TOPICS, topic_name)
-
-
-def cli_topic_private_endpoint_connection_approve(
-        client,
-        resource_group_name,
-        topic_name,
-        private_endpoint_connection_name,
-        description=None):
-
-    status = ConnectionState(description=description, status='Approved')
-    private_endpoint_conn = PrivateEndpointConnection(private_link_service_connection_state=status)
-    return client.update(
-        resource_group_name,
-        EVENTGRID_TOPICS,
-        topic_name,
-        private_endpoint_connection_name,
-        private_endpoint_conn)
-
-
-def cli_topic_private_endpoint_connection_reject(
-        client,
-        resource_group_name,
-        topic_name,
-        private_endpoint_connection_name,
-        description=None):
-
-    status = ConnectionState(description=description, status='Rejected')
-    private_endpoint_conn = PrivateEndpointConnection(private_link_service_connection_state=status)
-    return client.update(
-        resource_group_name,
-        EVENTGRID_TOPICS,
-        topic_name,
-        private_endpoint_connection_name,
-        private_endpoint_conn)
-
-
-def cli_domain_private_endpoint_connection_get(
-        client,
-        resource_group_name,
-        domain_name,
-        private_endpoint_connection_name):
-
-    return client.get(resource_group_name, EVENTGRID_DOMAINS, domain_name, private_endpoint_connection_name)
-
-
-def cli_domain_private_endpoint_connection_list(
-        client,
-        resource_group_name,
-        domain_name):
-
-    return client.list_by_resource(resource_group_name, EVENTGRID_DOMAINS, domain_name)
-
-
-def cli_domain_private_endpoint_connection_delete(
-        client,
-        resource_group_name,
-        domain_name,
-        private_endpoint_connection_name):
-
-    return client.delete(resource_group_name, EVENTGRID_DOMAINS, domain_name, private_endpoint_connection_name)
-
-
-def cli_domain_private_endpoint_connection_approve(
-        client,
-        resource_group_name,
-        domain_name,
-        private_endpoint_connection_name,
-        description=None):
-
-    status = ConnectionState(description=description, status='Approved')
-    private_endpoint_conn = PrivateEndpointConnection(private_link_service_connection_state=status)
-    return client.update(
-        resource_group_name,
-        EVENTGRID_DOMAINS,
-        domain_name,
-        private_endpoint_connection_name,
-        private_endpoint_conn)
-
-
-def cli_domain_private_endpoint_connection_reject(
-        client,
-        resource_group_name,
-        domain_name,
-        private_endpoint_connection_name,
-        description=None):
-
-    status = ConnectionState(description=description, status='Rejected')
-    private_endpoint_conn = PrivateEndpointConnection(private_link_service_connection_state=status)
-    return client.update(
-        resource_group_name,
-        EVENTGRID_DOMAINS,
-        domain_name,
-        private_endpoint_connection_name,
-        private_endpoint_conn)
-
-
-def cli_topic_private_link_resource_get(
-        client,
-        resource_group_name,
-        topic_name,
-        private_link_resource_name):
-
-    return client.get(resource_group_name, EVENTGRID_TOPICS, topic_name, private_link_resource_name)
-
-
-def cli_topic_private_link_resource_list(
-        client,
-        resource_group_name,
-        topic_name):
-
-    return client.list_by_resource(resource_group_name, EVENTGRID_TOPICS, topic_name)
-
-
-def cli_domain_private_link_resource_get(
-        client,
-        resource_group_name,
-        domain_name,
-        private_link_resource_name):
-
-    return client.get(resource_group_name, EVENTGRID_DOMAINS, domain_name, private_link_resource_name)
-
-
-def cli_domain_private_link_resource_list(
-        client,
-        resource_group_name,
-        domain_name):
-
-    return client.list_by_resource(resource_group_name, EVENTGRID_DOMAINS, domain_name)
 
 
 def _get_event_subscription_info(    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
