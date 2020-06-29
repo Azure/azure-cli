@@ -233,7 +233,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-04-01')
-    @ResourceGroupPreparer(location='eastus2euap', name_prefix='cli_storage_account')
+    @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     def test_storage_create_with_public_access(self, resource_group):
         name1 = self.create_random_name(prefix='cli', length=24)
         name2 = self.create_random_name(prefix='cli', length=24)
