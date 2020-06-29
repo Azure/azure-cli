@@ -147,11 +147,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Request timeout in seconds. Applies to each call to the service.', type=int
     )
 
-    blob_public_access_type = CLIArgumentType(
-        arg_type=get_three_state_flag(), min_api='2019-04-01', is_preview=True,
-        help='Allow or disallow public access to all blobs or containers in the storage account. '
-        'The default interpretation is true for this property.')
-
     with self.argument_context('storage') as c:
         c.argument('container_name', container_name_type)
         c.argument('directory_name', directory_type)
