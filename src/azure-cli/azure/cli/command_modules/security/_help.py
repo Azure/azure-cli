@@ -559,7 +559,7 @@ examples:
         az security iot-solution list 
 """
 
-helps['security iot-analytics'] = """
+helps['security iot-analytics'] = """ 
 type: group
 short-summary:  View IoT Security Analytics metrics.
 """
