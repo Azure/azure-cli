@@ -137,15 +137,24 @@ def _get_mgmt_service_client(cli_ctx,
                              api_version=None,
                              base_url_bound=True,
                              resource=None,
+                             scopes=None,
                              sdk_profile=None,
                              aux_subscriptions=None,
                              aux_tenants=None,
                              **kwargs):
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
-    resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
-    profile = Profile(cli_ctx=cli_ctx)
-    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource,
+
+    if not scopes:
+        resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
+    
+    authority = kwargs.pop('authority', None)
+    client_id = kwargs.pop('client_id', None)
+
+    profile = Profile(cli_ctx=cli_ctx, authority=authority)
+    cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id,
+                                                             resource=resource, scopes=scopes,
+                                                             client_id=client_id,
                                                              aux_subscriptions=aux_subscriptions,
                                                              aux_tenants=aux_tenants)
 
@@ -158,6 +167,9 @@ def _get_mgmt_service_client(cli_ctx,
         client_kwargs['profile'] = sdk_profile
     if kwargs:
         client_kwargs.update(kwargs)
+    
+    if scopes:
+        client_kwargs['credential_scopes'] = scopes
 
     if is_track2(client_type):
         client_kwargs.update(configure_common_settings_track2(cli_ctx))

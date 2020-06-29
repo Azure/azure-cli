@@ -25,7 +25,7 @@ def _create_scopes(resource):
         scope = resource + '/.default'
     else:
         scope = resource.rstrip('/') + '/.default'
-    return scope
+    return scope,
 
 
 class AuthenticationWrapper(Authentication):
@@ -35,16 +35,21 @@ class AuthenticationWrapper(Authentication):
         # _external_credentials and _resource are only needed in Track1 SDK
         self._external_credentials = kwargs.pop("external_credentials", None)
         self._resource = kwargs.pop("resource", None)
+        self._scopes = kwargs.pop("scopes", None)
 
     def _get_token(self, *scopes):
         external_tenant_tokens = []
+
+        if not scopes:
+            scopes = self._scopes
         if not scopes:
             if self._resource:
                 scopes = _create_scopes(self._resource)
             else:
                 raise CLIError("Unexpected error: Resource or Scope need be specified to get access token")
+        
         try:
-            token = self._credential.get_token(scopes)
+            token = self._credential.get_token(*scopes)
             if self._external_credentials:
                 external_tenant_tokens = [cred.get_token(scopes) for cred in self._external_credentials]
         except CLIError as err:

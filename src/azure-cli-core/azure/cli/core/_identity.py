@@ -96,19 +96,19 @@ class Identity:
         msal_authority = "https://{}/{}".format(self.authority, self.tenant_id)
         return PublicClientApplication(authority=msal_authority, client_id=self.client_id, token_cache=cache)
 
-    def login_with_interactive_browser(self):
+    def login_with_interactive_browser(self, scopes=None):
         # Use InteractiveBrowserCredential
         credential = InteractiveBrowserCredential(authority=self.authority,
                                                   tenant_id=self.tenant_id,
                                                   client_id=self.client_id,
                                                   enable_persistent_cache=True,
                                                   allow_unencrypted_cache=self.allow_unencrypted)
-        auth_record = credential.authenticate()
+        auth_record = credential.authenticate(scopes=scopes)
         # todo: remove after ADAL token deprecation
-        self._cred_cache.add_credential(credential)
+        self._cred_cache.add_credential(credential, client_id=self.client_id, scopes=scopes)
         return credential, auth_record
 
-    def login_with_device_code(self):
+    def login_with_device_code(self, scopes=None):
         # Use DeviceCodeCredential
         def prompt_callback(verification_uri, user_code, _):
             # expires_on is discarded
@@ -121,12 +121,12 @@ class Identity:
                                           enable_persistent_cache=True,
                                           prompt_callback=prompt_callback,
                                           allow_unencrypted_cache=self.allow_unencrypted)
-        auth_record = credential.authenticate()
+        auth_record = credential.authenticate(scopes=scopes)
         # todo: remove after ADAL token deprecation
-        self._cred_cache.add_credential(credential)
+        self._cred_cache.add_credential(credential, client_id=self.client_id, scopes=scopes)
         return credential, auth_record
 
-    def login_with_username_password(self, username, password):
+    def login_with_username_password(self, username, password, scopes=None):
         # Use UsernamePasswordCredential
         credential = UsernamePasswordCredential(authority=self.authority,
                                                 tenant_id=self.tenant_id,
@@ -135,10 +135,10 @@ class Identity:
                                                 password=password,
                                                 enable_persistent_cache=True,
                                                 allow_unencrypted_cache=self.allow_unencrypted)
-        auth_record = credential.authenticate()
+        auth_record = credential.authenticate(scopes=scopes)
 
         # todo: remove after ADAL token deprecation
-        self._cred_cache.add_credential(credential)
+        self._cred_cache.add_credential(credential, client_id=self.client_id, scopes=scopes)
         return credential, auth_record
 
     def login_with_service_principal_secret(self, client_id, client_secret):
@@ -413,10 +413,12 @@ class ADALCredentialCache:
 
     # noinspection PyBroadException
     # pylint: disable=protected-access
-    def add_credential(self, credential):
+    def add_credential(self, credential, **kwargs):
         try:
+            client_id = kwargs.pop("client_id", _CLIENT_ID)
+
             query = {
-                "client_id": _CLIENT_ID,
+                "client_id": client_id,
                 "environment": credential._auth_record.authority,
                 "home_account_id": credential._auth_record.home_account_id
             }
@@ -424,8 +426,12 @@ class ADALCredentialCache:
                 credential._cache.CredentialType.REFRESH_TOKEN,
                 # target=scopes,  # AAD RTs are scope-independent
                 query=query)
-            access_token = credential.get_token(self._cli_ctx.cloud.endpoints.active_directory_resource_id.rstrip('/') +
-                                                '/.default')
+
+            scopes = kwargs.pop("scopes", None)
+            if not scopes:
+                scopes = [self._cli_ctx.cloud.endpoints.active_directory_resource_id.rstrip('/') + '/.default']
+            access_token = credential.get_token(*scopes)
+
             import datetime
             entry = {
                 "tokenType": "Bearer",
