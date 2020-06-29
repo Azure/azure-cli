@@ -567,6 +567,7 @@ def get_security_iot_recommendations(client, resource_group_name, iot_solution_n
         aggregated_recommendation_name= resource_name)
 
 
+# --------------------------------------------------------------------------------------------
 # Security Regulatory Compliance
 # --------------------------------------------------------------------------------------------
 
