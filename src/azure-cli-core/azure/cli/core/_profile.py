@@ -650,9 +650,11 @@ class Profile(object):
                                                                   tenant_dest, resource)
             else:
                 # Service Principal
+                use_cert_sn_issuer = bool(account[_USER_ENTITY].get(_SERVICE_PRINCIPAL_CERT_SN_ISSUER_AUTH))
                 creds = self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id,
                                                                                resource,
-                                                                               tenant_dest)
+                                                                               tenant_dest,
+                                                                               use_cert_sn_issuer)
         return (creds,
                 None if tenant else str(account[_SUBSCRIPTION_ID]),
                 str(tenant if tenant else account[_TENANT_ID]))
