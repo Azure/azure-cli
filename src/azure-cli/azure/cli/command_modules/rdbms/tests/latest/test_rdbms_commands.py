@@ -93,7 +93,8 @@ class ServerMgmtScenarioTest(ScenarioTest):
     def _test_server_mgmt(self, database_engine, resource_group_1, resource_group_2):
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbcligeorestore', SERVER_NAME_MAX_LENGTH)]
+                   self.create_random_name('azuredbcligeorestore', SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbcliinfraencrypt', SERVER_NAME_MAX_LENGTH)]
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         edition = 'GeneralPurpose'
@@ -110,6 +111,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
+        infrastructureEncryption = 'Enabled'
         geoloc = 'eastus'
 
         # test create server
@@ -232,6 +234,28 @@ class ServerMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('storageProfile.geoRedundantBackup', geoGeoRedundantBackup)])
         self.assertTrue(' does not have the server ' in '{}'.format(exception.exception))
 
+        # test infrastructre encryption on server
+        if database_engine != 'mariadb':
+            self.cmd('{} server create -g {} --name {} -l {} '
+                     '--admin-user {} --admin-password {} '
+                     '--sku-name {} --tags key=1 --geo-redundant-backup {} '
+                     '--backup-retention {} --infrastructure-encryption {}'
+                     .format(database_engine, resource_group_1, servers[3], loc,
+                             admin_login, admin_passwords[0], skuname,
+                             geoRedundantBackup, backupRetention, infrastructureEncryption),
+                     checks=[
+                         JMESPathCheck('name', servers[3]),
+                         JMESPathCheck('resourceGroup', resource_group_1),
+                         JMESPathCheck('administratorLogin', admin_login),
+                         JMESPathCheck('sslEnforcement', 'Enabled'),
+                         JMESPathCheck('infrastructureEncryption', 'Enabled'),
+                         JMESPathCheck('tags.key', '1'),
+                         JMESPathCheck('sku.capacity', old_cu),
+                         JMESPathCheck('sku.tier', edition),
+                         JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                         JMESPathCheck('publicNetworkAccess', default_public_network_access),
+                         JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
+
         # test list servers
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_2),
                  checks=[JMESPathCheck('type(@)', 'array')])
@@ -245,6 +269,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
         self.cmd('{} server delete -g {} -n {} --yes'
                  .format(database_engine, resource_group_2, servers[1]), checks=NoneCheck())
+        if database_engine != 'mariadb':
+            self.cmd('{} server delete -g {} -n {} --yes'
+                     .format(database_engine, resource_group_1, servers[3]), checks=NoneCheck())
 
         # test list server should be 0
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_1), checks=[NoneCheck()])

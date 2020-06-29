@@ -179,7 +179,6 @@ def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pyl
 def register_ids_argument(cli_ctx):
 
     from knack import events
-    from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
     ids_metadata = {}
 
@@ -305,6 +304,7 @@ def register_ids_argument(cli_ctx):
         if full_id_list:
             setattr(namespace, '_ids', full_id_list)
 
+        from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
         for val in full_id_list:
             if not is_valid_resource_id(val):
                 raise CLIError('invalid resource ID: {}'.format(val))

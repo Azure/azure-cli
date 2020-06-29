@@ -10,7 +10,8 @@ from azure.cli.core.commands.parameters import (get_three_state_flag,
 from knack.arguments import CLIArgumentType
 from ._validators import (validate_alert_status,
                           validate_auto_provisioning_toggle,
-                          validate_pricing_tier)
+                          validate_pricing_tier,
+                          validate_assessment_status_code)
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME', help='name of the resource to be fetched')
 home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), metavar='HOMEREGION', help='home region that was selected for the subscription')
@@ -37,6 +38,26 @@ pricing_tier_arg_type = CLIArgumentType(options_list=('--tier'), metavar='TIER',
 # Workspace settings
 workspace_setting_target_workspace_arg_type = CLIArgumentType(options_list=('--target-workspace'), metavar='TARGETWORKSPACE', help='An ID of the workspace resource that will hold the security data')
 
+# Assessments
+assessment_assessed_resource_id_arg_type = CLIArgumentType(options_list=('--assessed-resource-id'), metavar='ASSESSEDRESOURCEID', help='The target resource for this assessment')
+assessment_additional_data_arg_type = CLIArgumentType(options_list=('--additional-data'), metavar='ADDITIONALDATA', help='Data that is attached to the assessment result for better investigations or status clarity')
+assessment_status_code_arg_type = CLIArgumentType(options_list=('--status-code'), metavar='STATUSCODE', help='Progremmatic code for the result of the assessment. can be "Healthy", "Unhealthy" or "NotApplicable"')
+assessment_status_cause_arg_type = CLIArgumentType(options_list=('--status-cause'), metavar='STATUSCAUSE', help='Progremmatic code for the cause of the assessment result')
+assessment_status_description_arg_type = CLIArgumentType(options_list=('--status-description'), metavar='STATUSDESCRIPTION', help='Human readable description of the cause of the assessment result')
+
+# Assessment metadata
+assessment_metadata_display_name_arg_type = CLIArgumentType(options_list=('--display-name'), metavar='DISPLAYNAME', help='Human readable title for this object')
+assessment_metadata_remediation_description_arg_type = CLIArgumentType(options_list=('--remediation-description'), metavar='REMEDIATIONDESCRIPTION', help='Detailed string that will help users to understand the different ways to mitigate or fix the security issue')
+assessment_metadata_description_arg_type = CLIArgumentType(options_list=('--description'), metavar='DESCRIPTION', help='Detailed string that will help users to understand the assessment and how it is calculated')
+assessment_metadata_severity_arg_type = CLIArgumentType(options_list=('--severity'), metavar='SEVERITY', help='Indicates the importance of the security risk if the assessment is unhealthy')
+
+# Sub Assessment
+sub_assessment_assessment_name_arg_type = CLIArgumentType(options_list=('--assessment-name'), metavar='ASSESSMENTNAME', help='Name of the assessment resource')
+
+# Regulatory Compliance
+regulatory_compliance_standard_name = CLIArgumentType(option_list=('--standard-name'), metave='STANDARDNAME', help='The compliance standard name')
+regulatory_compliance_control_name = CLIArgumentType(option_list=('--control-name'), metave='CONTROLNAME', help='The compliance control name')
+
 
 def load_arguments(self, _):
     for scope in ['alert',
@@ -51,7 +72,13 @@ def load_arguments(self, _):
                   'location',
                   'pricing',
                   'topology',
-                  'workspace-setting']:
+                  'workspace-setting',
+                  'assessment',
+                  'assessment-metadata',
+                  'sub-assessment',
+                  'regulatory-compliance-standards',
+                  'regulatory-compliance-controls',
+                  'regulatory-compliance-assessments']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'resource_group_name',
@@ -66,6 +93,21 @@ def load_arguments(self, _):
             c.argument(
                 'storage_account_name',
                 arg_type=storage_account_arg_type)
+
+    for scope in ['regulatory-compliance-controls']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'standard_name',
+                arg_type=regulatory_compliance_standard_name)
+
+    for scope in ['regulatory-compliance-assessments']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'standard_name',
+                arg_type=regulatory_compliance_standard_name)
+            c.argument(
+                'control_name',
+                arg_type=regulatory_compliance_control_name)
 
     for scope in ['alert update']:
         with self.argument_context('security {}'.format(scope)) as c:
@@ -112,3 +154,49 @@ def load_arguments(self, _):
             c.argument(
                 'target_workspace',
                 arg_type=workspace_setting_target_workspace_arg_type)
+
+    for scope in ['assessment']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'assessed_resource_id',
+                arg_type=assessment_assessed_resource_id_arg_type)
+
+    for scope in ['assessment create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'additional_data',
+                arg_type=assessment_additional_data_arg_type)
+            c.argument(
+                'status_code',
+                validator=validate_assessment_status_code,
+                arg_type=assessment_status_code_arg_type)
+            c.argument(
+                'status_cause',
+                arg_type=assessment_status_cause_arg_type)
+            c.argument(
+                'status_description',
+                arg_type=assessment_status_description_arg_type)
+
+    for scope in ['assessment-metadata create']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'display_name',
+                arg_type=assessment_metadata_display_name_arg_type)
+            c.argument(
+                'remediation_description',
+                arg_type=assessment_metadata_remediation_description_arg_type)
+            c.argument(
+                'description',
+                arg_type=assessment_metadata_description_arg_type)
+            c.argument(
+                'severity',
+                arg_type=assessment_metadata_severity_arg_type)
+
+    for scope in ['sub-assessment']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'assessed_resource_id',
+                arg_type=assessment_assessed_resource_id_arg_type)
+            c.argument(
+                'assessment_name',
+                arg_type=sub_assessment_assessment_name_arg_type)

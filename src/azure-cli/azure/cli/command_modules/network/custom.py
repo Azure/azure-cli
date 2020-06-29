@@ -2895,14 +2895,115 @@ def set_lb_frontend_ip_configuration(
     return parent
 
 
-def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, item_name):
-    BackendAddressPool = cmd.get_models('BackendAddressPool')
+def create_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
+                                   vnet=None, backend_addresses=None, backend_addresses_config_file=None):
+    def _process_vnet_name_and_id(vnet):
+        if vnet and not is_valid_resource_id(vnet):
+            vnet = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace='Microsoft.Network',
+                type='virtualNetworks',
+                name=vnet)
+        return vnet
+    if backend_addresses and backend_addresses_config_file:
+        raise CLIError('usage error: Only one of --backend-address and --backend-addresses-config-file can be provided at the same time.')  # pylint: disable=line-too-long
+    if backend_addresses_config_file:
+        if not isinstance(backend_addresses_config_file, list):
+            raise CLIError('Config file must be a list. Please see example as a reference.')
+        for addr in backend_addresses_config_file:
+            if not isinstance(addr, dict):
+                raise CLIError('Each address in config file must be a dictionary. Please see example as a reference.')
     ncf = network_client_factory(cmd.cli_ctx)
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
-    new_pool = BackendAddressPool(name=item_name)
-    upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
-    poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
-    return get_property(poller.result().backend_address_pools, item_name)
+    (BackendAddressPool,
+     LoadBalancerBackendAddress,
+     VirtualNetwork) = cmd.get_models('BackendAddressPool',
+                                      'LoadBalancerBackendAddress',
+                                      'VirtualNetwork')
+    # Before 2020-03-01, service doesn't support the other rest method.
+    # We have to use old one to keep backward compatibility.
+    # Same for basic sku. service refuses that basic sku lb call the other rest method.
+    if cmd.supported_api_version(max_api='2020-03-01') or lb.sku.name.lower() == 'basic':
+        new_pool = BackendAddressPool(name=backend_address_pool_name)
+        upsert_to_collection(lb, 'backend_address_pools', new_pool, 'name')
+        poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+        return get_property(poller.result().backend_address_pools, backend_address_pool_name)
+
+    addresses_pool = []
+    if backend_addresses:
+        addresses_pool.extend(backend_addresses)
+    if backend_addresses_config_file:
+        addresses_pool.extend(backend_addresses_config_file)
+    for addr in addresses_pool:
+        if 'virtual_network' not in addr and vnet:
+            addr['virtual_network'] = vnet
+    # pylint: disable=line-too-long
+    try:
+        new_addresses = [LoadBalancerBackendAddress(name=addr['name'],
+                                                    virtual_network=VirtualNetwork(id=_process_vnet_name_and_id(addr['virtual_network'])),
+                                                    ip_address=addr['ip_address']) for addr in addresses_pool] if addresses_pool else None
+    except KeyError:
+        raise CLIError('Each backend address must have name, vnet and ip-address information.')
+    new_pool = BackendAddressPool(name=backend_address_pool_name,
+                                  load_balancer_backend_addresses=new_addresses)
+    return ncf.load_balancer_backend_address_pools.create_or_update(resource_group_name,
+                                                                    load_balancer_name,
+                                                                    backend_address_pool_name,
+                                                                    new_pool)
+
+
+def delete_lb_backend_address_pool(cmd, resource_group_name, load_balancer_name, backend_address_pool_name):
+    from azure.cli.core.commands import LongRunningOperation
+    ncf = network_client_factory(cmd.cli_ctx)
+    lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+
+    def delete_basic_lb_backend_address_pool():
+        new_be_pools = [pool for pool in lb.backend_address_pools
+                        if pool.name.lower() != backend_address_pool_name.lower()]
+        lb.backend_address_pools = new_be_pools
+        poller = ncf.load_balancers.create_or_update(resource_group_name, load_balancer_name, lb)
+        result = LongRunningOperation(cmd.cli_ctx)(poller).backend_address_pools
+        if next((x for x in result if x.name.lower() == backend_address_pool_name.lower()), None):
+            raise CLIError("Failed to delete '{}' on '{}'".format(backend_address_pool_name, load_balancer_name))
+
+    if lb.sku.name.lower() == 'basic':
+        delete_basic_lb_backend_address_pool()
+        return None
+
+    return ncf.load_balancer_backend_address_pools.delete(resource_group_name,
+                                                          load_balancer_name,
+                                                          backend_address_pool_name)
+
+
+def add_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name, backend_address_pool_name,
+                                        address_name, vnet, ip_address):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    (LoadBalancerBackendAddress,
+     VirtualNetwork) = cmd.get_models('LoadBalancerBackendAddress',
+                                      'VirtualNetwork')
+    new_address = LoadBalancerBackendAddress(name=address_name,
+                                             virtual_network=VirtualNetwork(id=vnet) if vnet else None,
+                                             ip_address=ip_address if ip_address else None)
+    address_pool.load_balancer_backend_addresses.append(new_address)
+    return client.create_or_update(resource_group_name, load_balancer_name, backend_address_pool_name, address_pool)
+
+
+def remove_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name,
+                                           backend_address_pool_name, address_name):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    lb_addresses = [addr for addr in address_pool.load_balancer_backend_addresses if addr.name != address_name]
+    address_pool.load_balancer_backend_addresses = lb_addresses
+    return client.create_or_update(resource_group_name, load_balancer_name, backend_address_pool_name, address_pool)
+
+
+def list_lb_backend_address_pool_address(cmd, resource_group_name, load_balancer_name,
+                                         backend_address_pool_name):
+    client = network_client_factory(cmd.cli_ctx).load_balancer_backend_address_pools
+    address_pool = client.get(resource_group_name, load_balancer_name, backend_address_pool_name)
+    return address_pool.load_balancer_backend_addresses
 
 
 def create_lb_outbound_rule(cmd, resource_group_name, load_balancer_name, item_name,
@@ -4978,9 +5079,10 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
                 location=None, tags=None, vm_protection=None, ddos_protection=None,
-                ddos_protection_plan=None):
-    AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource = \
-        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork', 'SubResource')
+                ddos_protection_plan=None, network_security_group=None):
+    AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource, NetworkSecurityGroup = \
+        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork',
+                       'SubResource', 'NetworkSecurityGroup')
     client = network_client_factory(cmd.cli_ctx).virtual_networks
     tags = tags or {}
 
@@ -4992,7 +5094,9 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
         if cmd.supported_api_version(min_api='2018-08-01'):
             vnet.subnets = [Subnet(name=subnet_name,
                                    address_prefix=subnet_prefix[0] if len(subnet_prefix) == 1 else None,
-                                   address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None)]
+                                   address_prefixes=subnet_prefix if len(subnet_prefix) > 1 else None,
+                                   network_security_group=NetworkSecurityGroup(id=network_security_group)
+                                   if network_security_group else None)]
         else:
             vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
     if cmd.supported_api_version(min_api='2017-09-01'):

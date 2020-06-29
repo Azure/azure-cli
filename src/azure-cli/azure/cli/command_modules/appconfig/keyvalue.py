@@ -344,7 +344,6 @@ def set_keyvault(cmd,
         if retrieved_kv is None:
             set_kv = KeyValue(key, keyvault_ref_value, label, tags, KeyVaultConstants.KEYVAULT_CONTENT_TYPE)
         else:
-            logger.warning("This operation will result in overwriting existing key whose value is: %s", retrieved_kv.value)
             set_kv = KeyValue(key=key,
                               label=label,
                               value=keyvault_ref_value,

@@ -76,7 +76,8 @@ def parse_storage_account(cmd, namespace):
     if namespace.account_name and is_valid_resource_id(namespace.account_name):
         namespace.resource_group_name = parse_resource_id(namespace.account_name)['resource_group']
         namespace.account_name = parse_resource_id(namespace.account_name)['name']
-    elif namespace.account_name and not namespace.resource_group_name:
+    elif namespace.account_name and not is_valid_resource_id(namespace.account_name) and \
+            not namespace.resource_group_name:
         namespace.resource_group_name = _query_account_rg(cmd.cli_ctx, namespace.account_name)[0]
 
 
@@ -127,7 +128,8 @@ def validate_client_parameters(cmd, namespace):
             if is_storagev2(prefix):
                 from azure.cli.core._profile import Profile
                 profile = Profile(cli_ctx=cmd.cli_ctx)
-                n.token_credential, _, _ = profile.get_login_credentials(resource="https://storage.azure.com")
+                n.token_credential, _, _ = profile.get_login_credentials(
+                    resource="https://storage.azure.com", subscription_id=n._subscription)
             # Otherwise, we will assume it is in track1 and keep previous token updater
             else:
                 n.token_credential = _create_token_credential(cmd.cli_ctx)
@@ -168,9 +170,13 @@ def validate_client_parameters(cmd, namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        logger.warning('No connection string, account key or sas token found, we will query account keys for your '
-                       'storage account. Please try to use --auth-mode login or provide one of the following parameters'
-                       ': connection string, account key or sas token for your storage account.')
+        logger.warning('There is no credential provided in your command and environment, we will query account key '
+                       'for your storage account. \nPlease provide --connection-string, --account-key or --sas-token '
+                       'as credential, or use `--auth-mode login` if you have required RBAC roles in your command. '
+                       'For more information about RBAC roles in stoarge, you can see '
+                       'https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-rbac-cli. \n'
+                       'Setting corresponding environment variable can avoid inputting credential in your command. '
+                       'Please use --help to get more information.')
         n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
@@ -1076,6 +1082,15 @@ def blob_tier_validator(cmd, namespace):
         raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
+def blob_rehydrate_priority_validator(namespace):
+    if namespace.blob_type == 'page' and namespace.rehydrate_priority:
+        raise ValueError('--rehydrate-priority is only applicable to block blob.')
+    if namespace.tier == 'Archive' and namespace.rehydrate_priority:
+        raise ValueError('--rehydrate-priority is only applicable to rehydrate blob data from the archive tier.')
+    if namespace.rehydrate_priority is None:
+        namespace.rehydrate_priority = 'Standard'
+
+
 def validate_azcopy_upload_destination_url(cmd, namespace):
     client = blob_data_service_factory(cmd.cli_ctx, {
         'account_name': namespace.account_name, 'connection_string': namespace.connection_string})
@@ -1135,6 +1150,8 @@ def validate_azcopy_remove_arguments(cmd, namespace):
 
 
 def as_user_validator(namespace):
+    if hasattr(namespace, 'token_credential') and not namespace.as_user:
+        raise CLIError('incorrect usage: specify --as-user when --auth-mode login is used to get user delegation key.')
     if namespace.as_user:
         if namespace.expiry is None:
             raise argparse.ArgumentError(
@@ -1259,3 +1276,19 @@ def validate_encryption_scope_client_params(ns):
 def validate_access_control(namespace):
     if namespace.acl and namespace.permissions:
         raise CLIError('usage error: invalid when specifying both --acl and --permissions.')
+
+
+def validate_service_type(services, service_type):
+    if service_type == 'table':
+        return 't' in services
+    if service_type == 'blob':
+        return 'b' in services
+    if service_type == 'queue':
+        return 'q' in services
+
+
+def validate_logging_version(namespace):
+    if validate_service_type(namespace.services, 'table') and namespace.version != 1.0:
+        raise CLIError(
+            'incorrect usage: for table service, the supported version for logging is `1.0`. For more information, '
+            'please refer to https://docs.microsoft.com/en-us/rest/api/storageservices/storage-analytics-log-format.')
