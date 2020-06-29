@@ -124,8 +124,12 @@ DEPENDENCIES = [
     'azure-multiapi-storage~=0.3.2',
 =======
     'azure-mgmt-web~=0.46.0',
+<<<<<<< HEAD
     'azure-multiapi-storage~=0.3.3',
 >>>>>>> update setup azdev in pipelines
+=======
+    'azure-multiapi-storage~=0.3.5',
+>>>>>>> fix merge conflict
     'azure-loganalytics~=0.1.0',
     'azure-storage-blob>=1.3.1,<2.0.0',
     'cryptography>=2.3.1,<3.0.0',
