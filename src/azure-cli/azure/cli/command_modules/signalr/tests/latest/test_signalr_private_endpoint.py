@@ -98,3 +98,10 @@ class AzureSignalRServicePrivateEndpointScenarioTest(ScenarioTest):
             self.check('networkAcLs.privateEndpoints[0].allow[0]', 'RESTAPI'),
             self.check('length(networkAcLs.privateEndpoints[0].deny)', 0),
         ])
+
+        # Test delete private endpoint connection
+        self.cmd('network private-endpoint-connection delete --id {private_endpoint_connection_id} -y')
+        time.sleep(30)
+        self.cmd('network private-endpoint-connection list --id {signalr_id}', checks=[
+            self.check('length(@)', 0)
+        ])
