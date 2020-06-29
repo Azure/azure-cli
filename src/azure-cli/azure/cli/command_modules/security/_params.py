@@ -59,6 +59,10 @@ iot_solution_name_arg_type = CLIArgumentType(options_list=('--solution-name'), m
 iot_solution_display_name_arg_type = CLIArgumentType(options_list=('--display-name'), metavar='DISPLAYNAME', help='Resource display name')
 iot_solution_iot_hubs_arg_type = CLIArgumentType(options_list=('--iot-hubs'), metavar='IOTHUBS', help='IoT Hub resource IDs')
 
+# Regulatory Compliance
+regulatory_compliance_standard_name = CLIArgumentType(option_list=('--standard-name'), metave='STANDARDNAME', help='The compliance standard name')
+regulatory_compliance_control_name = CLIArgumentType(option_list=('--control-name'), metave='CONTROLNAME', help='The compliance control name')
+
 
 def load_arguments(self, _):
     for scope in ['alert',
@@ -80,7 +84,10 @@ def load_arguments(self, _):
                   'iot-solution',
                   'iot-analytics',
                   'iot-alerts',
-                  'iot-recommendations']:
+                  'iot-recommendations',
+                  'regulatory-compliance-standards',
+                  'regulatory-compliance-controls',
+                  'regulatory-compliance-assessments']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'resource_group_name',
@@ -95,6 +102,21 @@ def load_arguments(self, _):
             c.argument(
                 'storage_account_name',
                 arg_type=storage_account_arg_type)
+
+    for scope in ['regulatory-compliance-controls']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'standard_name',
+                arg_type=regulatory_compliance_standard_name)
+
+    for scope in ['regulatory-compliance-assessments']:
+        with self.argument_context('security {}'.format(scope)) as c:
+            c.argument(
+                'standard_name',
+                arg_type=regulatory_compliance_standard_name)
+            c.argument(
+                'control_name',
+                arg_type=regulatory_compliance_control_name)
 
     for scope in ['alert update']:
         with self.argument_context('security {}'.format(scope)) as c:
