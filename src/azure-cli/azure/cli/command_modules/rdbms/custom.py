@@ -19,7 +19,7 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
-                   assign_identity=False, public_network_access=None):
+                   assign_identity=False, public_network_access=None, infrastructure_encryption=None):
     provider = 'Microsoft.DBforPostgreSQL'
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
@@ -37,6 +37,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 version=version,
                 ssl_enforcement=ssl_enforcement,
                 public_network_access=public_network_access,
+                infrastructure_encryption=infrastructure_encryption,
                 storage_profile=mysql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,
@@ -56,6 +57,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
                 version=version,
                 ssl_enforcement=ssl_enforcement,
                 public_network_access=public_network_access,
+                infrastructure_encryption=infrastructure_encryption,
                 storage_profile=postgresql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup,

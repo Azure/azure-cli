@@ -19,12 +19,30 @@ from ._client_factory import (cf_security_tasks,
                               cf_security_advanced_threat_protection,
                               cf_security_assessment,
                               cf_security_assessment_metadata,
-                              cf_security_sub_assessment)
+                              cf_security_sub_assessment,
+                              cf_security_regulatory_compliance_standards,
+                              cf_security_regulatory_compliance_control,
+                              cf_security_regulatory_compliance_assessment)
 
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
 def load_command_table(self, _):
+
+    security_regulatory_compliance_standards_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#RegulatoryComplianceStandardsOperations.{}',
+        client_factory=cf_security_regulatory_compliance_standards
+    )
+
+    security_regulatory_compliance_controls_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#RegulatoryComplianceControlsOperations.{}',
+        client_factory=cf_security_regulatory_compliance_control
+    )
+
+    security_regulatory_compliance_assessment_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.security.operations#RegulatoryComplianceAssessmentsOperations.{}',
+        client_factory=cf_security_regulatory_compliance_assessment
+    )
 
     security_tasks_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.security.operations#TasksOperations.{}',
@@ -117,6 +135,24 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.security.operations#SubAssessmentsOperations.{}',
         client_factory=cf_security_sub_assessment
     )
+
+    with self.command_group('security regulatory-compliance-standards',
+                            security_regulatory_compliance_standards_sdk,
+                            client_factory=cf_security_regulatory_compliance_standards) as g:
+        g.custom_command('list', 'list_regulatory_compliance_standards')
+        g.custom_command('show', 'get_regulatory_compliance_standard')
+
+    with self.command_group('security regulatory-compliance-controls',
+                            security_regulatory_compliance_controls_sdk,
+                            client_factory=cf_security_regulatory_compliance_control) as g:
+        g.custom_command('list', 'list_regulatory_compliance_controls')
+        g.custom_command('show', 'get_regulatory_compliance_control')
+
+    with self.command_group('security regulatory-compliance-assessments',
+                            security_regulatory_compliance_assessment_sdk,
+                            client_factory=cf_security_regulatory_compliance_assessment) as g:
+        g.custom_command('list', 'list_regulatory_compliance_assessments')
+        g.custom_command('show', 'get_regulatory_compliance_assessment')
 
     with self.command_group('security task',
                             security_tasks_sdk,

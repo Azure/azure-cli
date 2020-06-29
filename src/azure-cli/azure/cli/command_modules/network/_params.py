@@ -213,10 +213,16 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway root-cert') as c:
         c.argument('keyvault_secret', help='KeyVault secret ID.')
 
-    with self.argument_context('network application-gateway frontend-ip') as c:
-        c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
+    with self.argument_context('network application-gateway frontend-ip create') as c:
         c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-        c.argument('virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
+
+    for item in ['create', 'update']:
+        with self.argument_context('network application-gateway frontend-ip {}'.format(item)) as c:
+            c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
+            c.argument('virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
+
+    with self.argument_context('network application-gateway frontend-ip update') as c:
+        c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), deprecate_info=c.deprecate(hide=True))
 
     for item in ['frontend-port', 'http-settings']:
         with self.argument_context('network application-gateway {}'.format(item)) as c:

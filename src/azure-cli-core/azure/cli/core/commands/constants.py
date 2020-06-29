@@ -30,7 +30,7 @@ CONFIRM_PARAM_NAME = 'yes'
 # 1 hour in milliseconds
 DEFAULT_QUERY_TIME_RANGE = 3600000
 
-BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
+BLOCKED_MODS = ['context', 'shell', 'documentdb', 'component']
 
 SURVEY_PROMPT = 'Please let us know how we are doing: https://aka.ms/azureclihats'
 SURVEY_PROMPT_COLOR = Fore.YELLOW + Style.BRIGHT + 'Please let us know how we are doing: ' + Fore.BLUE + \
