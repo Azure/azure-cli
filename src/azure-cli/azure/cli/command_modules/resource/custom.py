@@ -13,6 +13,7 @@ import json
 import os
 import platform
 import re
+from re import template
 import ssl
 import sys
 import uuid
@@ -24,6 +25,7 @@ from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource, DeploymentMode
+#from azure.mgmt.resource.templatespecs.models import *
 
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
@@ -33,7 +35,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZUR
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
-    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
+    _resource_links_client_factory, _resource_deploymentscripts_client_factory, _authorization_management_client, _resource_managedapps_client_factory, _resource_templatespecs_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
 
 from knack.log import get_logger
@@ -301,8 +303,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         template_link = TemplateLink(uri=template_uri)
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
-        template_content = show_resource(cmd=cmd, resource_ids=[template_spec])
-        template_obj = _remove_comments_from_json(template_content, file_path=template_spec)
+        template_link = TemplateLink(id=template_spec)
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['template']
     else:
         template_content = read_file_content(template_file)
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
@@ -441,6 +443,7 @@ def _deploy_arm_template_at_subscription_scope(cmd,
                                                template_file=None, template_uri=None, template_spec=None, parameters=None,
                                                deployment_name=None, deployment_location=None, validate_only=False,
                                                no_wait=False, no_prompt=False):
+
     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
                                                                       template_uri=template_uri, template_spec=template_spec, parameters=parameters,
                                                                       mode='Incremental',
@@ -500,46 +503,37 @@ def validate_arm_template_at_resource_group(cmd,
                                                   validate_only=True, no_wait=no_wait,
                                                   no_prompt=no_prompt)
 
-
 def _deploy_arm_template_at_resource_group(cmd,
                                            resource_group_name=None,
                                            template_file=None, template_uri=None, template_spec=None, parameters=None,
                                            deployment_name=None, mode=None, rollback_on_error=None,
                                            validate_only=False, no_wait=False,
                                            aux_subscriptions=None, aux_tenants=None, no_prompt=False):
-#     deployment_properties = _prepare_deployment_properties_unmodified(cmd, template_file=template_file,
-#                                                                       template_uri=template_uri,
-#                                                                       template_spec=template_spec,
-#                                                                       parameters=parameters, mode=mode,
-#                                                                       rollback_on_error=rollback_on_error,
-#                                                                       no_prompt=no_prompt)
+    deployment_properties = _prepare_deployment_properties_unmodified(cmd=cmd, template_file=template_file,
+                                                                      template_uri=template_uri, template_spec=template_spec,
+                                                                      parameters=parameters, mode=mode,
+                                                                      rollback_on_error=rollback_on_error,
+                                                                      no_prompt=no_prompt)
 
-    cli_ctx=cmd.cli_ctx
-    mgmt_client = _get_deployment_management_client(cli_ctx, aux_subscriptions=aux_subscriptions,
+    mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions=aux_subscriptions,
                                                     aux_tenants=aux_tenants, plug_pipeline=(template_uri is None))
 
-    Deployment, DeploymentProperties, TemplateLink = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment', 'DeploymentProperties', 'TemplateLink', mod='models')
-    template_link = TemplateLink(id="/subscriptions/996a2f3f-ee01-4ffd-9765-d2c3fc98f30a/resourceGroups/giants-deep/providers/Microsoft.Resources/templateSpecs/BasicLinked01/versions/1.0")
-    deployment_properties = DeploymentProperties(template_link=template_link, mode="Incremental")
-    deployment = Deployment(properties=deployment_properties)
+    Deployment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment', mod='models')
+    deployment_obj = Deployment(properties=deployment_properties)
 
-    print(deployment)
 
-    validation_poller = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, parameters=deployment)
-    validation_result = LongRunningOperation(cli_ctx)(validation_poller)
+    validation_poller = mgmt_client.validate(resource_group_name=resource_group_name, deployment_name=deployment_name, parameters=deployment_obj)
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
-    print(validation_result)
 
-    # if validation_result and validation_result.error:
-    #     err_message = _build_preflight_error_message(validation_result.error)
-    #     raise CLIError(err_message)
-    # if validate_only:
-    #     return validation_result
+    if validation_result and validation_result.error:
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise CLIError(err_message)
+    if validate_only:
+        return validation_result
 
-    # return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name,
-    #                    deployment_name, deployment_properties)
-    return None
-
+    return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name,
+                       deployment_name, deployment_properties)
 
 
 # pylint: disable=unused-argument
@@ -624,7 +618,8 @@ def _deploy_arm_template_at_tenant_scope(cmd,
                                          template_file=None, template_uri=None, template_spec=None, parameters=None,
                                          deployment_name=None, deployment_location=None, validate_only=False,
                                          no_wait=False, no_prompt=False):
-    deployment_properties = _prepare_deployment_properties_unmodified(cmd=cmd, template_file=template_file,
+    deployment_properties = _prepare_deployment_properties_unmodified(cmd=cmd,
+                                                                      template_file=template_file,
                                                                       template_uri=template_uri,
                                                                       template_spec=template_spec,
                                                                       parameters=parameters, mode='Incremental',
@@ -719,8 +714,8 @@ def _build_preflight_error_message(preflight_error):
     return '\n'.join(err_messages)
 
 
-def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_uri=None, template_spec=None, parameters=None,
-                                              mode=None, rollback_on_error=None, no_prompt=False):
+def  _prepare_deployment_properties_unmodified(cmd, template_file=None, template_uri=None, template_spec=None, parameters=None,
+                                               mode=None, rollback_on_error=None, no_prompt=False):
     cli_ctx = cmd.cli_ctx
     DeploymentProperties, TemplateLink, OnErrorDeployment = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                                                     'DeploymentProperties', 'TemplateLink',
@@ -733,8 +728,10 @@ def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_
         template_link = TemplateLink(uri=template_uri)
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
-        template_content = show_resource(cmd=cmd, resource_ids=[template_spec])
-        template_obj = _remove_comments_from_json(template_content, file_path=template_spec)
+        print(template_spec)
+        template_link = TemplateLink(id=template_spec)
+        print(template_link)
+        template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['template']
     else:
         template_content = read_file_content(template_file)
         template_obj = _remove_comments_from_json(template_content, file_path=template_file)
@@ -748,12 +745,10 @@ def _prepare_deployment_properties_unmodified(cmd, template_file=None, template_
     template_obj['resources'] = template_obj.get('resources', [])
     parameters = _process_parameters(template_param_defs, parameters) or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
-
     parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
-
     return properties
 
 
@@ -1629,11 +1624,28 @@ def get_deployment_script_logs(cmd, resource_group_name, name):
     rcf = _resource_deploymentscripts_client_factory(cmd.cli_ctx)
     return rcf.deployment_scripts.get_logs(resource_group_name, name)
 
-
 def delete_deployment_script(cmd, resource_group_name, name):
     rcf = _resource_deploymentscripts_client_factory(cmd.cli_ctx)
     rcf.deployment_scripts.delete(resource_group_name, name)
 
+def list_template_specs(cmd, resource_group_name=None):
+    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
+    if resource_group_name is not None:
+        return rcf.template_specs.list_by_resource_group(resource_group_name)
+    return rcf.template_specs.list_by_subscription()
+
+
+def get_template_spec(cmd, resource_group_name, name):
+    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
+    return rcf.template_specs.get(resource_group_name, name)
+
+def get_template_spec_logs(cmd, resource_group_name, name):
+    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
+    return rcf.template_specs.get_logs(resource_group_name, name)
+
+def delete_template_spec(cmd, resource_group_name, name):
+    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
+    rcf.template_specs.delete(resource_group_name, name)
 
 def list_deployment_operations_at_subscription_scope(cmd, deployment_name):
     rcf = _resource_client_factory(cmd.cli_ctx)
