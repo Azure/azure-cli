@@ -516,7 +516,10 @@ def _deploy_arm_template_at_resource_group(cmd,
                                                                       no_prompt=no_prompt)
 
     mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions=aux_subscriptions,
-                                                    aux_tenants=aux_tenants, plug_pipeline=(template_uri is None))
+                                                    aux_tenants=aux_tenants, plug_pipeline=(template_uri is None and template_spec is None))
+
+    # mgmt_client = _get_deployment_management_client(cmd.cli_ctx, aux_subscriptions=aux_subscriptions,
+    #                                                 aux_tenants=aux_tenants, plug_pipeline=(template_uri is None))
 
     Deployment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'Deployment', mod='models')
     deployment_obj = Deployment(properties=deployment_properties)
@@ -533,7 +536,7 @@ def _deploy_arm_template_at_resource_group(cmd,
         return validation_result
 
     return sdk_no_wait(no_wait, mgmt_client.create_or_update, resource_group_name,
-                       deployment_name, deployment_properties)
+                       deployment_name, deployment_obj)
 
 
 # pylint: disable=unused-argument
@@ -729,7 +732,7 @@ def  _prepare_deployment_properties_unmodified(cmd, template_file=None, template
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
     elif template_spec:
         print(template_spec)
-        template_link = TemplateLink(id=template_spec)
+        template_link = TemplateLink(id=template_spec,mode="Incremental")
         print(template_link)
         template_obj = show_resource(cmd=cmd, resource_ids=[template_spec]).properties['template']
     else:
