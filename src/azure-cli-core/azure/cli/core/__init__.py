@@ -199,6 +199,8 @@ class MainCommandsLoader(CLICommandsLoader):
 
             count = 0
             cumulative_elapsed_time = 0
+            cumulative_group_count = 0
+            cumulative_command_count = 0
             logger.debug("Loading command modules:")
             logger.debug(self.header_mod)
 
@@ -216,6 +218,8 @@ class MainCommandsLoader(CLICommandsLoader):
                                  len(module_group_table), len(module_command_table))
                     count += 1
                     cumulative_elapsed_time += elapsed_time
+                    cumulative_group_count += len(module_group_table)
+                    cumulative_command_count += len(module_command_table)
                 except Exception as ex:  # pylint: disable=broad-except
                     # Changing this error message requires updating CI script that checks for failed
                     # module loading.
@@ -227,7 +231,7 @@ class MainCommandsLoader(CLICommandsLoader):
             # Summary line
             logger.debug(self.item_format_string,
                          "Total ({})".format(count), cumulative_elapsed_time,
-                         len(self.command_group_table), len(self.command_table))
+                         cumulative_group_count, cumulative_command_count)
 
         def _update_command_table_from_extensions(ext_suppressions, extension_modname=None):
 
@@ -537,12 +541,12 @@ class CommandIndex:
         """Invalidate the command index.
 
         This function MUST be called when installing or updating extensions. Otherwise, when an extension
-          1. overrides a built-in command, or
-          2. extends an existing command group,
+            1. overrides a built-in command, or
+            2. extends an existing command group,
         the command or command group will only be loaded from the command modules as per the stale command index,
         making the newly installed extension be ignored.
 
-        This function can be called when removing extensions and updating cloud profiles for double insurance.
+        This function can be called when removing extensions.
         """
         self.INDEX[self._COMMAND_INDEX_VERSION] = ""
         self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = ""
