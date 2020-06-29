@@ -87,7 +87,7 @@ class ProfileCommandTest(unittest.TestCase):
         expected_result = {
             'tokenType': 'bearer',
             'accessToken': 'token123',
-            'expiresOn': '2020-06-30 06:14:41',
+            'expiresOn': '2020-06-30 06:14:41.000000',
             'tenant': tenant_id
         }
         self.assertEqual(result, expected_result)

@@ -79,8 +79,9 @@ def get_access_token(cmd, subscription=None, resource=None, resource_type=None, 
     # Unify to UTC `expiresOn`, like "2020-06-30 06:14:41"
     if 'expires_on' in token_entry:
         from datetime import datetime
-        # https://docs.python.org/3.8/library/datetime.html#datetime.datetime.__str__
-        token_entry['expiresOn'] = str(datetime.fromtimestamp(int(token_entry['expires_on'])))
+        # https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
+        token_entry['expiresOn'] = datetime.fromtimestamp(int(token_entry['expires_on']))\
+            .strftime("%Y-%m-%d %H:%M:%S.%f")
 
     result = {
         'tokenType': creds[0],
