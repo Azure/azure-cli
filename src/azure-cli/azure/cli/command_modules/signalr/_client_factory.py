@@ -12,3 +12,15 @@ def _signalr_client_factory(cli_ctx, *_):
 
 def cf_signalr(cli_ctx, *_):
     return _signalr_client_factory(cli_ctx).signal_r
+
+
+def cf_private_endpoint_connections(cli_ctx, *_):
+    return _signalr_client_factory(cli_ctx).signal_rprivate_endpoint_connections
+
+
+def cf_private_link_resources(cli_ctx, *_):
+    return _signalr_client_factory(cli_ctx).signal_rprivate_link_resources
+
+
+def cf_usage(cli_ctx, *_):
+    return _signalr_client_factory(cli_ctx).usages

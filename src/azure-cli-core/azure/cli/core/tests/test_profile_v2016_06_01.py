@@ -747,7 +747,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds[1], self.raw_token1)
         # the last in the tuple is the whole token entry which has several fields
         self.assertEqual(creds[2]['expiresOn'], self.token_entry1['expiresOn'])
-        mock_get_token.assert_called_once_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id)
+        mock_get_token.assert_called_once_with(mock.ANY, 'sp1', 'https://foo', self.tenant_id, False)
         self.assertEqual(mock_get_token.call_count, 1)
         self.assertEqual(sub, '1')
         self.assertEqual(tenant, self.tenant_id)
