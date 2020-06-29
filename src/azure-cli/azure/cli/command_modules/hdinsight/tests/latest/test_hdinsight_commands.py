@@ -12,7 +12,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class HDInsightClusterTests(ScenarioTest):
-    location = 'southcentralus'
+    location = 'eastus2'
 
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
