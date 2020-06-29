@@ -51,8 +51,6 @@ setup(
         'portalocker~=1.2',
     ],
     packages=[
-        'azure',
-        'azure.cli',
         'azure.cli.telemetry',
         'azure.cli.telemetry.components'
     ],
